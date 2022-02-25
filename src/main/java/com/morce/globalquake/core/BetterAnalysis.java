@@ -78,7 +78,7 @@ public class BetterAnalysis extends Analysis {
 	public void nextSample(int v, long time) {
 		if (filter == null) {
 			filter = new Butterworth();
-			filter.bandPass(4, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
+			filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
 			reset();// initial reset;
 			return;
 		}
@@ -127,7 +127,7 @@ public class BetterAnalysis extends Analysis {
 			if (Math.abs(filteredV) > specialAverage) {
 				specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 0.25);
 			} else {
-				specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 70.0);
+				specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 50.0);
 			}
 
 			if (shortAverage / longAverage < 4.0) {
@@ -176,9 +176,9 @@ public class BetterAnalysis extends Analysis {
 				}
 			}
 			
-			if(mediumAverage < thirdAverage * 0.95) {
+			/*if(mediumAverage < thirdAverage * 0.95) {
 				specialAverage -= (specialAverage - Math.max(4, longAverage * 2.15))/ (getSampleRate() * 12);
-			}
+			}*/
 
 			if (ratio > _maxRatio || _maxRatioReset) {
 				_maxRatio = ratio;

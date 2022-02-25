@@ -3,6 +3,10 @@ package com.morce.globalquake.core;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,12 +18,14 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
 import com.morce.globalquake.database.StationManager;
+import com.morce.globalquake.main.Main;
 import com.morce.globalquake.ui.GlobalQuakeFrame;
 import com.morce.globalquake.utils.GeoUtils;
 import com.morce.globalquake.utils.NamedThreadFactory;
 
 public class GlobalQuake {
 
+	public static final File ERRORS_FILE = new File(Main.MAIN_FOLDER, "/error_logs/");
 	private GlobalQuakeFrame globalQuakeFrame;
 	protected ArrayList<GlobalStation> stations = new ArrayList<>();
 	private NetworkManager networkManager;
@@ -60,7 +66,7 @@ public class GlobalQuake {
 		earthquakeAnalysis = new EathquakeAnalysis(this);
 		alertCenter = new AlertCenter(this);
 		archive = new EarthquakeArchive(this);
-		
+
 		execAnalysis.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -73,6 +79,7 @@ public class GlobalQuake {
 				} catch (Exception e) {
 					System.err.println("Exception occured in station analysis");
 					e.printStackTrace();
+					saveError(e);
 				}
 			}
 		}, 0, 100, TimeUnit.MILLISECONDS);
@@ -92,6 +99,7 @@ public class GlobalQuake {
 				} catch (Exception e) {
 					System.err.println("Exception occured in 1-second loop");
 					e.printStackTrace();
+					saveError(e);
 				}
 			}
 		}, 0, 1, TimeUnit.SECONDS);
@@ -103,9 +111,11 @@ public class GlobalQuake {
 					long a = System.currentTimeMillis();
 					System.gc();
 					lastGC = System.currentTimeMillis() - a;
+					//throw new Exception("Error test");
 				} catch (Exception e) {
 					System.err.println("Exception in garbage collector");
 					e.printStackTrace();
+					saveError(e);
 				}
 			}
 		}, 0, 10, TimeUnit.SECONDS);
@@ -121,6 +131,7 @@ public class GlobalQuake {
 				} catch (Exception e) {
 					System.err.println("Exception occured in cluster analysis loop");
 					e.printStackTrace();
+					saveError(e);
 				}
 			}
 		}, 0, 500, TimeUnit.MILLISECONDS);
@@ -136,9 +147,24 @@ public class GlobalQuake {
 				} catch (Exception e) {
 					System.err.println("Exception occured in hypocenter location loop");
 					e.printStackTrace();
+					saveError(e);
 				}
 			}
 		}, 0, 1, TimeUnit.SECONDS);
+	}
+
+	protected void saveError(Exception e) {
+		try {
+			if(!ERRORS_FILE.exists()) {
+				ERRORS_FILE.mkdirs();
+			}
+			FileWriter fw = new FileWriter(ERRORS_FILE + "/err_" + System.currentTimeMillis() + ".txt", true);
+			PrintWriter pw = new PrintWriter(fw);
+			e.printStackTrace(pw);
+			fw.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	private void runNetworkManager() {
@@ -265,8 +291,8 @@ public class GlobalQuake {
 						synchronized (getEarthquakeAnalysis().earthquakesSync) {
 							quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
 						}
-						
-						for(Earthquake quake:quakes) {
+
+						for (Earthquake quake : quakes) {
 							getArchive().archiveQuake(quake);
 						}
 						getArchive().saveArchive();

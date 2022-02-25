@@ -17,11 +17,11 @@ public class Main {
 	public static final String version = "0.7.17";
 	public static final String fullName = "GlobalQuake " + version;
 
-	public static final File main_folder = new File("./GlobalQuake/");
+	public static final File MAIN_FOLDER = new File("./GlobalQuake/");
 
 	public Main() {
-		if (!main_folder.exists()) {
-			main_folder.mkdirs();
+		if (!MAIN_FOLDER.exists()) {
+			MAIN_FOLDER.mkdirs();
 		}
 
 		startDatabaseManager();
@@ -33,7 +33,7 @@ public class Main {
 				GlobePanel.init();
 			};
 		}.start();
-		StationManager.setFolderURL(main_folder.getAbsolutePath() + "/stationDatabase/");
+		StationManager.setFolderURL(MAIN_FOLDER.getAbsolutePath() + "/stationDatabase/");
 		stationManager = new StationManager() {
 			@Override
 			public void confirmDialog(String title, String message, int optionType, int messageType,

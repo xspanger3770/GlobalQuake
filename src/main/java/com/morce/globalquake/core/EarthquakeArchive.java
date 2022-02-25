@@ -16,8 +16,8 @@ import com.morce.globalquake.main.Main;
 public class EarthquakeArchive {
 
 	private GlobalQuake globalQuake;
-	public static final File ARCHIVE_FILE = new File(Main.main_folder, "archive.dat");
-	public static final File TEMP_ARCHIVE_FILE = new File(Main.main_folder, "temp_archive.dat");
+	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
+	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
 
 	public Object archivedQuakesSync;
 	private ArrayList<ArchivedQuake> archivedQuakes;
