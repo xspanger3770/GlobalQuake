@@ -62,24 +62,21 @@ public class EarthquakeListPanel extends JPanel {
 		});
 
 		addMouseListener(new MouseAdapter() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
 					int y = e.getY();
 					int i = (y + scroll) / cell_height;
-					ArrayList<ArchivedQuake> archivedQuakes = null;
 					synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
-						archivedQuakes = (ArrayList<ArchivedQuake>) getGlobalQuake().getArchive().getArchivedQuakes()
-								.clone();
-					}
-					if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
-						return;
-					}
-					ArchivedQuake quake = archivedQuakes.get(archivedQuakes.size() - 1 - i);
+						ArrayList<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
+						if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
+							return;
+						}
+						ArchivedQuake quake = archivedQuakes.get(archivedQuakes.size() - 1 - i);
 
-					if (e.getButton() == MouseEvent.BUTTON3) {
-						quake.setWrong(!quake.isWrong());
+						if (e.getButton() == MouseEvent.BUTTON3) {
+							quake.setWrong(!quake.isWrong());
+						}
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -99,114 +96,111 @@ public class EarthquakeListPanel extends JPanel {
 		return globalQuake;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void paint(Graphics gr) {
 		Graphics2D g = (Graphics2D) gr;
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		ArrayList<ArchivedQuake> archivedQuakes = null;
 		synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
-			archivedQuakes = (ArrayList<ArchivedQuake>) getGlobalQuake().getArchive().getArchivedQuakes().clone();
-		}
+			ArrayList<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
+			int i = 0;
+			for (int j = archivedQuakes.size() - 1; j >= 0; j--) {
+				ArchivedQuake quake = archivedQuakes.get(j);
+				int y = i * cell_height - scroll;
+				if (y > getHeight()) {
+					break;
+				}
+				Color col = Color.GRAY;
+				Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+				if (shindo != null && shindo != Shindo.ZERO) {
+					col = Shindo.getColorShindo(shindo);
+					col = new Color((int) (col.getRed() * 0.8), (int) (col.getGreen() * 0.8),
+							(int) (col.getBlue() * 0.8));
+				}
 
-		int i = 0;
+				Rectangle2D.Double rect = new Rectangle2D.Double(0, y, getWidth(), cell_height);
 
-		for (int j = archivedQuakes.size() - 1; j >= 0; j--) {
-			ArchivedQuake quake = archivedQuakes.get(j);
-			int y = i * cell_height - scroll;
-			if (y > getHeight()) {
-				break;
-			}
-			Color col = Color.GRAY;
-			Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
-			if (shindo != null && shindo != Shindo.ZERO) {
-				col = Shindo.getColorShindo(shindo);
-				col = new Color((int) (col.getRed() * 0.8), (int) (col.getGreen() * 0.8), (int) (col.getBlue() * 0.8));
-			}
-
-			Rectangle2D.Double rect = new Rectangle2D.Double(0, y, getWidth(), cell_height);
-
-			g.setColor(col);
-			g.fill(rect);
-			g.setColor(Color.LIGHT_GRAY);
-			g.setStroke(new BasicStroke(0.5f));
-			g.draw(rect);
-
-			if (y / cell_height == mouseY / cell_height) {
-				g.setColor(new Color(0, 0, 0, 60));
+				g.setColor(col);
 				g.fill(rect);
-			}
+				g.setColor(Color.LIGHT_GRAY);
+				g.setStroke(new BasicStroke(0.5f));
+				g.draw(rect);
 
-			String str = "M" + f1d.format(quake.getMag());
-			g.setFont(new Font("Calibri", Font.BOLD, 20));
-			g.setColor(quake.getMag() >= 6 ? new Color(200, 0, 0) : Color.white);
-			g.setColor(Color.WHITE);
-			g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
+				if (y / cell_height == mouseY / cell_height) {
+					g.setColor(new Color(0, 0, 0, 60));
+					g.fill(rect);
+				}
 
-			if (quake.getArchivedEvents().size() != 0) {
-				double pct = 100 * (quake.getArchivedEvents().size() - quake.getAbandonedCount())
-						/ quake.getArchivedEvents().size();
-				str = quake.getArchivedEvents().size() + " / " + (int) (pct) + "%";
+				String str = "M" + f1d.format(quake.getMag());
+				g.setFont(new Font("Calibri", Font.BOLD, 20));
+				g.setColor(quake.getMag() >= 6 ? new Color(200, 0, 0) : Color.white);
+				g.setColor(Color.WHITE);
+				g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
+
+				if (quake.getArchivedEvents().size() != 0) {
+					double pct = 100 * (quake.getArchivedEvents().size() - quake.getAbandonedCount())
+							/ quake.getArchivedEvents().size();
+					str = quake.getArchivedEvents().size() + " / " + (int) (pct) + "%";
+					g.setFont(new Font("Calibri", Font.PLAIN, 16));
+					g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 20);
+				}
+				str = "";
+				if (shindo != null) {
+					str = shindo.getName();
+				}
+
+				boolean plus = str.endsWith("+");
+				boolean minus = str.endsWith("-");
+				if (plus || minus) {
+					str = str.substring(0, 1) + " ";
+				}
+				if (plus) {
+					g.setColor(Color.white);
+					g.setFont(new Font("Arial", Font.PLAIN, 20));
+					g.drawString("+", 32, y + 21);
+
+				}
+				if (minus) {
+					g.setColor(Color.white);
+					g.setFont(new Font("Arial", Font.PLAIN, 26));
+					g.drawString("-", 30, y + 21);
+				}
+
+				if (shindo == null) {
+					str = "*";
+				}
+
+				g.setFont(new Font("Calibri", Font.PLAIN, 30));
+				g.setColor(Color.white);
+				g.drawString(str, 16, y + 30);
+
+				str = ((int) quake.getDepth()) + "km";
+				g.setFont(new Font("Calibri", Font.BOLD, 12));
+				g.setColor(Color.white);
+				g.drawString(str, (int) (25 - g.getFontMetrics().stringWidth(str) * 0.5), y + 46);
+
+				str = quake.getRegion();
+				g.setFont(new Font("Calibri", Font.BOLD, 12));
+				g.setColor(Color.white);
+				g.drawString(str, 52, y + 18);
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(quake.getOrigin());
+
+				str = formatNice.format(cal.getTime());
 				g.setFont(new Font("Calibri", Font.PLAIN, 16));
-				g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 20);
-			}
-			str = "";
-			if (shindo != null) {
-				str = shindo.getName();
-			}
-
-			boolean plus = str.endsWith("+");
-			boolean minus = str.endsWith("-");
-			if (plus || minus) {
-				str = str.substring(0, 1) + " ";
-			}
-			if (plus) {
 				g.setColor(Color.white);
-				g.setFont(new Font("Arial", Font.PLAIN, 20));
-				g.drawString("+", 32, y + 21);
+				g.drawString(str, 52, y + 42);
 
+				if (quake.isWrong()) {
+					g.setColor(new Color(200, 0, 0));
+					g.setStroke(new BasicStroke(2f));
+					int r = 5;
+					g.drawLine(r, y + r, getWidth() - r, y + cell_height - r);
+					g.drawLine(r, y + cell_height - r, getWidth() - r, y + r);
+				}
+
+				i++;
 			}
-			if (minus) {
-				g.setColor(Color.white);
-				g.setFont(new Font("Arial", Font.PLAIN, 26));
-				g.drawString("-", 30, y + 21);
-			}
-
-			if (shindo == null) {
-				str = "*";
-			}
-
-			g.setFont(new Font("Calibri", Font.PLAIN, 30));
-			g.setColor(Color.white);
-			g.drawString(str, 16, y + 30);
-
-			str = ((int) quake.getDepth()) + "km";
-			g.setFont(new Font("Calibri", Font.BOLD, 12));
-			g.setColor(Color.white);
-			g.drawString(str, (int) (25 - g.getFontMetrics().stringWidth(str) * 0.5), y + 46);
-
-			str = quake.getRegion();
-			g.setFont(new Font("Calibri", Font.BOLD, 12));
-			g.setColor(Color.white);
-			g.drawString(str, 52, y + 18);
-
-			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(quake.getOrigin());
-
-			str = formatNice.format(cal.getTime());
-			g.setFont(new Font("Calibri", Font.PLAIN, 16));
-			g.setColor(Color.white);
-			g.drawString(str, 52, y + 42);
-
-			if (quake.isWrong()) {
-				g.setColor(new Color(200, 0, 0));
-				g.setStroke(new BasicStroke(2f));
-				int r = 5;
-				g.drawLine(r, y + r, getWidth() - r, y + cell_height - r);
-				g.drawLine(r, y + cell_height - r, getWidth() - r, y + r);
-			}
-
-			i++;
 		}
 	}
 

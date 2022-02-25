@@ -164,7 +164,6 @@ public class GlobalQuakePanel extends GlobePanel {
 		return globalQuake;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void paint(Graphics gr) {
 		super.paint(gr);
@@ -187,10 +186,6 @@ public class GlobalQuakePanel extends GlobePanel {
 			path.lineTo(home_x + 10, home_y);
 
 			g.draw(path);
-		}
-		ArrayList<ArchivedQuake> archivedQuakes = null;
-		synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
-			archivedQuakes = (ArrayList<ArchivedQuake>) getGlobalQuake().getArchive().getArchivedQuakes().clone();
 		}
 
 		for (GlobalStation s : globalQuake.getStations()) {
@@ -240,51 +235,49 @@ public class GlobalQuakePanel extends GlobePanel {
 				g.draw(rect);
 			}
 
-			ArrayList<Event> previousEventsClone = null;
 			synchronized (s.getAnalysis().previousEventsSync) {
-				previousEventsClone = (ArrayList<Event>) s.getAnalysis().getPreviousEvents().clone();
-			}
+				ArrayList<Event> previousEvents = s.getAnalysis().getPreviousEvents();
 
-			if (showSCircles) {
-				for (Event e : previousEventsClone) {
-					if (System.currentTimeMillis() - e.getLastLogTime() < 90 * 1000) {
-						long pw = e.getpWave();
-						long sw = e.getsWave();
-						if (pw > 0 && sw > 0) {
-							long diff = sw - pw;
-							double distance = TravelTimeTable.getEpicenterDistance(10, diff / 1000.0);
-							if (distance > 0) {
-								Path2D.Double pol = createCircle(s.getLat(), s.getLon(), distance);
-								g.setColor(Color.gray);
-								g.setStroke(new BasicStroke(2f));
-								g.draw(pol);
+				if (showSCircles) {
+					for (Event e : previousEvents) {
+						if (System.currentTimeMillis() - e.getLastLogTime() < 90 * 1000) {
+							long pw = e.getpWave();
+							long sw = e.getsWave();
+							if (pw > 0 && sw > 0) {
+								long diff = sw - pw;
+								double distance = TravelTimeTable.getEpicenterDistance(10, diff / 1000.0);
+								if (distance > 0) {
+									Path2D.Double pol = createCircle(s.getLat(), s.getLon(), distance);
+									g.setColor(Color.gray);
+									g.setStroke(new BasicStroke(2f));
+									g.draw(pol);
+								}
 							}
 						}
 					}
 				}
-			}
-			String str2 = "";
-			if (showClusters) {
-				for (Event e : previousEventsClone) {
-					if (e.assignedCluster >= 0) {
-						synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-							if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
-								str2 = str2 + " [" + e.assignedCluster + "]";
+				String str2 = "";
+				if (showClusters) {
+					for (Event e : previousEvents) {
+						if (e.assignedCluster >= 0) {
+							synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
+								if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
+									str2 = str2 + " [" + e.assignedCluster + "]";
+								}
 							}
-						}
 
+						}
 					}
 				}
-			}
 
-			if (str2.length() > 0) {
-				str2 = str2.substring(1);
-				g.setColor(Color.magenta);
-				g.setFont(new Font("Calibri", Font.PLAIN, 14));
-				g.drawString(str2, (int) (x - g.getFontMetrics().stringWidth(str2) * 0.5),
-						(int) (y + r * 0.5 + 12 + 14 + 2));
+				if (str2.length() > 0) {
+					str2 = str2.substring(1);
+					g.setColor(Color.magenta);
+					g.setFont(new Font("Calibri", Font.PLAIN, 14));
+					g.drawString(str2, (int) (x - g.getFontMetrics().stringWidth(str2) * 0.5),
+							(int) (y + r * 0.5 + 12 + 14 + 2));
+				}
 			}
-
 			boolean hasData = s.hasData();
 			String str = (mouseNearby
 					? s.getStationCode() + " " + s.getNetworkCode() + " " + s.getChannelName() + " (+"
@@ -316,318 +309,316 @@ public class GlobalQuakePanel extends GlobePanel {
 				g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y + r * 0.5 + 12));
 			}
 		}
+		// ArrayList<ArchivedQuake> archivedQuakes = null;
+		synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
 
-		if (showQuakes) {
-			for (ArchivedQuake quake : archivedQuakes) {
-				if (quake.isWrong()) {
-					continue;
-				}
-				// quake.mag=(System.currentTimeMillis()%1000)/100.0;
-				double x0 = getX(quake.getLat(), quake.getLon());
-				double y0 = getY(quake.getLat(), quake.getLon());
-				double mag = quake.getMag();
-				double r = quake.getMag() < 0 ? 6 : 6 + Math.pow(mag + 1, 2.25);
-				double w = quake.getMag() < 0 ? 0.6 : 0.6 + Math.pow(mag < 2.5 ? mag + 1 : mag + 2, 1.2) * 0.5;
-				Ellipse2D.Double ell = new Ellipse2D.Double(x0 - r / 2, y0 - r / 2, r, r);
-				double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60);
-				Color col = ageInHRS < 3 ? (mag > 4 ? new Color(200, 0, 0) : Color.red)
-						: ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
-				g.setColor(col);
-				g.setStroke(new BasicStroke((float) w));
-				g.draw(ell);
-
-				boolean mouseNearby = isMouseNearby(x0, y0, 1+r*0.5); // TODO 7
-				if (mouseNearby && scroll < 7.5) {
-
-					if (showClosest && quake.getArchivedEvents() != null) {
-						for (ArchivedEvent event : quake.getArchivedEvents()) {
-							double x2 = getX(event.getLat(), event.getLon());
-							double y2 = getY(event.getLat(), event.getLon());
-							g.setColor(event.isAbandoned() ? Color.gray : Scale.getColorRatio(event.getMaxRatio()));
-							double rad = 12;
-							Ellipse2D.Double ell1 = new Ellipse2D.Double(x2 - rad / 2, y2 - rad / 2, rad, rad);
-							g.fill(ell1);
-							// g.setStroke(new BasicStroke(2f));
-							// TODO
-							// g.draw(new Line2D.Double(x0, y0, x2, y2));
-						}
+			if (showQuakes) {
+				for (ArchivedQuake quake : getGlobalQuake().getArchive().getArchivedQuakes()) {
+					if (quake.isWrong()) {
+						continue;
 					}
+					// quake.mag=(System.currentTimeMillis()%1000)/100.0;
+					double x0 = getX(quake.getLat(), quake.getLon());
+					double y0 = getY(quake.getLat(), quake.getLon());
+					double mag = quake.getMag();
+					double r = quake.getMag() < 0 ? 6 : 6 + Math.pow(mag + 1, 2.25);
+					double w = quake.getMag() < 0 ? 0.6 : 0.6 + Math.pow(mag < 2.5 ? mag + 1 : mag + 2, 1.2) * 0.5;
+					Ellipse2D.Double ell = new Ellipse2D.Double(x0 - r / 2, y0 - r / 2, r, r);
+					double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60);
+					Color col = ageInHRS < 3 ? (mag > 4 ? new Color(200, 0, 0) : Color.red)
+							: ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
+					g.setColor(col);
+					g.setStroke(new BasicStroke((float) w));
+					g.draw(ell);
 
-					String str = "M" + f1d.format(quake.getMag()) + ", " + f1d.format(quake.getDepth()) + "km";
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTimeInMillis(quake.getOrigin());
-					int _y = (int) (y0 - 35 - r * 0.5);
-					g.setFont(new Font("Calibri", Font.PLAIN, 14));
-					g.setColor(new Color(230, 230, 230));
-					g.setStroke(new BasicStroke(1f));
-					g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
-					str = "[" + f4d.format(quake.getLat()) + "," + f4d.format(quake.getLon()) + "]";
-					_y += 14;
-					g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
-					str = formatNice.format(calendar.getTime());
-					_y += 14;
-					g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
-					str = quake.getAssignedStations() + " stations";
-					_y = (int) (y0 + 20 + r * 0.5);
-					g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+					boolean mouseNearby = isMouseNearby(x0, y0, 1 + r * 0.5); // TODO 7
+					if (mouseNearby && scroll < 7.5) {
 
-					str = "max ratio = " + f1d.format(quake.getMaxRatio());
-					_y += 14;
-					g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+						if (showClosest && quake.getArchivedEvents() != null) {
+							for (ArchivedEvent event : quake.getArchivedEvents()) {
+								double x2 = getX(event.getLat(), event.getLon());
+								double y2 = getY(event.getLat(), event.getLon());
+								g.setColor(event.isAbandoned() ? Color.gray : Scale.getColorRatio(event.getMaxRatio()));
+								double rad = 12;
+								Ellipse2D.Double ell1 = new Ellipse2D.Double(x2 - rad / 2, y2 - rad / 2, rad, rad);
+								g.fill(ell1);
+								// g.setStroke(new BasicStroke(2f));
+								// TODO
+								// g.draw(new Line2D.Double(x0, y0, x2, y2));
+							}
+						}
 
+						String str = "M" + f1d.format(quake.getMag()) + ", " + f1d.format(quake.getDepth()) + "km";
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTimeInMillis(quake.getOrigin());
+						int _y = (int) (y0 - 35 - r * 0.5);
+						g.setFont(new Font("Calibri", Font.PLAIN, 14));
+						g.setColor(new Color(230, 230, 230));
+						g.setStroke(new BasicStroke(1f));
+						g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+						str = "[" + f4d.format(quake.getLat()) + "," + f4d.format(quake.getLon()) + "]";
+						_y += 14;
+						g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+						str = formatNice.format(calendar.getTime());
+						_y += 14;
+						g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+						str = quake.getAssignedStations() + " stations";
+						_y = (int) (y0 + 20 + r * 0.5);
+						g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+
+						str = "max ratio = " + f1d.format(quake.getMaxRatio());
+						_y += 14;
+						g.drawString(str, (int) x0 - g.getFontMetrics().stringWidth(str) / 2, _y);
+
+					}
 				}
 			}
 		}
 
 		if (showClusters) {
-			ArrayList<Cluster> clustersClone = null;
 			synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-				clustersClone = (ArrayList<Cluster>) getGlobalQuake().getClusterAnalysis().getClusters().clone();
-			}
+				ArrayList<Cluster> clusters = getGlobalQuake().getClusterAnalysis().getClusters();
+				for (Cluster c : clusters) {
+					double lat = c.getRootLat();
+					double lon = c.getRootLon();
+					double x0 = getX(lat, lon);
+					double y0 = getY(lat, lon);
 
-			for (Cluster c : clustersClone) {
-				double lat = c.getRootLat();
-				double lon = c.getRootLon();
-				double x0 = getX(lat, lon);
-				double y0 = getY(lat, lon);
+					Path2D.Double pol = createCircle(lat, lon, c.getSize());
+					g.setColor(new Color(255, 0, 255, 20));
+					g.setStroke(new BasicStroke(1f));
+					g.fill(pol);
+					g.setColor(new Color(255, 0, 255));
+					g.setStroke(new BasicStroke(2f));
+					g.draw(pol);
 
-				Path2D.Double pol = createCircle(lat, lon, c.getSize());
-				g.setColor(new Color(255, 0, 255, 20));
-				g.setStroke(new BasicStroke(1f));
-				g.fill(pol);
-				g.setColor(new Color(255, 0, 255));
-				g.setStroke(new BasicStroke(2f));
-				g.draw(pol);
+					double r = 6;
+					g.setColor(Color.yellow);
+					g.setStroke(new BasicStroke(2f));
+					g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
+					g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
 
-				double r = 6;
-				g.setColor(Color.yellow);
-				g.setStroke(new BasicStroke(2f));
-				g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
-				g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
+					String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
+					g.setStroke(new BasicStroke(1f));
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.PLAIN, 14));
+					g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
 
-				String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
-				g.setStroke(new BasicStroke(1f));
-				g.setColor(Color.white);
-				g.setFont(new Font("Calibri", Font.PLAIN, 14));
-				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
-
-				if (isMouseNearby(x0, y0, 7)) {
-					synchronized (c.assignedEventsSync) {
-						for (Event e : c.getAssignedEvents()) {
-							double lat1 = e.getAnalysis().getStation().getLat();
-							double lon1 = e.getAnalysis().getStation().getLon();
-							double x1 = getX(lat1, lon1);
-							double y1 = getY(lat1, lon1);
-							g.setColor(Color.white);
-							g.setStroke(new BasicStroke(2f));
-							g.draw(new Line2D.Double(x0, y0, x1, y1));
+					if (isMouseNearby(x0, y0, 7)) {
+						synchronized (c.assignedEventsSync) {
+							for (Event e : c.getAssignedEvents()) {
+								double lat1 = e.getAnalysis().getStation().getLat();
+								double lon1 = e.getAnalysis().getStation().getLon();
+								double x1 = getX(lat1, lon1);
+								double y1 = getY(lat1, lon1);
+								g.setColor(Color.white);
+								g.setStroke(new BasicStroke(2f));
+								g.draw(new Line2D.Double(x0, y0, x1, y1));
+							}
 						}
 					}
 				}
 			}
 		}
-		ArrayList<Earthquake> quakes = null;
 
 		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
-		}
-		for (Earthquake e : quakes) {
-			long age = System.currentTimeMillis() - e.getOrigin();
-			double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (e.getMag())), 2) * 40);
-			double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-					* GeoUtils.EARTH_CIRCUMFERENCE;
-			double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-					* GeoUtils.EARTH_CIRCUMFERENCE;
-			if (age / 1000.0 < maxDisplayTimeSec) {
-				if (pDist > 0) {
-					Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
-					g.setColor(Color.blue);
-					g.setStroke(new BasicStroke(3f));
-					g.draw(pPol);
-				}
-				if (sDist > 0) {
-					Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
-					g.setColor(Color.red);
-					g.setStroke(new BasicStroke(2f));
-					g.draw(sPol);
-				}
-			}
-			double x0 = getX(e.getLat(), e.getLon());
-			double y0 = getY(e.getLat(), e.getLon());
-
-			{
-				drawPga(g, e);
-			}
-
-			if (((System.currentTimeMillis() / 500) % 2 == 0)) {
-				Path2D.Double star = createStar(e.getLat(), e.getLon(), 20.0);
-
-				Color col = Scale.getColorLevel(e.getCluster().getLevel());
-
-				g.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 50));
-				g.setStroke(new BasicStroke(1f));
-				g.fill(star);
-				g.setColor(col);
-				g.setStroke(new BasicStroke(2f));
-				g.draw(star);
-			}
-
-			String str = e.getDepth() + "km";
-			g.setStroke(new BasicStroke(1f));
-			g.setColor(Color.white);
-			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 + 33));
-
-			str = "M" + format.format(e.getMag());
-			g.setStroke(new BasicStroke(1f));
-			g.setColor(Color.white);
-			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 26));
-		}
-
-		int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));
-
-		g.setFont(new Font("Calibri", Font.BOLD, 18));
-		g.setStroke(new BasicStroke(1f));
-		String string = "No Earthquakes Located";
-
-		int baseWidth = (int) (g.getFontMetrics().stringWidth(string) * 1.1 + 10);
-		int baseHeight = 132;
-
-		g.setColor(neutralColor);
-
-		if (displayedQuake == -1) {
-			g.fillRect(0, 0, baseWidth, baseHeight);
-			g.setColor(Color.white);
-			g.drawString(string, 3, 18);
-		} else {
-			Earthquake quake = quakes.get(displayedQuake);
-			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
-			g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
-			g.fillRect(0, 0, baseWidth, baseHeight);
-			g.setColor(Color.white);
-			String str = (displayedQuake + 1) + "/" + quakes.size();
-			g.drawString(str, baseWidth - 3 - g.getFontMetrics().stringWidth(str), 18);
-			g.setFont(new Font("Calibri", Font.BOLD, 22));
-			g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", 3, 23);
-			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			g.drawString(quake.getRegion(), 3, 44);
-			g.setFont(new Font("Calibri", Font.BOLD, 19));
-
-			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(quake.getOrigin());
-
-			g.drawString(formatNice.format(cal.getTime()), 3, 66);
-
-			g.setFont(new Font("Calibri", Font.BOLD, 16));
-			g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), 3, 85);
-			g.drawString(f1d.format(quake.getDepth()) + "km Deep", 3, 104);
-			str = quake.isFinished() ? "Final Report" : "Report no." + quake.getReportID();
-			g.drawString(str, 3, 125);
-			str = (int) quake.getPct() + "%";
-			g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
-			if (quake.getCluster().previousHypocenter != null) {
-				str = +quake.getCluster().previousHypocenter.getWrongCount() + " / "
-						+ quake.getCluster().getSelected().size() + " / "
-						+ quake.getCluster().getAssignedEvents().size();
-				g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
-			}
-
-			{
-				Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
-
-				g.setFont(new Font("Calibri", Font.BOLD, 10));
-				int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
-				Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 95);
-				g.setStroke(new BasicStroke(1f));
-				Color col = neutralColor;
-
-				if (shindo != null) {
-					col = Shindo.getColorShindo(shindo);
-					if (shindo == Shindo.ZERO) {
-						col = Shindo.getColorShindo(Shindo.ICHI);
+			ArrayList<Earthquake> quakes = getGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
+			for (Earthquake e : quakes) {
+				long age = System.currentTimeMillis() - e.getOrigin();
+				double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (e.getMag())), 2) * 40);
+				double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+						* GeoUtils.EARTH_CIRCUMFERENCE;
+				double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+						* GeoUtils.EARTH_CIRCUMFERENCE;
+				if (age / 1000.0 < maxDisplayTimeSec) {
+					if (pDist > 0) {
+						Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
+						g.setColor(Color.blue);
+						g.setStroke(new BasicStroke(3f));
+						g.draw(pPol);
+					}
+					if (sDist > 0) {
+						Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
+						g.setColor(Color.red);
+						g.setStroke(new BasicStroke(2f));
+						g.draw(sPol);
 					}
 				}
+				double x0 = getX(e.getLat(), e.getLon());
+				double y0 = getY(e.getLat(), e.getLon());
 
-				g.setColor(col);
-				g.fill(rectShindo);
+				{
+					drawPga(g, e);
+				}
 
+				if (((System.currentTimeMillis() / 500) % 2 == 0)) {
+					Path2D.Double star = createStar(e.getLat(), e.getLon(), 20.0);
+
+					Color col = Scale.getColorLevel(e.getCluster().getLevel());
+
+					g.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 50));
+					g.setStroke(new BasicStroke(1f));
+					g.fill(star);
+					g.setColor(col);
+					g.setStroke(new BasicStroke(2f));
+					g.draw(star);
+				}
+
+				String str = e.getDepth() + "km";
+				g.setStroke(new BasicStroke(1f));
 				g.setColor(Color.white);
-				g.setFont(new Font("Calibri", Font.BOLD, 10));
-				g.drawString("Max Intensity", 2, baseHeight + 12);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 + 33));
 
-				String str3 = "";
-				if (shindo != null) {
-					str3 = shindo.getName();
-				}
-				boolean plus = str3.endsWith("+");
-				boolean minus = str3.endsWith("-");
-				if (plus || minus) {
-					str3 = str3.substring(0, 1) + " ";
-				}
+				str = "M" + format.format(e.getMag());
+				g.setStroke(new BasicStroke(1f));
 				g.setColor(Color.white);
-				g.setFont(new Font("Arial", Font.PLAIN, 64));
-				g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
-				if (plus) {
-					g.setColor(Color.white);
-					g.setFont(new Font("Arial", Font.PLAIN, 36));
-					g.drawString("+", 48, baseHeight + 50);
-
-				}
-				if (minus) {
-					g.setColor(Color.white);
-					g.setFont(new Font("Arial", Font.PLAIN, 48));
-					g.drawString("-", 52, baseHeight + 50);
-				}
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 26));
 			}
-			g.setColor(Color.white);
+
+			int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));
+
+			g.setFont(new Font("Calibri", Font.BOLD, 18));
 			g.setStroke(new BasicStroke(1f));
+			String string = "No Earthquakes Located";
 
-			int startY = baseHeight + 115;
-			int startX = 16;
-			int hh = 200;
-			int ww = 60;
+			int baseWidth = (int) (g.getFontMetrics().stringWidth(string) * 1.1 + 10);
+			int baseHeight = 132;
 
-			g.setFont(new Font("Calibri", Font.BOLD, 12));
-			g.drawString("Ratio Mag", 10, startY - 5);
+			g.setColor(neutralColor);
 
-			g.drawRect(startX, startY, ww, hh);
-
-			for (int mag = 1; mag <= 9; mag++) {
-				double y0 = startY + hh * (10 - mag) / 10;
+			if (displayedQuake == -1) {
+				g.fillRect(0, 0, baseWidth, baseHeight);
 				g.setColor(Color.white);
+				g.drawString(string, 3, 18);
+			} else {
+				Earthquake quake = quakes.get(displayedQuake);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
+				g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
+				g.fillRect(0, 0, baseWidth, baseHeight);
+				g.setColor(Color.white);
+				String str = (displayedQuake + 1) + "/" + quakes.size();
+				g.drawString(str, baseWidth - 3 - g.getFontMetrics().stringWidth(str), 18);
+				g.setFont(new Font("Calibri", Font.BOLD, 22));
+				g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", 3, 23);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(quake.getRegion(), 3, 44);
+				g.setFont(new Font("Calibri", Font.BOLD, 19));
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(quake.getOrigin());
+
+				g.drawString(formatNice.format(cal.getTime()), 3, 66);
+
+				g.setFont(new Font("Calibri", Font.BOLD, 16));
+				g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), 3, 85);
+				g.drawString(f1d.format(quake.getDepth()) + "km Deep", 3, 104);
+				str = quake.isFinished() ? "Final Report" : "Report no." + quake.getReportID();
+				g.drawString(str, 3, 125);
+				str = (int) quake.getPct() + "%";
+				g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
+				if (quake.getCluster().previousHypocenter != null) {
+					str = +quake.getCluster().previousHypocenter.getWrongCount() + " / "
+							+ quake.getCluster().getSelected().size() + " / "
+							+ quake.getCluster().getAssignedEvents().size();
+					g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
+				}
+
+				{
+					Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+
+					g.setFont(new Font("Calibri", Font.BOLD, 10));
+					int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
+					Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 95);
+					g.setStroke(new BasicStroke(1f));
+					Color col = neutralColor;
+
+					if (shindo != null) {
+						col = Shindo.getColorShindo(shindo);
+						if (shindo == Shindo.ZERO) {
+							col = Shindo.getColorShindo(Shindo.ICHI);
+						}
+					}
+
+					g.setColor(col);
+					g.fill(rectShindo);
+
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.BOLD, 10));
+					g.drawString("Max Intensity", 2, baseHeight + 12);
+
+					String str3 = "";
+					if (shindo != null) {
+						str3 = shindo.getName();
+					}
+					boolean plus = str3.endsWith("+");
+					boolean minus = str3.endsWith("-");
+					if (plus || minus) {
+						str3 = str3.substring(0, 1) + " ";
+					}
+					g.setColor(Color.white);
+					g.setFont(new Font("Arial", Font.PLAIN, 64));
+					g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
+					if (plus) {
+						g.setColor(Color.white);
+						g.setFont(new Font("Arial", Font.PLAIN, 36));
+						g.drawString("+", 48, baseHeight + 50);
+
+					}
+					if (minus) {
+						g.setColor(Color.white);
+						g.setFont(new Font("Arial", Font.PLAIN, 48));
+						g.drawString("-", 52, baseHeight + 50);
+					}
+				}
+				g.setColor(Color.white);
+				g.setStroke(new BasicStroke(1f));
+
+				int startY = baseHeight + 115;
+				int startX = 16;
+				int hh = 200;
+				int ww = 60;
+
 				g.setFont(new Font("Calibri", Font.BOLD, 12));
-				g.drawString(mag + "", startX - g.getFontMetrics().stringWidth(mag + "") - 5, (int) (y0 + 5));
-				g.draw(new Line2D.Double(startX, y0, startX + 4, y0));
-				g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
-			}
+				g.drawString("Ratio Mag", 10, startY - 5);
 
-			ArrayList<java.lang.Double> mags = null;
-			synchronized (quake.magsSync) {
-				mags = (ArrayList<java.lang.Double>) quake.getMags().clone();
-			}
+				g.drawRect(startX, startY, ww, hh);
 
-			int[] groups = new int[100];
-
-			for (java.lang.Double d : mags) {
-				int group = (int) (d * 10.0);
-				if (group >= 0 && group < 100) {
-					groups[group]++;
+				for (int mag = 1; mag <= 9; mag++) {
+					double y0 = startY + hh * (10 - mag) / 10;
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.BOLD, 12));
+					g.drawString(mag + "", startX - g.getFontMetrics().stringWidth(mag + "") - 5, (int) (y0 + 5));
+					g.draw(new Line2D.Double(startX, y0, startX + 4, y0));
+					g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
 				}
-			}
 
-			for (int i = 0; i < groups.length; i++) {
-				int n = groups[i];
-				if (n == 0) {
-					continue;
+				synchronized (quake.magsSync) {
+					ArrayList<java.lang.Double> mags = quake.getMags();
+					int[] groups = new int[100];
+
+					for (java.lang.Double d : mags) {
+						int group = (int) (d * 10.0);
+						if (group >= 0 && group < 100) {
+							groups[group]++;
+						}
+					}
+
+					for (int i = 0; i < groups.length; i++) {
+						int n = groups[i];
+						if (n == 0) {
+							continue;
+						}
+						double mag = i / 10.0;
+						double y0 = startY + hh * (10 - mag) / 10;
+						double y1 = startY + hh * (10 - (mag + 0.1)) / 10;
+						double w = Math.min(ww, (n / 10.0) * ww);
+						g.setColor(Scale.getColorEasily(mag / 8.0));
+						g.fill(new Rectangle2D.Double(startX + 1, y1, w, y0 - y1));
+					}
 				}
-				double mag = i / 10.0;
-				double y0 = startY + hh * (10 - mag) / 10;
-				double y1 = startY + hh * (10 - (mag + 0.1)) / 10;
-				double w = Math.min(ww, (n / 10.0) * ww);
-				g.setColor(Scale.getColorEasily(mag/8.0));
-				g.fill(new Rectangle2D.Double(startX + 1, y1, w, y0 - y1));
 			}
 		}
 

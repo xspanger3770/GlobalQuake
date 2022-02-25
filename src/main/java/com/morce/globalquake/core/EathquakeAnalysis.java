@@ -457,7 +457,8 @@ public class EathquakeAnalysis {
 				Earthquake e = it.next();
 				int store_minutes = STORE_TABLE[((int) Math.max(0,
 						Math.min(STORE_TABLE.length - 1, (int) e.getMag())))];
-				if (System.currentTimeMillis() - e.getOrigin() > (store_minutes) * 60 * 1000) {
+				if (System.currentTimeMillis() - e.getOrigin() > store_minutes * 60 * 1000
+						&& System.currentTimeMillis() - e.getLastUpdate() > store_minutes * 60 * 1000) {
 					getGlobalQuake().getArchive().archiveQuakeAndSave(e);
 					it.remove();
 				}

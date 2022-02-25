@@ -105,6 +105,10 @@ public class Earthquake {
 		this.lastUpdate = lastUpdate;
 	}
 
+	public long getLastUpdate() {
+		return lastUpdate;
+	}
+	
 	public void setCluster(Cluster cluster) {
 		this.cluster = cluster;
 	}
@@ -144,10 +148,6 @@ public class Earthquake {
 				region = Regions.getRegion(getLat(), getLon());
 			};
 		}.start();
-	}
-
-	public long getLastUpdate() {
-		return lastUpdate;
 	}
 
 	public Cluster getCluster() {
