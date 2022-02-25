@@ -3,7 +3,6 @@ package com.morce.globalquake.core;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Locale;
@@ -76,8 +75,7 @@ public class BetterAnalysis extends Analysis {
 	}
 
 	@Override
-	public void nextSample(int v, Calendar c) {
-		long time = c.getTimeInMillis();
+	public void nextSample(int v, long time) {
 		if (filter == null) {
 			filter = new Butterworth();
 			filter.bandPass(4, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));

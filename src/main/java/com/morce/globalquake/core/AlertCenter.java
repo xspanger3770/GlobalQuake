@@ -20,7 +20,7 @@ public class AlertCenter {
 	@SuppressWarnings("unchecked")
 	public void tick() {
 		ArrayList<Earthquake> quakes = null;
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
 		}
 		for (Earthquake quake : quakes) {

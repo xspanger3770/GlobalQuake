@@ -428,7 +428,7 @@ public class GlobalQuakePanel extends GlobePanel {
 		}
 		ArrayList<Earthquake> quakes = null;
 
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
 		}
 		for (Earthquake e : quakes) {
@@ -644,9 +644,11 @@ public class GlobalQuakePanel extends GlobePanel {
 		String str = "----/--/-- --:--:--";
 		g.setFont(new Font("Calibri", Font.BOLD, 24));
 		g.setColor(Color.gray);
-		if (globalQuake.getLastReceivedRecord() != null) {
-			str = formatNice.format(globalQuake.getLastReceivedRecord().getTime());
-			if (System.currentTimeMillis() - globalQuake.getLastReceivedRecord().getTimeInMillis() < 1000 * 120) {
+		if (globalQuake.getLastReceivedRecord() != 0) {
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(globalQuake.getLastReceivedRecord());
+			str = formatNice.format(c.getTime());
+			if (System.currentTimeMillis() - globalQuake.getLastReceivedRecord() < 1000 * 120) {
 				g.setColor(Color.white);
 			}
 		}

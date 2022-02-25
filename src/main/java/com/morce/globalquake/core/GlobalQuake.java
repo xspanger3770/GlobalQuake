@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.Executors;
@@ -24,7 +23,7 @@ public class GlobalQuake {
 	private GlobalQuakeFrame globalQuakeFrame;
 	protected ArrayList<GlobalStation> stations = new ArrayList<>();
 	private NetworkManager networkManager;
-	private Calendar lastReceivedRecord;
+	private long lastReceivedRecord;
 	public long lastSecond;
 	public long lastAnalysis;
 	public long lastGC;
@@ -263,7 +262,7 @@ public class GlobalQuake {
 						// todo
 						ArrayList<Earthquake> quakes = null;
 
-						synchronized (getEarthquakeAnalysis().earthquakeSync) {
+						synchronized (getEarthquakeAnalysis().earthquakesSync) {
 							quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
 						}
 						
@@ -289,13 +288,13 @@ public class GlobalQuake {
 		return networkManager;
 	}
 
-	public Calendar getLastReceivedRecord() {
+	public long getLastReceivedRecord() {
 		return lastReceivedRecord;
 	}
 
-	public void logRecord(Calendar lastSample) {
-		if (lastReceivedRecord == null || lastSample.after(lastReceivedRecord)) {
-			lastReceivedRecord = (Calendar) lastSample.clone();
+	public void logRecord(long time) {
+		if (time > lastReceivedRecord) {
+			lastReceivedRecord = time;
 		}
 	}
 

@@ -234,7 +234,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 		}
 
 		ArrayList<Earthquake> quakes = null;
-		synchronized (simulator.getFakeGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+		synchronized (simulator.getFakeGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
 					.clone();
 		}

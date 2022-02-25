@@ -51,20 +51,21 @@ public abstract class Analysis {
 			e.printStackTrace();
 			return;
 		}
-		Calendar c = (Calendar) dataRecord.getStartBtime().convertToCalendar().clone();// CEST
+		
+		long time=  dataRecord.getStartBtime().convertToCalendar().getTimeInMillis();
 
 		if (data == null) {
 			return;
 		}
 
 		for (int v : data) {
-			nextSample(v, c);
-			c.add(Calendar.MILLISECOND, (int) (1000 / getSampleRate()));// should be int
+			nextSample(v, time);
+			time += 1000 / getSampleRate();
 		}
 
 	}
 
-	public abstract void nextSample(int v, Calendar c);
+	public abstract void nextSample(int v, long time);
 
 	public abstract long getGapTreshold();
 

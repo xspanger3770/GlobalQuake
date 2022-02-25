@@ -25,11 +25,11 @@ public class EathquakeAnalysis {
 	private GlobalQuake globalQuake;
 	private ArrayList<Earthquake> earthquakes = new ArrayList<Earthquake>();
 
-	public Object earthquakeSync;
+	public Object earthquakesSync;
 
 	public EathquakeAnalysis(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		this.earthquakeSync = new Object();
+		this.earthquakesSync = new Object();
 		this.earthquakes = new ArrayList<Earthquake>();
 	}
 
@@ -151,7 +151,7 @@ public class EathquakeAnalysis {
 	@SuppressWarnings("unchecked")
 	private void calculateMagnitudes() {
 		ArrayList<Earthquake> quakes = null;
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
 		}
 		for (Earthquake earthquake : quakes) {
@@ -345,7 +345,7 @@ public class EathquakeAnalysis {
 						// bestHypocenter.correctStations));
 						boolean valid = pct > VALID_TRESHOLD;
 						if (!valid && cluster.getEarthquake() != null && pct < REMOVE_TRESHOLD) {
-							synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+							synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 								getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
 										.remove(cluster.getEarthquake());
 							}
@@ -354,7 +354,7 @@ public class EathquakeAnalysis {
 						if (valid) {
 							if (cluster.getEarthquake() == null) {
 								Sounds.playSound(Sounds.incoming);
-								synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+								synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 									getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().add(earthquake);
 								}
 								cluster.setEarthquake(earthquake);
@@ -451,7 +451,7 @@ public class EathquakeAnalysis {
 	public static final int[] STORE_TABLE = { 5, 5, 5, 5, 8, 15, 30, 60, 90, 90 };
 
 	public void second() {
-		synchronized (earthquakeSync) {
+		synchronized (earthquakesSync) {
 			Iterator<Earthquake> it = earthquakes.iterator();
 			while (it.hasNext()) {
 				Earthquake e = it.next();

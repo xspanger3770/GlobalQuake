@@ -15,9 +15,9 @@ public class ClusterAnalysis {
 
 	private GlobalQuake globalQuake;
 
-	public Object clustersSync = new Object();
 	private ArrayList<Cluster> clusters = new ArrayList<Cluster>();
-
+	public Object clustersSync = new Object();
+	
 	private int nextClusterId;
 
 	public ClusterAnalysis(GlobalQuake globalQuake) {
@@ -56,7 +56,7 @@ public class ClusterAnalysis {
 					HashMap<Earthquake, Event> map = new HashMap<>();
 					ArrayList<Earthquake> quakes = null;
 
-					synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+					synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 						quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
 								.clone();
 					}

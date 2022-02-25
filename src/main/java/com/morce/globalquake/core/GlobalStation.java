@@ -1,6 +1,8 @@
 package com.morce.globalquake.core;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 
@@ -17,7 +19,7 @@ public class GlobalStation {
 	private double alt;
 	private long sensitivity;
 	private BetterAnalysis analysis;
-	private ArrayList<DataRecord> pendingRecords;
+	private Queue<DataRecord> recordsQueue;
 	private Object recordsSync = new Object();
 	private double frequency;
 	private GlobalQuake globalQuake;
@@ -39,7 +41,7 @@ public class GlobalStation {
 		this.sensitivity = sensitivity;
 		this.frequency = frequency;
 		this.analysis = new BetterAnalysis(this);
-		this.pendingRecords = new ArrayList<DataRecord>();
+		this.recordsQueue = new LinkedList<DataRecord>();
 		this.id = id;
 	}
 
@@ -101,27 +103,18 @@ public class GlobalStation {
 
 	public void addRecord(DataRecord dr) {
 		synchronized (recordsSync) {
-			pendingRecords.add(dr);
+			recordsQueue.add(dr);
 		}
 	}
 
 	public void analyse() {
-		ArrayList<DataRecord> chunk;
 		synchronized (recordsSync) {
-			if (pendingRecords.isEmpty()) {
-				return;
-			} else {
-				chunk = new ArrayList<>();
-				chunk.addAll(pendingRecords);
-				pendingRecords.clear();
+			while(!recordsQueue.isEmpty()) {
+				DataRecord record = recordsQueue.remove();
+				analysis.analyse(record);
+				globalQuake.logRecord(record.getLastSampleBtime().convertToCalendar().getTimeInMillis());
 			}
 		}
-
-		for (DataRecord dr : chunk) {
-			analysis.analyse(dr);
-			globalQuake.logRecord(dr.getLastSampleBtime().convertToCalendar());
-		}
-
 	}
 
 	public long getDelayMS() {

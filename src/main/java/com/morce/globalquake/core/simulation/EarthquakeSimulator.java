@@ -128,7 +128,7 @@ public class EarthquakeSimulator extends JFrame {
 					synchronized (getClusterAnalysis().clustersSync) {
 						getClusterAnalysis().getClusters().clear();
 					}
-					synchronized (earthquakeAnalysis.earthquakeSync) {
+					synchronized (earthquakeAnalysis.earthquakesSync) {
 						earthquakeAnalysis.getEarthquakes().clear();
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -146,7 +146,7 @@ public class EarthquakeSimulator extends JFrame {
 							}
 						}
 					}
-					synchronized (getFakeGlobalQuake().getEarthquakeAnalysis().earthquakeSync) {
+					synchronized (getFakeGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 						for (Earthquake ea : getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakes()) {
 							ea.setOrigin(ea.getOrigin() - skip);
 						}
