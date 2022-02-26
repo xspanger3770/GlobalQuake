@@ -118,8 +118,8 @@ public class GlobalStation {
 	}
 
 	public long getDelayMS() {
-		return getAnalysis().getLastRecord() == null ? -1
-				: System.currentTimeMillis() - getAnalysis().getLastRecord().getTimeInMillis();
+		return getAnalysis().getLastRecord() == 0 ? -1
+				: System.currentTimeMillis() - getAnalysis().getLastRecord();
 	}
 
 	private ArrayList<Double> ratioHistory = new ArrayList<>();

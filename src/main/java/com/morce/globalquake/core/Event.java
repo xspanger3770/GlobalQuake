@@ -1,10 +1,14 @@
 package com.morce.globalquake.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Event {
+import com.morce.globalquake.core.report.StationReport;
 
+public class Event implements Serializable{
+
+	private static final long serialVersionUID = 2303478912602245970L;
 	public static final double[] RECALCULATE_P_WAVE_TRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
 	public static final double[] SLOW_TRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
@@ -17,10 +21,10 @@ public class Event {
 	private long lastLogTime;// last log time (increasing until 90 seconds after event end)
 	private long lastAnalysisTime;
 
-	public int nextPWaveCalc;
+	public transient int nextPWaveCalc;
 
 	private ArrayList<Log> logs;
-	public Object logsSync;
+	public transient Object logsSync;
 
 	public double maxRatio;
 
@@ -28,7 +32,8 @@ public class Event {
 
 	public int assignedCluster;
 	private int updatesCount;
-	private Analysis analysis;
+	private transient Analysis analysis;
+	public StationReport report;
 
 	public Event(Analysis analysis, long start, ArrayList<Log> logs) {
 		this(analysis);

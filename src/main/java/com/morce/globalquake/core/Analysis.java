@@ -1,11 +1,9 @@
 package com.morce.globalquake.core;
 
-import java.util.Calendar;
-
 import edu.sc.seis.seisFile.mseed.DataRecord;
 
 public abstract class Analysis {
-	private Calendar lastRecord;
+	private long lastRecord;
 	private GlobalStation station;
 	private double sampleRate;
 
@@ -14,7 +12,7 @@ public abstract class Analysis {
 		this.sampleRate = -1;
 	}
 
-	public Calendar getLastRecord() {
+	public long getLastRecord() {
 		return lastRecord;
 	}
 
@@ -27,18 +25,19 @@ public abstract class Analysis {
 			sampleRate = dr.getSampleRate();
 			reset();
 		}
-		if (dr.getLastSampleBtime().convertToCalendar().before(lastRecord)) {
-			System.err.println("ERROR: BACKWARDS TIME (" + getStation().getStationCode() + ")");
+		long time = dr.getLastSampleBtime().convertToCalendar().getTimeInMillis();
+		if (time < lastRecord) {
+			System.err.println(
+					"ERROR: BACKWARDS TIME AT " + getStation().getStationCode() + " (" + (lastRecord - time) + ")");
 		} else {
 			decode(dr);
-			lastRecord = dr.getLastSampleBtime().convertToCalendar();
+			lastRecord = time;
 		}
 	}
 
 	private void decode(DataRecord dataRecord) {
-		long gap = lastRecord != null
-				? (dataRecord.getStartBtime().convertToCalendar().getTimeInMillis() - lastRecord.getTimeInMillis())
-				: -1;
+		long time= dataRecord.getStartBtime().convertToCalendar().getTimeInMillis();
+		long gap = lastRecord != 0 ? (time - lastRecord) : -1;
 		if (gap > getGapTreshold()) {
 			System.err.println("Station " + getStation().getStationCode() + " reset due to a gap (" + gap + "ms)");
 			reset();
@@ -51,8 +50,6 @@ public abstract class Analysis {
 			e.printStackTrace();
 			return;
 		}
-		
-		long time=  dataRecord.getStartBtime().convertToCalendar().getTimeInMillis();
 
 		if (data == null) {
 			return;

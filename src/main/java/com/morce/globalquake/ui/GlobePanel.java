@@ -23,9 +23,9 @@ import com.morce.globalquake.utils.GeoUtils;
 public class GlobePanel extends JPanel implements GeoUtils {
 
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<org.geojson.Polygon> polygonsUHD = Regions.raw_polygonsUHD;
-	private static ArrayList<org.geojson.Polygon> polygonsHD = Regions.raw_polygonsHD;
-	private static ArrayList<org.geojson.Polygon> polygonsMD = Regions.raw_polygonsMD;
+	public static ArrayList<org.geojson.Polygon> polygonsUHD = Regions.raw_polygonsUHD;
+	public static ArrayList<org.geojson.Polygon> polygonsHD = Regions.raw_polygonsHD;
+	public static ArrayList<org.geojson.Polygon> polygonsMD = Regions.raw_polygonsMD;
 	public double centerLat = 49.7;
 	public double centerLon = 15.65;
 	public double dragStartLat;

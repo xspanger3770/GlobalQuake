@@ -35,11 +35,11 @@ public class SimulatedEarthquake extends Earthquake {
 	}
 
 	public double maxR(double dist) {
-		return (Math.pow(10, mag + 5.5)) / (100 * Math.pow(dist, 2.25) + 1);
+		return (Math.pow(10, mag + 5.8)) / (100 * Math.pow(dist, 2.25) + 1);
 	}
 
 	public static double mag(double dist, double maxR) {
-		return Math.log10((maxR) * (100 * Math.pow(dist, 2.25) + 1)) - 5.5;
+		return Math.log10((maxR) * (100 * Math.pow(dist, 2.25) + 1)) - 5.8;
 	}
 
 	public HashMap<SimulatedStation, Event> getEventMap() {

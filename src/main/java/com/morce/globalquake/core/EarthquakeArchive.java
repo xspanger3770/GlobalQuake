@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.morce.globalquake.core.report.EarthquakeReporter;
 import com.morce.globalquake.core.simulation.FakeGlobalQuake;
 import com.morce.globalquake.main.Main;
 
@@ -18,7 +19,7 @@ public class EarthquakeArchive {
 	private GlobalQuake globalQuake;
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
-
+	
 	public Object archivedQuakesSync;
 	private ArrayList<ArchivedQuake> archivedQuakes;
 
@@ -92,9 +93,23 @@ public class EarthquakeArchive {
 					Collections.sort(archivedQuakes, Comparator.comparing(ArchivedQuake::getOrigin));
 				}
 				saveArchive();
+				if(true) {
+					new Thread("Quake Reporter") {
+						@Override
+						public void run() {
+							try {
+								EarthquakeReporter.report(earthquake);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}.start();
+				}
 			};
 		}.start();
 	}
+
+
 
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);

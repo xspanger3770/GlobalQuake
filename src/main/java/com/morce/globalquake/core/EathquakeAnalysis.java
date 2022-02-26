@@ -61,7 +61,7 @@ public class EathquakeAnalysis {
 			}
 
 			if (cluster.lastEpicenterUpdate == cluster.updateCount) {
-				System.err.println("NO_NEED");
+				//System.err.println("NO_NEED");
 				continue;
 			}
 			cluster.lastEpicenterUpdate = cluster.updateCount;
@@ -448,7 +448,7 @@ public class EathquakeAnalysis {
 		return good;
 	}
 
-	public static final int[] STORE_TABLE = { 5, 5, 5, 5, 8, 15, 30, 60, 90, 90 };
+	public static final int[] STORE_TABLE = { 3, 3, 3, 5, 8, 15, 30, 60, 90, 90 };
 
 	public void second() {
 		synchronized (earthquakesSync) {
