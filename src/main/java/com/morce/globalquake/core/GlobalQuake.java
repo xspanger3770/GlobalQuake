@@ -39,8 +39,10 @@ public class GlobalQuake {
 	public EathquakeAnalysis earthquakeAnalysis;
 	public AlertCenter alertCenter;
 	public EarthquakeArchive archive;
+	public static GlobalQuake instance;
 
 	public GlobalQuake(StationManager stationManager) {
+		instance = this;
 		if (stationManager == null) {
 			return;
 		}
@@ -153,7 +155,7 @@ public class GlobalQuake {
 		}, 0, 1, TimeUnit.SECONDS);
 	}
 
-	protected void saveError(Exception e) {
+	public void saveError(Exception e) {
 		try {
 			if(!ERRORS_FILE.exists()) {
 				ERRORS_FILE.mkdirs();

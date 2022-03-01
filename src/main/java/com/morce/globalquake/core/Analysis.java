@@ -45,21 +45,16 @@ public abstract class Analysis {
 		int[] data = null;
 		try {
 			data = dataRecord.decompress().getAsInt();
+			for (int v : data) {
+				nextSample(v, time);
+				time += 1000 / getSampleRate();
+			}
 		} catch (Exception e) {
 			System.err.println("Crash occured at station " + getStation().getStationCode() + ", thread continues.");
 			e.printStackTrace();
+			GlobalQuake.instance.saveError(e);
 			return;
 		}
-
-		if (data == null) {
-			return;
-		}
-
-		for (int v : data) {
-			nextSample(v, time);
-			time += 1000 / getSampleRate();
-		}
-
 	}
 
 	public abstract void nextSample(int v, long time);

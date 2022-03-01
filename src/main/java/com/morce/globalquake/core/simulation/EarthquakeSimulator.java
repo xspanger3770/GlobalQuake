@@ -428,7 +428,7 @@ public class EarthquakeSimulator extends JFrame {
 						stations.add(new SimulatedStation(n.getNetworkCode(), s.getStationCode(), ch.getName(),
 								ch.getLocationCode(), ch.getSeedlinkNetwork(), ch.getSource(), s.getLat(), s.getLon(),
 								s.getAlt(), ch.getSensitivity(), ch.getFrequency(), i,
-								0.1 + random.nextDouble() * 1.8));
+								1)); //0.1 + random.nextDouble() * 1.8 //TODO
 						i++;
 					}
 				}
