@@ -6,7 +6,11 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,7 +31,8 @@ public class GlobalQuake {
 
 	public static final File ERRORS_FILE = new File(Main.MAIN_FOLDER, "/error_logs/");
 	private GlobalQuakeFrame globalQuakeFrame;
-	protected ArrayList<GlobalStation> stations = new ArrayList<>();
+	protected ArrayList<AbstractStation> stations = new ArrayList<>();
+	private ZejfNetStation zejf;
 	private NetworkManager networkManager;
 	private long lastReceivedRecord;
 	public long lastSecond;
@@ -48,6 +53,7 @@ public class GlobalQuake {
 		}
 		createFrame();
 		initStations(stationManager);
+		runZejf();
 		runNetworkManager();
 		runThreads();
 	}
@@ -74,7 +80,7 @@ public class GlobalQuake {
 			public void run() {
 				try {
 					long a = System.currentTimeMillis();
-					for (GlobalStation station : stations) {
+					for (AbstractStation station : stations) {
 						station.analyse();
 					}
 					lastAnalysis = System.currentTimeMillis() - a;
@@ -91,7 +97,7 @@ public class GlobalQuake {
 			public void run() {
 				try {
 					long a = System.currentTimeMillis();
-					for (GlobalStation s : stations) {
+					for (AbstractStation s : stations) {
 						s.second();
 					}
 					if (getEarthquakeAnalysis() != null) {
@@ -113,7 +119,7 @@ public class GlobalQuake {
 					long a = System.currentTimeMillis();
 					System.gc();
 					lastGC = System.currentTimeMillis() - a;
-					//throw new Exception("Error test");
+					// throw new Exception("Error test");
 				} catch (Exception e) {
 					System.err.println("Exception in garbage collector");
 					e.printStackTrace();
@@ -157,7 +163,7 @@ public class GlobalQuake {
 
 	public void saveError(Exception e) {
 		try {
-			if(!ERRORS_FILE.exists()) {
+			if (!ERRORS_FILE.exists()) {
 				ERRORS_FILE.mkdirs();
 			}
 			FileWriter fw = new FileWriter(ERRORS_FILE + "/err_" + System.currentTimeMillis() + ".txt", true);
@@ -167,6 +173,53 @@ public class GlobalQuake {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public static final String ZEJF_ADDR = "25.105.96.68";
+	public static final int ZEJF_PORT = 6222;
+
+	private void runZejf() {
+		new Thread("ZejfNet Socket") {
+			public void run() {
+				while (true) {
+					try {
+						System.out.println("Connecting to ZejfNet...");
+						Socket socket = new Socket();
+						socket.connect(new InetSocketAddress(ZEJF_ADDR, ZEJF_PORT));
+						ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+						ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+						outputStream.writeUTF("realtime");
+						outputStream.flush();
+						System.out.println("Listening for ZejfNet packets...");
+						while (true) {
+							String command = "";
+							command = inputStream.readUTF();
+							if (!command.isEmpty()) {
+								try {
+									if (command.startsWith("log")) {
+										long time = inputStream.readLong();
+										int value = inputStream.readInt();
+										zejf.addRecord(new SimpleLog(time, value));
+									}
+								} catch (Exception e) {
+									System.err.println("Unable to parse command '" + command + "': " + e.getMessage());
+									break;
+								}
+							}
+						}
+						socket.close();
+					} catch (IOException e) {
+						System.err.println("Unable to connect to Zejf: " + e.getMessage());
+					} finally {
+						try {
+							sleep(10000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+		}.start();
 	}
 
 	private void runNetworkManager() {
@@ -188,21 +241,27 @@ public class GlobalQuake {
 				}
 			}
 		}
+		addZejfNetStations();
 		createListOfClosestStations();
 		System.out.println("Initalized " + stations.size() + " Stations.");
+	}
+
+	private void addZejfNetStations() {
+		zejf = new ZejfNetStation(this, "ZEJF", "Zejf", "BHE", "Zejf", 50.262, 17.262, 400, -1, 40, nextID++);
+		stations.add(zejf);
 	}
 
 	public static final int RAYS = 9;
 
 	private void createListOfClosestStations() {
-		for (GlobalStation stat : stations) {
+		for (AbstractStation stat : stations) {
 			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<ArrayList<StationDistanceInfo>>();
 			for (int i = 0; i < RAYS; i++) {
 				rays.add(new ArrayList<StationDistanceInfo>());
 			}
 			int num = 0;
 			outerLoop: for (int i = 0; i < 2; i++) {
-				for (GlobalStation stat2 : stations) {
+				for (AbstractStation stat2 : stations) {
 					if (!(stat2.getId() == stat.getId())) {
 						double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
 								stat2.getLon());
@@ -270,8 +329,7 @@ public class GlobalQuake {
 		GlobalStation station = new GlobalStation(this, ch.getStation().getNetwork().getNetworkCode(),
 				ch.getStation().getStationCode(), ch.getName(), ch.getLocationCode(), ch.getSource(),
 				ch.getSeedlinkNetwork(), ch.getStation().getLat(), ch.getStation().getLon(), ch.getStation().getAlt(),
-				ch.getSensitivity(), ch.getFrequency(), nextID);
-		nextID++;
+				ch.getSensitivity(), ch.getFrequency(), nextID++);
 		return station;
 	}
 
@@ -304,11 +362,11 @@ public class GlobalQuake {
 		});
 	}
 
-	public ArrayList<GlobalStation> getStations() {
+	public ArrayList<AbstractStation> getStations() {
 		return stations;
 	}
 
-	public GlobalStation getStationById(int id) {
+	public AbstractStation getStationById(int id) {
 		return stations.get(id);
 	}
 

@@ -2,8 +2,8 @@ package com.morce.globalquake.core.simulation;
 
 import java.util.ArrayList;
 
+import com.morce.globalquake.core.AbstractStation;
 import com.morce.globalquake.core.GlobalQuake;
-import com.morce.globalquake.core.GlobalStation;
 
 public class FakeGlobalQuake extends GlobalQuake {
 
@@ -16,7 +16,7 @@ public class FakeGlobalQuake extends GlobalQuake {
 	}
 
 	private void init() {
-		this.stations = new ArrayList<GlobalStation>();
+		this.stations = new ArrayList<AbstractStation>();
 		for (SimulatedStation sims : sim.getStations()) {
 			this.stations.add(sims.toGlobalStation());
 		}

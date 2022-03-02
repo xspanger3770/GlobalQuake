@@ -27,12 +27,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 
+import com.morce.globalquake.core.AbstractStation;
 import com.morce.globalquake.core.ArchivedEvent;
 import com.morce.globalquake.core.ArchivedQuake;
 import com.morce.globalquake.core.Cluster;
 import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
-import com.morce.globalquake.core.GlobalStation;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
 import com.morce.globalquake.ui.GlobePanel;
 import com.morce.globalquake.utils.GeoUtils;
@@ -316,7 +316,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 
 			if (mouseNearby) {
 				for (NearbyStationDistanceInfo info : s.getNearbyStations()) {
-					GlobalStation stat = info.getStation();
+					AbstractStation stat = info.getStation();
 					double x2 = getX(stat.getLat(), stat.getLon());
 					double y2 = getY(stat.getLat(), stat.getLon());
 					g.setColor(Color.white);

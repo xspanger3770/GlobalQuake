@@ -18,9 +18,9 @@ import javax.imageio.ImageIO;
 
 import org.geojson.LngLatAlt;
 
+import com.morce.globalquake.core.AbstractStation;
 import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
-import com.morce.globalquake.core.GlobalStation;
 import com.morce.globalquake.main.Main;
 import com.morce.globalquake.ui.GlobePanel;
 import com.morce.globalquake.utils.Scale;
@@ -50,7 +50,7 @@ public class EarthquakeReporter {
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(assignedEventsFile));
 		synchronized (earthquake.getCluster().assignedEventsSync) {
 			for (Event e : earthquake.getCluster().getAssignedEvents()) {
-				GlobalStation station = e.getAnalysis().getStation();
+				AbstractStation station = e.getAnalysis().getStation();
 				e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
 						station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
 						station.getAlt());
@@ -149,11 +149,13 @@ public class EarthquakeReporter {
 				+ (height * 0.5);
 	}
 
+	@SuppressWarnings("unused")
 	private static double getLat(double y) {
 		return centerLat - (y - (height * 0.5)) * (scroll / (300 - 200 * Math.cos(Math.toRadians(centerLat))));
 
 	}
 
+	@SuppressWarnings("unused")
 	private static double getLon(double x) {
 		return (x - (width * 0.5)) * (scroll / 100.0) + centerLon;
 	}

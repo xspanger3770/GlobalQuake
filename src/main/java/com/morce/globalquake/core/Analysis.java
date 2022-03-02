@@ -4,10 +4,10 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 
 public abstract class Analysis {
 	private long lastRecord;
-	private GlobalStation station;
-	private double sampleRate;
+	private AbstractStation station;
+	double sampleRate;
 
-	public Analysis(GlobalStation station) {
+	public Analysis(AbstractStation station) {
 		this.station = station;
 		this.sampleRate = -1;
 	}
@@ -16,7 +16,7 @@ public abstract class Analysis {
 		return lastRecord;
 	}
 
-	public GlobalStation getStation() {
+	public AbstractStation getStation() {
 		return station;
 	}
 

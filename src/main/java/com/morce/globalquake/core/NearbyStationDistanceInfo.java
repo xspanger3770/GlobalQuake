@@ -2,11 +2,11 @@ package com.morce.globalquake.core;
 
 public class NearbyStationDistanceInfo {
 
-	private GlobalStation station;
+	private AbstractStation station;
 	private double dist;
 	private double angle;
 
-	public NearbyStationDistanceInfo(GlobalStation station, double dist, double angle) {
+	public NearbyStationDistanceInfo(AbstractStation station, double dist, double angle) {
 		this.station = station;
 		this.dist = dist;
 		this.angle = angle;
@@ -20,7 +20,7 @@ public class NearbyStationDistanceInfo {
 		return dist;
 	}
 	
-	public GlobalStation getStation() {
+	public AbstractStation getStation() {
 		return station;
 	}
 	

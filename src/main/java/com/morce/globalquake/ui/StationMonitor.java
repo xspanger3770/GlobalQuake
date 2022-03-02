@@ -7,13 +7,13 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
-import com.morce.globalquake.core.GlobalStation;
+import com.morce.globalquake.core.AbstractStation;
 
 public class StationMonitor extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
-	public StationMonitor(GlobalStation station) {
+	public StationMonitor(AbstractStation station) {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		StationMonitorPanel panel = new StationMonitorPanel(station);
 		setContentPane(panel);

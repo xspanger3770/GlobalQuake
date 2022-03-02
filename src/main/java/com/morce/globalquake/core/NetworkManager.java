@@ -29,7 +29,7 @@ public class NetworkManager {
 				System.out.println("No stations selected at " + seedlink.getHost());
 				continue;
 			}
-			Thread seedlinkThread = new Thread("Network Thread - "+seedlink.getHost()) {
+			Thread seedlinkThread = new Thread("Network Thread - " + seedlink.getHost()) {
 				@Override
 				public void run() {
 					while (true) {
@@ -40,7 +40,7 @@ public class NetworkManager {
 							System.out.println("Connecting to seedlink server \"" + seedlink.getHost() + "\"");
 							reader = new SeedlinkReader(seedlink.getHost(), 18000, 90, false);
 
-							for (GlobalStation s : globalQuake.getStations()) {
+							for (AbstractStation s : globalQuake.getStations()) {
 								if (s.getSeedlinkNetwork() == seedlink.getId()) {
 									System.out.println("Connecting to " + s.getStationCode() + " " + s.getNetworkCode()
 											+ " " + s.getChannelName() + " " + s.getLocationCode() + ", "
@@ -95,9 +95,11 @@ public class NetworkManager {
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
-		for (GlobalStation s : globalQuake.getStations()) {
-			if (s.getNetworkCode().equals(network) && s.getStationCode().equals(station)) {
-				s.addRecord(dr);
+		for (AbstractStation s : globalQuake.getStations()) {
+			if (s instanceof GlobalStation) {
+				if (s.getNetworkCode().equals(network) && s.getStationCode().equals(station)) {
+					((GlobalStation) s).addRecord(dr);
+				}
 			}
 		}
 	}

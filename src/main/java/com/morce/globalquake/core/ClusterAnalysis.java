@@ -43,7 +43,7 @@ public class ClusterAnalysis {
 
 	@SuppressWarnings({ "unchecked", "unused" })
 	private void assignEventsToExistingEarthquakeClusters() {
-		for (GlobalStation station : getGlobalQuake().getStations()) {
+		for (AbstractStation station : getGlobalQuake().getStations()) {
 			ArrayList<Event> events = null;
 
 			synchronized (station.getAnalysis().previousEventsSync) {
@@ -140,7 +140,7 @@ public class ClusterAnalysis {
 		//c.removeShittyEvents();
 	}
 
-	private boolean _contains(ArrayList<Event> newEvents, GlobalStation station) {
+	private boolean _contains(ArrayList<Event> newEvents, AbstractStation station) {
 		for (Event e : newEvents) {
 			if (e.getAnalysis().getStation().getId() == station.getId()) {
 				return true;
@@ -162,7 +162,7 @@ public class ClusterAnalysis {
 	}
 
 	private void createNewClusters() {
-		for (GlobalStation station : getGlobalQuake().getStations()) {
+		for (AbstractStation station : getGlobalQuake().getStations()) {
 			ArrayList<Event> evList = null;
 			synchronized (station.getAnalysis().previousEventsSync) {
 				evList = station.getAnalysis().getPreviousEvents();
@@ -174,7 +174,7 @@ public class ClusterAnalysis {
 					// so we have eligible event
 					ArrayList<Event> validEvents = new ArrayList<Event>();
 					closestLoop: for (NearbyStationDistanceInfo info : station.getNearbyStations()) {
-						GlobalStation close = info.getStation();
+						AbstractStation close = info.getStation();
 						double dist = info.getDist();
 						ArrayList<Event> evList2 = null;
 						synchronized (close.getAnalysis().previousEventsSync) {// this should not cause issues, even

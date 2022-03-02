@@ -61,7 +61,7 @@ public class BetterAnalysis extends Analysis {
 	private ArrayList<Log> previousLogs;
 	public long latestLogTime;
 
-	public BetterAnalysis(GlobalStation station) {
+	public BetterAnalysis(AbstractStation station) {
 		super(station);
 		previousEventsSync = new Object();
 		previousLogsSync = new Object();
@@ -120,12 +120,13 @@ public class BetterAnalysis extends Analysis {
 			initProgress++;
 		} else {
 			double filteredV = filter.filter(v - initialOffset);
-			shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.30);
+			shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
+			//shortAverage = Math.abs(filteredV);
 			mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
 			thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
 
 			if (Math.abs(filteredV) > specialAverage) {
-				specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 0.25);
+				specialAverage = Math.abs(filteredV);
 			} else {
 				specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 50.0);
 			}
@@ -136,8 +137,8 @@ public class BetterAnalysis extends Analysis {
 			double ratio = shortAverage / longAverage;
 			// double slowRatio = mediumAverage / longAverage;
 			if (status == IDLE && previousLogs.size() > 0) {
-				boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD && time - eventTimer > 2000;
-				boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2 && time - eventTimer > 1000;
+				boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD * 1.5 && time - eventTimer > 200;
+				boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2.25 && time - eventTimer > 100;
 				boolean condMain = shortAverage / thirdAverage > 2;
 				if (condMain && (cond1 || cond2)) {
 					ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
@@ -181,7 +182,7 @@ public class BetterAnalysis extends Analysis {
 			}*/
 
 			if (ratio > _maxRatio || _maxRatioReset) {
-				_maxRatio = ratio;
+				_maxRatio = ratio * 1.25;
 				_maxRatioReset = false;
 			}
 			if (time - System.currentTimeMillis() < 1000 * 10

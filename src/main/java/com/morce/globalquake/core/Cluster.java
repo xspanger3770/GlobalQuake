@@ -161,7 +161,7 @@ public class Cluster {
 		return size;
 	}
 
-	protected boolean containsStation(GlobalStation station) {
+	protected boolean containsStation(AbstractStation station) {
 		for (Event e : getAssignedEvents()) {
 			if (e.getAnalysis().getStation().getId() == station.getId()) {
 				return true;

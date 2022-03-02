@@ -13,18 +13,18 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import com.morce.globalquake.core.AbstractStation;
 import com.morce.globalquake.core.BetterAnalysis;
 import com.morce.globalquake.core.Event;
-import com.morce.globalquake.core.GlobalStation;
 import com.morce.globalquake.core.Log;
 
 public class StationMonitorPanel extends JPanel {
 
 	private static final long serialVersionUID = -1l;
 	private BufferedImage image;
-	private GlobalStation station;
+	private AbstractStation station;
 
-	public StationMonitorPanel(GlobalStation station) {
+	public StationMonitorPanel(AbstractStation station) {
 		this.station = station;
 		setLayout(null);
 		setPreferredSize(new Dimension(600, 500));

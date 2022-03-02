@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import com.morce.globalquake.core.report.StationReport;
 
-public class Event implements Serializable{
+public class Event implements Serializable {
 
 	private static final long serialVersionUID = 2303478912602245970L;
 	public static final double[] RECALCULATE_P_WAVE_TRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
@@ -220,7 +220,7 @@ public class Event implements Serializable{
 		// double slowRatioAtTheBeginning = logAtStart.getMediumRatio();
 		double slow15Pct = slows.get((int) ((slows.size() - 1) * 0.175));
 
-		double mul = SPECIAL_PERCENTILE[strenghtLevel];
+		double mul = SPECIAL_PERCENTILE[strenghtLevel] * 1.1;
 		double specialTreshold = maxSpecial * mul + (1 - mul) * minSpecial;
 
 		double slowTresholdMultiplier = SLOW_TRESHOLD_MULTIPLIERS[strenghtLevel];
@@ -233,7 +233,7 @@ public class Event implements Serializable{
 		for (Log l : logs) {
 			long time = l.getTime();
 			boolean slowRatioOK = true;// l.getMediumRatio() <= slowTreshold;
-			boolean ratioOK = l.getRatio() <= slow15Pct * (slowTresholdMultiplier * 1.0);
+			boolean ratioOK = l.getRatio() <= slow15Pct * (slowTresholdMultiplier * 1.25);
 			boolean specialOK = l.getSpecialRatio() <= specialTreshold;
 			if (time >= lookBack && time <= getStart()) {
 				if (pWave == -1) {

@@ -24,6 +24,7 @@ import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
+import com.morce.globalquake.core.AbstractStation;
 import com.morce.globalquake.core.ArchivedEvent;
 import com.morce.globalquake.core.ArchivedQuake;
 import com.morce.globalquake.core.BetterAnalysis;
@@ -31,7 +32,6 @@ import com.morce.globalquake.core.Cluster;
 import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
 import com.morce.globalquake.core.GlobalQuake;
-import com.morce.globalquake.core.GlobalStation;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
 import com.morce.globalquake.database.SeedlinkNetwork;
 import com.morce.globalquake.database.StationManager;
@@ -72,8 +72,8 @@ public class GlobalQuakePanel extends GlobePanel {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (lastMouse != null) {
-					ArrayList<GlobalStation> clickedStations = new ArrayList<>();
-					for (GlobalStation s : globalQuake.getStations()) {
+					ArrayList<AbstractStation> clickedStations = new ArrayList<>();
+					for (AbstractStation s : globalQuake.getStations()) {
 						double x = getX(s.getLat(), s.getLon());
 						double y = getY(s.getLat(), s.getLon());
 						if (isMouseNearby(x, y, 7)) {
@@ -115,15 +115,15 @@ public class GlobalQuakePanel extends GlobePanel {
 		});
 	}
 
-	private void stationMonitor(ArrayList<GlobalStation> clickedStations) {
-		GlobalStation station = null;
+	private void stationMonitor(ArrayList<AbstractStation> clickedStations) {
+		AbstractStation station = null;
 
 		if (clickedStations.size() == 1) {
 			station = clickedStations.get(0);
 		} else {
 			String[] realOptions = new String[clickedStations.size()];
 			int i = 0;
-			for (GlobalStation s : clickedStations) {
+			for (AbstractStation s : clickedStations) {
 				realOptions[i] = s.getStationCode() + " " + s.getNetworkCode();
 				i++;
 			}
@@ -148,7 +148,7 @@ public class GlobalQuakePanel extends GlobePanel {
 			System.err.println("Fatal Error: null");
 			return;
 		} else {
-			final GlobalStation _station = station;
+			final AbstractStation _station = station;
 			EventQueue.invokeLater(new Runnable() {
 
 				@Override
@@ -188,7 +188,7 @@ public class GlobalQuakePanel extends GlobePanel {
 			g.draw(path);
 		}
 
-		for (GlobalStation s : globalQuake.getStations()) {
+		for (AbstractStation s : globalQuake.getStations()) {
 			double x = getX(s.getLat(), s.getLon());
 			double y = getY(s.getLat(), s.getLon());
 			if (!isOnScreen(x, y)) {
@@ -207,7 +207,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 				if (showClosest) {
 					for (NearbyStationDistanceInfo info : s.getNearbyStations()) {
-						GlobalStation stat = info.getStation();
+						AbstractStation stat = info.getStation();
 						double x2 = getX(stat.getLat(), stat.getLon());
 						double y2 = getY(stat.getLat(), stat.getLon());
 						g.setColor(Color.white);
@@ -697,7 +697,7 @@ public class GlobalQuakePanel extends GlobePanel {
 		}
 	}
 
-	private Color displayColor(GlobalStation s) {
+	private Color displayColor(AbstractStation s) {
 		if (!s.hasData()) {
 			return Color.gray;
 		} else {
