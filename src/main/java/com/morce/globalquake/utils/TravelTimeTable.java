@@ -666,6 +666,12 @@ public class TravelTimeTable {
 		return (1 - r) * valLow + r * valHigh;
 	}
 
+	/**
+	 * 
+	 * @param depth depth in km
+	 * @param angle angle
+	 * @return P wave travel time in seconds
+	 */
 	public static double getPWaveTravelTime(double depth, double angle) {
 		depth = Math.max(0, Math.min(DEPTHS[DEPTHS.length - 1], depth));
 		int d = 0;

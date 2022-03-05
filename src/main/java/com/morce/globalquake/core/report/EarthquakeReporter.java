@@ -7,9 +7,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,8 +44,9 @@ public class EarthquakeReporter {
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		File assignedEventsFile = new File(folder, "assigned_events.dat");
-		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(assignedEventsFile));
+		//File assignedEventsFile = new File(folder, "assigned_events.dat");
+		// ObjectOutputStream out = new ObjectOutputStream(new
+		// FileOutputStream(assignedEventsFile));
 		synchronized (earthquake.getCluster().assignedEventsSync) {
 			for (Event e : earthquake.getCluster().getAssignedEvents()) {
 				AbstractStation station = e.getAnalysis().getStation();
@@ -55,10 +54,10 @@ public class EarthquakeReporter {
 						station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
 						station.getAlt());
 			}
-			out.writeObject(earthquake.getCluster().getAssignedEvents());
+			// out.writeObject(earthquake.getCluster().getAssignedEvents());
 
 		}
-		out.close();
+		// out.close();
 		drawMap(folder, earthquake);
 	}
 

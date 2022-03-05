@@ -219,7 +219,7 @@ public class EathquakeAnalysis {
 			for (double depth = depthStart; depth <= depthEnd; depth += depthAccuracy) {
 				Hypocenter hyp = new Hypocenter(lat, lon, depth, 0);
 				hyp.origin = findBestOrigin(hyp, events);
-				double treshold = 2500;
+				double treshold = 500;
 				double[] values = analyseHypocenter(hyp, events, treshold);
 				int acc = (int) values[1];
 				double err = values[0];
@@ -287,7 +287,7 @@ public class EathquakeAnalysis {
 		if (cluster.previousHypocenter == null || cluster.previousHypocenter.correctStations < 12) {
 			bestHypocenter = scanArea(events, bestHypocenter, 9, 14000, _lat, _lon, correctLimit, 50, 100);
 		}
-		// phase 2 find exact area
+		// phase 3 find exact area
 		_lat = bestHypocenter.lat;
 		_lon = bestHypocenter.lon;
 		System.out.println("FAR: " + (System.currentTimeMillis() - xx));
@@ -299,7 +299,7 @@ public class EathquakeAnalysis {
 		xx = System.currentTimeMillis();
 		_lat = bestHypocenter.lat;
 		_lon = bestHypocenter.lon;
-		// phase 3 find exact depth
+		// phase 4 find exact depth
 		if (true) {
 			bestHypocenter = scanArea(events, bestHypocenter, 8, 50, _lat, _lon, correctLimit, 1, 2);
 		}
@@ -394,7 +394,7 @@ public class EathquakeAnalysis {
 			long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC))
 					* 1000);
 			long actuallTravel = Math.abs(e.getpWave() - hyp.origin);
-			boolean wrong = e.getpWave() < hyp.origin || Math.abs(expectedTravel - actuallTravel) > 2500;
+			boolean wrong = e.getpWave() < hyp.origin || Math.abs(expectedTravel - actuallTravel) > 500;
 			if (wrong) {
 				list.add(e);
 			}
@@ -458,7 +458,7 @@ public class EathquakeAnalysis {
 				int store_minutes = STORE_TABLE[((int) Math.max(0,
 						Math.min(STORE_TABLE.length - 1, (int) e.getMag())))];
 				if (System.currentTimeMillis() - e.getOrigin() > store_minutes * 60 * 1000
-						&& System.currentTimeMillis() - e.getLastUpdate() > store_minutes * 60 * 1000) {
+						&& System.currentTimeMillis() - e.getLastUpdate() > 0.25*store_minutes * 60 * 1000) {
 					getGlobalQuake().getArchive().archiveQuakeAndSave(e);
 					it.remove();
 				}

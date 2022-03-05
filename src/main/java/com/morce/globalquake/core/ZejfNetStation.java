@@ -39,7 +39,7 @@ public class ZejfNetStation extends AbstractStation {
 
 	@Override
 	public long getDelayMS() {
-		return getAnalysis().getLastRecord();
+		return System.currentTimeMillis()- getAnalysis().latestLogTime;
 	}
 
 

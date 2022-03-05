@@ -6,11 +6,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +40,7 @@ public class GlobalQuake {
 	public EathquakeAnalysis earthquakeAnalysis;
 	public AlertCenter alertCenter;
 	public EarthquakeArchive archive;
+	private ZejfNetClient zejfClient;
 	public static GlobalQuake instance;
 
 	public GlobalQuake(StationManager stationManager) {
@@ -175,51 +172,11 @@ public class GlobalQuake {
 		}
 	}
 
-	public static final String ZEJF_ADDR = "25.105.96.68";
-	public static final int ZEJF_PORT = 6222;
-
 	private void runZejf() {
-		new Thread("ZejfNet Socket") {
-			public void run() {
-				while (true) {
-					try {
-						System.out.println("Connecting to ZejfNet...");
-						Socket socket = new Socket();
-						socket.connect(new InetSocketAddress(ZEJF_ADDR, ZEJF_PORT));
-						ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-						ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-						outputStream.writeUTF("realtime");
-						outputStream.flush();
-						System.out.println("Listening for ZejfNet packets...");
-						while (true) {
-							String command = "";
-							command = inputStream.readUTF();
-							if (!command.isEmpty()) {
-								try {
-									if (command.startsWith("log")) {
-										long time = inputStream.readLong();
-										int value = inputStream.readInt();
-										zejf.addRecord(new SimpleLog(time, value));
-									}
-								} catch (Exception e) {
-									System.err.println("Unable to parse command '" + command + "': " + e.getMessage());
-									break;
-								}
-							}
-						}
-						socket.close();
-					} catch (IOException e) {
-						System.err.println("Unable to connect to Zejf: " + e.getMessage());
-					} finally {
-						try {
-							sleep(10000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			};
-		}.start();
+		if (zejf != null) {
+			zejfClient = new ZejfNetClient(zejf);
+			zejfClient.connect();
+		}
 	}
 
 	private void runNetworkManager() {
@@ -402,6 +359,10 @@ public class GlobalQuake {
 
 	public EarthquakeArchive getArchive() {
 		return archive;
+	}
+
+	public ZejfNetClient getZejfClient() {
+		return zejfClient;
 	}
 
 }

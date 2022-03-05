@@ -68,16 +68,16 @@ public class StationManager implements IStationManager {
 	public boolean auto_update = true;
 
 	static {
-		sources.add(new DataSource("EIDA_DE", "http://eida.bgr.de/fdsnws/station/1/query?nodata=404&", (byte) 0));
-		sources.add(new DataSource("EIDA_RO", "http://eida-sc3.infp.ro/fdsnws/station/1/query?nodata=404&", (byte) 1));
+		sources.add(new DataSource("EIDA_DE", "https://eida.bgr.de/fdsnws/station/1/query?nodata=404&", (byte) 0));
+		sources.add(new DataSource("EIDA_RO", "https://eida-sc3.infp.ro/fdsnws/station/1/query?nodata=404&", (byte) 1));
 
-		sources.add(new DataSource("RESIF", "http://ws.resif.fr/fdsnws/station/1/query?nodata=404&", (byte) 2));
+		sources.add(new DataSource("RESIF", "https://ws.resif.fr/fdsnws/station/1/query?nodata=404&", (byte) 2));
 		sources.add(
-				new DataSource("GEOFON", "http://geofon.gfz-potsdam.de/fdsnws/station/1/query?nodata=404&", (byte) 3));
-		sources.add(new DataSource("ERDE", "http://erde.geophysik.uni-muenchen.de/fdsnws/station/1/query?nodata=404&",
+				new DataSource("GEOFON", "https://geofon.gfz-potsdam.de/fdsnws/station/1/query?nodata=404&", (byte) 3));
+		sources.add(new DataSource("ERDE", "https://erde.geophysik.uni-muenchen.de/fdsnws/station/1/query?nodata=404&",
 				(byte) 4));
-		sources.add(new DataSource("ORFEUS", "http://www.orfeus-eu.org/fdsnws/station/1/query?nodata=404&", (byte) 5));
-		sources.add(new DataSource("IRIS", "http://service.iris.edu/fdsnws/station/1/query?nodata=404&", (byte) 6));
+		sources.add(new DataSource("ORFEUS", "https://www.orfeus-eu.org/fdsnws/station/1/query?nodata=404&", (byte) 5));
+		sources.add(new DataSource("IRIS", "https://service.iris.edu/fdsnws/station/1/query?nodata=404&", (byte) 6));
 
 		seedlinks.add(new SeedlinkNetwork((byte) 0, "Geofon Seedlink", GEOFON));
 		seedlinks.add(new SeedlinkNetwork((byte) 1, "Resif Seedlink", RESIF));

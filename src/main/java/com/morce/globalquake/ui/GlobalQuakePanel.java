@@ -33,6 +33,7 @@ import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
 import com.morce.globalquake.core.GlobalQuake;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
+import com.morce.globalquake.core.ZejfNetClient;
 import com.morce.globalquake.database.SeedlinkNetwork;
 import com.morce.globalquake.database.StationManager;
 import com.morce.globalquake.res.sounds.Sounds;
@@ -327,6 +328,7 @@ public class GlobalQuakePanel extends GlobePanel {
 					double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60);
 					Color col = ageInHRS < 3 ? (mag > 4 ? new Color(200, 0, 0) : Color.red)
 							: ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
+					//col=Scale.getColorEasily(0.90-quake.getDepth()*0.002);
 					g.setColor(col);
 					g.setStroke(new BasicStroke((float) w));
 					g.draw(ell);
@@ -622,7 +624,15 @@ public class GlobalQuakePanel extends GlobePanel {
 			}
 		}
 
-		int _y = getHeight() - 38;
+		int _y = getHeight() - 54;
+		{
+			ZejfNetClient client = globalQuake.getZejfClient();
+			g.setColor(!client.isConnected() ? (client.isConnecting() ? Color.yellow : Color.red) : Color.green);
+			g.setFont(new Font("Calibri", Font.BOLD, 14));
+			g.drawString("ZejfNet", 2, _y);
+			_y += 16;
+		}
+
 		for (SeedlinkNetwork seed : StationManager.seedlinks) {
 			g.setColor(seed.selectedStations == 0 ? Color.lightGray
 					: (seed.status == SeedlinkNetwork.DISCONNECTED ? Color.red
@@ -631,7 +641,6 @@ public class GlobalQuakePanel extends GlobePanel {
 			g.drawString(seed.getHost() + " (" + seed.connectedStations + "/" + seed.selectedStations + ")", 2, _y);
 			_y += 16;
 		}
-
 		String str = "----/--/-- --:--:--";
 		g.setFont(new Font("Calibri", Font.BOLD, 24));
 		g.setColor(Color.gray);
@@ -643,7 +652,7 @@ public class GlobalQuakePanel extends GlobePanel {
 				g.setColor(Color.white);
 			}
 		}
-		g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 4, getHeight() - 9);
+		g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 24, getHeight() - 9);
 
 		ArrayList<String> strs = new ArrayList<String>();
 		if (showQuakes) {
@@ -671,7 +680,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 		g.setColor(Color.WHITE);
 		g.setFont(new Font("Calibri", Font.PLAIN, 14));
-		int _y2 = getHeight() - 40;
+		int _y2 = getHeight() - 56;
 		g.drawString("Hypocenters: " + globalQuake.lastQuakesT + "ms", 3, _y2 -= 16);
 		g.drawString("1-Second: " + globalQuake.lastSecond + "ms", 3, _y2 -= 16);
 		g.drawString("Analysis: " + globalQuake.lastAnalysis + "ms", 3, _y2 -= 16);
