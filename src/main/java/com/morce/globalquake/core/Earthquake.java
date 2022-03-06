@@ -21,8 +21,7 @@ public class Earthquake {
 	private int reportID;
 
 	public Object magsSync;
-	
-	
+
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
 		this.lat = lat;
 		this.lon = lon;
@@ -31,12 +30,11 @@ public class Earthquake {
 		this.cluster = cluster;
 		this.mags = new ArrayList<Double>();
 		this.magsSync = new Object();
-		this.region = "Searching...";
+		this.region = Regions.getRegion(getLat(), getLon());
 		updateRegion();
 		this.lastUpdate = System.currentTimeMillis();
 	}
-	
-	
+
 	public boolean isFinished() {
 		return finished;
 	}
@@ -108,7 +106,7 @@ public class Earthquake {
 	public long getLastUpdate() {
 		return lastUpdate;
 	}
-	
+
 	public void setCluster(Cluster cluster) {
 		this.cluster = cluster;
 	}
@@ -134,18 +132,29 @@ public class Earthquake {
 	}
 
 	public void update(Earthquake earthquake) {
+		double lastLat = lat;
+		double lastLon = lon;
 		this.lat = earthquake.getLat();
 		this.lon = earthquake.getLon();
 		this.depth = earthquake.getDepth();
 		this.origin = earthquake.getOrigin();
-		updateRegion();
+		if (this.lat != lastLat || this.lon != lastLon) {
+			updateRegion();
+		}
 		this.lastUpdate = System.currentTimeMillis();
 	}
 
+	private boolean regionUpdateRunning;
+
 	private void updateRegion() {
+		if (regionUpdateRunning) {
+			return;
+		}
 		new Thread("Region Search") {
 			public void run() {
-				region = Regions.getRegion(getLat(), getLon());
+				regionUpdateRunning = true;
+				region = Regions.downloadRegion(getLat(), getLon());
+				regionUpdateRunning = false;
 			};
 		}.start();
 	}
@@ -155,6 +164,10 @@ public class Earthquake {
 	}
 
 	public String getRegion() {
+		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION)) {
+			updateRegion();
+			return "Loading...";
+		}
 		return region;
 	}
 

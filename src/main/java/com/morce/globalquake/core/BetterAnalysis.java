@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Locale;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -121,7 +120,6 @@ public class BetterAnalysis extends Analysis {
 		} else {
 			double filteredV = filter.filter(v - initialOffset);
 			shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
-			//shortAverage = Math.abs(filteredV);
 			mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
 			thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
 
@@ -135,7 +133,6 @@ public class BetterAnalysis extends Analysis {
 				longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
 			}
 			double ratio = shortAverage / longAverage;
-			// double slowRatio = mediumAverage / longAverage;
 			if (status == IDLE && previousLogs.size() > 0) {
 				boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD * 1.5 && time - eventTimer > 200;
 				boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2.25 && time - eventTimer > 100;
@@ -166,8 +163,7 @@ public class BetterAnalysis extends Analysis {
 				if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
 					status = IDLE;
 					latestEvent.end(time);
-					//specialAverage = Math.max(4, mediumAverage * 2.15);
-					
+
 				}
 				if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
 					System.err.println("Station " + getStation().getStationCode()
@@ -176,15 +172,12 @@ public class BetterAnalysis extends Analysis {
 					return;
 				}
 			}
-			
-			/*if(mediumAverage < thirdAverage * 0.95) {
-				specialAverage -= (specialAverage - Math.max(4, longAverage * 2.15))/ (getSampleRate() * 12);
-			}*/
 
 			if (ratio > _maxRatio || _maxRatioReset) {
 				_maxRatio = ratio * 1.25;
 				_maxRatioReset = false;
 			}
+
 			if (time - System.currentTimeMillis() < 1000 * 10
 					&& System.currentTimeMillis() - time < 1000 * LOGS_STORE_TIME) {
 				Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
@@ -281,14 +274,8 @@ public class BetterAnalysis extends Analysis {
 
 		long oldestTime = (System.currentTimeMillis() - (long) (LOGS_STORE_TIME * 1000));
 		synchronized (previousLogsSync) {
-			ListIterator<Log> li = previousLogs.listIterator(previousLogs.size());
-			while (li.hasPrevious()) {
-				Log prev = li.previous();
-				if (prev.getTime() < oldestTime) {
-					li.remove();
-				} else {
-					break;
-				}
+			while (!previousLogs.isEmpty() && previousLogs.get(previousLogs.size() - 1).getTime() < oldestTime) {
+				previousLogs.remove(previousLogs.size() - 1);
 			}
 		}
 	}

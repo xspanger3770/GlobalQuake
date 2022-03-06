@@ -50,7 +50,7 @@ public class EarthquakeArchive {
 		if (getGlobalQuake() instanceof FakeGlobalQuake) {
 			ArchivedQuake q;
 			// will not be saved
-			archivedQuakes.add(q = new ArchivedQuake(69.2, 44.24, 10, 5.0, System.currentTimeMillis()));
+			archivedQuakes.add(q = new ArchivedQuake(69.2, 44.24, 10, 5.0, System.currentTimeMillis(), "debug-quake"));
 			for (double ang = 0; ang < 360; ang += 60) {
 				q.getArchivedEvents().add(new ArchivedEvent(50 + Math.sin(Math.toRadians(ang)),
 						17 + Math.cos(Math.toRadians(ang)), 0, 0, ang % 120 == 0));

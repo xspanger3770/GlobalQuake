@@ -30,7 +30,7 @@ public class ArchivedQuake implements Serializable {
 
 	public ArchivedQuake(Earthquake earthquake) {
 		this(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
-				earthquake.getOrigin());
+				earthquake.getOrigin(), earthquake.getRegion());
 		copyEvents(earthquake);
 	}
 
@@ -62,15 +62,23 @@ public class ArchivedQuake implements Serializable {
 		}
 	}
 
+	private boolean regionUpdateRunning;
+
 	private void updateRegion() {
+		if (regionUpdateRunning) {
+			return;
+		}
 		new Thread("Region Search") {
 			public void run() {
+				regionUpdateRunning = true;
 				region = Regions.getRegion(getLat(), getLon());
+				region = Regions.downloadRegion(getLat(), getLon());
+				regionUpdateRunning = false;
 			};
 		}.start();
 	}
 
-	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin) {
+	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin, String region) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
@@ -113,7 +121,7 @@ public class ArchivedQuake implements Serializable {
 	}
 
 	public String getRegion() {
-		if (region == null || region.isEmpty()) {
+		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION)) {
 			updateRegion();
 			return "Loading...";
 		}

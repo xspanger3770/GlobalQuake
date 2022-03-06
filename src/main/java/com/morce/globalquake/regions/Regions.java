@@ -2,7 +2,9 @@ package com.morce.globalquake.regions;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +16,14 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPolygon;
 import org.geojson.Polygon;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.morce.globalquake.res.Res;
 import com.morce.globalquake.utils.GeoUtils;
 
 public class Regions {
+	public static final String UNKNOWN_REGION = "Unknown Region";
 	public static ArrayList<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<Polygon>();
 	public static ArrayList<org.geojson.Polygon> raw_polygonsHD = new ArrayList<Polygon>();
 	public static ArrayList<org.geojson.Polygon> raw_polygonsMD = new ArrayList<Polygon>();
@@ -36,6 +40,36 @@ public class Regions {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	//
+	public static String downloadRegion(double lat, double lon) {
+		try {
+			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
+					lat, lon);
+			URL url = new URL(str);
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+			System.out.println("URL: " + url.toString());
+			StringBuilder result = new StringBuilder();
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				result.append(inputLine);
+			}
+			in.close();
+
+			JSONObject obj = new JSONObject(result.toString());
+			return (String) obj.get("name_l");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return UNKNOWN_REGION;
+	}
+
+	public static void main(String[] args) {
+		for (int i = 40; i <= 55; i++)
+			System.out.println(downloadRegion(i, 17.262));
 	}
 
 	public static String getRegion(double lat, double lon) {
@@ -158,10 +192,11 @@ public class Regions {
 
 	static int n = 0;
 
-	public static void main(String[] args) {
-		benchmark();
-	}
+	/*
+	 * public static void main(String[] args) { benchmark(); }
+	 */
 
+	@SuppressWarnings("unused")
 	private static void benchmark() {
 		new Thread() {
 			public void run() {

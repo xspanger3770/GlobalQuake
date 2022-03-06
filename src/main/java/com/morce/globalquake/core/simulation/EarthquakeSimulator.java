@@ -72,26 +72,26 @@ public class EarthquakeSimulator extends JFrame {
 	public static final double P_INACCURACY = 0;
 
 	/**
-	 * 0.0005 - low 0.001 - medium 0.002 - high 0.004 - savage
-	 * in reality this is very low (maybe about 0.001 depending on time)
+	 * 0.0005 - low 0.001 - medium 0.002 - high 0.004 - savage in reality this is
+	 * very low (maybe about 0.001 depending on time)
 	 */
 	public static final double SHIT_PER_SECOND = 0.000;
 
 	public EarthquakeSimulator() {
 		init();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		EarthquakeSimulatorPanel panel = new EarthquakeSimulatorPanel(this);
 		EarthquakeListPanel list = new EarthquakeListPanel(getFakeGlobalQuake());
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
-		
+
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.setPreferredSize(new Dimension(800, 600));
-		mainPanel.add(panel,BorderLayout.CENTER);
-		mainPanel.add(list,BorderLayout.EAST);
-		
+		mainPanel.add(panel, BorderLayout.CENTER);
+		mainPanel.add(list, BorderLayout.EAST);
+
 		setContentPane(mainPanel);
 
 		pack();
@@ -231,16 +231,16 @@ public class EarthquakeSimulator extends JFrame {
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Actuall Garbage Collector Thread"));
 		ScheduledExecutorService execQuake = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Simulated Hypocenter Location Thread"));
-		
+
 		clusterAnalysis = new ClusterAnalysis(getFakeGlobalQuake());
 		earthquakeAnalysis = new EathquakeAnalysis(getFakeGlobalQuake());
 		alertCenter = new AlertCenter(getFakeGlobalQuake());
-		getFakeGlobalQuake().archive=new EarthquakeArchive(getFakeGlobalQuake());
-		
+		getFakeGlobalQuake().archive = new EarthquakeArchive(getFakeGlobalQuake());
+
 		getFakeGlobalQuake().earthquakeAnalysis = earthquakeAnalysis;
 		getFakeGlobalQuake().clusterAnalysis = clusterAnalysis;
 		getFakeGlobalQuake().alertCenter = alertCenter;
-		
+
 		execSim.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -329,18 +329,18 @@ public class EarthquakeSimulator extends JFrame {
 		synchronized (earthquakesSync) {
 			for (SimulatedEarthquake simE : getEarthquakes()) {
 				long age = System.currentTimeMillis() - simE.getOrigin();
-				double pDist = TravelTimeTable.getPWaveTravelAngle(simE.getDepth(), age / 1000.0,false) / 360.0
+				double pDist = TravelTimeTable.getPWaveTravelAngle(simE.getDepth(), age / 1000.0, false) / 360.0
 						* GeoUtils.EARTH_CIRCUMFERENCE;
-				double sDist = TravelTimeTable.getSWaveTravelAngle(simE.getDepth(), age / 1000.0,false) / 360.0
+				double sDist = TravelTimeTable.getSWaveTravelAngle(simE.getDepth(), age / 1000.0, false) / 360.0
 						* GeoUtils.EARTH_CIRCUMFERENCE;
 				double dDist = (2.0 / Math.pow(simE.getMag(), 2.0)) * (age / 1000.0 - 25 - Math.pow(simE.getMag(), 2));
 				for (SimulatedStation simStat : getStations()) {
 					double distGC = GeoUtils.greatCircleDistance(simE.getLat(), simE.getLon(), simStat.getLat(),
 							simStat.getLon());
-					//double distAng = (distGC * 360.0) / GeoUtils.EARTH_CIRCUMFERENCE;
+					// double distAng = (distGC * 360.0) / GeoUtils.EARTH_CIRCUMFERENCE;
 					double distGEO = GeoUtils.geologicalDistance(simE.getLat(), simE.getLon(), -simE.getDepth(),
 							simStat.getLat(), simStat.getLon(), simStat.getAlt() / 1000.0);
-					double maxR = simE.maxR(distGEO) * simStat.getSensFactor();
+					double maxR = SimulatedEarthquake.maxR(simE.getMag(), distGEO) * simStat.getSensFactor();
 					long actuallPWave = simE.getOrigin() + (long) (1000
 							* TravelTimeTable.getPWaveTravelTime(simE.getDepth(), TravelTimeTable.toAngle(distGC)));
 					long actuallSWave = simE.getOrigin() + (long) (1000
@@ -427,8 +427,8 @@ public class EarthquakeSimulator extends JFrame {
 					if (database.getSelectedStation(s) != null) {
 						stations.add(new SimulatedStation(n.getNetworkCode(), s.getStationCode(), ch.getName(),
 								ch.getLocationCode(), ch.getSeedlinkNetwork(), ch.getSource(), s.getLat(), s.getLon(),
-								s.getAlt(), ch.getSensitivity(), ch.getFrequency(), i,
-								1)); //0.1 + random.nextDouble() * 1.8 //TODO
+								s.getAlt(), ch.getSensitivity(), ch.getFrequency(), i, 1)); // 0.1 + random.nextDouble()
+																							// * 1.8 //TODO
 						i++;
 					}
 				}

@@ -42,7 +42,7 @@ public class SimulatedEarthquake extends Earthquake {
 		return Math.log10((maxR) * (100 * Math.pow(dist, 2.25) + 1)) - 5.8;
 	}*/
 	
-	public double maxR(double dist) {
+	public static double maxR(double mag, double dist) {
 		return (Math.pow(10, mag*1.2 + 4.1)) / (20 * Math.pow(dist, 2.1) + 10);
 	}
 

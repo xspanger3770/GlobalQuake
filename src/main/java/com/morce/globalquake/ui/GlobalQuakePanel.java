@@ -34,6 +34,7 @@ import com.morce.globalquake.core.Event;
 import com.morce.globalquake.core.GlobalQuake;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
 import com.morce.globalquake.core.ZejfNetClient;
+import com.morce.globalquake.core.simulation.SimulatedEarthquake;
 import com.morce.globalquake.database.SeedlinkNetwork;
 import com.morce.globalquake.database.StationManager;
 import com.morce.globalquake.res.sounds.Sounds;
@@ -62,7 +63,7 @@ public class GlobalQuakePanel extends GlobePanel {
 	private boolean showSCircles;
 	private boolean showClosest;
 	private boolean showQuakes = true;
-	private boolean showClusters = true;
+	private boolean showClusters = false;
 	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
@@ -328,7 +329,7 @@ public class GlobalQuakePanel extends GlobePanel {
 					double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60);
 					Color col = ageInHRS < 3 ? (mag > 4 ? new Color(200, 0, 0) : Color.red)
 							: ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
-					//col=Scale.getColorEasily(0.90-quake.getDepth()*0.002);
+					// col=Scale.getColorEasily(0.90-quake.getDepth()*0.002);
 					g.setColor(col);
 					g.setStroke(new BasicStroke((float) w));
 					g.draw(ell);
@@ -433,18 +434,35 @@ public class GlobalQuakePanel extends GlobePanel {
 				double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
 						* GeoUtils.EARTH_CIRCUMFERENCE;
 				if (age / 1000.0 < maxDisplayTimeSec) {
+					g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 					if (pDist > 0) {
 						Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
-						g.setColor(Color.blue);
-						g.setStroke(new BasicStroke(3f));
+						g.setColor(Scale.getColorRatio(SimulatedEarthquake.maxR(e.getMag(), pDist)));
+						g.setStroke(new BasicStroke(5f));
 						g.draw(pPol);
 					}
 					if (sDist > 0) {
 						Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
-						g.setColor(Color.red);
-						g.setStroke(new BasicStroke(2f));
+						if (e.getMag() <= 3.0) {
+							g.setColor(new Color(255, 200, 0));
+							g.setStroke(new BasicStroke(2f));
+						} else if (e.getMag() <= 4.0) {
+							g.setColor(new Color(255, 140, 0));
+							g.setStroke(new BasicStroke(4f));
+						} else if (e.getMag() <= 4.0) {
+							g.setColor(Color.red);
+							g.setStroke(new BasicStroke(6f));
+						} else {
+							g.setColor(new Color(160, 0, 0));
+							g.setStroke(new BasicStroke(6f));
+						}
 						g.draw(sPol);
+						Color c = g.getColor();
+						Color colB = new Color(c.getRed(), c.getGreen(), c.getBlue(), 50);
+						g.setColor(colB);
+						g.fill(sPol);
 					}
+					g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 				}
 				double x0 = getX(e.getLat(), e.getLon());
 				double y0 = getY(e.getLat(), e.getLon());
