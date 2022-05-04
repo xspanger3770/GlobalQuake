@@ -13,7 +13,7 @@ public class ZejfNetStation extends AbstractStation {
 			long sensitivity, double frequency, int id) {
 		super(globalQuake, networkCode, stationCode, channelName, locationCode, (byte)-1, (byte)-1, lat, lon, alt, sensitivity, frequency, id);
 		this.recordsQueue = new LinkedList<SimpleLog>();
-		this.getAnalysis().sampleRate = frequency;
+		this.getAnalysis().setSampleRate(frequency);
 	}
 
 	public void addRecord(SimpleLog dr) {

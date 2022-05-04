@@ -1,10 +1,14 @@
-package com.morce.globalquake.core;
+package com.morce.globalquake.core.analysis;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
+
+import com.morce.globalquake.core.AbstractStation;
+import com.morce.globalquake.core.Event;
+import com.morce.globalquake.core.Log;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import uk.me.berndporr.iirj.Butterworth;
@@ -20,11 +24,6 @@ public class BetterAnalysis extends Analysis {
 	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	public static final DecimalFormat f2d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.ENGLISH));
 
-	public static final byte INIT = 0;
-	public static final byte IDLE = 1;
-	public static final byte EVENT = 2;
-	private byte status;
-
 	private int initProgress = 0;
 	private double initialOffsetSum;
 	private int initialOffsetCnt;
@@ -37,9 +36,7 @@ public class BetterAnalysis extends Analysis {
 	private double thirdAverage;
 	private long eventTimer;
 
-	public double _maxRatio;
-	public boolean _maxRatioReset;
-	public long numRecords;
+
 	public static final double min_frequency = 2.0;
 	public static final double max_frequency = 5.0;
 
@@ -53,25 +50,13 @@ public class BetterAnalysis extends Analysis {
 	private Butterworth filter;
 	private double initialOffset;
 
-	public Object previousEventsSync;
-	private ArrayList<Event> previousEvents;
 
-	public Object previousLogsSync;
-	private ArrayList<Log> previousLogs;
-	public long latestLogTime;
-
+	
 	public BetterAnalysis(AbstractStation station) {
 		super(station);
-		previousEventsSync = new Object();
-		previousLogsSync = new Object();
-		previousEvents = new ArrayList<Event>();
-		previousLogs = new ArrayList<Log>();
+
 	}
 
-	@Override
-	public int getStatus() {
-		return status;
-	}
 
 	@Override
 	public void nextSample(int v, long time) {
@@ -88,7 +73,7 @@ public class BetterAnalysis extends Analysis {
 			return;
 		}
 		latestLogTime = time;
-		if (status == INIT) {
+		if (getStatus() == AnalysisStatus.INIT) {
 			if (initProgress <= INIT_OFFSET_CALCULATION * 0.001 * getSampleRate()) {
 				initialOffsetSum += v;
 				initialOffsetCnt++;
@@ -114,7 +99,7 @@ public class BetterAnalysis extends Analysis {
 				thirdAverage = longAverage;
 
 				longAverage *= 0.75;
-				status = IDLE;
+				setStatus(AnalysisStatus.IDLE);
 			}
 			initProgress++;
 		} else {
@@ -133,17 +118,17 @@ public class BetterAnalysis extends Analysis {
 				longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
 			}
 			double ratio = shortAverage / longAverage;
-			if (status == IDLE && previousLogs.size() > 0) {
+			if (getStatus() == AnalysisStatus.IDLE && getPreviousLogs().size() > 0) {
 				boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD * 1.5 && time - eventTimer > 200;
 				boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2.25 && time - eventTimer > 100;
 				boolean condMain = shortAverage / thirdAverage > 2;
 				if (condMain && (cond1 || cond2)) {
 					ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
 					if (_logs != null && _logs.size() > 0) {
-						status = EVENT;
+						setStatus(AnalysisStatus.EVENT);
 						Event event = new Event(this, time, _logs);
 						synchronized (previousEventsSync) {
-							previousEvents.add(0, event);
+							getPreviousEvents().add(0, event);
 						}
 					}
 				}
@@ -152,7 +137,7 @@ public class BetterAnalysis extends Analysis {
 				eventTimer = time;
 			}
 
-			if (status == EVENT) {
+			if (getStatus() == AnalysisStatus.EVENT) {
 				Event latestEvent = getLatestEvent();
 				if (latestEvent == null) {
 					reset();
@@ -161,7 +146,7 @@ public class BetterAnalysis extends Analysis {
 				}
 				long timeFromStart = time - latestEvent.getStart();
 				if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
-					status = IDLE;
+					setStatus(AnalysisStatus.IDLE);
 					latestEvent.end(time);
 
 				}
@@ -181,13 +166,13 @@ public class BetterAnalysis extends Analysis {
 			if (time - System.currentTimeMillis() < 1000 * 10
 					&& System.currentTimeMillis() - time < 1000 * LOGS_STORE_TIME) {
 				Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-						(float) longAverage, (float) thirdAverage, (float) specialAverage, (byte) status);
+						(float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
 				synchronized (previousLogsSync) {
-					previousLogs.add(0, currentLog);
+					getPreviousLogs().add(0, currentLog);
 				}
 				// from latest event to oldest event
 				synchronized (previousEventsSync) {
-					for (Event e : previousEvents) {
+					for (Event e : getPreviousEvents()) {
 						if (!e.isBroken()) {
 							if (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000) {
 								e.log(currentLog);
@@ -203,7 +188,7 @@ public class BetterAnalysis extends Analysis {
 	private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {
 		ArrayList<Log> logs = new ArrayList<Log>();
 		synchronized (previousLogsSync) {
-			for (Log l : previousLogs) {
+			for (Log l : getPreviousLogs()) {
 				long time = l.getTime();
 				if (time >= oldestLog && time <= newestLog) {
 					logs.add(l);
@@ -215,7 +200,7 @@ public class BetterAnalysis extends Analysis {
 
 	@Override
 	public void analyse(DataRecord dr) {
-		if (status != INIT) {
+		if (getStatus() != AnalysisStatus.INIT) {
 			numRecords++;
 		}
 		super.analyse(dr);
@@ -229,7 +214,7 @@ public class BetterAnalysis extends Analysis {
 	@Override
 	public void reset() {
 		_maxRatio = 0;
-		status = INIT;
+		setStatus(AnalysisStatus.INIT);
 		initProgress = 0;
 		initialOffsetSum = 0;
 		initialOffsetCnt = 0;
@@ -240,7 +225,7 @@ public class BetterAnalysis extends Analysis {
 		// from latest event to oldest event
 		// it has to be synced because there is the 1-second thread
 		synchronized (previousEventsSync) {
-			for (Event e : previousEvents) {
+			for (Event e : getPreviousEvents()) {
 				if (!e.hasEnded()) {
 					e.endBadly(-1);
 				}
@@ -248,18 +233,13 @@ public class BetterAnalysis extends Analysis {
 		}
 	}
 
-	public long getNumRecords() {
-		return numRecords;
-	}
 
-	public ArrayList<Event> getPreviousEvents() {
-		return previousEvents;
-	}
+
 
 	@Override
 	public void second() {
 		synchronized (previousEventsSync) {
-			Iterator<Event> it = previousEvents.iterator();
+			Iterator<Event> it = getPreviousEvents().iterator();
 			while (it.hasNext()) {
 				Event event = it.next();
 				if (event.hasEnded()) {
@@ -274,23 +254,13 @@ public class BetterAnalysis extends Analysis {
 
 		long oldestTime = (System.currentTimeMillis() - (long) (LOGS_STORE_TIME * 1000));
 		synchronized (previousLogsSync) {
-			while (!previousLogs.isEmpty() && previousLogs.get(previousLogs.size() - 1).getTime() < oldestTime) {
-				previousLogs.remove(previousLogs.size() - 1);
+			while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).getTime() < oldestTime) {
+				getPreviousLogs().remove(getPreviousLogs().size() - 1);
 			}
 		}
 	}
 
-	public ArrayList<Log> getLogs() {
-		return previousLogs;
-	}
 
-	public Event getLatestEvent() {
-		if (previousEvents == null || previousEvents.size() == 0) {
-			return null;
-		} else {
-			return previousEvents.get(0);
-		}
-	}
 
 	public long getLatestLogTime() {
 		return latestLogTime;

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.morce.globalquake.core.analysis.Analysis;
 import com.morce.globalquake.core.report.StationReport;
 
 public class Event implements Serializable {

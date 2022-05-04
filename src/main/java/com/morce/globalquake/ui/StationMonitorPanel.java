@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import com.morce.globalquake.core.AbstractStation;
-import com.morce.globalquake.core.BetterAnalysis;
 import com.morce.globalquake.core.Event;
 import com.morce.globalquake.core.Log;
+import com.morce.globalquake.core.analysis.AnalysisStatus;
+import com.morce.globalquake.core.analysis.BetterAnalysis;
 
 public class StationMonitorPanel extends JPanel {
 
@@ -55,7 +56,7 @@ public class StationMonitorPanel extends JPanel {
 
 		ArrayList<Log> logs = null;
 		synchronized (station.getAnalysis().previousLogsSync) {
-			logs = new ArrayList<Log>(station.getAnalysis().getLogs());
+			logs = new ArrayList<Log>(station.getAnalysis().getPreviousLogs());
 		}
 
 		if (logs.size() > 1) {
@@ -209,7 +210,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y9c, x2, y10c));
 
-				g.setColor(a.getStatus() <= BetterAnalysis.IDLE ? Color.black : Color.green);
+				g.setColor(a.getStatus() == AnalysisStatus.IDLE ? Color.black : Color.green);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y5, x2, y6));
 

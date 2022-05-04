@@ -336,7 +336,7 @@ public class GlobalQuake {
 	}
 
 	public void logRecord(long time) {
-		if (time > lastReceivedRecord) {
+		if (time > lastReceivedRecord && time <= System.currentTimeMillis()) {
 			lastReceivedRecord = time;
 		}
 	}

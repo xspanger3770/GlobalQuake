@@ -21,6 +21,7 @@ public class Earthquake {
 	private int reportID;
 
 	public Object magsSync;
+	public int nextReport;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
 		this.lat = lat;
@@ -153,7 +154,10 @@ public class Earthquake {
 		new Thread("Region Search") {
 			public void run() {
 				regionUpdateRunning = true;
-				region = Regions.downloadRegion(getLat(), getLon());
+				String newRegion = Regions.downloadRegion(getLat(), getLon());
+				if(newRegion != Regions.UNKNOWN_REGION) {
+					region = newRegion;
+				}
 				regionUpdateRunning = false;
 			};
 		}.start();

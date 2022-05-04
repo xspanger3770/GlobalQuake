@@ -2,6 +2,9 @@ package com.morce.globalquake.core;
 
 import java.util.ArrayList;
 
+import com.morce.globalquake.core.analysis.Analysis;
+import com.morce.globalquake.core.analysis.BetterAnalysis;
+
 public abstract class AbstractStation {
 
 	private String networkCode;
@@ -82,7 +85,7 @@ public abstract class AbstractStation {
 		return stationCode;
 	}
 
-	public BetterAnalysis getAnalysis() {
+	public Analysis getAnalysis() {
 		return analysis;
 	}
 

@@ -6,10 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import com.morce.globalquake.settings.Settings;
+
 public class ZejfNetClient {
 
-	public static final String ZEJF_ADDR = "25.105.96.68";
-	public static final int ZEJF_PORT = 6222;
 	private boolean connected;
 	private boolean connecting;
 	private boolean intendedClose;
@@ -35,7 +35,7 @@ public class ZejfNetClient {
 						System.out.println("Connecting to ZejfNet...");
 						socket = new Socket();
 						socket.setSoTimeout(10000);
-						socket.connect(new InetSocketAddress(ZEJF_ADDR, ZEJF_PORT));
+						socket.connect(new InetSocketAddress(Settings.zejfSeisIP, Settings.zejfSeisPort));
 						outputStream = new ObjectOutputStream(socket.getOutputStream());
 						inputStream = new ObjectInputStream(socket.getInputStream());
 						outputStream.writeUTF("realtime");

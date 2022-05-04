@@ -2,6 +2,8 @@ package com.morce.globalquake.core;
 
 import java.io.Serializable;
 
+import com.morce.globalquake.core.analysis.AnalysisStatus;
+
 public class Log implements Serializable {
 
 	private static final long serialVersionUID = 5578601429266635895L;
@@ -18,13 +20,13 @@ public class Log implements Serializable {
 	private float shortAverage;
 	private float mediumAverage;
 	private float longAverage;
-	private byte status;
+	private AnalysisStatus status;
 	private byte phase;
 	private float thirdAverage;
 	private float specialAverage;
 
 	public Log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-			float thirdAverage, float specialAverage, byte status) {
+			float thirdAverage, float specialAverage, AnalysisStatus status) {
 		this.time = time;
 		this.rawValue = rawValue;
 		this.filteredV = filteredV;
@@ -73,7 +75,7 @@ public class Log implements Serializable {
 		return specialAverage;
 	}
 
-	public byte getStatus() {
+	public AnalysisStatus getStatus() {
 		return status;
 	}
 

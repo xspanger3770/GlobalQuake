@@ -14,7 +14,7 @@ public class Main {
 	private DatabaseMonitor databaseMonitor;
 	private GlobalQuake globalQuake;
 
-	public static final String version = "0.7.18";
+	public static final String version = "0.7.22";
 	public static final String fullName = "GlobalQuake " + version;
 
 	public static final File MAIN_FOLDER = new File("./GlobalQuake/");

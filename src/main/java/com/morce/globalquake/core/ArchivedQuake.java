@@ -72,7 +72,10 @@ public class ArchivedQuake implements Serializable {
 			public void run() {
 				regionUpdateRunning = true;
 				region = Regions.getRegion(getLat(), getLon());
-				region = Regions.downloadRegion(getLat(), getLon());
+				String newRegion = Regions.downloadRegion(getLat(), getLon());
+				if(newRegion != Regions.UNKNOWN_REGION) {
+					region = newRegion;
+				}
 				regionUpdateRunning = false;
 			};
 		}.start();

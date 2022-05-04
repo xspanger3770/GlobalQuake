@@ -19,7 +19,7 @@ public class EarthquakeArchive {
 	private GlobalQuake globalQuake;
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
-	
+
 	public Object archivedQuakesSync;
 	private ArrayList<ArchivedQuake> archivedQuakes;
 
@@ -93,23 +93,24 @@ public class EarthquakeArchive {
 					Collections.sort(archivedQuakes, Comparator.comparing(ArchivedQuake::getOrigin));
 				}
 				saveArchive();
-				if(true) {
-					new Thread("Quake Reporter") {
-						@Override
-						public void run() {
-							try {
-								EarthquakeReporter.report(earthquake);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}.start();
-				}
+				reportQuake(earthquake);
+
 			};
 		}.start();
 	}
 
-
+	private void reportQuake(Earthquake earthquake) {
+		new Thread("Quake Reporter") {
+			@Override
+			public void run() {
+				try {
+					EarthquakeReporter.report(earthquake);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+	}
 
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);

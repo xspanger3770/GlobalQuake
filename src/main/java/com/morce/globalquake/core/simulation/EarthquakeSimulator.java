@@ -69,7 +69,7 @@ public class EarthquakeSimulator extends JFrame {
 	public long lastQuakesT;
 	private AlertCenter alertCenter;
 
-	public static final double P_INACCURACY = 0;
+	public static final double P_INACCURACY = 1000;
 
 	/**
 	 * 0.0005 - low 0.001 - medium 0.002 - high 0.004 - savage in reality this is
@@ -414,7 +414,7 @@ public class EarthquakeSimulator extends JFrame {
 		stations = new ArrayList<SimulatedStation>();
 		try {
 			ObjectInputStream in = new ObjectInputStream(
-					new FileInputStream(new File("./GlobalQuake/stationDatabase/stationDatabaseSim.dat")));
+					new FileInputStream(new File("./GlobalQuake/stationDatabase/stationDatabase.dat")));
 			StationDatabase database = (StationDatabase) in.readObject();
 			in.close();
 
