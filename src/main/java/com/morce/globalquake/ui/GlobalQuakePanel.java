@@ -34,11 +34,12 @@ import com.morce.globalquake.core.GlobalQuake;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
 import com.morce.globalquake.core.ZejfNetClient;
 import com.morce.globalquake.core.analysis.AnalysisStatus;
-import com.morce.globalquake.core.simulation.SimulatedEarthquake;
 import com.morce.globalquake.database.SeedlinkNetwork;
 import com.morce.globalquake.database.StationManager;
 import com.morce.globalquake.res.sounds.Sounds;
+import com.morce.globalquake.settings.Settings;
 import com.morce.globalquake.utils.GeoUtils;
+import com.morce.globalquake.utils.IntensityTable;
 import com.morce.globalquake.utils.Level;
 import com.morce.globalquake.utils.Scale;
 import com.morce.globalquake.utils.Shindo;
@@ -173,8 +174,8 @@ public class GlobalQuakePanel extends GlobePanel {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		{
-			double home_x = getX(GeoUtils.HOME_LAT, GeoUtils.HOME_LON);
-			double home_y = getY(GeoUtils.HOME_LAT, GeoUtils.HOME_LON);
+			double home_x = getX(Settings.homeLat, Settings.homeLon);
+			double home_y = getY(Settings.homeLat, Settings.homeLon);
 			g.setColor(Color.pink);
 			g.setStroke(new BasicStroke(2f));
 			Rectangle2D.Double rect = new Rectangle2D.Double(home_x - 6, home_y - 6, 12, 12);
@@ -437,7 +438,7 @@ public class GlobalQuakePanel extends GlobePanel {
 					g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 					if (pDist > 0) {
 						Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
-						g.setColor(Scale.getColorRatio(SimulatedEarthquake.maxR(e.getMag(), pDist)));
+						g.setColor(Scale.getColorRatio(IntensityTable.getMaxIntensity(e.getMag(), GeoUtils.gcdToGeo(pDist))));
 						g.setStroke(new BasicStroke(5f));
 						g.draw(pPol);
 					}

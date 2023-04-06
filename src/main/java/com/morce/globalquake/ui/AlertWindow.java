@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import com.morce.globalquake.core.Earthquake;
+import com.morce.globalquake.settings.Settings;
 import com.morce.globalquake.utils.GeoUtils;
 import com.morce.globalquake.utils.Level;
 import com.morce.globalquake.utils.Shindo;
@@ -68,10 +69,10 @@ public class AlertWindow extends JFrame {
 	private void updateInfo() {
 		lblMag.setText("M" + f1d.format(earthquake.getMag()) + " Earthquake struck!");
 
-		double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), GeoUtils.HOME_LAT,
-				GeoUtils.HOME_LON);
+		double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat,
+				Settings.homeLon);
 		double distGEO = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(),
-				GeoUtils.HOME_LAT, GeoUtils.HOME_LON, 0.0);
+				Settings.homeLat, Settings.homeLon, 0.0);
 
 		lblDist.setText(f1d.format(distGC) + "km from home location");
 

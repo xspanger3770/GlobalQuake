@@ -34,6 +34,7 @@ import com.morce.globalquake.core.Cluster;
 import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
 import com.morce.globalquake.core.NearbyStationDistanceInfo;
+import com.morce.globalquake.settings.Settings;
 import com.morce.globalquake.ui.GlobePanel;
 import com.morce.globalquake.utils.GeoUtils;
 import com.morce.globalquake.utils.Level;
@@ -457,8 +458,8 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 		}
 
 		{
-			double home_x = getX(GeoUtils.HOME_LAT, GeoUtils.HOME_LON);
-			double home_y = getY(GeoUtils.HOME_LAT, GeoUtils.HOME_LON);
+			double home_x = getX(Settings.homeLat, Settings.homeLon);
+			double home_y = getY(Settings.homeLat, Settings.homeLon);
 			g.setColor(Color.pink);
 			g.setStroke(new BasicStroke(2f));
 			Rectangle2D.Double rect = new Rectangle2D.Double(home_x - 6, home_y - 6, 12, 12);

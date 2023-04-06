@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.morce.globalquake.settings.Settings;
 import com.morce.globalquake.ui.AlertWindow;
 import com.morce.globalquake.utils.GeoUtils;
 
@@ -42,10 +43,10 @@ public class AlertCenter {
 	}
 
 	public static boolean meetsConditions(Earthquake quake) {
-		double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), GeoUtils.HOME_LAT,
-				GeoUtils.HOME_LON);
+		double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
+				Settings.homeLon);
 		double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
-				GeoUtils.HOME_LAT, GeoUtils.HOME_LON, 0.0);
+				Settings.homeLat, Settings.homeLon, 0.0);
 		double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
 		if (distGC < 400) {

@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.morce.globalquake.core.GlobalQuake;
 import com.morce.globalquake.main.Main;
+import com.morce.globalquake.settings.SettingsFrame;
 
 public class GlobalQuakeFrame extends JFrame {
 
@@ -63,8 +64,8 @@ public class GlobalQuakeFrame extends JFrame {
 				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= 0 && y <= 30) {
 					toggleList();
 				}
-				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= getHeight() - 30 && y <= getHeight()) {
-					// settings
+				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= panel.getHeight() - 30 && y <= panel.getHeight()) {
+					SettingsFrame.show();
 				}
 			}
 

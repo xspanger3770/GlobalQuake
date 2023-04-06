@@ -34,6 +34,7 @@ import com.morce.globalquake.database.StationDatabase;
 import com.morce.globalquake.res.sounds.Sounds;
 import com.morce.globalquake.ui.EarthquakeListPanel;
 import com.morce.globalquake.utils.GeoUtils;
+import com.morce.globalquake.utils.IntensityTable;
 import com.morce.globalquake.utils.NamedThreadFactory;
 import com.morce.globalquake.utils.TravelTimeTable;
 
@@ -254,7 +255,7 @@ public class EarthquakeSimulator extends JFrame {
 					e.printStackTrace();
 				}
 			}
-		}, 0, 100, TimeUnit.MILLISECONDS);
+		}, 0, 500, TimeUnit.MILLISECONDS);
 
 		execGC.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -325,6 +326,7 @@ public class EarthquakeSimulator extends JFrame {
 
 	public Random random = new Random();
 
+	@SuppressWarnings("unused")
 	protected void updateEarthquakes() {
 		synchronized (earthquakesSync) {
 			for (SimulatedEarthquake simE : getEarthquakes()) {
@@ -340,11 +342,14 @@ public class EarthquakeSimulator extends JFrame {
 					// double distAng = (distGC * 360.0) / GeoUtils.EARTH_CIRCUMFERENCE;
 					double distGEO = GeoUtils.geologicalDistance(simE.getLat(), simE.getLon(), -simE.getDepth(),
 							simStat.getLat(), simStat.getLon(), simStat.getAlt() / 1000.0);
-					double maxR = SimulatedEarthquake.maxR(simE.getMag(), distGEO) * simStat.getSensFactor();
+					double maxR = IntensityTable.getMaxIntensity(simE.getMag(), distGEO) * simStat.getSensFactor();
 					long actuallPWave = simE.getOrigin() + (long) (1000
 							* TravelTimeTable.getPWaveTravelTime(simE.getDepth(), TravelTimeTable.toAngle(distGC)));
 					long actuallSWave = simE.getOrigin() + (long) (1000
 							* TravelTimeTable.getSWaveTravelTime(simE.getDepth(), TravelTimeTable.toAngle(distGC)));
+					
+					maxR *= Math.min(1, (System.currentTimeMillis() - actuallPWave) / (Math.pow(4, simE.getMag())));
+					
 					if (!simE.getArrivedPWave().contains(simStat)) {
 						if (distGC < pDist) {
 							Event event = new Event(simStat.getAnalysis());
@@ -366,7 +371,13 @@ public class EarthquakeSimulator extends JFrame {
 							}
 						}
 					}
-					if (!simE.getArrivedSWave().contains(simStat)) {
+					if (distGC < pDist) {
+						Event event = simE.getEventMap().get(simStat);
+						if(event != null) {
+							event.maxRatio= maxR;
+						}
+					}
+					if (false && !simE.getArrivedSWave().contains(simStat)) {
 						if (distGC < sDist) {
 							Event event = simE.getEventMap().get(simStat);
 							double _maxR = maxR * (2 - distGC / 400.0);
@@ -414,7 +425,7 @@ public class EarthquakeSimulator extends JFrame {
 		stations = new ArrayList<SimulatedStation>();
 		try {
 			ObjectInputStream in = new ObjectInputStream(
-					new FileInputStream(new File("./GlobalQuake/stationDatabase/stationDatabase.dat")));
+					new FileInputStream(new File("./GlobalQuake/stationDatabase/stationDatabaseNormal.dat")));
 			StationDatabase database = (StationDatabase) in.readObject();
 			in.close();
 

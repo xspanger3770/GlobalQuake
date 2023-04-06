@@ -83,7 +83,6 @@ public class SettingsFrame {
 					}
 				}
 				Settings.save();
-				frame.dispose();
 			}
 		});
 
@@ -106,6 +105,10 @@ public class SettingsFrame {
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);
 		}
+	}
+
+	public static void show() {
+		main(null);
 	}
 
 }

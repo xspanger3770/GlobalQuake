@@ -99,6 +99,9 @@ public class EarthquakeListPanel extends JPanel {
 	@Override
 	public void paint(Graphics gr) {
 		Graphics2D g = (Graphics2D) gr;
+		if(getGlobalQuake().getArchive() == null) {
+			return;
+		}
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
 			ArrayList<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();

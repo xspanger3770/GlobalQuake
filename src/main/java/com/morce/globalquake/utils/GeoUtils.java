@@ -23,9 +23,17 @@ public interface GeoUtils {
 	public static final double RISOUL_LAT = 44.6222500;
 	public static final double RISOUL_LON = 6.6317100;
 	
-	public static double HOME_LAT = ZEJF_LAT;
-	public static double HOME_LON = ZEJF_LON;
+	//public static double HOME_LAT = ZEJF_LAT;
+	//public static double HOME_LON = ZEJF_LON;
 
+	/**
+	 * 
+	 * @param lat1 Latitude
+	 * @param long1 Longitude
+	 * @param distance GCD
+	 * @param angle Heading
+	 * @return
+	 */
 	public static double[] moveOnGlobe(double lat1, double long1, double distance, double angle) {
 		// calculate angles
 		double delta = distance / EARTH_RADIUS;
@@ -119,6 +127,10 @@ public interface GeoUtils {
 		double a = mag + 1.5;
 		return ((Math.pow((Math.pow((a + 0.9) / 5.5, 7.0)) / pga - 0.09, 1 / 2.5)
 				* (Math.pow(a, (5.4) / (1 + a * 0.075))))) / (14.0 - a * 0.85);
+	}
+
+	public static double gcdToGeo(double greatCircleDistance) {
+		return geologicalDistance(0, 0, 0, 0, (360 * greatCircleDistance) / EARTH_CIRCUMFERENCE, 0);
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import com.morce.globalquake.res.sounds.Sounds;
+import com.morce.globalquake.settings.Settings;
 import com.morce.globalquake.utils.GeoUtils;
 import com.morce.globalquake.utils.Level;
 import com.morce.globalquake.utils.Shindo;
@@ -275,9 +276,9 @@ public class ClusterAnalysis {
 			}
 
 			double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
-					GeoUtils.HOME_LAT, GeoUtils.HOME_LON, 0.0);
-			double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), GeoUtils.HOME_LAT,
-					GeoUtils.HOME_LON);
+					Settings.homeLat, Settings.homeLon, 0.0);
+			double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
+					Settings.homeLon);
 			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
 			if (info.maxPGAHome < pgaHome) {

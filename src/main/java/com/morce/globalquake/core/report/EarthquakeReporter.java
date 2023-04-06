@@ -21,6 +21,9 @@ import com.morce.globalquake.core.Earthquake;
 import com.morce.globalquake.core.Event;
 import com.morce.globalquake.main.Main;
 import com.morce.globalquake.ui.GlobePanel;
+import com.morce.globalquake.utils.DistanceIntensityRecord;
+import com.morce.globalquake.utils.GeoUtils;
+import com.morce.globalquake.utils.IntensityGraphs;
 import com.morce.globalquake.utils.Scale;
 
 public class EarthquakeReporter {
@@ -44,7 +47,7 @@ public class EarthquakeReporter {
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		//File assignedEventsFile = new File(folder, "assigned_events.dat");
+		// File assignedEventsFile = new File(folder, "assigned_events.dat");
 		// ObjectOutputStream out = new ObjectOutputStream(new
 		// FileOutputStream(assignedEventsFile));
 		synchronized (earthquake.getCluster().assignedEventsSync) {
@@ -59,12 +62,38 @@ public class EarthquakeReporter {
 		}
 		// out.close();
 		drawMap(folder, earthquake);
+		drawIntensities(folder, earthquake);
 	}
 
 	private static void calculatePos(Earthquake earthquake) {
 		centerLat = earthquake.getLat();
 		centerLon = earthquake.getLon();
 		scroll = 2;
+	}
+
+	private static void drawIntensities(File folder, Earthquake earthquake) {
+		int w = 800;
+		int h = 600;
+		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+		Graphics2D g = img.createGraphics();
+
+		ArrayList<DistanceIntensityRecord> recs = new ArrayList<DistanceIntensityRecord>();
+		for (Event event : earthquake.getCluster().getAssignedEvents()) {
+			double lat = event.report.lat;
+			double lon = event.report.lon;
+			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
+					-earthquake.getDepth(), lat, lon, event.report.alt / 1000.0);
+			recs.add(new DistanceIntensityRecord(0, distGE, event.maxRatio));
+		}
+
+		IntensityGraphs.drawGraph(g, w, h, recs);
+
+		g.dispose();
+		try {
+			ImageIO.write(img, "PNG", new File(folder, "intensities.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static void drawMap(File folder, Earthquake earthquake) {

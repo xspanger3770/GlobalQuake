@@ -80,11 +80,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 				dragStartLon = getLon(dragStart.getX());
 			}
 
-			@Override
-			public void mouseClicked(MouseEvent e) {
-
-			}
-
 		});
 
 		addMouseWheelListener(new MouseWheelListener() {

@@ -16,6 +16,12 @@ public final class Settings {
 	public static String zejfSeisIP;
 	public static Integer zejfSeisPort;
 	public static Boolean zejfSeisAutoReconnect;
+	
+	public static Boolean enableAlarmDialogs;
+	
+	public static Double homeLat;
+	public static Double homeLon;
+	
 
 	static {
 		load();
@@ -30,6 +36,11 @@ public final class Settings {
 		zejfSeisIP = (String) properties.getOrDefault("zejfSeisIP", "25.27.127.112");
 		zejfSeisPort = Integer.valueOf((String) properties.getOrDefault("zejfSeisPort", "6222"));
 		zejfSeisAutoReconnect = Boolean.valueOf((String) properties.getOrDefault("zejfSeisAutoReconnect", "true"));
+		
+		enableAlarmDialogs = Boolean.valueOf((String) properties.getOrDefault("enableAlarmDialogs", "true"));
+		
+		homeLat = Double.valueOf((String) properties.getOrDefault("homeLat", "50.262"));
+		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "17.262"));
 		save();
 	}
 	
@@ -38,6 +49,10 @@ public final class Settings {
 		properties.setProperty("zejfSeisIP", zejfSeisIP);
 		properties.setProperty("zejfSeisPort", zejfSeisPort+"");
 		properties.setProperty("zejfSeisAutoReconnect", zejfSeisAutoReconnect+"");
+		properties.setProperty("enableAlarmDialogs", enableAlarmDialogs+"");
+		
+		properties.setProperty("homeLat", homeLat+"");
+		properties.setProperty("homeLon", homeLon+"");
 		try {
 			properties.store(new FileOutputStream(optionsFile), "magic");
 		} catch (IOException e) {

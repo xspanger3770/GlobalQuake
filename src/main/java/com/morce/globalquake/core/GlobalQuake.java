@@ -204,7 +204,7 @@ public class GlobalQuake {
 	}
 
 	private void addZejfNetStations() {
-		zejf = new ZejfNetStation(this, "ZEJF", "Zejf", "BHE", "Zejf", 50.262, 17.262, 400, -1, 40, nextID++);
+		zejf = new ZejfNetStation(this, "ZEJF", "Zejf", "EHE", "Zejf", 50.262, 17.262, 400, -1, -1, nextID++);
 		stations.add(zejf);
 	}
 

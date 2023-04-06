@@ -7,10 +7,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import com.morce.globalquake.core.analysis.BetterAnalysis;
-import com.morce.globalquake.core.simulation.SimulatedEarthquake;
 import com.morce.globalquake.core.simulation.SimulatedStation;
 import com.morce.globalquake.res.sounds.Sounds;
 import com.morce.globalquake.utils.GeoUtils;
+import com.morce.globalquake.utils.IntensityTable;
 import com.morce.globalquake.utils.TravelTimeTable;
 
 public class EathquakeAnalysis {
@@ -456,6 +456,8 @@ public class EathquakeAnalysis {
 			for (Event e : goodEvents) {
 				double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
 						e.getLatFromStation(), e.getLonFromStation());
+				double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
+						-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
 				long expectedSArrival = (long) (earthquake.getOrigin()
 						+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
 								* 1000);
@@ -463,7 +465,7 @@ public class EathquakeAnalysis {
 						: ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
 				// *0.5 because s wave is stronger
 				double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-				mags.add(SimulatedEarthquake.mag(distGC, e.getMaxRatio() * mul));
+				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
 			}
 			Collections.sort(mags);
 			synchronized (earthquake.magsSync) {
@@ -474,7 +476,7 @@ public class EathquakeAnalysis {
 		}
 	}
 
-	public static final int[] STORE_TABLE = { 3, 3, 3, 5, 8, 15, 30, 60, 90, 90 };
+	public static final int[] STORE_TABLE = { 3, 3, 3, 5, 7, 10, 15, 25, 40, 40 };
 
 	public void second() {
 		synchronized (earthquakesSync) {

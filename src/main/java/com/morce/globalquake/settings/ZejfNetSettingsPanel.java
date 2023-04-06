@@ -3,6 +3,12 @@ package com.morce.globalquake.settings;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import com.morce.globalquake.core.GlobalQuake;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
@@ -41,6 +47,16 @@ public class ZejfNetSettingsPanel extends SettingsPanel {
 		JButton btnReconnect = new JButton("Reconnect");
 		btnReconnect.setBounds(163, 78, 117, 25);
 		add(btnReconnect);
+		
+		btnReconnect.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(GlobalQuake.instance != null && GlobalQuake.instance.getZejfClient() != null) {
+					GlobalQuake.instance.getZejfClient().reconnect();
+				}
+			}
+		});
 
 		chckbxReconnect = new JCheckBox("Auto reconnect");
 		chckbxReconnect.setBounds(12, 79, 143, 23);

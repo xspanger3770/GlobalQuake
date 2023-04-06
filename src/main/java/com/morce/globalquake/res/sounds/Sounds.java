@@ -59,18 +59,22 @@ public class Sounds {
 			dong.open(audioIn);
 
 			for (int i = 0; i < strs.length; i++) {
-				audioIn = AudioSystem.getAudioInputStream(Levels.class.getResource("level_" + strs[i] + ".wav"));
-				Clip first = AudioSystem.getClip();
-				first.open(audioIn);
+				try {
+					audioIn = AudioSystem.getAudioInputStream(Levels.class.getResource("level_" + strs[i] + ".wav"));
+					Clip first = AudioSystem.getClip();
+					first.open(audioIn);
 
-				levelsFirst[i] = first;
+					levelsFirst[i] = first;
 
-				if (i != strs.length - 1) {
-					audioIn = AudioSystem
-							.getAudioInputStream(Levels.class.getResource("up_to_" + strs[i + 1] + ".wav"));
-					Clip next = AudioSystem.getClip();
-					next.open(audioIn);
-					levelsNext[i] = next;
+					if (i != strs.length - 1) {
+						audioIn = AudioSystem
+								.getAudioInputStream(Levels.class.getResource("up_to_" + strs[i + 1] + ".wav"));
+						Clip next = AudioSystem.getClip();
+						next.open(audioIn);
+						levelsNext[i] = next;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 
@@ -111,5 +115,5 @@ public class Sounds {
 		}
 		return -1;
 	}
-
+	
 }
