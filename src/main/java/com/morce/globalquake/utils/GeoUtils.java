@@ -4,28 +4,6 @@ public interface GeoUtils {
 	public static final double EARTH_CIRCUMFERENCE = 40082;
 	public static final double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
 
-	public static final double ZEJF_LAT = 50.262;
-	public static final double ZEJF_LON = 17.262;
-
-	public static final double BILOVEC_LAT = 49.7590281;
-	public static final double BILOVEC_LON = 18.0196850;
-	
-	//N, E
-	public static final double MANESKY_LAT = 49.2317964;
-	public static final double MANESKY_LON = 16.5865289;
-	
-	//45.02566806313586, 14.58138295603414
-	
-	public static final double KRK_LAT = 45.02566806313586;
-	public static final double KRK_LON = 14.58138295603414;
-
-	//44.6222500N, 6.6317100E
-	public static final double RISOUL_LAT = 44.6222500;
-	public static final double RISOUL_LON = 6.6317100;
-	
-	//public static double HOME_LAT = ZEJF_LAT;
-	//public static double HOME_LON = ZEJF_LON;
-
 	/**
 	 * 
 	 * @param lat1 Latitude
