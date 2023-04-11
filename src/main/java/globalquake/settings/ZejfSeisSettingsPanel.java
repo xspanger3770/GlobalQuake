@@ -12,14 +12,14 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
-public class ZejfNetSettingsPanel extends SettingsPanel {
+public class ZejfSeisSettingsPanel extends SettingsPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField textFieldAddr;
 	private JTextField textFieldPort;
 	private JCheckBox chckbxReconnect;
 
-	public ZejfNetSettingsPanel() {
+	public ZejfSeisSettingsPanel() {
 		setLayout(null);
 
 		JLabel lblAddr = new JLabel("IP Address");
@@ -74,6 +74,6 @@ public class ZejfNetSettingsPanel extends SettingsPanel {
 
 	@Override
 	public String getTitle() {
-		return "ZejfNet";
+		return "ZejfSeis";
 	}
 }
