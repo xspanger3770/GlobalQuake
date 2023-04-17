@@ -22,6 +22,7 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 	
+	public static boolean reportsEnabled = false; // not available
 	public static final boolean enableSound = false; // not available ATM
 
 	static {
