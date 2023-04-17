@@ -6,6 +6,7 @@ import javax.sound.sampled.Clip;
 
 import globalquake.res.sounds.countdown.Countdown;
 import globalquake.res.sounds.levels.Levels;
+import globalquake.settings.Settings;
 
 public class Sounds {
 
@@ -101,6 +102,9 @@ public class Sounds {
 	}
 
 	public static void playSound(Clip clip) {
+		if(!Settings.enableSound) {
+			return;
+		}
 		if (soundsEnabled && clip != null) {
 			clip.setFramePosition(0);
 			clip.start();

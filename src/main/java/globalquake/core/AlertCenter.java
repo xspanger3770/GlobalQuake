@@ -20,6 +20,9 @@ public class AlertCenter {
 
 	@SuppressWarnings("unchecked")
 	public void tick() {
+		if(!Settings.enableAlarmDialogs) {
+			return;
+		}
 		ArrayList<Earthquake> quakes = null;
 		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
