@@ -13,6 +13,7 @@ import java.util.Iterator;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.core.simulation.FakeGlobalQuake;
 import globalquake.main.Main;
+import globalquake.settings.Settings;
 
 public class EarthquakeArchive {
 
@@ -93,7 +94,9 @@ public class EarthquakeArchive {
 					Collections.sort(archivedQuakes, Comparator.comparing(ArchivedQuake::getOrigin));
 				}
 				saveArchive();
-				reportQuake(earthquake);
+				if(Settings.reportsEnabled) {
+					reportQuake(earthquake);
+				}
 
 			};
 		}.start();
