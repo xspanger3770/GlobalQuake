@@ -419,9 +419,8 @@ public class StationManager implements IStationManager {
 	}
 
 	private void downloadSource(final DataSource se, StationDatabase database, Calendar now) throws Exception {
-
 		URL url = new URL(se.getUrl()
-				+ "level=channel&endafter=2020-12-29T00:00:00&includerestricted=false&format=xml&channel=" + channels);
+				+ "level=channel&endafter="+format1.format(new Date())+"&includerestricted=false&format=xml&channel=" + channels);
 
 		System.out.println("Connecting to " + se.getName());
 		updating_string = "Connecting to " + se.getName();

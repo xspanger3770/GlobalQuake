@@ -22,6 +22,7 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 	
+	public static final boolean enableSound = false; // not available ATM
 
 	static {
 		load();
@@ -33,14 +34,14 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
-		zejfSeisIP = (String) properties.getOrDefault("zejfSeisIP", "25.27.127.112");
+		zejfSeisIP = (String) properties.getOrDefault("zejfSeisIP", "0.0.0.0");
 		zejfSeisPort = Integer.valueOf((String) properties.getOrDefault("zejfSeisPort", "6222"));
 		zejfSeisAutoReconnect = Boolean.valueOf((String) properties.getOrDefault("zejfSeisAutoReconnect", "true"));
 		
-		enableAlarmDialogs = Boolean.valueOf((String) properties.getOrDefault("enableAlarmDialogs", "true"));
+		enableAlarmDialogs = Boolean.valueOf((String) properties.getOrDefault("enableAlarmDialogs", "false"));
 		
-		homeLat = Double.valueOf((String) properties.getOrDefault("homeLat", "50.262"));
-		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "17.262"));
+		homeLat = Double.valueOf((String) properties.getOrDefault("homeLat", "0.0"));
+		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "0.0"));
 		save();
 	}
 	

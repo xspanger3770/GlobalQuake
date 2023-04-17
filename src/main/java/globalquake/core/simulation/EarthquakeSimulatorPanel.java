@@ -46,6 +46,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 
 	private static final long serialVersionUID = 1L;
 	private EarthquakeSimulator simulator;
+	private boolean draw_clusters = false;
 	private static final Color neutralColor = new Color(20, 20, 160);
 	private static final Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 			new float[] { 3 }, 0);
@@ -136,43 +137,45 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 		super.paint(gr);
 		Graphics2D g = (Graphics2D) gr;
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		synchronized (simulator.earthquakesSync) {
-			Iterator<SimulatedEarthquake> it = simulator.getEarthquakes().iterator();
-			while (it.hasNext()) {
-				SimulatedEarthquake e = it.next();
-				long age = System.currentTimeMillis() - e.getOrigin();
-				double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-						* GeoUtils.EARTH_CIRCUMFERENCE;
-				double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-						* GeoUtils.EARTH_CIRCUMFERENCE;
-				if (pDist > 0) {
-					Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
-					g.setColor(Color.lightGray);
-					g.setStroke(new BasicStroke(3f));
-					g.draw(pPol);
-				}
-				if (sDist > 0) {
-					Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
-					g.setColor(Color.lightGray);
-					g.setStroke(dashed);
-					g.draw(sPol);
-				}
-				double x0 = getX(e.getLat(), e.getLon());
-				double y0 = getY(e.getLat(), e.getLon());
+		if (false) {
+			synchronized (simulator.earthquakesSync) {
+				Iterator<SimulatedEarthquake> it = simulator.getEarthquakes().iterator();
+				while (it.hasNext()) {
+					SimulatedEarthquake e = it.next();
+					long age = System.currentTimeMillis() - e.getOrigin();
+					double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+							* GeoUtils.EARTH_CIRCUMFERENCE;
+					double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+							* GeoUtils.EARTH_CIRCUMFERENCE;
+					if (pDist > 0) {
+						Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
+						g.setColor(Color.lightGray);
+						g.setStroke(new BasicStroke(3f));
+						g.draw(pPol);
+					}
+					if (sDist > 0) {
+						Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
+						g.setColor(Color.lightGray);
+						g.setStroke(dashed);
+						g.draw(sPol);
+					}
+					double x0 = getX(e.getLat(), e.getLon());
+					double y0 = getY(e.getLat(), e.getLon());
 
-				if (((System.currentTimeMillis() / 500) % 2 == 0)) {
-					double r = 10;
-					g.setColor(Color.orange);
-					g.setStroke(new BasicStroke(4f));
-					g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
-					g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
-				}
+					if (((System.currentTimeMillis() / 500) % 2 == 0)) {
+						double r = 10;
+						g.setColor(Color.orange);
+						g.setStroke(new BasicStroke(4f));
+						g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
+						g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
+					}
 
-				String str = "M" + ((int) (e.getMag() * 10.0)) / 10.0 + "";
-				g.setStroke(new BasicStroke(1f));
-				g.setColor(Color.white);
-				g.setFont(new Font("Calibri", Font.BOLD, 18));
-				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 20));
+					String str = "M" + ((int) (e.getMag() * 10.0)) / 10.0 + "";
+					g.setStroke(new BasicStroke(1f));
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.BOLD, 18));
+					g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 20));
+				}
 			}
 		}
 
@@ -273,7 +276,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 			double x0 = getX(e.getLat(), e.getLon());
 			double y0 = getY(e.getLat(), e.getLon());
 
-			{
+			if (false) {
 				drawPga(g, e);
 			}
 
@@ -356,108 +359,111 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 			g.fill(new Ellipse2D.Double(x - r / 2, y - r / 2, r, r));
 		}
 
-		ArrayList<Cluster> clustersClone = null;
-		synchronized (simulator.getClusterAnalysis().clustersSync) {
-			clustersClone = (ArrayList<Cluster>) simulator.getClusterAnalysis().getClusters().clone();
-		}
+		if (draw_clusters) {
 
-		for (Cluster c : clustersClone) {
-			double lat = c.getRootLat();
-			double lon = c.getRootLon();
-			double x0 = getX(lat, lon);
-			double y0 = getY(lat, lon);
-			double lat2 = c.getAnchorLat();
-			double lon2 = c.getAnchorLon();
-			double x02 = getX(lat2, lon2);
-			double y02 = getY(lat2, lon2);
-
-			Path2D.Double pol = createCircle(lat, lon, c.getSize());
-			g.setColor(new Color(255, 0, 255, 10));
-			g.setStroke(new BasicStroke(1f));
-			g.fill(pol);
-			g.setColor(new Color(255, 0, 255));
-			g.setStroke(new BasicStroke(2f));
-			g.draw(pol);
-
-			double r = 6;
-			g.setColor(Color.yellow);
-			g.setStroke(new BasicStroke(2f));
-			g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
-			g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
-			g.setColor(Color.red);
-			g.setStroke(new BasicStroke(2f));
-			g.draw(new Line2D.Double(x02 + r, y02 - r, x02 - r, y02 + r));
-			g.draw(new Line2D.Double(x02 + r, y02 + r, x02 - r, y02 - r));
-
-			if (c.bestAngle >= 0) {
-				Path2D.Double pol200KM = createCircle(c.getRootLat(), c.getRootLon(), 200);
-				g.setColor(Color.cyan);
-				g.setStroke(new BasicStroke(2f));
-				g.draw(pol200KM);
-
-				double[] vals = GeoUtils.moveOnGlobe(c.getRootLat(), c.getRootLon(), 200, c.bestAngle);
-				double lat1 = vals[0];
-				double lon1 = vals[1];
-				double x1 = getX(lat1, lon1);
-				double y1 = getY(lat1, lon1);
-
-				g.setColor(Color.green);
-				g.setStroke(new BasicStroke(3f));
-				g.draw(new Line2D.Double(x0, y0, x1, y1));
+			ArrayList<Cluster> clustersClone = null;
+			synchronized (simulator.getClusterAnalysis().clustersSync) {
+				clustersClone = (ArrayList<Cluster>) simulator.getClusterAnalysis().getClusters().clone();
 			}
 
-			if (!c.getSelected().isEmpty()) {
-				synchronized (c.selectedEventsSync) {
-					for (Event e : c.getSelected()) {
+			for (Cluster c : clustersClone) {
+				double lat = c.getRootLat();
+				double lon = c.getRootLon();
+				double x0 = getX(lat, lon);
+				double y0 = getY(lat, lon);
+				double lat2 = c.getAnchorLat();
+				double lon2 = c.getAnchorLon();
+				double x02 = getX(lat2, lon2);
+				double y02 = getY(lat2, lon2);
+
+				Path2D.Double pol = createCircle(lat, lon, c.getSize());
+				g.setColor(new Color(255, 0, 255, 10));
+				g.setStroke(new BasicStroke(1f));
+				g.fill(pol);
+				g.setColor(new Color(255, 0, 255));
+				g.setStroke(new BasicStroke(2f));
+				g.draw(pol);
+
+				double r = 6;
+				g.setColor(Color.yellow);
+				g.setStroke(new BasicStroke(2f));
+				g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
+				g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
+				g.setColor(Color.red);
+				g.setStroke(new BasicStroke(2f));
+				g.draw(new Line2D.Double(x02 + r, y02 - r, x02 - r, y02 + r));
+				g.draw(new Line2D.Double(x02 + r, y02 + r, x02 - r, y02 - r));
+
+				if (c.bestAngle >= 0) {
+					Path2D.Double pol200KM = createCircle(c.getRootLat(), c.getRootLon(), 200);
+					g.setColor(Color.cyan);
+					g.setStroke(new BasicStroke(2f));
+					g.draw(pol200KM);
+
+					double[] vals = GeoUtils.moveOnGlobe(c.getRootLat(), c.getRootLon(), 200, c.bestAngle);
+					double lat1 = vals[0];
+					double lon1 = vals[1];
+					double x1 = getX(lat1, lon1);
+					double y1 = getY(lat1, lon1);
+
+					g.setColor(Color.green);
+					g.setStroke(new BasicStroke(3f));
+					g.draw(new Line2D.Double(x0, y0, x1, y1));
+				}
+
+				if (!c.getSelected().isEmpty()) {
+					synchronized (c.selectedEventsSync) {
+						for (Event e : c.getSelected()) {
+							double x1 = getX(e.getLatFromStation(), e.getLonFromStation());
+							double y1 = getY(e.getLatFromStation(), e.getLonFromStation());
+							double r2 = 30;
+							Rectangle2D.Double rect = new Rectangle2D.Double(x1 - r2 / 2, y1 - r2 / 2, r2, r2);
+							g.setColor(Color.cyan);
+							g.setStroke(new BasicStroke(3f));
+							g.draw(rect);
+						}
+					}
+				}
+
+				/*
+				 * if(c.getEarthquake()!=null) { test(g, c.getRootLat(), c.getRootLon()); }
+				 */
+
+				if (c.previousHypocenter != null && c.previousHypocenter.getWrongEvents() != null) {
+					for (Event e : c.previousHypocenter.getWrongEvents()) {
 						double x1 = getX(e.getLatFromStation(), e.getLonFromStation());
 						double y1 = getY(e.getLatFromStation(), e.getLonFromStation());
 						double r2 = 30;
 						Rectangle2D.Double rect = new Rectangle2D.Double(x1 - r2 / 2, y1 - r2 / 2, r2, r2);
-						g.setColor(Color.cyan);
+						g.setColor(Color.red);
 						g.setStroke(new BasicStroke(3f));
 						g.draw(rect);
 					}
 				}
-			}
 
-			/*
-			 * if(c.getEarthquake()!=null) { test(g, c.getRootLat(), c.getRootLon()); }
-			 */
+				String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
+				g.setStroke(new BasicStroke(1f));
+				g.setColor(Color.white);
+				g.setFont(new Font("Calibri", Font.PLAIN, 14));
+				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
 
-			if (c.previousHypocenter != null && c.previousHypocenter.getWrongEvents() != null) {
-				for (Event e : c.previousHypocenter.getWrongEvents()) {
-					double x1 = getX(e.getLatFromStation(), e.getLonFromStation());
-					double y1 = getY(e.getLatFromStation(), e.getLonFromStation());
-					double r2 = 30;
-					Rectangle2D.Double rect = new Rectangle2D.Double(x1 - r2 / 2, y1 - r2 / 2, r2, r2);
-					g.setColor(Color.red);
-					g.setStroke(new BasicStroke(3f));
-					g.draw(rect);
-				}
-			}
-
-			String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
-			g.setStroke(new BasicStroke(1f));
-			g.setColor(Color.white);
-			g.setFont(new Font("Calibri", Font.PLAIN, 14));
-			g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
-
-			if (isMouseNearby(x0, y0, 7)) {
-				synchronized (c.assignedEventsSync) {
-					for (Event e : c.getAssignedEvents()) {
-						double lat1 = e.getAnalysis().getStation().getLat();
-						double lon1 = e.getAnalysis().getStation().getLon();
-						double x1 = getX(lat1, lon1);
-						double y1 = getY(lat1, lon1);
-						g.setColor(Color.white);
-						g.setStroke(new BasicStroke(2f));
-						g.draw(new Line2D.Double(x0, y0, x1, y1));
+				if (isMouseNearby(x0, y0, 7)) {
+					synchronized (c.assignedEventsSync) {
+						for (Event e : c.getAssignedEvents()) {
+							double lat1 = e.getAnalysis().getStation().getLat();
+							double lon1 = e.getAnalysis().getStation().getLon();
+							double x1 = getX(lat1, lon1);
+							double y1 = getY(lat1, lon1);
+							g.setColor(Color.white);
+							g.setStroke(new BasicStroke(2f));
+							g.draw(new Line2D.Double(x0, y0, x1, y1));
+						}
 					}
 				}
 			}
 		}
 
-		{
+		if (false) {
 			double home_x = getX(Settings.homeLat, Settings.homeLon);
 			double home_y = getY(Settings.homeLat, Settings.homeLon);
 			g.setColor(Color.pink);
