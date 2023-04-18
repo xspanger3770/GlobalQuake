@@ -227,8 +227,4 @@ public class GlobePanel extends JPanel implements GeoUtils {
 		return path;
 	}
 
-	public static void init() {
-
-	}
-
 }

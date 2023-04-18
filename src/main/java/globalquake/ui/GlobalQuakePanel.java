@@ -32,12 +32,12 @@ import globalquake.core.Earthquake;
 import globalquake.core.Event;
 import globalquake.core.GlobalQuake;
 import globalquake.core.NearbyStationDistanceInfo;
-import globalquake.core.ZejfNetClient;
 import globalquake.core.analysis.AnalysisStatus;
+import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.StationManager;
+import globalquake.main.Settings;
 import globalquake.res.sounds.Sounds;
-import globalquake.settings.Settings;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.IntensityTable;
 import globalquake.utils.Level;
@@ -645,7 +645,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 		int _y = getHeight() - 54;
 		{
-			ZejfNetClient client = globalQuake.getZejfClient();
+			ZejfSeisClient client = globalQuake.getZejfClient();
 			g.setColor(!client.isConnected() ? (client.isConnecting() ? Color.yellow : Color.red) : Color.green);
 			g.setFont(new Font("Calibri", Font.BOLD, 14));
 			g.drawString("ZejfNet", 2, _y);

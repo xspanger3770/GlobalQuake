@@ -1,10 +1,11 @@
-package globalquake.settings;
+package globalquake.ui.settings;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import globalquake.core.GlobalQuake;
+import globalquake.main.Settings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

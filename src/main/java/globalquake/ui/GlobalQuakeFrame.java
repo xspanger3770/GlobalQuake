@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
-import globalquake.settings.SettingsFrame;
+import globalquake.ui.settings.SettingsFrame;
 
 public class GlobalQuakeFrame extends JFrame {
 

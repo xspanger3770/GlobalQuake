@@ -18,6 +18,8 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
 
+import globalquake.core.zejfseis.ZejfSeisClient;
+import globalquake.core.zejfseis.ZejfSeisStation;
 import globalquake.database.StationManager;
 import globalquake.main.Main;
 import globalquake.ui.GlobalQuakeFrame;
@@ -29,7 +31,7 @@ public class GlobalQuake {
 	public static final File ERRORS_FILE = new File(Main.MAIN_FOLDER, "/error_logs/");
 	private GlobalQuakeFrame globalQuakeFrame;
 	protected ArrayList<AbstractStation> stations = new ArrayList<>();
-	private ZejfNetStation zejf;
+	private ZejfSeisStation zejf;
 	private NetworkManager networkManager;
 	private long lastReceivedRecord;
 	public long lastSecond;
@@ -41,7 +43,7 @@ public class GlobalQuake {
 	public EathquakeAnalysis earthquakeAnalysis;
 	public AlertCenter alertCenter;
 	public EarthquakeArchive archive;
-	private ZejfNetClient zejfClient;
+	private ZejfSeisClient zejfClient;
 	public static GlobalQuake instance;
 
 	public GlobalQuake(StationManager stationManager) {
@@ -175,7 +177,7 @@ public class GlobalQuake {
 
 	private void runZejf() {
 		if (zejf != null) {
-			zejfClient = new ZejfNetClient(zejf);
+			zejfClient = new ZejfSeisClient(zejf);
 			zejfClient.connect();
 		}
 	}
@@ -205,7 +207,7 @@ public class GlobalQuake {
 	}
 
 	private void addZejfNetStations() {
-		zejf = new ZejfNetStation(this, "ZEJF", "Zejf", "EHE", "Zejf", 50.262, 17.262, 400, -1, -1, nextID++);
+		zejf = new ZejfSeisStation(this, "ZEJF", "Zejf", "EHE", "Zejf", 50.262, 17.262, 400, -1, -1, nextID++);
 		stations.add(zejf);
 	}
 
@@ -362,7 +364,7 @@ public class GlobalQuake {
 		return archive;
 	}
 
-	public ZejfNetClient getZejfClient() {
+	public ZejfSeisClient getZejfClient() {
 		return zejfClient;
 	}
 

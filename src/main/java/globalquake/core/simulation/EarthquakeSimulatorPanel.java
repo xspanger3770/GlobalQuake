@@ -34,7 +34,7 @@ import globalquake.core.Cluster;
 import globalquake.core.Earthquake;
 import globalquake.core.Event;
 import globalquake.core.NearbyStationDistanceInfo;
-import globalquake.settings.Settings;
+import globalquake.main.Settings;
 import globalquake.ui.GlobePanel;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Level;

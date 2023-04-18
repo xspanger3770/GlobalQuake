@@ -18,7 +18,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,14 +36,14 @@ import com.morce.globalquake.database.Station;
 import com.morce.globalquake.database.StationDatabase;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.main.Main;
 import globalquake.utils.TimeFixer;
 
 public class StationManager implements IStationManager {
 
 	public static final ArrayList<DataSource> sources = new ArrayList<DataSource>();
 	public static final ArrayList<SeedlinkNetwork> seedlinks = new ArrayList<SeedlinkNetwork>();
-	private static final String folderURL_default = "./stationDatabase/";
-
+	
 	private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final SimpleDateFormat format3 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
@@ -89,7 +88,7 @@ public class StationManager implements IStationManager {
 		seedlinks.add(new SeedlinkNetwork((byte) 2, "Iris Seedlink", IRIS_RTSERVER));
 	}
 
-	private static String folderURL = folderURL_default;
+	private static File stationsFile = new File(Main.MAIN_FOLDER, "/stationDatabase/");
 
 	private StationDatabase database;
 
@@ -193,20 +192,6 @@ public class StationManager implements IStationManager {
 		availability_string = "Done!";
 	}
 	
-	@SuppressWarnings("unused")
-	private void europeOnly() {
-		Iterator<SelectedStation> it=database.getSelectedStations().iterator();
-		while(it.hasNext()) {
-			SelectedStation selectedStation = it.next();
-			Station stat = getDatabase().getNetwork(selectedStation.getNetworkCode()).getStation(selectedStation.getStationCode());
-			if(stat!=null) {
-				if(stat.getLon() >=45||stat.getLon() <=-33) {
-					it.remove();
-				}
-			}
-		}
-	}
-
 	private String exc(Exception e) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -641,19 +626,11 @@ public class StationManager implements IStationManager {
 	}
 
 	public static File getDatabaseFile() {
-		return new File(folderURL, "stationDatabase.dat");
+		return new File(stationsFile, "stationDatabase.dat");
 	}
 
 	public static File getTempDatabaseFile() {
-		return new File(folderURL, "_stationDatabase.dat");
-	}
-
-	public static void setFolderURL(String folderURL) {
-		StationManager.folderURL = folderURL;
-	}
-
-	public static String getFolderURL() {
-		return folderURL;
+		return new File(stationsFile, "_stationDatabase.dat");
 	}
 
 	@Override

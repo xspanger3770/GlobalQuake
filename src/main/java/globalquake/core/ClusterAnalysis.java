@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import globalquake.main.Settings;
 import globalquake.res.sounds.Sounds;
-import globalquake.settings.Settings;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Level;
 import globalquake.utils.Shindo;

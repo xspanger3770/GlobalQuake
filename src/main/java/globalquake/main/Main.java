@@ -6,7 +6,6 @@ import java.io.File;
 import globalquake.core.GlobalQuake;
 import globalquake.database.StationManager;
 import globalquake.ui.DatabaseMonitor;
-import globalquake.ui.GlobePanel;
 
 public class Main {
 
@@ -28,12 +27,6 @@ public class Main {
 	}
 
 	private void startDatabaseManager() {
-		new Thread("Init GlobePanel") {
-			public void run() {
-				GlobePanel.init();
-			};
-		}.start();
-		StationManager.setFolderURL(MAIN_FOLDER.getAbsolutePath() + "/stationDatabase/");
 		stationManager = new StationManager() {
 			@Override
 			public void confirmDialog(String title, String message, int optionType, int messageType,

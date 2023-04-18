@@ -1,4 +1,4 @@
-package globalquake.core;
+package globalquake.core.zejfseis;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,9 +6,10 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import globalquake.settings.Settings;
+import globalquake.core.SimpleLog;
+import globalquake.main.Settings;
 
-public class ZejfNetClient {
+public class ZejfSeisClient {
 
 	private static final int COMPATIBILITY_VERSION = 4;
 	private boolean connected;
@@ -16,7 +17,7 @@ public class ZejfNetClient {
 	private boolean intendedClose;
 	private boolean reconnect;
 
-	private ZejfNetStation station;
+	private ZejfSeisStation station;
 	private Thread thread;
 	protected Socket socket;
 	protected OutputStream outputStream;
@@ -24,7 +25,7 @@ public class ZejfNetClient {
 	private int errVal;
 	private int sampleRate;
 
-	public ZejfNetClient(ZejfNetStation station) {
+	public ZejfSeisClient(ZejfSeisStation station) {
 		this.station = station;
 		init();
 	}
@@ -202,7 +203,7 @@ public class ZejfNetClient {
 		return connecting;
 	}
 
-	public ZejfNetStation getStation() {
+	public ZejfSeisStation getStation() {
 		return station;
 	}
 
