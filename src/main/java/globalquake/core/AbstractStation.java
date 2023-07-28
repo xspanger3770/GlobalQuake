@@ -7,30 +7,28 @@ import globalquake.core.analysis.BetterAnalysis;
 
 public abstract class AbstractStation {
 
-	private String networkCode;
-	private String stationCode;
-	private String channelName;
-	private String locationCode;
-	private byte source;
-	private byte seedlinkNetwork;
-	private double lat;
-	private double lon;
-	private double alt;
-	private long sensitivity;
-	private BetterAnalysis analysis;
-	private double frequency;
-	private GlobalQuake globalQuake;
-	private int id;
+	private final String networkCode;
+	private final String stationCode;
+	private final String channelName;
+	private final String locationCode;
+	private final byte seedlinkNetwork;
+	private final double lat;
+	private final double lon;
+	private final double alt;
+	private final long sensitivity;
+	private final BetterAnalysis analysis;
+	private final double frequency;
+	private final GlobalQuake globalQuake;
+	private final int id;
 
 	public AbstractStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
-			String locationCode, byte source, byte seedlinkNetwork, double lat, double lon, double alt,
-			long sensitivity, double frequency, int id) {
+						   String locationCode, byte seedlinkNetwork, double lat, double lon, double alt,
+						   long sensitivity, double frequency, int id) {
 		this.globalQuake = globalQuake;
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
 		this.locationCode = locationCode;
-		this.source = source;
 		this.seedlinkNetwork = seedlinkNetwork;
 		this.lat = lat;
 		this.lon = lon;
@@ -77,9 +75,11 @@ public abstract class AbstractStation {
 		return frequency;
 	}
 
-	public byte getSource() {
-		return source;
-	}
+// --Commented out by Inspection START (28/07/2023, 5:25 pm):
+//	public byte getSource() {
+//		return source;
+//	}
+// --Commented out by Inspection STOP (28/07/2023, 5:25 pm)
 
 	public String getStationCode() {
 		return stationCode;
@@ -97,8 +97,8 @@ public abstract class AbstractStation {
 	
 	public abstract long getDelayMS();
 	
-	private ArrayList<Double> ratioHistory = new ArrayList<>();
-	private Object ratioSync = new Object();
+	private final ArrayList<Double> ratioHistory = new ArrayList<>();
+	private final Object ratioSync = new Object();
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public void second() {
@@ -118,10 +118,7 @@ public abstract class AbstractStation {
 	public double getMaxRatio60S() {
 		double max = 0.0;
 		synchronized (ratioSync) {
-			if (ratioHistory == null) {
-				return 0.0;
-			}
-			for (double d : ratioHistory) {
+            for (double d : ratioHistory) {
 				if (d > max) {
 					max = d;
 				}

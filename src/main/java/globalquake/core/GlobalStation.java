@@ -7,14 +7,14 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 
 public class GlobalStation extends AbstractStation {
 
-	private Queue<DataRecord> recordsQueue;
-	private Object recordsSync = new Object();
+	private final Queue<DataRecord> recordsQueue;
+	private final Object recordsSync = new Object();
 
 	public GlobalStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
 			String locationCode, byte source, byte seedlinkNetwork, double lat, double lon, double alt,
 			long sensitivity, double frequency, int id) {
-		super(globalQuake, networkCode, stationCode, channelName, locationCode, source, seedlinkNetwork, lat, lon, alt, sensitivity, frequency, id);
-		this.recordsQueue = new LinkedList<DataRecord>();
+		super(globalQuake, networkCode, stationCode, channelName, locationCode, seedlinkNetwork, lat, lon, alt, sensitivity, frequency, id);
+		this.recordsQueue = new LinkedList<>();
 	}
 
 	public void addRecord(DataRecord dr) {
@@ -36,7 +36,7 @@ public class GlobalStation extends AbstractStation {
 
 	@Override
 	public boolean hasDisplayableData() {
-		return hasData() && getAnalysis().getNumRecords() >= 3;
+		return !hasData() || getAnalysis().getNumRecords() < 3;
 	}
 
 	@Override

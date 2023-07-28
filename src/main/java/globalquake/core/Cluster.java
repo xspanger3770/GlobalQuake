@@ -6,8 +6,8 @@ import globalquake.geo.GeoUtils;
 
 public class Cluster {
 
-	private int id;
-	private ArrayList<Event> assignedEvents;
+	private final int id;
+	private final ArrayList<Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -15,31 +15,29 @@ public class Cluster {
 	private long lastUpdate;
 
 	private Earthquake earthquake;
-	public double bestAngle;
+	public final double bestAngle;
 	public Hypocenter previousHypocenter;
 	private int level;
 
 	public boolean active;
 	public int lastEpicenterUpdate;
 
-	public SoundsInfo soundsInfo;
+	public final SoundsInfo soundsInfo;
 	private double anchorLon;
 	private double anchorLat;
 	public int reportID;
 
 	public static final double NONE = -999;
-	public Object assignedEventsSync;
-	public Object abandonedEventsSync;
-	public Object selectedEventsSync;
+	public final Object assignedEventsSync;
+	public final Object selectedEventsSync;
 
 	// 20 selected
-	private ArrayList<Event> selected = new ArrayList<Event>();
+	private ArrayList<Event> selected = new ArrayList<>();
 
 	public Cluster(int id) {
 		this.id = id;
-		this.assignedEvents = new ArrayList<Event>();
+		this.assignedEvents = new ArrayList<>();
 		this.assignedEventsSync = new Object();
-		this.abandonedEventsSync = new Object();
 		this.selectedEventsSync = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;

@@ -1,26 +1,26 @@
 package globalquake.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import globalquake.regions.Regions;
 
 public class ArchivedQuake implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 6690311245585670539L;
 
-	private double lat;
-	private double lon;
-	private double depth;
-	private long origin;
-	private double mag;
+	private final double lat;
+	private final double lon;
+	private final double depth;
+	private final long origin;
+	private final double mag;
 	private double maxRatio;
 	private String region;
 
-	private ArrayList<ArchivedEvent> archivedEvents;
-
-	@Deprecated
-	private int assignedStations;
+	private final ArrayList<ArchivedEvent> archivedEvents;
 
 	private int abandonedCount;
 	private boolean wrong;
@@ -30,19 +30,17 @@ public class ArchivedQuake implements Serializable {
 
 	public ArchivedQuake(Earthquake earthquake) {
 		this(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
-				earthquake.getOrigin(), earthquake.getRegion());
+				earthquake.getOrigin());
 		copyEvents(earthquake);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void copyEvents(Earthquake earthquake) {
-		if (earthquake.getCluster().getAssignedEvents() == null || earthquake.getCluster().previousHypocenter == null
-				|| earthquake.getCluster().previousHypocenter.getWrongEvents() == null
-				|| earthquake.getCluster().previousHypocenter.wrongEventsSync == null) {
+		if (earthquake.getCluster().getAssignedEvents() == null || earthquake.getCluster().previousHypocenter == null || earthquake.getCluster().previousHypocenter.getWrongEvents() == null) {
 			return;
 		}
-		ArrayList<Event> events = null;
-		ArrayList<Event> wrongEvents = null;
+		ArrayList<Event> events;
+		ArrayList<Event> wrongEvents;
 		synchronized (earthquake.getCluster().assignedEventsSync) {
 			events = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
 		}
@@ -73,21 +71,21 @@ public class ArchivedQuake implements Serializable {
 				regionUpdateRunning = true;
 				region = Regions.getRegion(getLat(), getLon());
 				String newRegion = Regions.downloadRegion(getLat(), getLon());
-				if(newRegion != Regions.UNKNOWN_REGION) {
+				if(!Objects.equals(newRegion, Regions.UNKNOWN_REGION)) {
 					region = newRegion;
 				}
 				regionUpdateRunning = false;
-			};
-		}.start();
+			}
+        }.start();
 	}
 
-	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin, String region) {
+	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.mag = mag;
 		this.origin = origin;
-		this.archivedEvents = new ArrayList<ArchivedEvent>();
+		this.archivedEvents = new ArrayList<>();
 		updateRegion();
 	}
 
@@ -112,7 +110,7 @@ public class ArchivedQuake implements Serializable {
 	}
 
 	public int getAssignedStations() {
-		return assignedStations > 0 ? assignedStations : archivedEvents == null ? 0 : archivedEvents.size();
+		return archivedEvents == null ? 0 : archivedEvents.size();
 	}
 
 	public ArrayList<ArchivedEvent> getArchivedEvents() {

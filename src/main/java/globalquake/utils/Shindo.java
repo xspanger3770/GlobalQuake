@@ -29,13 +29,13 @@ public class Shindo {
 		levels[i++] = ROKU_JAKU = new Level("6-", 250, 7);
 		levels[i++] = ROKU_KYOU = new Level("6+", 315, 8);
 		levels[i++] = NANA = new Level("7", 400, 9);
-		levels[i++] = HACHI = new Level("8", 1000, 10);
-	}
+		levels[i] = HACHI = new Level("8", 1000, 10);
+    }
 
 	public static Level getLevel(double pga) {
 		for (int i = levels.length - 1; i >= 0; i--) {
 			Level l = levels[i];
-			if (pga > l.getPga()) {
+			if (pga > l.pga()) {
 				return l;
 			}
 		}
@@ -46,34 +46,34 @@ public class Shindo {
 		if (shindoSfc == null) {
 			return Color.WHITE;
 		}
-		if (shindoSfc.getPga() == Shindo.ICHI.getPga()) {
+		if (shindoSfc.pga() == Shindo.ICHI.pga()) {
 			return new Color(120, 135, 135);
 		}
-		if (shindoSfc.getPga() == Shindo.NI.getPga()) {
+		if (shindoSfc.pga() == Shindo.NI.pga()) {
 			return new Color(20, 135, 205);
 		}
-		if (shindoSfc.getPga() == Shindo.SAN.getPga()) {
+		if (shindoSfc.pga() == Shindo.SAN.pga()) {
 			return new Color(19, 154, 76);
 		}
-		if (shindoSfc.getPga() == Shindo.YON.getPga()) {
+		if (shindoSfc.pga() == Shindo.YON.pga()) {
 			return new Color(220, 165, 0);
 		}
-		if (shindoSfc.getPga() == Shindo.GO_JAKU.getPga()) {
+		if (shindoSfc.pga() == Shindo.GO_JAKU.pga()) {
 			return new Color(241, 138, 46);
 		}
-		if (shindoSfc.getPga() == Shindo.GO_KYOU.getPga()) {
+		if (shindoSfc.pga() == Shindo.GO_KYOU.pga()) {
 			return new Color(209, 106, 14);
 		}
-		if (shindoSfc.getPga() == Shindo.ROKU_JAKU.getPga()) {
+		if (shindoSfc.pga() == Shindo.ROKU_JAKU.pga()) {
 			return new Color(235, 26, 0);
 		}
-		if (shindoSfc.getPga() == Shindo.ROKU_KYOU.getPga()) {
+		if (shindoSfc.pga() == Shindo.ROKU_KYOU.pga()) {
 			return new Color(165, 2, 7);
 		}
-		if (shindoSfc.getPga() == Shindo.NANA.getPga()) {
+		if (shindoSfc.pga() == Shindo.NANA.pga()) {
 			return new Color(150, 0, 150);
 		}
-		if (shindoSfc.getPga() == Shindo.HACHI.getPga()) {
+		if (shindoSfc.pga() == Shindo.HACHI.pga()) {
 			return new Color(10, 10, 10);
 		}
 		return Color.WHITE;

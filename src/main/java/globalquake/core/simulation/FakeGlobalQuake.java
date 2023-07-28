@@ -2,12 +2,11 @@ package globalquake.core.simulation;
 
 import java.util.ArrayList;
 
-import globalquake.core.AbstractStation;
 import globalquake.core.GlobalQuake;
 
 public class FakeGlobalQuake extends GlobalQuake {
 
-	private EarthquakeSimulator sim;
+	private final EarthquakeSimulator sim;
 
 	public FakeGlobalQuake(EarthquakeSimulator sim) {
 		super(null);
@@ -16,7 +15,7 @@ public class FakeGlobalQuake extends GlobalQuake {
 	}
 
 	private void init() {
-		this.stations = new ArrayList<AbstractStation>();
+		this.stations = new ArrayList<>();
 		for (SimulatedStation sims : sim.getStations()) {
 			this.stations.add(sims.toGlobalStation());
 		}

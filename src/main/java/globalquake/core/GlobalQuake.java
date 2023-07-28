@@ -1,39 +1,31 @@
 package globalquake.core;
 
-import java.awt.EventQueue;
+import com.morce.globalquake.database.Channel;
+import com.morce.globalquake.database.Network;
+import com.morce.globalquake.database.Station;
+import globalquake.core.zejfseis.ZejfSeisClient;
+import globalquake.core.zejfseis.ZejfSeisStation;
+import globalquake.database.SeedlinkManager;
+import globalquake.geo.GeoUtils;
+import globalquake.main.Main;
+import globalquake.ui.GlobalQuakeFrame;
+import globalquake.utils.NamedThreadFactory;
+
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.morce.globalquake.database.Channel;
-import com.morce.globalquake.database.Network;
-import com.morce.globalquake.database.Station;
-
-import globalquake.core.zejfseis.ZejfSeisClient;
-import globalquake.core.zejfseis.ZejfSeisStation;
-import globalquake.database.SeedlinkManager;
-import globalquake.main.Main;
-import globalquake.ui.GlobalQuakeFrame;
-import globalquake.geo.GeoUtils;
-import globalquake.utils.NamedThreadFactory;
-
 public class GlobalQuake {
 
-	public static final File ERRORS_FILE = new File(Main.MAIN_FOLDER, "/error_logs/");
 	private GlobalQuakeFrame globalQuakeFrame;
 
 	protected ArrayList<AbstractStation> stations = new ArrayList<>();
 	private ZejfSeisStation zejf;
-	private NetworkManager networkManager;
 	private long lastReceivedRecord;
 	public long lastSecond;
 	public long lastAnalysis;
@@ -41,7 +33,7 @@ public class GlobalQuake {
 	public long clusterAnalysisT;
 	public long lastQuakesT;
 	public ClusterAnalysis clusterAnalysis;
-	public EathquakeAnalysis earthquakeAnalysis;
+	public EarthquakeAnalysis earthquakeAnalysis;
 	public AlertCenter alertCenter;
 	public EarthquakeArchive archive;
 	private ZejfSeisClient zejfClient;
@@ -69,7 +61,7 @@ public class GlobalQuake {
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Hypocenter Location Thread"));
 
 		clusterAnalysis = new ClusterAnalysis(this);
-		earthquakeAnalysis = new EathquakeAnalysis(this);
+		earthquakeAnalysis = new EarthquakeAnalysis(this);
 		alertCenter = new AlertCenter(this);
 		archive = new EarthquakeArchive(this);
 
@@ -82,8 +74,7 @@ public class GlobalQuake {
                 lastAnalysis = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occurred in station analysis");
-                e.printStackTrace();
-                saveError(e);
+                Main.getErrorHandler().handleException(e);
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
 
@@ -99,8 +90,7 @@ public class GlobalQuake {
                 lastSecond = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occurred in 1-second loop");
-                e.printStackTrace();
-                saveError(e);
+				Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);
 
@@ -112,8 +102,7 @@ public class GlobalQuake {
                 // throw new Exception("Error test");
             } catch (Exception e) {
                 System.err.println("Exception in garbage collector");
-                e.printStackTrace();
-                saveError(e);
+				Main.getErrorHandler().handleException(e);
             }
         }, 0, 10, TimeUnit.SECONDS);
 
@@ -125,8 +114,7 @@ public class GlobalQuake {
                 clusterAnalysisT = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occured in cluster analysis loop");
-                e.printStackTrace();
-                saveError(e);
+				Main.getErrorHandler().handleException(e);
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
 
@@ -138,24 +126,9 @@ public class GlobalQuake {
                 lastQuakesT = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occured in hypocenter location loop");
-                e.printStackTrace();
-                saveError(e);
+				Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);
-	}
-
-	public void saveError(Exception e) {
-		try {
-			if (!ERRORS_FILE.exists()) {
-				ERRORS_FILE.mkdirs();
-			}
-			FileWriter fw = new FileWriter(ERRORS_FILE + "/err_" + System.currentTimeMillis() + ".txt", true);
-			PrintWriter pw = new PrintWriter(fw);
-			e.printStackTrace(pw);
-			fw.close();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	private void runZejfSeisClient() {
@@ -166,23 +139,28 @@ public class GlobalQuake {
 	}
 
 	private void runNetworkManager() {
-		networkManager = new NetworkManager(this);
+		NetworkManager networkManager = new NetworkManager(this);
 		networkManager.run();
 	}
 
 	private void initStations(SeedlinkManager seedlinkManager) {
 		stations.clear();
-		for (Network n : seedlinkManager.getDatabase().getNetworks()) {
-			for (Station s : n.getStations()) {
-				for (Channel ch : s.getChannels()) {
-					if (ch.isSelected() && ch.isAvailable()) {
-						GlobalStation station = createGlobalStation(ch);
-						stations.add(station);
+		seedlinkManager.getDatabase().getNetworksReadLock().lock();
+		try {
+			for (Network n : seedlinkManager.getDatabase().getNetworks()) {
+				for (Station s : n.getStations()) {
+					for (Channel ch : s.getChannels()) {
+						if (ch.isSelected() && ch.isAvailable()) {
+							GlobalStation station = createGlobalStation(ch);
+							stations.add(station);
 
-						break;// only 1 channel per station
+							break;// only 1 channel per station
+						}
 					}
 				}
 			}
+		} finally {
+			seedlinkManager.getDatabase().getNetworksReadLock().unlock();
 		}
 
 		addZejfNetStations();
@@ -199,45 +177,45 @@ public class GlobalQuake {
 
 	private void createListOfClosestStations() {
 		for (AbstractStation stat : stations) {
-			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<ArrayList<StationDistanceInfo>>();
+			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<>();
 			for (int i = 0; i < RAYS; i++) {
-				rays.add(new ArrayList<StationDistanceInfo>());
+				rays.add(new ArrayList<>());
 			}
 			int num = 0;
-			outerLoop: for (int i = 0; i < 2; i++) {
-				for (AbstractStation stat2 : stations) {
-					if (!(stat2.getId() == stat.getId())) {
-						double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
-								stat2.getLon());
-						if (dist > (i == 0 ? 1200 : 3600)) {
-							continue;
-						}
-						double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
-								stat2.getLon());
-						int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-						rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						int ray2 = ray + 1;
-						if (ray2 == RAYS) {
-							ray2 = 0;
-						}
-						int ray3 = ray - 1;
-						if (ray3 == -1) {
-							ray3 = RAYS - 1;
-						}
-						rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						num++;
-					}
-				}
-				if (num > 4) {
-					break outerLoop;
-				}
-			}
-			ArrayList<Integer> closestStations = new ArrayList<Integer>();
-			ArrayList<NearbyStationDistanceInfo> nearbys = new ArrayList<NearbyStationDistanceInfo>();
+            for (int i = 0; i < 2; i++) {
+                for (AbstractStation stat2 : stations) {
+                    if (!(stat2.getId() == stat.getId())) {
+                        double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
+                                stat2.getLon());
+                        if (dist > (i == 0 ? 1200 : 3600)) {
+                            continue;
+                        }
+                        double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
+                                stat2.getLon());
+                        int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
+                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        int ray2 = ray + 1;
+                        if (ray2 == RAYS) {
+                            ray2 = 0;
+                        }
+                        int ray3 = ray - 1;
+                        if (ray3 == -1) {
+                            ray3 = RAYS - 1;
+                        }
+                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        num++;
+                    }
+                }
+                if (num > 4) {
+                    break;
+                }
+            }
+			ArrayList<Integer> closestStations = new ArrayList<>();
+			ArrayList<NearbyStationDistanceInfo> nearbys = new ArrayList<>();
 			for (int i = 0; i < RAYS; i++) {
-				if (rays.get(i).size() > 0) {
-					Collections.sort(rays.get(i), Comparator.comparing(StationDistanceInfo::getDist));
+				if (!rays.get(i).isEmpty()) {
+					rays.get(i).sort(Comparator.comparing(StationDistanceInfo::dist));
 					for (int j = 0; j <= Math.min(1, rays.get(i).size() - 1); j++) {
 						if (!closestStations.contains(rays.get(i).get(j).id)) {
 							closestStations.add(rays.get(i).get(j).id);
@@ -251,20 +229,8 @@ public class GlobalQuake {
 		}
 	}
 
-	class StationDistanceInfo {
-		public StationDistanceInfo(int id, double dist, double ang) {
-			this.id = id;
-			this.dist = dist;
-			this.ang = ang;
-		}
+	record StationDistanceInfo(int id, double dist, double ang) {
 
-		int id;
-		double dist;
-		double ang;
-
-		public double getDist() {
-			return dist;
-		}
 	}
 
 	private int nextID = 0;
@@ -288,8 +254,7 @@ public class GlobalQuake {
                 @SuppressWarnings("unchecked")
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    // todo
-                    ArrayList<Earthquake> quakes = null;
+                    ArrayList<Earthquake> quakes;
 
                     synchronized (getEarthquakeAnalysis().earthquakesSync) {
                         quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
@@ -312,10 +277,6 @@ public class GlobalQuake {
 		return stations.get(id);
 	}
 
-	public NetworkManager getNetworkManager() {
-		return networkManager;
-	}
-
 	public long getLastReceivedRecord() {
 		return lastReceivedRecord;
 	}
@@ -326,20 +287,12 @@ public class GlobalQuake {
 		}
 	}
 
-	public GlobalQuakeFrame getGlobalQuakeFrame() {
-		return globalQuakeFrame;
-	}
-
 	public ClusterAnalysis getClusterAnalysis() {
 		return clusterAnalysis;
 	}
 
-	public EathquakeAnalysis getEarthquakeAnalysis() {
+	public EarthquakeAnalysis getEarthquakeAnalysis() {
 		return earthquakeAnalysis;
-	}
-
-	public AlertCenter getAlertCenter() {
-		return alertCenter;
 	}
 
 	public EarthquakeArchive getArchive() {

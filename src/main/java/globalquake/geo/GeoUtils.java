@@ -1,8 +1,8 @@
 package globalquake.geo;
 
 public interface GeoUtils {
-	public static final double EARTH_CIRCUMFERENCE = 40082;
-	public static final double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
+	double EARTH_CIRCUMFERENCE = 40082;
+	double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
 
 	/**
 	 * 
@@ -10,9 +10,9 @@ public interface GeoUtils {
 	 * @param long1 Longitude
 	 * @param distance GCD
 	 * @param angle Heading
-	 * @return
+	 * @return n
 	 */
-	public static double[] moveOnGlobe(double lat1, double long1, double distance, double angle) {
+	static double[] moveOnGlobe(double lat1, double long1, double distance, double angle) {
 		// calculate angles
 		double delta = distance / EARTH_RADIUS;
 		double theta = Math.toRadians(lat1);
@@ -41,19 +41,7 @@ public interface GeoUtils {
 		return new double[] { Math.toDegrees(theta2), Math.toDegrees(phi2) };
 	}
 
-	public static double placeOnSurface(double travelledDistance, double alt1, double alt2) {
-		double l = travelledDistance;
-		double d = alt1 - alt2;
-		double angDiff = (l * 360.0) / EARTH_CIRCUMFERENCE;
-		double s2 = l * l - d * d * Math.cos(Math.toRadians(angDiff));
-		if (s2 < 0) {
-			return 0;
-		}
-		double s = Math.sqrt(s2);
-		return s;
-	}
-
-	public static double greatCircleDistance(double lat1, double lon1, double lat2, double lon2) {
+	static double greatCircleDistance(double lat1, double lon1, double lat2, double lon2) {
 		lat1 = Math.toRadians(lat1);
 		lon1 = Math.toRadians(lon1);
 		lat2 = Math.toRadians(lat2);
@@ -62,7 +50,7 @@ public interface GeoUtils {
 				* Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));
 	}
 
-	public static double calculateAngle(double lat1, double lon1, double lat2, double lon2) {
+	static double calculateAngle(double lat1, double lon1, double lat2, double lon2) {
 		lat1 = Math.toRadians(lat1);
 		lon1 = Math.toRadians(lon1);
 		lat2 = Math.toRadians(lat2);
@@ -81,8 +69,8 @@ public interface GeoUtils {
 		return brng;
 	}
 
-	public static double geologicalDistance(double lat1, double lon1, double alt1, double lat2, double lon2,
-			double alt2) {
+	static double geologicalDistance(double lat1, double lon1, double alt1, double lat2, double lon2,
+                                     double alt2) {
 		alt1 += EARTH_RADIUS;
 		alt2 += EARTH_RADIUS;
 		double x1 = Math.sin(Math.toRadians(lon1)) * alt1 * Math.cos(Math.toRadians(lat1));
@@ -94,20 +82,20 @@ public interface GeoUtils {
 		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	}
 
-	public static double pgaFunctionGen1(double mag, double distKm) {
+	static double pgaFunctionGen1(double mag, double distKm) {
 		distKm = Math.abs(distKm);
 		double a = mag + 1.5;
 		return Math.pow((a + 0.9) / 5.5, 7.0)
 				/ (0.09 + Math.pow((distKm * (14.0 - a * 0.85)) / (Math.pow(a, (5.4) / (1 + a * 0.075))), 2.5));
 	}
 
-	public static double inversePgaFunctionGen1(double mag, double pga) {
+	static double inversePgaFunctionGen1(double mag, double pga) {
 		double a = mag + 1.5;
 		return ((Math.pow((Math.pow((a + 0.9) / 5.5, 7.0)) / pga - 0.09, 1 / 2.5)
 				* (Math.pow(a, (5.4) / (1 + a * 0.075))))) / (14.0 - a * 0.85);
 	}
 
-	public static double gcdToGeo(double greatCircleDistance) {
+	static double gcdToGeo(double greatCircleDistance) {
 		return geologicalDistance(0, 0, 0, 0, (360 * greatCircleDistance) / EARTH_CIRCUMFERENCE, 0);
 	}
 

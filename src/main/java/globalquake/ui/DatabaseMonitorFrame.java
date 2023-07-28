@@ -16,7 +16,6 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.ConcurrentModificationException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -254,33 +253,39 @@ public abstract class DatabaseMonitorFrame extends JFrame {
 
             int nets = 0;
             int stats = 0;
-            int chans = 0;
+            int channels = 0;
             int ava = 0;
             int sel = 0;
 
-			for (Network n : seedlinkManager.getDatabase().getNetworks()) {
-				nets++;
-				for (Station s : n.getStations()) {
-					stats++;
-					boolean av = false;
-					boolean se = false;
-					for (Channel ch : s.getChannels()) {
-						chans++;
-						if (ch.isAvailable() && !av) {
-							ava++;
-							av = true;
-						}
-						if (ch.isSelected() && !se) {
-							sel++;
-							se = true;
+			seedlinkManager.getDatabase().getNetworksReadLock().lock();
+
+			try {
+				for (Network n : seedlinkManager.getDatabase().getNetworks()) {
+					nets++;
+					for (Station s : n.getStations()) {
+						stats++;
+						boolean av = false;
+						boolean se = false;
+						for (Channel ch : s.getChannels()) {
+							channels++;
+							if (ch.isAvailable() && !av) {
+								ava++;
+								av = true;
+							}
+							if (ch.isSelected() && !se) {
+								sel++;
+								se = true;
+							}
 						}
 					}
 				}
+			} finally {
+				seedlinkManager.getDatabase().getNetworksReadLock().unlock();
 			}
 
             lblNetworks.setText("Networks: " + nets);
             lblStations.setText("Stations: " + stats);
-            lblChannels.setText("Channels: " + chans);
+            lblChannels.setText("Channels: " + channels);
             lblAvailable.setText("Available stations: " + ava);
             if (state >= SeedlinkManager.DONE) {
                 lblSelected.setText("Selected stations: " + sel);
@@ -310,20 +315,26 @@ public abstract class DatabaseMonitorFrame extends JFrame {
 
 	private DefaultMutableTreeNode createRoot() {
 		DefaultMutableTreeNode networksNode = new DefaultMutableTreeNode("Networks");
-		for (Network n : seedlinkManager.getDatabase().getNetworks()) {
-			DefaultMutableTreeNode netwNode = new DefaultMutableTreeNode(n.getNetworkCode());
-			for (Station s : n.getStations()) {
-				DefaultMutableTreeNode statNode = new DefaultMutableTreeNode(s.getStationCode());
-				for (Channel ch : s.getChannels()) {
-					DefaultMutableTreeNode chanNode = new DefaultMutableTreeNode(
-							ch.getName() + " " + ch.getLocationCode());
-					statNode.add(chanNode);
+		seedlinkManager.getDatabase().getNetworksReadLock().lock();
+		try {
+			for (Network n : seedlinkManager.getDatabase().getNetworks()) {
+				DefaultMutableTreeNode networkNode = new DefaultMutableTreeNode(n.getNetworkCode());
+				for (Station s : n.getStations()) {
+					DefaultMutableTreeNode statNode = new DefaultMutableTreeNode(s.getStationCode());
+					for (Channel ch : s.getChannels()) {
+						DefaultMutableTreeNode chanNode = new DefaultMutableTreeNode(
+								ch.getName() + " " + ch.getLocationCode());
+						statNode.add(chanNode);
+					}
+					networkNode.add(statNode);
 				}
-				netwNode.add(statNode);
-			}
 
-			networksNode.add(netwNode);
+				networksNode.add(networkNode);
+			}
+		} finally {
+			seedlinkManager.getDatabase().getNetworksReadLock().unlock();
 		}
+
 		return networksNode;
 	}
 

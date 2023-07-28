@@ -15,6 +15,7 @@ public class Scale {
 		pgaScale = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("scales/pgaScale3.png")));
 	}
 
+	@SuppressWarnings("unused")
 	public static Color getColorPGA(double pga) {
 		int i = (int) (Math.log10(pga * 100.0) * 20.0);
 		return new Color(pgaScale.getRGB(0, Math.max(0, Math.min(pgaScale.getHeight() - 1, i))));
@@ -32,7 +33,7 @@ public class Scale {
 
 	public static void main(String[] args) {
 		int sps = 50;
-		int window = sps * 10; // 10 second window
+		int window = sps * 10; // 10-second window
 		double[] data = new double[window];
 
 		double freq = 3;

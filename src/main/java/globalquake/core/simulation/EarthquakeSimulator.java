@@ -5,13 +5,9 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,37 +24,20 @@ import globalquake.core.AlertCenter;
 import globalquake.core.ClusterAnalysis;
 import globalquake.core.Earthquake;
 import globalquake.core.EarthquakeArchive;
-import globalquake.core.EathquakeAnalysis;
+import globalquake.core.EarthquakeAnalysis;
 import globalquake.core.Event;
 import globalquake.core.GlobalStation;
 import globalquake.core.NearbyStationDistanceInfo;
-import globalquake.sounds.Sounds;
 import globalquake.ui.EarthquakeListPanel;
 import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityTable;
 import globalquake.utils.NamedThreadFactory;
 import globalquake.geo.TravelTimeTable;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class EarthquakeSimulator extends JFrame {
 
-	class StationDistanceInfo {
-		public StationDistanceInfo(int id, double dist, double ang) {
-			this.id = id;
-			this.dist = dist;
-			this.ang = ang;
-		}
-
-		int id;
-		double dist;
-		double ang;
-
-		public double getDist() {
-			return dist;
-		}
-	}
-
-	private static final long serialVersionUID = 1L;
-	public Object earthquakesSync;
+	public final Object earthquakesSync = new Object();
 	private ArrayList<SimulatedEarthquake> earthquakes;
 	private ArrayList<SimulatedStation> stations;
 	private FakeGlobalQuake fakeGlobalQuake;
@@ -67,17 +46,20 @@ public class EarthquakeSimulator extends JFrame {
 	protected long lastGC;
 	protected long lastClusters;
 	private ClusterAnalysis clusterAnalysis;
-	private EathquakeAnalysis earthquakeAnalysis;
+	private EarthquakeAnalysis earthquakeAnalysis;
 	public long lastQuakesT;
 	private AlertCenter alertCenter;
 
 	public static final double P_INACCURACY = 1000;
 
+
+	public static final int RAYS = 9;
+
 	/**
 	 * 0.0005 - low 0.001 - medium 0.002 - high 0.004 - savage in reality this is
 	 * very low (maybe about 0.001 depending on time)
 	 */
-	public static final double SHIT_PER_SECOND = 0.000;
+	public static final double SHIT_PER_SECOND = 0.001;
 
 	public EarthquakeSimulator() {
 		init();
@@ -102,18 +84,12 @@ public class EarthquakeSimulator extends JFrame {
 		setResizable(true);
 		setTitle("GlobalQuake Sim");
 
-		new Thread("Simulated UI Thread") {
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				while (true) {
-					try {
-						sleep(50);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					mainPanel.repaint();
-				}
-			};
-		}.start();
+				mainPanel.repaint();
+			}
+		}, 0, 50);
 
 		addKeyListener(new KeyAdapter() {
 			@Override
@@ -144,7 +120,6 @@ public class EarthquakeSimulator extends JFrame {
 						synchronized (simStat.getAnalysis().previousEventsSync) {
 							for (Event ev : simStat.getAnalysis().getPreviousEvents()) {
 								ev.setpWave(ev.getpWave() - skip);
-								// ev.s(ev.getpWave()-2*1000);
 							}
 						}
 					}
@@ -159,68 +134,64 @@ public class EarthquakeSimulator extends JFrame {
 	}
 
 	private void init() {
-		Sounds.firstLevelBeginsWith0(0);
 		createStations();
 		createListOfClosestStations();
-		earthquakesSync = new Object();
-		earthquakes = new ArrayList<SimulatedEarthquake>();
+		earthquakes = new ArrayList<>();
 		fakeGlobalQuake = new FakeGlobalQuake(this);
 		runThreads();
 	}
 
-	public static final int RAYS = 9;
-
 	private void createListOfClosestStations() {
 		for (GlobalStation stat : stations) {
-			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<ArrayList<StationDistanceInfo>>();
+			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<>();
 			for (int i = 0; i < RAYS; i++) {
-				rays.add(new ArrayList<StationDistanceInfo>());
+				rays.add(new ArrayList<>());
 			}
 			int num = 0;
-			outerLoop: for (int i = 0; i < 2; i++) {
-				for (GlobalStation stat2 : stations) {
-					if (!(stat2.getId() == stat.getId())) {
-						double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
-								stat2.getLon());
-						if (dist > (i == 0 ? 1200 : 3600)) {
-							continue;
-						}
-						double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
-								stat2.getLon());
-						int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-						rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						int ray2 = ray + 1;
-						if (ray2 == RAYS) {
-							ray2 = 0;
-						}
-						int ray3 = ray - 1;
-						if (ray3 == -1) {
-							ray3 = RAYS - 1;
-						}
-						rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-						num++;
-					}
-				}
-				if (num > 4) {
-					break outerLoop;
-				}
-			}
-			ArrayList<Integer> closestStations = new ArrayList<Integer>();
-			ArrayList<NearbyStationDistanceInfo> nearbys = new ArrayList<NearbyStationDistanceInfo>();
+            for (int i = 0; i < 2; i++) {
+                for (GlobalStation stat2 : stations) {
+                    if (!(stat2.getId() == stat.getId())) {
+                        double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
+                                stat2.getLon());
+                        if (dist > (i == 0 ? 1200 : 3600)) {
+                            continue;
+                        }
+                        double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
+                                stat2.getLon());
+                        int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
+                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        int ray2 = ray + 1;
+                        if (ray2 == RAYS) {
+                            ray2 = 0;
+                        }
+                        int ray3 = ray - 1;
+                        if (ray3 == -1) {
+                            ray3 = RAYS - 1;
+                        }
+                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        num++;
+                    }
+                }
+                if (num > 4) {
+                    break;
+                }
+            }
+			ArrayList<Integer> closestStations = new ArrayList<>();
+			ArrayList<NearbyStationDistanceInfo> nearby = new ArrayList<>();
 			for (int i = 0; i < RAYS; i++) {
-				if (rays.get(i).size() > 0) {
-					Collections.sort(rays.get(i), Comparator.comparing(StationDistanceInfo::getDist));
+				if (!rays.get(i).isEmpty()) {
+					rays.get(i).sort(Comparator.comparing(StationDistanceInfo::dist));
 					for (int j = 0; j <= Math.min(1, rays.get(i).size() - 1); j++) {
-						if (!closestStations.contains(rays.get(i).get(j).id)) {
-							closestStations.add(rays.get(i).get(j).id);
-							nearbys.add(new NearbyStationDistanceInfo(getStations().get(rays.get(i).get(j).id),
-									rays.get(i).get(j).dist, rays.get(i).get(j).ang));
+						if (!closestStations.contains(rays.get(i).get(j).id())) {
+							closestStations.add(rays.get(i).get(j).id());
+							nearby.add(new NearbyStationDistanceInfo(getStations().get(rays.get(i).get(j).id()),
+									rays.get(i).get(j).dist(), rays.get(i).get(j).ang()));
 						}
 					}
 				}
 			}
-			stat.setNearbyStations(nearbys);
+			stat.setNearbyStations(nearby);
 		}
 	}
 
@@ -230,12 +201,12 @@ public class EarthquakeSimulator extends JFrame {
 		ScheduledExecutorService execClusters = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Simulated Cluster Analysis Thread"));
 		ScheduledExecutorService execGC = Executors
-				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Actuall Garbage Collector Thread"));
+				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Actual Garbage Collector Thread"));
 		ScheduledExecutorService execQuake = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Simulated Hypocenter Location Thread"));
 
 		clusterAnalysis = new ClusterAnalysis(getFakeGlobalQuake());
-		earthquakeAnalysis = new EathquakeAnalysis(getFakeGlobalQuake());
+		earthquakeAnalysis = new EarthquakeAnalysis(getFakeGlobalQuake());
 		alertCenter = new AlertCenter(getFakeGlobalQuake());
 		getFakeGlobalQuake().archive = new EarthquakeArchive(getFakeGlobalQuake());
 
@@ -243,61 +214,49 @@ public class EarthquakeSimulator extends JFrame {
 		getFakeGlobalQuake().clusterAnalysis = clusterAnalysis;
 		getFakeGlobalQuake().alertCenter = alertCenter;
 
-		execSim.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					updateEarthquakes();
-					shit();
-					lastEQSim = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in earthquake simulations");
-					e.printStackTrace();
-				}
-			}
-		}, 0, 500, TimeUnit.MILLISECONDS);
+		execSim.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                updateEarthquakes();
+                shit();
+                lastEQSim = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occured in earthquake simulations");
+                e.printStackTrace();
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
 
-		execGC.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					System.gc();
-					lastGC = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception in garbage collector");
-					e.printStackTrace();
-				}
-			}
-		}, 0, 1, TimeUnit.MINUTES);
-		execClusters.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					clusterAnalysis.run();
-					lastClusters = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured cluster analysis loop");
-					e.printStackTrace();
-				}
-			}
-		}, 0, 500, TimeUnit.MILLISECONDS);
-		execQuake.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					earthquakeAnalysis.run();
-					alertCenter.tick();
-					lastQuakesT = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in hypocenter location loop");
-					e.printStackTrace();
-				}
-			}
-		}, 0, 1, TimeUnit.SECONDS);
+		execGC.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                System.gc();
+                lastGC = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception in garbage collector");
+                e.printStackTrace();
+            }
+        }, 0, 1, TimeUnit.MINUTES);
+		execClusters.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                clusterAnalysis.run();
+                lastClusters = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occured cluster analysis loop");
+                e.printStackTrace();
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
+		execQuake.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                earthquakeAnalysis.run();
+                alertCenter.tick();
+                lastQuakesT = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occured in hypocenter location loop");
+                e.printStackTrace();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
 	}
 
 	protected void shit() {
@@ -309,23 +268,21 @@ public class EarthquakeSimulator extends JFrame {
 					shitEvent.maxRatio = random.nextDouble() * 32.0;
 					station.getAnalysis().getPreviousEvents().add(shitEvent);
 
-					new Thread() {
-						public void run() {
-							try {
-								sleep((long) (random.nextDouble() * 30000));
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							shitEvent.end(System.currentTimeMillis());
-						};
-					}.start();
+					new Thread(() -> {
+                        try {
+                            Thread.sleep((long) (random.nextDouble() * 30000));
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        shitEvent.end(System.currentTimeMillis());
+                    }).start();
 				}
 			}
 		}
 	}
 
-	public Random random = new Random();
+	public final Random random = new Random();
 
 	@SuppressWarnings("unused")
 	protected void updateEarthquakes() {
@@ -344,21 +301,21 @@ public class EarthquakeSimulator extends JFrame {
 					double distGEO = GeoUtils.geologicalDistance(simE.getLat(), simE.getLon(), -simE.getDepth(),
 							simStat.getLat(), simStat.getLon(), simStat.getAlt() / 1000.0);
 					double maxR = IntensityTable.getMaxIntensity(simE.getMag(), distGEO) * simStat.getSensFactor();
-					long actuallPWave = simE.getOrigin() + (long) (1000
+					long actualPWave = simE.getOrigin() + (long) (1000
 							* TravelTimeTable.getPWaveTravelTime(simE.getDepth(), TravelTimeTable.toAngle(distGC)));
-					long actuallSWave = simE.getOrigin() + (long) (1000
+					long actualSWave = simE.getOrigin() + (long) (1000
 							* TravelTimeTable.getSWaveTravelTime(simE.getDepth(), TravelTimeTable.toAngle(distGC)));
 					
-					maxR *= Math.min(1, (System.currentTimeMillis() - actuallPWave) / (Math.pow(4, simE.getMag())));
+					maxR *= Math.min(1, (System.currentTimeMillis() - actualPWave) / (Math.pow(4, simE.getMag())));
 					
 					if (!simE.getArrivedPWave().contains(simStat)) {
 						if (distGC < pDist) {
 							Event event = new Event(simStat.getAnalysis());
-							actuallPWave += ((random.nextDouble() - 0.5) * 2) * P_INACCURACY;
-							event.setpWave(actuallPWave);
+							actualPWave += (long) (((random.nextDouble() - 0.5) * 2) * P_INACCURACY);
+							event.setpWave(actualPWave);
 							event.maxRatio = maxR;
 							simE.getArrivedPWave().add(simStat);
-							boolean b = false;
+							boolean b;
 							if (maxR > 10) {
 								b = true;
 							} else if (maxR < 3.0) {
@@ -378,36 +335,34 @@ public class EarthquakeSimulator extends JFrame {
 							event.maxRatio= maxR;
 						}
 					}
-					if (false && !simE.getArrivedSWave().contains(simStat)) {
-						if (distGC < sDist) {
-							Event event = simE.getEventMap().get(simStat);
-							double _maxR = maxR * (2 - distGC / 400.0);
-							if (event == null) {
-								event = new Event(simStat.getAnalysis());
-								event.setpWave(actuallPWave);
-								event.setsWave(actuallSWave);
-								simE.getEventMap().put(simStat, event);
-								boolean b = false;
-								if (_maxR > 10) {
-									b = true;
-								} else if (_maxR < 3.0) {
-									b = false;
-								} else {
-									b = random.nextDouble() < (_maxR - 3.0) / 7.0;
-								}
-								if (b) {
-									simStat.getAnalysis().getPreviousEvents().add(0, event);
-								}
-							} else {
-								event.setsWave(actuallSWave);
-							}
-							simE.getArrivedSWave().add(simStat);
-							if (_maxR > event.maxRatio) {
-								event.maxRatio = _maxR;
-							}
-						}
-					}
-					if (dDist > distGC) {
+                    if (distGC < sDist) {
+                        Event event = simE.getEventMap().get(simStat);
+                        double _maxR = maxR * (2 - distGC / 400.0);
+                        if (event == null) {
+                            event = new Event(simStat.getAnalysis());
+                            event.setpWave(actualPWave);
+                            event.setsWave(actualSWave);
+                            simE.getEventMap().put(simStat, event);
+                            boolean b;
+                            if (_maxR > 10) {
+                                b = true;
+                            } else if (_maxR < 3.0) {
+                                b = false;
+                            } else {
+                                b = random.nextDouble() < (_maxR - 3.0) / 7.0;
+                            }
+                            if (b) {
+                                simStat.getAnalysis().getPreviousEvents().add(0, event);
+                            }
+                        } else {
+                            event.setsWave(actualSWave);
+                        }
+                        simE.getArrivedSWave().add(simStat);
+                        if (_maxR > event.maxRatio) {
+                            event.maxRatio = _maxR;
+                        }
+                    }
+                    if (dDist > distGC) {
 						Event e = simE.getEventMap().get(simStat);
 						if (e != null && !e.hasEnded()) {
 							e.end(System.currentTimeMillis());
@@ -423,27 +378,32 @@ public class EarthquakeSimulator extends JFrame {
 	}
 
 	private void createStations() {
-		stations = new ArrayList<SimulatedStation>();
+		stations = new ArrayList<>();
 		try {
 			ObjectInputStream in = new ObjectInputStream(
-					new FileInputStream(new File("./GlobalQuake/stationDatabase/stationDatabaseNormal.dat")));
+					new FileInputStream("./GlobalQuake/stationDatabase/stationDatabaseNormal.dat"));
 			StationDatabase database = (StationDatabase) in.readObject();
 			in.close();
 
 			doImportantStuff(database);
 
 			int i = 0;
-			for (Network n : database.getNetworks()) {
-				for (Station s : n.getStations()) {
-					Channel ch = s.getChannels().get(0);
-					if (database.getSelectedStation(s) != null) {
-						stations.add(new SimulatedStation(n.getNetworkCode(), s.getStationCode(), ch.getName(),
-								ch.getLocationCode(), ch.getSeedlinkNetwork(), ch.getSource(), s.getLat(), s.getLon(),
-								s.getAlt(), ch.getSensitivity(), ch.getFrequency(), i, 1)); // 0.1 + random.nextDouble()
-																							// * 1.8 //TODO
-						i++;
+			database.getNetworksReadLock().lock();
+			try {
+				for (Network n : database.getNetworks()) {
+					for (Station s : n.getStations()) {
+						Channel ch = s.getChannels().get(0);
+						if (database.getSelectedStation(s) != null) {
+							stations.add(new SimulatedStation(n.getNetworkCode(), s.getStationCode(), ch.getName(),
+									ch.getLocationCode(), ch.getSeedlinkNetwork(), ch.getSource(), s.getLat(), s.getLon(),
+									s.getAlt(), ch.getSensitivity(), ch.getFrequency(), i, 1)); // 0.1 + random.nextDouble()
+							// * 1.8 //TODO
+							i++;
+						}
 					}
 				}
+			}finally {
+				database.getNetworksReadLock().unlock();
 			}
 			System.out.println("Created " + stations.size() + " fake stations");
 		} catch (Exception e) {
@@ -452,24 +412,23 @@ public class EarthquakeSimulator extends JFrame {
 	}
 
 	private void doImportantStuff(StationDatabase database) {
-		for (Network n : database.getNetworks()) {
-			for (Station s : n.getStations()) {
-				s.setNetwork(n);
-				for (Channel ch : s.getChannels()) {
-					ch.setStation(s);
+		database.getNetworksReadLock().lock();
+		try {
+			for (Network n : database.getNetworks()) {
+				for (Station s : n.getStations()) {
+					s.setNetwork(n);
+					for (Channel ch : s.getChannels()) {
+						ch.setStation(s);
+					}
 				}
 			}
+		} finally {
+			database.getNetworksReadLock().unlock();
 		}
 	}
 
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				new EarthquakeSimulator().setVisible(true);
-			}
-		});
+		EventQueue.invokeLater(() -> new EarthquakeSimulator().setVisible(true));
 	}
 
 	public ArrayList<SimulatedEarthquake> getEarthquakes() {

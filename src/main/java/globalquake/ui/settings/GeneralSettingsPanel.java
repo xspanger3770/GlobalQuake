@@ -29,9 +29,8 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		textFieldLon.setColumns(10);
 	}
 
-	private static final long serialVersionUID = 1L;
-	private JTextField textFieldLat;
-	private JTextField textFieldLon;
+	private final JTextField textFieldLat;
+	private final JTextField textFieldLon;
 
 	@Override
 	public void save() {

@@ -7,6 +7,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkManager;
+import org.tinylog.Logger;
 
 public class NetworkManager {
 
@@ -22,16 +23,13 @@ public class NetworkManager {
 		return globalQuake;
 	}
 
+	@SuppressWarnings("all")
 	public void run() {
 		for (SeedlinkNetwork seedlink : SeedlinkManager.seedlinks) {
-			if (seedlink.selectedStations == 0) {
-				System.out.println("No stations selected at " + seedlink.getHost());
-				continue;
-			}
 			Thread seedlinkThread = new Thread("Network Thread - " + seedlink.getHost()) {
 				@Override
 				public void run() {
-					while (true) {
+					while (seedlink.selectedStations > 0) {
 						SeedlinkReader reader = null;
 						try {
 							seedlink.status = SeedlinkNetwork.CONNECTING;
@@ -57,19 +55,19 @@ public class NetworkManager {
 								try {
 									newPacket(slp.getMiniSeed());
 								} catch (Exception e) {
-									e.printStackTrace();
+									Logger.error(e);
 								}
 							}
 							reader.close();
 						} catch (Exception e) {
 							seedlink.status = SeedlinkNetwork.DISCONNECTED;
 							seedlink.connectedStations = 0;
-							e.printStackTrace();
+							Logger.error(e);
 							if (reader != null) {
 								try {
 									reader.close();
 								} catch (Exception ex) {
-									ex.printStackTrace();
+									Logger.error(ex);
 								}
 							}
 							System.err.println(seedlink.getHost() + " Crashed, Reconnecting after " + RECONNECT_DELAY
@@ -77,7 +75,7 @@ public class NetworkManager {
 							try {
 								sleep(RECONNECT_DELAY * 1000);
 							} catch (InterruptedException e1) {
-								e1.printStackTrace();
+								break;
 							}
 						}
 					}

@@ -22,9 +22,9 @@ public class Sounds {
 
 	public static final int[] countdown_levels = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 120, 180 };
 
-	public static Clip[] levelsFirst = new Clip[10];
-	public static Clip[] levelsNext = new Clip[9];
-	public static Clip[] countdowns = new Clip[countdown_levels.length];
+	public static final Clip[] levelsFirst = new Clip[10];
+	public static final Clip[] levelsNext = new Clip[9];
+	public static final Clip[] countdowns = new Clip[countdown_levels.length];
 
 	public static boolean soundsEnabled = true;
 
@@ -68,10 +68,6 @@ public class Sounds {
 			Clip count = loadSound("sounds/countdown/countdown_" + str + ".wav");
 			countdowns[i] = count;
 		}
-	}
-
-	public static Clip firstLevelBeginsWith0(int i) {
-		return levelsFirst[i];
 	}
 
 	public static Clip nextLevelBeginsWith1(int i) {

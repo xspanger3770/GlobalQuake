@@ -21,9 +21,8 @@ import globalquake.core.analysis.BetterAnalysis;
 
 public class StationMonitorPanel extends JPanel {
 
-	private static final long serialVersionUID = -1l;
 	private BufferedImage image;
-	private AbstractStation station;
+	private final AbstractStation station;
 
 	public StationMonitorPanel(AbstractStation station) {
 		this.station = station;
@@ -44,9 +43,9 @@ public class StationMonitorPanel extends JPanel {
 		g.setColor(Color.white);
 		g.fillRect(0, 0, w, h);
 
-		long upperMinute = (long) (Math.ceil(System.currentTimeMillis() / (1000l * 60l) + 1) * (1000l * 60l));
+		long upperMinute = (long) (Math.ceil(System.currentTimeMillis() / (1000 * 60.0) + 1) * (1000L * 60L));
 		for (int deltaSec = 0; deltaSec <= BetterAnalysis.LOGS_STORE_TIME + 80; deltaSec += 10) {
-			long time = upperMinute - deltaSec * 1000;
+			long time = upperMinute - deltaSec * 1000L;
 			boolean fullMinute = time % 60000 == 0;
 			double x = getX(time);
 			g.setColor(!fullMinute ? Color.lightGray : Color.gray);
@@ -54,9 +53,9 @@ public class StationMonitorPanel extends JPanel {
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
 		}
 
-		ArrayList<Log> logs = null;
+		ArrayList<Log> logs;
 		synchronized (station.getAnalysis().previousLogsSync) {
-			logs = new ArrayList<Log>(station.getAnalysis().getPreviousLogs());
+			logs = new ArrayList<>(station.getAnalysis().getPreviousLogs());
 		}
 
 		if (logs.size() > 1) {

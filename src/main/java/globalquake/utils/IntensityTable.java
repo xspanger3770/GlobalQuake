@@ -4,8 +4,8 @@ public class IntensityTable {
 
 	private static final int ROWS = 100; // UP TO 100,000km
 	private static final int COLS = 120; // M-2 - M10
-	private static double TABLE[][];
-	private static double TABLE2[][];
+	private static final double[][] TABLE;
+	private static final double[][] TABLE2;
 
 	static {
 		TABLE = new double[ROWS][COLS];
@@ -78,13 +78,17 @@ public class IntensityTable {
 	public static double getMaxIntensity(double mag, double dist) {
 		double _row = getRow(dist);
 		double _col = getCol(mag);
+		return extrapolateVal(_row, _col, TABLE);
+	}
+
+	private static double extrapolateVal(double _row, double _col, double[][] table) {
 		int row0 = (int)(Math.max(0, Math.min(ROWS-2, _row)));
 		int col0 = (int)(Math.max(0, Math.min(COLS-2, _col)));
-		double valAB = TABLE[row0][col0] * (1-_col%1.0)+TABLE[row0][col0+1]*(_col%1.0);
-		double valCD = TABLE[row0+1][col0] * (1-_col%1.0)+TABLE[row0+1][col0+1]*(_col%1.0);
+		double valAB = table[row0][col0] * (1-_col%1.0)+ table[row0][col0+1]*(_col%1.0);
+		double valCD = table[row0+1][col0] * (1-_col%1.0)+ table[row0+1][col0+1]*(_col%1.0);
 		return valAB*(1-_row%1.0)+valCD * (_row%1.0);
 	}
-	
+
 	/**
 	 * 
 	 * @param dist 'Geological' distance in KM
@@ -95,11 +99,7 @@ public class IntensityTable {
 	public static double getMagnitude(double dist, double intensity) {
 		double _row = getRow(dist);
 		double _col = getColByIntensity(intensity);
-		int row0 = (int)(Math.max(0, Math.min(ROWS-2, _row)));
-		int col0 = (int)(Math.max(0, Math.min(COLS-2, _col)));
-		double valAB = TABLE2[row0][col0] * (1-_col%1.0)+TABLE2[row0][col0+1]*(_col%1.0);
-		double valCD = TABLE2[row0+1][col0] * (1-_col%1.0)+TABLE2[row0+1][col0+1]*(_col%1.0);
-		return valAB*(1-_row%1.0)+valCD * (_row%1.0);
+		return extrapolateVal(_row, _col, TABLE2);
 	}
 	
 	private static double maxIntensity(double mag, double dist) {
@@ -110,8 +110,4 @@ public class IntensityTable {
 		return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.15+0.07*mag) + 8 * Math.pow(5, mag));
 
 	}
-
-	//return (Math.pow(15, mag * 0.97 + 4.0))
-	/// (5 * Math.pow(1000 + (dist - 1000) / 6.0,2.6+0.01*mag) + 10 * Math.pow(5, mag) + 200);
-
 }

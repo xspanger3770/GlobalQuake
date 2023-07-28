@@ -2,7 +2,8 @@ package com.morce.globalquake.database;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Station implements Serializable {
 
@@ -10,7 +11,7 @@ public class Station implements Serializable {
 	private static final long serialVersionUID = 2312757862612025168L;
 	private final String stationCode;
 	private final String stationSite;
-	private final ArrayList<Channel> channels;
+	private final List<Channel> channels;
 	private final double lat;
 	private final double lon;
 	private final double alt;
@@ -26,7 +27,7 @@ public class Station implements Serializable {
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
-		this.channels = new ArrayList<>();
+		this.channels = new CopyOnWriteArrayList<>();
 	}
 
 	public boolean containsChannel(String channel, String locationCode) {
@@ -50,7 +51,7 @@ public class Station implements Serializable {
 		return lon;
 	}
 
-	public ArrayList<Channel> getChannels() {
+	public List<Channel> getChannels() {
 		return channels;
 	}
 

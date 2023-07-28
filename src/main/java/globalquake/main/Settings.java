@@ -20,7 +20,7 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 	
-	public static boolean reportsEnabled = false; // not available
+	public static final boolean reportsEnabled = false; // not available
 	public static final boolean enableSound = true; // not available ATM
 
 	static {
@@ -56,7 +56,7 @@ public final class Settings {
 		try {
 			properties.store(new FileOutputStream(optionsFile), "magic");
 		} catch (IOException e) {
-			e.printStackTrace();
+			Main.getErrorHandler().handleException(e);
 		}
 	}
 }

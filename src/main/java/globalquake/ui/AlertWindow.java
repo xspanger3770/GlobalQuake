@@ -9,6 +9,8 @@ import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,42 +26,34 @@ import globalquake.geo.TravelTimeTable;
 
 public class AlertWindow extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private JLabel lblMag;
-	private JLabel lblDist;
-	private JPanel panelP;
-	private JLabel lblPSec;
-	private JPanel panelS;
-	private JLabel lblSSec;
-	private JPanel panelIntensity;
-	private JLabel lblShindo;
+	private final JPanel contentPane;
+	private final JLabel lblMag;
+	private final JLabel lblDist;
+	private final JPanel panelP;
+	private final JLabel lblPSec;
+	private final JPanel panelS;
+	private final JLabel lblSSec;
+	private final JPanel panelIntensity;
+	private final JLabel lblShindo;
 	private Earthquake earthquake;
-	private Thread uiThread;
-	private Color chillColor = new Color(51, 204, 255);
-	private Color strongColor = new Color(255, 204, 51);
+	private final Color chillColor = new Color(51, 204, 255);
+	private final Color strongColor = new Color(255, 204, 51);
 
 	public AlertWindow(Earthquake earthquake) {
 		this();
 		this.earthquake = earthquake;
-		uiThread = new Thread() {
+
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				while (true) {
-					try {
-						sleep(200);
-					} catch (InterruptedException e) {
-						break;
-					}
-					updateInfo();
-				}
-			};
-		};
-		uiThread.start();
+				updateInfo();
+			}
+		}, 0, 200);
 
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				uiThread.interrupt();
+				timer.cancel();
 			}
 		});
 	}
@@ -80,7 +74,6 @@ public class AlertWindow extends JFrame {
 
 		if (age > 60 * 30) {
 			this.dispose();
-			uiThread.interrupt();
 			return;
 		}
 
@@ -110,7 +103,7 @@ public class AlertWindow extends JFrame {
 
 		if (!chill) {
 			c = Shindo.getColorShindo(shindo);
-			str = shindo.getName();
+			str = shindo.name();
 		}
 
 		lblShindo.setText(str);

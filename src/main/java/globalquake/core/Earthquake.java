@@ -1,6 +1,7 @@
 package globalquake.core;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import globalquake.regions.Regions;
 
@@ -11,16 +12,14 @@ public class Earthquake {
 	private double depth;
 	private long origin;
 	private long lastUpdate;
-	private Cluster cluster;
-	private boolean finished;
-	private int lastAssigned;
+	private final Cluster cluster;
 	private double mag;
 	private ArrayList<Double> mags;
 	private String region;
 	private double pct;
 	private int reportID;
 
-	public Object magsSync;
+	public final Object magsSync;
 	public int nextReport;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
@@ -29,27 +28,11 @@ public class Earthquake {
 		this.depth = depth;
 		this.origin = origin;
 		this.cluster = cluster;
-		this.mags = new ArrayList<Double>();
+		this.mags = new ArrayList<>();
 		this.magsSync = new Object();
 		this.region = Regions.getRegion(getLat(), getLon());
 		updateRegion();
 		this.lastUpdate = System.currentTimeMillis();
-	}
-
-	public boolean isFinished() {
-		return finished;
-	}
-
-	public void setFinished(boolean finished) {
-		this.finished = finished;
-	}
-
-	public int getLastAssigned() {
-		return lastAssigned;
-	}
-
-	public void setLastAssigned(int lastAssigned) {
-		this.lastAssigned = lastAssigned;
 	}
 
 	public double getMag() {
@@ -92,24 +75,12 @@ public class Earthquake {
 		this.lon = lon;
 	}
 
-	public void setDepth(double depth) {
-		this.depth = depth;
-	}
-
 	public void setOrigin(long origin) {
 		this.origin = origin;
 	}
 
-	public void setLastUpdate(long lastUpdate) {
-		this.lastUpdate = lastUpdate;
-	}
-
 	public long getLastUpdate() {
 		return lastUpdate;
-	}
-
-	public void setCluster(Cluster cluster) {
-		this.cluster = cluster;
 	}
 
 	public void setRegion(String region) {
@@ -155,12 +126,12 @@ public class Earthquake {
 			public void run() {
 				regionUpdateRunning = true;
 				String newRegion = Regions.downloadRegion(getLat(), getLon());
-				if(newRegion != Regions.UNKNOWN_REGION) {
+				if(!Objects.equals(newRegion, Regions.UNKNOWN_REGION)) {
 					region = newRegion;
 				}
 				regionUpdateRunning = false;
-			};
-		}.start();
+			}
+        }.start();
 	}
 
 	public Cluster getCluster() {

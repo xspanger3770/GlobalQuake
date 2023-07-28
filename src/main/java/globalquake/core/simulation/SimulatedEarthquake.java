@@ -9,16 +9,16 @@ import globalquake.core.Event;
 
 public class SimulatedEarthquake extends Earthquake {
 
-	private double mag;
-	private ArrayList<SimulatedStation> arrivedPWave;
-	private ArrayList<SimulatedStation> arrivedSWave;
-	private HashMap<SimulatedStation, Event> eventMap;
+	private final double mag;
+	private final ArrayList<SimulatedStation> arrivedPWave;
+	private final ArrayList<SimulatedStation> arrivedSWave;
+	private final HashMap<SimulatedStation, Event> eventMap;
 
 	public SimulatedEarthquake(Cluster cluster, double lat, double lon, double depth, long origin, double mag) {
 		super(cluster, lat, lon, depth, origin);
 		this.mag = mag;
-		this.arrivedPWave = new ArrayList<SimulatedStation>();
-		this.arrivedSWave = new ArrayList<SimulatedStation>();
+		this.arrivedPWave = new ArrayList<>();
+		this.arrivedSWave = new ArrayList<>();
 		this.eventMap = new HashMap<>();
 	}
 

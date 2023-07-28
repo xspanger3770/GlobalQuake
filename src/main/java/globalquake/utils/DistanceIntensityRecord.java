@@ -1,9 +1,9 @@
 package globalquake.utils;
 
 public class DistanceIntensityRecord{
-	double mag;
-	double dist;
-	double intensity;
+	final double mag;
+	final double dist;
+	final double intensity;
 	
 	public DistanceIntensityRecord(double mag, double dist, double intensity) {
 		this.mag=mag;

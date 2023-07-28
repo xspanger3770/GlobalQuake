@@ -127,7 +127,7 @@ public class SeedlinkManager implements IStationManager {
 		}
 	}
 
-	private void finish() throws IOException {
+	private void finish() {
 		for (SeedlinkNetwork seed : seedlinks) {
 			seed.availableStations = 0;
 			seed.selectedStations = 0;
@@ -143,24 +143,29 @@ public class SeedlinkManager implements IStationManager {
 		int ava = 0;
 		int sel = 0;
 
-		for (Network n : getDatabase().getNetworks()) {
-			nets++;
-			for (Station s : n.getStations()) {
-				stats++;
-				for (Channel ch : s.getChannels()) {
-					chans++;
-					if (ch.isAvailable()) {
-						ava++;
+		database.getNetworksWriteLock().lock();
+		try {
+			for (Network n : getDatabase().getNetworks()) {
+				nets++;
+				for (Station s : n.getStations()) {
+					stats++;
+					for (Channel ch : s.getChannels()) {
+						chans++;
+						if (ch.isAvailable()) {
+							ava++;
+						}
+						if (ch.isSelected()) {
+							sel++;
+						}
 					}
-					if (ch.isSelected()) {
-						sel++;
-					}
+					s.getChannels().sort(Comparator.comparing(Channel::getName));
 				}
-				s.getChannels().sort(Comparator.comparing(Channel::getName));
+				n.getStations().sort(Comparator.comparing(Station::getStationCode));
 			}
-			n.getStations().sort(Comparator.comparing(Station::getStationCode));
+			getDatabase().getNetworks().sort(Comparator.comparing(Network::getNetworkCode));
+		} finally {
+			database.getNetworksWriteLock().unlock();
 		}
-		getDatabase().getNetworks().sort(Comparator.comparing(Network::getNetworkCode));
 
 		buildDatabase();
 
@@ -188,32 +193,37 @@ public class SeedlinkManager implements IStationManager {
 		System.out.println("Saving stations database to " + file.getAbsolutePath());
 		out.writeObject(database);
 		out.close();
-		if(!(file.delete() && _file.renameTo(file) && _file.delete())) {
+		if(!((!file.exists() || file.delete()) && _file.renameTo(file))) {
 			throw new IOException("Error occurred while saving database!");
 		}
 		System.out.println("Save successful.");
 	}
 
 	private void buildDatabase() {
-		for (Network n : getDatabase().getNetworks()) {
-			for (Station s : n.getStations()) {
-				s.setNetwork(n);
-				int i = 0;
-				boolean b = false;
-				for (Channel ch : s.getChannels()) {
-					ch.setStation(s);
-					if (ch.isSelected()) {
-						if (!b) {
-							s.setSelectedChannel(i);
-							b = true;
+		database.getNetworksReadLock().lock();
+		try {
+			for (Network n : getDatabase().getNetworks()) {
+				for (Station s : n.getStations()) {
+					s.setNetwork(n);
+					int i = 0;
+					boolean b = false;
+					for (Channel ch : s.getChannels()) {
+						ch.setStation(s);
+						if (ch.isSelected()) {
+							if (!b) {
+								s.setSelectedChannel(i);
+								b = true;
+							}
 						}
+						i++;
 					}
-					i++;
-				}
-				if (!b) {
-					s.setSelectedChannel(-1);
+					if (!b) {
+						s.setSelectedChannel(-1);
+					}
 				}
 			}
+		} finally {
+			database.getNetworksReadLock().unlock();
 		}
 	}
 
@@ -238,12 +248,17 @@ public class SeedlinkManager implements IStationManager {
 		state = CHECKING_AVAILABILITY;
 		updating_progress = 1;
 		updating_string = "Done!";
-		for (Network n : getDatabase().getNetworks()) {
-			for (Station s : n.getStations()) {
-				for (Channel ch : s.getChannels()) {
-					ch.setSeedlinkNetwork((byte) -1);
+		database.getNetworksReadLock().lock();
+		try {
+			for (Network n : getDatabase().getNetworks()) {
+				for (Station s : n.getStations()) {
+					for (Channel ch : s.getChannels()) {
+						ch.setSeedlinkNetwork((byte) -1);
+					}
 				}
 			}
+		} finally {
+			database.getNetworksReadLock().unlock();
 		}
 		int i = 0;
 		for (SeedlinkNetwork seed : seedlinks) {
@@ -319,7 +334,7 @@ public class SeedlinkManager implements IStationManager {
 	}
 
 	public boolean needsUpdate() {
-		return database == null || database.needsUpdate();
+		return database == null || database.needsUpdate(false);
 	}
 
 	public void updateDatabase() throws IOException{
@@ -509,14 +524,20 @@ public class SeedlinkManager implements IStationManager {
 	}
 
 	private Network getOrCreateNetwork(StationDatabase database2, String networkCode, String networkDescription) {
-		for (Network net : database2.getNetworks()) {
-			if (net.getNetworkCode().equals(networkCode)) {
-				return net;
+		database2.getNetworksWriteLock().lock();
+		try {
+			for (Network net : database2.getNetworks()) {
+				if (net.getNetworkCode().equals(networkCode)) {
+					return net;
+				}
 			}
+
+			Network net = new Network(networkCode, networkDescription);
+			database2.getNetworks().add(net);
+			return net;
+		}finally {
+			database2.getNetworksWriteLock().unlock();
 		}
-		Network net = new Network(networkCode, networkDescription);
-		database2.getNetworks().add(net);
-		return net;
 	}
 
 	public static String obtainElement(Node item, String name, String defaultValue) {
@@ -547,7 +568,6 @@ public class SeedlinkManager implements IStationManager {
 		return new File(STATIONS_FILE, "_stationDatabase.dat");
 	}
 
-	@Override
 	public void confirmDialog(String title, String message, int optionType, int messageType, String... options) {
 		System.err.println(message);
 	}

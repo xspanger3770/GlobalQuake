@@ -4,7 +4,6 @@ public class SoundsInfo {
 
 	public boolean firstSound;
 	public int maxLevel;
-	public boolean newEarthquake;
 	public double maxPGA;
 	public double maxPGAHome;
 	public boolean warningPlayed;

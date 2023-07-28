@@ -26,12 +26,6 @@ public class Main {
 
 	private static void startDatabaseManager() throws IOException {
 		seedlinkManager = new SeedlinkManager() {
-			@Override
-			public void confirmDialog(String title, String message, int optionType, int messageType,
-					String... options) {
-				super.confirmDialog(title, message, optionType, messageType, options);
-				databaseMonitorFrame.confirmDialog(title, message, optionType, messageType, options);
-			}
 		};
 
 		databaseMonitorFrame = new DatabaseMonitorFrame(seedlinkManager){
@@ -72,10 +66,6 @@ public class Main {
 
 	public static void launchGlobalQuake() {
 		globalQuake = new GlobalQuake(seedlinkManager);
-	}
-
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
 	}
 
 	public static ApplicationErrorHandler getErrorHandler() {

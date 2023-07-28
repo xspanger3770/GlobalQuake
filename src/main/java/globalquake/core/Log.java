@@ -1,11 +1,13 @@
 package globalquake.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import globalquake.core.analysis.AnalysisStatus;
 
 public class Log implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 5578601429266635895L;
 	
 	public static final int NOTHING=0;
@@ -14,16 +16,16 @@ public class Log implements Serializable {
 	public static final int S_WAVES=3;
 	public static final int DECAY=4;
 	
-	private long time;
-	private int rawValue;
-	private float filteredV;
-	private float shortAverage;
-	private float mediumAverage;
-	private float longAverage;
-	private AnalysisStatus status;
+	private final long time;
+	private final int rawValue;
+	private final float filteredV;
+	private final float shortAverage;
+	private final float mediumAverage;
+	private final float longAverage;
+	private final AnalysisStatus status;
 	private byte phase;
-	private float thirdAverage;
-	private float specialAverage;
+	private final float thirdAverage;
+	private final float specialAverage;
 
 	public Log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
 			float thirdAverage, float specialAverage, AnalysisStatus status) {
@@ -45,10 +47,6 @@ public class Log implements Serializable {
 
 	public int getRawValue() {
 		return rawValue;
-	}
-
-	public int getValue() {
-		return getRawValue();
 	}
 
 	public float getFilteredV() {

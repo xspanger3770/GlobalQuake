@@ -27,9 +27,8 @@ import globalquake.main.Main;
 
 public class StationSelectPanel extends GlobePanel {
 
-	private static final long serialVersionUID = 1L;
 	private final StationSelect stationSelect;
-	public static DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
+	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static final SimpleDateFormat formatSimple = new SimpleDateFormat("yyyy/MM/dd");
 
 	public StationSelectPanel(StationSelect stationSelect) {
@@ -54,7 +53,7 @@ public class StationSelectPanel extends GlobePanel {
 							clickedStations.add(s);
 						}
 					}
-					if (clickedStations.size() > 0) {
+					if (!clickedStations.isEmpty()) {
 						editStations(clickedStations);
 						StationSelectPanel.super.repaint();
 					}
@@ -95,15 +94,11 @@ public class StationSelectPanel extends GlobePanel {
 		if (station == null) {
 			System.err.println("Fatal Error: null");
         } else {
-			String[] allChannels = new String[station.getChannels().size()];
-			int j = 0;
 			int ava = 0;
 			for (Channel ch : station.getChannels()) {
-				allChannels[j] = ch.getName() + " " + ch.getLocationCode();
 				if (ch.isAvailable()) {
 					ava++;
 				}
-				j++;
 			}
 
 			int k = 0;
@@ -195,7 +190,7 @@ public class StationSelectPanel extends GlobePanel {
 
 				g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y - r * 0.5 - 3 - 12));
 
-				int __y = +26;
+				int __y = 26;
 				int i = 0;
 				for (Channel ch : s.getChannels()) {
 					g.setColor(!ch.isAvailable() ? Color.LIGHT_GRAY
@@ -227,7 +222,4 @@ public class StationSelectPanel extends GlobePanel {
 
 	}
 
-	public StationSelect getStationSelect() {
-		return stationSelect;
-	}
 }

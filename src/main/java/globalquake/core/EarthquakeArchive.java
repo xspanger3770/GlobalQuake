@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -14,14 +13,15 @@ import globalquake.core.report.EarthquakeReporter;
 import globalquake.core.simulation.FakeGlobalQuake;
 import globalquake.main.Main;
 import globalquake.main.Settings;
+import org.tinylog.Logger;
 
 public class EarthquakeArchive {
 
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
 
-	public Object archivedQuakesSync;
+	public final Object archivedQuakesSync;
 	private ArrayList<ArchivedQuake> archivedQuakes;
 
 	public EarthquakeArchive(GlobalQuake globalQuake) {
@@ -33,7 +33,7 @@ public class EarthquakeArchive {
 	@SuppressWarnings("unchecked")
 	private void loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
-			archivedQuakes = new ArrayList<ArchivedQuake>();
+			archivedQuakes = new ArrayList<>();
 			System.out.println("Created new archive");
 		} else {
 			try {
@@ -42,16 +42,15 @@ public class EarthquakeArchive {
 				oin.close();
 				System.out.println("Loaded " + archivedQuakes.size() + " quakes from archive.");
 			} catch (Exception e) {
-				System.err.println("Failed to load archive");
-				e.printStackTrace();
-				archivedQuakes = new ArrayList<ArchivedQuake>();
+				Logger.error(e);
+				archivedQuakes = new ArrayList<>();
 			}
 		}
 		saveArchive();
 		if (getGlobalQuake() instanceof FakeGlobalQuake) {
 			ArchivedQuake q;
 			// will not be saved
-			archivedQuakes.add(q = new ArchivedQuake(69.2, 44.24, 10, 5.0, System.currentTimeMillis(), "debug-quake"));
+			archivedQuakes.add(q = new ArchivedQuake(69.2, 44.24, 10, 5.0, System.currentTimeMillis()));
 			for (double ang = 0; ang < 360; ang += 60) {
 				q.getArchivedEvents().add(new ArchivedEvent(50 + Math.sin(Math.toRadians(ang)),
 						17 + Math.cos(Math.toRadians(ang)), 0, 0, ang % 120 == 0));
@@ -67,12 +66,13 @@ public class EarthquakeArchive {
 					System.out.println("Saving " + archivedQuakes.size() + " quakes to " + ARCHIVE_FILE.getName());
 					out.writeObject(archivedQuakes);
 					out.close();
-					ARCHIVE_FILE.delete();
-					TEMP_ARCHIVE_FILE.renameTo(ARCHIVE_FILE);
-					TEMP_ARCHIVE_FILE.delete();
+					boolean res = (!ARCHIVE_FILE.exists() || ARCHIVE_FILE.delete()) && TEMP_ARCHIVE_FILE.renameTo(ARCHIVE_FILE);
+					if(!res){
+						Logger.error("Unable to save archive!");
+					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 	}
@@ -91,15 +91,15 @@ public class EarthquakeArchive {
 				ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 				synchronized (archivedQuakesSync) {
 					archivedQuakes.add(archivedQuake);
-					Collections.sort(archivedQuakes, Comparator.comparing(ArchivedQuake::getOrigin));
+					archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 				}
 				saveArchive();
 				if(Settings.reportsEnabled) {
 					reportQuake(earthquake);
 				}
 
-			};
-		}.start();
+			}
+        }.start();
 	}
 
 	private void reportQuake(Earthquake earthquake) {
@@ -109,7 +109,7 @@ public class EarthquakeArchive {
 				try {
 					EarthquakeReporter.report(earthquake);
 				} catch (Exception e) {
-					e.printStackTrace();
+					Logger.error(e);
 				}
 			}
 		}.start();
@@ -119,7 +119,7 @@ public class EarthquakeArchive {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		synchronized (archivedQuakesSync) {
 			archivedQuakes.add(archivedQuake);
-			Collections.sort(archivedQuakes, Comparator.comparing(ArchivedQuake::getOrigin));
+			archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 		}
 	}
 
@@ -130,7 +130,7 @@ public class EarthquakeArchive {
 			while (it.hasNext()) {
 				ArchivedQuake archivedQuake = it.next();
 				long age = System.currentTimeMillis() - archivedQuake.getOrigin();
-				if (age > 1000l * 60 * 60 * 24 * 3l) {
+				if (age > 1000L * 60 * 60 * 24 * 3L) {
 					if (!save) {
 						save = true;
 					}
@@ -142,8 +142,8 @@ public class EarthquakeArchive {
 				new Thread("Archive Save Thread") {
 					public void run() {
 						saveArchive();
-					};
-				}.start();
+					}
+                }.start();
 			}
 		}
 	}

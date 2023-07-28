@@ -14,16 +14,16 @@ import globalquake.geo.TravelTimeTable;
 
 public class ClusterAnalysis {
 
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 
-	private ArrayList<Cluster> clusters = new ArrayList<Cluster>();
-	public Object clustersSync = new Object();
+	private final ArrayList<Cluster> clusters;
+	public final Object clustersSync;
 
 	private int nextClusterId;
 
 	public ClusterAnalysis(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		clusters = new ArrayList<Cluster>();
+		clusters = new ArrayList<>();
 		clustersSync = new Object();
 		this.nextClusterId = 0;
 	}
@@ -36,7 +36,6 @@ public class ClusterAnalysis {
 		if (getGlobalQuake().getEarthquakeAnalysis() == null) {
 			return;
 		}
-		// assignEventsToExistingEarthquakeClusters();
 		expandExistingClusters();
 		createNewClusters();
 		updateClusters();
@@ -45,17 +44,15 @@ public class ClusterAnalysis {
 	@SuppressWarnings({ "unchecked", "unused" })
 	private void assignEventsToExistingEarthquakeClusters() {
 		for (AbstractStation station : getGlobalQuake().getStations()) {
-			ArrayList<Event> events = null;
+			ArrayList<Event> events;
 
 			synchronized (station.getAnalysis().previousEventsSync) {
 				events = station.getAnalysis().getPreviousEvents();
 			}
 			for (Event event : events) {
-				if (event.isBroken() || event.getpWave() <= 0 || event.assignedCluster >= 0) {
-					continue;
-				} else {
+                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
 					HashMap<Earthquake, Event> map = new HashMap<>();
-					ArrayList<Earthquake> quakes = null;
+					ArrayList<Earthquake> quakes;
 
 					synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 						quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
@@ -69,9 +66,9 @@ public class ClusterAnalysis {
 								event.getLatFromStation(), event.getLonFromStation());
 						long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(earthquake.getDepth(),
 								TravelTimeTable.toAngle(distGC)) * 1000);
-						long actuallTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
+						long actualTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
 						boolean abandon = event.getpWave() < earthquake.getOrigin()
-								|| Math.abs(expectedTravel - actuallTravel) > 2500 + distGC * 2.0;
+								|| Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
 						if (!abandon) {
 							map.put(earthquake, event);
 							break;
@@ -80,26 +77,24 @@ public class ClusterAnalysis {
 					}
 
 					for (Entry<Earthquake, Event> entry : map.entrySet()) {
-						Cluster cluster = ((Earthquake) entry.getKey()).getCluster();
-						Event event2 = (Event) entry.getValue();
+						Cluster cluster = entry.getKey().getCluster();
+						Event event2 = entry.getValue();
 						if (!cluster.containsStation(event2.getAnalysis().getStation())) {
-							ArrayList<Event> list = new ArrayList<Event>();
+							ArrayList<Event> list = new ArrayList<>();
 							list.add(event2);
 							append(cluster, list);
 						}
 					}
 				}
-			}
+            }
 		}
 
 	}
 
 	private void expandExistingClusters() {
-		Iterator<Cluster> it = clusters.iterator();
-		while (it.hasNext()) {
-			Cluster c = it.next();
-			expandCluster(c);
-		}
+        for (Cluster c : clusters) {
+            expandCluster(c);
+        }
 	}
 
 	private void expandCluster(Cluster c) {
@@ -107,19 +102,17 @@ public class ClusterAnalysis {
 		// no need to sync here
 		ArrayList<Event> list = (ArrayList<Event>) c.getAssignedEvents().clone();
 		while (!list.isEmpty()) {
-			ArrayList<Event> newEvents = new ArrayList<Event>();
+			ArrayList<Event> newEvents = new ArrayList<>();
 			mainLoop: for (Event e : list) {
 				for (NearbyStationDistanceInfo info : e.getAnalysis().getStation().getNearbyStations()) {
-					if (!c.containsStation(info.getStation()) && !_contains(newEvents, info.getStation())) {
-						double dist = info.getDist();
-						ArrayList<Event> events = null;
-						synchronized (info.getStation().getAnalysis().previousEventsSync) {// this has to be here
-							events = info.getStation().getAnalysis().getPreviousEvents();
+					if (!c.containsStation(info.station()) && !_contains(newEvents, info.station())) {
+						double dist = info.dist();
+						ArrayList<Event> events;
+						synchronized (info.station().getAnalysis().previousEventsSync) {// this has to be here
+							events = info.station().getAnalysis().getPreviousEvents();
 						}
 						for (Event ev : events) {
-							if (ev.isBroken() || ev.getpWave() <= 0 || ev.assignedCluster >= 0) {
-								continue;
-							} else {
+                            if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster < 0) {
 								long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
 										- 2500;
 								long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
@@ -130,7 +123,7 @@ public class ClusterAnalysis {
 									continue mainLoop;
 								}
 							}
-						}
+                        }
 					}
 				}
 			}
@@ -166,22 +159,18 @@ public class ClusterAnalysis {
 		for (AbstractStation station : getGlobalQuake().getStations()) {
 			synchronized (station.getAnalysis().previousEventsSync) {
 				for (Event event : station.getAnalysis().getPreviousEvents()) {
-					if (event.isBroken() || event.getpWave() <= 0 || event.assignedCluster >= 0) {
-						continue;
-					} else {
+                    if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
 						// so we have eligible event
-						ArrayList<Event> validEvents = new ArrayList<Event>();
+						ArrayList<Event> validEvents = new ArrayList<>();
 						closestLoop: for (NearbyStationDistanceInfo info : station.getNearbyStations()) {
-							AbstractStation close = info.getStation();
-							double dist = info.getDist();
-							ArrayList<Event> evList2 = null;
+							AbstractStation close = info.station();
+							double dist = info.dist();
+							ArrayList<Event> evList2;
 							synchronized (close.getAnalysis().previousEventsSync) {// this should not cause issues, even
 								evList2 = close.getAnalysis().getPreviousEvents(); // though it is a double sync
 							}
 							for (Event e : evList2) {
-								if (e.isBroken() || e.getpWave() <= 0 || e.assignedCluster >= 0) {
-									continue;
-								} else {
+                                if (!e.isBroken() && e.getpWave() > 0 && e.assignedCluster < 0) {
 									long earliestPossibleTimeOfThatEvent = event.getpWave()
 											- (long) ((dist * 1000.0) / 5.0) - 2500;
 									long latestPossibleTimeOfThatEvent = event.getpWave()
@@ -192,7 +181,7 @@ public class ClusterAnalysis {
 										continue closestLoop;
 									}
 								}
-							}
+                            }
 						}
 						// so no we have a list of all nearby events that could be earthquake
 						if (validEvents.size() >= 3) {
@@ -200,7 +189,7 @@ public class ClusterAnalysis {
 							expandCluster(createCluster(validEvents));
 						}
 					}
-				}
+                }
 			}
 		}
 
@@ -232,11 +221,6 @@ public class ClusterAnalysis {
 
 	private void sounds(Cluster c) {
 		SoundsInfo info = c.soundsInfo;
-
-		/*
-		 * if (info.newEarthquake) {//PLAYED RIGHT IN EARTHQUAKE_ANALYSIS
-		 * Sounds.playSound(Sounds.eew); info.newEarthquake = false; }
-		 */
 
 		if (!info.firstSound) {
 			Sounds.playSound(Sounds.weak);
@@ -284,17 +268,17 @@ public class ClusterAnalysis {
 			if (info.maxPGAHome < pgaHome) {
 				Level shindoLast = Shindo.getLevel(info.maxPGAHome);
 				Level shindoNow = Shindo.getLevel(pgaHome);
-				if (shindoLast != shindoNow && shindoNow.getIndex() > 0) {
-					Sounds.playSound(Sounds.nextLevelBeginsWith1(shindoNow.getIndex() - 1));
+				if (shindoLast != shindoNow && (shindoNow != null ? shindoNow.index() : 0) > 0) {
+					Sounds.playSound(Sounds.nextLevelBeginsWith1(shindoNow.index() - 1));
 				}
 
-				if (pgaHome >= Shindo.ZERO.getPga() && info.maxPGAHome < Shindo.ZERO.getPga()) {
+				if (pgaHome >= Shindo.ZERO.pga() && info.maxPGAHome < Shindo.ZERO.pga()) {
 					Sounds.playSound(Sounds.felt);
 				}
 				info.maxPGAHome = pgaHome;
 			}
 
-			if (info.maxPGAHome >= Shindo.ZERO.getPga()) {
+			if (info.maxPGAHome >= Shindo.ZERO.pga()) {
 				double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
 
 				double sTravel = (long) (TravelTimeTable.getSWaveTravelTime(quake.getDepth(),

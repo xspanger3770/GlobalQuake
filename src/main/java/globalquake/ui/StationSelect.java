@@ -14,8 +14,7 @@ import globalquake.database.SeedlinkManager;
 
 public class StationSelect extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private SeedlinkManager seedlinkManager;
+	private final SeedlinkManager seedlinkManager;
 	private ArrayList<Station> displayedStations = new ArrayList<>();
 
 	public StationSelect(SeedlinkManager seedlinkManager) {
@@ -33,9 +32,10 @@ public class StationSelect extends JFrame {
 	}
 
 	private void loadDisplayed() {
-		new Thread() {
-			public void run() {
-				ArrayList<Station> list = new ArrayList<Station>();
+		new Thread(() -> {
+            ArrayList<Station> list = new ArrayList<>();
+			seedlinkManager.getDatabase().getNetworksReadLock().lock();
+			try {
 				for (Network n : seedlinkManager.getDatabase().getNetworks()) {
 					for (Station s : n.getStations()) {
 						for (Channel ch : s.getChannels()) {
@@ -47,10 +47,12 @@ public class StationSelect extends JFrame {
 
 					}
 				}
-				System.out.println(list.size() + " Displayed Stations.");
-				displayedStations = list;
-			};
-		}.start();
+			}finally {
+				seedlinkManager.getDatabase().getNetworksReadLock().unlock();
+			}
+            System.out.println(list.size() + " Displayed Stations.");
+            displayedStations = list;
+        }).start();
 	}
 
 	public SeedlinkManager getStationManager() {

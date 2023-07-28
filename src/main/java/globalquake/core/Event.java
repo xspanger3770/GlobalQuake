@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +10,7 @@ import globalquake.core.report.StationReport;
 
 public class Event implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 2303478912602245970L;
 	public static final double[] RECALCULATE_P_WAVE_TRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
@@ -25,7 +27,7 @@ public class Event implements Serializable {
 	public transient int nextPWaveCalc;
 
 	private ArrayList<Log> logs;
-	public transient Object logsSync;
+	public final transient Object logsSync;
 
 	public double maxRatio;
 
@@ -33,7 +35,7 @@ public class Event implements Serializable {
 
 	public int assignedCluster;
 	private int updatesCount;
-	private transient Analysis analysis;
+	private final transient Analysis analysis;
 	public StationReport report;
 
 	public Event(Analysis analysis, long start, ArrayList<Log> logs) {
@@ -45,7 +47,6 @@ public class Event implements Serializable {
 
 	// used in emulator
 	public Event(Analysis analysis) {
-		this.analysis = analysis;
 		this.logsSync = new Object();
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
@@ -100,19 +101,6 @@ public class Event implements Serializable {
 		return end;
 	}
 
-	/**
-	 * 
-	 * @return time in seconds between event start and event end - including the
-	 *         extra time needed for event end
-	 */
-	public double getFullDuration() {
-		if (!hasEnded()) {
-			throw new IllegalStateException(
-					"Cannot determine full duration of event because it hasn't ended yet or is corrupted");
-		}
-		return (getEnd() - getStart()) / 1000.0;
-	}
-
 	public long getFirstLogTime() {
 		return firstLogTime;
 	}
@@ -129,10 +117,6 @@ public class Event implements Serializable {
 		return lastLogTime;
 	}
 
-	public ArrayList<Log> getLogs() {
-		return logs;
-	}
-
 	public double getMaxRatio() {
 		return maxRatio;
 	}
@@ -141,6 +125,7 @@ public class Event implements Serializable {
 		return analysis;
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean isBroken() {
 		return broken;
 	}
@@ -182,7 +167,7 @@ public class Event implements Serializable {
 	private void findPWaveMethod1() {
 
 		// 0 - when first detected
-		// 1 - first upgrade etc..
+		// 1 - first upgrade etc...
 		int strenghtLevel = nextPWaveCalc;
 		Log logAtStart = getClosestLog(getStart() - 1, true);
 		if (logAtStart == null) {
@@ -190,8 +175,7 @@ public class Event implements Serializable {
 		}
 		long lookBack = (getStart() - (long) ((60.0 / strenghtLevel) * 1000));
 
-		ArrayList<Double> slows = new ArrayList<Double>();
-		ArrayList<Double> ratios = new ArrayList<Double>();
+		ArrayList<Double> slows = new ArrayList<>();
 
 		double maxSpecial = -Double.MAX_VALUE;
 		double minSpecial = Double.MAX_VALUE;
@@ -200,7 +184,6 @@ public class Event implements Serializable {
 			long time = l.getTime();
 			if (time >= lookBack && time <= getStart()) {
 				slows.add(l.getMediumRatio());
-				ratios.add(l.getRatio());
 				double spec = l.getSpecialRatio();
 				if (spec > 0) {
 					if (spec > maxSpecial) {
@@ -216,7 +199,6 @@ public class Event implements Serializable {
 		maxSpecial = Math.max(minSpecial * 5.0, maxSpecial);
 
 		Collections.sort(slows);
-		Collections.sort(ratios);
 
 		// double slowRatioAtTheBeginning = logAtStart.getMediumRatio();
 		double slow15Pct = slows.get((int) ((slows.size() - 1) * 0.175));
@@ -233,17 +215,15 @@ public class Event implements Serializable {
 		long pWave = -1;
 		for (Log l : logs) {
 			long time = l.getTime();
-			boolean slowRatioOK = true;// l.getMediumRatio() <= slowTreshold;
+			// l.getMediumRatio() <= slowTreshold;
 			boolean ratioOK = l.getRatio() <= slow15Pct * (slowTresholdMultiplier * 1.25);
 			boolean specialOK = l.getSpecialRatio() <= specialTreshold;
 			if (time >= lookBack && time <= getStart()) {
-				if (pWave == -1) {
-					if (slowRatioOK && ratioOK && specialOK) {
-						pWave = time;
-						break;
-					}
-				}
-			}
+                if (ratioOK && specialOK) {
+                    pWave = time;
+                    break;
+                }
+            }
 		}
 
 		setpWave(pWave);
@@ -265,9 +245,15 @@ public class Event implements Serializable {
 			return;
 		}
 		long end = !hasEnded() ? getLastLogTime() : getEnd();
-		// from oldest log to newest loglogs
+		// from oldest log to newest logs
 		byte phase = Log.P_WAVES;
-		double specialRatioStart = getClosestLog(pWave, false).getSpecialRatio();
+		var log = getClosestLog(pWave, false);
+
+		if(log == null){
+			return;
+		}
+
+		double specialRatioStart = log.getSpecialRatio();
 		double specialRatioW = 0;
 		long specialRatioWT = 0;
 		double specialRatioMax0 = 0;

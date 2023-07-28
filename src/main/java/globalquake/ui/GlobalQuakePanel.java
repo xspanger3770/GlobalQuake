@@ -47,7 +47,6 @@ import globalquake.geo.TravelTimeTable;
 
 public class GlobalQuakePanel extends GlobePanel {
 
-	private static final long serialVersionUID = 1L;
 	private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 	private static final DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);
 	public static final DecimalFormat format = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
@@ -60,7 +59,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 	private static final DecimalFormat fxd = new DecimalFormat("#,###,###,##0", dfs);
 
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	private boolean showSCircles;
 	private boolean showClosest;
 	private boolean showQuakes = true;
@@ -83,7 +82,7 @@ public class GlobalQuakePanel extends GlobePanel {
 							clickedStations.add(s);
 						}
 					}
-					if (clickedStations.size() > 0) {
+					if (!clickedStations.isEmpty()) {
 						stationMonitor(clickedStations);
 					}
 				}
@@ -114,8 +113,8 @@ public class GlobalQuakePanel extends GlobePanel {
 				if (e.getKeyCode() == KeyEvent.VK_C) {
 					showClosest = false;
 				}
-			};
-		});
+			}
+        });
 	}
 
 	private void stationMonitor(ArrayList<AbstractStation> clickedStations) {
@@ -149,16 +148,9 @@ public class GlobalQuakePanel extends GlobePanel {
 
 		if (station == null) {
 			System.err.println("Fatal Error: null");
-			return;
-		} else {
+        } else {
 			final AbstractStation _station = station;
-			EventQueue.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-					new StationMonitor(_station).setVisible(true);
-				}
-			});
+			EventQueue.invokeLater(() -> new StationMonitor(_station).setVisible(true));
 		}
 
 	}
@@ -210,7 +202,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 				if (showClosest) {
 					for (NearbyStationDistanceInfo info : s.getNearbyStations()) {
-						AbstractStation stat = info.getStation();
+						AbstractStation stat = info.station();
 						double x2 = getX(stat.getLat(), stat.getLon());
 						double y2 = getY(stat.getLat(), stat.getLon());
 						g.setColor(Color.white);
@@ -259,13 +251,13 @@ public class GlobalQuakePanel extends GlobePanel {
 						}
 					}
 				}
-				String str2 = "";
+				StringBuilder str2 = new StringBuilder();
 				if (showClusters) {
 					for (Event e : previousEvents) {
 						if (e.assignedCluster >= 0) {
 							synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
 								if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
-									str2 = str2 + " [" + e.assignedCluster + "]";
+									str2.append(" [").append(e.assignedCluster).append("]");
 								}
 							}
 
@@ -273,11 +265,11 @@ public class GlobalQuakePanel extends GlobePanel {
 					}
 				}
 
-				if (str2.length() > 0) {
-					str2 = str2.substring(1);
+				if (!str2.isEmpty()) {
+					str2 = new StringBuilder(str2.substring(1));
 					g.setColor(Color.magenta);
 					g.setFont(new Font("Calibri", Font.PLAIN, 14));
-					g.drawString(str2, (int) (x - g.getFontMetrics().stringWidth(str2) * 0.5),
+					g.drawString(str2.toString(), (int) (x - g.getFontMetrics().stringWidth(str2.toString()) * 0.5),
 							(int) (y + r * 0.5 + 12 + 14 + 2));
 				}
 			}
@@ -288,9 +280,9 @@ public class GlobalQuakePanel extends GlobePanel {
 					: "");
 			g.setColor(!hasData ? Color.LIGHT_GRAY : Color.green);
 			g.setFont(new Font("Calibri", Font.PLAIN, 14));
-			if (str.length() > 0 && scroll < 5) {
+			if (!str.isEmpty() && scroll < 5) {
 				g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5),
-						(int) (y - r * 0.5 - 3 - (mouseNearby ? 24 : 0)));
+						(int) (y - r * 0.5 - 3 - (isMouseNearby(x, y, 7) ? 24 : 0)));
 			}
 
 			if (mouseNearby && scroll < 5) {
@@ -306,7 +298,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
 			}
 			if (scroll < 5) {
-				str = !s.hasDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
+				str = s.hasDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
 				g.setFont(new Font("Calibri", Font.PLAIN, 13));
 				g.setColor(s.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
 				g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y + r * 0.5 + 12));
@@ -327,7 +319,7 @@ public class GlobalQuakePanel extends GlobePanel {
 					double r = quake.getMag() < 0 ? 6 : 6 + Math.pow(mag + 1, 2.25);
 					double w = quake.getMag() < 0 ? 0.6 : 0.6 + Math.pow(mag < 2.5 ? mag + 1 : mag + 2, 1.2) * 0.5;
 					Ellipse2D.Double ell = new Ellipse2D.Double(x0 - r / 2, y0 - r / 2, r, r);
-					double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60);
+					double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
 					Color col = ageInHRS < 3 ? (mag > 4 ? new Color(200, 0, 0) : Color.red)
 							: ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
 					// col=Scale.getColorEasily(0.90-quake.getDepth()*0.002);
@@ -340,9 +332,9 @@ public class GlobalQuakePanel extends GlobePanel {
 
 						if (showClosest && quake.getArchivedEvents() != null) {
 							for (ArchivedEvent event : quake.getArchivedEvents()) {
-								double x2 = getX(event.getLat(), event.getLon());
-								double y2 = getY(event.getLat(), event.getLon());
-								g.setColor(event.isAbandoned() ? Color.gray : Scale.getColorRatio(event.getMaxRatio()));
+								double x2 = getX(event.lat(), event.lon());
+								double y2 = getY(event.lat(), event.lon());
+								g.setColor(event.abandoned() ? Color.gray : Scale.getColorRatio(event.maxRatio()));
 								double rad = 12;
 								Ellipse2D.Double ell1 = new Ellipse2D.Double(x2 - rad / 2, y2 - rad / 2, rad, rad);
 								g.fill(ell1);
@@ -450,7 +442,7 @@ public class GlobalQuakePanel extends GlobePanel {
 						} else if (e.getMag() <= 4.0) {
 							g.setColor(new Color(255, 140, 0));
 							g.setStroke(new BasicStroke(4f));
-						} else if (e.getMag() <= 4.0) {
+						} else if (e.getMag() <= 5.0) {
 							g.setColor(Color.red);
 							g.setStroke(new BasicStroke(6f));
 						} else {
@@ -536,12 +528,12 @@ public class GlobalQuakePanel extends GlobePanel {
 				g.setFont(new Font("Calibri", Font.BOLD, 16));
 				g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), 3, 85);
 				g.drawString(f1d.format(quake.getDepth()) + "km Deep", 3, 104);
-				str = quake.isFinished() ? "Final Report" : "Report no." + quake.getReportID();
+				str = "Report no." + quake.getReportID();
 				g.drawString(str, 3, 125);
 				str = (int) quake.getPct() + "%";
 				g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
 				if (quake.getCluster().previousHypocenter != null) {
-					str = +quake.getCluster().previousHypocenter.getWrongCount() + " / "
+					str = quake.getCluster().previousHypocenter.getWrongCount() + " / "
 							+ quake.getCluster().getSelected().size() + " / "
 							+ quake.getCluster().getAssignedEvents().size();
 					g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
@@ -572,12 +564,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
 					String str3 = "";
 					if (shindo != null) {
-						str3 = shindo.getName();
+						str3 = shindo.name();
 					}
 					boolean plus = str3.endsWith("+");
 					boolean minus = str3.endsWith("-");
 					if (plus || minus) {
-						str3 = str3.substring(0, 1) + " ";
+						str3 = str3.charAt(0) + " ";
 					}
 					g.setColor(Color.white);
 					g.setFont(new Font("Arial", Font.PLAIN, 64));
@@ -608,7 +600,7 @@ public class GlobalQuakePanel extends GlobePanel {
 				g.drawRect(startX, startY, ww, hh);
 
 				for (int mag = 1; mag <= 9; mag++) {
-					double y0 = startY + hh * (10 - mag) / 10;
+					double y0 = startY + hh * (10 - mag) / 10.0;
 					g.setColor(Color.white);
 					g.setFont(new Font("Calibri", Font.BOLD, 12));
 					g.drawString(mag + "", startX - g.getFontMetrics().stringWidth(mag + "") - 5, (int) (y0 + 5));
@@ -673,7 +665,7 @@ public class GlobalQuakePanel extends GlobePanel {
 		}
 		g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 24, getHeight() - 9);
 
-		ArrayList<String> strs = new ArrayList<String>();
+		ArrayList<String> strs = new ArrayList<>();
 		if (showQuakes) {
 			strs.add("Earthquakes");
 		}
@@ -704,12 +696,12 @@ public class GlobalQuakePanel extends GlobePanel {
 		g.drawString("1-Second: " + globalQuake.lastSecond + "ms", 3, _y2 -= 16);
 		g.drawString("Analysis: " + globalQuake.lastAnalysis + "ms", 3, _y2 -= 16);
 		g.drawString("Clusters: " + globalQuake.clusterAnalysisT + "ms", 3, _y2 -= 16);
-		g.drawString("GC: " + globalQuake.lastGC + "ms", 3, _y2 -= 16);
+		g.drawString("GC: " + globalQuake.lastGC + "ms", 3, _y2 - 16);
 	}
 
 	private void drawPga(Graphics2D g, Earthquake q) {
 		for (Level l : Shindo.getLevels()) {
-			double pga = l.getPga();
+			double pga = l.pga();
 			double reversedDistance = GeoUtils.inversePgaFunctionGen1(q.getMag(), pga);
 			reversedDistance = Math.sqrt(reversedDistance * reversedDistance - q.getDepth() * q.getDepth());
 			if (!java.lang.Double.isNaN(reversedDistance) && reversedDistance > 0) {
@@ -729,7 +721,7 @@ public class GlobalQuakePanel extends GlobePanel {
 		if (!s.hasData()) {
 			return Color.gray;
 		} else {
-			if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || !s.hasDisplayableData()) {
+			if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || s.hasDisplayableData()) {
 				return Color.lightGray;
 			} else {
 				return Scale.getColorRatio(s.getMaxRatio60S());

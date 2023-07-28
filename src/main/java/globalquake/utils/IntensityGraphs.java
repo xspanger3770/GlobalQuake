@@ -53,7 +53,7 @@ public class IntensityGraphs {
 		System.out.printf("M3.1 82km: %s / 200\n", (int) IntensityTable.getMaxIntensity(3.1, 82));
 	}
 
-	public static BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 			new float[] { 3 }, 0);
 	private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);
 
@@ -66,7 +66,7 @@ public class IntensityGraphs {
 		g.fillRect(0, 0, w, h);
 		g.setColor(Color.black);
 		g.drawRect(0, 0, w - 1, h - 1);
-		g.drawRect(wrx, 0, w - wrx, h - wry - h);
+		g.drawRect(wrx, 0, w - wrx, -wry);
 		for (int p = 0; p <= 4; p++) {
 			for (int n = 1; n < 10; n++) {
 				double dist = n * Math.pow(10, p);
@@ -99,7 +99,7 @@ public class IntensityGraphs {
 					g.setFont(new Font("Calibri", Font.BOLD, 14));
 					String str = "10e" + p;
 					int width = g.getFontMetrics().stringWidth(str);
-					g.drawString(str, (int) (wrx - width - 3), (int) (y + 4));
+					g.drawString(str, wrx - width - 3, (int) (y + 4));
 				}
 			}
 		}
@@ -107,8 +107,6 @@ public class IntensityGraphs {
 		for (int mag = -10; mag <= 90; mag += 1) {
 			for (double dist1 = 1; dist1 <= 100000; dist1 *= 2) {
 				double dist2 = dist1 * 2;
-				// double dist1 = Math.log10((4 * (x1 - wrx)) / (w - wrx));
-				// double dist2 = Math.log10((4 * (x2 - wrx)) / (w - wrx));
 				double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);
 				double x2 = wrx + (Math.log10(dist2) / 5) * (w - wrx);
 				double v1 = IntensityTable.getMaxIntensity(mag/10.0, dist1);
@@ -138,22 +136,4 @@ public class IntensityGraphs {
 			g.draw(new Line2D.Double(x-r, y+r, x+r, y-r));
 		}
 	}
-	
-	/*{
-		System.out.printf("M5.7 800km: %s / 200\n", (int) maxR(5.7, 800));
-		System.out.printf("M5.7 300km: %s / 5000\n", (int) maxR(5.7, 300));
-
-		System.out.printf("M4.2 200km: %s / 1000\n", (int) maxR(4.2, 200));
-
-		System.out.printf("M4.2 500km: %s / 50\n", (int) maxR(4.2, 500));
-
-		System.out.printf("M3.8 100km: %s / 1000\n", (int) maxR(3.8, 100));
-		System.out.printf("M3.8 330km: %s / 100\n", (int) maxR(3.8, 330));
-		System.out.printf("M3.8 800km: %s / 10\n", (int) maxR(3.8, 800));
-
-		System.out.printf("M3.1 82km: %s / 200\n", (int) maxR(3.1, 82));
-	}*/
-	
-	
-
 }

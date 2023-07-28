@@ -25,31 +25,32 @@ import globalquake.utils.DistanceIntensityRecord;
 import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityGraphs;
 import globalquake.utils.Scale;
+import org.tinylog.Logger;
 
 public class EarthquakeReporter {
-	public static final File ANAlYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
-	public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy_HH.mm.ss");
+	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
+	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy_HH.mm.ss");
 	private static double centerLat = 49.7;
 	private static double centerLon = 15.65;
 	private static double scroll = 8;
-	private static int width = 600;
-	private static int height = 600;
+	private static final int width = 600;
+	private static final int height = 600;
 
-	private static Color oceanC = new Color(7, 37, 48);
-	private static Color landC = new Color(15, 47, 68);
-	private static Color borderC = new Color(153, 153, 153);
+	private static final Color oceanC = new Color(7, 37, 48);
+	private static final Color landC = new Color(15, 47, 68);
+	private static final Color borderC = new Color(153, 153, 153);
 
-	public static void report(Earthquake earthquake) throws Exception {
+	public static void report(Earthquake earthquake) {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(earthquake.getOrigin());
-		File folder = new File(ANAlYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
+		File folder = new File(ANALYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
 				earthquake.getRegion().replace(' ', '_'), dateFormat.format(c.getTime()) + "/"));
 		if (!folder.exists()) {
-			folder.mkdirs();
+			if(!folder.mkdirs()){
+				return;
+			}
 		}
-		// File assignedEventsFile = new File(folder, "assigned_events.dat");
-		// ObjectOutputStream out = new ObjectOutputStream(new
-		// FileOutputStream(assignedEventsFile));
+
 		synchronized (earthquake.getCluster().assignedEventsSync) {
 			for (Event e : earthquake.getCluster().getAssignedEvents()) {
 				AbstractStation station = e.getAnalysis().getStation();
@@ -57,10 +58,7 @@ public class EarthquakeReporter {
 						station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
 						station.getAlt());
 			}
-			// out.writeObject(earthquake.getCluster().getAssignedEvents());
-
 		}
-		// out.close();
 		drawMap(folder, earthquake);
 		drawIntensities(folder, earthquake);
 	}
@@ -77,12 +75,12 @@ public class EarthquakeReporter {
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = img.createGraphics();
 
-		ArrayList<DistanceIntensityRecord> recs = new ArrayList<DistanceIntensityRecord>();
+		ArrayList<DistanceIntensityRecord> recs = new ArrayList<>();
 		for (Event event : earthquake.getCluster().getAssignedEvents()) {
-			double lat = event.report.lat;
-			double lon = event.report.lon;
+			double lat = event.report.lat();
+			double lon = event.report.lon();
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
-					-earthquake.getDepth(), lat, lon, event.report.alt / 1000.0);
+					-earthquake.getDepth(), lat, lon, event.report.alt() / 1000.0);
 			recs.add(new DistanceIntensityRecord(0, distGE, event.maxRatio));
 		}
 
@@ -92,7 +90,7 @@ public class EarthquakeReporter {
 		try {
 			ImageIO.write(img, "PNG", new File(folder, "intensities.png"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 	}
 
@@ -103,35 +101,33 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-		if (GlobePanel.polygonsHD == null || GlobePanel.polygonsMD == null || GlobePanel.polygonsUHD == null) {
+        if (GlobePanel.polygonsHD != null && GlobePanel.polygonsMD != null && GlobePanel.polygonsUHD != null) {
+            ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? GlobePanel.polygonsUHD
+                    : scroll < 4.8 ? GlobePanel.polygonsHD : GlobePanel.polygonsMD;
+            for (org.geojson.Polygon polygon : pols) {
+                java.awt.Polygon awt = new java.awt.Polygon();
+                boolean add = false;
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double x = getX(pos.getLongitude());
+                    double y = getY(pos.getLatitude());
 
-		} else {
-			ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? GlobePanel.polygonsUHD
-					: scroll < 4.8 ? GlobePanel.polygonsHD : GlobePanel.polygonsMD;
-			for (org.geojson.Polygon polygon : pols) {
-				java.awt.Polygon awt = new java.awt.Polygon();
-				boolean add = false;
-				for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-					double x = getX(pos.getLatitude(), pos.getLongitude());
-					double y = getY(pos.getLatitude(), pos.getLongitude());
+                    if (!add && isOnScreen(x, y)) {
+                        add = true;
+                    }
+                    awt.addPoint((int) x, (int) y);
+                }
+                if (add) {
+                    g.setColor(landC);
+                    g.fill(awt);
+                    g.setColor(borderC);
+                    g.draw(awt);
+                }
+            }
+        }
 
-					if (!add && isOnScreen(x, y)) {
-						add = true;
-					}
-					awt.addPoint((int) x, (int) y);
-				}
-				if (add) {
-					g.setColor(landC);
-					g.fill(awt);
-					g.setColor(borderC);
-					g.draw(awt);
-				}
-			}
-		}
-
-		{
-			double x = getX(earthquake.getLat(), earthquake.getLon());
-			double y = getY(earthquake.getLat(), earthquake.getLon());
+        {
+			double x = getX(earthquake.getLon());
+			double y = getY(earthquake.getLat());
 			double r = 12;
 			Line2D.Double line1 = new Line2D.Double(x - r, y - r, x + r, y + r);
 			Line2D.Double line2 = new Line2D.Double(x - r, y + r, x + r, y - r);
@@ -147,8 +143,8 @@ public class EarthquakeReporter {
 
 		g.setStroke(new BasicStroke(1f));
 		for (Event event : earthquake.getCluster().getAssignedEvents()) {
-			double x = getX(event.report.lat, event.report.lon);
-			double y = getY(event.report.lat, event.report.lon);
+			double x = getX(event.report.lon());
+			double y = getY(event.report.lat());
 			double r = 12;
 			g.setColor(Scale.getColorRatio(event.getMaxRatio()));
 			Ellipse2D.Double ell1 = new Ellipse2D.Double(x - r / 2, y - r / 2, r, r);
@@ -160,7 +156,7 @@ public class EarthquakeReporter {
 		try {
 			ImageIO.write(img, "PNG", file);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 	}
 
@@ -168,11 +164,11 @@ public class EarthquakeReporter {
 		return x >= 0 && y >= 0 && x < width && y < height;
 	}
 
-	private static double getX(double lat, double lon) {
+	private static double getX(double lon) {
 		return (lon - centerLon) / (scroll / 100.0) + (width * 0.5);
 	}
 
-	private static double getY(double lat, double lon) {
+	private static double getY(double lat) {
 		return (centerLat - lat) / (scroll / (300 - 200 * Math.cos(0.5 * Math.toRadians(centerLat + lat))))
 				+ (height * 0.5);
 	}

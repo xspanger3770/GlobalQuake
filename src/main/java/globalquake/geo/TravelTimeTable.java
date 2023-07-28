@@ -1,9 +1,5 @@
 package globalquake.geo;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 
 public class TravelTimeTable {
@@ -14,9 +10,9 @@ public class TravelTimeTable {
 
 	private static final int PKP_START = 113;
 
-	public static final ArrayList<double[]> PTravelTimeTable = new ArrayList<double[]>();
-	public static final ArrayList<double[]> STravelTimeTable = new ArrayList<double[]>();
-	public static final ArrayList<double[]> PKPTravelTimeTable = new ArrayList<double[]>();
+	public static final ArrayList<double[]> PTravelTimeTable = new ArrayList<>();
+	public static final ArrayList<double[]> STravelTimeTable = new ArrayList<>();
+	public static final ArrayList<double[]> PKPTravelTimeTable = new ArrayList<>();
 
 	static {
 		fillTable();
@@ -621,6 +617,7 @@ public class TravelTimeTable {
 		System.out.println("[TravelTimeTable] found " + errors + " errors.");
 	}
 
+	@SuppressWarnings("unused")
 	public static double getPKPWaveTravelTime(double depth, double angle) {
 		double val = _getPKPWaveTravelTime(depth, angle);
 		if (val == 0) {
@@ -733,12 +730,9 @@ public class TravelTimeTable {
 	}
 
 	/**
-	 * -1 WHEN IT HASNT OCCURED YET +INFINITY WHEN IT ALREADY PASSED THE EARTH
-	 * 
-	 * @param depth
-	 * @param ageSec
-	 * @return
-	 */
+	 * -1 WHEN IT HASN'T OCCURRED YET +INFINITY WHEN IT ALREADY PASSED THE EARTH
+	 **/
+
 	public static double getPKPWaveTravelAngle(double depth, double ageSec) {
 		depth = Math.max(0, Math.min(DEPTHS_PKP[DEPTHS_PKP.length - 1], depth));
 		int d = 0;
@@ -787,8 +781,7 @@ public class TravelTimeTable {
 			return Double.POSITIVE_INFINITY;
 		}
 		double r = (ageSec - valHi) / (valLo - valHi);
-		double val = hi + r + PKP_START;
-		return val;
+        return hi + r + PKP_START;
 	}
 
 	public static double getPWaveTravelAngle(double depth, double ageSec, boolean outOfBounds) {
@@ -805,10 +798,7 @@ public class TravelTimeTable {
 			}
 		}
 
-		// System.out.println("lower: " + DEPTHS[d] + ", upper: " + DEPTHS[d + 1] + ", "
-		// + q);
-
-		double val0 = PTravelTimeTable.get(0)[d] * (1 - q) + PTravelTimeTable.get(0)[d + 1] * (q);
+        double val0 = PTravelTimeTable.get(0)[d] * (1 - q) + PTravelTimeTable.get(0)[d + 1] * (q);
 		// System.out.println("val0=" + val0+", "+d+", "+q);
 		// its still underground
 		if (ageSec <= val0) {
@@ -856,19 +846,14 @@ public class TravelTimeTable {
 			}
 		}
 
-		// System.out.println("lower: " + DEPTHS[d] + ", upper: " + DEPTHS[d + 1] + ", "
-		// + q);
-
 		double val0 = STravelTimeTable.get(0)[d] * (1 - q) + STravelTimeTable.get(0)[d + 1] * (q);
-		// its still underground
+		// It's still underground
 		if (ageSec <= val0) {
 			return outOfBounds ? -1 : 0.0;
 		}
 
 		double valN = STravelTimeTable.get(STravelTimeTable.size() - 1)[d] * (1 - q)
 				+ STravelTimeTable.get(STravelTimeTable.size() - 1)[d + 1] * (q);
-		// System.out.println("valN=" + valN);
-		// exceeded 125°
 		if (ageSec > valN) {
 			return outOfBounds ? -1 : PTravelTimeTable.size() - 1;
 		}
@@ -906,7 +891,6 @@ public class TravelTimeTable {
 		for (int i = 0; i < runs; i++) {
 			double v = current + (max / Math.pow(2, i + 1)); // distance
 			double dt = Math.abs(getSWaveTravelTime(depth, toAngle(v)) - getPWaveTravelTime(depth, toAngle(v)));
-			// System.out.println(current + ", " + v + ", " + dt);
 			if (dt < deltaT) {
 				current += (max / Math.pow(2, i + 1));
 			}
@@ -916,107 +900,6 @@ public class TravelTimeTable {
 
 	public static double toAngle(double km) {
 		return (km / GeoUtils.EARTH_CIRCUMFERENCE) * 360.0;
-	}
-
-	/**
-	 * TODO NEARBY DISTANCE CURVE (<3°) ELLIPSE?
-	 */
-
-	public static void main(String[] args) throws Exception {
-		System.err.println(getEpicenterDistance(0, 8));
-	}
-
-	static boolean skipNext = true;
-
-	@SuppressWarnings("unused")
-	private static void clipboardMoon() {
-		String str = "";
-		while (true) {
-			try {
-				String clip = (String) Toolkit.getDefaultToolkit().getSystemClipboard()
-						.getData(DataFlavor.stringFlavor);
-
-				if (!clip.equals(str)) {
-					if (!skipNext) {
-						try {
-							System.out.println(clip);
-							decode(clip);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-					} else {
-						skipNext = false;
-					}
-					str = clip;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private static ArrayList<Double> numbers = new ArrayList<Double>();
-
-	private static void decode(String clip) {
-		String[] strs = clip.split(" ");
-		/*
-		 * System.out.println(strs.length); for (int i = 0; i < strs.length; i++) {
-		 * System.out.println(i + ": [" + strs[i] + "]"); }
-		 */
-
-		int minutes = Integer.valueOf(strs[0]);
-		int i = 1;
-		while (true) {
-			String str = strs[i];
-			if (str.length() == 6) {
-				double seconds = Double.valueOf(str.substring(0, 5));
-				double val = minutes * 60 + seconds;
-				numbers.add(val);
-				minutes = Integer.valueOf(str.substring(5));
-				// System.out.println("added value: "+val);
-				// System.out.println("seconds: "+seconds+", nextMinutes: "+minutes);
-				i++;
-			} else {
-				System.out.println(str);
-				double seconds = Double.valueOf(str.substring(0, 5));
-				double val = minutes * 60 + seconds;
-				numbers.add(val);
-				// System.out.println("added value: "+val);
-				i += 4;
-				if (i >= strs.length) {
-					break;
-				}
-				str = strs[i];
-				minutes = Integer.valueOf(str);
-				i++;
-			}
-			if (i >= strs.length) {
-				break;
-			}
-		}
-		if (numbers.size() >= DEPTHS_PKP.length) {
-			String string = "PKPTravelTimeTable.add(new double[] { ";
-			for (double d : numbers) {
-				string = string + d + ",";
-			}
-			string = string.substring(0, string.length() - 1);
-			string = string + "});";
-			System.out.println(string);
-			numbers.clear();
-			skipNext = true;
-			StringSelection selection = new StringSelection(string);
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clipboard.setContents(selection, selection);
-			Toolkit.getDefaultToolkit().beep();
-		}
 	}
 
 }

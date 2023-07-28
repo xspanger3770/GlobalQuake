@@ -2,6 +2,6 @@ package globalquake.core;
 
 public enum EventStatus {
 	
-	P_WAVES, ENDED, CORRUPTED;
+	P_WAVES, ENDED, CORRUPTED
 
 }

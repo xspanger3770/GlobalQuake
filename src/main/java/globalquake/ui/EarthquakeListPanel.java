@@ -1,16 +1,16 @@
 package globalquake.ui;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import globalquake.core.ArchivedQuake;
+import globalquake.core.GlobalQuake;
+import globalquake.geo.GeoUtils;
+import globalquake.utils.Level;
+import globalquake.utils.Shindo;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -19,18 +19,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-import javax.swing.JPanel;
-
-import globalquake.core.ArchivedQuake;
-import globalquake.core.GlobalQuake;
-import globalquake.geo.GeoUtils;
-import globalquake.utils.Level;
-import globalquake.utils.Shindo;
-
 public class EarthquakeListPanel extends JPanel {
 
-	private static final long serialVersionUID = 1L;
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	private int scroll = 0;
 	protected int mouseY;
 
@@ -43,45 +34,37 @@ public class EarthquakeListPanel extends JPanel {
 	public EarthquakeListPanel(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
 
-		addMouseWheelListener(new MouseWheelListener() {
-
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				boolean down = e.getWheelRotation() < 0;
-				if (!down) {
-					scroll += 25;
-					int maxScroll = getGlobalQuake().getArchive().getArchivedQuakes().size() * cell_height
-							- getHeight();
-					maxScroll = Math.max(0, maxScroll);
-					scroll = Math.min(scroll, maxScroll);
-				} else {
-					scroll -= 25;
-					scroll = Math.max(0, scroll);
-				}
-			}
-		});
+		addMouseWheelListener(e -> {
+            boolean down = e.getWheelRotation() < 0;
+            if (!down) {
+                scroll += 25;
+                int maxScroll = getGlobalQuake().getArchive().getArchivedQuakes().size() * cell_height
+                        - getHeight();
+                maxScroll = Math.max(0, maxScroll);
+                scroll = Math.min(scroll, maxScroll);
+            } else {
+                scroll -= 25;
+                scroll = Math.max(0, scroll);
+            }
+        });
 
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				try {
-					int y = e.getY();
-					int i = (y + scroll) / cell_height;
-					synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
-						ArrayList<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
-						if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
-							return;
-						}
-						ArchivedQuake quake = archivedQuakes.get(archivedQuakes.size() - 1 - i);
+                int y = e.getY();
+                int i = (y + scroll) / cell_height;
+                synchronized (getGlobalQuake().getArchive().archivedQuakesSync) {
+                    ArrayList<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
+                    if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
+                        return;
+                    }
+                    ArchivedQuake quake = archivedQuakes.get(archivedQuakes.size() - 1 - i);
 
-						if (e.getButton() == MouseEvent.BUTTON3) {
-							quake.setWrong(!quake.isWrong());
-						}
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        quake.setWrong(!quake.isWrong());
+                    }
+                }
+            }
 		});
 
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -139,9 +122,9 @@ public class EarthquakeListPanel extends JPanel {
 				g.setColor(Color.WHITE);
 				g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
 
-				if (quake.getArchivedEvents().size() != 0) {
+				if (!quake.getArchivedEvents().isEmpty()) {
 					double pct = 100 * (quake.getArchivedEvents().size() - quake.getAbandonedCount())
-							/ quake.getArchivedEvents().size();
+							/ (double)quake.getArchivedEvents().size();
 					//str = quake.getArchivedEvents().size() + " / " + (int) (pct) + "%";
 					str = (int) (pct) + "%";
 					g.setFont(new Font("Calibri", Font.PLAIN, 14));
@@ -149,13 +132,13 @@ public class EarthquakeListPanel extends JPanel {
 				}
 				str = "";
 				if (shindo != null) {
-					str = shindo.getName();
+					str = shindo.name();
 				}
 
 				boolean plus = str.endsWith("+");
 				boolean minus = str.endsWith("-");
 				if (plus || minus) {
-					str = str.substring(0, 1) + " ";
+					str = str.charAt(0) + " ";
 				}
 				if (plus) {
 					g.setColor(Color.white);

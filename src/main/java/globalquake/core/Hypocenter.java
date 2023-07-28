@@ -3,10 +3,9 @@ package globalquake.core;
 import java.util.ArrayList;
 
 public class Hypocenter {
-	public Object wrongEventsSync;
-	ArrayList<Event> wrongEvents;
+	public final Object wrongEventsSync = new Object();
+    ArrayList<Event> wrongEvents;
 	public double totalErr;
-	public int iteration;
 
 	public Hypocenter(double lat, double lon, double depth, long origin) {
 		this.lat = lat;
@@ -15,16 +14,13 @@ public class Hypocenter {
 		this.origin = origin;
 	}
 
-	double lat;
-	double lon;
-	double depth;
+	final double lat;
+	final double lon;
+	final double depth;
 	long origin;
 	public int correctStations;
 
 	public void setWrongEvents(ArrayList<Event> wrongEvents) {
-		if (wrongEventsSync == null) {
-			wrongEventsSync = new Object();
-		}
 		this.wrongEvents = wrongEvents;
 	}
 

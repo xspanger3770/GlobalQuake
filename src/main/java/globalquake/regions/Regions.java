@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import globalquake.geo.GeoUtils;
 import org.geojson.*;
 import org.json.JSONObject;
+import org.tinylog.Logger;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -17,13 +18,13 @@ import java.util.List;
 
 public class Regions {
 	public static final String UNKNOWN_REGION = "Unknown Region";
-	public static ArrayList<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<Polygon>();
-	public static ArrayList<org.geojson.Polygon> raw_polygonsHD = new ArrayList<Polygon>();
-	public static ArrayList<org.geojson.Polygon> raw_polygonsMD = new ArrayList<Polygon>();
+	public static final ArrayList<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<>();
+	public static final ArrayList<org.geojson.Polygon> raw_polygonsHD = new ArrayList<>();
+	public static final ArrayList<org.geojson.Polygon> raw_polygonsMD = new ArrayList<>();
 
-	public static ArrayList<Region> regionsMD = new ArrayList<Region>();
-	public static ArrayList<Region> regionsHD = new ArrayList<Region>();
-	public static ArrayList<Region> regionsUHD = new ArrayList<Region>();
+	public static final ArrayList<Region> regionsMD = new ArrayList<>();
+	public static final ArrayList<Region> regionsHD = new ArrayList<>();
+	public static final ArrayList<Region> regionsUHD = new ArrayList<>();
 
 	public static void init() throws IOException {
 		loadPolygons("polygons/countriesMD.json", raw_polygonsMD, regionsMD);
@@ -32,7 +33,7 @@ public class Regions {
 	}
 
 	//
-	public static String downloadRegion(double lat, double lon){
+	public static String downloadRegion(double lat, double lon) {
 		try {
 			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
 					lat, lon);
@@ -50,19 +51,18 @@ public class Regions {
 			JSONObject obj = new JSONObject(result.toString());
 			return (String) obj.get("name_l");
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.error(e);
+			return UNKNOWN_REGION;
 		}
-
-		return UNKNOWN_REGION;
 	}
 
 	public static String getRegion(double lat, double lon) {
 		Point2D.Double point = new Point2D.Double(lon, lat);
 		for (Region reg : regionsUHD) {
-			for (Path2D.Double path : reg.getPaths()) {
+			for (Path2D.Double path : reg.paths()) {
 				if (path.getBounds2D().contains(point)) {
 					if (path.contains(point)) {
-						return reg.getName();
+						return reg.name();
 					}
 				}
 			}
@@ -71,18 +71,18 @@ public class Regions {
 		String closest = "Unknown";
 		double closestDistance = Double.MAX_VALUE;
 		for (Region reg : regionsMD) {
-			for (Polygon polygon : reg.getRaws()) {
+			for (Polygon polygon : reg.raws()) {
 				for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
 					double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
 					if (dist < closestDistance) {
 						closestDistance = dist;
-						closest = reg.getName();
+						closest = reg.name();
 					}
 				}
 			}
 		}
 
-		String name = "";
+		String name;
 		if (closestDistance < 100) {
 			name = "Near The Coast Of " + closest;
 		} else if (closestDistance < 1500) {
@@ -122,9 +122,9 @@ public class Regions {
 	}
 
 	private static void createRegion(ArrayList<Region> regions, Feature f, MultiPolygon mp) {
-		ArrayList<Path2D.Double> paths = new ArrayList<Path2D.Double>();
+		ArrayList<Path2D.Double> paths = new ArrayList<>();
 		List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
-		ArrayList<Polygon> raws = new ArrayList<Polygon>();
+		ArrayList<Polygon> raws = new ArrayList<>();
 		for (List<List<LngLatAlt>> polygon : polygons) {
 			org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
 			paths.add(toPath(pol));
@@ -134,10 +134,10 @@ public class Regions {
 	}
 
 	private static void createRegion(ArrayList<Region> regions, Feature f, Polygon o) {
-		ArrayList<Path2D.Double> paths = new ArrayList<Path2D.Double>();
+		ArrayList<Path2D.Double> paths = new ArrayList<>();
 		paths.add(toPath(o));
 
-		ArrayList<Polygon> raws = new ArrayList<Polygon>();
+		ArrayList<Polygon> raws = new ArrayList<>();
 		raws.add(o);
 		regions.add(new Region(f.getProperty("name_long"), paths, raws));
 	}

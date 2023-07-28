@@ -1,16 +1,13 @@
 package globalquake.core.analysis;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Locale;
-
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.AbstractStation;
 import globalquake.core.Event;
 import globalquake.core.Log;
 import uk.me.berndporr.iirj.Butterworth;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class BetterAnalysis extends Analysis {
 
@@ -19,9 +16,6 @@ public class BetterAnalysis extends Analysis {
 	public static final int INIT_AVERAGE_RATIO = 10 * 1000;
 
 	public static final double EVENT_TRESHOLD = 4.75;
-
-	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
-	public static final DecimalFormat f2d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.ENGLISH));
 
 	private int initProgress = 0;
 	private double initialOffsetSum;
@@ -117,13 +111,13 @@ public class BetterAnalysis extends Analysis {
 				longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
 			}
 			double ratio = shortAverage / longAverage;
-			if (getStatus() == AnalysisStatus.IDLE && getPreviousLogs().size() > 0) {
+			if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty()) {
 				boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD * 1.5 && time - eventTimer > 200;
 				boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2.25 && time - eventTimer > 100;
 				boolean condMain = shortAverage / thirdAverage > 2;
 				if (condMain && (cond1 || cond2)) {
 					ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
-					if (_logs != null && _logs.size() > 0) {
+					if (!_logs.isEmpty()) {
 						setStatus(AnalysisStatus.EVENT);
 						Event event = new Event(this, time, _logs);
 						synchronized (previousEventsSync) {
@@ -169,7 +163,7 @@ public class BetterAnalysis extends Analysis {
 				synchronized (previousLogsSync) {
 					getPreviousLogs().add(0, currentLog);
 				}
-				// from latest event to oldest event
+				// from latest event to the oldest event
 				synchronized (previousEventsSync) {
 					for (Event e : getPreviousEvents()) {
 						if (!e.isBroken()) {
@@ -185,7 +179,7 @@ public class BetterAnalysis extends Analysis {
 	}
 
 	private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {
-		ArrayList<Log> logs = new ArrayList<Log>();
+		ArrayList<Log> logs = new ArrayList<>();
 		synchronized (previousLogsSync) {
 			for (Log l : getPreviousLogs()) {
 				long time = l.getTime();
@@ -221,7 +215,7 @@ public class BetterAnalysis extends Analysis {
 		initialRatioCnt = 0;
 		numRecords = 0;
 		latestLogTime = 0;
-		// from latest event to oldest event
+		// from latest event to the oldest event
 		// it has to be synced because there is the 1-second thread
 		synchronized (previousEventsSync) {
 			for (Event e : getPreviousEvents()) {
