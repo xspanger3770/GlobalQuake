@@ -1,7 +1,7 @@
 package globalquake.sounds;
 
 import globalquake.exception.FatalIOException;
-import globalquake.main.Settings;
+import globalquake.ui.settings.Settings;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;

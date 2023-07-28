@@ -13,9 +13,9 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import globalquake.core.AbstractStation;
-import globalquake.core.Event;
-import globalquake.core.Log;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.earthquake.Event;
+import globalquake.core.analysis.Log;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
 

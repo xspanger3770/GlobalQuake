@@ -3,9 +3,8 @@ package globalquake.core.zejfseis;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import globalquake.core.AbstractStation;
-import globalquake.core.GlobalQuake;
-import globalquake.core.SimpleLog;
+import globalquake.core.station.AbstractStation;
+import globalquake.main.GlobalQuake;
 
 public class ZejfSeisStation extends AbstractStation {
 

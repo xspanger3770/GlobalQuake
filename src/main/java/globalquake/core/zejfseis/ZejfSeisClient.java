@@ -1,7 +1,6 @@
 package globalquake.core.zejfseis;
 
-import globalquake.core.SimpleLog;
-import globalquake.main.Settings;
+import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
 import java.io.IOException;

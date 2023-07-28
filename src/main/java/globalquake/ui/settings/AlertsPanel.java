@@ -1,8 +1,6 @@
 package globalquake.ui.settings;
 import javax.swing.JCheckBox;
 
-import globalquake.main.Settings;
-
 public class AlertsPanel extends SettingsPanel {
 	private final JCheckBox boxDialogs;
 

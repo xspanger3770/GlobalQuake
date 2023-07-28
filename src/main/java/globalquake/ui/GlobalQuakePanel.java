@@ -24,25 +24,25 @@ import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
-import globalquake.core.AbstractStation;
-import globalquake.core.ArchivedEvent;
-import globalquake.core.ArchivedQuake;
-import globalquake.core.Cluster;
-import globalquake.core.Earthquake;
-import globalquake.core.Event;
-import globalquake.core.GlobalQuake;
-import globalquake.core.NearbyStationDistanceInfo;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.earthquake.ArchivedEvent;
+import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.core.earthquake.Cluster;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.Event;
+import globalquake.main.GlobalQuake;
+import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkManager;
-import globalquake.main.Settings;
+import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;
-import globalquake.utils.IntensityTable;
-import globalquake.utils.Level;
+import globalquake.geo.IntensityTable;
+import globalquake.geo.Level;
 import globalquake.utils.Scale;
-import globalquake.utils.Shindo;
+import globalquake.geo.Shindo;
 import globalquake.geo.TravelTimeTable;
 
 public class GlobalQuakePanel extends GlobePanel {

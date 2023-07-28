@@ -17,11 +17,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import globalquake.core.Earthquake;
-import globalquake.main.Settings;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.ui.settings.Settings;
 import globalquake.geo.GeoUtils;
-import globalquake.utils.Level;
-import globalquake.utils.Shindo;
+import globalquake.geo.Level;
+import globalquake.geo.Shindo;
 import globalquake.geo.TravelTimeTable;
 
 public class AlertWindow extends JFrame {

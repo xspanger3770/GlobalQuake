@@ -4,8 +4,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import globalquake.core.GlobalQuake;
-import globalquake.main.Settings;
+import globalquake.main.GlobalQuake;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;

@@ -2,8 +2,6 @@ package globalquake.ui.settings;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import globalquake.main.Settings;
-
 public class GeneralSettingsPanel extends SettingsPanel {
 	public GeneralSettingsPanel() {
 		setLayout(null);

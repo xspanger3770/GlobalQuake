@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import globalquake.main.Settings;
 import org.tinylog.Logger;
 
 public class SettingsFrame {

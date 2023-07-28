@@ -9,7 +9,7 @@ import java.util.TimerTask;
 
 import javax.swing.JFrame;
 
-import globalquake.core.AbstractStation;
+import globalquake.core.station.AbstractStation;
 
 public class StationMonitor extends JFrame {
 

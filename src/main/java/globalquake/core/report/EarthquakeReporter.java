@@ -16,14 +16,12 @@ import javax.imageio.ImageIO;
 
 import org.geojson.LngLatAlt;
 
-import globalquake.core.AbstractStation;
-import globalquake.core.Earthquake;
-import globalquake.core.Event;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.Event;
 import globalquake.main.Main;
 import globalquake.ui.GlobePanel;
-import globalquake.utils.DistanceIntensityRecord;
 import globalquake.geo.GeoUtils;
-import globalquake.utils.IntensityGraphs;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
