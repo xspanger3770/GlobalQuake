@@ -28,14 +28,14 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
 
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 import globalquake.main.Main;
 
 public class DatabaseMonitor extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private StationManager stationManager;
+	private SeedlinkManager seedlinkManager;
 	private JLabel lblVersion;
 	private JLabel lblLastUpdate;
 	private JProgressBar progressBar2;
@@ -55,8 +55,8 @@ public class DatabaseMonitor extends JFrame {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	public DatabaseMonitor(StationManager stationManager, Main globalQuake) {
-		this.stationManager = stationManager;
+	public DatabaseMonitor(SeedlinkManager seedlinkManager, Main globalQuake) {
+		this.seedlinkManager = seedlinkManager;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		contentPane = new JPanel();
 		contentPane.setPreferredSize(new Dimension(460, 330));
@@ -74,7 +74,7 @@ public class DatabaseMonitor extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (stationManager.getSelectedStations() == 0) {
+				if (seedlinkManager.getSelectedStations() == 0) {
 					String[] options = { "Cancel", "Yes" };
 					int n = JOptionPane.showOptionDialog(DatabaseMonitor.this, "Launch with no selected stations?",
 							"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
@@ -127,11 +127,11 @@ public class DatabaseMonitor extends JFrame {
 
 					@Override
 					public void run() {
-						if (stationManager == null) {
+						if (seedlinkManager == null) {
 							return;
 						}
 						DatabaseMonitor.this.setEnabled(false);
-						stationSelect = new StationSelect(stationManager);
+						stationSelect = new StationSelect(seedlinkManager);
 						stationSelect.setVisible(true);
 						stationSelect.addWindowListener(new WindowAdapter() {
 							@Override
@@ -189,10 +189,10 @@ public class DatabaseMonitor extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (stationManager != null && stationManager.getDatabase() != null) {
+				if (seedlinkManager != null && seedlinkManager.getDatabase() != null) {
 					new Thread() {
 						public void run() {
-							stationManager.update(true);
+							seedlinkManager.update(true);
 						};
 					}.start();
 				}
@@ -240,14 +240,14 @@ public class DatabaseMonitor extends JFrame {
 	}
 
 	private void updateFrame() {
-		int state = stationManager.getState();
-		if (stationManager == null) {
+		int state = seedlinkManager.getState();
+		if (seedlinkManager == null) {
 			lblVersion.setText("FATAL ERROR");
 		} else {
-			if (stationManager.getDatabase() == null) {
+			if (seedlinkManager.getDatabase() == null) {
 				return;
 			}
-			if (state < StationManager.DONE && btnSelectStations.isEnabled()) {
+			if (state < SeedlinkManager.DONE && btnSelectStations.isEnabled()) {
 				btnSelectStations.setEnabled(false);
 				btnLaunch.setEnabled(false);
 				btnUpdate.setEnabled(false);
@@ -264,32 +264,32 @@ public class DatabaseMonitor extends JFrame {
 			}
 
 
-			progressBar2.setIndeterminate(state >= StationManager.CHECKING_AVAILABILITY);
+			progressBar2.setIndeterminate(state >= SeedlinkManager.CHECKING_AVAILABILITY);
 			progressBar1.setIndeterminate(state <= 0);
 			
 
 			if (state > 0) {
-				if (stationManager.getDatabase().getDatabaseVersion() == StationManager.DATABASE_VERSION) {
+				if (seedlinkManager.getDatabase().getDatabaseVersion() == SeedlinkManager.DATABASE_VERSION) {
 					lblVersion.setText("<html>Database version: <font color='green'>"
-							+ stationManager.getDatabase().getDatabaseVersion() + "</font></html>");
+							+ seedlinkManager.getDatabase().getDatabaseVersion() + "</font></html>");
 				} else {
 					lblVersion.setText("<html>Database version: <font color='red'>"
-							+ stationManager.getDatabase().getDatabaseVersion() + " -> "
-							+ StationManager.DATABASE_VERSION + "</font></html>");
+							+ seedlinkManager.getDatabase().getDatabaseVersion() + " -> "
+							+ SeedlinkManager.DATABASE_VERSION + "</font></html>");
 				}
 				Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(stationManager.getDatabase().getLastUpdate());
+				c.setTimeInMillis(seedlinkManager.getDatabase().getLastUpdate());
 				lblLastUpdate.setText("<html>Last update: "
-						+ (state == StationManager.UPDATING_DATABASE ? "<font color='green'>Updating now...</font>"
+						+ (state == SeedlinkManager.UPDATING_DATABASE ? "<font color='green'>Updating now...</font>"
 								: "<font color='" + colAge(c) + "'>" + dateFormat.format(c.getTime()) + "</font>")
 						+ "</html>");
-				progressBar1.setValue((int) (stationManager.updating_progress * 100));
+				progressBar1.setValue((int) (seedlinkManager.updating_progress * 100));
 				progressBar1.setString(
-						(int) (stationManager.updating_progress * 100) + "% - " + stationManager.updating_string);
+						(int) (seedlinkManager.updating_progress * 100) + "% - " + seedlinkManager.updating_string);
 
-				progressBar2.setValue((int) (stationManager.availability_progress * 100));
-				progressBar2.setString((int) (stationManager.availability_progress * 100) + "% - "
-						+ stationManager.availability_string);
+				progressBar2.setValue((int) (seedlinkManager.availability_progress * 100));
+				progressBar2.setString((int) (seedlinkManager.availability_progress * 100) + "% - "
+						+ seedlinkManager.availability_string);
 
 				int nets = 0;
 				int stats = 0;
@@ -298,7 +298,7 @@ public class DatabaseMonitor extends JFrame {
 				int sel = 0;
 
 				try {
-					for (Network n : stationManager.getDatabase().getNetworks()) {
+					for (Network n : seedlinkManager.getDatabase().getNetworks()) {
 						nets++;
 						for (Station s : n.getStations()) {
 							stats++;
@@ -326,10 +326,10 @@ public class DatabaseMonitor extends JFrame {
 				lblStations.setText("Stations: " + stats);
 				lblChannels.setText("Channels: " + chans);
 				lblAvailable.setText("Available stations: " + ava);
-				if (state >= StationManager.DONE) {
+				if (state >= SeedlinkManager.DONE) {
 					lblSelected.setText("Selected stations: " + sel);
 				}
-				if (state >= StationManager.DONE && !btnSelectStations.isEnabled()) {
+				if (state >= SeedlinkManager.DONE && !btnSelectStations.isEnabled()) {
 					btnSelectStations.setEnabled(true);
 					btnLaunch.setEnabled(true);
 					btnUpdate.setEnabled(true);
@@ -355,7 +355,7 @@ public class DatabaseMonitor extends JFrame {
 
 	private DefaultMutableTreeNode createRoot() {
 		DefaultMutableTreeNode networksNode = new DefaultMutableTreeNode("Networks");
-		for (Network n : stationManager.getDatabase().getNetworks()) {
+		for (Network n : seedlinkManager.getDatabase().getNetworks()) {
 			DefaultMutableTreeNode netwNode = new DefaultMutableTreeNode(n.getNetworkCode());
 			for (Station s : n.getStations()) {
 				DefaultMutableTreeNode statNode = new DefaultMutableTreeNode(s.getStationCode());
@@ -372,7 +372,7 @@ public class DatabaseMonitor extends JFrame {
 		return networksNode;
 	}
 
-	public StationManager getStationManager() {
-		return stationManager;
+	public SeedlinkManager getStationManager() {
+		return seedlinkManager;
 	}
 }

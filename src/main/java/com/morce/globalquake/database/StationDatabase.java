@@ -1,22 +1,24 @@
 package com.morce.globalquake.database;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 
 public class StationDatabase implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -1294709487345197451L;
 
 	public static final long updateIntervalDays = 14;
 
 	private long lastUpdate;
-	private int databaseVersion;
+	private final int databaseVersion;
 
-	private ArrayList<Network> networks = new ArrayList<Network>();
+	private final ArrayList<Network> networks = new ArrayList<Network>();
 	private ArrayList<SelectedStation> selectedStations = new ArrayList<SelectedStation>();
 
 	public StationDatabase(int databaseVersion) {
@@ -24,12 +26,12 @@ public class StationDatabase implements Serializable {
 	}
 
 	public boolean needsUpdate() {
-		if (databaseVersion != StationManager.DATABASE_VERSION) {
+		if (databaseVersion != SeedlinkManager.DATABASE_VERSION) {
 			return true;
 		}
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
-		return c.getTimeInMillis() - lastUpdate > (1000l * 60 * 60 * 24 * updateIntervalDays);
+		return c.getTimeInMillis() - lastUpdate > (1000L * 60 * 60 * 24 * updateIntervalDays);
 	}
 
 	public ArrayList<Network> getNetworks() {
@@ -50,7 +52,7 @@ public class StationDatabase implements Serializable {
 	}
 
 	public void copySelectedStationsFrom(StationDatabase oldDatabase) {
-		this.selectedStations = new ArrayList<SelectedStation>();
+		this.selectedStations = new ArrayList<>();
 		if (oldDatabase == null || oldDatabase.getSelectedStations() == null) {
 			return;
 		}

@@ -20,7 +20,7 @@ import com.morce.globalquake.database.Station;
 
 import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.core.zejfseis.ZejfSeisStation;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 import globalquake.main.Main;
 import globalquake.ui.GlobalQuakeFrame;
 import globalquake.utils.GeoUtils;
@@ -30,6 +30,7 @@ public class GlobalQuake {
 
 	public static final File ERRORS_FILE = new File(Main.MAIN_FOLDER, "/error_logs/");
 	private GlobalQuakeFrame globalQuakeFrame;
+
 	protected ArrayList<AbstractStation> stations = new ArrayList<>();
 	private ZejfSeisStation zejf;
 	private NetworkManager networkManager;
@@ -46,21 +47,18 @@ public class GlobalQuake {
 	private ZejfSeisClient zejfClient;
 	public static GlobalQuake instance;
 
-	public GlobalQuake(StationManager stationManager) {
+	public GlobalQuake(SeedlinkManager seedlinkManager) {
 		instance = this;
-		if (stationManager == null) {
-			return;
-		}
 		createFrame();
-		initStations(stationManager);
-		runZejf();
+		initStations(seedlinkManager);
+		runZejfSeisClient();
 		runNetworkManager();
 		runThreads();
 	}
 
 	private void runThreads() {
 		ScheduledExecutorService execAnalysis = Executors
-				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Station Analyis Thread"));
+				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Station Analysis Thread"));
 		ScheduledExecutorService exec1Sec = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("1-Second Loop Thread"));
 		ScheduledExecutorService execClusters = Executors
@@ -75,90 +73,75 @@ public class GlobalQuake {
 		alertCenter = new AlertCenter(this);
 		archive = new EarthquakeArchive(this);
 
-		execAnalysis.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					for (AbstractStation station : stations) {
-						station.analyse();
-					}
-					lastAnalysis = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in station analysis");
-					e.printStackTrace();
-					saveError(e);
-				}
-			}
-		}, 0, 100, TimeUnit.MILLISECONDS);
+		execAnalysis.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                for (AbstractStation station : stations) {
+                    station.analyse();
+                }
+                lastAnalysis = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occurred in station analysis");
+                e.printStackTrace();
+                saveError(e);
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
 
-		exec1Sec.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					for (AbstractStation s : stations) {
-						s.second();
-					}
-					if (getEarthquakeAnalysis() != null) {
-						getEarthquakeAnalysis().second();
-					}
-					lastSecond = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in 1-second loop");
-					e.printStackTrace();
-					saveError(e);
-				}
-			}
-		}, 0, 1, TimeUnit.SECONDS);
+		exec1Sec.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                for (AbstractStation s : stations) {
+                    s.second();
+                }
+                if (getEarthquakeAnalysis() != null) {
+                    getEarthquakeAnalysis().second();
+                }
+                lastSecond = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occurred in 1-second loop");
+                e.printStackTrace();
+                saveError(e);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
 
-		execGC.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					System.gc();
-					lastGC = System.currentTimeMillis() - a;
-					// throw new Exception("Error test");
-				} catch (Exception e) {
-					System.err.println("Exception in garbage collector");
-					e.printStackTrace();
-					saveError(e);
-				}
-			}
-		}, 0, 10, TimeUnit.SECONDS);
+		execGC.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                System.gc();
+                lastGC = System.currentTimeMillis() - a;
+                // throw new Exception("Error test");
+            } catch (Exception e) {
+                System.err.println("Exception in garbage collector");
+                e.printStackTrace();
+                saveError(e);
+            }
+        }, 0, 10, TimeUnit.SECONDS);
 
-		execClusters.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					clusterAnalysis.run();
-					alertCenter.tick();
-					clusterAnalysisT = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in cluster analysis loop");
-					e.printStackTrace();
-					saveError(e);
-				}
-			}
-		}, 0, 500, TimeUnit.MILLISECONDS);
+		execClusters.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                clusterAnalysis.run();
+                alertCenter.tick();
+                clusterAnalysisT = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occured in cluster analysis loop");
+                e.printStackTrace();
+                saveError(e);
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
 
-		execQuake.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					long a = System.currentTimeMillis();
-					earthquakeAnalysis.run();
-					archive.update();
-					lastQuakesT = System.currentTimeMillis() - a;
-				} catch (Exception e) {
-					System.err.println("Exception occured in hypocenter location loop");
-					e.printStackTrace();
-					saveError(e);
-				}
-			}
-		}, 0, 1, TimeUnit.SECONDS);
+		execQuake.scheduleAtFixedRate(() -> {
+            try {
+                long a = System.currentTimeMillis();
+                earthquakeAnalysis.run();
+                archive.update();
+                lastQuakesT = System.currentTimeMillis() - a;
+            } catch (Exception e) {
+                System.err.println("Exception occured in hypocenter location loop");
+                e.printStackTrace();
+                saveError(e);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
 	}
 
 	public void saveError(Exception e) {
@@ -175,7 +158,7 @@ public class GlobalQuake {
 		}
 	}
 
-	private void runZejf() {
+	private void runZejfSeisClient() {
 		if (zejf != null) {
 			zejfClient = new ZejfSeisClient(zejf);
 			zejfClient.connect();
@@ -187,9 +170,9 @@ public class GlobalQuake {
 		networkManager.run();
 	}
 
-	private void initStations(StationManager stationManager) {
+	private void initStations(SeedlinkManager seedlinkManager) {
 		stations.clear();
-		for (Network n : stationManager.getDatabase().getNetworks()) {
+		for (Network n : seedlinkManager.getDatabase().getNetworks()) {
 			for (Station s : n.getStations()) {
 				for (Channel ch : s.getChannels()) {
 					if (ch.isSelected() && ch.isAvailable()) {
@@ -201,9 +184,10 @@ public class GlobalQuake {
 				}
 			}
 		}
+
 		addZejfNetStations();
 		createListOfClosestStations();
-		System.out.println("Initalized " + stations.size() + " Stations.");
+		System.out.println("Initialized " + stations.size() + " Stations.");
 	}
 
 	private void addZejfNetStations() {
@@ -286,11 +270,10 @@ public class GlobalQuake {
 	private int nextID = 0;
 
 	private GlobalStation createGlobalStation(Channel ch) {
-		GlobalStation station = new GlobalStation(this, ch.getStation().getNetwork().getNetworkCode(),
+        return new GlobalStation(this, ch.getStation().getNetwork().getNetworkCode(),
 				ch.getStation().getStationCode(), ch.getName(), ch.getLocationCode(), ch.getSource(),
 				ch.getSeedlinkNetwork(), ch.getStation().getLat(), ch.getStation().getLon(), ch.getStation().getAlt(),
 				ch.getSensitivity(), ch.getFrequency(), nextID++);
-		return station;
 	}
 
 	private void createFrame() {

@@ -1,18 +1,22 @@
 package com.morce.globalquake.database;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Station implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 2312757862612025168L;
-	private String stationCode;
-	private String stationSite;
-	private ArrayList<Channel> channels;
-	private double lat;
-	private double lon;
-	private double alt;
-	private transient long delay = 9999999999l;
+	private final String stationCode;
+	private final String stationSite;
+	private final ArrayList<Channel> channels;
+	private final double lat;
+	private final double lon;
+	private final double alt;
+
+	@SuppressWarnings("unused")
+	private final transient long delay = 9999999999L;
 	private transient int selectedChannel = -1;
 	private transient Network network;
 
@@ -22,7 +26,7 @@ public class Station implements Serializable {
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
-		this.channels = new ArrayList<Channel>();
+		this.channels = new ArrayList<>();
 	}
 
 	public boolean containsChannel(String channel, String locationCode) {
@@ -65,14 +69,6 @@ public class Station implements Serializable {
 			}
 		}
 		return null;
-	}
-
-	public long getDelay() {
-		return delay;
-	}
-
-	public void setDelay(long delay) {
-		this.delay = delay;
 	}
 
 	public int getSelectedChannel() {

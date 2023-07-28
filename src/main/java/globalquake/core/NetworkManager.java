@@ -6,7 +6,7 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 
 public class NetworkManager {
 
@@ -23,7 +23,7 @@ public class NetworkManager {
 	}
 
 	public void run() {
-		for (SeedlinkNetwork seedlink : StationManager.seedlinks) {
+		for (SeedlinkNetwork seedlink : SeedlinkManager.seedlinks) {
 			if (seedlink.selectedStations == 0) {
 				System.out.println("No stations selected at " + seedlink.getHost());
 				continue;

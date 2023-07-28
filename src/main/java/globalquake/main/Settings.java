@@ -9,7 +9,7 @@ import java.util.Properties;
 public final class Settings {
 
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
-	private static Properties properties = new Properties();
+	private static final Properties properties = new Properties();
 	
 	public static String zejfSeisIP;
 	public static Integer zejfSeisPort;
@@ -47,12 +47,12 @@ public final class Settings {
 	
 	public static void save() {
 		properties.setProperty("zejfSeisIP", zejfSeisIP);
-		properties.setProperty("zejfSeisPort", zejfSeisPort+"");
-		properties.setProperty("zejfSeisAutoReconnect", zejfSeisAutoReconnect+"");
-		properties.setProperty("enableAlarmDialogs", enableAlarmDialogs+"");
+		properties.setProperty("zejfSeisPort", String.valueOf(zejfSeisPort));
+		properties.setProperty("zejfSeisAutoReconnect", String.valueOf(zejfSeisAutoReconnect));
+		properties.setProperty("enableAlarmDialogs", String.valueOf(enableAlarmDialogs));
 		
-		properties.setProperty("homeLat", homeLat+"");
-		properties.setProperty("homeLon", homeLon+"");
+		properties.setProperty("homeLat", String.valueOf(homeLat));
+		properties.setProperty("homeLon", String.valueOf(homeLon));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "magic");
 		} catch (IOException e) {

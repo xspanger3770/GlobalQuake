@@ -21,7 +21,7 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Station;
 
 import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 
 public class StationSelectPanel extends GlobePanel {
 
@@ -117,9 +117,9 @@ public class StationSelectPanel extends GlobePanel {
 					start.setTimeInMillis(ch.getStart());
 					String str = ch.getLocationCode() + " " + ch.getName() + " - " + ch.getSampleRate() + "sps, "
 							+ (ch.getSource() < 0 ? "?????, "
-									: StationManager.sources.get(ch.getSource()).getName() + ", ")
+									: SeedlinkManager.sources.get(ch.getSource()).getName() + ", ")
 							+ (ch.getSeedlinkNetwork() == -1 ? "not available"
-									: StationManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
+									: SeedlinkManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
 							+ ", begin: " + formatSimple.format(start.getTime()) + ", delay="
 							+ f1d.format(ch.getDelay() / 1000.0) + "s";
 
@@ -204,9 +204,9 @@ public class StationSelectPanel extends GlobePanel {
 					start.setTimeInMillis(ch.getStart());
 					str = ch.getLocationCode() + " " + ch.getName() + " - " + ch.getSampleRate() + "sps, "
 							+ (ch.getSource() < 0 ? "?????, "
-									: StationManager.sources.get(ch.getSource()).getName() + ", ")
+									: SeedlinkManager.sources.get(ch.getSource()).getName() + ", ")
 							+ (ch.getSeedlinkNetwork() == -1 ? "not available"
-									: StationManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
+									: SeedlinkManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
 							+ ", begin: " + formatSimple.format(start.getTime()) + ", delay="
 							+ f1d.format(ch.getDelay() / 1000.0) + "s";
 					g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5),
@@ -218,7 +218,7 @@ public class StationSelectPanel extends GlobePanel {
 		}
 
 		int _y = 16;
-		for (SeedlinkNetwork seed : StationManager.seedlinks) {
+		for (SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
 			g.setColor(seed.selectedStations > 0 ? Color.green : Color.lightGray);
 			g.setFont(new Font("Calibri", Font.BOLD, 18));
 			g.drawString(seed.getHost() + " (" + seed.selectedStations + "/" + seed.availableStations + ")", 5, _y);

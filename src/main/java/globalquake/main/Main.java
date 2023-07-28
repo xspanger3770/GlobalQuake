@@ -3,12 +3,12 @@ package globalquake.main;
 import java.io.File;
 
 import globalquake.core.GlobalQuake;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 import globalquake.ui.DatabaseMonitor;
 
 public class Main {
 
-	private StationManager stationManager;
+	private SeedlinkManager seedlinkManager;
 	private DatabaseMonitor databaseMonitor;
 	private GlobalQuake globalQuake;
 
@@ -26,7 +26,7 @@ public class Main {
 	}
 
 	private void startDatabaseManager() {
-		stationManager = new StationManager() {
+		seedlinkManager = new SeedlinkManager() {
 			@Override
 			public void confirmDialog(String title, String message, int optionType, int messageType,
 					String... options) {
@@ -35,11 +35,11 @@ public class Main {
 			}
 		};
 
-		databaseMonitor = new DatabaseMonitor(stationManager, this);
+		databaseMonitor = new DatabaseMonitor(seedlinkManager, this);
 		databaseMonitor.setVisible(true);
 		
 		System.out.println("init");
-		stationManager.init();
+		seedlinkManager.init();
 	}
 
 	public static void main(String[] args) {
@@ -49,7 +49,7 @@ public class Main {
 	public void launch() {
 		System.gc();
 		System.out.println("Launch");
-		globalQuake = new GlobalQuake(stationManager);
+		globalQuake = new GlobalQuake(seedlinkManager);
 	}
 
 	public GlobalQuake getGlobalQuake() {

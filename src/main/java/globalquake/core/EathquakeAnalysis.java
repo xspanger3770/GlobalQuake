@@ -30,10 +30,10 @@ public class EathquakeAnalysis {
 
 	public static SimpleDateFormat form = new SimpleDateFormat("HH:mm:ss");
 
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	private ArrayList<Earthquake> earthquakes = new ArrayList<Earthquake>();
 
-	public Object earthquakesSync;
+	public final Object earthquakesSync;
 
 	public EathquakeAnalysis(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;

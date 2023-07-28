@@ -35,7 +35,7 @@ import globalquake.core.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 import globalquake.main.Settings;
 import globalquake.res.sounds.Sounds;
 import globalquake.utils.GeoUtils;
@@ -652,7 +652,7 @@ public class GlobalQuakePanel extends GlobePanel {
 			_y += 16;
 		}
 
-		for (SeedlinkNetwork seed : StationManager.seedlinks) {
+		for (SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
 			g.setColor(seed.selectedStations == 0 ? Color.lightGray
 					: (seed.status == SeedlinkNetwork.DISCONNECTED ? Color.red
 							: seed.status == SeedlinkNetwork.CONNECTING ? Color.yellow : Color.green));
