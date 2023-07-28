@@ -32,12 +32,12 @@ import globalquake.core.EathquakeAnalysis;
 import globalquake.core.Event;
 import globalquake.core.GlobalStation;
 import globalquake.core.NearbyStationDistanceInfo;
-import globalquake.res.sounds.Sounds;
+import globalquake.sounds.Sounds;
 import globalquake.ui.EarthquakeListPanel;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityTable;
 import globalquake.utils.NamedThreadFactory;
-import globalquake.utils.TravelTimeTable;
+import globalquake.geo.TravelTimeTable;
 
 public class EarthquakeSimulator extends JFrame {
 

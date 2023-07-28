@@ -1,5 +1,7 @@
 package globalquake.utils;
 
+import globalquake.geo.TravelTimeTable;
+
 import java.util.Random;
 
 public class Test {

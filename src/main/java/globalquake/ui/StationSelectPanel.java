@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -22,11 +23,12 @@ import com.morce.globalquake.database.Station;
 
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkManager;
+import globalquake.main.Main;
 
 public class StationSelectPanel extends GlobePanel {
 
 	private static final long serialVersionUID = 1L;
-	private StationSelect stationSelect;
+	private final StationSelect stationSelect;
 	public static DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static final SimpleDateFormat formatSimple = new SimpleDateFormat("yyyy/MM/dd");
 
@@ -92,8 +94,7 @@ public class StationSelectPanel extends GlobePanel {
 
 		if (station == null) {
 			System.err.println("Fatal Error: null");
-			return;
-		} else {
+        } else {
 			String[] allChannels = new String[station.getChannels().size()];
 			int j = 0;
 			int ava = 0;
@@ -136,9 +137,7 @@ public class StationSelectPanel extends GlobePanel {
 			String result = (String) JOptionPane.showInputDialog(this,
 					"Select channel for station " + station.getStationCode() + ":", "Channel selection",
 					JOptionPane.PLAIN_MESSAGE, null, availableChannels, availableChannels[selectedIndex]);
-			if (result == null) {
-				return;
-			} else {
+            if (result != null) {
 				int selectedChannel = -1;
 				int l = 0;
 				for (String str : availableChannels) {
@@ -151,14 +150,15 @@ public class StationSelectPanel extends GlobePanel {
 				// if "None" is selected, then it is -1
 				Station s2 = station;
 				int see = selectedChannel;
-				new Thread() {
-					public void run() {
+				new Thread(() -> {
+					try {
 						stationSelect.getStationManager().editSelection(s2, see == -1 || see == 0 ? -1 : map.get(see));
-
-					};
-				}.start();
+					} catch (IOException e) {
+						Main.getErrorHandler().handleException(e);
+					}
+				}).start();
 			}
-		}
+        }
 
 	}
 

@@ -36,11 +36,11 @@ import globalquake.core.Event;
 import globalquake.core.NearbyStationDistanceInfo;
 import globalquake.main.Settings;
 import globalquake.ui.GlobePanel;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.Level;
 import globalquake.utils.Scale;
 import globalquake.utils.Shindo;
-import globalquake.utils.TravelTimeTable;
+import globalquake.geo.TravelTimeTable;
 
 public class EarthquakeSimulatorPanel extends GlobePanel {
 

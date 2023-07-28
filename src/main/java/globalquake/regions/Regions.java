@@ -1,8 +1,7 @@
 package globalquake.regions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import globalquake.res.Res;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import org.geojson.*;
 import org.json.JSONObject;
 
@@ -26,14 +25,14 @@ public class Regions {
 	public static ArrayList<Region> regionsHD = new ArrayList<Region>();
 	public static ArrayList<Region> regionsUHD = new ArrayList<Region>();
 
-	public static void init() throws IOException{
-		loadPolygons("countriesUHD.json", raw_polygonsUHD, regionsUHD);
-		loadPolygons("countriesHD.json", raw_polygonsHD, regionsHD);
-		loadPolygons("countriesMD.json", raw_polygonsMD, regionsMD);
+	public static void init() throws IOException {
+		loadPolygons("polygons/countriesMD.json", raw_polygonsMD, regionsMD);
+		loadPolygons("polygons/countriesHD.json", raw_polygonsHD, regionsHD);
+		loadPolygons("polygons/countriesUHD.json", raw_polygonsUHD, regionsUHD);
 	}
 
 	//
-	public static String downloadRegion(double lat, double lon) {
+	public static String downloadRegion(double lat, double lon){
 		try {
 			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
 					lat, lon);
@@ -96,9 +95,9 @@ public class Regions {
 	}
 
 	private static void loadPolygons(String name, ArrayList<Polygon> raw, ArrayList<Region> regions) throws IOException {
-		URL resource = Res.class.getResource(name);
+		URL resource = ClassLoader.getSystemClassLoader().getResource(name);
 		if(resource == null){
-			throw new NullPointerException("Unable to load polygons");
+			throw new IOException("Unable to load polygons: %s".formatted(name));
 		}
 		InputStream stream;
 		FeatureCollection featureCollection = new ObjectMapper().readValue(stream = resource.openStream(),

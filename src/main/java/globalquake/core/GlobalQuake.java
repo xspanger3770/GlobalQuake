@@ -23,7 +23,7 @@ import globalquake.core.zejfseis.ZejfSeisStation;
 import globalquake.database.SeedlinkManager;
 import globalquake.main.Main;
 import globalquake.ui.GlobalQuakeFrame;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.NamedThreadFactory;
 
 public class GlobalQuake {
@@ -277,32 +277,31 @@ public class GlobalQuake {
 	}
 
 	private void createFrame() {
-		EventQueue.invokeLater(new Runnable() {
+		EventQueue.invokeLater(() -> {
+            globalQuakeFrame = new GlobalQuakeFrame(GlobalQuake.this);
+            globalQuakeFrame.setVisible(true);
 
-			@Override
-			public void run() {
-				globalQuakeFrame = new GlobalQuakeFrame(GlobalQuake.this);
-				globalQuakeFrame.setVisible(true);
 
-				globalQuakeFrame.addWindowListener(new WindowAdapter() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public void windowClosing(WindowEvent e) {
-						// todo
-						ArrayList<Earthquake> quakes = null;
+			Main.getErrorHandler().setParent(globalQuakeFrame);
 
-						synchronized (getEarthquakeAnalysis().earthquakesSync) {
-							quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
-						}
+            globalQuakeFrame.addWindowListener(new WindowAdapter() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    // todo
+                    ArrayList<Earthquake> quakes = null;
 
-						for (Earthquake quake : quakes) {
-							getArchive().archiveQuake(quake);
-						}
-						getArchive().saveArchive();
-					}
-				});
-			}
-		});
+                    synchronized (getEarthquakeAnalysis().earthquakesSync) {
+                        quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
+                    }
+
+                    for (Earthquake quake : quakes) {
+                        getArchive().archiveQuake(quake);
+                    }
+                    getArchive().saveArchive();
+                }
+            });
+        });
 	}
 
 	public ArrayList<AbstractStation> getStations() {

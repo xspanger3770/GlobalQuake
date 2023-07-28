@@ -2,7 +2,7 @@ package globalquake.core;
 
 import java.util.ArrayList;
 
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 
 public class Cluster {
 

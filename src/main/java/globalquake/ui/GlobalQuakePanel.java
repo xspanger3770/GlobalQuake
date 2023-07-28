@@ -37,13 +37,13 @@ import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkManager;
 import globalquake.main.Settings;
-import globalquake.res.sounds.Sounds;
-import globalquake.utils.GeoUtils;
+import globalquake.sounds.Sounds;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityTable;
 import globalquake.utils.Level;
 import globalquake.utils.Scale;
 import globalquake.utils.Shindo;
-import globalquake.utils.TravelTimeTable;
+import globalquake.geo.TravelTimeTable;
 
 public class GlobalQuakePanel extends GlobePanel {
 

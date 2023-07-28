@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import globalquake.main.Settings;
-import globalquake.res.sounds.Sounds;
-import globalquake.utils.GeoUtils;
+import globalquake.sounds.Sounds;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.Level;
 import globalquake.utils.Shindo;
-import globalquake.utils.TravelTimeTable;
+import globalquake.geo.TravelTimeTable;
 
 public class ClusterAnalysis {
 

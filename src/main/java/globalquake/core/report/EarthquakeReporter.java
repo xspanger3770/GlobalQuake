@@ -22,7 +22,7 @@ import globalquake.core.Event;
 import globalquake.main.Main;
 import globalquake.ui.GlobePanel;
 import globalquake.utils.DistanceIntensityRecord;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityGraphs;
 import globalquake.utils.Scale;
 

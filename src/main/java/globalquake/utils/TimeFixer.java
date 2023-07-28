@@ -14,9 +14,5 @@ public class TimeFixer {
 	public static long offset() {
 		return TimeZone.getTimeZone("CET").getOffset(System.currentTimeMillis());
 	}
-	
-	public static long bTimeToMillis(Btime time) {
-		return 0;
-	}
 
 }

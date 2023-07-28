@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 import org.geojson.LngLatAlt;
 
 import globalquake.regions.Regions;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 

@@ -6,16 +6,17 @@ import java.util.HashMap;
 
 import globalquake.main.Settings;
 import globalquake.ui.AlertWindow;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
+import org.tinylog.Logger;
 
 public class AlertCenter {
 
-	private GlobalQuake globalQuake;
-	private HashMap<Earthquake, Warning> warnedQuakes;
+	private final GlobalQuake globalQuake;
+	private final HashMap<Earthquake, Warning> warnedQuakes;
 
 	public AlertCenter(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		this.warnedQuakes = new HashMap<Earthquake, Warning>();
+		this.warnedQuakes = new HashMap<>();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -23,24 +24,21 @@ public class AlertCenter {
 		if(!Settings.enableAlarmDialogs) {
 			return;
 		}
-		ArrayList<Earthquake> quakes = null;
+		ArrayList<Earthquake> quakes;
 		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
 			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
 		}
 		for (Earthquake quake : quakes) {
 			if (meetsConditions(quake) && !warnedQuakes.containsKey(quake)) {
 				warnedQuakes.put(quake, new Warning());
-				System.err.println("WARNING");
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						try {
-							AlertWindow frame = new AlertWindow(quake);
-							frame.setVisible(true);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
+				EventQueue.invokeLater(() -> {
+                    try {
+                        AlertWindow frame = new AlertWindow(quake);
+                        frame.setVisible(true);
+                    } catch (Exception e) {
+                        Logger.error(e);
+                    }
+                });
 			}
 		}
 	}
@@ -64,12 +62,8 @@ public class AlertCenter {
 			return true;
 		}
 
-		if (pgaHome >= 0.1) {
-			return true;
-		}
-
-		return false;
-	}
+        return pgaHome >= 0.1;
+    }
 
 	public GlobalQuake getGlobalQuake() {
 		return globalQuake;

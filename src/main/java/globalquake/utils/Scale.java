@@ -1,25 +1,18 @@
 package globalquake.utils;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import globalquake.res.Res;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Objects;
 
 public class Scale {
 
 	private static BufferedImage pgaScale;
-	static {
-		try {
-			pgaScale = ImageIO.read(Res.class.getResource("pgaScale3.png"));
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
+	public static void load() throws IOException, NullPointerException {
+		pgaScale = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("scales/pgaScale3.png")));
 	}
 
 	public static Color getColorPGA(double pga) {

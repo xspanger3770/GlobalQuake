@@ -11,7 +11,7 @@ import globalquake.database.SeedlinkManager;
 public class NetworkManager {
 
 	protected static final int RECONNECT_DELAY = 10;
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	private Calendar lastData;
 
 	public NetworkManager(GlobalQuake globalQuake) {

@@ -8,10 +8,10 @@ import java.util.Iterator;
 
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.simulation.SimulatedStation;
-import globalquake.res.sounds.Sounds;
-import globalquake.utils.GeoUtils;
+import globalquake.sounds.Sounds;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.IntensityTable;
-import globalquake.utils.TravelTimeTable;
+import globalquake.geo.TravelTimeTable;
 
 public class EathquakeAnalysis {
 

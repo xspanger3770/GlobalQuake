@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 
 import globalquake.core.ArchivedQuake;
 import globalquake.core.GlobalQuake;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import globalquake.utils.Level;
 import globalquake.utils.Shindo;
 

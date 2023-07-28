@@ -4,6 +4,7 @@ import com.morce.globalquake.database.*;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.main.Main;
 import globalquake.utils.TimeFixer;
+import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,8 +28,9 @@ public class SeedlinkManager implements IStationManager {
 
 	public static final int DATABASE_VERSION = 4;
 
-	public static final ArrayList<StationSource> sources = new ArrayList<StationSource>();
-	public static final ArrayList<SeedlinkNetwork> seedlinks = new ArrayList<SeedlinkNetwork>();
+	private static final File STATIONS_FILE = new File(Main.MAIN_FOLDER, "/stationDatabase/");
+	public static final ArrayList<StationSource> sources = new ArrayList<>();
+	public static final ArrayList<SeedlinkNetwork> seedlinks = new ArrayList<>();
 	
 	private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -54,10 +56,9 @@ public class SeedlinkManager implements IStationManager {
 	public String updating_string = "";
 	public String availability_string = "";
 	
-	private static final File stationsFile = new File(Main.MAIN_FOLDER, "/stationDatabase/");
 	private StationDatabase database;
 	
-	static {
+	private void initServers() {
 		sources.add(new StationSource("EIDA_DE", "https://eida.bgr.de/fdsnws/station/1/query?nodata=404&", (byte) 0));
 		sources.add(new StationSource("EIDA_RO", "https://eida-sc3.infp.ro/fdsnws/station/1/query?nodata=404&", (byte) 1));
 
@@ -75,16 +76,15 @@ public class SeedlinkManager implements IStationManager {
 		seedlinks.add(new SeedlinkNetwork((byte) 2, "Iris Seedlink", IRIS_RTSERVER));
 	}
 
-	public void init() {
-		load();
-		update(false);
+	public SeedlinkManager(){
+		initServers();
 	}
 
 	public int getState() {
 		return state;
 	}
 
-	private void load() {
+	public void load() throws IOException{
 		state = LOAD_DATABASE;
 		updating_progress = 0;
 		updating_string = "Waiting...";
@@ -97,7 +97,9 @@ public class SeedlinkManager implements IStationManager {
 					"Station database file doesn't exists, a new one will be created at:\n" + file.getAbsolutePath(),
 					JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, "Cancel", "Ok");
 			if (!getTempDatabaseFile().getParentFile().exists()) {
-				getTempDatabaseFile().getParentFile().mkdirs();
+				if(!getTempDatabaseFile().getParentFile().mkdirs()){
+					throw new IOException("Unable to create database file directory!");
+				}
 			}
 			updateDatabase();
 		} else {
@@ -108,9 +110,14 @@ public class SeedlinkManager implements IStationManager {
 				
 				this.database = database;
 				System.out.println("Station database loaded sucesfully.");
-				checkForUpdates();
+
+				if(needsUpdate()) {
+					updateDatabase();
+				} else {
+					finish();
+				}
 				
-			} catch (Exception e) {
+			} catch (IOException | ClassNotFoundException e) {
 				confirmDialog("Error",
 						exc(e) + "\nFailed to load database file " + file.getAbsolutePath()
 								+ ", it is probably corrupted\nA new database will be created",
@@ -120,11 +127,7 @@ public class SeedlinkManager implements IStationManager {
 		}
 	}
 
-	public void update(boolean updateDatabase) {
-		if (updateDatabase) {
-			updateDatabase();
-		}
-
+	private void finish() throws IOException {
 		for (SeedlinkNetwork seed : seedlinks) {
 			seed.availableStations = 0;
 			seed.selectedStations = 0;
@@ -159,14 +162,14 @@ public class SeedlinkManager implements IStationManager {
 		}
 		getDatabase().getNetworks().sort(Comparator.comparing(Network::getNetworkCode));
 
-		doImportantStuff();
-		
-	
+		buildDatabase();
+
 		System.out.println();
 		System.out.println(nets + " networks, " + stats + " stations, " + chans + " channels.");
 		System.out.println(ava + " available channels, " + sel + " selected channels");
 		System.out.println();
 		System.out.println("The database is ready.");
+
 		state = DONE;
 		availability_string = "Done!";
 	}
@@ -178,24 +181,20 @@ public class SeedlinkManager implements IStationManager {
         return sw.toString();
 	}
 
-	public void save() {
-		try {
-			File file = getDatabaseFile();
-			File _file = getTempDatabaseFile();
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(_file));
-			System.out.println("Saving stations database to " + file.getAbsolutePath());
-			out.writeObject(database);
-			out.close();
-			file.delete();
-			_file.renameTo(file);
-			_file.delete();
-			System.out.println("Save successful.");
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void save() throws IOException{
+		File file = getDatabaseFile();
+		File _file = getTempDatabaseFile();
+		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(_file));
+		System.out.println("Saving stations database to " + file.getAbsolutePath());
+		out.writeObject(database);
+		out.close();
+		if(!(file.delete() && _file.renameTo(file) && _file.delete())) {
+			throw new IOException("Error occurred while saving database!");
 		}
+		System.out.println("Save successful.");
 	}
 
-	private void doImportantStuff() {
+	private void buildDatabase() {
 		for (Network n : getDatabase().getNetworks()) {
 			for (Station s : n.getStations()) {
 				s.setNetwork(n);
@@ -304,8 +303,6 @@ public class SeedlinkManager implements IStationManager {
 			ch.setSeedlinkNetwork(seedlinkNetwork);
 
 			seedlinks.get(seedlinkNetwork).availableStations++;
-		} else {
-			// available channel isnt in the database
 		}
 	}
 
@@ -321,21 +318,11 @@ public class SeedlinkManager implements IStationManager {
 		return null;
 	}
 
-	private void checkForUpdates() {
-		System.out.println("Checking for database updates...");
-		if (!needsUpdate()) {
-			System.out.println("No need for database update.");
-			return;
-		} else {
-			updateDatabase();
-		}
-	}
-
 	public boolean needsUpdate() {
 		return database == null || database.needsUpdate();
 	}
 
-	private void updateDatabase() {
+	public void updateDatabase() throws IOException{
 		System.out.println("Updating database, this may take a minute...");
 
 		Calendar now = Calendar.getInstance();
@@ -373,6 +360,8 @@ public class SeedlinkManager implements IStationManager {
 		updating_string = "Done!";
 
 		System.out.println("The new database now contains " + newDatabase.getNetworks().size() + " networks");
+
+		finish();
 	}
 
 	private void downloadSource(final StationSource se, StationDatabase database, Calendar now) throws Exception {
@@ -388,34 +377,11 @@ public class SeedlinkManager implements IStationManager {
 		f.setValidating(false);
 		final CountInputStream in = new CountInputStream(inp);
 
-		in.setEvent(new Runnable() {
-			public void run() {
-				updating_string = "Downloading from " + se.getName() + ": " + (in.getCount() / 1024) + "kB";
-			}
-		});
+		in.setEvent(() -> updating_string = "Downloading from " + se.getName() + ": " + (in.getCount() / 1024) + "kB");
 
-		System.out.println("Downloading stations from " + se.getName() + " (" + url.toString() + ")");
-
-		Thread counter = new Thread("Counting Thread") {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						sleep(1000);
-					} catch (InterruptedException e) {
-						System.out.println("Total file size was " + (in.getCount() / 1024) + "kB");
-						break;
-					}
-					System.out.println("Downloading... " + (in.getCount() / 1024) + "kB");
-				}
-			}
-		};
-
-		counter.start();
+		System.out.println("Downloading stations from " + se.getName() + " (" + url + ")");
 
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-
-		counter.interrupt();
 
 		doc.getDocumentElement().normalize();
 
@@ -441,12 +407,7 @@ public class SeedlinkManager implements IStationManager {
 					NodeList channels = ((Element) stationNode).getElementsByTagName("Channel");
 					for (int k = 0; k < channels.getLength(); k++) {
 						try {
-
-							/**
-							 * Necessary values: lat lon alt sampleRate
-							 * 
-							 * Other can fail
-							 */
+							 // Necessary values: lat lon alt sampleRate, Other can fail
 
 							Node channelNode = channels.item(k);
 							String channel = channelNode.getAttributes().getNamedItem("code").getNodeValue();
@@ -487,35 +448,21 @@ public class SeedlinkManager implements IStationManager {
 								System.err.println(
 										"No Input Units!!! " + stationCode + " " + networkCode + " " + channel);
 							}
-							String startDate = "";
-							try {
-								startDate = obtainAttribute(channels.item(k), "startDate", "unknown");
-							} catch (Exception e) {
-								System.err.println("Error: broken start date.");
-								continue;
-							}
 
-							String endDate = "";
-							try {
-								endDate = obtainAttribute(channels.item(k), "endDate", "unknown");
-							} catch (Exception e) {
-
-							}
+							String startDate = obtainAttribute(channels.item(k), "startDate", "unknown");
+							String endDate = obtainAttribute(channels.item(k), "endDate", "unknown");
 
 							addChannel(database, se, networkCode, networkDescription, stationCode, stationSite, channel,
 									locationCode, lat, lon, alt, sensitivity, frequency, sampleRate, inputUnits,
 									startDate, endDate, now);
 						} catch (Exception e) {
-							System.err.println("Weird Error occured");
-							e.printStackTrace();
-							continue;
+							Main.getErrorHandler().handleException(e);
 						}
 					}
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
+				Main.getErrorHandler().handleException(e);
 			}
 		}
 	}
@@ -541,7 +488,7 @@ public class SeedlinkManager implements IStationManager {
 					return;
 				}
 			} catch (ParseException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 		Network net = getOrCreateNetwork(database, networkCode, networkDescription);
@@ -552,7 +499,7 @@ public class SeedlinkManager implements IStationManager {
 
 		if (!stat.containsChannel(channel, locationCode)) {
 			Channel ch = new Channel(channel, locationCode, sensitivity, frequency, sampleRate, inputUnits, startMS,
-					endMS, (byte) se.getId());
+					endMS, se.getId());
 			stat.getChannels().add(ch);
 		} else {
 			System.err
@@ -593,11 +540,11 @@ public class SeedlinkManager implements IStationManager {
 	}
 
 	public static File getDatabaseFile() {
-		return new File(stationsFile, "stationDatabase.dat");
+		return new File(STATIONS_FILE, "stationDatabase.dat");
 	}
 
 	public static File getTempDatabaseFile() {
-		return new File(stationsFile, "_stationDatabase.dat");
+		return new File(STATIONS_FILE, "_stationDatabase.dat");
 	}
 
 	@Override
@@ -605,42 +552,40 @@ public class SeedlinkManager implements IStationManager {
 		System.err.println(message);
 	}
 
-	public void editSelection(Station station, int selectedChannel) {
-		if (selectedChannel == station.getSelectedChannel()) {
-			return;// nothing changed
-		} else {
-			if (selectedChannel == -1) {
-				for (Channel ch : station.getChannels()) {
-					ch.setSelected(false);
-				}
-				seedlinks.get(station.getChannels().get(station.getSelectedChannel())
-						.getSeedlinkNetwork()).selectedStations--;
-				SelectedStation sel = getDatabase().getSelectedStation(station);
-				if (sel == null) {
-					System.err.println("Weird, no SelectedStation found.");
-				} else {
-					getDatabase().getSelectedStations().remove(sel);
-				}
-			} else {
-				Channel theChannel = station.getChannels().get(selectedChannel);
-				for (Channel ch : station.getChannels()) {
-					ch.setSelected(ch.equals(theChannel));
-				}
-				seedlinks.get(theChannel.getSeedlinkNetwork()).selectedStations++;
-				SelectedStation sel = getDatabase().getSelectedStation(station);
-				if (sel == null) {
-					// -1 => 5
-					getDatabase().getSelectedStations().add(new SelectedStation(station.getNetwork().getNetworkCode(),
-							station.getStationCode(), theChannel.getName(), theChannel.getLocationCode()));
-				} else {
-					sel.setChannelCode(theChannel.getName());
-					sel.setLocation(theChannel.getLocationCode());
-				}
-			}
-			station.setSelectedChannel(selectedChannel);
-			save();
-		}
-	}
+	public void editSelection(Station station, int selectedChannel) throws IOException{
+        if (selectedChannel != station.getSelectedChannel()) {
+            if (selectedChannel == -1) {
+                for (Channel ch : station.getChannels()) {
+                    ch.setSelected(false);
+                }
+                seedlinks.get(station.getChannels().get(station.getSelectedChannel())
+                        .getSeedlinkNetwork()).selectedStations--;
+                SelectedStation sel = getDatabase().getSelectedStation(station);
+                if (sel == null) {
+                    System.err.println("Weird, no SelectedStation found.");
+                } else {
+                    getDatabase().getSelectedStations().remove(sel);
+                }
+            } else {
+                Channel theChannel = station.getChannels().get(selectedChannel);
+                for (Channel ch : station.getChannels()) {
+                    ch.setSelected(ch.equals(theChannel));
+                }
+                seedlinks.get(theChannel.getSeedlinkNetwork()).selectedStations++;
+                SelectedStation sel = getDatabase().getSelectedStation(station);
+                if (sel == null) {
+                    // -1 => 5
+                    getDatabase().getSelectedStations().add(new SelectedStation(station.getNetwork().getNetworkCode(),
+                            station.getStationCode(), theChannel.getName(), theChannel.getLocationCode()));
+                } else {
+                    sel.setChannelCode(theChannel.getName());
+                    sel.setLocation(theChannel.getLocationCode());
+                }
+            }
+            station.setSelectedChannel(selectedChannel);
+            save();
+        }
+    }
 
 	public int getSelectedStations() {
 		int n = 0;
