@@ -1,12 +1,10 @@
-package globalquake.settings;
+package globalquake.main;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-import globalquake.main.Main;
 
 public final class Settings {
 
@@ -23,7 +21,7 @@ public final class Settings {
 	public static Double homeLon;
 	
 	public static boolean reportsEnabled = false; // not available
-	public static final boolean enableSound = false; // not available ATM
+	public static final boolean enableSound = true; // not available ATM
 
 	static {
 		load();

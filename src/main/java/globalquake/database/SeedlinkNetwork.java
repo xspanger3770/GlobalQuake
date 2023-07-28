@@ -1,6 +1,7 @@
 package globalquake.database;
 
 public class SeedlinkNetwork {
+	
 	public static final int DISCONNECTED = 0;
 	public static final int CONNECTING = 1;
 	public static final int CONNECTED = 2;
@@ -13,9 +14,10 @@ public class SeedlinkNetwork {
 
 	public int availableStations;
 	public int selectedStations;
-	public Thread seedlinkThread;
 	public int connectedStations;
 
+	public Thread seedlinkThread;
+	
 	public SeedlinkNetwork(byte id, String name, String host) {
 		this.host = host;
 		this.name = name;

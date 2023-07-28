@@ -1,4 +1,4 @@
-package globalquake.settings;
+package globalquake.ui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -13,6 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
+import globalquake.main.Settings;
 
 public class SettingsFrame {
 

@@ -1,12 +1,10 @@
 package globalquake.main;
 
-import java.awt.EventQueue;
 import java.io.File;
 
 import globalquake.core.GlobalQuake;
 import globalquake.database.StationManager;
 import globalquake.ui.DatabaseMonitor;
-import globalquake.ui.GlobePanel;
 
 public class Main {
 
@@ -28,12 +26,6 @@ public class Main {
 	}
 
 	private void startDatabaseManager() {
-		new Thread("Init GlobePanel") {
-			public void run() {
-				GlobePanel.init();
-			};
-		}.start();
-		StationManager.setFolderURL(MAIN_FOLDER.getAbsolutePath() + "/stationDatabase/");
 		stationManager = new StationManager() {
 			@Override
 			public void confirmDialog(String title, String message, int optionType, int messageType,
@@ -42,30 +34,10 @@ public class Main {
 				databaseMonitor.confirmDialog(title, message, optionType, messageType, options);
 			}
 		};
-		stationManager.auto_update = false;
 
-		final Object obj = new Object();
-
-		EventQueue.invokeLater(new Runnable() {
-
-			public void run() {
-				databaseMonitor = new DatabaseMonitor(stationManager, Main.this);
-				databaseMonitor.setVisible(true);
-
-				synchronized (obj) {
-					obj.notify();
-				}
-			}
-		});
-
-		// wait for frame to init
-		synchronized (obj) {
-			try {
-				obj.wait();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		}
+		databaseMonitor = new DatabaseMonitor(stationManager, this);
+		databaseMonitor.setVisible(true);
+		
 		System.out.println("init");
 		stationManager.init();
 	}

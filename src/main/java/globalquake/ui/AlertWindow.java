@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import globalquake.core.Earthquake;
-import globalquake.settings.Settings;
+import globalquake.main.Settings;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Level;
 import globalquake.utils.Shindo;

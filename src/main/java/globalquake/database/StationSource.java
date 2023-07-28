@@ -1,12 +1,12 @@
 package globalquake.database;
 
-public class DataSource {
+public class StationSource {
 
 	private String url;
 	private String name;
 	private byte id;
 
-	public DataSource(String name, String fdsnwsURL, byte id) {
+	public StationSource(String name, String fdsnwsURL, byte id) {
 		this.url = fdsnwsURL;
 		this.name = name;
 		this.id = id;

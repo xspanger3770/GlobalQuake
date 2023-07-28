@@ -1,14 +1,18 @@
-package globalquake.core;
+package globalquake.core.zejfseis;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class ZejfNetStation extends AbstractStation {
+import globalquake.core.AbstractStation;
+import globalquake.core.GlobalQuake;
+import globalquake.core.SimpleLog;
+
+public class ZejfSeisStation extends AbstractStation {
 
 	private Queue<SimpleLog> recordsQueue;
 	private Object recordsSync = new Object();
 
-	public ZejfNetStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
+	public ZejfSeisStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
 			String locationCode, double lat, double lon, double alt,
 			long sensitivity, double frequency, int id) {
 		super(globalQuake, networkCode, stationCode, channelName, locationCode, (byte)-1, (byte)-1, lat, lon, alt, sensitivity, frequency, id);

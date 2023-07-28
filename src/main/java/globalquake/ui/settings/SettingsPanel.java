@@ -1,4 +1,4 @@
-package globalquake.settings;
+package globalquake.ui.settings;
 
 import javax.swing.JPanel;
 

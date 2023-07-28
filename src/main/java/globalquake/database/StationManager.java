@@ -18,7 +18,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,14 +36,14 @@ import com.morce.globalquake.database.Station;
 import com.morce.globalquake.database.StationDatabase;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.main.Main;
 import globalquake.utils.TimeFixer;
 
 public class StationManager implements IStationManager {
 
-	public static final ArrayList<DataSource> sources = new ArrayList<DataSource>();
+	public static final ArrayList<StationSource> sources = new ArrayList<StationSource>();
 	public static final ArrayList<SeedlinkNetwork> seedlinks = new ArrayList<SeedlinkNetwork>();
-	private static final String folderURL_default = "./stationDatabase/";
-
+	
 	private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final SimpleDateFormat format3 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
@@ -57,44 +56,38 @@ public class StationManager implements IStationManager {
 
 	public static final int DATABASE_VERSION = 4;
 
-	public int state;
 	public static final int LOAD_DATABASE = 0;
 	public static final int UPDATING_DATABASE = 1;
 	public static final int CHECKING_AVAILABILITY = 2;
 	public static final int FINISHING = 3;
 	public static final int DONE = 4;
-
+	public int state;
+	
 	public double updating_progress = 0;
 	public double availability_progress = 0;
 
 	public String updating_string = "";
 	public String availability_string = "";
-
-	public boolean auto_update = true;
-
+	
+	private static File stationsFile = new File(Main.MAIN_FOLDER, "/stationDatabase/");
+	private StationDatabase database;
+	
 	static {
-		sources.add(new DataSource("EIDA_DE", "https://eida.bgr.de/fdsnws/station/1/query?nodata=404&", (byte) 0));
-		sources.add(new DataSource("EIDA_RO", "https://eida-sc3.infp.ro/fdsnws/station/1/query?nodata=404&", (byte) 1));
+		sources.add(new StationSource("EIDA_DE", "https://eida.bgr.de/fdsnws/station/1/query?nodata=404&", (byte) 0));
+		sources.add(new StationSource("EIDA_RO", "https://eida-sc3.infp.ro/fdsnws/station/1/query?nodata=404&", (byte) 1));
 
-		sources.add(new DataSource("RESIF", "https://ws.resif.fr/fdsnws/station/1/query?nodata=404&", (byte) 2));
+		sources.add(new StationSource("RESIF", "https://ws.resif.fr/fdsnws/station/1/query?nodata=404&", (byte) 2));
 		sources.add(
-				new DataSource("GEOFON", "https://geofon.gfz-potsdam.de/fdsnws/station/1/query?nodata=404&", (byte) 3));
-		sources.add(new DataSource("ERDE", "https://erde.geophysik.uni-muenchen.de/fdsnws/station/1/query?nodata=404&",
+				new StationSource("GEOFON", "https://geofon.gfz-potsdam.de/fdsnws/station/1/query?nodata=404&", (byte) 3));
+		sources.add(new StationSource("ERDE", "https://erde.geophysik.uni-muenchen.de/fdsnws/station/1/query?nodata=404&",
 				(byte) 4));
-		sources.add(new DataSource("ORFEUS", "https://www.orfeus-eu.org/fdsnws/station/1/query?nodata=404&", (byte) 5));
-		sources.add(new DataSource("IRIS", "https://service.iris.edu/fdsnws/station/1/query?nodata=404&", (byte) 6));
+		sources.add(new StationSource("ORFEUS", "https://www.orfeus-eu.org/fdsnws/station/1/query?nodata=404&", (byte) 5));
+		sources.add(new StationSource("IRIS", "https://service.iris.edu/fdsnws/station/1/query?nodata=404&", (byte) 6));
 
+		
 		seedlinks.add(new SeedlinkNetwork((byte) 0, "Geofon Seedlink", GEOFON));
 		seedlinks.add(new SeedlinkNetwork((byte) 1, "Resif Seedlink", RESIF));
 		seedlinks.add(new SeedlinkNetwork((byte) 2, "Iris Seedlink", IRIS_RTSERVER));
-	}
-
-	private static String folderURL = folderURL_default;
-
-	private StationDatabase database;
-
-	public StationManager() {
-
 	}
 
 	public void init() {
@@ -127,11 +120,11 @@ public class StationManager implements IStationManager {
 				ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
 				StationDatabase database = (StationDatabase) in.readObject();
 				in.close();
+				
 				this.database = database;
 				System.out.println("Station database loaded sucesfully.");
-				if (auto_update) {
-					checkForUpdates();
-				}
+				checkForUpdates();
+				
 			} catch (Exception e) {
 				confirmDialog("Error",
 						exc(e) + "\nFailed to load database file " + file.getAbsolutePath()
@@ -154,7 +147,7 @@ public class StationManager implements IStationManager {
 
 		checkAvailability();
 		state = FINISHING;
-		parseSelectedStations();
+		processSelectedStations();
 
 		int nets = 0;
 		int stats = 0;
@@ -193,20 +186,6 @@ public class StationManager implements IStationManager {
 		availability_string = "Done!";
 	}
 	
-	@SuppressWarnings("unused")
-	private void europeOnly() {
-		Iterator<SelectedStation> it=database.getSelectedStations().iterator();
-		while(it.hasNext()) {
-			SelectedStation selectedStation = it.next();
-			Station stat = getDatabase().getNetwork(selectedStation.getNetworkCode()).getStation(selectedStation.getStationCode());
-			if(stat!=null) {
-				if(stat.getLon() >=45||stat.getLon() <=-33) {
-					it.remove();
-				}
-			}
-		}
-	}
-
 	private String exc(Exception e) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -255,8 +234,7 @@ public class StationManager implements IStationManager {
 		}
 	}
 
-	private void parseSelectedStations() {
-		System.out.println("Parsing " + database.getSelectedStations().size() + " selected stations");
+	private void processSelectedStations() {
 		for (SelectedStation selected : database.getSelectedStations()) {
 			Channel ch = getChannel(selected.getNetworkCode(), selected.getStationCode(), selected.getChannelCode(),
 					selected.getLocation());
@@ -264,14 +242,13 @@ public class StationManager implements IStationManager {
 				try {
 					seedlinks.get(ch.getSeedlinkNetwork()).selectedStations++;
 					ch.setSelected(true);
-				} catch (IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException | NullPointerException e) {
 					System.err.println("Selected channel " + selected.getNetworkCode() + " " + selected.getStationCode()
 							+ " " + selected.getChannelCode() + " " + selected.getLocation()
 							+ " is no longer available");
 				}
 			}
 		}
-
 	}
 
 	private void checkAvailability() {
@@ -321,9 +298,6 @@ public class StationManager implements IStationManager {
 				Node channel = channelList.item(k);
 				String locationCode = channel.getAttributes().getNamedItem("location").getTextContent();
 				String channelName = channel.getAttributes().getNamedItem("seedname").getTextContent();
-				if (!isGoodChannel(channelName)) {
-					continue;
-				}
 				String endDate = channel.getAttributes().getNamedItem("end_time").getTextContent();
 				Calendar end = Calendar.getInstance();
 				end.setTime(endDate.contains("-") ? format2.parse(endDate) : format3.parse(endDate));
@@ -357,12 +331,10 @@ public class StationManager implements IStationManager {
 			Station stat = net.getStation(stationCode);
 			if (stat != null) {
 				return stat.getChannel(channelName, locationCode);
-			} else {
-				return null;
-			}
-		} else {
-			return null;
+			} 
 		}
+		
+		return null;
 	}
 
 	private void checkForUpdates() {
@@ -395,7 +367,7 @@ public class StationManager implements IStationManager {
 		availability_string = "Waiting...";
 
 		int i = 0;
-		for (DataSource se : sources) {
+		for (StationSource se : sources) {
 			updating_progress = i / (double) sources.size();
 			try {
 				downloadSource(se, newDatabase, now);
@@ -406,6 +378,7 @@ public class StationManager implements IStationManager {
 			}
 			i++;
 		}
+		
 		newDatabase.logUpdate(now);
 		if (oldDatabase != null) {
 			newDatabase.copySelectedStationsFrom(oldDatabase);
@@ -418,7 +391,7 @@ public class StationManager implements IStationManager {
 		System.out.println("The new database now contains " + newDatabase.getNetworks().size() + " networks");
 	}
 
-	private void downloadSource(final DataSource se, StationDatabase database, Calendar now) throws Exception {
+	private void downloadSource(final StationSource se, StationDatabase database, Calendar now) throws Exception {
 		URL url = new URL(se.getUrl()
 				+ "level=channel&endafter="+format1.format(new Date())+"&includerestricted=false&format=xml&channel=" + channels);
 
@@ -466,7 +439,7 @@ public class StationManager implements IStationManager {
 		parseStations(se, database, root, now);
 	}
 
-	private void parseStations(DataSource se, StationDatabase database, Element root, Calendar now) {
+	private void parseStations(StationSource se, StationDatabase database, Element root, Calendar now) {
 		NodeList networks = root.getElementsByTagName("Network");
 		for (int i = 0; i < networks.getLength(); i++) {
 			try {
@@ -563,7 +536,7 @@ public class StationManager implements IStationManager {
 		}
 	}
 
-	private void addChannel(StationDatabase database, DataSource se, String networkCode, String networkDescription,
+	private void addChannel(StationDatabase database, StationSource se, String networkCode, String networkDescription,
 			String stationCode, String stationSite, String channel, String locationCode, double lat, double lon,
 			double alt, long sensitivity, double frequency, double sampleRate, String inputUnits, String startDate,
 			String endDate, Calendar now) {
@@ -615,11 +588,6 @@ public class StationManager implements IStationManager {
 		return net;
 	}
 
-	private static boolean isGoodChannel(String channelName) {
-		return (channelName.startsWith("E") || channelName.startsWith("S") || channelName.startsWith("H")
-				|| channelName.startsWith("B")) && (channelName.charAt(1) == 'H');
-	}
-
 	public static String obtainElement(Node item, String name, String defaultValue) {
 		try {
 			return ((Element) item).getElementsByTagName(name).item(0).getTextContent();
@@ -641,19 +609,11 @@ public class StationManager implements IStationManager {
 	}
 
 	public static File getDatabaseFile() {
-		return new File(folderURL, "stationDatabase.dat");
+		return new File(stationsFile, "stationDatabase.dat");
 	}
 
 	public static File getTempDatabaseFile() {
-		return new File(folderURL, "_stationDatabase.dat");
-	}
-
-	public static void setFolderURL(String folderURL) {
-		StationManager.folderURL = folderURL;
-	}
-
-	public static String getFolderURL() {
-		return folderURL;
+		return new File(stationsFile, "_stationDatabase.dat");
 	}
 
 	@Override

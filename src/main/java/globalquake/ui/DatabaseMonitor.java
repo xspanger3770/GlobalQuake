@@ -263,23 +263,10 @@ public class DatabaseMonitor extends JFrame {
 				lblAvailable.setText("Available: Loading...");
 			}
 
-			if (state >= StationManager.CHECKING_AVAILABILITY) {
-				if (progressBar2.isIndeterminate()) {
-					progressBar2.setIndeterminate(false);
-				}
-			} else if (!progressBar2.isIndeterminate()) {
-				progressBar2.setIndeterminate(true);
-			}
 
-			if (state > 0) {
-				if (progressBar1.isIndeterminate()) {
-					progressBar1.setIndeterminate(false);
-				}
-			} else {
-				if (!progressBar1.isIndeterminate()) {
-					progressBar1.setIndeterminate(true);
-				}
-			}
+			progressBar2.setIndeterminate(state >= StationManager.CHECKING_AVAILABILITY);
+			progressBar1.setIndeterminate(state <= 0);
+			
 
 			if (state > 0) {
 				if (stationManager.getDatabase().getDatabaseVersion() == StationManager.DATABASE_VERSION) {

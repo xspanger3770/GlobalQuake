@@ -13,7 +13,7 @@ import java.util.Iterator;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.core.simulation.FakeGlobalQuake;
 import globalquake.main.Main;
-import globalquake.settings.Settings;
+import globalquake.main.Settings;
 
 public class EarthquakeArchive {
 
