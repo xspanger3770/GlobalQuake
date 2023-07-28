@@ -4,15 +4,15 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 
-import globalquake.core.AbstractStation;
+import globalquake.core.station.AbstractStation;
 
 public class StationMonitor extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	
 	public StationMonitor(AbstractStation station) {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		StationMonitorPanel panel = new StationMonitorPanel(station);
@@ -24,26 +24,18 @@ public class StationMonitor extends JFrame {
 		setTitle("Station Monitor - " + station.getNetworkCode() + " " + station.getStationCode() + " "
 				+ station.getChannelName() + " " + station.getLocationCode());
 
-		Thread uiThread = new Thread("Station Monitor UI Thread") {
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				while (true) {
-					try {
-						sleep(1000);
-					} catch (InterruptedException e) {
-						break;
-					}
-					panel.updateImage();
-					panel.repaint();
-				}
-			};
-		};
-
-		uiThread.start();
+				panel.updateImage();
+				panel.repaint();
+			}
+		}, 0, 1000);
 
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				uiThread.interrupt();
+				timer.cancel();
 			}
 		});
 

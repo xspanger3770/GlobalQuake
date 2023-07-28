@@ -1,19 +1,19 @@
 package com.morce.globalquake.database;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Channel implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -5228573909048724520L;
-	private String name;
-	private String locationCode;
-	private long sensitivity;
-	private double frequency;
-	private double sampleRate;
-	private String inputUnits;
-	private long start;
-	private long end;
-	private byte source;
+	private final String name;
+	private final String locationCode;
+	private final long sensitivity;
+	private final double frequency;
+	private final double sampleRate;
+	private final long start;
+	private final byte source;
 
 	private transient boolean available;
 	private transient boolean selected;
@@ -28,9 +28,7 @@ public class Channel implements Serializable {
 		this.sensitivity = sensitivity;
 		this.frequency = frequency;
 		this.sampleRate = sampleRate;
-		this.inputUnits = inputUnits;
 		this.start = start;
-		this.end = end;
 		this.source = source;
 	}
 
@@ -38,16 +36,8 @@ public class Channel implements Serializable {
 		return source;
 	}
 
-	public long getEnd() {
-		return end;
-	}
-
 	public double getFrequency() {
 		return frequency;
-	}
-
-	public String getInputUnits() {
-		return inputUnits;
 	}
 
 	public double getSampleRate() {

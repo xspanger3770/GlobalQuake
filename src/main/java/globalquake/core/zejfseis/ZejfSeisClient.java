@@ -1,13 +1,14 @@
 package globalquake.core.zejfseis;
 
+import globalquake.ui.settings.Settings;
+import org.tinylog.Logger;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-
-import globalquake.core.SimpleLog;
-import globalquake.main.Settings;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ZejfSeisClient {
 
@@ -17,11 +18,10 @@ public class ZejfSeisClient {
 	private boolean intendedClose;
 	private boolean reconnect;
 
-	private ZejfSeisStation station;
+	private final ZejfSeisStation station;
 	private Thread thread;
 	protected Socket socket;
 	protected OutputStream outputStream;
-	protected InputStream inputStream;
 	private int errVal;
 	private int sampleRate;
 
@@ -32,6 +32,7 @@ public class ZejfSeisClient {
 
 	private void init() {
 		thread = new Thread("ZejfNet Socket") {
+			@SuppressWarnings("BusyWait")
 			public void run() {
 				do {
 					reconnect = false;
@@ -45,8 +46,8 @@ public class ZejfSeisClient {
 						break;
 					}
 				} while (Settings.zejfSeisAutoReconnect || reconnect);
-			};
-		};
+			}
+        };
 	}
 
 	public void connect() {
@@ -71,14 +72,13 @@ public class ZejfSeisClient {
 				intendedClose = true;
 				socket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		}
 		thread.interrupt();
 	}
 
 	private void runZejfClient() {
-		Thread heartbeatThread = null;
 		try {
 			intendedClose = false;
 			connected = false;
@@ -88,42 +88,34 @@ public class ZejfSeisClient {
 			socket.setSoTimeout(6000);
 			socket.connect(new InetSocketAddress(Settings.zejfSeisIP, Settings.zejfSeisPort), 6000);
 			outputStream = socket.getOutputStream();
-			inputStream = socket.getInputStream();
 			receiveInitialInfo();
 			outputStream.flush();
 			connecting = false;
 			connected = true;
 
-			heartbeatThread = new Thread("Heartbeat") {
-				public void run() {
-					while (true) {
-						try {
-							sleep(5000);
-						} catch (InterruptedException e) {
-							break;
-						}
-						try {
-							outputStream.write("heartbeat\n".getBytes());
-							outputStream.flush();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				};
-			};
+			Timer timer = new Timer();
 
-			heartbeatThread.start();
+			timer.scheduleAtFixedRate(new TimerTask() {
+				public void run() {
+					try {
+						outputStream.write("heartbeat\n".getBytes());
+						outputStream.flush();
+					} catch (Exception e) {
+						Logger.error(e);
+					}
+				}
+			}, 0, 5000);
 
 			System.out.println("Listening for ZejfNet packets...");
 			while (true) {
-				String command = "";
+				String command;
 				command = readString();
 				if (!command.isEmpty()) {
 					try {
 						if (command.startsWith("realtime")) {
 							int value;
-							while((value = Integer.valueOf(readString())) != errVal) {
-								long time = Long.valueOf(readString()) * (1000 / sampleRate);
+							while((value = Integer.parseInt(readString())) != errVal) {
+								long time = Long.parseLong(readString()) * (1000 / sampleRate);
 								getStation().addRecord(new SimpleLog(time, value));
 							}
 						}
@@ -137,21 +129,19 @@ public class ZejfSeisClient {
 		} catch (IOException e) {
 			System.err.println("ZejfNet Disconnected: " + e.getMessage());
 			if (!intendedClose) {
-				e.printStackTrace();
+				Logger.error(e);
 			}
 		} finally {
 			System.out.println("ZejfNet Disconnected");
 			connected = false;
 			connecting = false;
-			if (heartbeatThread != null)
-				heartbeatThread.interrupt();
-		}
+        }
 	}
 	
 	private void receiveInitialInfo() throws IOException, NumberFormatException {
 		String compat_version = readString();
 		System.out.println(compat_version);
-		int comp = Integer.valueOf(compat_version.split(":")[1]);
+		int comp = Integer.parseInt(compat_version.split(":")[1]);
 		if (comp != COMPATIBILITY_VERSION) {
 			System.err.println("ZEJFNET INCOMPATIBLE");
 			return;
@@ -166,9 +156,9 @@ public class ZejfSeisClient {
 		System.out.println(err_value);
 		System.out.println(last_log_id);
 
-		int sr = Integer.valueOf(sample_rate.split(":")[1]);
-		int err = Integer.valueOf(err_value.split(":")[1]);
-		long lli = Long.valueOf(last_log_id.split(":")[1]);
+		int sr = Integer.parseInt(sample_rate.split(":")[1]);
+		int err = Integer.parseInt(err_value.split(":")[1]);
+		long lli = Long.parseLong(last_log_id.split(":")[1]);
 		
 		errVal = err;
 		sampleRate = sr;

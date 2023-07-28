@@ -10,8 +10,6 @@ public class HypocenterAnalysisPanel extends SettingsPanel {
 		add(slider);
 	}
 
-	private static final long serialVersionUID = 1L;
-
 	@Override
 	public void save() {
 		

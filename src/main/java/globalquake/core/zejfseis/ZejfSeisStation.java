@@ -3,20 +3,19 @@ package globalquake.core.zejfseis;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import globalquake.core.AbstractStation;
-import globalquake.core.GlobalQuake;
-import globalquake.core.SimpleLog;
+import globalquake.core.station.AbstractStation;
+import globalquake.main.GlobalQuake;
 
 public class ZejfSeisStation extends AbstractStation {
 
-	private Queue<SimpleLog> recordsQueue;
-	private Object recordsSync = new Object();
+	private final Queue<SimpleLog> recordsQueue;
+	private final Object recordsSync = new Object();
 
 	public ZejfSeisStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
 			String locationCode, double lat, double lon, double alt,
 			long sensitivity, double frequency, int id) {
-		super(globalQuake, networkCode, stationCode, channelName, locationCode, (byte)-1, (byte)-1, lat, lon, alt, sensitivity, frequency, id);
-		this.recordsQueue = new LinkedList<SimpleLog>();
+		super(globalQuake, networkCode, stationCode, channelName, locationCode, (byte)-1, lat, lon, alt, sensitivity, frequency, id);
+		this.recordsQueue = new LinkedList<>();
 		this.getAnalysis().setSampleRate(frequency);
 	}
 
@@ -31,14 +30,14 @@ public class ZejfSeisStation extends AbstractStation {
 		synchronized (recordsSync) {
 			while (!recordsQueue.isEmpty()) {
 				SimpleLog record = recordsQueue.remove();
-				getAnalysis().nextSample(record.getValue(), record.getTime());
+				getAnalysis().nextSample(record.value(), record.time());
 			}
 		}
 	}
 
 	@Override
 	public boolean hasDisplayableData() {
-		return hasData();
+		return !hasData();
 	}
 
 	@Override

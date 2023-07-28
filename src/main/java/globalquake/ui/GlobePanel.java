@@ -8,8 +8,6 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
@@ -18,23 +16,22 @@ import javax.swing.JPanel;
 import org.geojson.LngLatAlt;
 
 import globalquake.regions.Regions;
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
-	private static final long serialVersionUID = 1L;
-	public static ArrayList<org.geojson.Polygon> polygonsUHD = Regions.raw_polygonsUHD;
-	public static ArrayList<org.geojson.Polygon> polygonsHD = Regions.raw_polygonsHD;
-	public static ArrayList<org.geojson.Polygon> polygonsMD = Regions.raw_polygonsMD;
+	public static final ArrayList<org.geojson.Polygon> polygonsUHD = Regions.raw_polygonsUHD;
+	public static final ArrayList<org.geojson.Polygon> polygonsHD = Regions.raw_polygonsHD;
+	public static final ArrayList<org.geojson.Polygon> polygonsMD = Regions.raw_polygonsMD;
 	public double centerLat = 49.7;
 	public double centerLon = 15.65;
 	public double dragStartLat;
 	public double dragStartLon;
 	public double scroll = 8;
 
-	private static Color oceanC = new Color(7, 37, 48);
-	private static Color landC = new Color(15, 47, 68);
-	private static Color borderC = new Color(153, 153, 153);
+	private static final Color oceanC = new Color(7, 37, 48);
+	private static final Color landC = new Color(15, 47, 68);
+	private static final Color borderC = new Color(153, 153, 153);
 
 	private Point dragStart;
 	public Point lastMouse;
@@ -58,8 +55,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
 				// dragStartLat and dragStartLon has to be located at the new mouse location
 
-				double deltaX = lastMouse.getX() - getWidth() / 2;
-				double deltaY = lastMouse.getY() - getHeight() / 2;
+				double deltaX = lastMouse.getX() - getWidth() / 2.0;
+				double deltaY = lastMouse.getY() - getHeight() / 2.0;
 				centerLon = dragStartLon - (getLon(lastMouse.getX()) - getLon(lastMouse.getX() - deltaX));
 				centerLat = dragStartLat - (getLat(lastMouse.getY()) - getLat(lastMouse.getY() - deltaY));
 
@@ -82,42 +79,37 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
 		});
 
-		addMouseWheelListener(new MouseWheelListener() {
+		addMouseWheelListener(e -> {
+            boolean down = e.getWheelRotation() < 0;
+            double mul = down ? (1 / 1.15) : 1.15;
 
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				boolean down = e.getWheelRotation() < 0;
-				double mul = down ? (1 / 1.15) : 1.15;
+            boolean can = false;
 
-				boolean can = false;
+            if (down) {
+                scroll *= mul;
+                can = true;
+            } else {
+                if (scroll < 12) {
+                    scroll *= mul;
+                    can = true;
+                }
+            }
+            if (lastMouse != null && can) {
+                double mouseLon = getLon(lastMouse.x);
+                double mouseLat = getLat(lastMouse.y);
+                double _centerLon = centerLon - (mouseLon - centerLon) * (mul - 1) / mul;
+                double _centerLat = centerLat - (mouseLat - centerLat) * (mul - 1) / mul;
 
-				if (down) {
-					scroll *= mul;
-					can = true;
-				} else {
-					if (scroll < 12) {
-						scroll *= mul;
-						can = true;
-					}
-				}
-				if (lastMouse != null && can) {
-					double mouseLon = getLon(lastMouse.x);
-					double mouseLat = getLat(lastMouse.y);
-					double _centerLon = centerLon - (mouseLon - centerLon) * (mul - 1) / mul;
-					double _centerLat = centerLat - (mouseLat - centerLat) * (mul - 1) / mul;
+                double __centerLon = Math.max(-180 + ((scroll * getWidth() * 0.5) / 100.0),
+                        Math.min(180 - ((scroll * getWidth() * 0.5) / 100.0), _centerLon));
 
-					double __centerLon = Math.max(-180 + ((scroll * getWidth() * 0.5) / 100.0),
-							Math.min(180 - ((scroll * getWidth() * 0.5) / 100.0), _centerLon));
-					double __centerLat = Math.max(-90 + ((scroll * 0.5 * getHeight() * 0.5) / 100.0),
-							Math.min(90 - ((scroll * 0.5 * getHeight() * 0.5) / 100.0), _centerLat));
+                centerLat = Math.max(-90 + ((scroll * 0.5 * getHeight() * 0.5) / 100.0),
+                        Math.min(90 - ((scroll * 0.5 * getHeight() * 0.5) / 100.0), _centerLat));
+                centerLon = __centerLon;
 
-					centerLat = __centerLat;
-					centerLon = __centerLon;
-
-				}
-				repaint();
-			}
-		});
+            }
+            repaint();
+        });
 	}
 
 	public boolean isOnScreen(double x, double y) {
@@ -125,15 +117,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 	}
 
 	public boolean isMouseNearby(double x, double y, double dist) {
-		try {
-			Point mouse = lastMouse;
-			return mouse == null ? false
-					: (Math.abs(x - mouse.x) < (dist)
-							&& Math.abs(y - mouse.y) < (dist));
-		} catch (NullPointerException e) {
-			e.printStackTrace();
-		}
-		return false;
+		Point mouse = lastMouse;
+		return mouse != null && (Math.abs(x - mouse.x) < (dist)
+				&& Math.abs(y - mouse.y) < (dist));
 	}
 
 	@Override
@@ -143,31 +129,29 @@ public class GlobePanel extends JPanel implements GeoUtils {
 		RenderingHints defaultRenderingHints = g.getRenderingHints();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-		if (polygonsHD == null || polygonsMD == null || polygonsUHD == null) {
+        if (polygonsHD != null && polygonsMD != null && polygonsUHD != null) {
+            ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? polygonsUHD : scroll < 4.8 ? polygonsHD : polygonsMD;
+            for (org.geojson.Polygon polygon : pols) {
+                java.awt.Polygon awt = new java.awt.Polygon();
+                boolean add = false;
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double x = getX(pos.getLatitude(), pos.getLongitude());
+                    double y = getY(pos.getLatitude(), pos.getLongitude());
 
-		} else {
-			ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? polygonsUHD : scroll < 4.8 ? polygonsHD : polygonsMD;
-			for (org.geojson.Polygon polygon : pols) {
-				java.awt.Polygon awt = new java.awt.Polygon();
-				boolean add = false;
-				for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-					double x = getX(pos.getLatitude(), pos.getLongitude());
-					double y = getY(pos.getLatitude(), pos.getLongitude());
-
-					if (!add && isOnScreen(x, y)) {
-						add = true;
-					}
-					awt.addPoint((int) x, (int) y);
-				}
-				if (add) {
-					g.setColor(landC);
-					g.fill(awt);
-					g.setColor(borderC);
-					g.draw(awt);
-				}
-			}
-		}
-		g.setRenderingHints(defaultRenderingHints);
+                    if (!add && isOnScreen(x, y)) {
+                        add = true;
+                    }
+                    awt.addPoint((int) x, (int) y);
+                }
+                if (add) {
+                    g.setColor(landC);
+                    g.fill(awt);
+                    g.setColor(borderC);
+                    g.draw(awt);
+                }
+            }
+        }
+        g.setRenderingHints(defaultRenderingHints);
 	}
 
 	public double getX(double lat, double lon) {
@@ -201,9 +185,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
 			path.moveTo(x1, y1);
 			if (Math.abs(x1 - x2) < 300 && Math.abs(y1 - y2) < 300) {
 				path.lineTo(x2, y2);
-			} else {
-				// path.moveTo(x2, y2);
 			}
+
 		}
 		path.closePath();
 		return path;

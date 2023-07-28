@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -21,13 +22,13 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Station;
 
 import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
+import globalquake.main.Main;
 
 public class StationSelectPanel extends GlobePanel {
 
-	private static final long serialVersionUID = 1L;
-	private StationSelect stationSelect;
-	public static DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
+	private final StationSelect stationSelect;
+	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static final SimpleDateFormat formatSimple = new SimpleDateFormat("yyyy/MM/dd");
 
 	public StationSelectPanel(StationSelect stationSelect) {
@@ -52,7 +53,7 @@ public class StationSelectPanel extends GlobePanel {
 							clickedStations.add(s);
 						}
 					}
-					if (clickedStations.size() > 0) {
+					if (!clickedStations.isEmpty()) {
 						editStations(clickedStations);
 						StationSelectPanel.super.repaint();
 					}
@@ -92,17 +93,12 @@ public class StationSelectPanel extends GlobePanel {
 
 		if (station == null) {
 			System.err.println("Fatal Error: null");
-			return;
-		} else {
-			String[] allChannels = new String[station.getChannels().size()];
-			int j = 0;
+        } else {
 			int ava = 0;
 			for (Channel ch : station.getChannels()) {
-				allChannels[j] = ch.getName() + " " + ch.getLocationCode();
 				if (ch.isAvailable()) {
 					ava++;
 				}
-				j++;
 			}
 
 			int k = 0;
@@ -117,9 +113,9 @@ public class StationSelectPanel extends GlobePanel {
 					start.setTimeInMillis(ch.getStart());
 					String str = ch.getLocationCode() + " " + ch.getName() + " - " + ch.getSampleRate() + "sps, "
 							+ (ch.getSource() < 0 ? "?????, "
-									: StationManager.sources.get(ch.getSource()).getName() + ", ")
+									: SeedlinkManager.sources.get(ch.getSource()).getName() + ", ")
 							+ (ch.getSeedlinkNetwork() == -1 ? "not available"
-									: StationManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
+									: SeedlinkManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
 							+ ", begin: " + formatSimple.format(start.getTime()) + ", delay="
 							+ f1d.format(ch.getDelay() / 1000.0) + "s";
 
@@ -136,9 +132,7 @@ public class StationSelectPanel extends GlobePanel {
 			String result = (String) JOptionPane.showInputDialog(this,
 					"Select channel for station " + station.getStationCode() + ":", "Channel selection",
 					JOptionPane.PLAIN_MESSAGE, null, availableChannels, availableChannels[selectedIndex]);
-			if (result == null) {
-				return;
-			} else {
+            if (result != null) {
 				int selectedChannel = -1;
 				int l = 0;
 				for (String str : availableChannels) {
@@ -151,14 +145,15 @@ public class StationSelectPanel extends GlobePanel {
 				// if "None" is selected, then it is -1
 				Station s2 = station;
 				int see = selectedChannel;
-				new Thread() {
-					public void run() {
+				new Thread(() -> {
+					try {
 						stationSelect.getStationManager().editSelection(s2, see == -1 || see == 0 ? -1 : map.get(see));
-
-					};
-				}.start();
+					} catch (IOException e) {
+						Main.getErrorHandler().handleException(e);
+					}
+				}).start();
 			}
-		}
+        }
 
 	}
 
@@ -195,7 +190,7 @@ public class StationSelectPanel extends GlobePanel {
 
 				g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y - r * 0.5 - 3 - 12));
 
-				int __y = +26;
+				int __y = 26;
 				int i = 0;
 				for (Channel ch : s.getChannels()) {
 					g.setColor(!ch.isAvailable() ? Color.LIGHT_GRAY
@@ -204,9 +199,9 @@ public class StationSelectPanel extends GlobePanel {
 					start.setTimeInMillis(ch.getStart());
 					str = ch.getLocationCode() + " " + ch.getName() + " - " + ch.getSampleRate() + "sps, "
 							+ (ch.getSource() < 0 ? "?????, "
-									: StationManager.sources.get(ch.getSource()).getName() + ", ")
+									: SeedlinkManager.sources.get(ch.getSource()).getName() + ", ")
 							+ (ch.getSeedlinkNetwork() == -1 ? "not available"
-									: StationManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
+									: SeedlinkManager.seedlinks.get(ch.getSeedlinkNetwork()).getHost())
 							+ ", begin: " + formatSimple.format(start.getTime()) + ", delay="
 							+ f1d.format(ch.getDelay() / 1000.0) + "s";
 					g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5),
@@ -218,7 +213,7 @@ public class StationSelectPanel extends GlobePanel {
 		}
 
 		int _y = 16;
-		for (SeedlinkNetwork seed : StationManager.seedlinks) {
+		for (SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
 			g.setColor(seed.selectedStations > 0 ? Color.green : Color.lightGray);
 			g.setFont(new Font("Calibri", Font.BOLD, 18));
 			g.drawString(seed.getHost() + " (" + seed.selectedStations + "/" + seed.availableStations + ")", 5, _y);
@@ -227,7 +222,4 @@ public class StationSelectPanel extends GlobePanel {
 
 	}
 
-	public StationSelect getStationSelect() {
-		return stationSelect;
-	}
 }

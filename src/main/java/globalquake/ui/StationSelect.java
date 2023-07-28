@@ -10,16 +10,15 @@ import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
 
-import globalquake.database.StationManager;
+import globalquake.database.SeedlinkManager;
 
 public class StationSelect extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private StationManager stationManager;
+	private final SeedlinkManager seedlinkManager;
 	private ArrayList<Station> displayedStations = new ArrayList<>();
 
-	public StationSelect(StationManager stationManager) {
-		this.stationManager = stationManager;
+	public StationSelect(SeedlinkManager seedlinkManager) {
+		this.seedlinkManager = seedlinkManager;
 		loadDisplayed();
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JPanel panel = new StationSelectPanel(this);
@@ -33,10 +32,11 @@ public class StationSelect extends JFrame {
 	}
 
 	private void loadDisplayed() {
-		new Thread() {
-			public void run() {
-				ArrayList<Station> list = new ArrayList<Station>();
-				for (Network n : stationManager.getDatabase().getNetworks()) {
+		new Thread(() -> {
+            ArrayList<Station> list = new ArrayList<>();
+			seedlinkManager.getDatabase().getNetworksReadLock().lock();
+			try {
+				for (Network n : seedlinkManager.getDatabase().getNetworks()) {
 					for (Station s : n.getStations()) {
 						for (Channel ch : s.getChannels()) {
 							if (ch.isAvailable()) {
@@ -47,14 +47,16 @@ public class StationSelect extends JFrame {
 
 					}
 				}
-				System.out.println(list.size() + " Displayed Stations.");
-				displayedStations = list;
-			};
-		}.start();
+			}finally {
+				seedlinkManager.getDatabase().getNetworksReadLock().unlock();
+			}
+            System.out.println(list.size() + " Displayed Stations.");
+            displayedStations = list;
+        }).start();
 	}
 
-	public StationManager getStationManager() {
-		return stationManager;
+	public SeedlinkManager getStationManager() {
+		return seedlinkManager;
 	}
 	
 	public ArrayList<Station> getDisplayedStations() {

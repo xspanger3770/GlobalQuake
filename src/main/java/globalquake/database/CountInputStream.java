@@ -13,11 +13,6 @@ public class CountInputStream extends FilterInputStream {
 		super(in);
 	}
 
-	public CountInputStream(InputStream in, Runnable event) {
-		super(in);
-		this.event = event;
-	}
-	
 	public void setEvent(Runnable event) {
 		this.event = event;
 	}

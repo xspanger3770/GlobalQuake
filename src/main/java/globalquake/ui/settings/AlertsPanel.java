@@ -1,10 +1,8 @@
 package globalquake.ui.settings;
 import javax.swing.JCheckBox;
 
-import globalquake.main.Settings;
-
 public class AlertsPanel extends SettingsPanel {
-	private JCheckBox boxDialogs;
+	private final JCheckBox boxDialogs;
 
 	public AlertsPanel() {
 		setLayout(null);
@@ -14,8 +12,6 @@ public class AlertsPanel extends SettingsPanel {
 		boxDialogs.setSelected(Settings.enableAlarmDialogs);
 		add(boxDialogs);
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void save() {

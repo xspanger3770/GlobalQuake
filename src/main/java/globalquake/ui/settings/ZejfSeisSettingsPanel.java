@@ -4,21 +4,16 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import globalquake.core.GlobalQuake;
-import globalquake.main.Settings;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import globalquake.main.GlobalQuake;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 public class ZejfSeisSettingsPanel extends SettingsPanel {
 
-	private static final long serialVersionUID = 1L;
-	private JTextField textFieldAddr;
-	private JTextField textFieldPort;
-	private JCheckBox chckbxReconnect;
+	private final JTextField textFieldAddr;
+	private final JTextField textFieldPort;
+	private final JCheckBox chckbxReconnect;
 
 	public ZejfSeisSettingsPanel() {
 		setLayout(null);
@@ -49,15 +44,11 @@ public class ZejfSeisSettingsPanel extends SettingsPanel {
 		btnReconnect.setBounds(163, 78, 117, 25);
 		add(btnReconnect);
 		
-		btnReconnect.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(GlobalQuake.instance != null && GlobalQuake.instance.getZejfClient() != null) {
-					GlobalQuake.instance.getZejfClient().reconnect();
-				}
-			}
-		});
+		btnReconnect.addActionListener(e -> {
+            if(GlobalQuake.instance != null && GlobalQuake.instance.getZejfClient() != null) {
+                GlobalQuake.instance.getZejfClient().reconnect();
+            }
+        });
 
 		chckbxReconnect = new JCheckBox("Auto reconnect");
 		chckbxReconnect.setBounds(12, 79, 143, 23);

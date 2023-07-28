@@ -8,9 +8,9 @@ public class SeedlinkNetwork {
 
 	public int status;
 
-	private String host;
-	private String name;
-	private byte id;
+	private final String host;
+	private final String name;
+	private final byte id;
 
 	public int availableStations;
 	public int selectedStations;
@@ -34,14 +34,6 @@ public class SeedlinkNetwork {
 
 	public byte getId() {
 		return id;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
 	}
 
 }

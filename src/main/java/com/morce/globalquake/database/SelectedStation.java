@@ -1,11 +1,13 @@
 package com.morce.globalquake.database;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class SelectedStation implements Serializable {
+	@Serial
 	private static final long serialVersionUID = -1189564266293642864L;
-	private String networkCode;
-	private String stationCode;
+	private final String networkCode;
+	private final String stationCode;
 	private String channelCode;
 	private String location;
 
@@ -38,14 +40,6 @@ public class SelectedStation implements Serializable {
 	
 	public void setLocation(String location) {
 		this.location = location;
-	}
-	
-	public void setNetworkCode(String networkCode) {
-		this.networkCode = networkCode;
-	}
-	
-	public void setStationCode(String stationCode) {
-		this.stationCode = stationCode;
 	}
 
 }

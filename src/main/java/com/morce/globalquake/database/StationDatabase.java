@@ -1,38 +1,64 @@
 package com.morce.globalquake.database;
 
+import globalquake.database.SeedlinkManager;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
-import globalquake.database.StationManager;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class StationDatabase implements Serializable {
-
+	@Serial
 	private static final long serialVersionUID = -1294709487345197451L;
 
 	public static final long updateIntervalDays = 14;
 
 	private long lastUpdate;
-	private int databaseVersion;
+	private final int databaseVersion;
 
-	private ArrayList<Network> networks = new ArrayList<Network>();
-	private ArrayList<SelectedStation> selectedStations = new ArrayList<SelectedStation>();
+	private final List<Network> networks = new ArrayList<>();
+	private List<SelectedStation> selectedStations = new ArrayList<>();
+
+	private transient ReadWriteLock networksLock = new ReentrantReadWriteLock();
+
+	private transient Lock networksReadLock = networksLock.readLock();
+	private transient Lock networksWriteLock = networksLock.writeLock();
+
+	@Serial
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+
+		networksLock = new ReentrantReadWriteLock();
+		networksReadLock = networksLock.readLock();
+		networksWriteLock = networksLock.writeLock();
+	}
 
 	public StationDatabase(int databaseVersion) {
 		this.databaseVersion = databaseVersion;
 	}
 
-	public boolean needsUpdate() {
-		if (databaseVersion != StationManager.DATABASE_VERSION) {
+	public boolean needsUpdate(boolean updateOld) {
+		if (databaseVersion != SeedlinkManager.DATABASE_VERSION) {
 			return true;
 		}
+
+		if(!updateOld){
+			return false;
+		}
+
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
-		return c.getTimeInMillis() - lastUpdate > (1000l * 60 * 60 * 24 * updateIntervalDays);
+		return c.getTimeInMillis() - lastUpdate > (1000L * 60 * 60 * 24 * updateIntervalDays);
 	}
 
-	public ArrayList<Network> getNetworks() {
+	public List<Network> getNetworks() {
 		return networks;
 	}
 
@@ -50,7 +76,7 @@ public class StationDatabase implements Serializable {
 	}
 
 	public void copySelectedStationsFrom(StationDatabase oldDatabase) {
-		this.selectedStations = new ArrayList<SelectedStation>();
+		this.selectedStations = new ArrayList<>();
 		if (oldDatabase == null || oldDatabase.getSelectedStations() == null) {
 			return;
 		}
@@ -60,7 +86,7 @@ public class StationDatabase implements Serializable {
 		}
 	}
 
-	public ArrayList<SelectedStation> getSelectedStations() {
+	public List<SelectedStation> getSelectedStations() {
 		return selectedStations;
 	}
 
@@ -81,4 +107,11 @@ public class StationDatabase implements Serializable {
 		return lastUpdate;
 	}
 
+	public Lock getNetworksReadLock() {
+        return networksReadLock;
+	}
+
+	public Lock getNetworksWriteLock() {
+		return networksWriteLock;
+	}
 }

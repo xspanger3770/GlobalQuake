@@ -2,8 +2,6 @@ package globalquake.ui.settings;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import globalquake.main.Settings;
-
 public class GeneralSettingsPanel extends SettingsPanel {
 	public GeneralSettingsPanel() {
 		setLayout(null);
@@ -29,9 +27,8 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		textFieldLon.setColumns(10);
 	}
 
-	private static final long serialVersionUID = 1L;
-	private JTextField textFieldLat;
-	private JTextField textFieldLon;
+	private final JTextField textFieldLat;
+	private final JTextField textFieldLon;
 
 	@Override
 	public void save() {

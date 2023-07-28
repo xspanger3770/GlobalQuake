@@ -2,9 +2,9 @@ package globalquake.database;
 
 public class StationSource {
 
-	private String url;
-	private String name;
-	private byte id;
+	private final String url;
+	private final String name;
+	private final byte id;
 
 	public StationSource(String name, String fdsnwsURL, byte id) {
 		this.url = fdsnwsURL;
