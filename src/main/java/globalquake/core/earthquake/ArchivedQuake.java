@@ -40,7 +40,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 			return;
 		}
 		ArrayList<Event> wrongEvents;
-		synchronized (earthquake.getCluster().previousHypocenter.wrongEventsSync) {
+		synchronized (earthquake.getCluster().previousHypocenter.wrongEventsLock) {
 			wrongEvents = (ArrayList<Event>) earthquake.getCluster().previousHypocenter.getWrongEvents().clone();
 		}
 

@@ -54,7 +54,7 @@ public class StationMonitorPanel extends JPanel {
 		}
 
 		ArrayList<Log> logs;
-		synchronized (station.getAnalysis().previousLogsSync) {
+		synchronized (station.getAnalysis().previousLogsLock) {
 			logs = new ArrayList<>(station.getAnalysis().getPreviousLogs());
 		}
 
@@ -245,7 +245,7 @@ public class StationMonitorPanel extends JPanel {
 			}
 		}
 
-		for (Event e : station.getAnalysis().getPreviousEvents()) {
+		for (Event e : station.getAnalysis().getDetectedEvents()) {
 			double x = getX(e.getpWave());
 			g.setColor(Color.blue);
 			g.setStroke(new BasicStroke(2f));

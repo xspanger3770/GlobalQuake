@@ -99,11 +99,11 @@ public abstract class AbstractStation {
 	public abstract long getDelayMS();
 	
 	private final ArrayList<Double> ratioHistory = new ArrayList<>();
-	private final Object ratioSync = new Object();
+	private final Object ratioLock = new Object();
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public void second() {
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
 			if (getAnalysis()._maxRatio > 0) {
 				ratioHistory.add(0, getAnalysis()._maxRatio);
 				getAnalysis()._maxRatioReset = true;
@@ -118,7 +118,7 @@ public abstract class AbstractStation {
 
 	public double getMaxRatio60S() {
 		double max = 0.0;
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
             for (double d : ratioHistory) {
 				if (d > max) {
 					max = d;
@@ -129,7 +129,7 @@ public abstract class AbstractStation {
 	}
 
 	public void reset() {
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
 			ratioHistory.clear();
 		}
 	}

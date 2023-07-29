@@ -99,9 +99,7 @@ public class EarthquakeSimulator extends JFrame {
                         earthquakes.clear();
                     }
                     for (SimulatedStation stat : getStations()) {
-                        synchronized (stat.getAnalysis().previousEventsSync) {
-                            stat.getAnalysis().getPreviousEvents().clear();
-                        }
+                        stat.getAnalysis().getDetectedEvents().clear();
                     }
                     getClusterAnalysis().getClusters().clear();
                     earthquakeAnalysis.getEarthquakes().clear();
@@ -113,10 +111,8 @@ public class EarthquakeSimulator extends JFrame {
                         }
                     }
                     for (SimulatedStation simStat : stations) {
-                        synchronized (simStat.getAnalysis().previousEventsSync) {
-                            for (Event ev : simStat.getAnalysis().getPreviousEvents()) {
-                                ev.setpWave(ev.getpWave() - skip);
-                            }
+                        for (Event ev : simStat.getAnalysis().getDetectedEvents()) {
+                            ev.setpWave(ev.getpWave() - skip);
                         }
                     }
 
@@ -258,21 +254,19 @@ public class EarthquakeSimulator extends JFrame {
     protected void shit() {
         for (GlobalStation station : getStations()) {
             if (random.nextDouble() < (SHIT_PER_SECOND / 10.0)) {
-                synchronized (station.getAnalysis().previousEventsSync) {
-                    Event shitEvent = new Event(station.getAnalysis());
-                    shitEvent.setpWave(System.currentTimeMillis());
-                    shitEvent.maxRatio = random.nextDouble() * 32.0;
-                    station.getAnalysis().getPreviousEvents().add(shitEvent);
+                Event shitEvent = new Event(station.getAnalysis());
+                shitEvent.setpWave(System.currentTimeMillis());
+                shitEvent.maxRatio = random.nextDouble() * 32.0;
+                station.getAnalysis().getDetectedEvents().add(shitEvent);
 
-                    new Thread(() -> {
-                        try {
-                            Thread.sleep((long) (random.nextDouble() * 30000));
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        shitEvent.end(System.currentTimeMillis());
-                    }).start();
-                }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep((long) (random.nextDouble() * 30000));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    shitEvent.end(System.currentTimeMillis());
+                }).start();
             }
         }
     }
@@ -319,7 +313,7 @@ public class EarthquakeSimulator extends JFrame {
                                 b = random.nextDouble() < (maxR - 3.0) / 7.0;
                             }
                             if (b) {
-                                simStat.getAnalysis().getPreviousEvents().add(0, event);
+                                simStat.getAnalysis().getDetectedEvents().add(0, event);
                                 simE.getEventMap().put(simStat, event);
                             }
                         }
@@ -347,7 +341,7 @@ public class EarthquakeSimulator extends JFrame {
                                 b = random.nextDouble() < (_maxR - 3.0) / 7.0;
                             }
                             if (b) {
-                                simStat.getAnalysis().getPreviousEvents().add(0, event);
+                                simStat.getAnalysis().getDetectedEvents().add(0, event);
                             }
                         } else {
                             event.setsWave(actualSWave);
@@ -361,9 +355,7 @@ public class EarthquakeSimulator extends JFrame {
                         Event e = simE.getEventMap().get(simStat);
                         if (e != null && !e.hasEnded()) {
                             e.end(System.currentTimeMillis());
-                            synchronized (simStat.getAnalysis().previousEventsSync) {
-                                simStat.getAnalysis().getPreviousEvents().remove(e);
-                            }
+                            simStat.getAnalysis().getDetectedEvents().remove(e);
                         }
 
                     }

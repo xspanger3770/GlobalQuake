@@ -6,27 +6,27 @@ import globalquake.core.earthquake.Event;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Analysis {
 	private long lastRecord;
 	private final AbstractStation station;
 	private double sampleRate;
-	private final ArrayList<Event> previousEvents;
-	public final Object previousEventsSync;
+	private final List<Event> detectedEvents;
 	public long numRecords;
 	public long latestLogTime;
 	public double _maxRatio;
 	public boolean _maxRatioReset;
-	public final Object previousLogsSync;
+	public final Object previousLogsLock;
 	private final ArrayList<Log> previousLogs;
 	private AnalysisStatus status;
 	
 	public Analysis(AbstractStation station) {
 		this.station = station;
 		this.sampleRate = -1;
-		previousEvents = new ArrayList<>();
-		previousEventsSync = new Object();
-		previousLogsSync = new Object();
+		detectedEvents = new CopyOnWriteArrayList<>();
+		previousLogsLock = new Object();
 		previousLogs = new ArrayList<>();
 		status = AnalysisStatus.IDLE;
 	}
@@ -93,15 +93,15 @@ public abstract class Analysis {
 
 	public abstract void second();
 
-	public ArrayList<Event> getPreviousEvents() {
-		return previousEvents;
+	public List<Event> getDetectedEvents() {
+		return detectedEvents;
 	}
 
 	public Event getLatestEvent() {
-		if (previousEvents.isEmpty()) {
+		if (detectedEvents.isEmpty()) {
 			return null;
 		} else {
-			return previousEvents.get(0);
+			return detectedEvents.get(0);
 		}
 	}
 

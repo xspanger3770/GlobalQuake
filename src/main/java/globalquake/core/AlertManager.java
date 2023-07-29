@@ -1,7 +1,6 @@
 package globalquake.core;
 
 import java.awt.EventQueue;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import globalquake.core.earthquake.Earthquake;

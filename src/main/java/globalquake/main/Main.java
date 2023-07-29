@@ -15,8 +15,6 @@ public class Main {
 
 	private static ApplicationErrorHandler errorHandler;
 	private static SeedlinkManager seedlinkManager;
-	private static DatabaseMonitorFrame databaseMonitorFrame;
-	private static GlobalQuake globalQuake;
 
 	public static final String version = "0.8.1";
 	public static final String fullName = "GlobalQuake " + version;
@@ -27,9 +25,9 @@ public class Main {
 		seedlinkManager = new SeedlinkManager() {
 		};
 
-		databaseMonitorFrame = new DatabaseMonitorFrame(seedlinkManager){
+		DatabaseMonitorFrame databaseMonitorFrame = new DatabaseMonitorFrame(seedlinkManager) {
 			@Override
-			public void launch(){
+			public void launch() {
 				launchGlobalQuake();
 			}
 		};
@@ -64,7 +62,7 @@ public class Main {
 	}
 
 	public static void launchGlobalQuake() {
-		globalQuake = new GlobalQuake(seedlinkManager);
+		GlobalQuake globalQuake = new GlobalQuake(seedlinkManager);
 	}
 
 	public static ApplicationErrorHandler getErrorHandler() {

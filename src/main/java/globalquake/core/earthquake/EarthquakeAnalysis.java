@@ -2,9 +2,6 @@ package globalquake.core.earthquake;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.simulator.SimulatedStation;
@@ -110,7 +107,7 @@ public class EarthquakeAnalysis {
 		long b = System.currentTimeMillis() - a;
 		System.out.println("find good events took "+b+"ms");
 
-		synchronized (cluster.selectedEventsSync) {
+		synchronized (cluster.selectedEventsLock) {
 			cluster.setSelected(selectedEvents);	
 		}
 		
@@ -406,10 +403,9 @@ public class EarthquakeAnalysis {
 		return good;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void calculateMagnitudes() {
 		for (Earthquake earthquake : getEarthquakes()) {
-			ArrayList<Event> goodEvents = goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents();
+			List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
 			if (goodEvents.isEmpty()) {
 				continue;
 			}
@@ -429,7 +425,7 @@ public class EarthquakeAnalysis {
 				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
 			}
 			Collections.sort(mags);
-			synchronized (earthquake.magsSync) {
+			synchronized (earthquake.magsLock) {
 				earthquake.setMags(mags);
 				earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
 

@@ -231,46 +231,45 @@ public class GlobalQuakePanel extends GlobePanel {
                 g.draw(rect);
             }
 
-            synchronized (s.getAnalysis().previousEventsSync) {
-                ArrayList<Event> previousEvents = s.getAnalysis().getPreviousEvents();
+            List<Event> previousEvents = s.getAnalysis().getDetectedEvents();
 
-                if (showSCircles) {
-                    for (Event e : previousEvents) {
-                        if (System.currentTimeMillis() - e.getLastLogTime() < 90 * 1000) {
-                            long pw = e.getpWave();
-                            long sw = e.getsWave();
-                            if (pw > 0 && sw > 0) {
-                                long diff = sw - pw;
-                                double distance = TravelTimeTable.getEpicenterDistance(10, diff / 1000.0);
-                                if (distance > 0) {
-                                    Path2D.Double pol = createCircle(s.getLat(), s.getLon(), distance);
-                                    g.setColor(Color.gray);
-                                    g.setStroke(new BasicStroke(2f));
-                                    g.draw(pol);
-                                }
+            if (showSCircles) {
+                for (Event e : previousEvents) {
+                    if (System.currentTimeMillis() - e.getLastLogTime() < 90 * 1000) {
+                        long pw = e.getpWave();
+                        long sw = e.getsWave();
+                        if (pw > 0 && sw > 0) {
+                            long diff = sw - pw;
+                            double distance = TravelTimeTable.getEpicenterDistance(10, diff / 1000.0);
+                            if (distance > 0) {
+                                Path2D.Double pol = createCircle(s.getLat(), s.getLon(), distance);
+                                g.setColor(Color.gray);
+                                g.setStroke(new BasicStroke(2f));
+                                g.draw(pol);
                             }
                         }
                     }
-                }
-                StringBuilder str2 = new StringBuilder();
-                if (showClusters) {
-                    for (Event e : previousEvents) {
-                        if (e.assignedCluster >= 0) {
-                            if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
-                                str2.append(" [").append(e.assignedCluster).append("]");
-                            }
-                        }
-                    }
-                }
-
-                if (!str2.isEmpty()) {
-                    str2 = new StringBuilder(str2.substring(1));
-                    g.setColor(Color.magenta);
-                    g.setFont(new Font("Calibri", Font.PLAIN, 14));
-                    g.drawString(str2.toString(), (int) (x - g.getFontMetrics().stringWidth(str2.toString()) * 0.5),
-                            (int) (y + r * 0.5 + 12 + 14 + 2));
                 }
             }
+            StringBuilder str2 = new StringBuilder();
+            if (showClusters) {
+                for (Event e : previousEvents) {
+                    if (e.assignedCluster >= 0) {
+                        if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
+                            str2.append(" [").append(e.assignedCluster).append("]");
+                        }
+                    }
+                }
+            }
+
+            if (!str2.isEmpty()) {
+                str2 = new StringBuilder(str2.substring(1));
+                g.setColor(Color.magenta);
+                g.setFont(new Font("Calibri", Font.PLAIN, 14));
+                g.drawString(str2.toString(), (int) (x - g.getFontMetrics().stringWidth(str2.toString()) * 0.5),
+                        (int) (y + r * 0.5 + 12 + 14 + 2));
+            }
+
             boolean hasData = s.hasData();
             String str = (mouseNearby
                     ? s.getStationCode() + " " + s.getNetworkCode() + " " + s.getChannelName() + " (+"
@@ -599,8 +598,8 @@ public class GlobalQuakePanel extends GlobePanel {
                 g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
             }
 
-            synchronized (quake.magsSync) {
-                ArrayList<java.lang.Double> mags = quake.getMags();
+            synchronized (quake.magsLock) {
+                List<java.lang.Double> mags = quake.getMags();
                 int[] groups = new int[100];
 
                 for (java.lang.Double d : mags) {

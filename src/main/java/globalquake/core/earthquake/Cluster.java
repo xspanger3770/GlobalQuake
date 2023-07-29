@@ -32,7 +32,7 @@ public class Cluster {
 	public int reportID;
 
 	public static final double NONE = -999;
-	public final Object selectedEventsSync;
+	public final Object selectedEventsLock;
 
 	// 20 selected
 	private ArrayList<Event> selected = new ArrayList<>();
@@ -40,7 +40,7 @@ public class Cluster {
 	public Cluster(int id) {
 		this.id = id;
 		this.assignedEvents = Collections.synchronizedList(new ArrayList<>());
-		this.selectedEventsSync = new Object();
+		this.selectedEventsLock = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;
 		this.bestAngle = -1;

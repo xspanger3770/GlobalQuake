@@ -16,10 +16,7 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.Locale;
+import java.util.*;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -384,7 +381,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
             }
 
             if (!c.getSelected().isEmpty()) {
-                synchronized (c.selectedEventsSync) {
+                synchronized (c.selectedEventsLock) {
                     for (Event e : c.getSelected()) {
                         double x1 = getX(e.getLatFromStation(), e.getLonFromStation());
                         double y1 = getY(e.getLatFromStation(), e.getLonFromStation());
@@ -568,14 +565,9 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
                 g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
             }
 
-            ArrayList<java.lang.Double> mags;
-            synchronized (quake.magsSync) {
-                mags = (ArrayList<java.lang.Double>) quake.getMags().clone();
-            }
-
             int[] groups = new int[100];
 
-            for (java.lang.Double d : mags) {
+            for (java.lang.Double d : new ArrayList<>(quake.getMags())) {
                 int group = (int) (d * 10.0);
                 if (group >= 0 && group < 100) {
                     groups[group]++;

@@ -48,12 +48,7 @@ public class ClusterAnalysis {
     @SuppressWarnings({"unused"})
     private void assignEventsToExistingEarthquakeClusters() {
         for (AbstractStation station : getGlobalQuake().getStations()) {
-            ArrayList<Event> events;
-
-            synchronized (station.getAnalysis().previousEventsSync) {
-                events = station.getAnalysis().getPreviousEvents();
-            }
-            for (Event event : events) {
+            for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
@@ -107,11 +102,7 @@ public class ClusterAnalysis {
                 for (NearbyStationDistanceInfo info : e.getAnalysis().getStation().getNearbyStations()) {
                     if (!c.containsStation(info.station()) && !_contains(newEvents, info.station())) {
                         double dist = info.dist();
-                        ArrayList<Event> events;
-                        synchronized (info.station().getAnalysis().previousEventsSync) {// this has to be here
-                            events = info.station().getAnalysis().getPreviousEvents();
-                        }
-                        for (Event ev : events) {
+                        for (Event ev : info.station().getAnalysis().getDetectedEvents()) {
                             if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster < 0) {
                                 long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
                                         - 2500;
@@ -157,38 +148,32 @@ public class ClusterAnalysis {
 
     private void createNewClusters() {
         for (AbstractStation station : getGlobalQuake().getStations()) {
-            synchronized (station.getAnalysis().previousEventsSync) {
-                for (Event event : station.getAnalysis().getPreviousEvents()) {
-                    if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
-                        // so we have eligible event
-                        ArrayList<Event> validEvents = new ArrayList<>();
-                        closestLoop:
-                        for (NearbyStationDistanceInfo info : station.getNearbyStations()) {
-                            AbstractStation close = info.station();
-                            double dist = info.dist();
-                            ArrayList<Event> evList2;
-                            synchronized (close.getAnalysis().previousEventsSync) {// this should not cause issues, even
-                                evList2 = close.getAnalysis().getPreviousEvents(); // though it is a double sync
-                            }
-                            for (Event e : evList2) {
-                                if (!e.isBroken() && e.getpWave() > 0 && e.assignedCluster < 0) {
-                                    long earliestPossibleTimeOfThatEvent = event.getpWave()
-                                            - (long) ((dist * 1000.0) / 5.0) - 2500;
-                                    long latestPossibleTimeOfThatEvent = event.getpWave()
-                                            + (long) ((dist * 1000.0) / 5.0) + 2500;
-                                    if (e.getpWave() >= earliestPossibleTimeOfThatEvent
-                                            && e.getpWave() <= latestPossibleTimeOfThatEvent) {
-                                        validEvents.add(e);
-                                        continue closestLoop;
-                                    }
+            for (Event event : station.getAnalysis().getDetectedEvents()) {
+                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
+                    // so we have eligible event
+                    ArrayList<Event> validEvents = new ArrayList<>();
+                    closestLoop:
+                    for (NearbyStationDistanceInfo info : station.getNearbyStations()) {
+                        AbstractStation close = info.station();
+                        double dist = info.dist();
+                        for (Event e : close.getAnalysis().getDetectedEvents()) {
+                            if (!e.isBroken() && e.getpWave() > 0 && e.assignedCluster < 0) {
+                                long earliestPossibleTimeOfThatEvent = event.getpWave()
+                                        - (long) ((dist * 1000.0) / 5.0) - 2500;
+                                long latestPossibleTimeOfThatEvent = event.getpWave()
+                                        + (long) ((dist * 1000.0) / 5.0) + 2500;
+                                if (e.getpWave() >= earliestPossibleTimeOfThatEvent
+                                        && e.getpWave() <= latestPossibleTimeOfThatEvent) {
+                                    validEvents.add(e);
+                                    continue closestLoop;
                                 }
                             }
                         }
-                        // so no we have a list of all nearby events that could be earthquake
-                        if (validEvents.size() >= 3) {
-                            validEvents.add(event);
-                            expandCluster(createCluster(validEvents));
-                        }
+                    }
+                    // so no we have a list of all nearby events that could be earthquake
+                    if (validEvents.size() >= 3) {
+                        validEvents.add(event);
+                        expandCluster(createCluster(validEvents));
                     }
                 }
             }
