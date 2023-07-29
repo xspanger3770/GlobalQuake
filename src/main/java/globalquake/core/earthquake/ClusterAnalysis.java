@@ -46,7 +46,7 @@ public class ClusterAnalysis {
 		updateClusters();
 	}
 
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings({"unused" })
 	private void assignEventsToExistingEarthquakeClusters() {
 		for (AbstractStation station : getGlobalQuake().getStations()) {
 			ArrayList<Event> events;
@@ -57,28 +57,29 @@ public class ClusterAnalysis {
 			for (Event event : events) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
 					HashMap<Earthquake, Event> map = new HashMap<>();
-					ArrayList<Earthquake> quakes;
 
-					synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-						quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
-								.clone();
-					}
-					for (Earthquake earthquake : quakes) {
-						if (!earthquake.getCluster().isActive()) {
-							continue;
-						}
-						double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
-								event.getLatFromStation(), event.getLonFromStation());
-						long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(earthquake.getDepth(),
-								TravelTimeTable.toAngle(distGC)) * 1000);
-						long actualTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
-						boolean abandon = event.getpWave() < earthquake.getOrigin()
-								|| Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
-						if (!abandon) {
-							map.put(earthquake, event);
-							break;
-						}
+					getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().lock();
+					try {
+						ArrayList<Earthquake> quakes = getGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
+						for (Earthquake earthquake : quakes) {
+							if (!earthquake.getCluster().isActive()) {
+								continue;
+							}
+							double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
+									event.getLatFromStation(), event.getLonFromStation());
+							long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(earthquake.getDepth(),
+									TravelTimeTable.toAngle(distGC)) * 1000);
+							long actualTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
+							boolean abandon = event.getpWave() < earthquake.getOrigin()
+									|| Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
+							if (!abandon) {
+								map.put(earthquake, event);
+								break;
+							}
 
+						}
+					}finally {
+						getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
 					}
 
 					for (Entry<Earthquake, Event> entry : map.entrySet()) {

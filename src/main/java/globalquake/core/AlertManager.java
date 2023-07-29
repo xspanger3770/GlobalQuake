@@ -26,22 +26,23 @@ public class AlertManager {
 		if(!Settings.enableAlarmDialogs) {
 			return;
 		}
-		ArrayList<Earthquake> quakes;
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
-		}
-		for (Earthquake quake : quakes) {
-			if (meetsConditions(quake) && !warnedQuakes.containsKey(quake)) {
-				warnedQuakes.put(quake, new Warning());
-				EventQueue.invokeLater(() -> {
-                    try {
-                        AlertWindow frame = new AlertWindow(quake);
-                        frame.setVisible(true);
-                    } catch (Exception e) {
-                        Logger.error(e);
-                    }
-                });
+		getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().lock();
+		try {
+			for (Earthquake quake : getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()) {
+				if (meetsConditions(quake) && !warnedQuakes.containsKey(quake)) {
+					warnedQuakes.put(quake, new Warning());
+					EventQueue.invokeLater(() -> {
+						try {
+							AlertWindow frame = new AlertWindow(quake);
+							frame.setVisible(true);
+						} catch (Exception e) {
+							Logger.error(e);
+						}
+					});
+				}
 			}
+		}finally {
+			getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
 		}
 	}
 

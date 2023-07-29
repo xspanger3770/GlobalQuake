@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.simulator.SimulatedStation;
@@ -31,11 +34,16 @@ public class EarthquakeAnalysis {
 	private final GlobalQuake globalQuake;
 	private final ArrayList<Earthquake> earthquakes;
 
-	public final Object earthquakesSync;
+	private final ReadWriteLock earthquakesLock = new ReentrantReadWriteLock();
+
+	private final Lock earthquakesReadLock = earthquakesLock.readLock();
+	private final Lock earthquakesWriteLock = earthquakesLock.writeLock();
+
+	//public final Object earthquakesSync;
 
 	public EarthquakeAnalysis(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		this.earthquakesSync = new Object();
+		//this.earthquakesSync = new Object();
 		this.earthquakes = new ArrayList<>();
 	}
 
@@ -45,6 +53,14 @@ public class EarthquakeAnalysis {
 
 	public ArrayList<Earthquake> getEarthquakes() {
 		return earthquakes;
+	}
+
+	public Lock getEarthquakesReadLock() {
+		return earthquakesReadLock;
+	}
+
+	public Lock getEarthquakesWriteLock() {
+		return earthquakesWriteLock;
 	}
 
 	public void run() {
@@ -354,16 +370,22 @@ public class EarthquakeAnalysis {
 				+ bestHypocenter.correctStations + " w " + events.size());
 		boolean valid = pct > VALID_TRESHOLD;
 		if (!valid && cluster.getEarthquake() != null && pct < REMOVE_TRESHOLD) {
-			synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
+			getEarthquakesWriteLock().lock();
+			try {
 				getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
+			}finally {
+				getEarthquakesWriteLock().unlock();
 			}
 			cluster.setEarthquake(null);
 		}
 		if (valid) {
 			if (cluster.getEarthquake() == null) {
 				Sounds.playSound(Sounds.incoming);
-				synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
+				getEarthquakesWriteLock().lock();
+				try{
 					getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+				}finally {
+					getEarthquakesWriteLock().unlock();
 				}
 				cluster.setEarthquake(earthquake);
 			} else {
@@ -421,46 +443,48 @@ public class EarthquakeAnalysis {
 
 	@SuppressWarnings("unchecked")
 	private void calculateMagnitudes() {
-		ArrayList<Earthquake> quakes;
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
-		}
-		for (Earthquake earthquake : quakes) {
-			ArrayList<Event> goodEvents;
-			synchronized (earthquake.getCluster().assignedEventsSync) {
-				goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
+		getEarthquakesReadLock().lock();
+		try {
+			for (Earthquake earthquake : getEarthquakes()) {
+				ArrayList<Event> goodEvents;
+				synchronized (earthquake.getCluster().assignedEventsSync) {
+					goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
+				}
+				if (goodEvents.isEmpty()) {
+					continue;
+				}
+				ArrayList<Double> mags = new ArrayList<>();
+				for (Event e : goodEvents) {
+					double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
+							e.getLatFromStation(), e.getLonFromStation());
+					double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
+							-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
+					long expectedSArrival = (long) (earthquake.getOrigin()
+							+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
+							* 1000);
+					long lastRecord = e.getAnalysis().getStation() instanceof SimulatedStation ? System.currentTimeMillis()
+							: ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
+					// *0.5 because s wave is stronger
+					double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
+					mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
+				}
+				Collections.sort(mags);
+				synchronized (earthquake.magsSync) {
+					earthquake.setMags(mags);
+					earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
+
+				}
 			}
-			if (goodEvents.isEmpty()) {
-				continue;
-			}
-			ArrayList<Double> mags = new ArrayList<>();
-			for (Event e : goodEvents) {
-				double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
-						e.getLatFromStation(), e.getLonFromStation());
-				double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
-						-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
-				long expectedSArrival = (long) (earthquake.getOrigin()
-						+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
-								* 1000);
-				long lastRecord = e.getAnalysis().getStation() instanceof SimulatedStation ? System.currentTimeMillis()
-						: ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
-				// *0.5 because s wave is stronger
-				double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
-			}
-			Collections.sort(mags);
-			synchronized (earthquake.magsSync) {
-				earthquake.setMags(mags);
-				earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
-	
-			}
+		} finally {
+			getEarthquakesReadLock().unlock();
 		}
 	}
 
 	public static final int[] STORE_TABLE = { 3, 3, 3, 5, 7, 10, 15, 25, 40, 40 };
 
 	public void second() {
-		synchronized (earthquakesSync) {
+		getEarthquakesWriteLock().lock();
+		try {
 			Iterator<Earthquake> it = earthquakes.iterator();
 			while (it.hasNext()) {
 				Earthquake e = it.next();
@@ -472,6 +496,8 @@ public class EarthquakeAnalysis {
 					it.remove();
 				}
 			}
+		} finally {
+			getEarthquakesWriteLock().unlock();
 		}
 	}
 

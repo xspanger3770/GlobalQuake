@@ -417,7 +417,8 @@ public class GlobalQuakePanel extends GlobePanel {
 			}
 		}
 
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
+		getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().lock();
+		try {
 			ArrayList<Earthquake> quakes = getGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
 			for (Earthquake e : quakes) {
 				long age = System.currentTimeMillis() - e.getOrigin();
@@ -633,6 +634,8 @@ public class GlobalQuakePanel extends GlobePanel {
 					}
 				}
 			}
+		} finally {
+			getGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
 		}
 
 		int _y = getHeight() - 54;

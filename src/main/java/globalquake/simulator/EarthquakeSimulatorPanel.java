@@ -230,71 +230,72 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 			}
 		}
 
-		ArrayList<Earthquake> quakes;
-		synchronized (simulator.getFakeGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-			quakes = (ArrayList<Earthquake>) simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakes()
-					.clone();
+
+		simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().lock();
+		try {
+			for (Earthquake e : simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakes()) {
+				long age = System.currentTimeMillis() - e.getOrigin();
+				double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (e.getMag())), 2) * 40);
+				double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+						* GeoUtils.EARTH_CIRCUMFERENCE;
+				double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
+						* GeoUtils.EARTH_CIRCUMFERENCE;
+				double pkpDist = TravelTimeTable.getPKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+						* GeoUtils.EARTH_CIRCUMFERENCE;
+				if (age / 1000.0 < maxDisplayTimeSec) {
+					if (pDist > 0) {
+						Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
+						g.setColor(Color.blue);
+						g.setStroke(new BasicStroke(3f));
+						g.draw(pPol);
+					}
+					if (sDist > 0) {
+						Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
+						g.setColor(Color.red);
+						g.setStroke(new BasicStroke(2f));
+						g.draw(sPol);
+					}
+					if (pkpDist > 0) {
+						Path2D.Double pkpPol = createCircle(e.getLat(), e.getLon(), pkpDist);
+						g.setColor(Color.green);
+						g.setStroke(new BasicStroke(3f));
+						g.draw(pkpPol);
+					}
+				}
+				double x0 = getX(e.getLat(), e.getLon());
+				double y0 = getY(e.getLat(), e.getLon());
+
+				drawPga(g, e);
+
+				if (((System.currentTimeMillis() / 500) % 2 == 0)) {
+					Path2D.Double star = createStar(e.getLat(), e.getLon(), 20.0);
+
+					Color col = Scale.getColorLevel(e.getCluster().getLevel());
+
+					g.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 50));
+					g.setStroke(new BasicStroke(1f));
+					g.fill(star);
+					g.setColor(col);
+					g.setStroke(new BasicStroke(2f));
+					g.draw(star);
+				}
+
+				String str = e.getDepth() + "km";
+				g.setStroke(new BasicStroke(1f));
+				g.setColor(Color.white);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 + 33));
+
+				str = "M" + f1d.format(e.getMag());
+				g.setStroke(new BasicStroke(1f));
+				g.setColor(Color.white);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 26));
+
+			}
+		}finally {
+			simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
 		}
-        for (Earthquake e : quakes) {
-            long age = System.currentTimeMillis() - e.getOrigin();
-            double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (e.getMag())), 2) * 40);
-            double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-                    * GeoUtils.EARTH_CIRCUMFERENCE;
-            double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, true) / 360.0
-                    * GeoUtils.EARTH_CIRCUMFERENCE;
-            double pkpDist = TravelTimeTable.getPKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
-                    * GeoUtils.EARTH_CIRCUMFERENCE;
-            if (age / 1000.0 < maxDisplayTimeSec) {
-                if (pDist > 0) {
-                    Path2D.Double pPol = createCircle(e.getLat(), e.getLon(), pDist);
-                    g.setColor(Color.blue);
-                    g.setStroke(new BasicStroke(3f));
-                    g.draw(pPol);
-                }
-                if (sDist > 0) {
-                    Path2D.Double sPol = createCircle(e.getLat(), e.getLon(), sDist);
-                    g.setColor(Color.red);
-                    g.setStroke(new BasicStroke(2f));
-                    g.draw(sPol);
-                }
-                if (pkpDist > 0) {
-                    Path2D.Double pkpPol = createCircle(e.getLat(), e.getLon(), pkpDist);
-                    g.setColor(Color.green);
-                    g.setStroke(new BasicStroke(3f));
-                    g.draw(pkpPol);
-                }
-            }
-            double x0 = getX(e.getLat(), e.getLon());
-            double y0 = getY(e.getLat(), e.getLon());
-
-            drawPga(g, e);
-
-            if (((System.currentTimeMillis() / 500) % 2 == 0)) {
-                Path2D.Double star = createStar(e.getLat(), e.getLon(), 20.0);
-
-                Color col = Scale.getColorLevel(e.getCluster().getLevel());
-
-                g.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 50));
-                g.setStroke(new BasicStroke(1f));
-                g.fill(star);
-                g.setColor(col);
-                g.setStroke(new BasicStroke(2f));
-                g.draw(star);
-            }
-
-            String str = e.getDepth() + "km";
-            g.setStroke(new BasicStroke(1f));
-            g.setColor(Color.white);
-            g.setFont(new Font("Calibri", Font.BOLD, 18));
-            g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 + 33));
-
-            str = "M" + f1d.format(e.getMag());
-            g.setStroke(new BasicStroke(1f));
-            g.setColor(Color.white);
-            g.setFont(new Font("Calibri", Font.BOLD, 18));
-            g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 26));
-
-        }
 
 		for (SimulatedStation s : simulator.getStations()) {
 			double x = getX(s.getLat(), s.getLon());
@@ -465,150 +466,158 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
 
         g.draw(path);
 
-        int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));
+		simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().lock();
 
-		g.setFont(new Font("Calibri", Font.BOLD, 18));
-		g.setStroke(new BasicStroke(1f));
-		String string = "No Earthquakes Located";
+		try {
+			var quakes = simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
 
-		int baseWidth = (int) (g.getFontMetrics().stringWidth(string) * 1.1 + 10);
-		int baseHeight = 132;
+			int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));
 
-		g.setColor(neutralColor);
-
-		if (displayedQuake == -1) {
-			g.fillRect(0, 0, baseWidth, baseHeight);
-			g.setColor(Color.white);
-			g.drawString(string, 3, 18);
-		} else {
-			Earthquake quake = quakes.get(displayedQuake);
 			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
-			g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
-			g.fillRect(0, 0, baseWidth, baseHeight);
-			g.setColor(Color.white);
-			String str = (displayedQuake + 1) + "/" + quakes.size();
-			g.drawString(str, baseWidth - 3 - g.getFontMetrics().stringWidth(str), 18);
-			g.setFont(new Font("Calibri", Font.BOLD, 22));
-			g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", 3, 23);
-			g.setFont(new Font("Calibri", Font.BOLD, 18));
-			g.drawString(quake.getRegion(), 3, 44);
-			g.setFont(new Font("Calibri", Font.BOLD, 19));
+			g.setStroke(new BasicStroke(1f));
+			String string = "No Earthquakes Located";
 
-			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(quake.getOrigin());
+			int baseWidth = (int) (g.getFontMetrics().stringWidth(string) * 1.1 + 10);
+			int baseHeight = 132;
 
-			g.drawString(formatNice.format(cal.getTime()), 3, 66);
-			// TODO Auto-generated method stub
-			g.setFont(new Font("Calibri", Font.BOLD, 16));
-			g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), 3, 85);
-			g.drawString(f1d.format(quake.getDepth()) + "km Deep", 3, 104);
-			str ="Report no." + quake.getReportID();
-			g.drawString(str, 3, 125);
-			str = (int) quake.getPct() + "%";
-			g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
-			if (quake.getCluster().previousHypocenter != null) {
-				str = quake.getCluster().previousHypocenter.getWrongCount() + " / "
-						+ quake.getCluster().getSelected().size() + " / "
-						+ quake.getCluster().getAssignedEvents().size();
-				g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
-			}
+			g.setColor(neutralColor);
 
-			{
-				Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+			if (displayedQuake == -1) {
+				g.fillRect(0, 0, baseWidth, baseHeight);
+				g.setColor(Color.white);
+				g.drawString(string, 3, 18);
+			} else {
+				Earthquake quake = quakes.get(displayedQuake);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
+				g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
+				g.fillRect(0, 0, baseWidth, baseHeight);
+				g.setColor(Color.white);
+				String str = (displayedQuake + 1) + "/" + quakes.size();
+				g.drawString(str, baseWidth - 3 - g.getFontMetrics().stringWidth(str), 18);
+				g.setFont(new Font("Calibri", Font.BOLD, 22));
+				g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", 3, 23);
+				g.setFont(new Font("Calibri", Font.BOLD, 18));
+				g.drawString(quake.getRegion(), 3, 44);
+				g.setFont(new Font("Calibri", Font.BOLD, 19));
 
-				g.setFont(new Font("Calibri", Font.BOLD, 10));
-				int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
-				Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 95);
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(quake.getOrigin());
+
+				g.drawString(formatNice.format(cal.getTime()), 3, 66);
+				// TODO Auto-generated method stub
+				g.setFont(new Font("Calibri", Font.BOLD, 16));
+				g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), 3, 85);
+				g.drawString(f1d.format(quake.getDepth()) + "km Deep", 3, 104);
+				str = "Report no." + quake.getReportID();
+				g.drawString(str, 3, 125);
+				str = (int) quake.getPct() + "%";
+				g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
+				if (quake.getCluster().previousHypocenter != null) {
+					str = quake.getCluster().previousHypocenter.getWrongCount() + " / "
+							+ quake.getCluster().getSelected().size() + " / "
+							+ quake.getCluster().getAssignedEvents().size();
+					g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
+				}
+
+				{
+					Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+
+					g.setFont(new Font("Calibri", Font.BOLD, 10));
+					int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
+					Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 95);
+					g.setStroke(new BasicStroke(1f));
+					Color col = neutralColor;
+
+					if (shindo != null) {
+						col = Shindo.getColorShindo(shindo);
+						if (shindo == Shindo.ZERO) {
+							col = Shindo.getColorShindo(Shindo.ICHI);
+						}
+					}
+
+					g.setColor(col);
+					g.fill(rectShindo);
+
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.BOLD, 10));
+					g.drawString("Max Intensity", 2, baseHeight + 12);
+
+					String str3 = "";
+					if (shindo != null) {
+						str3 = shindo.name();
+					}
+					boolean plus = str3.endsWith("+");
+					boolean minus = str3.endsWith("-");
+					if (plus || minus) {
+						str3 = str3.charAt(0) + " ";
+					}
+					g.setColor(Color.white);
+					g.setFont(new Font("Arial", Font.PLAIN, 64));
+					g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
+					if (plus) {
+						g.setColor(Color.white);
+						g.setFont(new Font("Arial", Font.PLAIN, 36));
+						g.drawString("+", 48, baseHeight + 50);
+
+					}
+					if (minus) {
+						g.setColor(Color.white);
+						g.setFont(new Font("Arial", Font.PLAIN, 48));
+						g.drawString("-", 52, baseHeight + 50);
+					}
+				}
+				g.setColor(Color.white);
 				g.setStroke(new BasicStroke(1f));
-				Color col = neutralColor;
 
-				if (shindo != null) {
-					col = Shindo.getColorShindo(shindo);
-					if (shindo == Shindo.ZERO) {
-						col = Shindo.getColorShindo(Shindo.ICHI);
+				int startY = baseHeight + 115;
+				int startX = 16;
+				int hh = 200;
+				int ww = 60;
+
+				g.setFont(new Font("Calibri", Font.BOLD, 12));
+				g.drawString("Ratio Mag", 10, startY - 5);
+
+				g.drawRect(startX, startY, ww, hh);
+
+				for (int mag = 1; mag <= 9; mag++) {
+					double y0 = startY + hh * (10 - mag) / 10.0;
+					g.setColor(Color.white);
+					g.setFont(new Font("Calibri", Font.BOLD, 12));
+					g.drawString(mag + "", startX - g.getFontMetrics().stringWidth(mag + "") - 5, (int) (y0 + 5));
+					g.draw(new Line2D.Double(startX, y0, startX + 4, y0));
+					g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
+				}
+
+				ArrayList<java.lang.Double> mags;
+				synchronized (quake.magsSync) {
+					mags = (ArrayList<java.lang.Double>) quake.getMags().clone();
+				}
+
+				int[] groups = new int[100];
+
+				for (java.lang.Double d : mags) {
+					int group = (int) (d * 10.0);
+					if (group >= 0 && group < 100) {
+						groups[group]++;
 					}
 				}
 
-				g.setColor(col);
-				g.fill(rectShindo);
-
-				g.setColor(Color.white);
-				g.setFont(new Font("Calibri", Font.BOLD, 10));
-				g.drawString("Max Intensity", 2, baseHeight + 12);
-
-				String str3 = "";
-				if (shindo != null) {
-					str3 = shindo.name();
-				}
-				boolean plus = str3.endsWith("+");
-				boolean minus = str3.endsWith("-");
-				if (plus || minus) {
-					str3 = str3.charAt(0) + " ";
-				}
-				g.setColor(Color.white);
-				g.setFont(new Font("Arial", Font.PLAIN, 64));
-				g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
-				if (plus) {
-					g.setColor(Color.white);
-					g.setFont(new Font("Arial", Font.PLAIN, 36));
-					g.drawString("+", 48, baseHeight + 50);
-
-				}
-				if (minus) {
-					g.setColor(Color.white);
-					g.setFont(new Font("Arial", Font.PLAIN, 48));
-					g.drawString("-", 52, baseHeight + 50);
+				for (int i = 0; i < groups.length; i++) {
+					int n = groups[i];
+					if (n == 0) {
+						continue;
+					}
+					double mag = i / 10.0;
+					double y0 = startY + hh * (10 - mag) / 10;
+					double y1 = startY + hh * (10 - (mag + 0.1)) / 10;
+					double w = Math.min(ww, (n / 10.0) * ww);
+					g.setColor(Scale.getColorEasily(mag / 8.0));
+					g.fill(new Rectangle2D.Double(startX + 1, y1, w, y0 - y1));
 				}
 			}
-			g.setColor(Color.white);
-			g.setStroke(new BasicStroke(1f));
-
-			int startY = baseHeight + 115;
-			int startX = 16;
-			int hh = 200;
-			int ww = 60;
-
-			g.setFont(new Font("Calibri", Font.BOLD, 12));
-			g.drawString("Ratio Mag", 10, startY - 5);
-
-			g.drawRect(startX, startY, ww, hh);
-
-			for (int mag = 1; mag <= 9; mag++) {
-				double y0 = startY + hh * (10 - mag) / 10.0;
-				g.setColor(Color.white);
-				g.setFont(new Font("Calibri", Font.BOLD, 12));
-				g.drawString(mag + "", startX - g.getFontMetrics().stringWidth(mag + "") - 5, (int) (y0 + 5));
-				g.draw(new Line2D.Double(startX, y0, startX + 4, y0));
-				g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
-			}
-
-			ArrayList<java.lang.Double> mags;
-			synchronized (quake.magsSync) {
-				mags = (ArrayList<java.lang.Double>) quake.getMags().clone();
-			}
-
-			int[] groups = new int[100];
-
-			for (java.lang.Double d : mags) {
-				int group = (int) (d * 10.0);
-				if (group >= 0 && group < 100) {
-					groups[group]++;
-				}
-			}
-
-			for (int i = 0; i < groups.length; i++) {
-				int n = groups[i];
-				if (n == 0) {
-					continue;
-				}
-				double mag = i / 10.0;
-				double y0 = startY + hh * (10 - mag) / 10;
-				double y1 = startY + hh * (10 - (mag + 0.1)) / 10;
-				double w = Math.min(ww, (n / 10.0) * ww);
-				g.setColor(Scale.getColorEasily(mag / 8.0));
-				g.fill(new Rectangle2D.Double(startX + 1, y1, w, y0 - y1));
-			}
+		}finally {
+			simulator.getFakeGlobalQuake().getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
 		}
 
 		g.setColor(Color.WHITE);

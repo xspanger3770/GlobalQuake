@@ -258,18 +258,16 @@ public class GlobalQuake {
 			Main.getErrorHandler().setParent(globalQuakeFrame);
 
             globalQuakeFrame.addWindowListener(new WindowAdapter() {
-                @SuppressWarnings("unchecked")
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    ArrayList<Earthquake> quakes;
-
-                    synchronized (getEarthquakeAnalysis().earthquakesSync) {
-                        quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
-                    }
-
-                    for (Earthquake quake : quakes) {
-                        getArchive().archiveQuake(quake);
-                    }
+					getEarthquakeAnalysis().getEarthquakesReadLock().lock();
+                    try {
+						for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+							getArchive().archiveQuake(quake);
+						}
+					}finally {
+						getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
+					}
                     getArchive().saveArchive();
                 }
             });
