@@ -172,13 +172,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
             }
         }
 
-        ArrayList<ArchivedQuake> archivedQuakes;
-        synchronized (simulator.getFakeGlobalQuake().getArchive().archivedQuakesSync) {
-            archivedQuakes = (ArrayList<ArchivedQuake>) simulator.getFakeGlobalQuake().getArchive().getArchivedQuakes()
-                    .clone();
-        }
-
-        for (ArchivedQuake quake : archivedQuakes) {
+        for (ArchivedQuake quake : simulator.getFakeGlobalQuake().getArchive().getArchivedQuakes()) {
             if (quake.isWrong()) {
                 continue;
             }

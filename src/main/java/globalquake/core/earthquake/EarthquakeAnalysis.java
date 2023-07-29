@@ -446,6 +446,7 @@ public class EarthquakeAnalysis {
 
 	public void second() {
 		Iterator<Earthquake> it = earthquakes.iterator();
+		List<Earthquake> toBeRemoved = new ArrayList<>();
 		while (it.hasNext()) {
 			Earthquake e = it.next();
 			int store_minutes = STORE_TABLE[Math.max(0,
@@ -453,9 +454,10 @@ public class EarthquakeAnalysis {
 			if (System.currentTimeMillis() - e.getOrigin() > (long) store_minutes * 60 * 1000
 					&& System.currentTimeMillis() - e.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
 				getGlobalQuake().getArchive().archiveQuakeAndSave(e);
-				it.remove();
+				toBeRemoved.add(e);
 			}
 		}
+		earthquakes.removeAll(toBeRemoved);
 	}
 
 }

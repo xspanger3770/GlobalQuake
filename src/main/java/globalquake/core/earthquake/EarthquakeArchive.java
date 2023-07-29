@@ -1,20 +1,15 @@
 package globalquake.core.earthquake;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-
 import globalquake.core.report.EarthquakeReporter;
-import globalquake.simulator.FakeGlobalQuake;
 import globalquake.main.GlobalQuake;
 import globalquake.main.Main;
+import globalquake.simulator.FakeGlobalQuake;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EarthquakeArchive {
 
@@ -22,29 +17,27 @@ public class EarthquakeArchive {
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
 
-	public final Object archivedQuakesSync;
-	private ArrayList<ArchivedQuake> archivedQuakes;
+	private SortedSet<ArchivedQuake> archivedQuakes;
 
 	public EarthquakeArchive(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		this.archivedQuakesSync = new Object();
 		loadArchive();
 	}
 
 	@SuppressWarnings("unchecked")
 	private void loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
-			archivedQuakes = new ArrayList<>();
+			archivedQuakes = new ConcurrentSkipListSet<>();
 			System.out.println("Created new archive");
 		} else {
 			try {
 				ObjectInputStream oin = new ObjectInputStream(new FileInputStream(ARCHIVE_FILE));
-				archivedQuakes = (ArrayList<ArchivedQuake>) oin.readObject();
+				archivedQuakes = (ConcurrentSkipListSet<ArchivedQuake>) oin.readObject();
 				oin.close();
 				System.out.println("Loaded " + archivedQuakes.size() + " quakes from archive.");
 			} catch (Exception e) {
 				Logger.error(e);
-				archivedQuakes = new ArrayList<>();
+				archivedQuakes = new ConcurrentSkipListSet<>();
 			}
 		}
 		saveArchive();
@@ -62,15 +55,13 @@ public class EarthquakeArchive {
 	public void saveArchive() {
 		if (archivedQuakes != null) {
 			try {
-				synchronized (archivedQuakesSync) {
-					ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(TEMP_ARCHIVE_FILE));
-					System.out.println("Saving " + archivedQuakes.size() + " quakes to " + ARCHIVE_FILE.getName());
-					out.writeObject(archivedQuakes);
-					out.close();
-					boolean res = (!ARCHIVE_FILE.exists() || ARCHIVE_FILE.delete()) && TEMP_ARCHIVE_FILE.renameTo(ARCHIVE_FILE);
-					if(!res){
-						Logger.error("Unable to save archive!");
-					}
+				ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(TEMP_ARCHIVE_FILE));
+				System.out.println("Saving " + archivedQuakes.size() + " quakes to " + ARCHIVE_FILE.getName());
+				out.writeObject(archivedQuakes);
+				out.close();
+				boolean res = (!ARCHIVE_FILE.exists() || ARCHIVE_FILE.delete()) && TEMP_ARCHIVE_FILE.renameTo(ARCHIVE_FILE);
+				if(!res){
+					Logger.error("Unable to save archive!");
 				}
 			} catch (Exception e) {
 				Logger.error(e);
@@ -82,7 +73,7 @@ public class EarthquakeArchive {
 		return globalQuake;
 	}
 
-	public ArrayList<ArchivedQuake> getArchivedQuakes() {
+	public SortedSet<ArchivedQuake> getArchivedQuakes() {
 		return archivedQuakes;
 	}
 
@@ -90,10 +81,8 @@ public class EarthquakeArchive {
 		new Thread("Archive Thread") {
 			public void run() {
 				ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
-				synchronized (archivedQuakesSync) {
-					archivedQuakes.add(archivedQuake);
-					archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
-				}
+				archivedQuakes.add(archivedQuake);
+
 				saveArchive();
 				if(Settings.reportsEnabled) {
 					reportQuake(earthquake);
@@ -118,35 +107,32 @@ public class EarthquakeArchive {
 
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
-		synchronized (archivedQuakesSync) {
-			archivedQuakes.add(archivedQuake);
-			archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
-		}
+		archivedQuakes.add(archivedQuake);
 	}
 
 	public void update() {
-		synchronized (archivedQuakesSync) {
-			Iterator<ArchivedQuake> it = archivedQuakes.iterator();
-			boolean save = false;
-			while (it.hasNext()) {
-				ArchivedQuake archivedQuake = it.next();
-				long age = System.currentTimeMillis() - archivedQuake.getOrigin();
-				if (age > 1000L * 60 * 60 * 24 * 3L) {
-					if (!save) {
-						save = true;
-					}
-					it.remove();
+		Iterator<ArchivedQuake> it = archivedQuakes.iterator();
+		List<ArchivedQuake> toBeRemoved = new ArrayList<>();
+		boolean save = false;
+		while (it.hasNext()) {
+			ArchivedQuake archivedQuake = it.next();
+			long age = System.currentTimeMillis() - archivedQuake.getOrigin();
+			if (age > 1000L * 60 * 60 * 24 * 3L) {
+				if (!save) {
+					save = true;
 				}
-			}
-
-			if (save) {
-				new Thread("Archive Save Thread") {
-					public void run() {
-						saveArchive();
-					}
-                }.start();
+				toBeRemoved.add(archivedQuake);
 			}
 		}
-	}
 
+		toBeRemoved.forEach(archivedQuakes::remove);
+
+		if (save) {
+			new Thread("Archive Save Thread") {
+				public void run() {
+					saveArchive();
+				}
+			}.start();
+		}
+	}
 }

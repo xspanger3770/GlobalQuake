@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import globalquake.regions.Regions;
 
-public class ArchivedQuake implements Serializable {
+public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 
 	@Serial
 	private static final long serialVersionUID = 6690311245585670539L;
@@ -141,4 +141,8 @@ public class ArchivedQuake implements Serializable {
 		return abandonedCount;
 	}
 
+	@Override
+	public int compareTo(ArchivedQuake archivedQuake) {
+		return Long.compare(this.getOrigin(), archivedQuake.getOrigin());
+	}
 }

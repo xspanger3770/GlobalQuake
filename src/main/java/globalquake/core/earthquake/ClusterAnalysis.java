@@ -199,6 +199,7 @@ public class ClusterAnalysis {
 
     private void updateClusters() {
         Iterator<Cluster> it = clusters.iterator();
+        List<Cluster> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Cluster c = it.next();
             int numberOfActiveEvents = 0;
@@ -211,12 +212,14 @@ public class ClusterAnalysis {
             c.active = numberOfActiveEvents >= minimum;
             if (numberOfActiveEvents < minimum && System.currentTimeMillis() - c.getLastUpdate() > 2 * 60 * 1000) {
                 System.out.println("Cluster #" + c.getId() + " died");
-                it.remove();
+                toBeRemoved.add(c);
             } else {
                 c.tick();
             }
             sounds(c);
         }
+
+        clusters.removeAll(toBeRemoved);
     }
 
     private void sounds(Cluster c) {
