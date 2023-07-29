@@ -260,13 +260,8 @@ public class GlobalQuake {
             globalQuakeFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-					getEarthquakeAnalysis().getEarthquakesReadLock().lock();
-                    try {
-						for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
-							getArchive().archiveQuake(quake);
-						}
-					}finally {
-						getEarthquakeAnalysis().getEarthquakesReadLock().unlock();
+					for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+						getArchive().archiveQuake(quake);
 					}
                     getArchive().saveArchive();
                 }
