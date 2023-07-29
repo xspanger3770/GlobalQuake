@@ -396,16 +396,14 @@ public class GlobalQuakePanel extends GlobePanel {
                 g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
 
                 if (isMouseNearby(x0, y0, 7)) {
-                    synchronized (c.assignedEventsSync) {
-                        for (Event e : c.getAssignedEvents()) {
-                            double lat1 = e.getAnalysis().getStation().getLat();
-                            double lon1 = e.getAnalysis().getStation().getLon();
-                            double x1 = getX(lat1, lon1);
-                            double y1 = getY(lat1, lon1);
-                            g.setColor(Color.white);
-                            g.setStroke(new BasicStroke(2f));
-                            g.draw(new Line2D.Double(x0, y0, x1, y1));
-                        }
+                    for (Event e : c.getAssignedEvents()) {
+                        double lat1 = e.getAnalysis().getStation().getLat();
+                        double lon1 = e.getAnalysis().getStation().getLon();
+                        double x1 = getX(lat1, lon1);
+                        double y1 = getY(lat1, lon1);
+                        g.setColor(Color.white);
+                        g.setStroke(new BasicStroke(2f));
+                        g.draw(new Line2D.Double(x0, y0, x1, y1));
                     }
                 }
             }

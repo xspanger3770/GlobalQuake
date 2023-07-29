@@ -1,6 +1,8 @@
 package globalquake.core.earthquake;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
@@ -9,7 +11,7 @@ import globalquake.sounds.SoundsInfo;
 public class Cluster {
 
 	private final int id;
-	private final ArrayList<Event> assignedEvents;
+	private final List<Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -30,7 +32,6 @@ public class Cluster {
 	public int reportID;
 
 	public static final double NONE = -999;
-	public final Object assignedEventsSync;
 	public final Object selectedEventsSync;
 
 	// 20 selected
@@ -38,8 +39,7 @@ public class Cluster {
 
 	public Cluster(int id) {
 		this.id = id;
-		this.assignedEvents = new ArrayList<>();
-		this.assignedEventsSync = new Object();
+		this.assignedEvents = Collections.synchronizedList(new ArrayList<>());
 		this.selectedEventsSync = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;
@@ -55,9 +55,7 @@ public class Cluster {
 	}
 
 	public void addEvent(Event ev) {
-		synchronized (assignedEventsSync) {
-			this.assignedEvents.add(ev);
-		}
+		this.assignedEvents.add(ev);
 		lastUpdate = System.currentTimeMillis();
 	}
 
@@ -65,7 +63,7 @@ public class Cluster {
 	 * 
 	 * @return all events that were added to this cluster
 	 */
-	public ArrayList<Event> getAssignedEvents() {
+	public List<Event> getAssignedEvents() {
 		return assignedEvents;
 	}
 

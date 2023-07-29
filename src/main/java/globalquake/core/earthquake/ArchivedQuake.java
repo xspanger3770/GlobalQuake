@@ -39,18 +39,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		if (earthquake.getCluster().getAssignedEvents() == null || earthquake.getCluster().previousHypocenter == null || earthquake.getCluster().previousHypocenter.getWrongEvents() == null) {
 			return;
 		}
-		ArrayList<Event> events;
 		ArrayList<Event> wrongEvents;
-		synchronized (earthquake.getCluster().assignedEventsSync) {
-			events = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
-		}
 		synchronized (earthquake.getCluster().previousHypocenter.wrongEventsSync) {
 			wrongEvents = (ArrayList<Event>) earthquake.getCluster().previousHypocenter.getWrongEvents().clone();
 		}
 
 		this.maxRatio = 1;
 		this.abandonedCount = wrongEvents.size();
-		for (Event e : events) {
+		for (Event e : earthquake.getCluster().getAssignedEvents()) {
 			boolean aba = wrongEvents.contains(e);
 			archivedEvents.add(
 					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), aba));

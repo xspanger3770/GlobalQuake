@@ -49,14 +49,13 @@ public class EarthquakeReporter {
 			}
 		}
 
-		synchronized (earthquake.getCluster().assignedEventsSync) {
-			for (Event e : earthquake.getCluster().getAssignedEvents()) {
-				AbstractStation station = e.getAnalysis().getStation();
-				e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
-						station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
-						station.getAlt());
-			}
+		for (Event e : earthquake.getCluster().getAssignedEvents()) {
+			AbstractStation station = e.getAnalysis().getStation();
+			e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
+					station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
+					station.getAlt());
 		}
+
 		drawMap(folder, earthquake);
 		drawIntensities(folder, earthquake);
 	}

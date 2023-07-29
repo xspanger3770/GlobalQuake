@@ -70,9 +70,7 @@ public class EarthquakeAnalysis {
 		cluster.lastEpicenterUpdate = cluster.updateCount;
 
 		ArrayList<Event> events;
-		synchronized (cluster.assignedEventsSync) {
-			events = new ArrayList<>(cluster.getAssignedEvents());
-		}
+		events = new ArrayList<>(cluster.getAssignedEvents());
 
 		if (events.isEmpty()) {
 			return;
@@ -411,10 +409,7 @@ public class EarthquakeAnalysis {
 	@SuppressWarnings("unchecked")
 	private void calculateMagnitudes() {
 		for (Earthquake earthquake : getEarthquakes()) {
-			ArrayList<Event> goodEvents;
-			synchronized (earthquake.getCluster().assignedEventsSync) {
-				goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
-			}
+			ArrayList<Event> goodEvents = goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents();
 			if (goodEvents.isEmpty()) {
 				continue;
 			}

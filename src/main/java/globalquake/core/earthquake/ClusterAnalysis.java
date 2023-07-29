@@ -98,9 +98,8 @@ public class ClusterAnalysis {
     }
 
     private void expandCluster(Cluster c) {
-        @SuppressWarnings("unchecked")
         // no need to sync here
-        ArrayList<Event> list = (ArrayList<Event>) c.getAssignedEvents().clone();
+        ArrayList<Event> list = new ArrayList<>(c.getAssignedEvents());
         while (!list.isEmpty()) {
             ArrayList<Event> newEvents = new ArrayList<>();
             mainLoop:
