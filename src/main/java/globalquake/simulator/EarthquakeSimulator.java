@@ -103,9 +103,7 @@ public class EarthquakeSimulator extends JFrame {
                             stat.getAnalysis().getPreviousEvents().clear();
                         }
                     }
-                    synchronized (getClusterAnalysis().clustersSync) {
-                        getClusterAnalysis().getClusters().clear();
-                    }
+                    getClusterAnalysis().getClusters().clear();
                     earthquakeAnalysis.getEarthquakes().clear();
                 } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                     long skip = 3 * 1000;

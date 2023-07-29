@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.core.AlertManager;
@@ -22,15 +23,12 @@ public class ClusterAnalysis {
 
     private final GlobalQuake globalQuake;
 
-    private final ArrayList<Cluster> clusters;
-    public final Object clustersSync;
-
+    private final List<Cluster> clusters;
     private int nextClusterId;
 
     public ClusterAnalysis(GlobalQuake globalQuake) {
         this.globalQuake = globalQuake;
-        clusters = new ArrayList<>();
-        clustersSync = new Object();
+        clusters = new CopyOnWriteArrayList<>();
         this.nextClusterId = 0;
     }
 
@@ -200,26 +198,24 @@ public class ClusterAnalysis {
     }
 
     private void updateClusters() {
-        synchronized (clustersSync) {
-            Iterator<Cluster> it = clusters.iterator();
-            while (it.hasNext()) {
-                Cluster c = it.next();
-                int numberOfActiveEvents = 0;
-                int minimum = (int) Math.max(2, c.getAssignedEvents().size() * 0.12);
-                for (Event e : c.getAssignedEvents()) {
-                    if (!e.hasEnded() && !e.isBroken()) {
-                        numberOfActiveEvents++;
-                    }
+        Iterator<Cluster> it = clusters.iterator();
+        while (it.hasNext()) {
+            Cluster c = it.next();
+            int numberOfActiveEvents = 0;
+            int minimum = (int) Math.max(2, c.getAssignedEvents().size() * 0.12);
+            for (Event e : c.getAssignedEvents()) {
+                if (!e.hasEnded() && !e.isBroken()) {
+                    numberOfActiveEvents++;
                 }
-                c.active = numberOfActiveEvents >= minimum;
-                if (numberOfActiveEvents < minimum && System.currentTimeMillis() - c.getLastUpdate() > 2 * 60 * 1000) {
-                    System.out.println("Cluster #" + c.getId() + " died");
-                    it.remove();
-                } else {
-                    c.tick();
-                }
-                sounds(c);
             }
+            c.active = numberOfActiveEvents >= minimum;
+            if (numberOfActiveEvents < minimum && System.currentTimeMillis() - c.getLastUpdate() > 2 * 60 * 1000) {
+                System.out.println("Cluster #" + c.getId() + " died");
+                it.remove();
+            } else {
+                c.tick();
+            }
+            sounds(c);
         }
     }
 
@@ -322,13 +318,11 @@ public class ClusterAnalysis {
         System.out.println("New Cluster #" + cluster.getId() + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         nextClusterId++;
-        synchronized (clustersSync) {
-            clusters.add(cluster);
-        }
+        clusters.add(cluster);
         return cluster;
     }
 
-    public ArrayList<Cluster> getClusters() {
+    public List<Cluster> getClusters() {
         return clusters;
     }
 

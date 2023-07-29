@@ -344,12 +344,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
             g.fill(new Ellipse2D.Double(x - r / 2, y - r / 2, r, r));
         }
 
-        ArrayList<Cluster> clustersClone;
-        synchronized (simulator.getClusterAnalysis().clustersSync) {
-            clustersClone = (ArrayList<Cluster>) simulator.getClusterAnalysis().getClusters().clone();
-        }
-
-        for (Cluster c : clustersClone) {
+        for (Cluster c : simulator.getClusterAnalysis().getClusters()) {
             double lat = c.getRootLat();
             double lon = c.getRootLon();
             double x0 = getX(lat, lon);

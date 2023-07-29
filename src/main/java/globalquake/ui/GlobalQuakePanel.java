@@ -256,12 +256,9 @@ public class GlobalQuakePanel extends GlobePanel {
                 if (showClusters) {
                     for (Event e : previousEvents) {
                         if (e.assignedCluster >= 0) {
-                            synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-                                if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
-                                    str2.append(" [").append(e.assignedCluster).append("]");
-                                }
+                            if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
+                                str2.append(" [").append(e.assignedCluster).append("]");
                             }
-
                         }
                     }
                 }
@@ -373,45 +370,43 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if (showClusters) {
-            synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-                ArrayList<Cluster> clusters = getGlobalQuake().getClusterAnalysis().getClusters();
-                for (Cluster c : clusters) {
-                    double lat = c.getRootLat();
-                    double lon = c.getRootLon();
-                    double x0 = getX(lat, lon);
-                    double y0 = getY(lat, lon);
+            List<Cluster> clusters = getGlobalQuake().getClusterAnalysis().getClusters();
+            for (Cluster c : clusters) {
+                double lat = c.getRootLat();
+                double lon = c.getRootLon();
+                double x0 = getX(lat, lon);
+                double y0 = getY(lat, lon);
 
-                    Path2D.Double pol = createCircle(lat, lon, c.getSize());
-                    g.setColor(new Color(255, 0, 255, 20));
-                    g.setStroke(new BasicStroke(1f));
-                    g.fill(pol);
-                    g.setColor(new Color(255, 0, 255));
-                    g.setStroke(new BasicStroke(2f));
-                    g.draw(pol);
+                Path2D.Double pol = createCircle(lat, lon, c.getSize());
+                g.setColor(new Color(255, 0, 255, 20));
+                g.setStroke(new BasicStroke(1f));
+                g.fill(pol);
+                g.setColor(new Color(255, 0, 255));
+                g.setStroke(new BasicStroke(2f));
+                g.draw(pol);
 
-                    double r = 6;
-                    g.setColor(Color.yellow);
-                    g.setStroke(new BasicStroke(2f));
-                    g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
-                    g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
+                double r = 6;
+                g.setColor(Color.yellow);
+                g.setStroke(new BasicStroke(2f));
+                g.draw(new Line2D.Double(x0 + r, y0 - r, x0 - r, y0 + r));
+                g.draw(new Line2D.Double(x0 + r, y0 + r, x0 - r, y0 - r));
 
-                    String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
-                    g.setStroke(new BasicStroke(1f));
-                    g.setColor(Color.white);
-                    g.setFont(new Font("Calibri", Font.PLAIN, 14));
-                    g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
+                String str = "#" + c.getId() + ", " + c.getAssignedEvents().size() + " events";
+                g.setStroke(new BasicStroke(1f));
+                g.setColor(Color.white);
+                g.setFont(new Font("Calibri", Font.PLAIN, 14));
+                g.drawString(str, (int) (x0 - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y0 - 16));
 
-                    if (isMouseNearby(x0, y0, 7)) {
-                        synchronized (c.assignedEventsSync) {
-                            for (Event e : c.getAssignedEvents()) {
-                                double lat1 = e.getAnalysis().getStation().getLat();
-                                double lon1 = e.getAnalysis().getStation().getLon();
-                                double x1 = getX(lat1, lon1);
-                                double y1 = getY(lat1, lon1);
-                                g.setColor(Color.white);
-                                g.setStroke(new BasicStroke(2f));
-                                g.draw(new Line2D.Double(x0, y0, x1, y1));
-                            }
+                if (isMouseNearby(x0, y0, 7)) {
+                    synchronized (c.assignedEventsSync) {
+                        for (Event e : c.getAssignedEvents()) {
+                            double lat1 = e.getAnalysis().getStation().getLat();
+                            double lon1 = e.getAnalysis().getStation().getLon();
+                            double x1 = getX(lat1, lon1);
+                            double y1 = getY(lat1, lon1);
+                            g.setColor(Color.white);
+                            g.setStroke(new BasicStroke(2f));
+                            g.draw(new Line2D.Double(x0, y0, x1, y1));
                         }
                     }
                 }

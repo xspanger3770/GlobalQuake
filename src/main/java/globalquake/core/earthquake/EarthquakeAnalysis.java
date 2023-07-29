@@ -46,12 +46,7 @@ public class EarthquakeAnalysis {
 	}
 
 	public void run() {
-		ArrayList<Cluster> clusters;
-		synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-			clusters = new ArrayList<>(getGlobalQuake().getClusterAnalysis().getClusters());
-		}
-
-		for (Cluster cluster : clusters) {
+		for (Cluster cluster : getGlobalQuake().getClusterAnalysis().getClusters()) {
 			processCluster(cluster);
 		}
 		calculateMagnitudes();
