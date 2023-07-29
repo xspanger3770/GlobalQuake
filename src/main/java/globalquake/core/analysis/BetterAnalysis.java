@@ -7,6 +7,7 @@ import uk.me.berndporr.iirj.Butterworth;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class BetterAnalysis extends Analysis {
 
@@ -223,17 +224,18 @@ public class BetterAnalysis extends Analysis {
     @Override
     public void second() {
         Iterator<Event> it = getDetectedEvents().iterator();
+        List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded()) {
                 long age = System.currentTimeMillis() - event.getEnd();
                 if (age >= EVENT_STORE_TIME * 1000) {
-                    it.remove();
+                    toBeRemoved.add(event);
                     System.out.println("Removed old event at station " + getStation().getStationCode());
-
                 }
             }
         }
+        getDetectedEvents().removeAll(toBeRemoved);
 
         long oldestTime = (System.currentTimeMillis() - (long) (LOGS_STORE_TIME * 1000));
         synchronized (previousLogsLock) {
