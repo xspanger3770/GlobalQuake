@@ -20,7 +20,8 @@ public class Cluster {
 
 	private Earthquake earthquake;
 	public final double bestAngle;
-	public Hypocenter previousHypocenter;
+	private Hypocenter previousHypocenter;
+
 	private int level;
 
 	public boolean active;
@@ -48,6 +49,14 @@ public class Cluster {
 		this.rootLon = NONE;
 		this.lastUpdate = System.currentTimeMillis();
 		this.soundsInfo = new SoundsInfo();
+	}
+
+	public Hypocenter getPreviousHypocenter() {
+		return previousHypocenter;
+	}
+
+	public void setPreviousHypocenter(Hypocenter previousHypocenter) {
+		this.previousHypocenter = previousHypocenter;
 	}
 
 	public int getId() {

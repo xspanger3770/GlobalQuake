@@ -34,20 +34,16 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		copyEvents(earthquake);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void copyEvents(Earthquake earthquake) {
-		if (earthquake.getCluster().getAssignedEvents() == null || earthquake.getCluster().previousHypocenter == null || earthquake.getCluster().previousHypocenter.getWrongEvents() == null) {
+		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
+		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
 			return;
-		}
-		ArrayList<Event> wrongEvents;
-		synchronized (earthquake.getCluster().previousHypocenter.wrongEventsLock) {
-			wrongEvents = (ArrayList<Event>) earthquake.getCluster().previousHypocenter.getWrongEvents().clone();
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = wrongEvents.size();
+		this.abandonedCount = previousHypocenter.getWrongEvents().size();
 		for (Event e : earthquake.getCluster().getAssignedEvents()) {
-			boolean aba = wrongEvents.contains(e);
+			boolean aba = previousHypocenter.getWrongEvents().contains(e);
 			archivedEvents.add(
 					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), aba));
 			if (!aba && e.maxRatio > this.maxRatio) {

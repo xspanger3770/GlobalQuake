@@ -23,12 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 
+import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.ArchivedEvent;
-import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Event;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.GlobePanel;
@@ -398,8 +394,10 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
              * if(c.getEarthquake()!=null) { test(g, c.getRootLat(), c.getRootLon()); }
              */
 
-            if (c.previousHypocenter != null && c.previousHypocenter.getWrongEvents() != null) {
-                for (Event e : c.previousHypocenter.getWrongEvents()) {
+            Hypocenter previousHypocenter = c.getPreviousHypocenter();
+
+            if (previousHypocenter != null && previousHypocenter.getWrongEvents() != null) {
+                for (Event e : previousHypocenter.getWrongEvents()) {
                     double x1 = getX(e.getLatFromStation(), e.getLonFromStation());
                     double y1 = getY(e.getLatFromStation(), e.getLonFromStation());
                     double r2 = 30;
@@ -489,8 +487,11 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
             g.drawString(str, 3, 125);
             str = (int) quake.getPct() + "%";
             g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
-            if (quake.getCluster().previousHypocenter != null) {
-                str = quake.getCluster().previousHypocenter.getWrongCount() + " / "
+
+            Hypocenter previousHypocenter = quake.getCluster().getPreviousHypocenter();
+
+            if (previousHypocenter != null) {
+                str = previousHypocenter.getWrongCount() + " / "
                         + quake.getCluster().getSelected().size() + " / "
                         + quake.getCluster().getAssignedEvents().size();
                 g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);

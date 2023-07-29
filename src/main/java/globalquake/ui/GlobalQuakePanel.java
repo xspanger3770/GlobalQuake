@@ -25,12 +25,8 @@ import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
+import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.ArchivedEvent;
-import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Event;
 import globalquake.main.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
@@ -522,12 +518,14 @@ public class GlobalQuakePanel extends GlobePanel {
             g.drawString(str, 3, 125);
             str = (int) quake.getPct() + "%";
             g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 104);
-            if (quake.getCluster().previousHypocenter != null) {
-                str = quake.getCluster().previousHypocenter.getWrongCount() + " / "
+            Hypocenter previousHypocenter = quake.getCluster().getPreviousHypocenter();
+            if (previousHypocenter!= null) {
+                str = previousHypocenter.getWrongCount() + " / "
                         + quake.getCluster().getSelected().size() + " / "
                         + quake.getCluster().getAssignedEvents().size();
                 g.drawString(str, baseWidth - 5 - g.getFontMetrics().stringWidth(str), 125);
             }
+
 
             {
                 Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));

@@ -174,14 +174,16 @@ public class EarthquakeAnalysis {
 		double _lon = cluster.getAnchorLon();
 		long xx = System.currentTimeMillis();
 
+		Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
+
 		// phase 1 search nearby
-		int correctLimit = cluster.previousHypocenter == null ? 0 : cluster.previousHypocenter.correctStations;
+		int correctLimit = previousHypocenter == null ? 0 : previousHypocenter.correctStations;
         bestHypocenter = scanArea(events, null, 9, 500, _lat, _lon, correctLimit, 10, 10);
         System.out.println("CLOSE: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
 
 		// phase 2 search far
-		if (cluster.previousHypocenter == null || cluster.previousHypocenter.correctStations < 12) {
+		if (previousHypocenter == null || previousHypocenter.correctStations < 12) {
 			bestHypocenter = scanArea(events, bestHypocenter, 9, 14000, _lat, _lon, correctLimit, 50, 100);
 		}
 
@@ -202,8 +204,8 @@ public class EarthquakeAnalysis {
 		xx = System.currentTimeMillis();
 	
 		HypocenterCondition result;
-		if ((result = checkConditions(events, bestHypocenter, cluster)) == HypocenterCondition.OK) {
-			updateHypocenter(events, cluster, bestHypocenter);
+		if ((result = checkConditions(events, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
+			updateHypocenter(events, cluster, bestHypocenter, previousHypocenter);
 		} else {
 			System.err.println(result);
 		}
@@ -307,7 +309,7 @@ public class EarthquakeAnalysis {
 		return new double[] { err, acc };
 	}
 
-	private HypocenterCondition checkConditions(ArrayList<Event> events, Hypocenter bestHypocenter, Cluster cluster) {
+	private HypocenterCondition checkConditions(ArrayList<Event> events, Hypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
 		if (bestHypocenter == null) {
 			return HypocenterCondition.NULL;
 		}
@@ -323,15 +325,15 @@ public class EarthquakeAnalysis {
 		if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
 			return HypocenterCondition.TOO_SHALLOW_ANGLE;
 		}
-		if (cluster.previousHypocenter != null
-				&& (bestHypocenter.correctStations < cluster.previousHypocenter.correctStations)) {
+		if (previousHypocenter != null
+				&& (bestHypocenter.correctStations < previousHypocenter.correctStations)) {
 			return HypocenterCondition.PREVIOUS_WAS_BETTER;
 		}
 	
 		return HypocenterCondition.OK;
 	}
 
-	private void updateHypocenter(ArrayList<Event> events, Cluster cluster, Hypocenter bestHypocenter) {
+	private void updateHypocenter(ArrayList<Event> events, Cluster cluster, Hypocenter bestHypocenter, Hypocenter previousHypocenter) {
 		ArrayList<Event> wrongEvents = getWrongEvents(cluster, bestHypocenter);
 		int wrongAmount = wrongEvents.size();
 
@@ -345,6 +347,7 @@ public class EarthquakeAnalysis {
 			getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
 			cluster.setEarthquake(null);
 		}
+
 		if (valid) {
 			if (cluster.getEarthquake() == null) {
 				Sounds.playSound(Sounds.incoming);
@@ -362,14 +365,15 @@ public class EarthquakeAnalysis {
 			cluster.reportID += 1;
 			cluster.getEarthquake().setReportID(cluster.reportID);
 			bestHypocenter.setWrongEvents(wrongEvents);
-			if (cluster.previousHypocenter != null && cluster.previousHypocenter.correctStations < 12
+			if (previousHypocenter != null && previousHypocenter.correctStations < 12
 					&& bestHypocenter.correctStations >= 12) {
 				System.err.println("FAR DISABLED");
 			}
 		} else {
 			System.err.println("NOT VALID");
 		}
-		cluster.previousHypocenter = bestHypocenter;
+
+		cluster.setPreviousHypocenter(bestHypocenter);
 	}
 
 	private ArrayList<Event> getWrongEvents(Cluster c, Hypocenter hyp) {
