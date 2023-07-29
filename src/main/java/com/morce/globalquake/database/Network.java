@@ -1,20 +1,24 @@
 package com.morce.globalquake.database;
 
 import java.awt.Color;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Network implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1897310675831889693L;
-	private String networkCode;
-	private String description;
-	private ArrayList<Station> stations;
+	private final String networkCode;
+	private final String description;
+	private final List<Station> stations;
 
 	public Network(String networkCode, String description) {
 		this.networkCode = networkCode;
 		this.description = description;
-		this.stations = new ArrayList<Station>();
+		this.stations = new CopyOnWriteArrayList<>();
 	}
 
 	public Station getOrCreateStation(String stationCode, String stationSite, double lat, double lon, double alt) {
@@ -36,16 +40,12 @@ public class Network implements Serializable {
 		return description;
 	}
 
-	public ArrayList<Station> getStations() {
+	public List<Station> getStations() {
 		return stations;
 	}
 
-	public int getNumStations() {
-		return stations == null ? -1 : stations.size();
-	}
-
 	private transient Color c;
-	private static Random r = new Random();
+	private static final Random r = new Random();
 
 	public Color getColor() {
 		if (c == null) {

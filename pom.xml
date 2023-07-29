@@ -5,8 +5,12 @@
 	<groupId>com.morce.stationDatabase</groupId>
 	<artifactId>stationDatabase</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+	</properties>
 
-	<dependencies>
+    <dependencies>
 		<dependency>
 			<groupId>edu.sc.seis</groupId>
 			<artifactId>seisFile</artifactId>
@@ -35,7 +39,17 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20210307</version>
+			<version>20230227</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>tinylog-api</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>tinylog-impl</artifactId>
+			<version>2.5.0</version>
 		</dependency>
 	</dependencies>
 

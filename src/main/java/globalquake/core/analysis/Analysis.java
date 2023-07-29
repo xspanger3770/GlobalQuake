@@ -1,34 +1,33 @@
 package globalquake.core.analysis;
 
-import java.util.ArrayList;
-
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import globalquake.core.AbstractStation;
-import globalquake.core.Event;
-import globalquake.core.GlobalQuake;
-import globalquake.core.Log;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.earthquake.Event;
+import org.tinylog.Logger;
+
+import java.util.ArrayList;
 
 public abstract class Analysis {
 	private long lastRecord;
-	private AbstractStation station;
+	private final AbstractStation station;
 	private double sampleRate;
-	private ArrayList<Event> previousEvents;
-	public Object previousEventsSync;
+	private final ArrayList<Event> previousEvents;
+	public final Object previousEventsSync;
 	public long numRecords;
 	public long latestLogTime;
 	public double _maxRatio;
 	public boolean _maxRatioReset;
-	public Object previousLogsSync;
-	private ArrayList<Log> previousLogs;
+	public final Object previousLogsSync;
+	private final ArrayList<Log> previousLogs;
 	private AnalysisStatus status;
 	
 	public Analysis(AbstractStation station) {
 		this.station = station;
 		this.sampleRate = -1;
-		previousEvents = new ArrayList<Event>();
+		previousEvents = new ArrayList<>();
 		previousEventsSync = new Object();
 		previousLogsSync = new Object();
-		previousLogs = new ArrayList<Log>();
+		previousLogs = new ArrayList<>();
 		status = AnalysisStatus.IDLE;
 	}
 
@@ -62,23 +61,22 @@ public abstract class Analysis {
 			System.err.println("Station " + getStation().getStationCode() + " reset due to a gap (" + gap + "ms)");
 			reset();
 		}
-		int[] data = null;
+		int[] data;
 		try {
 			data = dataRecord.decompress().getAsInt();
 			for (int v : data) {
 				nextSample(v, time);
-				time += 1000 / getSampleRate();
+				time += (long) (1000 / getSampleRate());
 			}
 		} catch (Exception e) {
-			System.err.println("Crash occured at station " + getStation().getStationCode() + ", thread continues.");
-			e.printStackTrace();
-			GlobalQuake.instance.saveError(e);
-			return;
-		}
+			System.err.println("Crash occurred at station " + getStation().getStationCode() + ", thread continues.");
+			Logger.error(e);
+        }
 	}
 
 	public abstract void nextSample(int v, long time);
 
+	@SuppressWarnings("SameReturnValue")
 	public abstract long getGapTreshold();
 
 	public void reset() {
@@ -100,7 +98,7 @@ public abstract class Analysis {
 	}
 
 	public Event getLatestEvent() {
-		if (previousEvents == null || previousEvents.size() == 0) {
+		if (previousEvents.isEmpty()) {
 			return null;
 		} else {
 			return previousEvents.get(0);

@@ -8,24 +8,25 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import globalquake.core.GlobalQuake;
+import globalquake.main.GlobalQuake;
 import globalquake.main.Main;
-import globalquake.settings.SettingsFrame;
+import globalquake.ui.settings.SettingsFrame;
 
 public class GlobalQuakeFrame extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private GlobalQuake globalQuake;
+	private final GlobalQuake globalQuake;
 	private static final int FPS = 20;
 
 	private boolean hideList = false;
-	private EarthquakeListPanel list;
-	private GlobalQuakePanel panel;
-	private JPanel mainPanel;
+	private final EarthquakeListPanel list;
+	private final GlobalQuakePanel panel;
+	private final JPanel mainPanel;
 	private boolean _containsListToggle;
 	private boolean _containsSettings;
 
@@ -33,7 +34,6 @@ public class GlobalQuakeFrame extends JFrame {
 		this.globalQuake = globalQuake;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new GlobalQuakePanel(globalQuake, this) {
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void paint(Graphics gr) {
@@ -105,18 +105,12 @@ public class GlobalQuakeFrame extends JFrame {
 		setResizable(true);
 		setTitle(Main.fullName);
 
-		new Thread("Main UI Thread") {
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				while (true) {
-					try {
-						sleep(1000 / FPS);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					mainPanel.repaint();
-				}
-			};
-		}.start();
+				mainPanel.repaint();
+			}
+		}, 0, 1000 / FPS);
 	}
 
 	protected void toggleList() {

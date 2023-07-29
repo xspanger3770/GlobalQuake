@@ -9,16 +9,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class GlobePanelDebug extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private GlobePanel panel;
-	private JPanel list;
-	private JPanel mainPanel;
+	private final GlobePanel panel;
+	private final JPanel list;
+	private final JPanel mainPanel;
 	protected boolean hideList;
 	private boolean _containsListToggle;
 	private boolean _containsSettings;
@@ -28,7 +29,6 @@ public class GlobePanelDebug extends JFrame {
 		setPreferredSize(new Dimension(800, 600));
 
 		panel = new GlobePanel() {
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void paint(Graphics gr) {
@@ -59,9 +59,6 @@ public class GlobePanelDebug extends JFrame {
 				int y = e.getY();
 				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= 0 && y <= 30) {
 					toggleList();
-				}
-				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= getHeight() - 30 && y <= getHeight()) {
-					//settings
 				}
 			}
 			
@@ -100,18 +97,12 @@ public class GlobePanelDebug extends JFrame {
 		setResizable(true);
 		setTitle("Globe Panel");
 
-		new Thread("Main UI Thread") {
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				while (true) {
-					try {
-						sleep(1000 / 40);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					mainPanel.repaint();
-				}
-			};
-		}.start();
+				mainPanel.repaint();
+			}
+		}, 0, 1000 / 40);
 	}
 
 	protected void toggleList() {
@@ -129,12 +120,6 @@ public class GlobePanelDebug extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				new GlobePanelDebug().setVisible(true);
-			}
-		});
+		EventQueue.invokeLater(() -> new GlobePanelDebug().setVisible(true));
 	}
 }

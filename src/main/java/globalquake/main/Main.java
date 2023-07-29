@@ -1,87 +1,73 @@
 package globalquake.main;
 
-import java.awt.EventQueue;
 import java.io.File;
+import java.io.IOException;
 
-import globalquake.core.GlobalQuake;
-import globalquake.database.StationManager;
-import globalquake.ui.DatabaseMonitor;
-import globalquake.ui.GlobePanel;
+import globalquake.database.SeedlinkManager;
+import globalquake.exception.ApplicationErrorHandler;
+import globalquake.exception.FatalIOException;
+import globalquake.regions.Regions;
+import globalquake.sounds.Sounds;
+import globalquake.ui.DatabaseMonitorFrame;
+import globalquake.utils.Scale;
 
 public class Main {
 
-	private StationManager stationManager;
-	private DatabaseMonitor databaseMonitor;
-	private GlobalQuake globalQuake;
+	private static ApplicationErrorHandler errorHandler;
+	private static SeedlinkManager seedlinkManager;
+	private static DatabaseMonitorFrame databaseMonitorFrame;
+	private static GlobalQuake globalQuake;
 
 	public static final String version = "0.8.1";
 	public static final String fullName = "GlobalQuake " + version;
 
 	public static final File MAIN_FOLDER = new File("./GlobalQuake/");
 
-	public Main() {
-		if (!MAIN_FOLDER.exists()) {
-			MAIN_FOLDER.mkdirs();
-		}
+	private static void startDatabaseManager() throws IOException {
+		seedlinkManager = new SeedlinkManager() {
+		};
 
-		startDatabaseManager();
-	}
-
-	private void startDatabaseManager() {
-		new Thread("Init GlobePanel") {
-			public void run() {
-				GlobePanel.init();
-			};
-		}.start();
-		StationManager.setFolderURL(MAIN_FOLDER.getAbsolutePath() + "/stationDatabase/");
-		stationManager = new StationManager() {
+		databaseMonitorFrame = new DatabaseMonitorFrame(seedlinkManager){
 			@Override
-			public void confirmDialog(String title, String message, int optionType, int messageType,
-					String... options) {
-				super.confirmDialog(title, message, optionType, messageType, options);
-				databaseMonitor.confirmDialog(title, message, optionType, messageType, options);
+			public void launch(){
+				launchGlobalQuake();
 			}
 		};
-		stationManager.auto_update = false;
+		errorHandler.setParent(databaseMonitorFrame);
 
-		final Object obj = new Object();
-
-		EventQueue.invokeLater(new Runnable() {
-
-			public void run() {
-				databaseMonitor = new DatabaseMonitor(stationManager, Main.this);
-				databaseMonitor.setVisible(true);
-
-				synchronized (obj) {
-					obj.notify();
-				}
-			}
-		});
-
-		// wait for frame to init
-		synchronized (obj) {
-			try {
-				obj.wait();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		}
-		System.out.println("init");
-		stationManager.init();
+		databaseMonitorFrame.setVisible(true);
+		seedlinkManager.load();
 	}
 
 	public static void main(String[] args) {
-		new Main();
+		Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+
+		try {
+			Regions.init();
+			Scale.load();
+			Sounds.load();
+		} catch (Exception e) {
+			getErrorHandler().handleException(e);
+		}
+
+		if (!MAIN_FOLDER.exists()) {
+			if(!MAIN_FOLDER.mkdirs()){
+				errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
+			}
+		}
+
+		try {
+			startDatabaseManager();
+		} catch (IOException e) {
+			errorHandler.handleException(e);
+		}
 	}
 
-	public void launch() {
-		System.gc();
-		System.out.println("Launch");
-		globalQuake = new GlobalQuake(stationManager);
+	public static void launchGlobalQuake() {
+		globalQuake = new GlobalQuake(seedlinkManager);
 	}
 
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
+	public static ApplicationErrorHandler getErrorHandler() {
+		return errorHandler;
 	}
-
 }
