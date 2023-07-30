@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
@@ -40,7 +41,7 @@ public class Cluster {
 
 	public Cluster(int id) {
 		this.id = id;
-		this.assignedEvents = Collections.synchronizedList(new ArrayList<>());
+		this.assignedEvents = new CopyOnWriteArrayList<>();
 		this.selectedEventsLock = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;

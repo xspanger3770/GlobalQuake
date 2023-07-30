@@ -26,7 +26,6 @@ public class EarthquakeListPanel extends JPanel {
     private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
-    public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
 
     public EarthquakeListPanel(GlobalQuake globalQuake) {
@@ -55,11 +54,23 @@ public class EarthquakeListPanel extends JPanel {
                 if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
                     return;
                 }
-                ArchivedQuake quake = new ArrayList<>(archivedQuakes).get(archivedQuakes.size() - 1 - i);
+                ArchivedQuake quake = getNth(archivedQuakes, i);
 
-                if (e.getButton() == MouseEvent.BUTTON3) {
+                if (quake != null && e.getButton() == MouseEvent.BUTTON3) {
                     quake.setWrong(!quake.isWrong());
                 }
+            }
+
+            private ArchivedQuake getNth(SortedSet<ArchivedQuake> archivedQuakes, int i) {
+                int j = 0;
+                for(ArchivedQuake archivedQuake:archivedQuakes){
+                    if(j == i){
+                        return archivedQuake;
+                    }
+                    j++;
+                }
+
+                return null;
             }
         });
 

@@ -135,6 +135,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 
 	@Override
 	public int compareTo(ArchivedQuake archivedQuake) {
-		return Long.compare(this.getOrigin(), archivedQuake.getOrigin());
+		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
 	}
 }
