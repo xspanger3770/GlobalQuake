@@ -3,25 +3,29 @@ package globalquake.ui.globe;
 import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
+import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.globe.feature.RenderFeature;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
-    public double centerLat = 50;
-    public double centerLon = 17;
-    public double dragStartLat;
-    public double dragStartLon;
-    public double scroll = 2;
+    private double centerLat = 50;
+    private double centerLon = 17;
+    private double dragStartLat;
+    private double dragStartLon;
+    private double scroll = 2;
 
     private Point dragStart;
-    public Point lastMouse;
+    private Point lastMouse;
 
     private final GlobeRenderer renderer;
-
-
 
     public GlobePanel() {
         renderer = new GlobeRenderer();
@@ -33,11 +37,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
             @Override
             public void mouseMoved(MouseEvent e) {
                 lastMouse = e.getPoint();
+                renderer.mouseMoved(e);
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 lastMouse = e.getPoint();
+                renderer.mouseMoved(e);
                 if (dragStart == null) {
                     return;
                 }
@@ -59,8 +65,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 dragStart = e.getPoint();
                 dragStartLat = centerLat;
                 dragStartLon = centerLon;
+                handleClick(e.getX(), e.getY());
             }
-
         });
 
         addMouseWheelListener(e -> {
@@ -97,8 +103,43 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsUHD, 0, 0.12));
     }
 
+    private void handleClick(int x, int y) {
+        long a = System.currentTimeMillis();
+        ArrayList<RenderFeature<?>> clicked = new ArrayList<>();
+        renderer.getRenderFeatures().parallelStream().forEach(feature -> {
+            for(RenderEntity<?> e: feature.getEntities()) {
+                Point2D centerCoords = feature.getCenterCoords(e);
+                if (centerCoords != null) {
+                    Vector3D pos = new Vector3D(GlobeRenderer.getX_3D(centerCoords.x, centerCoords.y, 0),
+                            GlobeRenderer.getY_3D(centerCoords.x, centerCoords.y, 0), GlobeRenderer.getZ_3D(centerCoords.x, centerCoords.y, 0));
+
+                    if (!renderer.isAboveHorizon(pos)) {
+                        continue;
+                    }
+
+                    Point2D centerProjected = renderer.projectPoint(pos);
+                    double distOnScreen = Math.sqrt(Math.pow(centerProjected.x - x, 2) + Math.pow(centerProjected.y - y, 2));
+                    if (distOnScreen <= 10) {
+                        synchronized (clicked) {
+                            clicked.add(feature);
+                        }
+                    }
+                }
+            }
+        });
+
+        featuresClicked(clicked);
+    }
+
+    public void featuresClicked(ArrayList<RenderFeature<?>> clicked) {
+    }
+
     private RenderProperties createRenderProperties() {
         return new RenderProperties(getWidth(), getHeight(), centerLat, centerLon, scroll);
+    }
+
+    public GlobeRenderer getRenderer() {
+        return renderer;
     }
 
     @Override

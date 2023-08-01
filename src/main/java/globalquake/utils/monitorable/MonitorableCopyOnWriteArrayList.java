@@ -10,6 +10,10 @@ public class MonitorableCopyOnWriteArrayList<E> extends CopyOnWriteArrayList<E> 
         super(tmpList);
     }
 
+    public MonitorableCopyOnWriteArrayList(){
+        super();
+    }
+
     @Override
     public boolean add(E e) {
         noteChange();

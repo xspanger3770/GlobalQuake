@@ -48,12 +48,17 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     }
 
     @Override
-    public void render(Graphics2D graphics, RenderEntity<Point2D> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity) {
         graphics.setColor(FeatureGeoPolygons.oceanColor);
         graphics.fill(entity.getShape());
         graphics.setColor(FeatureGeoPolygons.borderColor);
         graphics.setStroke(new BasicStroke(2f));
         graphics.draw(entity.getShape());
         graphics.setStroke(new BasicStroke(1f));
+    }
+
+    @Override
+    public Point2D getCenterCoords(RenderEntity<?> entity) {
+        return null;
     }
 }

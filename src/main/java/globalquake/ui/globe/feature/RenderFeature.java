@@ -1,6 +1,7 @@
 package globalquake.ui.globe.feature;
 
 import globalquake.ui.globe.GlobeRenderer;
+import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.utils.monitorable.Monitorable;
 
@@ -83,20 +84,22 @@ public abstract class RenderFeature<E> {
 
     public abstract void project(GlobeRenderer renderer, RenderEntity<E> entity);
 
-    public abstract void render(Graphics2D graphics, RenderEntity<E> entity);
+    public abstract void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<E> entity);
 
     protected boolean isVisible(RenderProperties properties){
         return true;
     }
 
-    public void renderAll(Graphics2D graphics, RenderProperties properties) {
+    public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
         if(isVisible(properties)){
             getEntities().forEach(entity -> {
                 if(entity.shouldDraw) {
-                    render(graphics, entity);
+                    render(renderer, graphics, entity);
                 }
             });
         }
     }
+
+    public abstract Point2D getCenterCoords(RenderEntity<?> entity);
 
 }

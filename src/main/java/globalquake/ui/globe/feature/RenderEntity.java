@@ -1,5 +1,6 @@
 package globalquake.ui.globe.feature;
 
+import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
 
 import java.awt.geom.Path2D;
@@ -32,4 +33,5 @@ public class RenderEntity<E> {
     public void setPolygon(Polygon3D polygon) {
         this.polygon = polygon;
     }
+
 }

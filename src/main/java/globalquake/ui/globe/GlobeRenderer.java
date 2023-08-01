@@ -7,6 +7,7 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,9 @@ public class GlobeRenderer {
     };
 
     public static final double QUALITY_LOW = 8;
+    @SuppressWarnings("unused")
     public static final double QUALITY_MEDIUM = 2;
+    @SuppressWarnings("unused")
     public static final double QUALITY_HIGH = 1;
     @SuppressWarnings("unused")
     public static final double QUALITY_ULTRA = 0.5;
@@ -37,8 +40,9 @@ public class GlobeRenderer {
     private double camera_altitude;
     private Vector3D cameraPoint;
 
+    private double oneDegPx;
+
     protected static final Vector3D center = new Vector3D(0, 0, 0);
-    private double centerToCamera;
     private double maxAngle;
 
     private double maxDistance;
@@ -46,6 +50,7 @@ public class GlobeRenderer {
     private double horizonDist;
 
     private final List<RenderFeature<?>> renderFeatures;
+    private Point lastMouse;
 
     public GlobeRenderer(){
         renderFeatures = new ArrayList<>();
@@ -99,7 +104,21 @@ public class GlobeRenderer {
                 getY_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
                 getZ_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000));
 
-        centerToCamera = center.distance(cameraPoint);
+        Vector3D surfacePoint = new Vector3D(getX_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0),
+                getY_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0),
+                getZ_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0));
+
+        double[] moved = GeoUtils.moveOnGlobe(getRenderProperties().centerLat, getRenderProperties().centerLon, 1, 0);
+
+        Vector3D surfacePoint1 = new Vector3D(getX_3D(moved[0], moved[1], 0),
+                getY_3D(moved[0], moved[1], 0),
+                getZ_3D(moved[0], moved[1], 0));
+
+        Point2D ptS1 = projectPoint(surfacePoint);
+        Point2D ptS2 = projectPoint(surfacePoint1);
+        oneDegPx = Math.sqrt(Math.pow(ptS1.x - ptS2.x, 2) + Math.pow(ptS1.y - ptS2.y, 2));
+
+        double centerToCamera = center.distance(cameraPoint);
         maxAngle = FastMath.acos(GeoUtils.EARTH_RADIUS / centerToCamera);
 
         double[] data1 = GeoUtils.moveOnGlobe(renderProperties.centerLat, renderProperties.centerLon, GeoUtils.EARTH_CIRCUMFERENCE * (maxAngle / (2.0 * Math.PI)), 0);
@@ -124,6 +143,15 @@ public class GlobeRenderer {
         );
 
         horizonDist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
+    }
+
+    public Point2D projectPoint(Vector3D pos){
+        Point2D point2D = new Point2D();
+        project(point2D, pos.getX(), pos.getY(), pos.getZ(),
+                GeoUtils.EARTH_RADIUS + camera_altitude,
+                renderProperties.width, renderProperties.height);
+
+        return point2D;
     }
 
     public boolean project3D(Path2D.Float result, Polygon3D polygon3D, boolean canClip) {
@@ -302,7 +330,7 @@ public class GlobeRenderer {
         point2D.y = renderProperties.height / 2.0 + (point2D.y - renderProperties.height / 2.0) * (horizonDist / dist);
     }
 
-    private boolean isAboveHorizon(Vector3D point) {
+    public boolean isAboveHorizon(Vector3D point) {
         double cameraToPoint = cameraPoint.distance(point);
         return cameraToPoint <= maxDistance;
     }
@@ -325,7 +353,7 @@ public class GlobeRenderer {
         long a = System.currentTimeMillis();
         renderFeatures.forEach(feature -> feature.process(this, props));
         long b = System.currentTimeMillis();
-        renderFeatures.forEach(feature -> feature.renderAll(graphics, props));
+        renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
         //System.out.println((b - a)+", "+(System.currentTimeMillis() - b));
     }
 
@@ -355,5 +383,26 @@ public class GlobeRenderer {
         }
 
         polygon3D.finish();
+    }
+
+    public List<RenderFeature<?>> getRenderFeatures() {
+        return renderFeatures;
+    }
+
+    public double pxToDeg(double px) {
+        return px / oneDegPx;
+    }
+
+    public boolean isMouseNearby(Point2D coords, double dist) {
+        if(lastMouse == null){
+            return false;
+        }
+        Point2D point = projectPoint(new Vector3D(getX_3D(coords.x, coords.y, 0),
+                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
+        return Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
+    }
+
+    public void mouseMoved(MouseEvent e) {
+        lastMouse = e.getPoint();
     }
 }

@@ -1,6 +1,7 @@
 package globalquake.ui.globe.feature;
 
 import globalquake.ui.globe.GlobeRenderer;
+import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -62,7 +63,12 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public void render(Graphics2D graphics, RenderEntity<Polygon> entity) {
+    public Point2D getCenterCoords(RenderEntity<?> entity) {
+        return null;
+    }
+
+    @Override
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity) {
         graphics.setColor(landColor);
         graphics.fill(entity.getShape());
         graphics.setColor(borderColor);
