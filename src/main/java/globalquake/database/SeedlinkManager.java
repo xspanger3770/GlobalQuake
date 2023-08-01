@@ -24,7 +24,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 
-public class SeedlinkManager implements IStationManager {
+public class SeedlinkManager {
 
 	public static final int DATABASE_VERSION = 4;
 
