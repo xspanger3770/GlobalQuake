@@ -91,7 +91,7 @@ public abstract class AbstractStation {
 		return getDelayMS() != -1 && getDelayMS() < 2 * 60 * 1000;
 	}
 
-	public abstract boolean hasDisplayableData() ;
+	public abstract boolean hasNoDisplayableData() ;
 	
 	public abstract long getDelayMS();
 	

@@ -286,7 +286,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
             }
             if (scroll < 5) {
-                str = s.hasDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
+                str = s.hasNoDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
                 g.setFont(new Font("Calibri", Font.PLAIN, 13));
                 g.setColor(s.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
                 g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y + r * 0.5 + 12));
@@ -696,7 +696,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if (!s.hasData()) {
             return Color.gray;
         } else {
-            if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || s.hasDisplayableData()) {
+            if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || s.hasNoDisplayableData()) {
                 return Color.lightGray;
             } else {
                 return Scale.getColorRatio(s.getMaxRatio60S());
