@@ -1,5 +1,11 @@
 package globalquake.ui;
 
+import globalquake.regions.Regions;
+import globalquake.sounds.Sounds;
+import globalquake.ui.globe.GeoPolygonsLoader;
+import globalquake.ui.globe.GlobePanel;
+import globalquake.utils.Scale;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +23,7 @@ import javax.swing.JPanel;
 
 public class GlobePanelDebug extends JFrame {
 
-	private final GlobePanelOld panel;
+	private final GlobePanel panel;
 	private final JPanel list;
 	private final JPanel mainPanel;
 	protected boolean hideList;
@@ -28,7 +34,7 @@ public class GlobePanelDebug extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
-		panel = new GlobePanelOld() {
+		panel = new GlobePanel() {
 
 			@Override
 			public void paint(Graphics gr) {
@@ -79,8 +85,9 @@ public class GlobePanelDebug extends JFrame {
 			}
 			
 		});
+
 		list = new JPanel();
-		list.setBackground(Color.red);
+		list.setBackground(Color.darkGray);
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -120,6 +127,15 @@ public class GlobePanelDebug extends JFrame {
 	}
 
 	public static void main(String[] args) {
+		try {
+			Regions.init();
+			Scale.load();
+			Sounds.load();
+			GeoPolygonsLoader.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 		EventQueue.invokeLater(() -> new GlobePanelDebug().setVisible(true));
 	}
 }
