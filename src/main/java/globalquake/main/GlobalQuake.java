@@ -3,7 +3,8 @@ package globalquake.main;
 import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
-import globalquake.core.*;
+import globalquake.core.AlertManager;
+import globalquake.core.SeedlinkReader;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
@@ -11,8 +12,6 @@ import globalquake.core.earthquake.EarthquakeArchive;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
-import globalquake.core.zejfseis.ZejfSeisClient;
-import globalquake.core.zejfseis.ZejfSeisStation;
 import globalquake.database.SeedlinkManager;
 import globalquake.geo.GeoUtils;
 import globalquake.ui.GlobalQuakeFrame;
@@ -32,7 +31,6 @@ public class GlobalQuake {
 	private GlobalQuakeFrame globalQuakeFrame;
 
 	protected ArrayList<AbstractStation> stations = new ArrayList<>();
-	private ZejfSeisStation zejf;
 	private long lastReceivedRecord;
 	public long lastSecond;
 	public long lastAnalysis;
@@ -43,14 +41,12 @@ public class GlobalQuake {
 	public EarthquakeAnalysis earthquakeAnalysis;
 	public AlertManager alertManager;
 	public EarthquakeArchive archive;
-	private ZejfSeisClient zejfClient;
 	public static GlobalQuake instance;
 
 	public GlobalQuake(SeedlinkManager seedlinkManager) {
 		instance = this;
 		createFrame();
 		initStations(seedlinkManager);
-		runZejfSeisClient();
 		runNetworkManager();
 		runThreads();
 	}
@@ -134,13 +130,6 @@ public class GlobalQuake {
         }, 0, 1, TimeUnit.SECONDS);
 	}
 
-	private void runZejfSeisClient() {
-		if (zejf != null) {
-			zejfClient = new ZejfSeisClient(zejf);
-			zejfClient.connect();
-		}
-	}
-
 	private void runNetworkManager() {
 		SeedlinkReader networkManager = new SeedlinkReader(this);
 		networkManager.run();
@@ -166,14 +155,8 @@ public class GlobalQuake {
 			seedlinkManager.getDatabase().getNetworksReadLock().unlock();
 		}
 
-		addZejfNetStations();
 		createListOfClosestStations();
 		System.out.println("Initialized " + stations.size() + " Stations.");
-	}
-
-	private void addZejfNetStations() {
-		zejf = new ZejfSeisStation(this, "ZEJF", "Zejf", "EHE", "Zejf", 50.262, 17.262, 400, -1, -1, nextID++);
-		stations.add(zejf);
 	}
 
 	public static final int RAYS = 9;
@@ -293,10 +276,6 @@ public class GlobalQuake {
 
 	public EarthquakeArchive getArchive() {
 		return archive;
-	}
-
-	public ZejfSeisClient getZejfClient() {
-		return zejfClient;
 	}
 
 }
