@@ -25,7 +25,7 @@ public class GlobalQuakeFrame extends JFrame {
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
-	private final GlobalQuakePanel panel;
+	private final GlobalQuakePanelOld panel;
 	private final JPanel mainPanel;
 	private boolean _containsListToggle;
 	private boolean _containsSettings;
@@ -33,7 +33,7 @@ public class GlobalQuakeFrame extends JFrame {
 	public GlobalQuakeFrame(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		panel = new GlobalQuakePanel(globalQuake, this) {
+		panel = new GlobalQuakePanelOld(globalQuake, this) {
 
 			@Override
 			public void paint(Graphics gr) {

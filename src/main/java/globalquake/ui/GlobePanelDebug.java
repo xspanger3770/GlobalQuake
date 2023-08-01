@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 
 public class GlobePanelDebug extends JFrame {
 
-	private final GlobePanel panel;
+	private final GlobePanelOld panel;
 	private final JPanel list;
 	private final JPanel mainPanel;
 	protected boolean hideList;
@@ -28,7 +28,7 @@ public class GlobePanelDebug extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
-		panel = new GlobePanel() {
+		panel = new GlobePanelOld() {
 
 			@Override
 			public void paint(Graphics gr) {

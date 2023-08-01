@@ -1,10 +1,10 @@
 package globalquake.ui.globe.feature;
 
+import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
-import globalquake.utils.GeoUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
