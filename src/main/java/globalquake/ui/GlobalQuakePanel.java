@@ -30,7 +30,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.main.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
-import globalquake.core.zejfseis.ZejfSeisClient;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkManager;
 import globalquake.ui.settings.Settings;
@@ -622,23 +621,17 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
 
-        int _y = getHeight() - 54;
-        {
-            ZejfSeisClient client = globalQuake.getZejfClient();
-            g.setColor(!client.isConnected() ? (client.isConnecting() ? Color.yellow : Color.red) : Color.green);
-            g.setFont(new Font("Calibri", Font.BOLD, 14));
-            g.drawString("ZejfNet", 2, _y);
-            _y += 16;
-        }
+        int _y = getHeight() + 10;
 
         for (SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
+            _y -= 16;
             g.setColor(seed.selectedStations == 0 ? Color.lightGray
                     : (seed.status == SeedlinkNetwork.DISCONNECTED ? Color.red
                     : seed.status == SeedlinkNetwork.CONNECTING ? Color.yellow : Color.green));
             g.setFont(new Font("Calibri", Font.BOLD, 14));
             g.drawString(seed.getHost() + " (" + seed.connectedStations + "/" + seed.selectedStations + ")", 2, _y);
-            _y += 16;
         }
+
         String str = "----/--/-- --:--:--";
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
@@ -678,12 +671,11 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Calibri", Font.PLAIN, 14));
-        int _y2 = getHeight() - 56;
-        g.drawString("Hypocenters: " + globalQuake.lastQuakesT + "ms", 3, _y2 -= 16);
-        g.drawString("1-Second: " + globalQuake.lastSecond + "ms", 3, _y2 -= 16);
-        g.drawString("Analysis: " + globalQuake.lastAnalysis + "ms", 3, _y2 -= 16);
-        g.drawString("Clusters: " + globalQuake.clusterAnalysisT + "ms", 3, _y2 -= 16);
-        g.drawString("GC: " + globalQuake.lastGC + "ms", 3, _y2 - 16);
+        g.drawString("Hypocenters: " + globalQuake.lastQuakesT + "ms", 3, _y -= 16);
+        g.drawString("1-Second: " + globalQuake.lastSecond + "ms", 3, _y -= 16);
+        g.drawString("Analysis: " + globalQuake.lastAnalysis + "ms", 3, _y -= 16);
+        g.drawString("Clusters: " + globalQuake.clusterAnalysisT + "ms", 3, _y -= 16);
+        g.drawString("GC: " + globalQuake.lastGC + "ms", 3, _y - 16);
     }
 
     private void drawPga(Graphics2D g, Earthquake q) {

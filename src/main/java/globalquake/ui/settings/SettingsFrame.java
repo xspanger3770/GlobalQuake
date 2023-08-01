@@ -84,7 +84,6 @@ public class SettingsFrame {
 		panels.add(new GeneralSettingsPanel());
 		panels.add(new HypocenterAnalysisPanel());
 		panels.add(new AlertsPanel());
-		panels.add(new ZejfSeisSettingsPanel());
 
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);
