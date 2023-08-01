@@ -71,7 +71,7 @@ public class GlobalQuakePanel extends GlobePanel {
             public void mouseClicked(MouseEvent e) {
                 if (lastMouse != null) {
                     ArrayList<AbstractStation> clickedStations = new ArrayList<>();
-                    for (AbstractStation s : globalQuake.getStations()) {
+                    for (AbstractStation s : globalQuake.getStationManager().getStations()) {
                         double x = getX(s.getLat(), s.getLon());
                         double y = getY(s.getLat(), s.getLon());
                         if (isMouseNearby(x, y, 7)) {
@@ -151,10 +151,6 @@ public class GlobalQuakePanel extends GlobePanel {
 
     }
 
-    public GlobalQuake getGlobalQuake() {
-        return globalQuake;
-    }
-
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
@@ -179,7 +175,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.draw(path);
         }
 
-        for (AbstractStation s : globalQuake.getStations()) {
+        for (AbstractStation s : globalQuake.getStationManager().getStations()) {
             double x = getX(s.getLat(), s.getLon());
             double y = getY(s.getLat(), s.getLon());
             if (!isOnScreen(x, y)) {
@@ -250,7 +246,7 @@ public class GlobalQuakePanel extends GlobePanel {
             if (showClusters) {
                 for (Event e : previousEvents) {
                     if (e.assignedCluster >= 0) {
-                        if (getGlobalQuake().getClusterAnalysis().clusterExists(e.assignedCluster)) {
+                        if (GlobalQuake.instance.getClusterAnalysis().clusterExists(e.assignedCluster)) {
                             str2.append(" [").append(e.assignedCluster).append("]");
                         }
                     }
@@ -290,7 +286,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
             }
             if (scroll < 5) {
-                str = s.hasDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
+                str = s.hasNoDisplayableData() ? "-.-" : (int) (s.getMaxRatio60S() * 10) / 10.0 + "";
                 g.setFont(new Font("Calibri", Font.PLAIN, 13));
                 g.setColor(s.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
                 g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y + r * 0.5 + 12));
@@ -299,7 +295,7 @@ public class GlobalQuakePanel extends GlobePanel {
         // ArrayList<ArchivedQuake> archivedQuakes = null;
 
         if (showQuakes) {
-            for (ArchivedQuake quake : getGlobalQuake().getArchive().getArchivedQuakes()) {
+            for (ArchivedQuake quake : GlobalQuake.instance.getArchive().getArchivedQuakes()) {
                 if (quake.isWrong()) {
                     continue;
                 }
@@ -362,7 +358,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if (showClusters) {
-            List<Cluster> clusters = getGlobalQuake().getClusterAnalysis().getClusters();
+            List<Cluster> clusters = GlobalQuake.instance.getClusterAnalysis().getClusters();
             for (Cluster c : clusters) {
                 double lat = c.getRootLat();
                 double lon = c.getRootLon();
@@ -403,7 +399,7 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
 
-        List<Earthquake> quakes = getGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
+        List<Earthquake> quakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes();
         for (Earthquake e : quakes) {
             long age = System.currentTimeMillis() - e.getOrigin();
             double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (e.getMag())), 2) * 40);
@@ -700,7 +696,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if (!s.hasData()) {
             return Color.gray;
         } else {
-            if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || s.hasDisplayableData()) {
+            if (s.getAnalysis().getStatus() == AnalysisStatus.INIT || s.hasNoDisplayableData()) {
                 return Color.lightGray;
             } else {
                 return Scale.getColorRatio(s.getMaxRatio60S());

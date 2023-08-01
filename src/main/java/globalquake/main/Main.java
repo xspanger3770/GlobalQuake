@@ -62,7 +62,7 @@ public class Main {
 	}
 
 	public static void launchGlobalQuake() {
-		GlobalQuake globalQuake = new GlobalQuake(seedlinkManager);
+		new GlobalQuake(seedlinkManager).createFrame().runNetworkManager().runThreads();
 	}
 
 	public static ApplicationErrorHandler getErrorHandler() {

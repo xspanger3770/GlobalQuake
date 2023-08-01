@@ -121,7 +121,6 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
         return slider;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);

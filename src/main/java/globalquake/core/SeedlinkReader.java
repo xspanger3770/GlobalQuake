@@ -21,10 +21,6 @@ public class SeedlinkReader {
 		this.globalQuake = globalQuake;
 	}
 
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
-	}
-
 	@SuppressWarnings("BusyWait")
 	public void run() {
 		for (SeedlinkNetwork seedlink : SeedlinkManager.seedlinks) {
@@ -39,7 +35,7 @@ public class SeedlinkReader {
 							System.out.println("Connecting to seedlink server \"" + seedlink.getHost() + "\"");
 							reader = new edu.sc.seis.seisFile.seedlink.SeedlinkReader(seedlink.getHost(), 18000, 90, false);
 
-							for (AbstractStation s : globalQuake.getStations()) {
+							for (AbstractStation s : globalQuake.getStationManager().getStations()) {
 								if (s.getSeedlinkNetwork() == seedlink.getId()) {
 									System.out.println("Connecting to " + s.getStationCode() + " " + s.getNetworkCode()
 											+ " " + s.getChannelName() + " " + s.getLocationCode() + ", "
@@ -94,7 +90,7 @@ public class SeedlinkReader {
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
-		for (AbstractStation s : globalQuake.getStations()) {
+		for (AbstractStation s : globalQuake.getStationManager().getStations()) {
 			if (s instanceof GlobalStation) {
 				if (s.getNetworkCode().equals(network) && s.getStationCode().equals(station)) {
 					((GlobalStation) s).addRecord(dr);

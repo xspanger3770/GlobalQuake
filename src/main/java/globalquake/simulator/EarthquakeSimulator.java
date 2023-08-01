@@ -28,11 +28,14 @@ import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.Event;
 import globalquake.core.station.GlobalStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
+import globalquake.regions.Regions;
+import globalquake.sounds.Sounds;
 import globalquake.ui.EarthquakeListPanel;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;
 import globalquake.utils.NamedThreadFactory;
 import globalquake.geo.TravelTimeTable;
+import globalquake.utils.Scale;
 
 @SuppressWarnings("CallToPrintStackTrace")
 public class EarthquakeSimulator extends JFrame {
@@ -200,8 +203,8 @@ public class EarthquakeSimulator extends JFrame {
         clusterAnalysis = new ClusterAnalysis(getFakeGlobalQuake());
         earthquakeAnalysis = new EarthquakeAnalysis(getFakeGlobalQuake());
         alertManager = new AlertManager(getFakeGlobalQuake());
-        getFakeGlobalQuake().archive = new EarthquakeArchive(getFakeGlobalQuake());
 
+        getFakeGlobalQuake().archive = new EarthquakeArchive(getFakeGlobalQuake());
         getFakeGlobalQuake().earthquakeAnalysis = earthquakeAnalysis;
         getFakeGlobalQuake().clusterAnalysis = clusterAnalysis;
         getFakeGlobalQuake().alertManager = alertManager;
@@ -368,7 +371,7 @@ public class EarthquakeSimulator extends JFrame {
         stations = new ArrayList<>();
         try {
             ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream("./GlobalQuake/stationDatabase/stationDatabaseNormal.dat"));
+                    new FileInputStream("./GlobalQuake/stationDatabase/stationDatabaseSim.dat"));
             StationDatabase database = (StationDatabase) in.readObject();
             in.close();
 
@@ -414,6 +417,13 @@ public class EarthquakeSimulator extends JFrame {
     }
 
     public static void main(String[] args) {
+        try {
+            Regions.init();
+            Scale.load();
+            Sounds.load();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         EventQueue.invokeLater(() -> new EarthquakeSimulator().setVisible(true));
     }
 

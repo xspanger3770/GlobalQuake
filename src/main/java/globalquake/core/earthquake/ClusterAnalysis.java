@@ -47,7 +47,7 @@ public class ClusterAnalysis {
 
     @SuppressWarnings({"unused"})
     private void assignEventsToExistingEarthquakeClusters() {
-        for (AbstractStation station : getGlobalQuake().getStations()) {
+        for (AbstractStation station : getGlobalQuake().getStationManager().getStations()) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     HashMap<Earthquake, Event> map = new HashMap<>();
@@ -147,7 +147,7 @@ public class ClusterAnalysis {
     }
 
     private void createNewClusters() {
-        for (AbstractStation station : getGlobalQuake().getStations()) {
+        for (AbstractStation station : getGlobalQuake().getStationManager().getStations()) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     // so we have eligible event
