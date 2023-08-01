@@ -1,7 +1,7 @@
 package globalquake.ui.globe;
 
+import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.feature.RenderFeature;
-import globalquake.utils.GeoUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;

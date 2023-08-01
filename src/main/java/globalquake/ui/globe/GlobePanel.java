@@ -1,8 +1,8 @@
 package globalquake.ui.globe;
 
+import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
-import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;

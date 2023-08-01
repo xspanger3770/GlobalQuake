@@ -1,6 +1,6 @@
 package globalquake.ui.globe;
 
-import globalquake.utils.GeoUtils;
+import globalquake.geo.GeoUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.util.ArrayList;
