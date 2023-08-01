@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.Log;
@@ -27,8 +28,8 @@ public class Event implements Serializable {
 
 	public transient int nextPWaveCalc;
 
-	private ArrayList<Log> logs;
-	public final transient Object logsSync;
+	private List<Log> logs;
+	public final transient Object logsLock;
 
 	public double maxRatio;
 
@@ -39,7 +40,7 @@ public class Event implements Serializable {
 	private final transient Analysis analysis;
 	public StationReport report;
 
-	public Event(Analysis analysis, long start, ArrayList<Log> logs) {
+	public Event(Analysis analysis, long start, List<Log> logs) {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
@@ -48,7 +49,7 @@ public class Event implements Serializable {
 
 	// used in emulator
 	public Event(Analysis analysis) {
-		this.logsSync = new Object();
+		this.logsLock = new Object();
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
 		this.broken = false;
@@ -140,7 +141,7 @@ public class Event implements Serializable {
 	}
 
 	public void log(Log currentLog) {
-		synchronized (logsSync) {
+		synchronized (logsLock) {
 			logs.add(0, currentLog);
 		}
 		this.lastLogTime = currentLog.getTime();
@@ -176,7 +177,7 @@ public class Event implements Serializable {
 		}
 		long lookBack = (getStart() - (long) ((60.0 / strenghtLevel) * 1000));
 
-		ArrayList<Double> slows = new ArrayList<>();
+		List<Double> slows = new ArrayList<>();
 
 		double maxSpecial = -Double.MAX_VALUE;
 		double minSpecial = Double.MAX_VALUE;

@@ -1,6 +1,7 @@
 package globalquake.core.earthquake;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import globalquake.regions.Regions;
@@ -19,7 +20,7 @@ public class Earthquake {
 	private double pct;
 	private int reportID;
 
-	public final Object magsSync;
+	public final Object magsLock;
 	public int nextReport;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
@@ -29,7 +30,7 @@ public class Earthquake {
 		this.origin = origin;
 		this.cluster = cluster;
 		this.mags = new ArrayList<>();
-		this.magsSync = new Object();
+		this.magsLock = new Object();
 		this.region = Regions.getRegion(getLat(), getLon());
 		updateRegion();
 		this.lastUpdate = System.currentTimeMillis();
@@ -43,7 +44,7 @@ public class Earthquake {
 		this.mag = mag;
 	}
 
-	public ArrayList<Double> getMags() {
+	public List<Double> getMags() {
 		return mags;
 	}
 

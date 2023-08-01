@@ -3,8 +3,8 @@ package globalquake.core.earthquake;
 import java.util.ArrayList;
 
 public class Hypocenter {
-	public final Object wrongEventsSync = new Object();
-    ArrayList<Event> wrongEvents;
+	public final Object wrongEventsLock = new Object();
+    private ArrayList<Event> wrongEvents;
 	public double totalErr;
 
 	public Hypocenter(double lat, double lon, double depth, long origin) {

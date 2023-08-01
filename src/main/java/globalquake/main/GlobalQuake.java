@@ -75,9 +75,7 @@ public class GlobalQuake {
 		execAnalysis.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                for (AbstractStation station : stations) {
-                    station.analyse();
-                }
+				stations.parallelStream().forEach(AbstractStation::analyse);
                 lastAnalysis = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occurred in station analysis");
@@ -88,9 +86,7 @@ public class GlobalQuake {
 		exec1Sec.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                for (AbstractStation s : stations) {
-                    s.second();
-                }
+				stations.parallelStream().forEach(AbstractStation::second);
                 if (getEarthquakeAnalysis() != null) {
                     getEarthquakeAnalysis().second();
                 }
@@ -258,18 +254,11 @@ public class GlobalQuake {
 			Main.getErrorHandler().setParent(globalQuakeFrame);
 
             globalQuakeFrame.addWindowListener(new WindowAdapter() {
-                @SuppressWarnings("unchecked")
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    ArrayList<Earthquake> quakes;
-
-                    synchronized (getEarthquakeAnalysis().earthquakesSync) {
-                        quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
-                    }
-
-                    for (Earthquake quake : quakes) {
-                        getArchive().archiveQuake(quake);
-                    }
+					for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+						getArchive().archiveQuake(quake);
+					}
                     getArchive().saveArchive();
                 }
             });

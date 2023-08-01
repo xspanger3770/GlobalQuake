@@ -9,7 +9,7 @@ import globalquake.main.GlobalQuake;
 public class ZejfSeisStation extends AbstractStation {
 
 	private final Queue<SimpleLog> recordsQueue;
-	private final Object recordsSync = new Object();
+	private final Object recordsLock = new Object();
 
 	public ZejfSeisStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
 			String locationCode, double lat, double lon, double alt,
@@ -20,14 +20,14 @@ public class ZejfSeisStation extends AbstractStation {
 	}
 
 	public void addRecord(SimpleLog dr) {
-		synchronized (recordsSync) {
+		synchronized (recordsLock) {
 			recordsQueue.add(dr);
 		}
 	}
 
 	@Override
 	public void analyse() {
-		synchronized (recordsSync) {
+		synchronized (recordsLock) {
 			while (!recordsQueue.isEmpty()) {
 				SimpleLog record = recordsQueue.remove();
 				getAnalysis().nextSample(record.value(), record.time());
