@@ -1,10 +1,9 @@
 package globalquake.core.station;
 
-import java.util.ArrayList;
-
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
-import globalquake.main.GlobalQuake;
+
+import java.util.ArrayList;
 
 public abstract class AbstractStation {
 
@@ -19,13 +18,11 @@ public abstract class AbstractStation {
 	private final long sensitivity;
 	private final BetterAnalysis analysis;
 	private final double frequency;
-	private final GlobalQuake globalQuake;
 	private final int id;
 
-	public AbstractStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
+	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, byte seedlinkNetwork, double lat, double lon, double alt,
 						   long sensitivity, double frequency, int id) {
-		this.globalQuake = globalQuake;
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
@@ -145,10 +142,6 @@ public abstract class AbstractStation {
 	public ArrayList<NearbyStationDistanceInfo> getNearbyStations() {
 		return nearbyStations;
 	}
-	
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
-	}
-	
+
 	public abstract void analyse();
 }

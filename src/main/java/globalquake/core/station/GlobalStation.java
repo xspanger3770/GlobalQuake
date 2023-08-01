@@ -10,10 +10,10 @@ public class GlobalStation extends AbstractStation {
 
 	private final Queue<DataRecord> recordsQueue;
 
-	public GlobalStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
+	public GlobalStation(String networkCode, String stationCode, String channelName,
 						 String locationCode, byte source, byte seedlinkNetwork, double lat, double lon, double alt,
 						 long sensitivity, double frequency, int id) {
-		super(globalQuake, networkCode, stationCode, channelName, locationCode, seedlinkNetwork, lat, lon, alt, sensitivity, frequency, id);
+		super(networkCode, stationCode, channelName, locationCode, seedlinkNetwork, lat, lon, alt, sensitivity, frequency, id);
 		this.recordsQueue = new ConcurrentLinkedQueue<>();
 	}
 
@@ -26,7 +26,7 @@ public class GlobalStation extends AbstractStation {
 		while (!recordsQueue.isEmpty()) {
 			DataRecord record = recordsQueue.remove();
 			getAnalysis().analyse(record);
-			getGlobalQuake().logRecord(record.getLastSampleBtime().convertToCalendar().getTimeInMillis());
+			GlobalQuake.instance.logRecord(record.getLastSampleBtime().convertToCalendar().getTimeInMillis());
 		}
 	}
 

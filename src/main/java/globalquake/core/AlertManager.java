@@ -20,7 +20,6 @@ public class AlertManager {
         this.warnedQuakes = new HashMap<>();
     }
 
-    @SuppressWarnings("unchecked")
     public void tick() {
         if (!Settings.enableAlarmDialogs) {
             return;
