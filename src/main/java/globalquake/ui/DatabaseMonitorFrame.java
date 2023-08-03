@@ -225,7 +225,7 @@ public abstract class DatabaseMonitorFrame extends JFrame {
             lblAvailable.setText("Available: Loading...");
         }
 
-        progressBar2.setIndeterminate(state < SeedlinkManager.DONE);
+        progressBar2.setIndeterminate(state <= 0);
         progressBar1.setIndeterminate(state <= 0);
 
         if (state > 0) {
