@@ -21,8 +21,8 @@ import javax.swing.JOptionPane;
 import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Station;
 
-import globalquake.database.SeedlinkNetwork;
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkNetwork;
+import globalquake.database_old.SeedlinkManager;
 import globalquake.main.Main;
 
 public class StationSelectPanel extends GlobePanel {

@@ -1,4 +1,4 @@
-package globalquake.database;
+package globalquake.database_old;
 
 import com.morce.globalquake.database.*;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
@@ -380,8 +380,7 @@ public class SeedlinkManager {
 	}
 
 	private void downloadSource(final StationSource se, StationDatabase database, Calendar now) throws Exception {
-		URL url = new URL(se.getUrl()
-				+ "level=channel&endafter="+format1.format(new Date())+"&includerestricted=false&format=xml&channel=" + channels);
+		URL url = new URL("%slevel=channel&endafter=%s&includerestricted=false&format=xml&channel=%s".formatted(se.getUrl(), format1.format(new Date()), channels));
 
 		System.out.println("Connecting to " + se.getName());
 		updating_string = "Connecting to " + se.getName();

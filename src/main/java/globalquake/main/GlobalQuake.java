@@ -8,7 +8,7 @@ import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.EarthquakeArchive;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationManager;
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkManager;
 import globalquake.ui.GlobalQuakeFrame;
 import globalquake.utils.NamedThreadFactory;
 

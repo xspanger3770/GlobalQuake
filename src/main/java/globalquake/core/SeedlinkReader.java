@@ -6,8 +6,8 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
-import globalquake.database.SeedlinkNetwork;
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkNetwork;
+import globalquake.database_old.SeedlinkManager;
 import globalquake.main.GlobalQuake;
 import org.tinylog.Logger;
 

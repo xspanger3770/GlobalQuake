@@ -3,7 +3,7 @@ package globalquake.main;
 import java.io.File;
 import java.io.IOException;
 
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkManager;
 import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.FatalIOException;
 import globalquake.regions.Regions;

@@ -1,6 +1,6 @@
 package com.morce.globalquake.database;
 
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

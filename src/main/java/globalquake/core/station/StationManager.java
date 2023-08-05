@@ -3,7 +3,7 @@ package globalquake.core.station;
 import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Network;
 import com.morce.globalquake.database.Station;
-import globalquake.database.SeedlinkManager;
+import globalquake.database_old.SeedlinkManager;
 import globalquake.geo.GeoUtils;
 
 import java.util.ArrayList;
