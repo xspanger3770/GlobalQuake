@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public abstract class DatabaseMonitorFrame extends JFrame {
+public abstract class DatabaseMonitorFrameOld extends JFrame {
 
 	private final SeedlinkManager seedlinkManager;
 	private final JLabel lblVersion;
@@ -40,7 +40,7 @@ public abstract class DatabaseMonitorFrame extends JFrame {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	public DatabaseMonitorFrame(SeedlinkManager seedlinkManager) {
+	public DatabaseMonitorFrameOld(SeedlinkManager seedlinkManager) {
 		this.seedlinkManager = seedlinkManager;
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,15 +59,15 @@ public abstract class DatabaseMonitorFrame extends JFrame {
 		btnLaunch.addActionListener(e -> {
             if (seedlinkManager.getSelectedStations() == 0) {
                 String[] options = { "Cancel", "Yes" };
-                int n = JOptionPane.showOptionDialog(DatabaseMonitorFrame.this, "Launch with no selected stations?",
+                int n = JOptionPane.showOptionDialog(DatabaseMonitorFrameOld.this, "Launch with no selected stations?",
                         "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
                         options[0]);
                 if (n == 0) {
                     return;
                 }
             }
-            DatabaseMonitorFrame.this.dispose();
-            DatabaseMonitorFrame.this.launch();
+            DatabaseMonitorFrameOld.this.dispose();
+            DatabaseMonitorFrameOld.this.launch();
         });
 
 		lblVersion = new JLabel("Database Version: Loading...");
@@ -104,13 +104,13 @@ public abstract class DatabaseMonitorFrame extends JFrame {
             if (seedlinkManager == null) {
                 return;
             }
-            DatabaseMonitorFrame.this.setEnabled(false);
+            DatabaseMonitorFrameOld.this.setEnabled(false);
             stationSelect = new StationSelect(seedlinkManager);
             stationSelect.setVisible(true);
             stationSelect.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e1) {
-                    DatabaseMonitorFrame.this.setEnabled(true);
+                    DatabaseMonitorFrameOld.this.setEnabled(true);
                 }
             });
         }));

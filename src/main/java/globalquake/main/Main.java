@@ -8,7 +8,7 @@ import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.FatalIOException;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
-import globalquake.ui.DatabaseMonitorFrame;
+import globalquake.ui.DatabaseMonitorFrameOld;
 import globalquake.utils.Scale;
 
 public class Main {
@@ -25,20 +25,20 @@ public class Main {
 		seedlinkManager = new SeedlinkManager() {
 		};
 
-		DatabaseMonitorFrame databaseMonitorFrame = new DatabaseMonitorFrame(seedlinkManager) {
+		DatabaseMonitorFrameOld databaseMonitorFrameOld = new DatabaseMonitorFrameOld(seedlinkManager) {
 			@Override
 			public void launch() {
 				launchGlobalQuake();
 			}
 		};
-		errorHandler.setParent(databaseMonitorFrame);
+		errorHandler.setParent(databaseMonitorFrameOld);
 
-		databaseMonitorFrame.setVisible(true);
+		databaseMonitorFrameOld.setVisible(true);
 		seedlinkManager.load();
 	}
 
 	public static void main(String[] args) {
-		Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+		initErrorHandler();
 
 		try {
 			Regions.init();
@@ -68,4 +68,8 @@ public class Main {
 	public static ApplicationErrorHandler getErrorHandler() {
 		return errorHandler;
 	}
+
+    public static void initErrorHandler() {
+		Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+    }
 }
