@@ -1,30 +1,70 @@
 package globalquake.ui.database;
 
+import globalquake.ui.database.action.AddStationSourceAction;
+import globalquake.ui.database.action.EditStationSourceAction;
+import globalquake.ui.database.action.RemoveStationSourceAction;
+import globalquake.ui.database.action.UpdateStationSourceAction;
 import globalquake.ui.database.table.StationSourcesTableModel;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 
 public class StationSourcesPanel extends JPanel {
     private final DatabaseMonitorFrame databaseMonitorFrame;
-    private final JTable table;
+
+    private final AddStationSourceAction addStationSourceAction;
+    private final EditStationSourceAction editStationSourceAction;
+    private final RemoveStationSourceAction removeStationSourceAction;
+    private final UpdateStationSourceAction updateStationSourceAction;
+    private StationSourcesTableModel tableModel;
 
     public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame) {
         this.databaseMonitorFrame = databaseMonitorFrame;
+        this.addStationSourceAction = new AddStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
+        this.editStationSourceAction = new EditStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
+        this.removeStationSourceAction = new RemoveStationSourceAction(databaseMonitorFrame.getManager());
+        this.updateStationSourceAction = new UpdateStationSourceAction(databaseMonitorFrame.getManager());
 
         setLayout(new BorderLayout());
 
-        JPanel actionsPanel = new JPanel();
-        actionsPanel.setLayout(new GridLayout(1,1));
+        JPanel actionsWrapPanel = new JPanel();
+        JPanel actionsPanel = createActionsPanel();
+        actionsWrapPanel.add(actionsPanel);
+        add(actionsWrapPanel, BorderLayout.NORTH);
 
-        actionsPanel.add(new JButton("Help"));
-
-        add(actionsPanel, BorderLayout.NORTH);
+        JTable table;
         add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
+
+        this.addStationSourceAction.setTableModel(tableModel);
+        this.editStationSourceAction.setTableModel(tableModel);
+        this.editStationSourceAction.setTable(table);
+        this.editStationSourceAction.setEnabled(false);
+        this.removeStationSourceAction.setTableModel(tableModel);
+        this.removeStationSourceAction.setTable(table);
+        this.removeStationSourceAction.setEnabled(false);
+        this.updateStationSourceAction.setTableModel(tableModel);
+        this.updateStationSourceAction.setTable(table);
+        this.updateStationSourceAction.setEnabled(true);
+    }
+
+    private JPanel createActionsPanel() {
+        JPanel actionsPanel = new JPanel();
+
+        GridLayout gridLayout = new GridLayout(1,4);
+        gridLayout.setHgap(5);
+
+        actionsPanel.setLayout(gridLayout);
+
+        actionsPanel.add(new JButton(addStationSourceAction));
+        actionsPanel.add(new JButton(editStationSourceAction));
+        actionsPanel.add(new JButton(removeStationSourceAction));
+        actionsPanel.add(new JButton(updateStationSourceAction));
+
+        return actionsPanel;
     }
 
     private JTable createTable() {
-        StationSourcesTableModel tableModel;
         JTable table = new JTable(tableModel = new StationSourcesTableModel(databaseMonitorFrame.getManager().getStationDatabase().getStationSources()));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
         table.setRowHeight(20);
@@ -37,6 +77,15 @@ public class StationSourcesPanel extends JPanel {
             table.getColumnModel().getColumn(i).setCellRenderer(tableModel.getColumnRenderer(i));
         }
 
+        table.getSelectionModel().addListSelectionListener(this::rowSelectionChanged);
+
         return table;
+    }
+
+    private void rowSelectionChanged(ListSelectionEvent event) {
+        var selectionModel = (ListSelectionModel) event.getSource();
+        var count = selectionModel.getSelectedItemsCount();
+        editStationSourceAction.setEnabled(count == 1);
+        removeStationSourceAction.setEnabled(count >= 1);
     }
 }

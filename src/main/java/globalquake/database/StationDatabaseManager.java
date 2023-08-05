@@ -4,6 +4,8 @@ import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class StationDatabaseManager {
 
@@ -53,6 +55,13 @@ public class StationDatabaseManager {
         }catch(IOException e){
             throw new FatalIOException("Unable to save station database!", e);
         }
+    }
+
+    public void runUpdate(List<StationSource> stationSources) {
+        stationSources.parallelStream().forEach(stationSource -> {
+            stationSource.getStatus().setString("Updating...");
+            stationSource.setLastUpdate(LocalDateTime.now());
+        });
     }
 
     private static File getDatabaseFile() {
