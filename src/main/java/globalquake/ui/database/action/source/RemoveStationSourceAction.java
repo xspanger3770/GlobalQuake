@@ -5,7 +5,6 @@ import globalquake.database.StationSource;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;

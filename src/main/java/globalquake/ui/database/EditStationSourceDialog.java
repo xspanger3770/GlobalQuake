@@ -12,9 +12,9 @@ public class EditStationSourceDialog extends JDialog {
     private final StationDatabaseManager databaseManager;
     private final StationSource stationSource;
     private final FilterableTableModel<?> tableModel;
-    private JTextField nameField;
-    private JTextField urlField;
-    private JButton saveButton;
+    private final JTextField nameField;
+    private final JTextField urlField;
+
     public EditStationSourceDialog(Window parent, StationDatabaseManager databaseManager, FilterableTableModel<?> tableModel, StationSource stationSource) {
         super(parent);
         setModal(true);
@@ -36,12 +36,10 @@ public class EditStationSourceDialog extends JDialog {
 
         nameField = new JTextField(stationSource==null ? "" : stationSource.getName(), 40);
         urlField = new JTextField(stationSource==null ? "" : stationSource.getUrl(), 40);
-        saveButton = new JButton("Save");
+        JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(actionEvent -> {
-            EditStationSourceDialog.this.dispose();
-        });
+        cancelButton.addActionListener(actionEvent -> EditStationSourceDialog.this.dispose());
 
         JPanel buttonsPanel = new JPanel();
 

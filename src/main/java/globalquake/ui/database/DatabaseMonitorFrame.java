@@ -1,7 +1,6 @@
 package globalquake.ui.database;
 
 import globalquake.database.StationDatabaseManager;
-import globalquake.database.StationSource;
 import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
 
@@ -16,8 +15,6 @@ import java.util.TimerTask;
 public class DatabaseMonitorFrame extends JFrame {
 
     private final StationDatabaseManager manager;
-    private JButton btnLaunch;
-    private JButton btnSelectStations;
 
     public DatabaseMonitorFrame(StationDatabaseManager manager) {
         this.manager = manager;
@@ -84,11 +81,11 @@ public class DatabaseMonitorFrame extends JFrame {
         gridLayout.setHgap(5);
         buttonsPanel.setLayout(gridLayout);
 
-        btnSelectStations = new JButton("Select Stations");
+        JButton btnSelectStations = new JButton("Select Stations");
         btnSelectStations.setEnabled(false);
         buttonsPanel.add(btnSelectStations);
 
-        btnLaunch = new JButton("Launch " + Main.fullName);
+        JButton btnLaunch = new JButton("Launch " + Main.fullName);
         btnLaunch.setEnabled(false);
         buttonsPanel.add(btnLaunch);
         return buttonsPanel;
