@@ -26,11 +26,11 @@ public final class Channel implements Serializable {
         this.elevation = elevation;
     }
 
-    public String code() {
+    public String getCode() {
         return code;
     }
 
-    public String locationCode() {
+    public String getLocationCode() {
         return locationCode;
     }
 

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -70,5 +71,65 @@ public class StationDatabase implements Serializable {
 
     public Lock getDatabaseWriteLock() {
         return databaseWriteLock;
+    }
+
+    public static Channel getChannel(Station station, String channelCode, String locationCode){
+        for(Channel channel: station.getChannels()){
+            if(channel.getCode().equals(channelCode) && channel.getLocationCode().equals(locationCode)){
+                return channel;
+            }
+        }
+        return null;
+    }
+
+    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
+        Channel channel = getChannel(station, channelCode, locationCode);
+        if(channel != null){
+            return channel;
+        }
+
+        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt);
+        station.getChannels().add(channel);
+
+        return channel;
+    }
+
+    public static Station getStation(Network network, String stationCode, String stationSite) {
+        for(Station station: network.getStations()){
+            if(station.getStationCode().equals(stationCode)){
+                return station;
+            }
+        }
+
+        Station station = new Station(stationCode, stationSite);
+
+        network.getStations().add(station);
+
+        return station;
+    }
+
+    public static Network getNetwork(List<Network> result, String networkCode, UUID stationSourceUuid, String networkDescription) {
+        for(Network network: result){
+            if(network.getNetworkCode().equals(networkCode) && network.getStationSourceUUID().equals(stationSourceUuid)){
+                return network;
+            }
+        }
+
+        Network resultNetwork = new Network(networkCode, networkDescription, stationSourceUuid);
+        result.add(resultNetwork);
+
+        return resultNetwork;
+    }
+
+
+    public Channel getOrCreateChannel(Network network, Station station, Channel channel) {
+        Network networkFound = getNetwork(networks, network.getNetworkCode(), network.getStationSourceUUID(), network.getDescription());
+        Station stationFound = getStation(networkFound, station.getStationCode(), station.getStationSite());
+        Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
+        if(channelFound == null){
+            stationFound.getChannels().add(channel);
+        }
+
+        return channel;
     }
 }

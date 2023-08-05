@@ -58,10 +58,32 @@ public class StationDatabaseManager {
     }
 
     public void runUpdate(List<StationSource> stationSources) {
-        stationSources.parallelStream().forEach(stationSource -> {
+        new Thread(() -> stationSources.parallelStream().forEach(stationSource -> {
             stationSource.getStatus().setString("Updating...");
-            stationSource.setLastUpdate(LocalDateTime.now());
-        });
+            try {
+                List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
+                acceptNetworks(networkList);
+                stationSource.setLastUpdate(LocalDateTime.now());
+            } catch (Exception e) {
+                stationSource.getStatus().setString("Error: %s".formatted(e.getMessage()));
+            }
+        })).start();
+    }
+
+    private void acceptNetworks(List<Network> networkList) {
+        stationDatabase.getDatabaseWriteLock().lock();
+        try{
+            for(Network network:networkList){
+                for(Station station: network.getStations()){
+                    for(Channel channel:station.getChannels()){
+                        stationDatabase.getOrCreateChannel(network, station, channel);
+                    }
+                }
+            }
+        }finally {
+            System.out.println(stationDatabase.getNetworks().size());
+            stationDatabase.getDatabaseWriteLock().unlock();
+        }
     }
 
     private static File getDatabaseFile() {
