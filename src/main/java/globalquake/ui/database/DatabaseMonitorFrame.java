@@ -35,12 +35,6 @@ public class DatabaseMonitorFrame extends JFrame {
         setTitle("Station Database Manager");
         setLocationRelativeTo(null);
 
-        for(StationSource stationSource : manager.getStationDatabase().getStationSources()){
-            stationSource.getStatus().setIndeterminate(false);
-            stationSource.getStatus().setValue(0);
-            stationSource.getStatus().setString("Waiting...");
-        }
-
         runTimer();
     }
 
@@ -78,7 +72,7 @@ public class DatabaseMonitorFrame extends JFrame {
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Station Sources", new StationSourcesPanel(this));
-        tabbedPane.addTab("Seedlink Networks", new JPanel());
+        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this));
         return tabbedPane;
     }
 

@@ -1,28 +1,28 @@
-package globalquake.ui.database.action;
+package globalquake.ui.database.action.seedlink;
 
+import globalquake.database.SeedlinkNetwork;
 import globalquake.database.StationDatabaseManager;
-import globalquake.database.StationSource;
-import globalquake.ui.database.EditStationSourceDialog;
+import globalquake.ui.database.EditSeedlinkNetworkDialog;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class EditStationSourceAction extends AbstractAction {
+public class EditSeedlinkNetworkAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
     private final Window parent;
-    private FilterableTableModel<StationSource> tableModel;
+    private FilterableTableModel<SeedlinkNetwork> tableModel;
 
     private JTable table;
 
-    public EditStationSourceAction(Window parent, StationDatabaseManager databaseManager){
+    public EditSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager){
         super("Edit");
         this.databaseManager = databaseManager;
         this.parent = parent;
 
-        putValue(SHORT_DESCRIPTION, "Edit Station Source");
+        putValue(SHORT_DESCRIPTION, "Edit Seedlink Network");
     }
 
     @Override
@@ -35,11 +35,11 @@ public class EditStationSourceAction extends AbstractAction {
             table.getCellEditor().cancelCellEditing();
         }
         int modelRow = table.convertRowIndexToModel(selectedRows[0]);
-        StationSource stationSource = tableModel.getEntity(modelRow);
-        new EditStationSourceDialog(parent, databaseManager, tableModel, stationSource);
+        SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(modelRow);
+        new EditSeedlinkNetworkDialog(parent, databaseManager, tableModel, seedlinkNetwork);
     }
 
-    public void setTableModel(FilterableTableModel<StationSource> tableModel) {
+    public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {
         this.tableModel = tableModel;
     }
 

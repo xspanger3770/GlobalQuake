@@ -4,13 +4,13 @@ import javax.swing.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.Objects;
 import java.util.UUID;
 
 public final class StationSource implements Serializable {
     @Serial
     private static final long serialVersionUID = -4919376873277933315L;
+    private static final long UPDATE_INTERVAL_DAYS = 14;
     private final String name;
     private final String url;
     private final UUID uuid;
@@ -34,17 +34,16 @@ public final class StationSource implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (StationSource) obj;
-        return Objects.equals(this.name, that.name) &&
-                Objects.equals(this.url, that.url);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StationSource that = (StationSource) o;
+        return Objects.equals(name, that.name) && Objects.equals(url, that.url) && Objects.equals(uuid, that.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, url);
+        return Objects.hash(name, url, uuid);
     }
 
     @Override
@@ -69,11 +68,15 @@ public final class StationSource implements Serializable {
     public JProgressBar getStatus() {
         if(status == null){
             status = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
-            status.setIndeterminate(true);
-            status.setString("Init...");
+            status.setIndeterminate(false);
+            status.setString(isOutdated() ? "Needs Update" : "Ready");
             status.setStringPainted(true);
         }
         return status;
+    }
+
+    public boolean isOutdated() {
+        return lastUpdate == null || lastUpdate.isAfter(LocalDateTime.now().plusDays(UPDATE_INTERVAL_DAYS));
     }
 
 }

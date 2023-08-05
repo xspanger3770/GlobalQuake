@@ -1,9 +1,9 @@
 package globalquake.ui.database;
 
-import globalquake.ui.database.action.AddStationSourceAction;
-import globalquake.ui.database.action.EditStationSourceAction;
-import globalquake.ui.database.action.RemoveStationSourceAction;
-import globalquake.ui.database.action.UpdateStationSourceAction;
+import globalquake.ui.database.action.source.AddStationSourceAction;
+import globalquake.ui.database.action.source.EditStationSourceAction;
+import globalquake.ui.database.action.source.RemoveStationSourceAction;
+import globalquake.ui.database.action.source.UpdateStationSourceAction;
 import globalquake.ui.database.table.StationSourcesTableModel;
 
 import javax.swing.*;

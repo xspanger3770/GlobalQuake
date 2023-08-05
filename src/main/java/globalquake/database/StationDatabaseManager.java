@@ -62,7 +62,10 @@ public class StationDatabaseManager {
             stationSource.getStatus().setString("Updating...");
             try {
                 List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
+                stationSource.getStatus().setString("Updating database...");
                 acceptNetworks(networkList);
+                stationSource.getStatus().setString("Done");
+                stationSource.getStatus().setValue(100);
                 stationSource.setLastUpdate(LocalDateTime.now());
             } catch (Exception e) {
                 stationSource.getStatus().setString("Error: %s".formatted(e.getMessage()));
@@ -92,5 +95,9 @@ public class StationDatabaseManager {
 
     public StationDatabase getStationDatabase() {
         return stationDatabase;
+    }
+
+    public void runAvailability(List<SeedlinkNetwork> toBeUpdated) {
+        // todo
     }
 }

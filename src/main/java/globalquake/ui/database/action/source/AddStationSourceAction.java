@@ -1,4 +1,4 @@
-package globalquake.ui.database.action;
+package globalquake.ui.database.action.source;
 
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.database.EditStationSourceDialog;

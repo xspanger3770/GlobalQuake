@@ -1,27 +1,26 @@
-package globalquake.ui.database.action;
+package globalquake.ui.database.action.seedlink;
 
+import globalquake.database.SeedlinkNetwork;
 import globalquake.database.StationDatabaseManager;
-import globalquake.database.StationSource;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RemoveStationSourceAction extends AbstractAction {
+public class RemoveSeedlinkNetworkAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
-    private FilterableTableModel<StationSource> tableModel;
+    private FilterableTableModel<SeedlinkNetwork> tableModel;
 
     private JTable table;
 
-    public RemoveStationSourceAction(StationDatabaseManager databaseManager){
+    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager){
         super("Remove");
         this.databaseManager = databaseManager;
 
-        putValue(SHORT_DESCRIPTION, "Remove Station Sources");
+        putValue(SHORT_DESCRIPTION, "Remove Seedlink Network");
     }
 
     @Override
@@ -45,12 +44,12 @@ public class RemoveStationSourceAction extends AbstractAction {
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
-            List<StationSource> toBeRemoved = new ArrayList<>();
+            List<SeedlinkNetwork> toBeRemoved = new ArrayList<>();
             for(int i:selectedRows){
-                StationSource stationSource = tableModel.getEntity(i);
-                toBeRemoved.add(stationSource);
+                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(i);
+                toBeRemoved.add(seedlinkNetwork);
             }
-            databaseManager.getStationDatabase().getStationSources().removeAll(toBeRemoved);
+            databaseManager.getStationDatabase().getSeedlinkNetworks().removeAll(toBeRemoved);
         }finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
@@ -58,7 +57,7 @@ public class RemoveStationSourceAction extends AbstractAction {
         tableModel.applyFilter();
     }
 
-    public void setTableModel(FilterableTableModel<StationSource> tableModel) {
+    public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {
         this.tableModel = tableModel;
     }
 

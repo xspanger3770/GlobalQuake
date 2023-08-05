@@ -27,7 +27,7 @@ public class FDSNWSDownloader {
 
         System.out.println("Connecting to " + stationSource.getName());
         stationSource.getStatus().setString("Connecting to " + stationSource.getName());
-
+        stationSource.getStatus().setValue(0);
         InputStream inp = url.openStream();
 
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -37,6 +37,7 @@ public class FDSNWSDownloader {
 
         in.setEvent(() ->  stationSource.getStatus().setString("Downloading from " + stationSource.getName() + ": " + (in.getCount() / 1024) + "kB"));
 
+        stationSource.getStatus().setValue(25);
         System.out.println("Downloading stations from " + stationSource.getName() + " (" + url + ")");
 
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
@@ -44,10 +45,12 @@ public class FDSNWSDownloader {
         doc.getDocumentElement().normalize();
 
         Element root = doc.getDocumentElement();
+
+        stationSource.getStatus().setValue(50);
+        stationSource.getStatus().setString("Parsing networks...");
         parseNetworks(result, stationSource, root);
 
-        stationSource.getStatus().setString("Done");
-
+        stationSource.getStatus().setValue(75);
         return result;
     }
 
