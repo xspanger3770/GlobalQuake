@@ -68,7 +68,7 @@ public class StationDatabaseManager {
                 stationSource.getStatus().setValue(100);
                 stationSource.setLastUpdate(LocalDateTime.now());
             } catch (Exception e) {
-                stationSource.getStatus().setString("Error: %s".formatted(e.getMessage()));
+                stationSource.getStatus().setString("Error!");
             }
         })).start();
     }
