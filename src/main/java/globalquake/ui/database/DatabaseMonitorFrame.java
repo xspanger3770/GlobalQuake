@@ -97,20 +97,6 @@ public class DatabaseMonitorFrame extends JFrame {
         return bottomPanel;
     }
 
-    public static void main(String[] args) {
-        Main.initErrorHandler();
-        StationDatabaseManager manager = new StationDatabaseManager();
-        try {
-            manager.load();
-            System.out.println(manager.getStationDatabase().getSeedlinkNetworks().size());
-            manager.save();
-        } catch (FatalIOException e) {
-            throw new RuntimeException(e);
-        }
-
-        new DatabaseMonitorFrame(manager).setVisible(true);
-    }
-
     public StationDatabaseManager getManager() {
         return manager;
     }

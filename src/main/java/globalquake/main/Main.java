@@ -3,38 +3,34 @@ package globalquake.main;
 import java.io.File;
 import java.io.IOException;
 
+import globalquake.database.StationDatabaseManager;
 import globalquake.database_old.SeedlinkManager;
 import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.FatalIOException;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.DatabaseMonitorFrameOld;
+import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.utils.Scale;
 
 public class Main {
 
 	private static ApplicationErrorHandler errorHandler;
-	private static SeedlinkManager seedlinkManager;
 
-	public static final String version = "0.8.1";
+	public static final String version = "0.9.0";
 	public static final String fullName = "GlobalQuake " + version;
 
 	public static final File MAIN_FOLDER = new File("./GlobalQuake/");
 
 	private static void startDatabaseManager() throws IOException {
-		seedlinkManager = new SeedlinkManager() {
-		};
+		StationDatabaseManager manager = new StationDatabaseManager();
+		try {
+			manager.load();
+		} catch (FatalIOException e) {
+			getErrorHandler().handleException(e);
+		}
 
-		DatabaseMonitorFrameOld databaseMonitorFrameOld = new DatabaseMonitorFrameOld(seedlinkManager) {
-			@Override
-			public void launch() {
-				launchGlobalQuake();
-			}
-		};
-		errorHandler.setParent(databaseMonitorFrameOld);
-
-		databaseMonitorFrameOld.setVisible(true);
-		seedlinkManager.load();
+		new DatabaseMonitorFrame(manager).setVisible(true);
 	}
 
 	public static void main(String[] args) {
@@ -62,7 +58,7 @@ public class Main {
 	}
 
 	public static void launchGlobalQuake() {
-		new GlobalQuake(seedlinkManager).createFrame().runNetworkManager().runThreads();
+
 	}
 
 	public static ApplicationErrorHandler getErrorHandler() {
