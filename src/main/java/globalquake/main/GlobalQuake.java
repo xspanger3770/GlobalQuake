@@ -1,28 +1,20 @@
 package globalquake.main;
 
-import com.morce.globalquake.database.Channel;
-import com.morce.globalquake.database.Network;
-import com.morce.globalquake.database.Station;
-import globalquake.core.*;
+import globalquake.core.AlertManager;
+import globalquake.core.SeedlinkReader;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.EarthquakeArchive;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
-import globalquake.core.station.NearbyStationDistanceInfo;
-import globalquake.core.zejfseis.ZejfSeisClient;
-import globalquake.core.zejfseis.ZejfSeisStation;
+import globalquake.core.station.StationManager;
 import globalquake.database.SeedlinkManager;
-import globalquake.geo.GeoUtils;
 import globalquake.ui.GlobalQuakeFrame;
 import globalquake.utils.NamedThreadFactory;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,9 +22,6 @@ import java.util.concurrent.TimeUnit;
 public class GlobalQuake {
 
 	private GlobalQuakeFrame globalQuakeFrame;
-
-	protected ArrayList<AbstractStation> stations = new ArrayList<>();
-	private ZejfSeisStation zejf;
 	private long lastReceivedRecord;
 	public long lastSecond;
 	public long lastAnalysis;
@@ -43,19 +32,22 @@ public class GlobalQuake {
 	public EarthquakeAnalysis earthquakeAnalysis;
 	public AlertManager alertManager;
 	public EarthquakeArchive archive;
-	private ZejfSeisClient zejfClient;
 	public static GlobalQuake instance;
+
+	private final StationManager stationManager;
 
 	public GlobalQuake(SeedlinkManager seedlinkManager) {
 		instance = this;
-		createFrame();
-		initStations(seedlinkManager);
-		runZejfSeisClient();
-		runNetworkManager();
-		runThreads();
+
+		clusterAnalysis = new ClusterAnalysis(this);
+		earthquakeAnalysis = new EarthquakeAnalysis(this);
+		alertManager = new AlertManager(this);
+		archive = new EarthquakeArchive(this);
+		stationManager = new StationManager();
+		stationManager.initStations(seedlinkManager);
 	}
 
-	private void runThreads() {
+	public GlobalQuake runThreads() {
 		ScheduledExecutorService execAnalysis = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Station Analysis Thread"));
 		ScheduledExecutorService exec1Sec = Executors
@@ -67,17 +59,10 @@ public class GlobalQuake {
 		ScheduledExecutorService execQuake = Executors
 				.newSingleThreadScheduledExecutor(new NamedThreadFactory("Hypocenter Location Thread"));
 
-		clusterAnalysis = new ClusterAnalysis(this);
-		earthquakeAnalysis = new EarthquakeAnalysis(this);
-		alertManager = new AlertManager(this);
-		archive = new EarthquakeArchive(this);
-
 		execAnalysis.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                for (AbstractStation station : stations) {
-                    station.analyse();
-                }
+				stationManager.getStations().parallelStream().forEach(AbstractStation::analyse);
                 lastAnalysis = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 System.err.println("Exception occurred in station analysis");
@@ -88,9 +73,7 @@ public class GlobalQuake {
 		exec1Sec.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                for (AbstractStation s : stations) {
-                    s.second();
-                }
+				stationManager.getStations().parallelStream().forEach(AbstractStation::second);
                 if (getEarthquakeAnalysis() != null) {
                     getEarthquakeAnalysis().second();
                 }
@@ -136,120 +119,17 @@ public class GlobalQuake {
 				Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);
+
+		return this;
 	}
 
-	private void runZejfSeisClient() {
-		if (zejf != null) {
-			zejfClient = new ZejfSeisClient(zejf);
-			zejfClient.connect();
-		}
-	}
-
-	private void runNetworkManager() {
+	public GlobalQuake runNetworkManager() {
 		SeedlinkReader networkManager = new SeedlinkReader(this);
 		networkManager.run();
+		return this;
 	}
 
-	private void initStations(SeedlinkManager seedlinkManager) {
-		stations.clear();
-		seedlinkManager.getDatabase().getNetworksReadLock().lock();
-		try {
-			for (Network n : seedlinkManager.getDatabase().getNetworks()) {
-				for (Station s : n.getStations()) {
-					for (Channel ch : s.getChannels()) {
-						if (ch.isSelected() && ch.isAvailable()) {
-							GlobalStation station = createGlobalStation(ch);
-							stations.add(station);
-
-							break;// only 1 channel per station
-						}
-					}
-				}
-			}
-		} finally {
-			seedlinkManager.getDatabase().getNetworksReadLock().unlock();
-		}
-
-		addZejfNetStations();
-		createListOfClosestStations();
-		System.out.println("Initialized " + stations.size() + " Stations.");
-	}
-
-	private void addZejfNetStations() {
-		zejf = new ZejfSeisStation(this, "ZEJF", "Zejf", "EHE", "Zejf", 50.262, 17.262, 400, -1, -1, nextID++);
-		stations.add(zejf);
-	}
-
-	public static final int RAYS = 9;
-
-	private void createListOfClosestStations() {
-		for (AbstractStation stat : stations) {
-			ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<>();
-			for (int i = 0; i < RAYS; i++) {
-				rays.add(new ArrayList<>());
-			}
-			int num = 0;
-            for (int i = 0; i < 2; i++) {
-                for (AbstractStation stat2 : stations) {
-                    if (!(stat2.getId() == stat.getId())) {
-                        double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
-                                stat2.getLon());
-                        if (dist > (i == 0 ? 1200 : 3600)) {
-                            continue;
-                        }
-                        double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
-                                stat2.getLon());
-                        int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-                        int ray2 = ray + 1;
-                        if (ray2 == RAYS) {
-                            ray2 = 0;
-                        }
-                        int ray3 = ray - 1;
-                        if (ray3 == -1) {
-                            ray3 = RAYS - 1;
-                        }
-                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-                        num++;
-                    }
-                }
-                if (num > 4) {
-                    break;
-                }
-            }
-			ArrayList<Integer> closestStations = new ArrayList<>();
-			ArrayList<NearbyStationDistanceInfo> nearbys = new ArrayList<>();
-			for (int i = 0; i < RAYS; i++) {
-				if (!rays.get(i).isEmpty()) {
-					rays.get(i).sort(Comparator.comparing(StationDistanceInfo::dist));
-					for (int j = 0; j <= Math.min(1, rays.get(i).size() - 1); j++) {
-						if (!closestStations.contains(rays.get(i).get(j).id)) {
-							closestStations.add(rays.get(i).get(j).id);
-							nearbys.add(new NearbyStationDistanceInfo(getStationById(rays.get(i).get(j).id),
-									rays.get(i).get(j).dist, rays.get(i).get(j).ang));
-						}
-					}
-				}
-			}
-			stat.setNearbyStations(nearbys);
-		}
-	}
-
-	record StationDistanceInfo(int id, double dist, double ang) {
-
-	}
-
-	private int nextID = 0;
-
-	private GlobalStation createGlobalStation(Channel ch) {
-        return new GlobalStation(this, ch.getStation().getNetwork().getNetworkCode(),
-				ch.getStation().getStationCode(), ch.getName(), ch.getLocationCode(), ch.getSource(),
-				ch.getSeedlinkNetwork(), ch.getStation().getLat(), ch.getStation().getLon(), ch.getStation().getAlt(),
-				ch.getSensitivity(), ch.getFrequency(), nextID++);
-	}
-
-	private void createFrame() {
+	public GlobalQuake createFrame() {
 		EventQueue.invokeLater(() -> {
             globalQuakeFrame = new GlobalQuakeFrame(GlobalQuake.this);
             globalQuakeFrame.setVisible(true);
@@ -258,30 +138,16 @@ public class GlobalQuake {
 			Main.getErrorHandler().setParent(globalQuakeFrame);
 
             globalQuakeFrame.addWindowListener(new WindowAdapter() {
-                @SuppressWarnings("unchecked")
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    ArrayList<Earthquake> quakes;
-
-                    synchronized (getEarthquakeAnalysis().earthquakesSync) {
-                        quakes = (ArrayList<Earthquake>) getEarthquakeAnalysis().getEarthquakes().clone();
-                    }
-
-                    for (Earthquake quake : quakes) {
-                        getArchive().archiveQuake(quake);
-                    }
+					for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+						getArchive().archiveQuake(quake);
+					}
                     getArchive().saveArchive();
                 }
             });
         });
-	}
-
-	public ArrayList<AbstractStation> getStations() {
-		return stations;
-	}
-
-	public AbstractStation getStationById(int id) {
-		return stations.get(id);
+		return this;
 	}
 
 	public long getLastReceivedRecord() {
@@ -306,8 +172,7 @@ public class GlobalQuake {
 		return archive;
 	}
 
-	public ZejfSeisClient getZejfClient() {
-		return zejfClient;
+	public StationManager getStationManager() {
+		return stationManager;
 	}
-
 }

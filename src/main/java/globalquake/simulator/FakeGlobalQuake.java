@@ -7,6 +7,11 @@ import globalquake.main.GlobalQuake;
 public class FakeGlobalQuake extends GlobalQuake {
 
 	private final EarthquakeSimulator sim;
+	private ArrayList<Object> stations;
+
+	public ArrayList<Object> getStations() {
+		return stations;
+	}
 
 	public FakeGlobalQuake(EarthquakeSimulator sim) {
 		super(null);
@@ -19,6 +24,7 @@ public class FakeGlobalQuake extends GlobalQuake {
 		for (SimulatedStation sims : sim.getStations()) {
 			this.stations.add(sims.toGlobalStation());
 		}
+		runThreads();
 	}
 
 }

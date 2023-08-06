@@ -1,6 +1,8 @@
 package globalquake.core.earthquake;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
@@ -9,7 +11,7 @@ import globalquake.sounds.SoundsInfo;
 public class Cluster {
 
 	private final int id;
-	private final ArrayList<Event> assignedEvents;
+	private final List<Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -18,7 +20,8 @@ public class Cluster {
 
 	private Earthquake earthquake;
 	public final double bestAngle;
-	public Hypocenter previousHypocenter;
+	private Hypocenter previousHypocenter;
+
 	private int level;
 
 	public boolean active;
@@ -30,17 +33,15 @@ public class Cluster {
 	public int reportID;
 
 	public static final double NONE = -999;
-	public final Object assignedEventsSync;
-	public final Object selectedEventsSync;
+	public final Object selectedEventsLock;
 
 	// 20 selected
 	private ArrayList<Event> selected = new ArrayList<>();
 
 	public Cluster(int id) {
 		this.id = id;
-		this.assignedEvents = new ArrayList<>();
-		this.assignedEventsSync = new Object();
-		this.selectedEventsSync = new Object();
+		this.assignedEvents = new CopyOnWriteArrayList<>();
+		this.selectedEventsLock = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;
 		this.bestAngle = -1;
@@ -50,14 +51,20 @@ public class Cluster {
 		this.soundsInfo = new SoundsInfo();
 	}
 
+	public Hypocenter getPreviousHypocenter() {
+		return previousHypocenter;
+	}
+
+	public void setPreviousHypocenter(Hypocenter previousHypocenter) {
+		this.previousHypocenter = previousHypocenter;
+	}
+
 	public int getId() {
 		return id;
 	}
 
 	public void addEvent(Event ev) {
-		synchronized (assignedEventsSync) {
-			this.assignedEvents.add(ev);
-		}
+		this.assignedEvents.add(ev);
 		lastUpdate = System.currentTimeMillis();
 	}
 
@@ -65,7 +72,7 @@ public class Cluster {
 	 * 
 	 * @return all events that were added to this cluster
 	 */
-	public ArrayList<Event> getAssignedEvents() {
+	public List<Event> getAssignedEvents() {
 		return assignedEvents;
 	}
 

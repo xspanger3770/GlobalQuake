@@ -1,9 +1,7 @@
 package globalquake.core.earthquake;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.simulator.SimulatedStation;
@@ -29,31 +27,23 @@ public class EarthquakeAnalysis {
 	private static final long DELTA_P_TRESHOLD = 2200;
 
 	private final GlobalQuake globalQuake;
-	private final ArrayList<Earthquake> earthquakes;
-
-	public final Object earthquakesSync;
+	private final List<Earthquake> earthquakes;
 
 	public EarthquakeAnalysis(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
-		this.earthquakesSync = new Object();
-		this.earthquakes = new ArrayList<>();
+		this.earthquakes = new CopyOnWriteArrayList<>();
 	}
 
 	public GlobalQuake getGlobalQuake() {
 		return globalQuake;
 	}
 
-	public ArrayList<Earthquake> getEarthquakes() {
+	public List<Earthquake> getEarthquakes() {
 		return earthquakes;
 	}
 
 	public void run() {
-		ArrayList<Cluster> clusters;
-		synchronized (getGlobalQuake().getClusterAnalysis().clustersSync) {
-			clusters = new ArrayList<>(getGlobalQuake().getClusterAnalysis().getClusters());
-		}
-
-		for (Cluster cluster : clusters) {
+		for (Cluster cluster : getGlobalQuake().getClusterAnalysis().getClusters()) {
 			processCluster(cluster);
 		}
 		calculateMagnitudes();
@@ -77,9 +67,7 @@ public class EarthquakeAnalysis {
 		cluster.lastEpicenterUpdate = cluster.updateCount;
 
 		ArrayList<Event> events;
-		synchronized (cluster.assignedEventsSync) {
-			events = new ArrayList<>(cluster.getAssignedEvents());
-		}
+		events = new ArrayList<>(cluster.getAssignedEvents());
 
 		if (events.isEmpty()) {
 			return;
@@ -119,7 +107,7 @@ public class EarthquakeAnalysis {
 		long b = System.currentTimeMillis() - a;
 		System.out.println("find good events took "+b+"ms");
 
-		synchronized (cluster.selectedEventsSync) {
+		synchronized (cluster.selectedEventsLock) {
 			cluster.setSelected(selectedEvents);	
 		}
 		
@@ -186,14 +174,16 @@ public class EarthquakeAnalysis {
 		double _lon = cluster.getAnchorLon();
 		long xx = System.currentTimeMillis();
 
+		Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
+
 		// phase 1 search nearby
-		int correctLimit = cluster.previousHypocenter == null ? 0 : cluster.previousHypocenter.correctStations;
+		int correctLimit = previousHypocenter == null ? 0 : previousHypocenter.correctStations;
         bestHypocenter = scanArea(events, null, 9, 500, _lat, _lon, correctLimit, 10, 10);
         System.out.println("CLOSE: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
 
 		// phase 2 search far
-		if (cluster.previousHypocenter == null || cluster.previousHypocenter.correctStations < 12) {
+		if (previousHypocenter == null || previousHypocenter.correctStations < 12) {
 			bestHypocenter = scanArea(events, bestHypocenter, 9, 14000, _lat, _lon, correctLimit, 50, 100);
 		}
 
@@ -214,8 +204,8 @@ public class EarthquakeAnalysis {
 		xx = System.currentTimeMillis();
 	
 		HypocenterCondition result;
-		if ((result = checkConditions(events, bestHypocenter, cluster)) == HypocenterCondition.OK) {
-			updateHypocenter(events, cluster, bestHypocenter);
+		if ((result = checkConditions(events, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
+			updateHypocenter(events, cluster, bestHypocenter, previousHypocenter);
 		} else {
 			System.err.println(result);
 		}
@@ -319,7 +309,7 @@ public class EarthquakeAnalysis {
 		return new double[] { err, acc };
 	}
 
-	private HypocenterCondition checkConditions(ArrayList<Event> events, Hypocenter bestHypocenter, Cluster cluster) {
+	private HypocenterCondition checkConditions(ArrayList<Event> events, Hypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
 		if (bestHypocenter == null) {
 			return HypocenterCondition.NULL;
 		}
@@ -335,15 +325,15 @@ public class EarthquakeAnalysis {
 		if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
 			return HypocenterCondition.TOO_SHALLOW_ANGLE;
 		}
-		if (cluster.previousHypocenter != null
-				&& (bestHypocenter.correctStations < cluster.previousHypocenter.correctStations)) {
+		if (previousHypocenter != null
+				&& (bestHypocenter.correctStations < previousHypocenter.correctStations)) {
 			return HypocenterCondition.PREVIOUS_WAS_BETTER;
 		}
 	
 		return HypocenterCondition.OK;
 	}
 
-	private void updateHypocenter(ArrayList<Event> events, Cluster cluster, Hypocenter bestHypocenter) {
+	private void updateHypocenter(ArrayList<Event> events, Cluster cluster, Hypocenter bestHypocenter, Hypocenter previousHypocenter) {
 		ArrayList<Event> wrongEvents = getWrongEvents(cluster, bestHypocenter);
 		int wrongAmount = wrongEvents.size();
 
@@ -354,17 +344,14 @@ public class EarthquakeAnalysis {
 				+ bestHypocenter.correctStations + " w " + events.size());
 		boolean valid = pct > VALID_TRESHOLD;
 		if (!valid && cluster.getEarthquake() != null && pct < REMOVE_TRESHOLD) {
-			synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-				getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
-			}
+			getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
 			cluster.setEarthquake(null);
 		}
+
 		if (valid) {
 			if (cluster.getEarthquake() == null) {
 				Sounds.playSound(Sounds.incoming);
-				synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-					getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-				}
+				getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().add(earthquake);
 				cluster.setEarthquake(earthquake);
 			} else {
 				cluster.getEarthquake().update(earthquake);
@@ -378,14 +365,15 @@ public class EarthquakeAnalysis {
 			cluster.reportID += 1;
 			cluster.getEarthquake().setReportID(cluster.reportID);
 			bestHypocenter.setWrongEvents(wrongEvents);
-			if (cluster.previousHypocenter != null && cluster.previousHypocenter.correctStations < 12
+			if (previousHypocenter != null && previousHypocenter.correctStations < 12
 					&& bestHypocenter.correctStations >= 12) {
 				System.err.println("FAR DISABLED");
 			}
 		} else {
 			System.err.println("NOT VALID");
 		}
-		cluster.previousHypocenter = bestHypocenter;
+
+		cluster.setPreviousHypocenter(bestHypocenter);
 	}
 
 	private ArrayList<Event> getWrongEvents(Cluster c, Hypocenter hyp) {
@@ -419,17 +407,9 @@ public class EarthquakeAnalysis {
 		return good;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void calculateMagnitudes() {
-		ArrayList<Earthquake> quakes;
-		synchronized (getGlobalQuake().getEarthquakeAnalysis().earthquakesSync) {
-			quakes = (ArrayList<Earthquake>) getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().clone();
-		}
-		for (Earthquake earthquake : quakes) {
-			ArrayList<Event> goodEvents;
-			synchronized (earthquake.getCluster().assignedEventsSync) {
-				goodEvents = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
-			}
+		for (Earthquake earthquake : getEarthquakes()) {
+			List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
 			if (goodEvents.isEmpty()) {
 				continue;
 			}
@@ -441,7 +421,7 @@ public class EarthquakeAnalysis {
 						-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
 				long expectedSArrival = (long) (earthquake.getOrigin()
 						+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
-								* 1000);
+						* 1000);
 				long lastRecord = e.getAnalysis().getStation() instanceof SimulatedStation ? System.currentTimeMillis()
 						: ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
 				// *0.5 because s wave is stronger
@@ -449,10 +429,10 @@ public class EarthquakeAnalysis {
 				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
 			}
 			Collections.sort(mags);
-			synchronized (earthquake.magsSync) {
+			synchronized (earthquake.magsLock) {
 				earthquake.setMags(mags);
 				earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
-	
+
 			}
 		}
 	}
@@ -460,19 +440,19 @@ public class EarthquakeAnalysis {
 	public static final int[] STORE_TABLE = { 3, 3, 3, 5, 7, 10, 15, 25, 40, 40 };
 
 	public void second() {
-		synchronized (earthquakesSync) {
-			Iterator<Earthquake> it = earthquakes.iterator();
-			while (it.hasNext()) {
-				Earthquake e = it.next();
-				int store_minutes = STORE_TABLE[Math.max(0,
-						Math.min(STORE_TABLE.length - 1, (int) e.getMag()))];
-				if (System.currentTimeMillis() - e.getOrigin() > (long) store_minutes * 60 * 1000
-						&& System.currentTimeMillis() - e.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
-					getGlobalQuake().getArchive().archiveQuakeAndSave(e);
-					it.remove();
-				}
+		Iterator<Earthquake> it = earthquakes.iterator();
+		List<Earthquake> toBeRemoved = new ArrayList<>();
+		while (it.hasNext()) {
+			Earthquake e = it.next();
+			int store_minutes = STORE_TABLE[Math.max(0,
+					Math.min(STORE_TABLE.length - 1, (int) e.getMag()))];
+			if (System.currentTimeMillis() - e.getOrigin() > (long) store_minutes * 60 * 1000
+					&& System.currentTimeMillis() - e.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
+				getGlobalQuake().getArchive().archiveQuakeAndSave(e);
+				toBeRemoved.add(e);
 			}
 		}
+		earthquakes.removeAll(toBeRemoved);
 	}
 
 }

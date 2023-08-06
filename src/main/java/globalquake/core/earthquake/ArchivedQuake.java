@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import globalquake.regions.Regions;
 
-public class ArchivedQuake implements Serializable {
+public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 
 	@Serial
 	private static final long serialVersionUID = 6690311245585670539L;
@@ -34,24 +34,16 @@ public class ArchivedQuake implements Serializable {
 		copyEvents(earthquake);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void copyEvents(Earthquake earthquake) {
-		if (earthquake.getCluster().getAssignedEvents() == null || earthquake.getCluster().previousHypocenter == null || earthquake.getCluster().previousHypocenter.getWrongEvents() == null) {
+		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
+		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
 			return;
-		}
-		ArrayList<Event> events;
-		ArrayList<Event> wrongEvents;
-		synchronized (earthquake.getCluster().assignedEventsSync) {
-			events = (ArrayList<Event>) earthquake.getCluster().getAssignedEvents().clone();
-		}
-		synchronized (earthquake.getCluster().previousHypocenter.wrongEventsSync) {
-			wrongEvents = (ArrayList<Event>) earthquake.getCluster().previousHypocenter.getWrongEvents().clone();
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = wrongEvents.size();
-		for (Event e : events) {
-			boolean aba = wrongEvents.contains(e);
+		this.abandonedCount = previousHypocenter.getWrongEvents().size();
+		for (Event e : earthquake.getCluster().getAssignedEvents()) {
+			boolean aba = previousHypocenter.getWrongEvents().contains(e);
 			archivedEvents.add(
 					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), aba));
 			if (!aba && e.maxRatio > this.maxRatio) {
@@ -141,4 +133,8 @@ public class ArchivedQuake implements Serializable {
 		return abandonedCount;
 	}
 
+	@Override
+	public int compareTo(ArchivedQuake archivedQuake) {
+		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
+	}
 }
