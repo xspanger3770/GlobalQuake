@@ -1,17 +1,16 @@
 package globalquake.main;
 
-import java.io.File;
-import java.io.IOException;
-
 import globalquake.database.StationDatabaseManager;
-import globalquake.database_old.SeedlinkManager;
+import globalquake.database.StationSource;
 import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.FatalIOException;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
-import globalquake.ui.DatabaseMonitorFrameOld;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.utils.Scale;
+
+import java.io.File;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -21,39 +20,61 @@ public class Main {
 	public static final String fullName = "GlobalQuake " + version;
 
 	public static final File MAIN_FOLDER = new File("./GlobalQuake/");
+	private static DatabaseMonitorFrame databaseMonitorFrame;
+	private static StationDatabaseManager databaseManager;
 
-	private static void startDatabaseManager() throws IOException {
-		StationDatabaseManager manager = new StationDatabaseManager();
-		try {
-			manager.load();
-		} catch (FatalIOException e) {
-			getErrorHandler().handleException(e);
-		}
-
-		new DatabaseMonitorFrame(manager).setVisible(true);
+	private static void startDatabaseManager() throws FatalIOException{
+		databaseManager = new StationDatabaseManager();
+		databaseManager.load();
+		databaseMonitorFrame = new DatabaseMonitorFrame(databaseManager);
+		databaseMonitorFrame.setVisible(true);
 	}
 
 	public static void main(String[] args) {
 		initErrorHandler();
 
 		try {
-			Regions.init();
-			Scale.load();
-			Sounds.load();
+			if (!MAIN_FOLDER.exists()) {
+				if(!MAIN_FOLDER.mkdirs()){
+					errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
+				}
+			}
+
+			startDatabaseManager();
+
+			new Thread("Init Thread"){
+				@Override
+				public void run() {
+					try {
+						databaseMonitorFrame.getMainProgressBar().setString("Loading regions...");
+						databaseMonitorFrame.getMainProgressBar().setValue(0);
+						Regions.init();
+						databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
+						databaseMonitorFrame.getMainProgressBar().setValue(20);
+						Scale.load();
+						databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
+						databaseMonitorFrame.getMainProgressBar().setValue(40);
+						Sounds.load();
+						databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
+						databaseMonitorFrame.getMainProgressBar().setValue(60);
+						databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
+								.filter(StationSource::isOutdated).collect(Collectors.toList()),
+								() -> {
+									databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
+									databaseMonitorFrame.getMainProgressBar().setValue(80);
+									databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
+                                        databaseMonitorFrame.getMainProgressBar().setString("Done");
+                                        databaseMonitorFrame.getMainProgressBar().setValue(100);
+                                    });
+
+								});
+					}catch(Exception e){
+						getErrorHandler().handleException(e);
+					}
+				}
+			}.start();
 		} catch (Exception e) {
 			getErrorHandler().handleException(e);
-		}
-
-		if (!MAIN_FOLDER.exists()) {
-			if(!MAIN_FOLDER.mkdirs()){
-				errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
-			}
-		}
-
-		try {
-			startDatabaseManager();
-		} catch (IOException e) {
-			errorHandler.handleException(e);
 		}
 	}
 

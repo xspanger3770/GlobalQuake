@@ -45,7 +45,6 @@ public class StationDatabaseManager {
             stationDatabase = new StationDatabase();
         }
 
-        runUpdate(stationDatabase.getStationSources().stream().filter(StationSource::isOutdated).collect(Collectors.toList()), () -> runAvailabilityCheck(stationDatabase.getSeedlinkNetworks(), null));
     }
 
     public void save() throws FatalIOException{

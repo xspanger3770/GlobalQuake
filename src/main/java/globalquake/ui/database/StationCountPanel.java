@@ -20,8 +20,6 @@ public class StationCountPanel extends JPanel {
         this.databaseMonitorFrame = databaseMonitorFrame;
         setLayout(new GridLayout(1, 4));
 
-        setBorder(new LineBorder(Color.black));
-
         add(total = new CounterPanel("Total", Color.lightGray));
         add(available = new CounterPanel("Available", Color.cyan));
         add(selected = new CounterPanel("Selected", Color.green));
@@ -74,6 +72,7 @@ public class StationCountPanel extends JPanel {
             this.name = name;
             add(new StationIcon(color));
             add(label = new JLabel());
+            setBorder(BorderFactory.createRaisedBevelBorder());
             updateLabel();
         }
 
@@ -106,8 +105,8 @@ public class StationCountPanel extends JPanel {
                 int size = Math.min(getWidth(), getHeight()) - 1;
 
                 Path2D path = new Path2D.Double();
-                path.moveTo(0, size);
-                path.lineTo(size, size);
+                path.moveTo(0, size * (Math.sqrt(3) / 2.0));
+                path.lineTo(size, size * (Math.sqrt(3) / 2.0));
                 path.lineTo(size/ 2.0, 0);
                 path.closePath();
 

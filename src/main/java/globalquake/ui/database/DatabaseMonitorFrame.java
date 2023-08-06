@@ -15,13 +15,18 @@ import java.util.TimerTask;
 public class DatabaseMonitorFrame extends JFrame {
 
     private final StationDatabaseManager manager;
+    private JProgressBar mainProgressBar;
+
+    public JProgressBar getMainProgressBar() {
+        return mainProgressBar;
+    }
 
     public DatabaseMonitorFrame(StationDatabaseManager manager) {
         this.manager = manager;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
-        contentPane.setPreferredSize(new Dimension(800, 500));
+        contentPane.setPreferredSize(new Dimension(800, 600));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
@@ -75,7 +80,7 @@ public class DatabaseMonitorFrame extends JFrame {
 
     private Component createBottomPanel() {
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new GridLayout(2, 1));
+        bottomPanel.setLayout(new GridLayout(3, 1));
 
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -93,6 +98,13 @@ public class DatabaseMonitorFrame extends JFrame {
         buttonsPanel.add(btnLaunch);
 
         bottomPanel.add(new StationCountPanel(this));
+
+        mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+        mainProgressBar.setValue(0);
+        mainProgressBar.setStringPainted(true);
+        mainProgressBar.setString("Init...");
+
+        bottomPanel.add(mainProgressBar);
         bottomPanel.add(buttonsPanel);
         return bottomPanel;
     }
