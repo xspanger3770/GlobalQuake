@@ -67,7 +67,7 @@ public class Polygon3D {
         if (index < 0 || index > 7) {
             throw new IllegalArgumentException("Index must be between 0 and 7");
         }
-        return bbox[index];
+        return bbox == null ? null : bbox[index];
     }
 
     private Vector3D getBoundingBoxTempCorner(int index) {

@@ -27,12 +27,12 @@ import globalquake.main.Main;
 
 public class StationSelectPanelOld extends GlobePanelOld {
 
-	private final StationSelect stationSelect;
+	private final StationSelectOld stationSelectOld;
 	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static final SimpleDateFormat formatSimple = new SimpleDateFormat("yyyy/MM/dd");
 
-	public StationSelectPanelOld(StationSelect stationSelect) {
-		this.stationSelect = stationSelect;
+	public StationSelectPanelOld(StationSelectOld stationSelectOld) {
+		this.stationSelectOld = stationSelectOld;
 
 		addMouseMotionListener(new MouseAdapter() {
 			@Override
@@ -46,7 +46,7 @@ public class StationSelectPanelOld extends GlobePanelOld {
 			public void mouseClicked(MouseEvent e) {
 				if (lastMouse != null) {
 					ArrayList<Station> clickedStations = new ArrayList<>();
-					for (Station s : stationSelect.getDisplayedStations()) {
+					for (Station s : stationSelectOld.getDisplayedStations()) {
 						double x = getX(s.getLat(), s.getLon());
 						double y = getY(s.getLat(), s.getLon());
 						if (isMouseNearby(x, y, 7)) {
@@ -147,7 +147,7 @@ public class StationSelectPanelOld extends GlobePanelOld {
 				int see = selectedChannel;
 				new Thread(() -> {
 					try {
-						stationSelect.getStationManager().editSelection(s2, see == -1 || see == 0 ? -1 : map.get(see));
+						stationSelectOld.getStationManager().editSelection(s2, see == -1 || see == 0 ? -1 : map.get(see));
 					} catch (IOException e) {
 						Main.getErrorHandler().handleException(e);
 					}
@@ -161,7 +161,7 @@ public class StationSelectPanelOld extends GlobePanelOld {
 	public void paint(Graphics gr) {
 		super.paint(gr);
 		Graphics2D g = (Graphics2D) gr;
-		for (Station s : stationSelect.getDisplayedStations()) {
+		for (Station s : stationSelectOld.getDisplayedStations()) {
 			double x = getX(s.getLat(), s.getLon());
 			double y = getY(s.getLat(), s.getLon());
 			if (!isOnScreen(x, y)) {

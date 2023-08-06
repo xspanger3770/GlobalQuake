@@ -36,7 +36,7 @@ public abstract class DatabaseMonitorFrameOld extends JFrame {
 	private final DefaultTreeModel defaultTreeModel;
 	private final JButton btnUpdate;
 	private final JTree tree;
-	private StationSelect stationSelect;
+	private StationSelectOld stationSelectOld;
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -105,9 +105,9 @@ public abstract class DatabaseMonitorFrameOld extends JFrame {
                 return;
             }
             DatabaseMonitorFrameOld.this.setEnabled(false);
-            stationSelect = new StationSelect(seedlinkManager);
-            stationSelect.setVisible(true);
-            stationSelect.addWindowListener(new WindowAdapter() {
+            stationSelectOld = new StationSelectOld(seedlinkManager);
+            stationSelectOld.setVisible(true);
+            stationSelectOld.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e1) {
                     DatabaseMonitorFrameOld.this.setEnabled(true);

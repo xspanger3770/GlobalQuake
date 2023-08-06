@@ -155,6 +155,9 @@ public class GlobeRenderer {
     }
 
     public boolean project3D(Path2D.Float result, Polygon3D polygon3D, boolean canClip) {
+        if(polygon3D == null || polygon3D.getBoundingBoxCorner(0) == null){
+            return false;
+        }
         Point2D point2D = new Point2D();
 
         boolean init = false;
@@ -394,7 +397,7 @@ public class GlobeRenderer {
     }
 
     public boolean isMouseNearby(Point2D coords, double dist) {
-        if(lastMouse == null){
+        if(lastMouse == null || coords == null){
             return false;
         }
         Point2D point = projectPoint(new Vector3D(getX_3D(coords.x, coords.y, 0),

@@ -3,10 +3,12 @@ package globalquake.ui.database;
 import globalquake.database.StationDatabaseManager;
 import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
+import globalquake.ui.stationselect.StationSelectFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Timer;
@@ -16,6 +18,8 @@ public class DatabaseMonitorFrame extends JFrame {
 
     private final StationDatabaseManager manager;
     private JProgressBar mainProgressBar;
+    private JButton btnSelectStations;
+    private JButton btnLaunch;
 
     public JProgressBar getMainProgressBar() {
         return mainProgressBar;
@@ -26,7 +30,7 @@ public class DatabaseMonitorFrame extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
-        contentPane.setPreferredSize(new Dimension(800, 600));
+        contentPane.setPreferredSize(new Dimension(900, 600));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
@@ -89,11 +93,19 @@ public class DatabaseMonitorFrame extends JFrame {
         gridLayout.setHgap(5);
         buttonsPanel.setLayout(gridLayout);
 
-        JButton btnSelectStations = new JButton("Select Stations");
+        btnSelectStations = new JButton("Select Stations");
         btnSelectStations.setEnabled(false);
+
+        btnSelectStations.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new StationSelectFrame(DatabaseMonitorFrame.this).setVisible(true);
+            }
+        });
+
         buttonsPanel.add(btnSelectStations);
 
-        JButton btnLaunch = new JButton("Launch " + Main.fullName);
+        btnLaunch = new JButton("Launch " + Main.fullName);
         btnLaunch.setEnabled(false);
         buttonsPanel.add(btnLaunch);
 
@@ -111,5 +123,10 @@ public class DatabaseMonitorFrame extends JFrame {
 
     public StationDatabaseManager getManager() {
         return manager;
+    }
+
+    public void initDone() {
+        btnSelectStations.setEnabled(true);
+        btnLaunch.setEnabled(true);
     }
 }
