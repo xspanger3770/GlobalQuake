@@ -16,6 +16,8 @@ public final class Channel implements Serializable {
 
     public transient boolean available;
 
+    public transient SeedlinkNetwork seedlinkNetwork = null;
+
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
                    double elevation) {
         this.code = code;

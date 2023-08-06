@@ -37,11 +37,11 @@ public class UpdateSeedlinkNetworkAction extends AbstractAction {
 
             List<SeedlinkNetwork> toBeUpdated = new ArrayList<>();
             for (int i : selectedRows) {
-                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(i);
+                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeUpdated.add(seedlinkNetwork);
             }
 
-            databaseManager.runAvailability(toBeUpdated);
+            databaseManager.runAvailabilityCheck(toBeUpdated);
         }finally {
             this.setEnabled(true);
         }

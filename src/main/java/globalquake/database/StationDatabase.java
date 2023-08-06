@@ -22,6 +22,7 @@ public class StationDatabase implements Serializable {
     private transient Lock databaseReadLock = databaseLock.readLock();
     private transient Lock databaseWriteLock = databaseLock.writeLock();
 
+
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -93,36 +94,68 @@ public class StationDatabase implements Serializable {
         return channel;
     }
 
-    public static Station getStation(Network network, String stationCode, String stationSite) {
+    public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
+        Network network = getNetwork(networks, networkCode);
+        if(network == null){
+            return null;
+        }
+
+        Station station = getStation(network, stationCode);
+        if(station == null){
+            return null;
+        }
+
+        return getChannel(station, channelName, locationCode);
+    }
+
+    private static Station getStation(Network network, String stationCode) {
         for(Station station: network.getStations()){
             if(station.getStationCode().equals(stationCode)){
                 return station;
             }
         }
+        return null;
+    }
 
-        Station station = new Station(stationCode, stationSite);
+
+    public static Station getStation(Network network, String stationCode, String stationSite) {
+        Station station = getStation(network, stationCode);
+        if(station != null){
+            return station;
+        }
+
+        station = new Station(stationCode, stationSite);
 
         network.getStations().add(station);
 
         return station;
     }
 
-    public static Network getNetwork(List<Network> result, String networkCode, UUID stationSourceUuid, String networkDescription) {
-        for(Network network: result){
-            if(network.getNetworkCode().equals(networkCode) && network.getStationSourceUUID().equals(stationSourceUuid)){
+    public static Network getNetwork(List<Network> networks, String networkCode) {
+        for(Network network: networks){
+            if(network.getNetworkCode().equals(networkCode)){
                 return network;
             }
         }
 
-        Network resultNetwork = new Network(networkCode, networkDescription, stationSourceUuid);
-        result.add(resultNetwork);
+        return null;
+    }
+
+    public static Network getOrCreateNetwork(List<Network> networks, String networkCode, UUID stationSourceUuid, String networkDescription) {
+        Network resultNetwork = getNetwork(networks, networkCode);
+        if(resultNetwork != null){
+            return resultNetwork;
+        }
+
+        resultNetwork = new Network(networkCode, networkDescription, stationSourceUuid);
+        networks.add(resultNetwork);
 
         return resultNetwork;
     }
 
 
     public Channel getOrCreateChannel(Network network, Station station, Channel channel) {
-        Network networkFound = getNetwork(networks, network.getNetworkCode(), network.getStationSourceUUID(), network.getDescription());
+        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getStationSourceUUID(), network.getDescription());
         Station stationFound = getStation(networkFound, station.getStationCode(), station.getStationSite());
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
         if(channelFound == null){

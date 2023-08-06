@@ -9,7 +9,9 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +21,7 @@ public class FDSNWSDownloader {
 
     private static final String CHANNELS = "EHZ,SHZ,HHZ,BHZ";
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private static final int TIMEOUT_SECONDS = 10;
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
@@ -28,7 +31,11 @@ public class FDSNWSDownloader {
         System.out.println("Connecting to " + stationSource.getName());
         stationSource.getStatus().setString("Connecting to " + stationSource.getName());
         stationSource.getStatus().setValue(0);
-        InputStream inp = url.openStream();
+
+        URLConnection con = url.openConnection();
+        con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
+        con.setReadTimeout(TIMEOUT_SECONDS * 1000);
+        InputStream inp = con.getInputStream();
 
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
         f.setNamespaceAware(false);
@@ -105,7 +112,7 @@ public class FDSNWSDownloader {
     }
 
     private static void addChannel(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, String stationCode, String stationSite, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
-        Network network = StationDatabase.getNetwork(result, networkCode, stationSource.getUuid(), networkDescription);
+        Network network = StationDatabase.getOrCreateNetwork(result, networkCode, stationSource.getUuid(), networkDescription);
         Station station = StationDatabase.getStation(network, stationCode, stationSite);
         StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate);
     }

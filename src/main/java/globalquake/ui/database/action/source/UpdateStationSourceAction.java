@@ -37,7 +37,7 @@ public class UpdateStationSourceAction extends AbstractAction {
 
             List<StationSource> toBeUpdated = new ArrayList<>();
             for (int i : selectedRows) {
-                StationSource stationSource = tableModel.getEntity(i);
+                StationSource stationSource = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeUpdated.add(stationSource);
             }
 

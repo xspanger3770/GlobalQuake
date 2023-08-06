@@ -46,7 +46,7 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
         try{
             List<SeedlinkNetwork> toBeRemoved = new ArrayList<>();
             for(int i:selectedRows){
-                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(i);
+                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeRemoved.add(seedlinkNetwork);
             }
             databaseManager.getStationDatabase().getSeedlinkNetworks().removeAll(toBeRemoved);

@@ -8,7 +8,10 @@ import globalquake.ui.database.table.SeedlinkNetworksTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class SeedlinkServersPanel extends JPanel {
     private final DatabaseMonitorFrame databaseMonitorFrame;

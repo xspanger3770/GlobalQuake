@@ -57,8 +57,8 @@ public class StationDatabaseManager {
         }
     }
 
-    public void runUpdate(List<StationSource> stationSources) {
-        new Thread(() -> stationSources.parallelStream().forEach(stationSource -> {
+    public void runUpdate(List<StationSource> toBeUpdated) {
+        new Thread(() -> toBeUpdated.parallelStream().forEach(stationSource -> {
             stationSource.getStatus().setString("Updating...");
             try {
                 List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
@@ -69,6 +69,7 @@ public class StationDatabaseManager {
                 stationSource.setLastUpdate(LocalDateTime.now());
             } catch (Exception e) {
                 stationSource.getStatus().setString("Error!");
+                stationSource.getStatus().setValue(0);
             }
         })).start();
     }
@@ -97,7 +98,14 @@ public class StationDatabaseManager {
         return stationDatabase;
     }
 
-    public void runAvailability(List<SeedlinkNetwork> toBeUpdated) {
-        // todo
+    public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated) {
+        new Thread(() -> toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
+            try {
+                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+            }catch(Exception e){
+                seedlinkNetwork.getStatus().setString("Error!");
+                seedlinkNetwork.getStatus().setValue(0);
+            }
+        })).start();
     }
 }

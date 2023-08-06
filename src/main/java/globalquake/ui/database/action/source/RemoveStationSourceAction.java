@@ -46,7 +46,7 @@ public class RemoveStationSourceAction extends AbstractAction {
         try{
             List<StationSource> toBeRemoved = new ArrayList<>();
             for(int i:selectedRows){
-                StationSource stationSource = tableModel.getEntity(i);
+                StationSource stationSource = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeRemoved.add(stationSource);
             }
             databaseManager.getStationDatabase().getStationSources().removeAll(toBeRemoved);
