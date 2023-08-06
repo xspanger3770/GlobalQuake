@@ -21,7 +21,7 @@ public class StationSelect extends JFrame {
 		this.seedlinkManager = seedlinkManager;
 		loadDisplayed();
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		JPanel panel = new StationSelectPanel(this);
+		JPanel panel = new StationSelectPanelOld(this);
 		setPreferredSize(new Dimension(800, 600));
 		setContentPane(panel);
 

@@ -68,7 +68,7 @@ public class EarthquakeSimulator extends JFrame {
         init();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        EarthquakeSimulatorPanel panel = new EarthquakeSimulatorPanel(this);
+        EarthquakeSimulatorPanelOld panel = new EarthquakeSimulatorPanelOld(this);
         EarthquakeListPanel list = new EarthquakeListPanel(getFakeGlobalQuake());
         panel.setPreferredSize(new Dimension(600, 600));
         list.setPreferredSize(new Dimension(300, 600));

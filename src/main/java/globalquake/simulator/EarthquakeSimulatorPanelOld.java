@@ -27,14 +27,14 @@ import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.ui.settings.Settings;
-import globalquake.ui.GlobePanel;
+import globalquake.ui.GlobePanelOld;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.Level;
 import globalquake.utils.Scale;
 import globalquake.geo.Shindo;
 import globalquake.geo.TravelTimeTable;
 
-public class EarthquakeSimulatorPanel extends GlobePanel {
+public class EarthquakeSimulatorPanelOld extends GlobePanelOld {
 
     private final EarthquakeSimulator simulator;
     private static final Color neutralColor = new Color(20, 20, 160);
@@ -46,7 +46,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public EarthquakeSimulatorPanel(EarthquakeSimulator emulator) {
+    public EarthquakeSimulatorPanelOld(EarthquakeSimulator emulator) {
         this.simulator = emulator;
 
         addMouseListener(new MouseAdapter() {

@@ -20,7 +20,7 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Event;
 import globalquake.main.Main;
-import globalquake.ui.GlobePanel;
+import globalquake.ui.GlobePanelOld;
 import globalquake.geo.GeoUtils;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
@@ -98,9 +98,9 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        if (GlobePanel.polygonsHD != null && GlobePanel.polygonsMD != null && GlobePanel.polygonsUHD != null) {
-            ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? GlobePanel.polygonsUHD
-                    : scroll < 4.8 ? GlobePanel.polygonsHD : GlobePanel.polygonsMD;
+        if (GlobePanelOld.polygonsHD != null && GlobePanelOld.polygonsMD != null && GlobePanelOld.polygonsUHD != null) {
+            ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? GlobePanelOld.polygonsUHD
+                    : scroll < 4.8 ? GlobePanelOld.polygonsHD : GlobePanelOld.polygonsMD;
             for (org.geojson.Polygon polygon : pols) {
                 java.awt.Polygon awt = new java.awt.Polygon();
                 boolean add = false;
