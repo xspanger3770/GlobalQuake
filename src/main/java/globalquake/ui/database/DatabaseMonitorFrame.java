@@ -26,7 +26,7 @@ public class DatabaseMonitorFrame extends JFrame {
         contentPane.setLayout(new BorderLayout());
 
         contentPane.add(createTabbedPane(), BorderLayout.CENTER);
-        contentPane.add(createButtonsPanel(), BorderLayout.SOUTH);
+        contentPane.add(createBottomPanel(), BorderLayout.SOUTH);
 
         pack();
         setTitle("Station Database Manager");
@@ -68,12 +68,15 @@ public class DatabaseMonitorFrame extends JFrame {
 
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this));
         tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this));
+        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this));
         return tabbedPane;
     }
 
-    private Component createButtonsPanel() {
+    private Component createBottomPanel() {
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new GridLayout(2, 1));
+
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -88,7 +91,10 @@ public class DatabaseMonitorFrame extends JFrame {
         JButton btnLaunch = new JButton("Launch " + Main.fullName);
         btnLaunch.setEnabled(false);
         buttonsPanel.add(btnLaunch);
-        return buttonsPanel;
+
+        bottomPanel.add(new StationCountPanel(this));
+        bottomPanel.add(buttonsPanel);
+        return bottomPanel;
     }
 
     public static void main(String[] args) {

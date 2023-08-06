@@ -5,12 +5,20 @@ import globalquake.main.Main;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class StationDatabaseManager {
 
     private static final File STATIONS_FOLDER = new File(Main.MAIN_FOLDER, "/stationDatabase/");
     private StationDatabase stationDatabase;
+
+    private final List<Runnable> updateListeners = new CopyOnWriteArrayList<>();
+
+    private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
+    private boolean updating = false;
 
     public void load() throws FatalIOException{
         File file = getDatabaseFile();
@@ -36,6 +44,8 @@ public class StationDatabaseManager {
             System.out.println("A new database created");
             stationDatabase = new StationDatabase();
         }
+
+        runUpdate(stationDatabase.getStationSources().stream().filter(StationSource::isOutdated).collect(Collectors.toList()), () -> runAvailabilityCheck(stationDatabase.getSeedlinkNetworks(), null));
     }
 
     public void save() throws FatalIOException{
@@ -62,7 +72,30 @@ public class StationDatabaseManager {
         }
     }
 
+    public void addUpdateListener(Runnable runnable){
+        this.updateListeners.add(runnable);
+    }
+
+    public void addStatusListener(Runnable runnable){
+        this.statusListeners.add(runnable);
+    }
+
+    private void fireUpdateEvent(){
+        for(Runnable runnable: updateListeners){
+            runnable.run();
+        }
+    }
+
+    private void fireStatusChangeEvent(){
+        for(Runnable runnable: statusListeners){
+            runnable.run();
+        }
+    }
+
     public void runUpdate(List<StationSource> toBeUpdated, Runnable onFinish) {
+        this.updating = true;
+        fireStatusChangeEvent();
+
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(stationSource -> {
                 stationSource.getStatus().setString("Updating...");
@@ -76,8 +109,13 @@ public class StationDatabaseManager {
                 } catch (Exception e) {
                     stationSource.getStatus().setString("Error!");
                     stationSource.getStatus().setValue(0);
+                }finally {
+                    fireUpdateEvent();
                 }
             });
+
+            this.updating = false;
+            fireStatusChangeEvent();
             if (onFinish != null) {
                 onFinish.run();
             }
@@ -109,6 +147,8 @@ public class StationDatabaseManager {
     }
 
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
+        this.updating = true;
+        fireStatusChangeEvent();
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         try {
@@ -116,12 +156,20 @@ public class StationDatabaseManager {
                         } catch (Exception e) {
                             seedlinkNetwork.getStatus().setString("Error!");
                             seedlinkNetwork.getStatus().setValue(0);
+                        }finally {
+                            fireUpdateEvent();
                         }
                     }
             );
+            this.updating = false;
+            fireStatusChangeEvent();
             if (onFinish != null) {
                 onFinish.run();
             }
         }).start();
+    }
+
+    public boolean isUpdating() {
+        return updating;
     }
 }

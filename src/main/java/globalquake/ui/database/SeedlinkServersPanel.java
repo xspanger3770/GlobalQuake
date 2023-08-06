@@ -8,13 +8,11 @@ import globalquake.ui.database.table.SeedlinkNetworksTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class SeedlinkServersPanel extends JPanel {
     private final DatabaseMonitorFrame databaseMonitorFrame;
+    private final JTable table;
 
     private SeedlinkNetworksTableModel tableModel;
 
@@ -38,7 +36,6 @@ public class SeedlinkServersPanel extends JPanel {
         actionsWrapPanel.add(actionsPanel);
         add(actionsWrapPanel, BorderLayout.NORTH);
 
-        JTable table;
         add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
 
         this.addSeedlinkNetworkAction.setTableModel(tableModel);
@@ -50,7 +47,9 @@ public class SeedlinkServersPanel extends JPanel {
         this.removeSeedlinkNetworkAction.setEnabled(false);
         this.updateSeedlinkNetworkAction.setTableModel(tableModel);
         this.updateSeedlinkNetworkAction.setTable(table);
-        this.updateSeedlinkNetworkAction.setEnabled(true);
+        this.updateSeedlinkNetworkAction.setEnabled(false);
+
+        databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
     }
 
     private JPanel createActionsPanel() {
@@ -88,9 +87,9 @@ public class SeedlinkServersPanel extends JPanel {
     }
 
     private void rowSelectionChanged(ListSelectionEvent event) {
-        var selectionModel = (ListSelectionModel) event.getSource();
-        var count = selectionModel.getSelectedItemsCount();
-        editSeedlinkNetworkAction.setEnabled(count == 1);
-        removeSeedlinkNetworkAction.setEnabled(count >= 1);
+        var count = table.getSelectionModel().getSelectedItemsCount();
+        editSeedlinkNetworkAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
+        removeSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
+        updateSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
     }
 }

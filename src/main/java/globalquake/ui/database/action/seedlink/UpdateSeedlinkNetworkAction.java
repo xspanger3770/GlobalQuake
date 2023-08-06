@@ -2,6 +2,7 @@ package globalquake.ui.database.action.seedlink;
 
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.StationDatabaseManager;
+import globalquake.exception.RuntimeApplicationException;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
@@ -28,7 +29,7 @@ public class UpdateSeedlinkNetworkAction extends AbstractAction {
         this.setEnabled(false);
         int[] selectedRows = table.getSelectedRows();
         if (selectedRows.length < 1) {
-            throw new IllegalStateException("Invalid selected rows count (must be > 0): " + selectedRows.length);
+            throw new RuntimeApplicationException("Invalid selected rows count (must be > 0): " + selectedRows.length);
         }
         if (table.isEditing()) {
             table.getCellEditor().cancelCellEditing();

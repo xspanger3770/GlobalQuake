@@ -17,6 +17,7 @@ public class StationSourcesPanel extends JPanel {
     private final EditStationSourceAction editStationSourceAction;
     private final RemoveStationSourceAction removeStationSourceAction;
     private final UpdateStationSourceAction updateStationSourceAction;
+    private final JTable table;
     private StationSourcesTableModel tableModel;
 
     public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame) {
@@ -33,7 +34,6 @@ public class StationSourcesPanel extends JPanel {
         actionsWrapPanel.add(actionsPanel);
         add(actionsWrapPanel, BorderLayout.NORTH);
 
-        JTable table;
         add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
 
         this.addStationSourceAction.setTableModel(tableModel);
@@ -45,7 +45,9 @@ public class StationSourcesPanel extends JPanel {
         this.removeStationSourceAction.setEnabled(false);
         this.updateStationSourceAction.setTableModel(tableModel);
         this.updateStationSourceAction.setTable(table);
-        this.updateStationSourceAction.setEnabled(true);
+        this.updateStationSourceAction.setEnabled(false);
+
+        databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
     }
 
     private JPanel createActionsPanel() {
@@ -83,9 +85,9 @@ public class StationSourcesPanel extends JPanel {
     }
 
     private void rowSelectionChanged(ListSelectionEvent event) {
-        var selectionModel = (ListSelectionModel) event.getSource();
-        var count = selectionModel.getSelectedItemsCount();
-        editStationSourceAction.setEnabled(count == 1);
-        removeStationSourceAction.setEnabled(count >= 1);
+        var count = table.getSelectionModel().getSelectedItemsCount();
+        editStationSourceAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
+        removeStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
+        updateStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
     }
 }
