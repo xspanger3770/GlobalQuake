@@ -280,6 +280,11 @@ public class SeedlinkManager {
 		availability_string = "Finishing...";
 	}
 
+	public static void main(String[] args) throws Exception {
+		SeedlinkReader reader = new SeedlinkReader("rtserve.resif.fr", 18000, 90, false);
+		System.out.println(reader.getInfoString(SeedlinkReader.INFO_STREAMS));
+	}
+
 	private void availability(String infoString, byte seedlinkNetwork) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();

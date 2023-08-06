@@ -26,7 +26,7 @@ public class GlobalStation extends AbstractStation {
 		while (!recordsQueue.isEmpty()) {
 			DataRecord record = recordsQueue.remove();
 			getAnalysis().analyse(record);
-			GlobalQuake.instance.logRecord(record.getLastSampleBtime().convertToCalendar().getTimeInMillis());
+			GlobalQuake.instance.logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 		}
 	}
 

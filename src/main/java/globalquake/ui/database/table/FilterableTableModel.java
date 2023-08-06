@@ -15,7 +15,7 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 
 	public FilterableTableModel(List<E> data) {
 		this.data = data;
-		this.filteredData = new ArrayList<E>(data);
+		this.filteredData = new ArrayList<>(data);
 		applyFilter();
 	}
 

@@ -106,7 +106,7 @@ public class EarthquakeSimulatorPanel extends GlobePanel {
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         Hashtable labelTable = new Hashtable();
-        labelTable.put(new Integer(0), new JLabel("0"));
+        labelTable.put(0, new JLabel("0"));
         // labelTable.put( new Integer( 5 ), new JLabel("0.5") );
         labelTable.put(10, new JLabel("1"));
         labelTable.put(20, new JLabel("2"));

@@ -44,7 +44,7 @@ public abstract class Analysis {
 			sampleRate = dr.getSampleRate();
 			reset();
 		}
-		long time = dr.getLastSampleBtime().convertToCalendar().getTimeInMillis();
+		long time = dr.getLastSampleBtime().toInstant().toEpochMilli();
 		if (time < lastRecord) {
 			System.err.println(
 					"ERROR: BACKWARDS TIME AT " + getStation().getStationCode() + " (" + (lastRecord - time) + ")");
@@ -55,7 +55,7 @@ public abstract class Analysis {
 	}
 
 	private void decode(DataRecord dataRecord) {
-		long time = dataRecord.getStartBtime().convertToCalendar().getTimeInMillis();
+		long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
 		long gap = lastRecord != 0 ? (time - lastRecord) : -1;
 		if (gap > getGapTreshold()) {
 			System.err.println("Station " + getStation().getStationCode() + " reset due to a gap (" + gap + "ms)");
@@ -85,10 +85,6 @@ public abstract class Analysis {
 
 	public double getSampleRate() {
 		return sampleRate;
-	}
-
-	public void setSampleRate(double sampleRate) {
-		this.sampleRate = sampleRate;
 	}
 
 	public abstract void second();

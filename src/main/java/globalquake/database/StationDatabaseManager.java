@@ -9,7 +9,7 @@ import java.util.List;
 
 public class StationDatabaseManager {
 
-    private static final File STATIONS_FOLDER = new File(Main.MAIN_FOLDER, "/stationDatabase/");;
+    private static final File STATIONS_FOLDER = new File(Main.MAIN_FOLDER, "/stationDatabase/");
     private StationDatabase stationDatabase;
 
     public StationDatabaseManager() {

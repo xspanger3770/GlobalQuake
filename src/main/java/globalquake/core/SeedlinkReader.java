@@ -1,21 +1,21 @@
 package globalquake.core;
 
-import java.util.Calendar;
-
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
-import globalquake.database_old.SeedlinkNetwork;
 import globalquake.database_old.SeedlinkManager;
+import globalquake.database_old.SeedlinkNetwork;
 import globalquake.main.GlobalQuake;
 import org.tinylog.Logger;
+
+import java.time.Instant;
 
 public class SeedlinkReader {
 
 	protected static final int RECONNECT_DELAY = 10;
 	private final GlobalQuake globalQuake;
-	private Calendar lastData;
+	private Instant lastData;
 
 	public SeedlinkReader(GlobalQuake globalQuake) {
 		this.globalQuake = globalQuake;
@@ -85,8 +85,8 @@ public class SeedlinkReader {
 	}
 
 	private void newPacket(DataRecord dr) {
-		if (lastData == null || dr.getLastSampleBtime().convertToCalendar().after(lastData)) {
-			lastData = dr.getLastSampleBtime().convertToCalendar();
+		if (lastData == null || dr.getLastSampleBtime().toInstant().isAfter(lastData)) {
+			lastData = dr.getLastSampleBtime().toInstant();
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
