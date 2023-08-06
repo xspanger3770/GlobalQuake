@@ -13,6 +13,7 @@ public class StationSelectPanel extends GlobePanel {
 
     private final StationDatabase stationDatabase;
     private final MonitorableCopyOnWriteArrayList<Station> allStationsList = new MonitorableCopyOnWriteArrayList<>();
+    public boolean showUnavailable;
 
     public StationSelectPanel(StationDatabase stationDatabase) {
         this.stationDatabase = stationDatabase;
@@ -20,16 +21,17 @@ public class StationSelectPanel extends GlobePanel {
         getRenderer().addFeature(new FeatureSelectableStation(allStationsList));
     }
 
-    private void updateAllStations() {
+    public void updateAllStations() {
         List<Station> stations = new ArrayList<>();
         stationDatabase.getDatabaseReadLock().lock();
         try{
             for(Network network:stationDatabase.getNetworks()){
-                stations.addAll(network.getStations());
+                stations.addAll(network.getStations().stream().filter(station -> showUnavailable || station.hasAvailableChannel()).toList());
             }
 
             allStationsList.clear();
             allStationsList.addAll(stations);
+            System.out.println(allStationsList.size());
         }finally {
             stationDatabase.getDatabaseReadLock().unlock();
         }

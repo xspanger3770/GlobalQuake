@@ -49,7 +49,7 @@ public class RemoveStationSourceAction extends AbstractAction {
                 StationSource stationSource = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeRemoved.add(stationSource);
             }
-            databaseManager.getStationDatabase().getStationSources().removeAll(toBeRemoved);
+            databaseManager.removeAllStationSources(toBeRemoved);
         }finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }

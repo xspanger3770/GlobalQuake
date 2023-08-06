@@ -37,15 +37,27 @@ public class StationDatabase implements Serializable {
     }
 
     private void addDefaults() {
-        stationSources.add(new StationSource("EIDA_DE", "https://eida.bgr.de/fdsnws/station/1/query?"));
-        stationSources.add(new StationSource("EIDA_RO", "https://eida-sc3.infp.ro/fdsnws/station/1/query?"));
-
-        stationSources.add(new StationSource("RESIF", "https://ws.resif.fr/fdsnws/station/1/query?"));
-        stationSources.add(
-                new StationSource("GEOFON", "https://geofon.gfz-potsdam.de/fdsnws/station/1/query?"));
-        stationSources.add(new StationSource("ERDE", "https://erde.geophysik.uni-muenchen.de/fdsnws/station/1/query?"));
-        stationSources.add(new StationSource("ORFEUS", "https://www.orfeus-eu.org/fdsnws/station/1/query?"));
-        stationSources.add(new StationSource("IRIS", "https://service.iris.edu/fdsnws/station/1/query?"));
+        stationSources.add(new StationSource("BGR", "http://eida.bgr.de/fdsnws/station/1/"));
+        stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
+        stationSources.add(new StationSource("KOERI", "http://eida-service.koeri.boun.edu.tr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("ETHZ", "http://eida.ethz.ch/fdsnws/station/1/"));
+        stationSources.add(new StationSource("GEOFON, GFZ", "http://geofon.gfz-potsdam.de/fdsnws/station/1/"));
+        stationSources.add(new StationSource("ICGC", "http://ws.icgc.cat/fdsnws/station/1/"));
+        stationSources.add(new StationSource("IPGP", "http://eida.ipgp.fr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("INGV", "http://webservices.ingv.it/fdsnws/station/1/"));
+        stationSources.add(new StationSource("LMU", "http://erde.geophysik.uni-muenchen.de/fdsnws/station/1/"));
+        stationSources.add(new StationSource("NIEP", "http://eida-sc3.infp.ro/fdsnws/station/1/"));
+        stationSources.add(new StationSource("NOA", "http://eida.gein.noa.gr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("ORFEUS", "http://www.orfeus-eu.org/fdsnws/station/1/"));
+        stationSources.add(new StationSource("RESIF", "http://ws.resif.fr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
+        stationSources.add(new StationSource("IRIS DMC", "http://service.iris.edu/fdsnws/station/1/"));
+        stationSources.add(new StationSource("NCEDC", "http://service.ncedc.org/fdsnws/station/1"));
+        stationSources.add(new StationSource("SCEDC", "http://service.scedc.caltech.edu/fdsnws/station/1/"));
+        stationSources.add(new StationSource("TexNet", "http://rtserve.beg.utexas.edu/fdsnws/station/1/"));
+        stationSources.add(new StationSource("USP-IAG", "http://seisrequest.iag.usp.br/fdsnws/station/1/"));
+        stationSources.add(new StationSource("BMKG", "https://geof.bmkg.go.id/fdsnws/station/1/"));
+        stationSources.add(new StationSource("AusPass", "http://auspass.edu.au:8080/fdsnws/station/1/"));
 
 
         seedlinkNetworks.add(new SeedlinkNetwork("Geofon Seedlink", "geofon.gfz-potsdam.de",18000));
@@ -118,13 +130,13 @@ public class StationDatabase implements Serializable {
     }
 
 
-    public static Station getStation(Network network, String stationCode, String stationSite) {
+    public static Station getStation(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
         Station station = getStation(network, stationCode);
         if(station != null){
             return station;
         }
 
-        station = new Station(stationCode, stationSite);
+        station = new Station(stationCode, stationSite, lat, lon ,alt);
 
         network.getStations().add(station);
 
@@ -141,26 +153,29 @@ public class StationDatabase implements Serializable {
         return null;
     }
 
-    public static Network getOrCreateNetwork(List<Network> networks, String networkCode, UUID stationSourceUuid, String networkDescription) {
+    public static Network getOrCreateNetwork(List<Network> networks, String networkCode, StationSource stationSource, String networkDescription) {
         Network resultNetwork = getNetwork(networks, networkCode);
-        if(resultNetwork != null){
+        if(resultNetwork != null) {
+            resultNetwork.getStationSources().add(stationSource);
             return resultNetwork;
         }
 
-        resultNetwork = new Network(networkCode, networkDescription, stationSourceUuid);
+        resultNetwork = new Network(networkCode, networkDescription, stationSource);
         networks.add(resultNetwork);
 
         return resultNetwork;
     }
 
 
-    public Channel getOrCreateChannel(Network network, Station station, Channel channel) {
-        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getStationSourceUUID(), network.getDescription());
-        Station stationFound = getStation(networkFound, station.getStationCode(), station.getStationSite());
+    public Channel getOrCreateChannel(Network network, Station station, Channel channel, StationSource stationSource) {
+        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), stationSource, network.getDescription());
+        Station stationFound = getStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLat(), station.getLon(), station.getAlt());
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
-        if(channelFound == null){
-            stationFound.getChannels().add(channel);
+        if(channelFound != null){
+            stationFound.getChannels().remove(channelFound);
         }
+
+        stationFound.getChannels().add(channel);
 
         return channel;
     }

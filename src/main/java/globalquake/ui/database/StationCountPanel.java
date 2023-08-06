@@ -40,11 +40,11 @@ public class StationCountPanel extends JPanel {
                 for(Station station: network.getStations()){
                     for(Channel channel:station.getChannels()){
                         tot++;
-                        if(channel.available){
+                        if(channel.isAvailable()){
                             ava++;
                         }
                         if(channel.equals(station.getSelectedChannel())){
-                            if(channel.available){
+                            if(channel.isAvailable()){
                                 sel++;
                             } else {
                                 unb++;

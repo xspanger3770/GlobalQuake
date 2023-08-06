@@ -6,6 +6,7 @@ import globalquake.main.Main;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -101,7 +102,7 @@ public class StationDatabaseManager {
                 try {
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
-                    StationDatabaseManager.this.acceptNetworks(networkList);
+                    StationDatabaseManager.this.acceptNetworks(networkList, stationSource);
                     stationSource.getStatus().setString("Done");
                     stationSource.getStatus().setValue(100);
                     stationSource.setLastUpdate(LocalDateTime.now());
@@ -121,13 +122,13 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private void acceptNetworks(List<Network> networkList) {
+    private void acceptNetworks(List<Network> networkList, StationSource stationSource) {
         stationDatabase.getDatabaseWriteLock().lock();
         try{
             for(Network network:networkList){
                 for(Station station: network.getStations()){
                     for(Channel channel:station.getChannels()){
-                        stationDatabase.getOrCreateChannel(network, station, channel);
+                        stationDatabase.getOrCreateChannel(network, station, channel, stationSource);
                     }
                 }
             }
@@ -170,5 +171,31 @@ public class StationDatabaseManager {
 
     public boolean isUpdating() {
         return updating;
+    }
+
+    public void removeAllSeedlinks(List<SeedlinkNetwork> toBeRemoved) {
+        for(Network network: getStationDatabase().getNetworks()){
+            for(Station station: network.getStations()){
+                for(Channel channel: station.getChannels()){
+                    toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
+                }
+            }
+        }
+        getStationDatabase().getSeedlinkNetworks().removeAll(toBeRemoved);
+        fireUpdateEvent();
+    }
+
+    public void removeAllStationSources(List<StationSource> toBeRemoved) {
+        for (Iterator<Network> iterator = getStationDatabase().getNetworks().iterator(); iterator.hasNext(); ) {
+            Network network = iterator.next();
+            toBeRemoved.forEach(network.getStationSources()::remove);
+            if(network.getStationSources().isEmpty()){
+                iterator.remove();
+            }
+        }
+
+        getStationDatabase().getStationSources().removeAll(toBeRemoved);
+
+        fireUpdateEvent();
     }
 }

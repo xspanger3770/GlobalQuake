@@ -36,7 +36,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
 
         nameField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getName(), 40);
         hostField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getHost(), 40);
-        portField = new JTextField(seedlinkNetwork==null ? "" : String.valueOf(seedlinkNetwork.getPort()), 40);
+        portField = new JTextField(seedlinkNetwork==null ? "18000" : String.valueOf(seedlinkNetwork.getPort()), 40);
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");

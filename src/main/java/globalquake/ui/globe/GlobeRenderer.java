@@ -388,6 +388,24 @@ public class GlobeRenderer {
         polygon3D.finish();
     }
 
+    public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {
+        polygon3D.reset();
+        Point2D point = new Point2D();
+        GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
+        GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
+        double ang = 0.0;
+        for(int i = 0; i < 4; i++) {
+            GeoUtils.moveOnGlobe(precomputed, point, ang);
+            Vector3D vector3D = new Vector3D(getX_3D(point.x, point.y, altitude),
+                    getY_3D(point.x, point.y, altitude), getZ_3D(point.x, point.y, altitude));
+
+            polygon3D.addPoint(vector3D);
+            ang += 120.0;
+        }
+
+        polygon3D.finish();
+    }
+
     public List<RenderFeature<?>> getRenderFeatures() {
         return renderFeatures;
     }
@@ -408,4 +426,5 @@ public class GlobeRenderer {
     public void mouseMoved(MouseEvent e) {
         lastMouse = e.getPoint();
     }
+
 }

@@ -2,9 +2,7 @@ package globalquake.database;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 public class Network implements Serializable {
 
@@ -14,18 +12,18 @@ public class Network implements Serializable {
     private final String networkCode;
     private final String description;
 
-    private final UUID stationSourceUUID;
+    private final Set<StationSource> stationSources = new HashSet<>();
     private final Collection<Station> stations;
 
-    public Network(String networkCode, String description, UUID stationSourceUUID) {
+    public Network(String networkCode, String description, StationSource stationSource) {
         this.networkCode = networkCode;
         this.description = description;
-        this.stationSourceUUID = stationSourceUUID;
         this.stations = new ArrayList<>();
+        this.stationSources.add(stationSource);
     }
 
-    public UUID getStationSourceUUID() {
-        return stationSourceUUID;
+    public Set<StationSource> getStationSources() {
+        return stationSources;
     }
 
     public String getNetworkCode() {

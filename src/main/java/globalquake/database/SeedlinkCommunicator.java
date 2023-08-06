@@ -22,11 +22,12 @@ public class SeedlinkCommunicator {
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
         seedlinkNetwork.getStatus().setValue(0);
-        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 10, false);
 
         seedlinkNetwork.getStatus().setString("Downloading...");
         seedlinkNetwork.getStatus().setValue(33);
-        String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS);
+        String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS).trim().replaceAll("[^\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]", " ");
+        System.out.println(infoString);
 
         seedlinkNetwork.getStatus().setString("Parsing...");
         seedlinkNetwork.getStatus().setValue(66);
@@ -73,8 +74,7 @@ public class SeedlinkCommunicator {
                 return;
             }
 
-            channel.available = true;
-            channel.seedlinkNetwork = seedlinkNetwork;
+            channel.getSeedlinkNetworks().add(seedlinkNetwork);
         }finally {
             stationDatabase.getDatabaseWriteLock().unlock();
         }

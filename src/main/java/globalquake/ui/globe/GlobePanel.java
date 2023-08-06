@@ -20,7 +20,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private double centerLon = 17;
     private double dragStartLat;
     private double dragStartLon;
-    private double scroll = 2;
+    private double scroll = 0.5;
 
     private Point dragStart;
     private Point lastMouse;

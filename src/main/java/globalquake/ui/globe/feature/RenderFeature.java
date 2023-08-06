@@ -25,7 +25,7 @@ public abstract class RenderFeature<E> {
         entities_temp = entities3;
     }
 
-    public final void updateEntities(){
+    public final boolean updateEntities(){
         int hash;
         if(getElements() instanceof Monitorable){
             hash = ((Monitorable) getElements()).getMonitorState();
@@ -40,7 +40,10 @@ public abstract class RenderFeature<E> {
             swapEntities();
 
             lastHash = hash;
+            return true;
         }
+
+        return false;
     }
 
     public boolean needsCreatePolygon(RenderEntity<E> entity, boolean propertiesChanged){
@@ -62,16 +65,18 @@ public abstract class RenderFeature<E> {
     }
 
     public final void process(GlobeRenderer renderer, RenderProperties renderProperties) {
+        boolean entitiesUpdated = false;
         if(needsUpdateEntities()) {
-            updateEntities();
+            entitiesUpdated = updateEntities();
         }
 
         boolean propertiesChanged = propertiesChanged(renderProperties);
 
+        boolean finalEntitiesUpdated = entitiesUpdated;
         getEntities().parallelStream().forEach(entity -> {
-            if(needsCreatePolygon(entity, propertiesChanged))
+            if(finalEntitiesUpdated || needsCreatePolygon(entity, propertiesChanged))
                 createPolygon(renderer, entity, renderProperties);
-            if(needsProject(entity, propertiesChanged))
+            if(finalEntitiesUpdated || needsProject(entity, propertiesChanged))
                 project(renderer, entity);
         });
     }

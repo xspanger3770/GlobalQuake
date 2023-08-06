@@ -2,11 +2,13 @@ package globalquake.database;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public final class Channel implements Serializable {
     @Serial
-    private static final long serialVersionUID = -5264582823624056195L;
+    private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
     private final double sampleRate;
@@ -14,9 +16,7 @@ public final class Channel implements Serializable {
     private final double longitude;
     private final double elevation;
 
-    public transient boolean available;
-
-    public transient SeedlinkNetwork seedlinkNetwork = null;
+    public final Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
 
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
                    double elevation) {
@@ -81,4 +81,11 @@ public final class Channel implements Serializable {
                 "elevation=" + elevation + ']';
     }
 
+    public boolean isAvailable(){
+        return !seedlinkNetworks.isEmpty();
+    }
+
+    public Set<SeedlinkNetwork> getSeedlinkNetworks() {
+        return seedlinkNetworks;
+    }
 }

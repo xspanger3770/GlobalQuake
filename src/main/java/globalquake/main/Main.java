@@ -67,6 +67,11 @@ public class Main {
 									databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
                                         databaseMonitorFrame.getMainProgressBar().setString("Done");
                                         databaseMonitorFrame.getMainProgressBar().setValue(100);
+										try {
+											databaseManager.save();
+										} catch (FatalIOException e) {
+											getErrorHandler().handleException(new RuntimeException(e));
+										}
 										databaseMonitorFrame.initDone();
                                     });
 								});

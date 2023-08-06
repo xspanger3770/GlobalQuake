@@ -24,7 +24,7 @@ public class FDSNWSDownloader {
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
 
-        URL url = new URL("%slevel=channel&endafter=%s&includerestricted=false&format=xml&channel=%s".formatted(stationSource.getUrl(), format1.format(new Date()), CHANNELS));
+        URL url = new URL("%squery?level=channel&endafter=%s&includerestricted=false&format=xml&channel=%s".formatted(stationSource.getUrl(), format1.format(new Date()), CHANNELS));
 
         System.out.println("Connecting to " + stationSource.getName());
         stationSource.getStatus().setString("Connecting to " + stationSource.getName());
@@ -110,8 +110,8 @@ public class FDSNWSDownloader {
     }
 
     private static void addChannel(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, String stationCode, String stationSite, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
-        Network network = StationDatabase.getOrCreateNetwork(result, networkCode, stationSource.getUuid(), networkDescription);
-        Station station = StationDatabase.getStation(network, stationCode, stationSite);
+        Network network = StationDatabase.getOrCreateNetwork(result, networkCode, stationSource, networkDescription);
+        Station station = StationDatabase.getStation(network, stationCode, stationSite, lat, lon, alt);
         StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate);
     }
 
