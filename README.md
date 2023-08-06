@@ -1,5 +1,13 @@
 # GlobalQuake
 
+## Updates
+
+__A new Station Manager will allow manually managing station sources as well as seedlink networks__\
+__Upgrade is also coming for station selection mechanics that will make it much more convenient to select stations__\
+__A 3D graphics upgrade is also almost ready to be included so stay tuned!__
+
+## Description
+
 GlobalQuake is an experimental java application used to monitor earthquakes in real time.
 
 Enables selection of seismic stations from publicly available seismic networks. 

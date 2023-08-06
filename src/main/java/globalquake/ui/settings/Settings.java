@@ -12,11 +12,6 @@ public final class Settings {
 
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
 	private static final Properties properties = new Properties();
-	
-	public static String zejfSeisIP;
-	public static Integer zejfSeisPort;
-	public static Boolean zejfSeisAutoReconnect;
-	
 	public static Boolean enableAlarmDialogs;
 	
 	public static Double homeLat;
@@ -35,9 +30,6 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
-		zejfSeisIP = (String) properties.getOrDefault("zejfSeisIP", "0.0.0.0");
-		zejfSeisPort = Integer.valueOf((String) properties.getOrDefault("zejfSeisPort", "6222"));
-		zejfSeisAutoReconnect = Boolean.valueOf((String) properties.getOrDefault("zejfSeisAutoReconnect", "true"));
 		
 		enableAlarmDialogs = Boolean.valueOf((String) properties.getOrDefault("enableAlarmDialogs", "false"));
 		
@@ -48,9 +40,6 @@ public final class Settings {
 	
 	
 	public static void save() {
-		properties.setProperty("zejfSeisIP", zejfSeisIP);
-		properties.setProperty("zejfSeisPort", String.valueOf(zejfSeisPort));
-		properties.setProperty("zejfSeisAutoReconnect", String.valueOf(zejfSeisAutoReconnect));
 		properties.setProperty("enableAlarmDialogs", String.valueOf(enableAlarmDialogs));
 		
 		properties.setProperty("homeLat", String.valueOf(homeLat));

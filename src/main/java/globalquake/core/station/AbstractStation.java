@@ -1,10 +1,9 @@
 package globalquake.core.station;
 
-import java.util.ArrayList;
-
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
-import globalquake.main.GlobalQuake;
+
+import java.util.ArrayList;
 
 public abstract class AbstractStation {
 
@@ -19,13 +18,11 @@ public abstract class AbstractStation {
 	private final long sensitivity;
 	private final BetterAnalysis analysis;
 	private final double frequency;
-	private final GlobalQuake globalQuake;
 	private final int id;
 
-	public AbstractStation(GlobalQuake globalQuake, String networkCode, String stationCode, String channelName,
+	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, byte seedlinkNetwork, double lat, double lon, double alt,
 						   long sensitivity, double frequency, int id) {
-		this.globalQuake = globalQuake;
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
@@ -94,16 +91,16 @@ public abstract class AbstractStation {
 		return getDelayMS() != -1 && getDelayMS() < 2 * 60 * 1000;
 	}
 
-	public abstract boolean hasDisplayableData() ;
+	public abstract boolean hasNoDisplayableData() ;
 	
 	public abstract long getDelayMS();
 	
 	private final ArrayList<Double> ratioHistory = new ArrayList<>();
-	private final Object ratioSync = new Object();
+	private final Object ratioLock = new Object();
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public void second() {
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
 			if (getAnalysis()._maxRatio > 0) {
 				ratioHistory.add(0, getAnalysis()._maxRatio);
 				getAnalysis()._maxRatioReset = true;
@@ -118,7 +115,7 @@ public abstract class AbstractStation {
 
 	public double getMaxRatio60S() {
 		double max = 0.0;
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
             for (double d : ratioHistory) {
 				if (d > max) {
 					max = d;
@@ -129,7 +126,7 @@ public abstract class AbstractStation {
 	}
 
 	public void reset() {
-		synchronized (ratioSync) {
+		synchronized (ratioLock) {
 			ratioHistory.clear();
 		}
 	}
@@ -145,10 +142,6 @@ public abstract class AbstractStation {
 	public ArrayList<NearbyStationDistanceInfo> getNearbyStations() {
 		return nearbyStations;
 	}
-	
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
-	}
-	
+
 	public abstract void analyse();
 }
