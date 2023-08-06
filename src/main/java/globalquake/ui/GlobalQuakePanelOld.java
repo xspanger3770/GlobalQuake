@@ -27,11 +27,11 @@ import javax.swing.JOptionPane;
 
 import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
+import globalquake.database_old.SeedlinkManager;
+import globalquake.database_old.SeedlinkNetwork;
 import globalquake.main.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
-import globalquake.database_old.SeedlinkNetwork;
-import globalquake.database_old.SeedlinkManager;
 import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;
@@ -41,7 +41,7 @@ import globalquake.utils.Scale;
 import globalquake.geo.Shindo;
 import globalquake.geo.TravelTimeTable;
 
-public class GlobalQuakePanel extends GlobePanel {
+public class GlobalQuakePanelOld extends GlobePanelOld {
 
     private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private static final DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);
@@ -63,7 +63,7 @@ public class GlobalQuakePanel extends GlobePanel {
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public GlobalQuakePanel(GlobalQuake globalQuake, GlobalQuakeFrame globalQuakeFrame) {
+    public GlobalQuakePanelOld(GlobalQuake globalQuake, GlobalQuakeFrame globalQuakeFrame) {
         this.globalQuake = globalQuake;
 
         addMouseListener(new MouseAdapter() {
@@ -619,7 +619,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         int _y = getHeight() + 10;
 
-        for (SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
+        for (globalquake.database_old.SeedlinkNetwork seed : SeedlinkManager.seedlinks) {
             _y -= 16;
             g.setColor(seed.selectedStations == 0 ? Color.lightGray
                     : (seed.status == SeedlinkNetwork.DISCONNECTED ? Color.red

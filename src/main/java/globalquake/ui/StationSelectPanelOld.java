@@ -21,23 +21,23 @@ import javax.swing.JOptionPane;
 import com.morce.globalquake.database.Channel;
 import com.morce.globalquake.database.Station;
 
-import globalquake.database_old.SeedlinkNetwork;
 import globalquake.database_old.SeedlinkManager;
+import globalquake.database_old.SeedlinkNetwork;
 import globalquake.main.Main;
 
-public class StationSelectPanel extends GlobePanel {
+public class StationSelectPanelOld extends GlobePanelOld {
 
 	private final StationSelect stationSelect;
 	public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static final SimpleDateFormat formatSimple = new SimpleDateFormat("yyyy/MM/dd");
 
-	public StationSelectPanel(StationSelect stationSelect) {
+	public StationSelectPanelOld(StationSelect stationSelect) {
 		this.stationSelect = stationSelect;
 
 		addMouseMotionListener(new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				StationSelectPanel.super.repaint();
+				StationSelectPanelOld.super.repaint();
 			}
 		});
 
@@ -55,7 +55,7 @@ public class StationSelectPanel extends GlobePanel {
 					}
 					if (!clickedStations.isEmpty()) {
 						editStations(clickedStations);
-						StationSelectPanel.super.repaint();
+						StationSelectPanelOld.super.repaint();
 					}
 				}
 			}
