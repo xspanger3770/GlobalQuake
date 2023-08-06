@@ -1,6 +1,5 @@
 package globalquake.database;
 
-import globalquake.database_old.CountInputStream;
 import globalquake.main.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -9,7 +8,6 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;

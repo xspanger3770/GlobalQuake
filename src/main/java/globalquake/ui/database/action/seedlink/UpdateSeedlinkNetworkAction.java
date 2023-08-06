@@ -16,7 +16,7 @@ public class UpdateSeedlinkNetworkAction extends AbstractAction {
 
     private JTable table;
 
-    public UpdateSeedlinkNetworkAction(StationDatabaseManager databaseManager){
+    public UpdateSeedlinkNetworkAction(StationDatabaseManager databaseManager) {
         super("Update");
         this.databaseManager = databaseManager;
 
@@ -26,25 +26,21 @@ public class UpdateSeedlinkNetworkAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         this.setEnabled(false);
-        try {
-            int[] selectedRows = table.getSelectedRows();
-            if (selectedRows.length < 1) {
-                throw new IllegalStateException("Invalid selected rows count (must be > 0): " + selectedRows.length);
-            }
-            if (table.isEditing()) {
-                table.getCellEditor().cancelCellEditing();
-            }
-
-            List<SeedlinkNetwork> toBeUpdated = new ArrayList<>();
-            for (int i : selectedRows) {
-                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
-                toBeUpdated.add(seedlinkNetwork);
-            }
-
-            databaseManager.runAvailabilityCheck(toBeUpdated);
-        }finally {
-            this.setEnabled(true);
+        int[] selectedRows = table.getSelectedRows();
+        if (selectedRows.length < 1) {
+            throw new IllegalStateException("Invalid selected rows count (must be > 0): " + selectedRows.length);
         }
+        if (table.isEditing()) {
+            table.getCellEditor().cancelCellEditing();
+        }
+
+        List<SeedlinkNetwork> toBeUpdated = new ArrayList<>();
+        for (int i : selectedRows) {
+            SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
+            toBeUpdated.add(seedlinkNetwork);
+        }
+
+        databaseManager.runAvailabilityCheck(toBeUpdated, () -> UpdateSeedlinkNetworkAction.this.setEnabled(true));
     }
 
     public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {

@@ -12,9 +12,6 @@ public class StationDatabaseManager {
     private static final File STATIONS_FOLDER = new File(Main.MAIN_FOLDER, "/stationDatabase/");
     private StationDatabase stationDatabase;
 
-    public StationDatabaseManager() {
-    }
-
     public void load() throws FatalIOException{
         File file = getDatabaseFile();
         if (!file.getParentFile().exists()) {
@@ -48,30 +45,43 @@ public class StationDatabaseManager {
                 throw new FatalIOException("Unable to create database file directory!", null);
             }
         }
+
+        if(stationDatabase == null){
+            return;
+        }
+
+        stationDatabase.getDatabaseReadLock().lock();
         try{
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
             out.writeObject(stationDatabase);
             out.close();
         }catch(IOException e){
             throw new FatalIOException("Unable to save station database!", e);
+        } finally {
+            stationDatabase.getDatabaseReadLock().unlock();
         }
     }
 
-    public void runUpdate(List<StationSource> toBeUpdated) {
-        new Thread(() -> toBeUpdated.parallelStream().forEach(stationSource -> {
-            stationSource.getStatus().setString("Updating...");
-            try {
-                List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
-                stationSource.getStatus().setString("Updating database...");
-                acceptNetworks(networkList);
-                stationSource.getStatus().setString("Done");
-                stationSource.getStatus().setValue(100);
-                stationSource.setLastUpdate(LocalDateTime.now());
-            } catch (Exception e) {
-                stationSource.getStatus().setString("Error!");
-                stationSource.getStatus().setValue(0);
+    public void runUpdate(List<StationSource> toBeUpdated, Runnable onFinish) {
+        new Thread(() -> {
+            toBeUpdated.parallelStream().forEach(stationSource -> {
+                stationSource.getStatus().setString("Updating...");
+                try {
+                    List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
+                    stationSource.getStatus().setString("Updating database...");
+                    StationDatabaseManager.this.acceptNetworks(networkList);
+                    stationSource.getStatus().setString("Done");
+                    stationSource.getStatus().setValue(100);
+                    stationSource.setLastUpdate(LocalDateTime.now());
+                } catch (Exception e) {
+                    stationSource.getStatus().setString("Error!");
+                    stationSource.getStatus().setValue(0);
+                }
+            });
+            if (onFinish != null) {
+                onFinish.run();
             }
-        })).start();
+        }).start();
     }
 
     private void acceptNetworks(List<Network> networkList) {
@@ -98,14 +108,20 @@ public class StationDatabaseManager {
         return stationDatabase;
     }
 
-    public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated) {
-        new Thread(() -> toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-            try {
-                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-            }catch(Exception e){
-                seedlinkNetwork.getStatus().setString("Error!");
-                seedlinkNetwork.getStatus().setValue(0);
+    public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
+        new Thread(() -> {
+            toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
+                        try {
+                            SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                        } catch (Exception e) {
+                            seedlinkNetwork.getStatus().setString("Error!");
+                            seedlinkNetwork.getStatus().setValue(0);
+                        }
+                    }
+            );
+            if (onFinish != null) {
+                onFinish.run();
             }
-        })).start();
+        }).start();
     }
 }

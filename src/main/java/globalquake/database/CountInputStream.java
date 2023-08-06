@@ -1,4 +1,4 @@
-package globalquake.database_old;
+package globalquake.database;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

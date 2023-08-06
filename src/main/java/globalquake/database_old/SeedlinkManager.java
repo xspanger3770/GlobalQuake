@@ -2,6 +2,7 @@ package globalquake.database_old;
 
 import com.morce.globalquake.database.*;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.database.CountInputStream;
 import globalquake.main.Main;
 import globalquake.utils.TimeFixer;
 import org.tinylog.Logger;
