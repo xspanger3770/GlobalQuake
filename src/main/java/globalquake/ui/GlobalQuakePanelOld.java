@@ -29,7 +29,7 @@ import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
 import globalquake.database_old.SeedlinkManager;
 import globalquake.database_old.SeedlinkNetwork;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.ui.settings.Settings;

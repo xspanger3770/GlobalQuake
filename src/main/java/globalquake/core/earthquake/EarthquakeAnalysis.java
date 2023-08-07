@@ -5,7 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.simulator.SimulatedStation;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;

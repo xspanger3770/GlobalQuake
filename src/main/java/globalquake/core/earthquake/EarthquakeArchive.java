@@ -1,7 +1,7 @@
 package globalquake.core.earthquake;
 
 import globalquake.core.report.EarthquakeReporter;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.simulator.FakeGlobalQuake;
 import globalquake.ui.settings.Settings;

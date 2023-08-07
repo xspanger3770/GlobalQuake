@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.AlertManager;
 import globalquake.core.station.NearbyStationDistanceInfo;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;

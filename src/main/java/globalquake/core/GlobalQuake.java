@@ -1,7 +1,5 @@
-package globalquake.main;
+package globalquake.core;
 
-import globalquake.core.AlertManager;
-import globalquake.core.SeedlinkReader;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
@@ -9,6 +7,7 @@ import globalquake.core.earthquake.EarthquakeArchive;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationManager;
 import globalquake.database_old.SeedlinkManager;
+import globalquake.main.Main;
 import globalquake.ui.GlobalQuakeFrame;
 import globalquake.utils.NamedThreadFactory;
 
@@ -89,8 +88,7 @@ public class GlobalQuake {
                 long a = System.currentTimeMillis();
                 System.gc();
                 lastGC = System.currentTimeMillis() - a;
-                // throw new Exception("Error test");
-            } catch (Exception e) {
+			} catch (Exception e) {
                 System.err.println("Exception in garbage collector");
 				Main.getErrorHandler().handleException(e);
             }

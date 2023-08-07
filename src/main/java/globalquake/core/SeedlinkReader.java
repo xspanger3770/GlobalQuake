@@ -6,7 +6,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database_old.SeedlinkManager;
 import globalquake.database_old.SeedlinkNetwork;
-import globalquake.main.GlobalQuake;
 import org.tinylog.Logger;
 
 import java.time.Instant;

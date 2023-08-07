@@ -1,7 +1,7 @@
 package globalquake.core.station;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

@@ -14,7 +14,7 @@ import java.util.TimerTask;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.settings.SettingsFrame;
 

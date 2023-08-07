@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.util.HashMap;
 
 import globalquake.core.earthquake.Earthquake;
-import globalquake.main.GlobalQuake;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.AlertWindow;
 import globalquake.geo.GeoUtils;

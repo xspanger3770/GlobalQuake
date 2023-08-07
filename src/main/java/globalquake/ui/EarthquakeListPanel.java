@@ -1,7 +1,7 @@
 package globalquake.ui;
 
 import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.main.GlobalQuake;
+import globalquake.core.GlobalQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.Level;
 import globalquake.geo.Shindo;
