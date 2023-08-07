@@ -6,6 +6,7 @@ import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
+import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -19,6 +20,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     private final StationSelectPanel stationSelectPanel;
 
     public FeatureSelectableStation(MonitorableCopyOnWriteArrayList<Station> allStationsList, StationSelectPanel stationSelectPanel){
+        super(1);
         this.allStationsList = allStationsList;
         this.stationSelectPanel = stationSelectPanel;
     }
@@ -35,11 +37,11 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Station> entity, RenderProperties renderProperties) {
-        if(entity.getPolygon() == null){
-            entity.setPolygon(new Polygon3D());
+        if(entity.getRenderElement(0).getPolygon() == null){
+            entity.getRenderElement(0).setPolygon(new Polygon3D());
         }
 
-        renderer.createTriangle(entity.getPolygon(),
+        renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
                 Math.min(50, renderer.pxToDeg(8.0)), 0);
@@ -52,20 +54,21 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Station> entity) {
-        entity.getShape().reset();
-        entity.shouldDraw =  renderer.project3D(entity.getShape(), entity.getPolygon(), true);
+        entity.getRenderElement(0).getShape().reset();
+        entity.getRenderElement(0).shouldDraw =  renderer.project3D(entity.getRenderElement(0).getShape(), entity.getRenderElement(0).getPolygon(), true);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Station> entity) {
+        RenderElement element = entity.getRenderElement(0);
         graphics.setColor(getDisplayedColor(entity.getOriginal()));
-        graphics.fill(entity.getShape());
+        graphics.fill(element.getShape());
         graphics.setColor(Color.BLACK);
-        graphics.draw(entity.getShape());
+        graphics.draw(element.getShape());
         if(renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1
                 || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())){
             graphics.setColor(Color.yellow);
-            graphics.draw(entity.getShape());
+            graphics.draw(element.getShape());
         }
     }
 

@@ -16,6 +16,7 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     private final double quality;
 
     public FeatureHorizon(Point2D center, double quality){
+        super(1);
         points.add(center);
         this.quality = quality;
     }
@@ -27,10 +28,11 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
 
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
-        if(entity.getPolygon() == null){
-            entity.setPolygon(new Polygon3D());
+        RenderElement element = entity.getRenderElement(0);
+        if(element.getPolygon() == null){
+            element.setPolygon(new Polygon3D());
         }
-        renderer.createCircle(entity.getPolygon(),
+        renderer.createCircle(element.getPolygon(),
                 renderProperties.centerLat,
                 renderProperties.centerLon,
                 renderer.getMaxAngle() / (2*Math.PI) * GeoUtils.EARTH_CIRCUMFERENCE, 0, quality);
@@ -43,17 +45,19 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Point2D> entity) {
-        entity.getShape().reset();
-        entity.shouldDraw =  renderer.project3D(entity.getShape(), entity.getPolygon(), false);
+        RenderElement element = entity.getRenderElement(0);
+        element.getShape().reset();
+        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), false);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity) {
+        RenderElement element = entity.getRenderElement(0);
         graphics.setColor(FeatureGeoPolygons.oceanColor);
-        graphics.fill(entity.getShape());
+        graphics.fill(element.getShape());
         graphics.setColor(FeatureGeoPolygons.borderColor);
         graphics.setStroke(new BasicStroke(2f));
-        graphics.draw(entity.getShape());
+        graphics.draw(element.getShape());
         graphics.setStroke(new BasicStroke(1f));
     }
 

@@ -1,37 +1,28 @@
 package globalquake.ui.globe.feature;
 
-import globalquake.ui.globe.Point2D;
-import globalquake.ui.globe.Polygon3D;
-
-import java.awt.geom.Path2D;
-
 public class RenderEntity<E> {
 
     private final E original;
-    public boolean shouldDraw;
 
-    private Polygon3D polygon;
+    private final RenderElement[] renderElements;
 
-    private final Path2D.Float shape = new Path2D.Float();
-
-    public RenderEntity(E original){
+    public RenderEntity(E original, int renderElements){
         this.original = original;
+        this.renderElements = new RenderElement[renderElements];
+        for(int i = 0; i < renderElements; i++){
+            this.renderElements[i] = new RenderElement();
+        }
     }
 
     public E getOriginal() {
         return original;
     }
 
-    public Polygon3D getPolygon() {
-        return polygon;
+    public RenderElement getRenderElement(int index){
+        return renderElements[index];
     }
 
-    public Path2D.Float getShape() {
-        return shape;
+    public RenderElement[] getRenderElements() {
+        return renderElements;
     }
-
-    public void setPolygon(Polygon3D polygon) {
-        this.polygon = polygon;
-    }
-
 }

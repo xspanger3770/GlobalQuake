@@ -24,6 +24,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     private final double maxScroll;
 
     public FeatureGeoPolygons(List<Polygon> polygonList, double minScroll, double maxScroll){
+        super(1);
         this.polygonList = polygonList;
         this.minScroll = minScroll;
         this.maxScroll = maxScroll;
@@ -48,13 +49,14 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
         }
 
         result_pol.finish();
-        entity.setPolygon(result_pol);
+        entity.getRenderElement(0).setPolygon(result_pol);
     }
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Polygon> entity) {
-        entity.getShape().reset();
-        entity.shouldDraw = renderer.project3D(entity.getShape(),entity.getPolygon(), true);
+        RenderElement element = entity.getRenderElement(0);
+        element.getShape().reset();
+        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
     }
 
     @Override
@@ -69,9 +71,10 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity) {
+        RenderElement element = entity.getRenderElement(0);
         graphics.setColor(landColor);
-        graphics.fill(entity.getShape());
+        graphics.fill(element.getShape());
         graphics.setColor(borderColor);
-        graphics.draw(entity.getShape());
+        graphics.draw(element.getShape());
     }
 }
