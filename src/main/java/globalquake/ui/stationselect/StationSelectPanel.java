@@ -3,6 +3,7 @@ package globalquake.ui.stationselect;
 import globalquake.database.Network;
 import globalquake.database.Station;
 import globalquake.database.StationDatabase;
+import globalquake.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
@@ -14,9 +15,10 @@ import java.util.List;
 
 public class StationSelectPanel extends GlobePanel {
 
-    private final StationDatabase stationDatabase;
+    private final StationDatabaseManager stationDatabaseManager;
     private final MonitorableCopyOnWriteArrayList<Station> allStationsList = new MonitorableCopyOnWriteArrayList<>();
     private final StationSelectFrame stationSelectFrame;
+    private final FeatureSelectableStation featureSelectableStation;
     public boolean showUnavailable;
 
     private Point dragStart;
@@ -27,11 +29,11 @@ public class StationSelectPanel extends GlobePanel {
         return dragRectangle;
     }
 
-    public StationSelectPanel(StationSelectFrame stationSelectFrame, StationDatabase stationDatabase) {
-        this.stationDatabase = stationDatabase;
+    public StationSelectPanel(StationSelectFrame stationSelectFrame, StationDatabaseManager stationDatabaseManager) {
+        this.stationDatabaseManager = stationDatabaseManager;
         this.stationSelectFrame = stationSelectFrame;
         updateAllStations();
-        getRenderer().addFeature(new FeatureSelectableStation(allStationsList, this));
+        getRenderer().addFeature(featureSelectableStation = new FeatureSelectableStation(allStationsList, this));
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -99,7 +101,19 @@ public class StationSelectPanel extends GlobePanel {
     }
 
     private void fireDragEvent() {
+        stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
+        try {
+            List<Station> selected = getRenderer().getAllInside(featureSelectableStation, dragRectangle);
+            if (stationSelectFrame.getDragMode().equals(DragMode.SELECT)) {
+                selected.forEach(Station::selectBestChannel);
+            } else {
+                selected.forEach(station -> station.setSelectedChannel(null));
+            }
 
+            stationDatabaseManager.fireUpdateEvent();
+        }finally {
+            stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
+        }
     }
 
     @Override
@@ -124,9 +138,9 @@ public class StationSelectPanel extends GlobePanel {
 
     public void updateAllStations() {
         List<Station> stations = new ArrayList<>();
-        stationDatabase.getDatabaseReadLock().lock();
+        stationDatabaseManager.getStationDatabase().getDatabaseReadLock().lock();
         try{
-            for(Network network:stationDatabase.getNetworks()){
+            for(Network network:stationDatabaseManager.getStationDatabase().getNetworks()){
                 stations.addAll(network.getStations().stream().filter(station -> showUnavailable || station.hasAvailableChannel()).toList());
             }
 
@@ -134,7 +148,7 @@ public class StationSelectPanel extends GlobePanel {
             allStationsList.addAll(stations);
             System.out.println(allStationsList.size());
         }finally {
-            stationDatabase.getDatabaseReadLock().unlock();
+            stationDatabaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }
     }
 }

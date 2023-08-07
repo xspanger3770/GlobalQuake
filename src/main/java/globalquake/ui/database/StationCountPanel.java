@@ -15,14 +15,14 @@ public class StationCountPanel extends JPanel {
     private final CounterPanel selected;
     private final CounterPanel unavailable;
 
-    public StationCountPanel(DatabaseMonitorFrame databaseMonitorFrame) {
+    public StationCountPanel(DatabaseMonitorFrame databaseMonitorFrame, LayoutManager layoutManager) {
         this.databaseMonitorFrame = databaseMonitorFrame;
-        setLayout(new GridLayout(1, 4));
+        setLayout(layoutManager);
 
-        add(total = new CounterPanel("Total", Color.lightGray));
-        add(available = new CounterPanel("Available", Color.cyan));
-        add(selected = new CounterPanel("Selected", Color.green));
-        add(unavailable = new CounterPanel("Selected Unavailable", Color.orange));
+        add(total = new CounterPanel("Total Channels", Color.lightGray));
+        add(available = new CounterPanel("Available Channels", Color.cyan));
+        add(selected = new CounterPanel("Selected Channels", Color.green));
+        add(unavailable = new CounterPanel("Unavailable Channels", Color.orange));
 
         databaseMonitorFrame.getManager().addUpdateListener(this::recalculate);
 

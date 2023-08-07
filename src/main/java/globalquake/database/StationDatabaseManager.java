@@ -78,7 +78,7 @@ public class StationDatabaseManager {
         this.statusListeners.add(runnable);
     }
 
-    private void fireUpdateEvent(){
+    public void fireUpdateEvent(){
         for(Runnable runnable: updateListeners){
             runnable.run();
         }

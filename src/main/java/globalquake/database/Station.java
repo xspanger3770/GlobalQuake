@@ -93,4 +93,20 @@ public class Station implements Serializable {
     public boolean hasAvailableChannel() {
         return getChannels().stream().anyMatch(Channel::isAvailable);
     }
+
+    public void selectBestChannel() {
+        if(selectedChannel != null){
+            return;
+        }
+
+        for(Channel channel : getChannels()){
+            if(channel.isAvailable()){
+                selectedChannel = channel;
+                return;
+            }
+        }
+
+        var anyChannel = getChannels().stream().findAny();
+        anyChannel.ifPresent(channel -> selectedChannel = channel);
+    }
 }

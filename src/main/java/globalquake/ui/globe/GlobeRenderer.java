@@ -403,6 +403,16 @@ public class GlobeRenderer {
         polygon3D.finish();
     }
 
+    public <E> List<E> getAllInside(RenderFeature<E> renderFeature, Shape shape) {
+        List<E> result = new ArrayList<>();
+        renderFeature.getEntities().forEach(renderEntity -> {
+            if(isMouseInside(renderFeature.getCenterCoords(renderEntity), shape)){
+                result.add(renderEntity.getOriginal());
+            }
+        });
+        return result;
+    }
+
     public List<RenderFeature<?>> getRenderFeatures() {
         return renderFeatures;
     }
@@ -415,18 +425,20 @@ public class GlobeRenderer {
         if(lastMouse == null || coords == null){
             return false;
         }
-        Point2D point = projectPoint(new Vector3D(getX_3D(coords.x, coords.y, 0),
+        Vector3D vect;
+        Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
-        return Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
+        return isAboveHorizon(vect) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
     }
 
     public boolean isMouseInside(Point2D coords, Shape shape) {
         if(coords == null || shape == null){
             return false;
         }
-        Point2D point = projectPoint(new Vector3D(getX_3D(coords.x, coords.y, 0),
+        Vector3D vect;
+        Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
-        return shape.contains(point.toAwt());
+        return  isAboveHorizon(vect) && shape.contains(point.toAwt());
     }
 
     public void mouseMoved(MouseEvent e) {

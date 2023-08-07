@@ -84,10 +84,14 @@ public class DatabaseMonitorFrame extends JFrame {
 
     private Component createBottomPanel() {
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new GridLayout(3, 1));
+        bottomPanel.setLayout(new GridLayout(2, 1));
+
+        GridLayout grid = new GridLayout(2, 1);
+        grid.setVgap(5);
+        JPanel buttonsOutsidePanel = new JPanel(grid);
+        buttonsOutsidePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         GridLayout gridLayout = new GridLayout(1, 2);
         gridLayout.setHgap(5);
@@ -109,15 +113,17 @@ public class DatabaseMonitorFrame extends JFrame {
         btnLaunch.setEnabled(false);
         buttonsPanel.add(btnLaunch);
 
-        bottomPanel.add(new StationCountPanel(this));
+        bottomPanel.add(new StationCountPanel(this, new GridLayout(2, 2)));
 
         mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         mainProgressBar.setValue(0);
         mainProgressBar.setStringPainted(true);
         mainProgressBar.setString("Init...");
 
-        bottomPanel.add(mainProgressBar);
-        bottomPanel.add(buttonsPanel);
+        buttonsOutsidePanel.add(mainProgressBar);
+        buttonsOutsidePanel.add(buttonsPanel);
+
+        bottomPanel.add(buttonsOutsidePanel);
         return bottomPanel;
     }
 

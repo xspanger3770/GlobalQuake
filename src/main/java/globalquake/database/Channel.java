@@ -1,5 +1,7 @@
 package globalquake.database;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -16,9 +18,16 @@ public final class Channel implements Serializable {
     private final double longitude;
     private final double elevation;
 
-    private final Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
+    private transient Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
 
     private final Set<StationSource> stationSources = new HashSet<>();
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        seedlinkNetworks = new HashSet<>();
+    }
 
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
                    double elevation, StationSource stationSource) {
@@ -37,22 +46,6 @@ public final class Channel implements Serializable {
 
     public String getLocationCode() {
         return locationCode;
-    }
-
-    public double sampleRate() {
-        return sampleRate;
-    }
-
-    public double latitude() {
-        return latitude;
-    }
-
-    public double longitude() {
-        return longitude;
-    }
-
-    public double elevation() {
-        return elevation;
     }
 
     @Override

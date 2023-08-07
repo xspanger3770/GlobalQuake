@@ -1,12 +1,15 @@
 package globalquake.ui.globe.feature;
 
+import globalquake.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.utils.monitorable.Monitorable;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class RenderFeature<E> {

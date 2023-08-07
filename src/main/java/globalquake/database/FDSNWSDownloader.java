@@ -40,10 +40,10 @@ public class FDSNWSDownloader {
         f.setValidating(false);
         final CountInputStream in = new CountInputStream(inp);
 
-        in.setEvent(() ->  stationSource.getStatus().setString("Downloading from " + stationSource.getName() + ": " + (in.getCount() / 1024) + "kB"));
+        in.setEvent(() ->  stationSource.getStatus().setString("Downloading %dkB".formatted(in.getCount() / 1024)));
 
         stationSource.getStatus().setValue(25);
-        System.out.println("Downloading stations from " + stationSource.getName() + " (" + url + ")");
+        System.out.printf("Downloading stations from %s (%s)%n", stationSource.getName(), url);
 
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 

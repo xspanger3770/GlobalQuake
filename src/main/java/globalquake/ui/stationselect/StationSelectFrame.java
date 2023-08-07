@@ -1,6 +1,7 @@
 package globalquake.ui.stationselect;
 
 import globalquake.ui.database.DatabaseMonitorFrame;
+import globalquake.ui.database.StationCountPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,15 +16,18 @@ public class StationSelectFrame extends JFrame {
     private JToggleButton deselectButton;
     private DragMode dragMode = DragMode.NONE;
 
-    public StationSelectFrame(DatabaseMonitorFrame owner) {
+    public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
         setLayout(new BorderLayout());
 
-        stationSelectPanel = new StationSelectPanel(this, owner.getManager().getStationDatabase());
+        stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager());
 
         setPreferredSize(new Dimension(1000, 800));
 
         add(stationSelectPanel, BorderLayout.CENTER);
-        add(createControlPanel(), BorderLayout.EAST);
+        add(createToolbar(), BorderLayout.PAGE_START);
+        add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
+
+        setJMenuBar(createMenuBar());
 
         pack();
         setLocationRelativeTo(null);
@@ -38,11 +42,11 @@ public class StationSelectFrame extends JFrame {
         }, 0, 1000 / 40);
     }
 
-    private JPanel createControlPanel() {
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(16, 1));
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
 
-        JCheckBox chkBoxShowUnavailable = new JCheckBox("Show not available stations");
+        JMenu menuOptions = new JMenu("Options");
+        JCheckBox chkBoxShowUnavailable = new JCheckBox("Show Unavailable Stations");
         chkBoxShowUnavailable.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -51,8 +55,15 @@ public class StationSelectFrame extends JFrame {
             }
         });
 
-        JPanel dragPanel = new JPanel();
-        dragPanel.setLayout(new GridLayout(1, 2));
+        menuOptions.add(chkBoxShowUnavailable);
+
+        menuBar.add(menuOptions);
+
+        return menuBar;
+    }
+
+    private JToolBar createToolbar() {
+        JToolBar toolBar = new JToolBar("Tools");
 
         selectButton = new JToggleButton("Select");
         deselectButton = new JToggleButton("Deselect");
@@ -79,14 +90,10 @@ public class StationSelectFrame extends JFrame {
             }
         });
 
-        dragPanel.add(selectButton);
-        dragPanel.add(deselectButton);
-        dragPanel.setBorder(BorderFactory.createTitledBorder("Drag"));
-        controlPanel.add(dragPanel);
+        toolBar.add(selectButton);
+        toolBar.add(deselectButton);
 
-        controlPanel.add(chkBoxShowUnavailable);
-
-        return controlPanel;
+        return toolBar;
     }
 
     public void setDragMode(DragMode dragMode) {
