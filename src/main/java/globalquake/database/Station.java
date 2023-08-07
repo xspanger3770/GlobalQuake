@@ -56,11 +56,11 @@ public class Station implements Serializable {
         return alt;
     }
 
-    public double getLat() {
+    public double getLatitude() {
         return lat;
     }
 
-    public double getLon() {
+    public double getLongitude() {
         return lon;
     }
 
@@ -95,6 +95,17 @@ public class Station implements Serializable {
     }
 
     public void selectBestChannel() {
+        selectBestAvailableChannel();
+
+        if(selectedChannel != null){
+            return;
+        }
+
+        var anyChannel = getChannels().stream().findAny();
+        anyChannel.ifPresent(channel -> selectedChannel = channel);
+    }
+
+    public void selectBestAvailableChannel() {
         if(selectedChannel != null){
             return;
         }
@@ -105,8 +116,5 @@ public class Station implements Serializable {
                 return;
             }
         }
-
-        var anyChannel = getChannels().stream().findAny();
-        anyChannel.ifPresent(channel -> selectedChannel = channel);
     }
 }

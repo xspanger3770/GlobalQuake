@@ -167,7 +167,7 @@ public class StationDatabase implements Serializable {
 
     public Channel acceptChannel(Network network, Station station, Channel channel) {
         Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getDescription());
-        Station stationFound = getOrCreateStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLat(), station.getLon(), station.getAlt());
+        Station stationFound = getOrCreateStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLatitude(), station.getLongitude(), station.getAlt());
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
         if(channelFound != null){
             stationFound.getChannels().remove(channelFound);

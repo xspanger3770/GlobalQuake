@@ -11,8 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -42,11 +40,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                lastMouse = e.getPoint();
+                renderer.mouseMoved(e);
                 if(!interactionAllowed()){
                     return;
                 }
-                lastMouse = e.getPoint();
-                renderer.mouseMoved(e);
                 if (dragStart == null) {
                     return;
                 }
@@ -65,12 +63,12 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if(!interactionAllowed()){
-                    return;
-                }
                 dragStart = e.getPoint();
                 dragStartLat = centerLat;
                 dragStartLon = centerLon;
+                if(!interactionAllowed()){
+                    return;
+                }
                 handleClick(e.getX(), e.getY());
             }
         });
@@ -115,7 +113,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private void handleClick(int x, int y) {
-        long a = System.currentTimeMillis();
         ArrayList<RenderFeature<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
             for(RenderEntity<?> e: feature.getEntities()) {

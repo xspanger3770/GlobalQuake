@@ -3,6 +3,7 @@ package globalquake.ui.database;
 import globalquake.database.Channel;
 import globalquake.database.Network;
 import globalquake.database.Station;
+import globalquake.ui.stationselect.StationColor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,10 +20,10 @@ public class StationCountPanel extends JPanel {
         this.databaseMonitorFrame = databaseMonitorFrame;
         setLayout(layoutManager);
 
-        add(total = new CounterPanel("Total Channels", Color.lightGray));
-        add(available = new CounterPanel("Available Channels", Color.cyan));
-        add(selected = new CounterPanel("Selected Channels", Color.green));
-        add(unavailable = new CounterPanel("Unavailable Channels", Color.orange));
+        add(total = new CounterPanel("Total Channels", StationColor.ALL));
+        add(available = new CounterPanel("Available Channels", StationColor.AVAILABLE));
+        add(selected = new CounterPanel("Selected Channels", StationColor.SELECTED));
+        add(unavailable = new CounterPanel("Unavailable Channels", StationColor.UNAVAILABLE));
 
         databaseMonitorFrame.getManager().addUpdateListener(this::recalculate);
 

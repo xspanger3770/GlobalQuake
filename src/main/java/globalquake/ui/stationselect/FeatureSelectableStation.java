@@ -40,8 +40,8 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         }
 
         renderer.createTriangle(entity.getPolygon(),
-                entity.getOriginal().getLat(),
-                entity.getOriginal().getLon(),
+                entity.getOriginal().getLatitude(),
+                entity.getOriginal().getLongitude(),
                 Math.min(50, renderer.pxToDeg(8.0)), 0);
     }
 
@@ -72,14 +72,14 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     private Color getDisplayedColor(Station original) {
         Channel selectedChannel = original.getSelectedChannel();
         if(selectedChannel != null){
-            return selectedChannel.isAvailable() ? Color.green : Color.orange;
+            return selectedChannel.isAvailable() ? StationColor.SELECTED : StationColor.UNAVAILABLE;
         }
 
-        return original.hasAvailableChannel() ? Color.cyan : Color.lightGray;
+        return original.hasAvailableChannel() ? StationColor.AVAILABLE : StationColor.ALL;
     }
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return new Point2D(((Station)(entity.getOriginal())).getLat(), ((Station)(entity.getOriginal())).getLon());
+        return new Point2D(((Station)(entity.getOriginal())).getLatitude(), ((Station)(entity.getOriginal())).getLongitude());
     }
 }

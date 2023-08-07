@@ -40,6 +40,14 @@ public final class Channel implements Serializable {
         this.getStationSources().add(stationSource);
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
     public String getCode() {
         return code;
     }

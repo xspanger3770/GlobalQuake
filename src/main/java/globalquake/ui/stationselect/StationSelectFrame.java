@@ -12,12 +12,14 @@ import java.util.TimerTask;
 public class StationSelectFrame extends JFrame {
 
     private final StationSelectPanel stationSelectPanel;
+    private final DatabaseMonitorFrame databaseMonitorFrame;
     private JToggleButton selectButton;
     private JToggleButton deselectButton;
     private DragMode dragMode = DragMode.NONE;
 
     public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
         setLayout(new BorderLayout());
+        this.databaseMonitorFrame = databaseMonitorFrame;
 
         stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager());
 
@@ -65,8 +67,8 @@ public class StationSelectFrame extends JFrame {
     private JToolBar createToolbar() {
         JToolBar toolBar = new JToolBar("Tools");
 
-        selectButton = new JToggleButton("Select");
-        deselectButton = new JToggleButton("Deselect");
+        selectButton = new JToggleButton("Select Region");
+        deselectButton = new JToggleButton("Deselect Region");
 
         selectButton.addActionListener(new AbstractAction() {
             @Override
@@ -92,6 +94,16 @@ public class StationSelectFrame extends JFrame {
 
         toolBar.add(selectButton);
         toolBar.add(deselectButton);
+
+        toolBar.addSeparator();
+
+        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager())));
+        toolBar.add(new JButton(new DeselectAllAction(databaseMonitorFrame.getManager())));
+        toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager())));
+
+        toolBar.addSeparator();
+
+        toolBar.add(new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this)));
 
         return toolBar;
     }
