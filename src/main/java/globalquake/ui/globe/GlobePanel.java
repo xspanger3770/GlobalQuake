@@ -42,6 +42,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if(!interactionAllowed()){
+                    return;
+                }
                 lastMouse = e.getPoint();
                 renderer.mouseMoved(e);
                 if (dragStart == null) {
@@ -62,6 +65,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                if(!interactionAllowed()){
+                    return;
+                }
                 dragStart = e.getPoint();
                 dragStartLat = centerLat;
                 dragStartLon = centerLon;
@@ -94,6 +100,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             public void componentResized(ComponentEvent e) {
                 renderer.updateCamera(createRenderProperties());
             }
+
         });
 
         renderer.addFeature(new FeatureHorizon(new Point2D(centerLat, centerLon), 1));
@@ -101,6 +108,10 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsMD, 0.5, Double.MAX_VALUE));
         renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsHD, 0.12, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsUHD, 0, 0.12));
+    }
+
+    public boolean interactionAllowed() {
+        return true;
     }
 
     private void handleClick(int x, int y) {

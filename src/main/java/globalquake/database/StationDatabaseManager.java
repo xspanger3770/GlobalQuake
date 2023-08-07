@@ -5,11 +5,9 @@ import globalquake.main.Main;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class StationDatabaseManager {
 
@@ -102,7 +100,7 @@ public class StationDatabaseManager {
                 try {
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
-                    StationDatabaseManager.this.acceptNetworks(networkList, stationSource);
+                    StationDatabaseManager.this.acceptNetworks(networkList);
                     stationSource.getStatus().setString("Done");
                     stationSource.getStatus().setValue(100);
                     stationSource.setLastUpdate(LocalDateTime.now());
@@ -122,13 +120,13 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private void acceptNetworks(List<Network> networkList, StationSource stationSource) {
+    private void acceptNetworks(List<Network> networkList) {
         stationDatabase.getDatabaseWriteLock().lock();
         try{
             for(Network network:networkList){
                 for(Station station: network.getStations()){
                     for(Channel channel:station.getChannels()){
-                        stationDatabase.getOrCreateChannel(network, station, channel, stationSource);
+                        stationDatabase.acceptChannel(network, station, channel);
                     }
                 }
             }
@@ -186,11 +184,23 @@ public class StationDatabaseManager {
     }
 
     public void removeAllStationSources(List<StationSource> toBeRemoved) {
-        for (Iterator<Network> iterator = getStationDatabase().getNetworks().iterator(); iterator.hasNext(); ) {
-            Network network = iterator.next();
-            toBeRemoved.forEach(network.getStationSources()::remove);
-            if(network.getStationSources().isEmpty()){
-                iterator.remove();
+        for (Iterator<Network> networkIterator = getStationDatabase().getNetworks().iterator(); networkIterator.hasNext(); ) {
+            Network network = networkIterator.next();
+            for(Iterator<Station> stationIterator = network.getStations().iterator(); stationIterator.hasNext(); ){
+                Station station = stationIterator.next();
+                for (Iterator<Channel> channelIterator = station.getChannels().iterator(); channelIterator.hasNext(); ) {
+                    Channel channel = channelIterator.next();
+                    toBeRemoved.forEach(channel.getStationSources()::remove);
+                    if (channel.getStationSources().isEmpty()) {
+                        channelIterator.remove();
+                    }
+                }
+                if(station.getChannels().isEmpty()){
+                    stationIterator.remove();
+                }
+            }
+            if(network.getStations().isEmpty()){
+                networkIterator.remove();
             }
         }
 

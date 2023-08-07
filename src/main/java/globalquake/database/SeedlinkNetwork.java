@@ -60,6 +60,7 @@ public final class SeedlinkNetwork implements Serializable {
             status = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
             status.setIndeterminate(false);
             status.setString("Ready");
+            status.setValue(100);
             status.setStringPainted(true);
         }
         return status;

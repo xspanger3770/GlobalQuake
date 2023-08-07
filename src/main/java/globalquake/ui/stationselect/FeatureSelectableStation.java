@@ -16,9 +16,11 @@ import java.util.Collection;
 public class FeatureSelectableStation extends RenderFeature<Station> {
 
     private final MonitorableCopyOnWriteArrayList<Station> allStationsList;
+    private final StationSelectPanel stationSelectPanel;
 
-    public FeatureSelectableStation(MonitorableCopyOnWriteArrayList<Station> allStationsList){
+    public FeatureSelectableStation(MonitorableCopyOnWriteArrayList<Station> allStationsList, StationSelectPanel stationSelectPanel){
         this.allStationsList = allStationsList;
+        this.stationSelectPanel = stationSelectPanel;
     }
 
     @Override
@@ -60,7 +62,8 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         graphics.fill(entity.getShape());
         graphics.setColor(Color.BLACK);
         graphics.draw(entity.getShape());
-        if(renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1){
+        if(renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1
+                || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())){
             graphics.setColor(Color.yellow);
             graphics.draw(entity.getShape());
         }

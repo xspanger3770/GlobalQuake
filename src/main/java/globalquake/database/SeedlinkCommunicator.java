@@ -27,7 +27,6 @@ public class SeedlinkCommunicator {
         seedlinkNetwork.getStatus().setString("Downloading...");
         seedlinkNetwork.getStatus().setValue(33);
         String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS).trim().replaceAll("[^\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]", " ");
-        System.out.println(infoString);
 
         seedlinkNetwork.getStatus().setString("Parsing...");
         seedlinkNetwork.getStatus().setValue(66);

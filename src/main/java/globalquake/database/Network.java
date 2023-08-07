@@ -11,19 +11,12 @@ public class Network implements Serializable {
 
     private final String networkCode;
     private final String description;
-
-    private final Set<StationSource> stationSources = new HashSet<>();
     private final Collection<Station> stations;
 
-    public Network(String networkCode, String description, StationSource stationSource) {
+    public Network(String networkCode, String description) {
         this.networkCode = networkCode;
         this.description = description;
         this.stations = new ArrayList<>();
-        this.stationSources.add(stationSource);
-    }
-
-    public Set<StationSource> getStationSources() {
-        return stationSources;
     }
 
     public String getNetworkCode() {

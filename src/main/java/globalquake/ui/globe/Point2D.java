@@ -12,4 +12,8 @@ public class Point2D {
     }
     public double x;
     public double y;
+
+    public java.awt.geom.Point2D toAwt() {
+        return new java.awt.geom.Point2D.Double(x, y);
+    }
 }

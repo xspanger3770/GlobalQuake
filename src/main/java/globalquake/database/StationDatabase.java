@@ -6,7 +6,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -94,13 +93,13 @@ public class StationDatabase implements Serializable {
         return null;
     }
 
-    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
+    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate, StationSource stationSource) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
             return channel;
         }
 
-        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt);
+        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource);
         station.getChannels().add(channel);
 
         return channel;
@@ -130,7 +129,7 @@ public class StationDatabase implements Serializable {
     }
 
 
-    public static Station getStation(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
+    public static Station getOrCreateStation(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
         Station station = getStation(network, stationCode);
         if(station != null){
             return station;
@@ -153,29 +152,30 @@ public class StationDatabase implements Serializable {
         return null;
     }
 
-    public static Network getOrCreateNetwork(List<Network> networks, String networkCode, StationSource stationSource, String networkDescription) {
+    public static Network getOrCreateNetwork(List<Network> networks, String networkCode, String networkDescription) {
         Network resultNetwork = getNetwork(networks, networkCode);
         if(resultNetwork != null) {
-            resultNetwork.getStationSources().add(stationSource);
             return resultNetwork;
         }
 
-        resultNetwork = new Network(networkCode, networkDescription, stationSource);
+        resultNetwork = new Network(networkCode, networkDescription);
         networks.add(resultNetwork);
 
         return resultNetwork;
     }
 
 
-    public Channel getOrCreateChannel(Network network, Station station, Channel channel, StationSource stationSource) {
-        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), stationSource, network.getDescription());
-        Station stationFound = getStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLat(), station.getLon(), station.getAlt());
+    public Channel acceptChannel(Network network, Station station, Channel channel) {
+        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getDescription());
+        Station stationFound = getOrCreateStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLat(), station.getLon(), station.getAlt());
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
         if(channelFound != null){
             stationFound.getChannels().remove(channelFound);
+            stationFound.getChannels().add(channel);
+            channel.merge(channelFound);
+        } else {
+            stationFound.getChannels().add(channel);
         }
-
-        stationFound.getChannels().add(channel);
 
         return channel;
     }

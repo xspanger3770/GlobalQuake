@@ -110,9 +110,9 @@ public class FDSNWSDownloader {
     }
 
     private static void addChannel(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, String stationCode, String stationSite, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
-        Network network = StationDatabase.getOrCreateNetwork(result, networkCode, stationSource, networkDescription);
-        Station station = StationDatabase.getStation(network, stationCode, stationSite, lat, lon, alt);
-        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate);
+        Network network = StationDatabase.getOrCreateNetwork(result, networkCode, networkDescription);
+        Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, lat, lon, alt);
+        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource);
     }
 
     public static String obtainElement(Node item, String name, String defaultValue) {

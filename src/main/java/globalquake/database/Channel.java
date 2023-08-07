@@ -16,16 +16,19 @@ public final class Channel implements Serializable {
     private final double longitude;
     private final double elevation;
 
-    public final Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
+    private final Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
+
+    private final Set<StationSource> stationSources = new HashSet<>();
 
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
-                   double elevation) {
+                   double elevation, StationSource stationSource) {
         this.code = code;
         this.locationCode = locationCode;
         this.sampleRate = sampleRate;
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
+        this.getStationSources().add(stationSource);
     }
 
     public String getCode() {
@@ -87,5 +90,14 @@ public final class Channel implements Serializable {
 
     public Set<SeedlinkNetwork> getSeedlinkNetworks() {
         return seedlinkNetworks;
+    }
+
+    public Set<StationSource> getStationSources() {
+        return stationSources;
+    }
+
+    public void merge(Channel newChannel) {
+        this.getStationSources().addAll(newChannel.getStationSources());
+        this.getSeedlinkNetworks().addAll(newChannel.getSeedlinkNetworks());
     }
 }

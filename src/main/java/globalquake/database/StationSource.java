@@ -70,6 +70,7 @@ public final class StationSource implements Serializable {
             status = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
             status.setIndeterminate(false);
             status.setString(isOutdated() ? "Needs Update" : "Ready");
+            status.setValue(isOutdated() ? 0 : 100);
             status.setStringPainted(true);
         }
         return status;

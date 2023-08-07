@@ -11,11 +11,14 @@ import java.util.TimerTask;
 public class StationSelectFrame extends JFrame {
 
     private final StationSelectPanel stationSelectPanel;
+    private JToggleButton selectButton;
+    private JToggleButton deselectButton;
+    private DragMode dragMode = DragMode.NONE;
 
     public StationSelectFrame(DatabaseMonitorFrame owner) {
         setLayout(new BorderLayout());
 
-        stationSelectPanel = new StationSelectPanel(owner.getManager().getStationDatabase());
+        stationSelectPanel = new StationSelectPanel(this, owner.getManager().getStationDatabase());
 
         setPreferredSize(new Dimension(1000, 800));
 
@@ -37,19 +40,62 @@ public class StationSelectFrame extends JFrame {
 
     private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new GridLayout(16, 1));
 
         JCheckBox chkBoxShowUnavailable = new JCheckBox("Show not available stations");
         chkBoxShowUnavailable.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("AASDADS");
                 stationSelectPanel.showUnavailable = chkBoxShowUnavailable.isSelected();
                 stationSelectPanel.updateAllStations();
             }
         });
 
+        JPanel dragPanel = new JPanel();
+        dragPanel.setLayout(new GridLayout(1, 2));
+
+        selectButton = new JToggleButton("Select");
+        deselectButton = new JToggleButton("Deselect");
+
+        selectButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(selectButton.isSelected()){
+                    setDragMode(DragMode.SELECT);
+                } else {
+                    setDragMode(DragMode.NONE);
+                }
+            }
+        });
+
+        deselectButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(deselectButton.isSelected()){
+                    setDragMode(DragMode.DESELECT);
+                } else {
+                    setDragMode(DragMode.NONE);
+                }
+            }
+        });
+
+        dragPanel.add(selectButton);
+        dragPanel.add(deselectButton);
+        dragPanel.setBorder(BorderFactory.createTitledBorder("Drag"));
+        controlPanel.add(dragPanel);
+
         controlPanel.add(chkBoxShowUnavailable);
 
         return controlPanel;
+    }
+
+    public void setDragMode(DragMode dragMode) {
+        this.dragMode=  dragMode;
+        selectButton.setSelected(this.dragMode.equals(DragMode.SELECT));
+        deselectButton.setSelected(this.dragMode.equals(DragMode.DESELECT));
+    }
+
+    public DragMode getDragMode() {
+        return dragMode;
     }
 }

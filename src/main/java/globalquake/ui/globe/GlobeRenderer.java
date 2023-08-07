@@ -353,11 +353,8 @@ public class GlobeRenderer {
 
 
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
-        long a = System.currentTimeMillis();
         renderFeatures.forEach(feature -> feature.process(this, props));
-        long b = System.currentTimeMillis();
         renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
-        //System.out.println((b - a)+", "+(System.currentTimeMillis() - b));
     }
 
     public synchronized void addFeature(RenderFeature<?> renderFeature){
@@ -423,8 +420,16 @@ public class GlobeRenderer {
         return Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
     }
 
+    public boolean isMouseInside(Point2D coords, Shape shape) {
+        if(coords == null || shape == null){
+            return false;
+        }
+        Point2D point = projectPoint(new Vector3D(getX_3D(coords.x, coords.y, 0),
+                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
+        return shape.contains(point.toAwt());
+    }
+
     public void mouseMoved(MouseEvent e) {
         lastMouse = e.getPoint();
     }
-
 }
