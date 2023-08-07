@@ -1,14 +1,16 @@
 package globalquake.core.earthquake;
 
-import globalquake.core.report.EarthquakeReporter;
 import globalquake.core.GlobalQuake;
+import globalquake.core.report.EarthquakeReporter;
 import globalquake.main.Main;
-import globalquake.simulator.FakeGlobalQuake;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EarthquakeArchive {
@@ -41,15 +43,6 @@ public class EarthquakeArchive {
 			}
 		}
 		saveArchive();
-		if (getGlobalQuake() instanceof FakeGlobalQuake) {
-			ArchivedQuake q;
-			// will not be saved
-			archivedQuakes.add(q = new ArchivedQuake(69.2, 44.24, 10, 5.0, System.currentTimeMillis()));
-			for (double ang = 0; ang < 360; ang += 60) {
-				q.getArchivedEvents().add(new ArchivedEvent(50 + Math.sin(Math.toRadians(ang)),
-						17 + Math.cos(Math.toRadians(ang)), 0, 0, ang % 120 == 0));
-			}
-		}
 	}
 
 	public void saveArchive() {

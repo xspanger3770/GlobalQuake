@@ -1,15 +1,14 @@
 package globalquake.core.earthquake;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import globalquake.core.analysis.BetterAnalysis;
-import globalquake.simulator.SimulatedStation;
 import globalquake.core.GlobalQuake;
-import globalquake.sounds.Sounds;
+import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;
 import globalquake.geo.TravelTimeTable;
+import globalquake.sounds.Sounds;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EarthquakeAnalysis {
 
@@ -422,8 +421,7 @@ public class EarthquakeAnalysis {
 				long expectedSArrival = (long) (earthquake.getOrigin()
 						+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
 						* 1000);
-				long lastRecord = e.getAnalysis().getStation() instanceof SimulatedStation ? System.currentTimeMillis()
-						: ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
+				long lastRecord = ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
 				// *0.5 because s wave is stronger
 				double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
 				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
