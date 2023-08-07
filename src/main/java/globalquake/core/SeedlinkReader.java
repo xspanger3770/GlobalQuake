@@ -13,12 +13,9 @@ import java.time.Instant;
 public class SeedlinkReader {
 
 	protected static final int RECONNECT_DELAY = 10;
-	private final GlobalQuake globalQuake;
 	private Instant lastData;
 
-	public SeedlinkReader(GlobalQuake globalQuake) {
-		this.globalQuake = globalQuake;
-	}
+    private long lastReceivedRecord;
 
 	@SuppressWarnings("BusyWait")
 	public void run() {
@@ -97,5 +94,15 @@ public class SeedlinkReader {
 			}
 		}
 	}
+
+    public long getLastReceivedRecord() {
+        return lastReceivedRecord;
+    }
+
+    public void logRecord(long time) {
+        if (time > lastReceivedRecord && time <= System.currentTimeMillis()) {
+            lastReceivedRecord = time;
+        }
+    }
 
 }

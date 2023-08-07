@@ -11,28 +11,22 @@ public abstract class AbstractStation {
 	private final String stationCode;
 	private final String channelName;
 	private final String locationCode;
-	private final byte seedlinkNetwork;
 	private final double lat;
 	private final double lon;
 	private final double alt;
-	private final long sensitivity;
 	private final BetterAnalysis analysis;
-	private final double frequency;
 	private final int id;
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
-						   String locationCode, byte seedlinkNetwork, double lat, double lon, double alt,
-						   long sensitivity, double frequency, int id) {
+						   String locationCode, double lat, double lon, double alt,
+						   int id) {
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
 		this.locationCode = locationCode;
-		this.seedlinkNetwork = seedlinkNetwork;
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
-		this.sensitivity = sensitivity;
-		this.frequency = frequency;
 		this.analysis = new BetterAnalysis(this);
 		this.id = id;
 	}
@@ -60,24 +54,6 @@ public abstract class AbstractStation {
 	public String getNetworkCode() {
 		return networkCode;
 	}
-
-	public byte getSeedlinkNetwork() {
-		return seedlinkNetwork;
-	}
-
-	public long getSensitivity() {
-		return sensitivity;
-	}
-
-	public double getFrequency() {
-		return frequency;
-	}
-
-// --Commented out by Inspection START (28/07/2023, 5:25 pm):
-//	public byte getSource() {
-//		return source;
-//	}
-// --Commented out by Inspection STOP (28/07/2023, 5:25 pm)
 
 	public String getStationCode() {
 		return stationCode;

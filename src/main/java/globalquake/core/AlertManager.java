@@ -10,12 +10,9 @@ import globalquake.geo.GeoUtils;
 import org.tinylog.Logger;
 
 public class AlertManager {
-
-    private final GlobalQuake globalQuake;
     private final HashMap<Earthquake, Warning> warnedQuakes;
 
-    public AlertManager(GlobalQuake globalQuake) {
-        this.globalQuake = globalQuake;
+    public AlertManager() {
         this.warnedQuakes = new HashMap<>();
     }
 
@@ -23,7 +20,7 @@ public class AlertManager {
         if (!Settings.enableAlarmDialogs) {
             return;
         }
-        for (Earthquake quake : getGlobalQuake().getEarthquakeAnalysis().getEarthquakes()) {
+        for (Earthquake quake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
             if (meetsConditions(quake) && !warnedQuakes.containsKey(quake)) {
                 warnedQuakes.put(quake, new Warning());
                 EventQueue.invokeLater(() -> {
@@ -60,9 +57,6 @@ public class AlertManager {
         return pgaHome >= 0.1;
     }
 
-    public GlobalQuake getGlobalQuake() {
-        return globalQuake;
-    }
 }
 
 class Warning {

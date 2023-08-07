@@ -21,23 +21,16 @@ import globalquake.geo.TravelTimeTable;
 
 public class ClusterAnalysis {
 
-    private final GlobalQuake globalQuake;
-
     private final List<Cluster> clusters;
     private int nextClusterId;
 
-    public ClusterAnalysis(GlobalQuake globalQuake) {
-        this.globalQuake = globalQuake;
+    public ClusterAnalysis() {
         clusters = new CopyOnWriteArrayList<>();
         this.nextClusterId = 0;
     }
 
-    public GlobalQuake getGlobalQuake() {
-        return globalQuake;
-    }
-
     public void run() {
-        if (getGlobalQuake().getEarthquakeAnalysis() == null) {
+        if (GlobalQuake.instance.getEarthquakeAnalysis() == null) {
             return;
         }
         expandExistingClusters();
@@ -47,12 +40,12 @@ public class ClusterAnalysis {
 
     @SuppressWarnings({"unused"})
     private void assignEventsToExistingEarthquakeClusters() {
-        for (AbstractStation station : getGlobalQuake().getStationManager().getStations()) {
+        for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
-                    List<Earthquake> quakes = getGlobalQuake().getEarthquakeAnalysis().getEarthquakes();
+                    List<Earthquake> quakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes();
                     for (Earthquake earthquake : quakes) {
                         if (!earthquake.getCluster().isActive()) {
                             continue;
@@ -147,7 +140,7 @@ public class ClusterAnalysis {
     }
 
     private void createNewClusters() {
-        for (AbstractStation station : getGlobalQuake().getStationManager().getStations()) {
+        for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     // so we have eligible event

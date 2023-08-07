@@ -1,6 +1,5 @@
 package globalquake.core.earthquake;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.main.Main;
 import globalquake.ui.settings.Settings;
@@ -15,14 +14,12 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EarthquakeArchive {
 
-	private final GlobalQuake globalQuake;
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
 
 	private SortedSet<ArchivedQuake> archivedQuakes;
 
-	public EarthquakeArchive(GlobalQuake globalQuake) {
-		this.globalQuake = globalQuake;
+	public EarthquakeArchive() {
 		loadArchive();
 	}
 
@@ -60,10 +57,6 @@ public class EarthquakeArchive {
 				Logger.error(e);
 			}
 		}
-	}
-
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
 	}
 
 	public SortedSet<ArchivedQuake> getArchivedQuakes() {

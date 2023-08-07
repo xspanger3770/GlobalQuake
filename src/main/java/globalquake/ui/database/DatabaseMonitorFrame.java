@@ -17,6 +17,7 @@ import java.util.TimerTask;
 public class DatabaseMonitorFrame extends JFrame {
 
     private final StationDatabaseManager manager;
+    private final Runnable onLaunch;
     private JProgressBar mainProgressBar;
     private JButton btnSelectStations;
     private JButton btnLaunch;
@@ -25,8 +26,9 @@ public class DatabaseMonitorFrame extends JFrame {
         return mainProgressBar;
     }
 
-    public DatabaseMonitorFrame(StationDatabaseManager manager) {
+    public DatabaseMonitorFrame(StationDatabaseManager manager, Runnable onLauch) {
         this.manager = manager;
+        this.onLaunch = onLauch;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
@@ -109,8 +111,14 @@ public class DatabaseMonitorFrame extends JFrame {
 
         buttonsPanel.add(btnSelectStations);
 
-        btnLaunch = new JButton("Launch " + Main.fullName);
+        btnLaunch = new JButton("Launch %s".formatted(Main.fullName));
         btnLaunch.setEnabled(false);
+        btnLaunch.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                onLaunch.run();
+            }
+        });
         buttonsPanel.add(btnLaunch);
 
         bottomPanel.add(new StationCountPanel(this, new GridLayout(2, 2)));

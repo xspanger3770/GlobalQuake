@@ -1,16 +1,16 @@
 package globalquake.core.station;
 
-import com.morce.globalquake.database.Channel;
-import com.morce.globalquake.database.Network;
-import com.morce.globalquake.database.Station;
-import globalquake.database_old.SeedlinkManager;
+import globalquake.database.Channel;
+import globalquake.database.Network;
+import globalquake.database.Station;
+import globalquake.database.StationDatabaseManager;
 import globalquake.geo.GeoUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class StationManager {
+public class GlobalStationManager {
 
     private final List<AbstractStation> stations = new ArrayList<>();
 
@@ -18,27 +18,24 @@ public class StationManager {
 
     private int nextID = 0;
 
-    public void initStations(SeedlinkManager seedlinkManager) {
-        if(seedlinkManager == null){
+    public void initStations(StationDatabaseManager databaseManager) {
+        if(databaseManager == null){
             return;
         }
         stations.clear();
-        seedlinkManager.getDatabase().getNetworksReadLock().lock();
+        databaseManager.getStationDatabase().getDatabaseReadLock().lock();
         try {
-            for (Network n : seedlinkManager.getDatabase().getNetworks()) {
+            for (Network n : databaseManager.getStationDatabase().getNetworks()) {
                 for (Station s : n.getStations()) {
-                    for (Channel ch : s.getChannels()) {
-                        if (ch.isSelected() && ch.isAvailable()) {
-                            GlobalStation station = createGlobalStation(ch);
-                            stations.add(station);
-
-                            break;// only 1 channel per station
-                        }
+                    if(s.getSelectedChannel() == null){
+                        continue;
                     }
+                    GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
+                    stations.add(station);
                 }
             }
         } finally {
-            seedlinkManager.getDatabase().getNetworksReadLock().unlock();
+            databaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }
 
         createListOfClosestStations();
@@ -99,11 +96,11 @@ public class StationManager {
         }
     }
 
-    private GlobalStation createGlobalStation(Channel ch) {
-        return new GlobalStation(ch.getStation().getNetwork().getNetworkCode(),
-                ch.getStation().getStationCode(), ch.getName(), ch.getLocationCode(), ch.getSource(),
-                ch.getSeedlinkNetwork(), ch.getStation().getLat(), ch.getStation().getLon(), ch.getStation().getAlt(),
-                ch.getSensitivity(), ch.getFrequency(), nextID++);
+    private GlobalStation createGlobalStation(Station station, Channel ch) {
+        return new GlobalStation(station.getNetwork().getNetworkCode(),
+                station.getStationCode(), ch.getCode(), ch.getLocationCode(),
+                ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
+                nextID++);
     }
 
     public List<AbstractStation> getStations() {

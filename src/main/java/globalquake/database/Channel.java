@@ -40,6 +40,10 @@ public final class Channel implements Serializable {
         this.getStationSources().add(stationSource);
     }
 
+    public double getElevation() {
+        return elevation;
+    }
+
     public double getLatitude() {
         return latitude;
     }

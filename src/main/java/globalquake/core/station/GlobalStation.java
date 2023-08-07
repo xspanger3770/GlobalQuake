@@ -11,9 +11,9 @@ public class GlobalStation extends AbstractStation {
 	private final Queue<DataRecord> recordsQueue;
 
 	public GlobalStation(String networkCode, String stationCode, String channelName,
-						 String locationCode, byte source, byte seedlinkNetwork, double lat, double lon, double alt,
-						 long sensitivity, double frequency, int id) {
-		super(networkCode, stationCode, channelName, locationCode, seedlinkNetwork, lat, lon, alt, sensitivity, frequency, id);
+						 String locationCode, double lat, double lon, double alt,
+						 int id) {
+		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id);
 		this.recordsQueue = new ConcurrentLinkedQueue<>();
 	}
 

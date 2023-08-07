@@ -25,16 +25,10 @@ public class EarthquakeAnalysis {
 
 	private static final long DELTA_P_TRESHOLD = 2200;
 
-	private final GlobalQuake globalQuake;
 	private final List<Earthquake> earthquakes;
 
-	public EarthquakeAnalysis(GlobalQuake globalQuake) {
-		this.globalQuake = globalQuake;
+	public EarthquakeAnalysis() {
 		this.earthquakes = new CopyOnWriteArrayList<>();
-	}
-
-	public GlobalQuake getGlobalQuake() {
-		return globalQuake;
 	}
 
 	public List<Earthquake> getEarthquakes() {
@@ -42,7 +36,7 @@ public class EarthquakeAnalysis {
 	}
 
 	public void run() {
-		for (Cluster cluster : getGlobalQuake().getClusterAnalysis().getClusters()) {
+		for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
 			processCluster(cluster);
 		}
 		calculateMagnitudes();
@@ -343,14 +337,14 @@ public class EarthquakeAnalysis {
 				+ bestHypocenter.correctStations + " w " + events.size());
 		boolean valid = pct > VALID_TRESHOLD;
 		if (!valid && cluster.getEarthquake() != null && pct < REMOVE_TRESHOLD) {
-			getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
+			GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
 			cluster.setEarthquake(null);
 		}
 
 		if (valid) {
 			if (cluster.getEarthquake() == null) {
 				Sounds.playSound(Sounds.incoming);
-				getGlobalQuake().getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+				GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
 				cluster.setEarthquake(earthquake);
 			} else {
 				cluster.getEarthquake().update(earthquake);
@@ -446,7 +440,7 @@ public class EarthquakeAnalysis {
 					Math.min(STORE_TABLE.length - 1, (int) e.getMag()))];
 			if (System.currentTimeMillis() - e.getOrigin() > (long) store_minutes * 60 * 1000
 					&& System.currentTimeMillis() - e.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
-				getGlobalQuake().getArchive().archiveQuakeAndSave(e);
+				GlobalQuake.instance.getArchive().archiveQuakeAndSave(e);
 				toBeRemoved.add(e);
 			}
 		}
