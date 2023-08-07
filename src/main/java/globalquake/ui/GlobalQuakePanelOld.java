@@ -27,8 +27,6 @@ import javax.swing.JOptionPane;
 
 import globalquake.core.earthquake.*;
 import globalquake.core.station.AbstractStation;
-import globalquake.database_old.SeedlinkManager;
-import globalquake.database_old.SeedlinkNetwork;
 import globalquake.core.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
@@ -278,11 +276,6 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
 
                 g.setColor(Color.LIGHT_GRAY);
                 g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y - r * 0.5 - 3 - 12));
-
-                str = s.getFrequency() + "Hz, " + fxd.format(s.getSensitivity()) + ", "
-                        + s.getAnalysis().getSampleRate() + " sps";
-
-                g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y - r * 0.5 - 3));
 
             }
             if (scroll < 5) {
@@ -631,11 +624,11 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
         String str = "----/--/-- --:--:--";
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
-        if (globalQuake.getLastReceivedRecord() != 0) {
+        if (globalQuake.getSeedlinkReader().getLastReceivedRecord() != 0) {
             Calendar c = Calendar.getInstance();
-            c.setTimeInMillis(globalQuake.getLastReceivedRecord());
+            c.setTimeInMillis(globalQuake.getSeedlinkReader().getLastReceivedRecord());
             str = formatNice.format(c.getTime());
-            if (System.currentTimeMillis() - globalQuake.getLastReceivedRecord() < 1000 * 120) {
+            if (System.currentTimeMillis() - globalQuake.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
                 g.setColor(Color.white);
             }
         }

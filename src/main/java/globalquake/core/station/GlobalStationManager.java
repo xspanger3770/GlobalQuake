@@ -1,9 +1,6 @@
 package globalquake.core.station;
 
-import globalquake.database.Channel;
-import globalquake.database.Network;
-import globalquake.database.Station;
-import globalquake.database.StationDatabaseManager;
+import globalquake.database.*;
 import globalquake.geo.GeoUtils;
 
 import java.util.ArrayList;
@@ -97,10 +94,12 @@ public class GlobalStationManager {
     }
 
     private GlobalStation createGlobalStation(Station station, Channel ch) {
+        var opt = ch.getSeedlinkNetworks().stream().findAny();
+        SeedlinkNetwork seedlinkNetwork = opt.orElse(null);
         return new GlobalStation(station.getNetwork().getNetworkCode(),
                 station.getStationCode(), ch.getCode(), ch.getLocationCode(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID++);
+                nextID++, seedlinkNetwork);
     }
 
     public List<AbstractStation> getStations() {

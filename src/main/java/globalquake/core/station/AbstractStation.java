@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
 
@@ -16,10 +17,11 @@ public abstract class AbstractStation {
 	private final double alt;
 	private final BetterAnalysis analysis;
 	private final int id;
+	private final SeedlinkNetwork seedlinkNetwork;
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, double lat, double lon, double alt,
-						   int id) {
+						   int id, SeedlinkNetwork seedlinkNetwork) {
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
@@ -29,6 +31,7 @@ public abstract class AbstractStation {
 		this.alt = alt;
 		this.analysis = new BetterAnalysis(this);
 		this.id = id;
+		this.seedlinkNetwork = seedlinkNetwork;
 	}
 
 	public double getAlt() {
@@ -120,4 +123,8 @@ public abstract class AbstractStation {
 	}
 
 	public abstract void analyse();
+
+	public SeedlinkNetwork getSeedlinkNetwork() {
+		return seedlinkNetwork;
+	}
 }

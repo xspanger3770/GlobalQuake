@@ -16,6 +16,8 @@ import java.awt.event.WindowEvent;
 public class GlobalQuake {
 
 	private final GlobalQuakeRuntime globalQuakeRuntime;
+	private final SeedlinkNetworksReader seedlinkNetworksReader;
+	private final StationDatabaseManager stationDatabaseManager;
 	private GlobalQuakeFrame globalQuakeFrame;
 	private final ClusterAnalysis clusterAnalysis;
 	private final EarthquakeAnalysis earthquakeAnalysis;
@@ -27,6 +29,7 @@ public class GlobalQuake {
 
 	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
+		this.stationDatabaseManager =stationDatabaseManager;
 
 		clusterAnalysis = new ClusterAnalysis();
 		earthquakeAnalysis = new EarthquakeAnalysis();
@@ -35,11 +38,11 @@ public class GlobalQuake {
 		globalStationManager = new GlobalStationManager();
 		globalStationManager.initStations(stationDatabaseManager);
 		globalQuakeRuntime = new GlobalQuakeRuntime();
+		seedlinkNetworksReader = new SeedlinkNetworksReader();
 	}
 
 	public GlobalQuake runSeedlinkReader() {
-		SeedlinkReader networkManager = new SeedlinkReader();
-		networkManager.run();
+		seedlinkNetworksReader.run();
 		return this;
 	}
 
@@ -91,5 +94,13 @@ public class GlobalQuake {
 
 	public GlobalQuakeRuntime getGlobalQuakeRuntime() {
 		return globalQuakeRuntime;
+	}
+
+	public SeedlinkNetworksReader getSeedlinkReader() {
+		return seedlinkNetworksReader;
+	}
+
+	public StationDatabaseManager getStationDatabaseManager() {
+		return stationDatabaseManager;
 	}
 }

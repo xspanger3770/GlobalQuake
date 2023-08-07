@@ -116,6 +116,7 @@ public class DatabaseMonitorFrame extends JFrame {
         btnLaunch.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                DatabaseMonitorFrame.this.dispose();
                 onLaunch.run();
             }
         });

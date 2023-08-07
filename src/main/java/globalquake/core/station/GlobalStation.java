@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.database.SeedlinkNetwork;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -12,8 +13,8 @@ public class GlobalStation extends AbstractStation {
 
 	public GlobalStation(String networkCode, String stationCode, String channelName,
 						 String locationCode, double lat, double lon, double alt,
-						 int id) {
-		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id);
+						 int id, SeedlinkNetwork seedlinkNetwork) {
+		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
 		this.recordsQueue = new ConcurrentLinkedQueue<>();
 	}
 
@@ -26,7 +27,7 @@ public class GlobalStation extends AbstractStation {
 		while (!recordsQueue.isEmpty()) {
 			DataRecord record = recordsQueue.remove();
 			getAnalysis().analyse(record);
-			GlobalQuake.instance.logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
+			GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 		}
 	}
 
