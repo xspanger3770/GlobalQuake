@@ -63,11 +63,6 @@ public class GlobePanelDebug extends JFrame {
 				g.setColor(Color.black);
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
 			}
-
-			@Override
-			public void featuresClicked(ArrayList<RenderFeature<?>> clicked) {
-				System.out.printf("%d Features clicked!\n", clicked.size());
-			}
 		};
 		Random r = new Random();
 		for(int i = 0; i < 50; i++) {

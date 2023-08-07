@@ -5,8 +5,11 @@ import globalquake.database.Station;
 import globalquake.database.StationDatabase;
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
+import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -98,6 +101,31 @@ public class StationSelectPanel extends GlobePanel {
                 dragRectangle = null;
             }
         });
+    }
+
+    @Override
+    public void featuresClicked(ArrayList<RenderEntity<?>> clicked) {
+        List<Station> clickedStations = new ArrayList<>();
+        for(RenderEntity<?> renderEntity:clicked){
+            if(renderEntity.getOriginal() instanceof Station){
+                clickedStations.add((Station)renderEntity.getOriginal());
+            }
+        }
+
+        if(clickedStations.isEmpty()){
+            return;
+        }
+
+        Station selectedStation = null;
+
+        if(clickedStations.size() == 1){
+            selectedStation = clickedStations.get(0);
+        } else {
+            selectedStation = (Station) JOptionPane.showInputDialog(this, "Select station to edit:", "Station selection",
+                    JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
+        }
+
+        new StationEditDialog(stationSelectFrame, selectedStation);
     }
 
     private void fireDragEvent() {

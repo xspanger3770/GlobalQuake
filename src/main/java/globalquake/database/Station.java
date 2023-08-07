@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Station implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 4798409607248332882L;
+    private static final long serialVersionUID = 1988088861845815884L;
 
     private final double lat;
 
@@ -21,15 +21,21 @@ public class Station implements Serializable {
     private final String stationCode;
     private final String stationSite;
     private final Collection<Channel> channels;
+    private final Network network;
     private Channel selectedChannel = null;
 
-    public Station(String stationCode, String stationSite, double lat, double lon, double alt) {
+    public Station(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
         this.lat = lat;
         this.lon = lon;
         this.alt = alt;
+        this.network = network;
         this.stationCode = stationCode;
         this.stationSite = stationSite;
         this.channels = new ArrayList<>();
+    }
+
+    public Network getNetwork() {
+        return network;
     }
 
     public Collection<Channel> getChannels() {
@@ -66,15 +72,7 @@ public class Station implements Serializable {
 
     @Override
     public String toString() {
-        return "Station{" +
-                "lat=" + lat +
-                ", lon=" + lon +
-                ", alt=" + alt +
-                ", stationCode='" + stationCode + '\'' +
-                ", stationSite='" + stationSite + '\'' +
-                ", channels=" + channels +
-                ", selectedChannel=" + selectedChannel +
-                '}';
+        return "%s %s".formatted(getNetwork().getNetworkCode(), getStationCode());
     }
 
     @Override
@@ -111,9 +109,8 @@ public class Station implements Serializable {
         }
 
         for(Channel channel : getChannels()){
-            if(channel.isAvailable()){
+            if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() > selectedChannel.getSampleRate())) {
                 selectedChannel = channel;
-                return;
             }
         }
     }

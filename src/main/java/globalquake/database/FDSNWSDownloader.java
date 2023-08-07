@@ -82,6 +82,7 @@ public class FDSNWSDownloader {
             Node stationNode = stations.item(j);
             String stationCode = stationNode.getAttributes().getNamedItem("code").getNodeValue();
             String stationSite = ((Element) stationNode).getElementsByTagName("Site").item(0).getTextContent();
+            // todo station-specific lat lon alt
             parseChannels(result, stationSource, networkCode, networkDescription, (Element) stationNode, stationCode, stationSite);
         }
     }

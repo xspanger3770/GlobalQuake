@@ -48,6 +48,10 @@ public final class Channel implements Serializable {
         return longitude;
     }
 
+    public double getSampleRate() {
+        return sampleRate;
+    }
+
     public String getCode() {
         return code;
     }
@@ -76,13 +80,7 @@ public final class Channel implements Serializable {
 
     @Override
     public String toString() {
-        return "Channel[" +
-                "code=" + code + ", " +
-                "locationCode=" + locationCode + ", " +
-                "sampleRate=" + sampleRate + ", " +
-                "latitude=" + latitude + ", " +
-                "longitude=" + longitude + ", " +
-                "elevation=" + elevation + ']';
+        return "%s %s %dsps".formatted(getCode(), getLocationCode(), (int)getSampleRate());
     }
 
     public boolean isAvailable(){

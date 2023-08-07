@@ -135,7 +135,7 @@ public class StationDatabase implements Serializable {
             return station;
         }
 
-        station = new Station(stationCode, stationSite, lat, lon ,alt);
+        station = new Station(network, stationCode, stationSite, lat, lon ,alt);
 
         network.getStations().add(station);
 

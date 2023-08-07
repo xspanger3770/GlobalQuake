@@ -18,7 +18,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private double centerLon = 17;
     private double dragStartLat;
     private double dragStartLon;
-    private double scroll = 0.5;
+    private double scroll = 0.45;
 
     private Point dragStart;
     private Point lastMouse;
@@ -66,9 +66,10 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 dragStart = e.getPoint();
                 dragStartLat = centerLat;
                 dragStartLon = centerLon;
-                if(!interactionAllowed()){
-                    return;
-                }
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 handleClick(e.getX(), e.getY());
             }
         });
@@ -113,7 +114,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private void handleClick(int x, int y) {
-        ArrayList<RenderFeature<?>> clicked = new ArrayList<>();
+        ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
             for(RenderEntity<?> e: feature.getEntities()) {
                 Point2D centerCoords = feature.getCenterCoords(e);
@@ -129,7 +130,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     double distOnScreen = Math.sqrt(Math.pow(centerProjected.x - x, 2) + Math.pow(centerProjected.y - y, 2));
                     if (distOnScreen <= 10) {
                         synchronized (clicked) {
-                            clicked.add(feature);
+                            clicked.add(e);
                         }
                     }
                 }
@@ -139,7 +140,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         featuresClicked(clicked);
     }
 
-    public void featuresClicked(ArrayList<RenderFeature<?>> clicked) {
+    public void featuresClicked(ArrayList<RenderEntity<?>> clicked) {
     }
 
     private RenderProperties createRenderProperties() {

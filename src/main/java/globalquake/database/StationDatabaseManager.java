@@ -197,6 +197,10 @@ public class StationDatabaseManager {
                 }
                 if(station.getChannels().isEmpty()){
                     stationIterator.remove();
+                } else if(station.getSelectedChannel() != null){
+                    if(!station.getChannels().contains(station.getSelectedChannel())){
+                        station.selectBestAvailableChannel();
+                    }
                 }
             }
             if(network.getStations().isEmpty()){
