@@ -58,7 +58,7 @@ public abstract class Analysis {
 		long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
 		long gap = lastRecord != 0 ? (time - lastRecord) : -1;
 		if (gap > getGapTreshold()) {
-			System.err.println("Station " + getStation().getStationCode() + " reset due to a gap (" + gap + "ms)");
+			//System.err.println("Station " + getStation().getStationCode() + " reset due to a gap (" + gap + "ms)");
 			reset();
 		}
 		int[] data;
