@@ -49,13 +49,13 @@ public class GlobalStationManager {
             for (int i = 0; i < 2; i++) {
                 for (AbstractStation stat2 : stations) {
                     if (!(stat2.getId() == stat.getId())) {
-                        double dist = GeoUtils.greatCircleDistance(stat.getLat(), stat.getLon(), stat2.getLat(),
-                                stat2.getLon());
+                        double dist = GeoUtils.greatCircleDistance(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
+                                stat2.getLongitude());
                         if (dist > (i == 0 ? 1200 : 3600)) {
                             continue;
                         }
-                        double ang = GeoUtils.calculateAngle(stat.getLat(), stat.getLon(), stat2.getLat(),
-                                stat2.getLon());
+                        double ang = GeoUtils.calculateAngle(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
+                                stat2.getLongitude());
                         int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
                         rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
                         int ray2 = ray + 1;

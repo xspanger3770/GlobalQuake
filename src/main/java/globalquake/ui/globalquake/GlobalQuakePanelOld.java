@@ -71,8 +71,8 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
                 if (lastMouse != null) {
                     ArrayList<AbstractStation> clickedStations = new ArrayList<>();
                     for (AbstractStation s : globalQuake.getStationManager().getStations()) {
-                        double x = getX(s.getLat(), s.getLon());
-                        double y = getY(s.getLat(), s.getLon());
+                        double x = getX(s.getLatitude(), s.getLongitude());
+                        double y = getY(s.getLatitude(), s.getLongitude());
                         if (isMouseNearby(x, y, 7)) {
                             clickedStations.add(s);
                         }
@@ -175,8 +175,8 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
         }
 
         for (AbstractStation s : globalQuake.getStationManager().getStations()) {
-            double x = getX(s.getLat(), s.getLon());
-            double y = getY(s.getLat(), s.getLon());
+            double x = getX(s.getLatitude(), s.getLongitude());
+            double y = getY(s.getLatitude(), s.getLongitude());
             if (!isOnScreen(x, y)) {
                 continue;
             }
@@ -194,8 +194,8 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
                 if (showClosest) {
                     for (NearbyStationDistanceInfo info : s.getNearbyStations()) {
                         AbstractStation stat = info.station();
-                        double x2 = getX(stat.getLat(), stat.getLon());
-                        double y2 = getY(stat.getLat(), stat.getLon());
+                        double x2 = getX(stat.getLatitude(), stat.getLongitude());
+                        double y2 = getY(stat.getLatitude(), stat.getLongitude());
                         g.setColor(Color.white);
                         g.setStroke(new BasicStroke(2f));
                         g.draw(new Line2D.Double(x, y, x2, y2));
@@ -232,7 +232,7 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
                             long diff = sw - pw;
                             double distance = TravelTimeTable.getEpicenterDistance(10, diff / 1000.0);
                             if (distance > 0) {
-                                Path2D.Double pol = createCircle(s.getLat(), s.getLon(), distance);
+                                Path2D.Double pol = createCircle(s.getLatitude(), s.getLongitude(), distance);
                                 g.setColor(Color.gray);
                                 g.setStroke(new BasicStroke(2f));
                                 g.draw(pol);
@@ -273,7 +273,7 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
             }
 
             if (mouseNearby && scroll < 5) {
-                str = s.getLat() + ", " + s.getLon() + ", " + s.getAlt() + "m";
+                str = s.getLatitude() + ", " + s.getLongitude() + ", " + s.getAlt() + "m";
 
                 g.setColor(Color.LIGHT_GRAY);
                 g.drawString(str, (int) (x - g.getFontMetrics().stringWidth(str) * 0.5), (int) (y - r * 0.5 - 3 - 12));
@@ -381,8 +381,8 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
 
                 if (isMouseNearby(x0, y0, 7)) {
                     for (Event e : c.getAssignedEvents()) {
-                        double lat1 = e.getAnalysis().getStation().getLat();
-                        double lon1 = e.getAnalysis().getStation().getLon();
+                        double lat1 = e.getAnalysis().getStation().getLatitude();
+                        double lon1 = e.getAnalysis().getStation().getLongitude();
                         double x1 = getX(lat1, lon1);
                         double y1 = getY(lat1, lon1);
                         g.setColor(Color.white);

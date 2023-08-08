@@ -42,7 +42,7 @@ public abstract class AbstractStation {
 		return channelName;
 	}
 
-	public double getLat() {
+	public double getLatitude() {
 		return lat;
 	}
 
@@ -50,7 +50,7 @@ public abstract class AbstractStation {
 		return locationCode;
 	}
 
-	public double getLon() {
+	public double getLongitude() {
 		return lon;
 	}
 

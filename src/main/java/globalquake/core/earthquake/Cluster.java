@@ -104,8 +104,8 @@ public class Cluster {
 		int r1024 = 0;
 		int r8192 = 0;
 		for (Event e : assignedEvents) {
-			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLat(),
-					e.getAnalysis().getStation().getLon());
+			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
+					e.getAnalysis().getStation().getLongitude());
 			if (dist > _size) {
 				_size = dist;
 			}
@@ -144,8 +144,8 @@ public class Cluster {
 		double sumLat = 0;
 		double sumLon = 0;
 		for (Event e : assignedEvents) {
-			sumLat += e.getAnalysis().getStation().getLat();
-			sumLon += e.getAnalysis().getStation().getLon();
+			sumLat += e.getAnalysis().getStation().getLatitude();
+			sumLon += e.getAnalysis().getStation().getLongitude();
 			n++;
 		}
 		if (n > 0) {

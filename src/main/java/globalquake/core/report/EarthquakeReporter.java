@@ -52,7 +52,7 @@ public class EarthquakeReporter {
 		for (Event e : earthquake.getCluster().getAssignedEvents()) {
 			AbstractStation station = e.getAnalysis().getStation();
 			e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
-					station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
+					station.getChannelName(), station.getLocationCode(), station.getLatitude(), station.getLongitude(),
 					station.getAlt());
 		}
 

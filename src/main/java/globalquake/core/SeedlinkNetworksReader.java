@@ -39,7 +39,7 @@ public class SeedlinkNetworksReader {
 						int connected = 0;
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
-							if (s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
+							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
                                 System.out.printf("Connecting to %s %s %s %s, %n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode());
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());

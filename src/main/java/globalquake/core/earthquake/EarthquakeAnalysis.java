@@ -274,8 +274,8 @@ public class EarthquakeAnalysis {
 		ArrayList<Long> origins = new ArrayList<>();
 	
 		for (Event e : events) {
-			double distGC = GeoUtils.greatCircleDistance(e.getAnalysis().getStation().getLat(),
-					e.getAnalysis().getStation().getLon(), hyp.lat, hyp.lon);
+			double distGC = GeoUtils.greatCircleDistance(e.getAnalysis().getStation().getLatitude(),
+					e.getAnalysis().getStation().getLongitude(), hyp.lat, hyp.lon);
 			double travelTime = TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC));
 			origins.add(e.getpWave() - ((long) travelTime * 1000));
 		}
@@ -288,8 +288,8 @@ public class EarthquakeAnalysis {
 		double err = 0;
 		int acc = 0;
 		for (Event e : events) {
-			double distGC = GeoUtils.greatCircleDistance(hyp.lat, hyp.lon, e.getAnalysis().getStation().getLat(),
-					e.getAnalysis().getStation().getLon());
+			double distGC = GeoUtils.greatCircleDistance(hyp.lat, hyp.lon, e.getAnalysis().getStation().getLatitude(),
+					e.getAnalysis().getStation().getLongitude());
 			double expectedDT = TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC));
 			double actualTravel = Math.abs((e.getpWave() - hyp.origin) / 1000.0);
 			double _err = Math.abs(expectedDT - actualTravel);

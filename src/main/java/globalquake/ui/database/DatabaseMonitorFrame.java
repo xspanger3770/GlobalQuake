@@ -62,7 +62,13 @@ public class DatabaseMonitorFrame extends JFrame {
 
         this.addWindowListener(new WindowAdapter() {
             @Override
+            public void windowClosed(WindowEvent e) {
+                windowClosing(e);
+            }
+
+            @Override
             public void windowClosing(WindowEvent e) {
+                System.out.println("SAVEE");
                 try {
                     manager.save();
                 } catch (FatalIOException ex) {
