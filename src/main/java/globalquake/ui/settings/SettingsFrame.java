@@ -1,8 +1,6 @@
 package globalquake.ui.settings;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,7 +22,7 @@ public class SettingsFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
             try {
-                SettingsFrame window = new SettingsFrame();
+                SettingsFrame window = new SettingsFrame(null);
                 window.frame.setVisible(true);
             } catch (Exception e) {
 				Logger.error(e);
@@ -32,11 +30,11 @@ public class SettingsFrame {
         });
 	}
 
-	public SettingsFrame() {
-		initialize();
+	public SettingsFrame(Component parent) {
+		initialize(parent);
 	}
 
-	private void initialize() {
+	private void initialize(Component parent) {
 		frame = new JFrame("GlobalQuake Settings");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setMinimumSize(new Dimension(400, 300));
@@ -73,7 +71,7 @@ public class SettingsFrame {
 		addPanels();
 
 		frame.pack();
-		frame.setLocationRelativeTo(null);
+		frame.setLocationRelativeTo(parent);
 	}
 
 	protected void error(Exception e) {

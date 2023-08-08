@@ -35,6 +35,9 @@ public class StationDatabase implements Serializable {
         addDefaults();
     }
 
+    /**
+     * COMMENTED SERVERS WERE UNRELIABLE
+     */
     private void addDefaults() {
         stationSources.add(new StationSource("BGR", "http://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
@@ -49,19 +52,61 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("NOA", "http://eida.gein.noa.gr/fdsnws/station/1/"));
         stationSources.add(new StationSource("ORFEUS", "http://www.orfeus-eu.org/fdsnws/station/1/"));
         stationSources.add(new StationSource("RESIF", "http://ws.resif.fr/fdsnws/station/1/"));
-        stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
+        //stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
         stationSources.add(new StationSource("IRIS DMC", "http://service.iris.edu/fdsnws/station/1/"));
-        stationSources.add(new StationSource("NCEDC", "http://service.ncedc.org/fdsnws/station/1"));
+        //stationSources.add(new StationSource("NCEDC", "http://service.ncedc.org/fdsnws/station/1"));
         stationSources.add(new StationSource("SCEDC", "http://service.scedc.caltech.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("TexNet", "http://rtserve.beg.utexas.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("USP-IAG", "http://seisrequest.iag.usp.br/fdsnws/station/1/"));
         stationSources.add(new StationSource("BMKG", "https://geof.bmkg.go.id/fdsnws/station/1/"));
         stationSources.add(new StationSource("AusPass", "http://auspass.edu.au:8080/fdsnws/station/1/"));
 
+        seedlinkNetworks.add(new SeedlinkNetwork("AusPass", "auspass.edu.au", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("BGR", "eida.bgr.de", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("CISMID", "www.cismid.uni.edu.pe", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("ENS", "ephesite.ens.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("GEOFON, GFZ", "geofon.gfz-potsdam.de", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("GEONET", "link.geonet.org.nz", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Geoscience Australia", "seis-pub.ga.gov.au", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("GSRAS (?)", "89.22.182.133", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Helsinki", "finseis.seismo.helsinki.fi", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Haiti", "ayiti.unice.fr", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("ICGC", "ws.icgc.cat", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IDA Project", "rtserve.ida.ucsd.edu", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IFZ", "data.ifz.ru", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IPGP", "rtserver.ipgp.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IRIS DMC", "rtserve.iris.washington.edu", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IRIS Jamaseis", "jamaseis.iris.edu", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("ISNET - UNINA Università degli Studi di Napoli Federico II", "185.15.171.86", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("LMU", "erde.geophysik.uni-muenchen.de", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("NIGGG", "195.96.231.100", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("NRCAN", "earthquakescanada.nrcan.gc.ca", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("OBSEBRE", "obsebre.es", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("OGS", "nam.ogs.it", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Oklahoma University", "rtserve.ou.edu", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("ORFEUS", "eida.orfeus-eu.org", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("PLSN (IGF Poland)", "hudson.igf.edu.pl", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Red Sìsmica de Puerto Rico", "161.35.236.45", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Red Sìsmica Baru", "helis.redsismicabaru.com", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("RESIF", "rtserve.resif.fr", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("SANET", "147.213.113.73", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("SCSN-USC (South Carolina Seismic Network)", "eeyore.seis.sc.edu", 6382));
+        seedlinkNetworks.add(new SeedlinkNetwork("Seisme IRD", "rtserve.ird.nc", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Staneo", "vibrato.staneo.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("SNAC NOA", "snac.gein.noa.gr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Thai Meteorological Department", "119.46.126.38", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("UFRN (Universidade Federal do Rio Grande do Norte)", "sislink.geofisica.ufrn.br", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("UNITSUniversità degli studi di Trieste", "rtweb.units.it", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("UNIV-AGUniversité des Antilles", "seedsrv0.ovmp.martinique.univ-ag.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Universidade de Évora", "clv-cge.uevora.pt", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Universidad de Colima", "148.213.24.15", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("UPR", "worm.uprm.edu", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("USGS", "cwbpub.cr.usgs.gov", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("USP-IAG", "seisrequest.iag.usp.br", 18000));
 
-        seedlinkNetworks.add(new SeedlinkNetwork("Geofon Seedlink", "geofon.gfz-potsdam.de",18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("Resif Seedlink", "rtserve.resif.fr", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("Iris Seedlink", "rtserve.iris.washington.edu", 18000));
     }
 
     public List<Network> getNetworks() {

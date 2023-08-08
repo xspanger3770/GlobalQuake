@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public final class Channel implements Serializable {
     @Serial
@@ -103,4 +101,10 @@ public final class Channel implements Serializable {
         this.getStationSources().addAll(newChannel.getStationSources());
         this.getSeedlinkNetworks().addAll(newChannel.getSeedlinkNetworks());
     }
+
+    public SeedlinkNetwork selectBestSeedlinkNetwork(){
+        var leastStations = getSeedlinkNetworks().stream().min(Comparator.comparing(seedlinkNetwork -> seedlinkNetwork.availableStations));
+        return leastStations.orElse(null);
+    }
+
 }

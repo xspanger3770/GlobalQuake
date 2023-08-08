@@ -72,6 +72,9 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity) {
         RenderElement element = entity.getRenderElement(0);
+        if(!element.shouldDraw){
+            return;
+        }
         graphics.setColor(landColor);
         graphics.fill(element.getShape());
         graphics.setColor(borderColor);

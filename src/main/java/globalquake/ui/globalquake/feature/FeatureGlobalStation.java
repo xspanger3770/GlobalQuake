@@ -74,10 +74,14 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
-        RenderElement elementStationSquare = entity.getRenderElement(1);
-        //RenderElement element = entity.getRenderElement(0);
 
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if(!elementStationCircle.shouldDraw){
+            return;
+        }
+
+        RenderElement elementStationSquare = entity.getRenderElement(1);
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
@@ -116,6 +120,8 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             g.setColor(Color.white);
             String str = station.toString();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 10);
+            str = station.getSeedlinkNetwork() == null ? "NONE!" : station.getSeedlinkNetwork().getName();
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 28);
         }
         if (scroll < 0.4) {
             g.setColor(Color.white);

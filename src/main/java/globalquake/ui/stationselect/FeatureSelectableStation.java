@@ -61,6 +61,9 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Station> entity) {
         RenderElement element = entity.getRenderElement(0);
+        if(!element.shouldDraw){
+            return;
+        }
         graphics.setColor(getDisplayedColor(entity.getOriginal()));
         graphics.fill(element.getShape());
         graphics.setColor(Color.BLACK);

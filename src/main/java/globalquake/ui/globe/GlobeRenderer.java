@@ -391,6 +391,36 @@ public class GlobeRenderer {
         polygon3D.finish();
     }
 
+
+    public void createCross(Polygon3D polygon3D, double lat, double lon, double radius) {
+        polygon3D.reset();
+        Point2D point = new Point2D();
+
+        GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
+        GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
+
+        Vector3D centerPoint = createVec3D(new Point2D(lat, lon));
+        double ang = 45;
+
+        for (int i = 0; i < 2; i++) {
+            polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
+
+            GeoUtils.moveOnGlobe(precomputed, point, ang);
+            Vector3D vector3D = createVec3D(point);
+            polygon3D.addPoint(vector3D);
+
+            GeoUtils.moveOnGlobe(precomputed, point, ang + 180);
+            vector3D = createVec3D(point);
+            polygon3D.addPoint(vector3D);
+
+            polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
+            ang += 90;
+        }
+        polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
+
+        polygon3D.finish();
+    }
+
     public void createCircle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double quality) {
         createNGon(polygon3D, lat, lon, radius, altitude, 0, quality);
     }
@@ -444,4 +474,5 @@ public class GlobeRenderer {
     public void mouseMoved(MouseEvent e) {
         lastMouse = e.getPoint();
     }
+
 }

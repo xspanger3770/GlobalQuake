@@ -145,7 +145,7 @@ public class GlobalQuakePanelOld extends GlobePanelOld {
             System.err.println("Fatal Error: null");
         } else {
             final AbstractStation _station = station;
-            EventQueue.invokeLater(() -> new StationMonitor(_station).setVisible(true));
+            EventQueue.invokeLater(() -> new StationMonitor(this, _station).setVisible(true));
         }
 
     }

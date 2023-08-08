@@ -6,9 +6,9 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;
 import globalquake.geo.TravelTimeTable;
 import globalquake.sounds.Sounds;
+import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EarthquakeAnalysis {
 
@@ -28,7 +28,7 @@ public class EarthquakeAnalysis {
 	private final List<Earthquake> earthquakes;
 
 	public EarthquakeAnalysis() {
-		this.earthquakes = new CopyOnWriteArrayList<>();
+		this.earthquakes = new MonitorableCopyOnWriteArrayList<>();
 	}
 
 	public List<Earthquake> getEarthquakes() {
@@ -402,6 +402,9 @@ public class EarthquakeAnalysis {
 
 	private void calculateMagnitudes() {
 		for (Earthquake earthquake : getEarthquakes()) {
+			if(earthquake.getCluster() == null){
+				continue;
+			}
 			List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
 			if (goodEvents.isEmpty()) {
 				continue;

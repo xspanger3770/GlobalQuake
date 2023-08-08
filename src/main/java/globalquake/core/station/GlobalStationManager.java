@@ -24,7 +24,7 @@ public class GlobalStationManager {
         try {
             for (Network n : databaseManager.getStationDatabase().getNetworks()) {
                 for (Station s : n.getStations()) {
-                    if(s.getSelectedChannel() == null){
+                    if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
@@ -94,12 +94,10 @@ public class GlobalStationManager {
     }
 
     private GlobalStation createGlobalStation(Station station, Channel ch) {
-        var opt = ch.getSeedlinkNetworks().stream().findAny();
-        SeedlinkNetwork seedlinkNetwork = opt.orElse(null);
         return new GlobalStation(station.getNetwork().getNetworkCode(),
                 station.getStationCode(), ch.getCode(), ch.getLocationCode(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID++, seedlinkNetwork);
+                nextID++, ch.selectBestSeedlinkNetwork());
     }
 
     public List<AbstractStation> getStations() {

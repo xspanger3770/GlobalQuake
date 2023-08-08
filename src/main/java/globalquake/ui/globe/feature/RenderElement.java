@@ -8,7 +8,7 @@ public class RenderElement {
 
     public boolean shouldDraw;
 
-    private Polygon3D polygon;
+    private Polygon3D polygon = new Polygon3D();
 
     private final Path2D.Float shape = new Path2D.Float();
 

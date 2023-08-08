@@ -27,7 +27,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         setTitle("Edit Seedlink Network");
         setSize(320, 180);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(parent);
 
         JPanel fieldsPanel = new JPanel();
         LayoutManager gridLayout = new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS);

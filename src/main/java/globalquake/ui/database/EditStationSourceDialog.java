@@ -27,7 +27,7 @@ public class EditStationSourceDialog extends JDialog {
         setTitle("Edit Station Source");
         setSize(320, 180);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(parent);
 
         JPanel fieldsPanel = new JPanel();
         LayoutManager gridLayout = new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS);

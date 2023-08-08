@@ -2,11 +2,9 @@ package globalquake.ui.stationselect;
 
 import globalquake.database.Network;
 import globalquake.database.Station;
-import globalquake.database.StationDatabase;
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
-import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;
@@ -116,7 +114,7 @@ public class StationSelectPanel extends GlobePanel {
             return;
         }
 
-        Station selectedStation = null;
+        Station selectedStation;
 
         if(clickedStations.size() == 1){
             selectedStation = clickedStations.get(0);
@@ -125,7 +123,8 @@ public class StationSelectPanel extends GlobePanel {
                     JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
         }
 
-        new StationEditDialog(stationSelectFrame, selectedStation);
+        if(selectedStation != null)
+            new StationEditDialog(stationSelectFrame, selectedStation);
     }
 
     private void fireDragEvent() {

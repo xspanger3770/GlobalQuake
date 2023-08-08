@@ -35,6 +35,9 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 	}
 
 	private void copyEvents(Earthquake earthquake) {
+		if(earthquake.getCluster() == null){
+			return;
+		}
 		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
 		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
 			return;

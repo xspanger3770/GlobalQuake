@@ -5,6 +5,7 @@ import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
@@ -19,11 +20,10 @@ public class GlobalQuakeFrame extends JFrame {
 	private final GlobalQuakePanel panel;
 	private final JPanel mainPanel;
 	private boolean _containsListToggle;
-	private boolean _containsSettings;
 
 	public GlobalQuakeFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		panel = new GlobalQuakePanel(this) {
+		panel = new GlobalQuakePanel() {
 
 			@Override
 			public void paint(Graphics gr) {
@@ -36,14 +36,6 @@ public class GlobalQuakeFrame extends JFrame {
 				g.setFont(new Font("Calibri", Font.BOLD, 16));
 				g.setColor(Color.black);
 				g.drawString(hideList ? "<" : ">", getWidth() - 16, 20);
-
-				g.setColor(_containsSettings ? Color.gray : Color.lightGray);
-				g.fillRect(getWidth() - 20, getHeight() - 30, 20, 30);
-				g.setColor(Color.black);
-				g.drawRect(getWidth() - 20, getHeight() - 30, 20, 30);
-				g.setFont(new Font("Calibri", Font.BOLD, 16));
-				g.setColor(Color.black);
-				g.drawString("S", getWidth() - 15, getHeight() - 8);
 			}
 		};
 		panel.addMouseListener(new MouseAdapter() {
@@ -54,15 +46,11 @@ public class GlobalQuakeFrame extends JFrame {
 				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= 0 && y <= 30) {
 					toggleList();
 				}
-				if (x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= panel.getHeight() - 30 && y <= panel.getHeight()) {
-					SettingsFrame.show();
-				}
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
 				_containsListToggle = false;
-				_containsSettings = false;
 			}
 		});
 		panel.addMouseMotionListener(new MouseAdapter() {
@@ -72,8 +60,6 @@ public class GlobalQuakeFrame extends JFrame {
 				int x = e.getX();
 				int y = e.getY();
 				_containsListToggle = x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= 0 && y <= 30;
-				_containsSettings = x >= panel.getWidth() - 20 && x <= panel.getWidth() && y >= panel.getHeight() - 30
-						&& y <= panel.getHeight();
 			}
 		});
 
@@ -89,6 +75,8 @@ public class GlobalQuakeFrame extends JFrame {
 
 		setContentPane(mainPanel);
 
+		setJMenuBar(createJMenuBar());
+
 		pack();
 		setLocationRelativeTo(null);
 		setMinimumSize(new Dimension(610, 500));
@@ -103,6 +91,27 @@ public class GlobalQuakeFrame extends JFrame {
 		}, 0, 1000 / FPS);
 	}
 
+	private JMenuBar createJMenuBar() {
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBackground(Color.lightGray);
+
+		JMenu menuOptions = new JMenu("Options");
+
+		JMenuItem settings = new JMenuItem("Settings");
+		settings.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				SettingsFrame.show();
+			}
+		});
+
+		menuOptions.add(settings);
+
+		menuBar.add(menuOptions);
+
+		return menuBar;
+	}
+
 	protected void toggleList() {
 		hideList = !hideList;
 		if (hideList) {
@@ -113,7 +122,6 @@ public class GlobalQuakeFrame extends JFrame {
 			list.setPreferredSize(new Dimension(300, (int) list.getPreferredSize().getHeight()));
 		}
 		_containsListToggle = false;
-		_containsSettings = false;
 		revalidate();
 	}
 

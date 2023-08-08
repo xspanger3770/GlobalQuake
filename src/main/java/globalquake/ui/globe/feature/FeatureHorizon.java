@@ -53,6 +53,9 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity) {
         RenderElement element = entity.getRenderElement(0);
+        if(!element.shouldDraw){
+            return;
+        }
         graphics.setColor(FeatureGeoPolygons.oceanColor);
         graphics.fill(element.getShape());
         graphics.setColor(FeatureGeoPolygons.borderColor);

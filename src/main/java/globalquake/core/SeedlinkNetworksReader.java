@@ -9,6 +9,8 @@ import globalquake.database.SeedlinkNetwork;
 import org.tinylog.Logger;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SeedlinkNetworksReader {
 
@@ -18,11 +20,22 @@ public class SeedlinkNetworksReader {
     private long lastReceivedRecord;
 
 	public void run() {
+		createCache();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(this::runSeedlinkThread);
 		} finally {
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().unlock();
+		}
+	}
+
+	private final Map<String, GlobalStation> stationCache = new HashMap<>();
+
+	private void createCache() {
+		for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
+			if (s instanceof GlobalStation) {
+				stationCache.put("%s %s".formatted(s.getNetworkCode(), s.getStationCode()), (GlobalStation) s);
+			}
 		}
 	}
 
@@ -40,7 +53,7 @@ public class SeedlinkNetworksReader {
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-                                System.out.printf("Connecting to %s %s %s %s, %n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode());
+                                System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
 								connected++;
@@ -92,13 +105,7 @@ public class SeedlinkNetworksReader {
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
-		for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
-			if (s instanceof GlobalStation) {
-				if (s.getNetworkCode().equals(network) && s.getStationCode().equals(station)) {
-					((GlobalStation) s).addRecord(dr);
-				}
-			}
-		}
+		stationCache.get("%s %s".formatted(network, station)).addRecord(dr);
 	}
 
     public long getLastReceivedRecord() {

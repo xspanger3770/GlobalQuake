@@ -32,7 +32,7 @@ public class StationSelectFrame extends JFrame {
         setJMenuBar(createMenuBar());
 
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(databaseMonitorFrame);
         setResizable(true);
         setTitle("Select Stations");
 

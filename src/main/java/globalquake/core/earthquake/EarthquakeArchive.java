@@ -3,13 +3,11 @@ package globalquake.core.earthquake;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.main.Main;
 import globalquake.ui.settings.Settings;
+import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EarthquakeArchive {
@@ -17,7 +15,7 @@ public class EarthquakeArchive {
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
 
-	private SortedSet<ArchivedQuake> archivedQuakes;
+	private List<ArchivedQuake> archivedQuakes;
 
 	public EarthquakeArchive() {
 		loadArchive();
@@ -26,17 +24,17 @@ public class EarthquakeArchive {
 	@SuppressWarnings("unchecked")
 	private void loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
-			archivedQuakes = new ConcurrentSkipListSet<>();
+			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			System.out.println("Created new archive");
 		} else {
 			try {
 				ObjectInputStream oin = new ObjectInputStream(new FileInputStream(ARCHIVE_FILE));
-				archivedQuakes = (ConcurrentSkipListSet<ArchivedQuake>) oin.readObject();
+				archivedQuakes = (MonitorableCopyOnWriteArrayList<ArchivedQuake>) oin.readObject();
 				oin.close();
 				System.out.println("Loaded " + archivedQuakes.size() + " quakes from archive.");
 			} catch (Exception e) {
 				Logger.error(e);
-				archivedQuakes = new ConcurrentSkipListSet<>();
+				archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			}
 		}
 		saveArchive();
@@ -59,7 +57,7 @@ public class EarthquakeArchive {
 		}
 	}
 
-	public SortedSet<ArchivedQuake> getArchivedQuakes() {
+	public List<ArchivedQuake> getArchivedQuakes() {
 		return archivedQuakes;
 	}
 
@@ -94,6 +92,7 @@ public class EarthquakeArchive {
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuakes.add(archivedQuake);
+		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}
 
 	public void update() {

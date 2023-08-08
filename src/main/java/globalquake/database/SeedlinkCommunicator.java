@@ -37,7 +37,9 @@ public class SeedlinkCommunicator {
         seedlinkNetwork.getStatus().setValue(100);
     }
 
-    private static void parseAvailability(String infoString, StationDatabase stationDatabase, SeedlinkNetwork seedlinkNetwork) throws Exception{
+    private static void parseAvailability(String infoString, StationDatabase stationDatabase, SeedlinkNetwork seedlinkNetwork) throws Exception {
+        seedlinkNetwork.availableStations = 0;
+
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document doc = db.parse(new InputSource(new StringReader(infoString)));
@@ -57,7 +59,7 @@ public class SeedlinkCommunicator {
                 Calendar end = Calendar.getInstance();
                 end.setTime(endDate.contains("-") ? format2.parse(endDate) : format3.parse(endDate));
                 long delay = System.currentTimeMillis() - end.getTimeInMillis() - TimeFixer.offset();
-                if (delay > 1000 * 60 * 60 * 24 * 7) {
+                if (delay > 1000 * 60 * 15) {
                     continue;
                 }
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
@@ -73,6 +75,7 @@ public class SeedlinkCommunicator {
                 return;
             }
 
+            seedlinkNetwork.availableStations++;
             channel.getSeedlinkNetworks().add(seedlinkNetwork);
         }finally {
             stationDatabase.getDatabaseWriteLock().unlock();

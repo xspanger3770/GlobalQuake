@@ -54,6 +54,9 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<DebugStation> entity) {
         RenderElement element=entity.getRenderElement(0);
+        if(!element.shouldDraw){
+            return;
+        }
         graphics.setColor(Color.BLUE);
         graphics.fill(element.getShape());
         if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0) && renderer.getRenderProperties().scroll < 1){

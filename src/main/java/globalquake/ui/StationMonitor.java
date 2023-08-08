@@ -1,5 +1,9 @@
 package globalquake.ui;
 
+import globalquake.core.station.AbstractStation;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -7,19 +11,15 @@ import java.awt.event.WindowEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.JFrame;
-
-import globalquake.core.station.AbstractStation;
-
 public class StationMonitor extends JFrame {
 
-	public StationMonitor(AbstractStation station) {
+	public StationMonitor(Component parent, AbstractStation station) {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		StationMonitorPanel panel = new StationMonitorPanel(station);
 		setContentPane(panel);
 
 		pack();
-		setLocationRelativeTo(null);
+		setLocationRelativeTo(parent);
 		setResizable(true);
 		setTitle("Station Monitor - " + station.getNetworkCode() + " " + station.getStationCode() + " "
 				+ station.getChannelName() + " " + station.getLocationCode());
@@ -46,6 +46,8 @@ public class StationMonitor extends JFrame {
 				panel.repaint();
 			}
 		});
+
+		setVisible(true);
 	}
 
 }

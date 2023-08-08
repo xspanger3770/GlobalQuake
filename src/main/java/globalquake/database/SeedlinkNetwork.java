@@ -14,6 +14,12 @@ public final class SeedlinkNetwork implements Serializable {
 
     private transient JProgressBar status;
 
+    public transient int availableStations;
+
+    public int getAvailableStations() {
+        return availableStations;
+    }
+
     public SeedlinkNetwork(String name, String host, int port) {
         this.name = name;
         this.host = host;
@@ -60,7 +66,7 @@ public final class SeedlinkNetwork implements Serializable {
             status = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
             status.setIndeterminate(false);
             status.setString("Ready");
-            status.setValue(100);
+            status.setValue(0);
             status.setStringPainted(true);
         }
         return status;
