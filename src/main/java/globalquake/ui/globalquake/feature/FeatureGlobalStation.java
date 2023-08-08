@@ -1,6 +1,7 @@
 package globalquake.ui.globalquake.feature;
 
 import globalquake.core.analysis.AnalysisStatus;
+import globalquake.core.earthquake.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.ui.globe.GlobeRenderer;
@@ -20,9 +21,9 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     private final List<AbstractStation> globalStations;
 
-    public FeatureGlobalStation(List<AbstractStation> globalStations){
-        super(1);
-        this.globalStations=globalStations;
+    public FeatureGlobalStation(List<AbstractStation> globalStations) {
+        super(2);
+        this.globalStations = globalStations;
     }
 
     @Override
@@ -32,15 +33,26 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        RenderElement element=entity.getRenderElement(0);
-        if(element.getPolygon() == null){
-            element.setPolygon(new Polygon3D());
+        RenderElement elementStationCircle = entity.getRenderElement(0);
+        RenderElement elementStationSquare = entity.getRenderElement(1);
+        if (elementStationCircle.getPolygon() == null) {
+            elementStationCircle.setPolygon(new Polygon3D());
+        }
+        if (elementStationSquare.getPolygon() == null) {
+            elementStationSquare.setPolygon(new Polygon3D());
         }
 
-        renderer.createCircle(element.getPolygon(),
+        double size = Math.min(50, renderer.pxToDeg(7.0));
+
+        renderer.createCircle(elementStationCircle.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                Math.min(50, renderer.pxToDeg(7.0)), entity.getOriginal().getAlt(), GlobeRenderer.QUALITY_LOW);
+                size, entity.getOriginal().getAlt(), GlobeRenderer.QUALITY_LOW);
+
+        renderer.createSquare(elementStationSquare.getPolygon(),
+                entity.getOriginal().getLatitude(),
+                entity.getOriginal().getLongitude(),
+                size * 1.75, entity.getOriginal().getAlt());
     }
 
     @Override
@@ -50,23 +62,68 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<AbstractStation> entity) {
-        RenderElement element=entity.getRenderElement(0);
-        element.getShape().reset();
-        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), true);
+        RenderElement elementStationCircle = entity.getRenderElement(0);
+        elementStationCircle.getShape().reset();
+        elementStationCircle.shouldDraw = renderer.project3D(elementStationCircle.getShape(), elementStationCircle.getPolygon(), true);
+
+        RenderElement elementStationSquare = entity.getRenderElement(1);
+        elementStationSquare.getShape().reset();
+        elementStationSquare.shouldDraw = renderer.project3D(elementStationSquare.getShape(), elementStationSquare.getPolygon(), true);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
-        RenderElement element=entity.getRenderElement(0);
+        RenderElement elementStationCircle = entity.getRenderElement(0);
+        RenderElement elementStationSquare = entity.getRenderElement(1);
+        //RenderElement element = entity.getRenderElement(0);
+
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(getDisplayColor(entity.getOriginal()));
-        graphics.fill(element.getShape());
-        if(renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1){
+        graphics.fill(elementStationCircle.getShape());
+
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+
+        if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
             graphics.setColor(Color.yellow);
-            graphics.draw(element.getShape());
+            graphics.draw(elementStationCircle.getShape());
         }
 
+        Event event = entity.getOriginal().getAnalysis().getLatestEvent();
+
+        if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+            Color c = Color.green;
+            if (event.getMaxRatio() >= 64) {
+                c = Color.yellow;
+            }
+            if (event.getMaxRatio() >= 512) {
+                c = Color.red;
+            }
+
+            graphics.setColor(c);
+            graphics.draw(elementStationSquare.getShape());
+
+        }
+
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D);
+
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        drawDetails(mouseNearby, renderer.getRenderProperties().scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());
+    }
+
+    private void drawDetails(boolean mouseNearby, double scroll, int x, int y, Graphics2D g, AbstractStation station) {
+        if (mouseNearby && scroll < 1) {
+            g.setColor(Color.white);
+            String str = station.toString();
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 10);
+        }
+        if (scroll < 0.4) {
+            g.setColor(Color.white);
+            String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
+            g.setFont(new Font("Calibri", Font.PLAIN, 13));
+            g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+        }
     }
 
     private Color getDisplayColor(AbstractStation station) {
@@ -84,6 +141,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return new Point2D(((GlobalStation)(entity.getOriginal())).getLatitude(), ((GlobalStation)(entity.getOriginal())).getLongitude());
+        return new Point2D(((GlobalStation) (entity.getOriginal())).getLatitude(), ((GlobalStation) (entity.getOriginal())).getLongitude());
     }
 }

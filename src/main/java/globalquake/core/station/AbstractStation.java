@@ -127,4 +127,9 @@ public abstract class AbstractStation {
 	public SeedlinkNetwork getSeedlinkNetwork() {
 		return seedlinkNetwork;
 	}
+
+	@Override
+	public String toString() {
+		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
+	}
 }

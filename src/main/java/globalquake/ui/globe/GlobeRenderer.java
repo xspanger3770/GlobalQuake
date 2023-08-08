@@ -361,20 +361,26 @@ public class GlobeRenderer {
         renderFeatures.add(renderFeature);
     }
 
-    public static Vector3D createVec3D(Vector2D latLon) {
-        double x = getX_3D(latLon.getX(), latLon.getY(), 0);
-        double y = getY_3D(latLon.getX(), latLon.getY(), 0);
-        double z = getZ_3D(latLon.getX(), latLon.getY(), 0);
+    public static Vector3D createVec3D(Vector2D latLon, double alt) {
+        double x = getX_3D(latLon.getX(), latLon.getY(), alt);
+        double y = getY_3D(latLon.getX(), latLon.getY(), alt);
+        double z = getZ_3D(latLon.getX(), latLon.getY(), alt);
 
         return new Vector3D(x, y, z);
     }
 
-    public void createCircle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double quality) {
+
+    public static Vector3D createVec3D(Point2D centerCoords) {
+        return createVec3D(new Vector2D(centerCoords.x, centerCoords.y), 0);
+    }
+
+    public void createNGon(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double startAngle, double step) {
         polygon3D.reset();
         Point2D point = new Point2D();
         GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
         GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
-        for (double ang = 0; ang < 360; ang += quality) {
+
+        for (double ang = startAngle; ang <= startAngle + 360; ang += step) {
             GeoUtils.moveOnGlobe(precomputed, point, ang);
             Vector3D vector3D = new Vector3D(getX_3D(point.x, point.y, altitude),
                     getY_3D(point.x, point.y, altitude), getZ_3D(point.x, point.y, altitude));
@@ -385,22 +391,16 @@ public class GlobeRenderer {
         polygon3D.finish();
     }
 
+    public void createCircle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double quality) {
+        createNGon(polygon3D, lat, lon, radius, altitude, 0, quality);
+    }
+
     public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {
-        polygon3D.reset();
-        Point2D point = new Point2D();
-        GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
-        GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
-        double ang = 0.0;
-        for(int i = 0; i < 4; i++) {
-            GeoUtils.moveOnGlobe(precomputed, point, ang);
-            Vector3D vector3D = new Vector3D(getX_3D(point.x, point.y, altitude),
-                    getY_3D(point.x, point.y, altitude), getZ_3D(point.x, point.y, altitude));
+        createNGon(polygon3D, lat, lon, radius, altitude, 0, 120);
+    }
 
-            polygon3D.addPoint(vector3D);
-            ang += 120.0;
-        }
-
-        polygon3D.finish();
+    public void createSquare(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {
+        createNGon(polygon3D, lat, lon, radius, altitude, 45, 90);
     }
 
     public <E> List<E> getAllInside(RenderFeature<E> renderFeature, Shape shape) {

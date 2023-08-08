@@ -45,14 +45,14 @@ public abstract class Analysis {
 			reset();
 		}
 		long time = dr.getLastSampleBtime().toInstant().toEpochMilli();
-		if (time < lastRecord) {
-			System.err.println(
-					"ERROR: BACKWARDS TIME AT " + getStation().getStationCode() + " (" + (lastRecord - time) + ")");
-		} else {
-			decode(dr);
-			lastRecord = time;
-		}
-	}
+        if (time >= lastRecord) {
+            decode(dr);
+            lastRecord = time;
+        } else {
+            //System.err.println(
+            //		"ERROR: BACKWARDS TIME AT " + getStation().getStationCode() + " (" + (lastRecord - time) + ")");
+        }
+    }
 
 	private void decode(DataRecord dataRecord) {
 		long time = dataRecord.getStartBtime().toInstant().toEpochMilli();

@@ -44,7 +44,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
         Polygon3D result_pol = new Polygon3D();
         for (LngLatAlt pos : entity.getOriginal().getCoordinates().get(0)) {
-            Vector3D vec = GlobeRenderer.createVec3D(new Vector2D(pos.getLatitude(), pos.getLongitude()));
+            Vector3D vec = GlobeRenderer.createVec3D(new Vector2D(pos.getLatitude(), pos.getLongitude()), 0);
             result_pol.addPoint(vec);
         }
 
