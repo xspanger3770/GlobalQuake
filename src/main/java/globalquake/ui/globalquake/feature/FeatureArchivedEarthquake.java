@@ -39,7 +39,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     private double getSize(ArchivedQuake quake, GlobeRenderer renderer) {
-        return Math.min(150, renderer.pxToDeg(quake.getMag() < 0 ? 6 : 6 + Math.pow(quake.getMag() + 1, 2.25)) * 0.6);
+        return Math.min(150, renderer.pxToDeg(quake.getMag() < 0 ? 3 : 3 + Math.pow(quake.getMag() + 1, 2.0)) * 0.8);
     }
 
     @Override

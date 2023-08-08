@@ -70,7 +70,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                handleClick(e.getX(), e.getY());
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    handleClick(e.getX(), e.getY());
+                }
             }
         });
 

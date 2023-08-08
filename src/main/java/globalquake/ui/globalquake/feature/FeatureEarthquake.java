@@ -80,7 +80,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for(int i = 0; i <= 2; i++) {
+        for (int i = 0; i <= 2; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
@@ -95,43 +95,43 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         if (age / 1000.0 < maxDisplayTimeSec) {
             RenderElement elementPWave = entity.getRenderElement(0);
             RenderElement elementSWave = entity.getRenderElement(1);
-            RenderElement elementCross = entity.getRenderElement(2);
 
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            if(elementPWave.shouldDraw) {
+            if (elementPWave.shouldDraw) {
                 graphics.setColor(Color.BLUE);
                 graphics.setStroke(new BasicStroke(4f));
                 graphics.draw(elementPWave.getShape());
             }
 
-            if(elementSWave.shouldDraw) {
+            if (elementSWave.shouldDraw) {
                 graphics.setColor(Color.RED);
                 graphics.setStroke(new BasicStroke(4f));
                 graphics.draw(elementSWave.getShape());
             }
-
-            if(elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
-                graphics.setColor(Color.YELLOW);
-                graphics.setStroke(new BasicStroke(4f));
-                graphics.draw(elementCross.getShape());
-
-                var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-                var centerPonint = renderer.projectPoint(point3D);
-
-                String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
-
-                graphics.setColor(Color.WHITE);
-                graphics.setFont(new Font("Calibri", Font.BOLD, 16));
-                graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
-
-                str = "%skm".formatted(f1d.format(entity.getOriginal().getDepth()));
-
-                graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
-            }
-
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         }
+
+        RenderElement elementCross = entity.getRenderElement(2);
+        if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
+            graphics.setColor(Color.YELLOW);
+            graphics.setStroke(new BasicStroke(4f));
+            graphics.draw(elementCross.getShape());
+
+            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+            var centerPonint = renderer.projectPoint(point3D);
+
+            String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
+
+            graphics.setColor(Color.WHITE);
+            graphics.setFont(new Font("Calibri", Font.BOLD, 16));
+            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
+
+            str = "%skm".formatted(f1d.format(entity.getOriginal().getDepth()));
+
+            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+        }
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
 
