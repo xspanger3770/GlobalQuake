@@ -20,7 +20,7 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Event;
 import globalquake.main.Main;
-import globalquake.ui.GlobePanelOld;
+import globalquake.ui.globalquake.GlobePanelOld;
 import globalquake.geo.GeoUtils;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;

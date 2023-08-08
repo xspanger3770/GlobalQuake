@@ -36,12 +36,20 @@ public class SeedlinkNetworksReader {
 						System.out.println("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 
+						int connected = 0;
+
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
                                 System.out.printf("Connecting to %s %s %s %s, %n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode());
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
+								connected++;
 							}
+						}
+
+						if(connected == 0){
+							System.out.println("No stations connected to "+seedlinkNetwork.getName());
+							break;
 						}
 
 						reader.startData("", "");

@@ -1,4 +1,4 @@
-package globalquake.ui;
+package globalquake.ui.globalquake;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -30,6 +30,7 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.GlobalQuake;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.analysis.AnalysisStatus;
+import globalquake.ui.StationMonitor;
 import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;

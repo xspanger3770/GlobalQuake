@@ -7,7 +7,7 @@ import globalquake.core.earthquake.EarthquakeArchive;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.database.StationDatabaseManager;
 import globalquake.main.Main;
-import globalquake.ui.GlobalQuakeFrame;
+import globalquake.ui.globalquake.GlobalQuakeFrame;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -48,7 +48,7 @@ public class GlobalQuake {
 
 	public GlobalQuake createFrame() {
 		EventQueue.invokeLater(() -> {
-            globalQuakeFrame = new GlobalQuakeFrame(GlobalQuake.this);
+            globalQuakeFrame = new GlobalQuakeFrame();
             globalQuakeFrame.setVisible(true);
 
 

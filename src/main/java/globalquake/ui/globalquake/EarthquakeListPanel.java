@@ -1,4 +1,4 @@
-package globalquake.ui;
+package globalquake.ui.globalquake;
 
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.core.GlobalQuake;
@@ -18,8 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class EarthquakeListPanel extends JPanel {
-
-    private final GlobalQuake globalQuake;
     private int scroll = 0;
     protected int mouseY;
 
@@ -28,14 +26,12 @@ public class EarthquakeListPanel extends JPanel {
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
 
-    public EarthquakeListPanel(GlobalQuake globalQuake) {
-        this.globalQuake = globalQuake;
-
+    public EarthquakeListPanel() {
         addMouseWheelListener(e -> {
             boolean down = e.getWheelRotation() < 0;
             if (!down) {
                 scroll += 25;
-                int maxScroll = getGlobalQuake().getArchive().getArchivedQuakes().size() * cell_height
+                int maxScroll = GlobalQuake.instance.getArchive().getArchivedQuakes().size() * cell_height
                         - getHeight();
                 maxScroll = Math.max(0, maxScroll);
                 scroll = Math.min(scroll, maxScroll);
@@ -50,7 +46,7 @@ public class EarthquakeListPanel extends JPanel {
             public void mousePressed(MouseEvent e) {
                 int y = e.getY();
                 int i = (y + scroll) / cell_height;
-                SortedSet<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
+                SortedSet<ArchivedQuake> archivedQuakes = GlobalQuake.instance.getArchive().getArchivedQuakes();
                 if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
                     return;
                 }
@@ -82,18 +78,14 @@ public class EarthquakeListPanel extends JPanel {
         });
     }
 
-    public GlobalQuake getGlobalQuake() {
-        return globalQuake;
-    }
-
     @Override
     public void paint(Graphics gr) {
         Graphics2D g = (Graphics2D) gr;
-        if (getGlobalQuake().getArchive() == null) {
+        if (GlobalQuake.instance.getArchive() == null) {
             return;
         }
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        SortedSet<ArchivedQuake> archivedQuakes = getGlobalQuake().getArchive().getArchivedQuakes();
+        SortedSet<ArchivedQuake> archivedQuakes = GlobalQuake.instance.getArchive().getArchivedQuakes();
         int i = 0;
         for (ArchivedQuake quake : archivedQuakes) {
             int y = i * cell_height - scroll;

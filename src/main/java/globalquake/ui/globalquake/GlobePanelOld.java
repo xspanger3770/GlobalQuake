@@ -1,4 +1,4 @@
-package globalquake.ui;
+package globalquake.ui.globalquake;
 
 import java.awt.Color;
 import java.awt.Graphics;
