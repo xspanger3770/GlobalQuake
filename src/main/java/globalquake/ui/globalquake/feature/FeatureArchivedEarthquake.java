@@ -36,11 +36,12 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         renderer.createCircle(element.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                getSize(archivedQuake, renderer), 0, GlobeRenderer.QUALITY_LOW);
+                getSize(archivedQuake, renderer), 0, 4);
     }
 
     private double getSize(ArchivedQuake quake, GlobeRenderer renderer) {
-        return Math.min(150, renderer.pxToDeg(quake.getMag() < 0 ? 3 : 3 + Math.pow(quake.getMag() + 1, 2.0)) * 0.8);
+        double size = 3 + Math.pow(quake.getMag(), 2) * 0.8;
+        return Math.min(10 * size, renderer.pxToDeg(quake.getMag() < 0 ? 3 : size));
     }
 
     @Override
@@ -62,12 +63,12 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
-        if(!entity.getRenderElement(0).shouldDraw || entity.getOriginal().isWrong() || !Settings.displayArchivedQuakes){
+        if (!entity.getRenderElement(0).shouldDraw || entity.getOriginal().isWrong() || !Settings.displayArchivedQuakes) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(getColor(entity.getOriginal()));
-        graphics.setStroke(new BasicStroke(3f));
+        graphics.setStroke(new BasicStroke((float) (1 + entity.getOriginal().getMag() * 0.6)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
