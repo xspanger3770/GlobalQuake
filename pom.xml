@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>edu.sc.seis</groupId>
 			<artifactId>seisFile</artifactId>
-			<version>1.8.6</version>
+			<version>2.0.5</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.geotools/gt-geojson -->
 		<dependency>
@@ -22,6 +22,13 @@
 			<artifactId>geojson-jackson</artifactId>
 			<version>1.14</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
+		<dependency>
+			<groupId>edu.sc.seis</groupId>
+			<artifactId>seedCodec</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/uk.me.berndporr/iirj -->
 		<dependency>

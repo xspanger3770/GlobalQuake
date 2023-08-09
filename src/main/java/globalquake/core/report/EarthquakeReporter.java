@@ -14,13 +14,13 @@ import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 
+import globalquake.regions.Regions;
 import org.geojson.LngLatAlt;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Event;
 import globalquake.main.Main;
-import globalquake.ui.GlobePanel;
 import globalquake.geo.GeoUtils;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
@@ -52,7 +52,7 @@ public class EarthquakeReporter {
 		for (Event e : earthquake.getCluster().getAssignedEvents()) {
 			AbstractStation station = e.getAnalysis().getStation();
 			e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
-					station.getChannelName(), station.getLocationCode(), station.getLat(), station.getLon(),
+					station.getChannelName(), station.getLocationCode(), station.getLatitude(), station.getLongitude(),
 					station.getAlt());
 		}
 
@@ -98,27 +98,25 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        if (GlobePanel.polygonsHD != null && GlobePanel.polygonsMD != null && GlobePanel.polygonsUHD != null) {
-            ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? GlobePanel.polygonsUHD
-                    : scroll < 4.8 ? GlobePanel.polygonsHD : GlobePanel.polygonsMD;
-            for (org.geojson.Polygon polygon : pols) {
-                java.awt.Polygon awt = new java.awt.Polygon();
-                boolean add = false;
-                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                    double x = getX(pos.getLongitude());
-                    double y = getY(pos.getLatitude());
+        ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
+                : scroll < 4.8 ? Regions.raw_polygonsHD : Regions.raw_polygonsMD;
+        for (org.geojson.Polygon polygon : pols) {
+            java.awt.Polygon awt = new java.awt.Polygon();
+            boolean add = false;
+            for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                double x = getX(pos.getLongitude());
+                double y = getY(pos.getLatitude());
 
-                    if (!add && isOnScreen(x, y)) {
-                        add = true;
-                    }
-                    awt.addPoint((int) x, (int) y);
+                if (!add && isOnScreen(x, y)) {
+                    add = true;
                 }
-                if (add) {
-                    g.setColor(landC);
-                    g.fill(awt);
-                    g.setColor(borderC);
-                    g.draw(awt);
-                }
+                awt.addPoint((int) x, (int) y);
+            }
+            if (add) {
+                g.setColor(landC);
+                g.fill(awt);
+                g.setColor(borderC);
+                g.draw(awt);
             }
         }
 

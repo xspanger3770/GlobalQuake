@@ -133,11 +133,11 @@ public class Event implements Serializable {
 	}
 
 	public double getLatFromStation() {
-		return getAnalysis().getStation().getLat();
+		return getAnalysis().getStation().getLatitude();
 	}
 
 	public double getLonFromStation() {
-		return getAnalysis().getStation().getLon();
+		return getAnalysis().getStation().getLongitude();
 	}
 
 	public void log(Log currentLog) {

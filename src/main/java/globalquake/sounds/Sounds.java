@@ -26,7 +26,7 @@ public class Sounds {
 	public static final Clip[] levelsNext = new Clip[9];
 	public static final Clip[] countdowns = new Clip[countdown_levels.length];
 
-	public static boolean soundsEnabled = true;
+	public static final boolean soundsEnabled = true;
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
 

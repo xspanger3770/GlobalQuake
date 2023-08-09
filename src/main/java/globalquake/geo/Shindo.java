@@ -79,7 +79,4 @@ public class Shindo {
 		return Color.WHITE;
 	}
 
-	public static Level[] getLevels() {
-		return levels;
-	}
 }
