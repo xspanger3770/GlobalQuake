@@ -36,6 +36,10 @@ public class EarthquakeArchive {
 				archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			}
 		}
+
+		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
+		Collections.reverse(archivedQuakes);
+
 		saveArchive();
 	}
 
@@ -90,8 +94,7 @@ public class EarthquakeArchive {
 
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
-		archivedQuakes.add(archivedQuake);
-		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin, Comparator.reverseOrder()));
+		archivedQuakes.add(0, archivedQuake);
 	}
 
 	public void update() {
