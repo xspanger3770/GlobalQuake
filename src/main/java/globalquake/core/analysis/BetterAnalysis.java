@@ -60,7 +60,7 @@ public class BetterAnalysis extends Analysis {
         }
 
         if (time < latestLogTime) {
-            System.err.println("BACKWARDS TIME IN ANALYSIS (" + getStation().getStationCode() + ")");
+            //System.err.println("BACKWARDS TIME IN ANALYSIS (" + getStation().getStationCode() + ")");
             reset();
             return;
         }

@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
 
@@ -11,30 +12,26 @@ public abstract class AbstractStation {
 	private final String stationCode;
 	private final String channelName;
 	private final String locationCode;
-	private final byte seedlinkNetwork;
 	private final double lat;
 	private final double lon;
 	private final double alt;
-	private final long sensitivity;
 	private final BetterAnalysis analysis;
-	private final double frequency;
 	private final int id;
+	private final SeedlinkNetwork seedlinkNetwork;
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
-						   String locationCode, byte seedlinkNetwork, double lat, double lon, double alt,
-						   long sensitivity, double frequency, int id) {
+						   String locationCode, double lat, double lon, double alt,
+						   int id, SeedlinkNetwork seedlinkNetwork) {
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
 		this.locationCode = locationCode;
-		this.seedlinkNetwork = seedlinkNetwork;
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
-		this.sensitivity = sensitivity;
-		this.frequency = frequency;
 		this.analysis = new BetterAnalysis(this);
 		this.id = id;
+		this.seedlinkNetwork = seedlinkNetwork;
 	}
 
 	public double getAlt() {
@@ -45,7 +42,7 @@ public abstract class AbstractStation {
 		return channelName;
 	}
 
-	public double getLat() {
+	public double getLatitude() {
 		return lat;
 	}
 
@@ -53,31 +50,13 @@ public abstract class AbstractStation {
 		return locationCode;
 	}
 
-	public double getLon() {
+	public double getLongitude() {
 		return lon;
 	}
 
 	public String getNetworkCode() {
 		return networkCode;
 	}
-
-	public byte getSeedlinkNetwork() {
-		return seedlinkNetwork;
-	}
-
-	public long getSensitivity() {
-		return sensitivity;
-	}
-
-	public double getFrequency() {
-		return frequency;
-	}
-
-// --Commented out by Inspection START (28/07/2023, 5:25 pm):
-//	public byte getSource() {
-//		return source;
-//	}
-// --Commented out by Inspection STOP (28/07/2023, 5:25 pm)
 
 	public String getStationCode() {
 		return stationCode;
@@ -87,6 +66,7 @@ public abstract class AbstractStation {
 		return analysis;
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hasData() {
 		return getDelayMS() != -1 && getDelayMS() < 2 * 60 * 1000;
 	}
@@ -144,4 +124,13 @@ public abstract class AbstractStation {
 	}
 
 	public abstract void analyse();
+
+	public SeedlinkNetwork getSeedlinkNetwork() {
+		return seedlinkNetwork;
+	}
+
+	@Override
+	public String toString() {
+		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
+	}
 }

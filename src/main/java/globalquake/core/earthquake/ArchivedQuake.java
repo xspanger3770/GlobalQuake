@@ -35,6 +35,9 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 	}
 
 	private void copyEvents(Earthquake earthquake) {
+		if(earthquake.getCluster() == null){
+			return;
+		}
 		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
 		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
 			return;
@@ -101,7 +104,8 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		return origin;
 	}
 
-	public int getAssignedStations() {
+	@SuppressWarnings("unused")
+    public int getAssignedStations() {
 		return archivedEvents == null ? 0 : archivedEvents.size();
 	}
 
@@ -109,6 +113,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		return archivedEvents;
 	}
 
+	@SuppressWarnings("unused")
 	public double getMaxRatio() {
 		return maxRatio;
 	}
