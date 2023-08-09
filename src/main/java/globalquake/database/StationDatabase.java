@@ -36,12 +36,10 @@ public class StationDatabase implements Serializable {
         addDefaults();
     }
 
-    /**
-     * COMMENTED SERVERS WERE UNRELIABLE
-     */
     @SuppressWarnings("HttpUrlsUsage")
     private void addDefaults() {
-        stationSources.add(new StationSource("BGR", "http://eida.bgr.de/fdsnws/station/1/"));
+        // todo some fdsnws servers are also available with https
+        stationSources.add(new StationSource("BGR", "https://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
         stationSources.add(new StationSource("KOERI", "http://eida-service.koeri.boun.edu.tr/fdsnws/station/1/"));
         stationSources.add(new StationSource("ETHZ", "http://eida.ethz.ch/fdsnws/station/1/"));
@@ -50,23 +48,25 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("IPGP", "http://eida.ipgp.fr/fdsnws/station/1/"));
         stationSources.add(new StationSource("INGV", "http://webservices.ingv.it/fdsnws/station/1/"));
         stationSources.add(new StationSource("LMU", "http://erde.geophysik.uni-muenchen.de/fdsnws/station/1/"));
-        stationSources.add(new StationSource("NIEP", "http://eida-sc3.infp.ro/fdsnws/station/1/"));
+        stationSources.add(new StationSource("NIEP", "https://eida-sc3.infp.ro/fdsnws/station/1/"));
         stationSources.add(new StationSource("NOA", "http://eida.gein.noa.gr/fdsnws/station/1/"));
         stationSources.add(new StationSource("ORFEUS", "http://www.orfeus-eu.org/fdsnws/station/1/"));
         stationSources.add(new StationSource("RESIF", "http://ws.resif.fr/fdsnws/station/1/"));
         //stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
         stationSources.add(new StationSource("IRIS DMC", "http://service.iris.edu/fdsnws/station/1/"));
-        //stationSources.add(new StationSource("NCEDC", "http://service.ncedc.org/fdsnws/station/1"));
+        stationSources.add(new StationSource("NCEDC", "https://service.ncedc.org/fdsnws/station/1"));
         stationSources.add(new StationSource("SCEDC", "http://service.scedc.caltech.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("TexNet", "http://rtserve.beg.utexas.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("USP-IAG", "http://seisrequest.iag.usp.br/fdsnws/station/1/"));
         stationSources.add(new StationSource("BMKG", "https://geof.bmkg.go.id/fdsnws/station/1/"));
         stationSources.add(new StationSource("AusPass", "http://auspass.edu.au:8080/fdsnws/station/1/"));
 
+        // COMMENTED SERVERS WERE UNRELIABLE
+
         seedlinkNetworks.add(new SeedlinkNetwork("AusPass", "auspass.edu.au", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("BGR", "eida.bgr.de", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("CISMID", "www.cismid.uni.edu.pe", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("ENS", "ephesite.ens.fr", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("ENS", "ephesite.ens.fr", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("GEOFON, GFZ", "geofon.gfz-potsdam.de", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("GEONET", "link.geonet.org.nz", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Geoscience Australia", "seis-pub.ga.gov.au", 18000));
@@ -87,7 +87,7 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("OGS", "nam.ogs.it", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("Oklahoma University", "rtserve.ou.edu", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("ORFEUS", "eida.orfeus-eu.org", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("PLSN (IGF Poland)", "hudson.igf.edu.pl", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("PLSN (IGF Poland)", "hudson.igf.edu.pl", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Red Sìsmica de Puerto Rico", "161.35.236.45", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("Red Sìsmica Baru", "helis.redsismicabaru.com", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("RESIF", "rtserve.resif.fr", 18000));
@@ -100,7 +100,7 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Thai Meteorological Department", "119.46.126.38", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("UFRN (Universidade Federal do Rio Grande do Norte)", "sislink.geofisica.ufrn.br", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("UNITSUniversità degli studi di Trieste", "rtweb.units.it", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("UNIV-AGUniversité des Antilles", "seedsrv0.ovmp.martinique.univ-ag.fr", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("Universidade de Évora", "clv-cge.uevora.pt", 18000));
