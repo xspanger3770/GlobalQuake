@@ -52,6 +52,10 @@ public class GlobalQuakePanel extends GlobePanel {
                     Settings.displayArchivedQuakes = !Settings.displayArchivedQuakes;
                     Settings.save();
                 }
+                if(e.getKeyCode() == KeyEvent.VK_S) {
+                    Settings.enableSound = !Settings.enableSound;
+                    Settings.save();
+                }
             }
         });
     }
@@ -104,6 +108,18 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
+
+        List<String> settingsStrings = new ArrayList<>();
+        settingsStrings.add("Sound Alarms: %s (S)".formatted(Settings.enableSound ? "Enabled" : "Disabled"));
+        settingsStrings.add("Earthquakes: %s (E)".formatted(Settings.displayArchivedQuakes ? "Enabled" : "Disabled"));
+        int _y = getHeight() - 6;
+        g.setColor(Color.MAGENTA);
+        g.setFont(new Font("Calibri", Font.PLAIN, 14));
+
+        for(String str2 : settingsStrings){
+            g.drawString(str2, 5, _y);
+            _y -= 16;
+        }
     }
 
     @SuppressWarnings("SameParameterValue")

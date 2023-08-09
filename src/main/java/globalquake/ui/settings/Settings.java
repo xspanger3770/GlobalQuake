@@ -19,8 +19,8 @@ public final class Settings {
 
 	public static Boolean displayArchivedQuakes;
 	
-	public static final boolean reportsEnabled = false; // not available
-	public static final boolean enableSound = true; // not available ATM
+	public static final boolean reportsEnabled = false; // not available ATM
+	public static Boolean enableSound = true;
 
 	static {
 		load();
@@ -38,6 +38,7 @@ public final class Settings {
 		homeLat = Double.valueOf((String) properties.getOrDefault("homeLat", "0.0"));
 		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "0.0"));
 		displayArchivedQuakes = Boolean.valueOf((String) properties.getOrDefault("displayArchivedQuakes", "true"));
+		enableSound = Boolean.valueOf((String) properties.getOrDefault("enableSound", "true"));
 		save();
 	}
 	
@@ -48,6 +49,7 @@ public final class Settings {
 		properties.setProperty("homeLat", String.valueOf(homeLat));
 		properties.setProperty("homeLon", String.valueOf(homeLon));
 		properties.setProperty("displayArchivedQuakes", String.valueOf(displayArchivedQuakes));
+		properties.setProperty("enableSound", String.valueOf(enableSound));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "magic");
 		} catch (IOException e) {
