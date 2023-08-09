@@ -26,7 +26,7 @@ public class SeedlinkServersPanel extends JPanel {
 
         this.addSeedlinkNetworkAction = new AddSeedlinkNetworkAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
         this.editSeedlinkNetworkAction = new EditSeedlinkNetworkAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.removeSeedlinkNetworkAction = new RemoveSeedlinkNetworkAction(databaseMonitorFrame.getManager());
+        this.removeSeedlinkNetworkAction = new RemoveSeedlinkNetworkAction(databaseMonitorFrame.getManager(), this);
         this.updateSeedlinkNetworkAction = new UpdateSeedlinkNetworkAction(databaseMonitorFrame.getManager());
 
         setLayout(new BorderLayout());

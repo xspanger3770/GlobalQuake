@@ -24,7 +24,7 @@ public class StationSourcesPanel extends JPanel {
         this.databaseMonitorFrame = databaseMonitorFrame;
         this.addStationSourceAction = new AddStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
         this.editStationSourceAction = new EditStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.removeStationSourceAction = new RemoveStationSourceAction(databaseMonitorFrame.getManager());
+        this.removeStationSourceAction = new RemoveStationSourceAction(databaseMonitorFrame.getManager(), this);
         this.updateStationSourceAction = new UpdateStationSourceAction(databaseMonitorFrame.getManager());
 
         setLayout(new BorderLayout());

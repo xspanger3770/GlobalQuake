@@ -7,6 +7,7 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.ui.settings.Settings;
 
 import java.awt.*;
 import java.util.Collection;
@@ -61,7 +62,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
-        if(!entity.getRenderElement(0).shouldDraw || entity.getOriginal().isWrong()){
+        if(!entity.getRenderElement(0).shouldDraw || entity.getOriginal().isWrong() || !Settings.displayArchivedQuakes){
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

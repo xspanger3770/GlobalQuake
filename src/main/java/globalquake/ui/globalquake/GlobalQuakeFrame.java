@@ -23,7 +23,7 @@ public class GlobalQuakeFrame extends JFrame {
 
 	public GlobalQuakeFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		panel = new GlobalQuakePanel() {
+		panel = new GlobalQuakePanel(this) {
 
 			@Override
 			public void paint(Graphics gr) {

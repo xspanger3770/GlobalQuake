@@ -5,6 +5,7 @@ import globalquake.database.StationDatabaseManager;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +13,14 @@ import java.util.List;
 public class RemoveSeedlinkNetworkAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
+    private final Component parent;
     private FilterableTableModel<SeedlinkNetwork> tableModel;
 
     private JTable table;
 
-    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager){
+    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager, Component parent){
         super("Remove");
+        this.parent = parent;
         this.databaseManager = databaseManager;
 
         putValue(SHORT_DESCRIPTION, "Remove Seedlink Network");
@@ -33,7 +36,7 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
             table.getCellEditor().cancelCellEditing();
         }
 
-        int option = JOptionPane.showConfirmDialog(null,
+        int option = JOptionPane.showConfirmDialog(parent,
                 "Are you sure you want to delete those items?",
                 "Confirmation",
                 JOptionPane.YES_NO_OPTION);

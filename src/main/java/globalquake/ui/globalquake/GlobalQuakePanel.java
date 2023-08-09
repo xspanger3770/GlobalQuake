@@ -14,10 +14,13 @@ import globalquake.ui.globalquake.feature.FeatureEarthquake;
 import globalquake.ui.globalquake.feature.FeatureGlobalStation;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
@@ -37,10 +40,20 @@ public class GlobalQuakePanel extends GlobePanel {
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-    public GlobalQuakePanel() {
+    public GlobalQuakePanel(JFrame frame) {
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+
+        frame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_E) {
+                    Settings.displayArchivedQuakes = !Settings.displayArchivedQuakes;
+                    Settings.save();
+                }
+            }
+        });
     }
 
     @Override
