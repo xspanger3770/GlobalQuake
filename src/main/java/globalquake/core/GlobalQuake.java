@@ -67,9 +67,8 @@ public class GlobalQuake {
 		return this;
 	}
 
-	public GlobalQuake startRuntime(){
+	public void startRuntime(){
 		getGlobalQuakeRuntime().runThreads();
-		return this;
 	}
 
 	public ClusterAnalysis getClusterAnalysis() {
