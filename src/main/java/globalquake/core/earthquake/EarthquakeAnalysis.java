@@ -36,10 +36,8 @@ public class EarthquakeAnalysis {
 	}
 
 	public void run() {
-		for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
-			processCluster(cluster);
-		}
-		calculateMagnitudes();
+		GlobalQuake.instance.getClusterAnalysis().getClusters().parallelStream().forEach(this::processCluster);
+		getEarthquakes().parallelStream().forEach(this::calculateMagnitude);
 	}
 
 	private void processCluster(Cluster cluster) {
@@ -110,8 +108,6 @@ public class EarthquakeAnalysis {
 		}
 
 		findHypocenter(selectedEvents, cluster);
-		
-		
 	}
 
 	private void findGoodEvents(ArrayList<Event> events, ArrayList<Event> selectedEvents) {
@@ -400,35 +396,33 @@ public class EarthquakeAnalysis {
 		return good;
 	}
 
-	private void calculateMagnitudes() {
-		for (Earthquake earthquake : getEarthquakes()) {
-			if(earthquake.getCluster() == null){
-				continue;
-			}
-			List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
-			if (goodEvents.isEmpty()) {
-				continue;
-			}
-			ArrayList<Double> mags = new ArrayList<>();
-			for (Event e : goodEvents) {
-				double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
-						e.getLatFromStation(), e.getLonFromStation());
-				double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
-						-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
-				long expectedSArrival = (long) (earthquake.getOrigin()
-						+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
-						* 1000);
-				long lastRecord = ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
-				// *0.5 because s wave is stronger
-				double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-				mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
-			}
-			Collections.sort(mags);
-			synchronized (earthquake.magsLock) {
-				earthquake.setMags(mags);
-				earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
+	private void calculateMagnitude(Earthquake earthquake) {
+		if(earthquake.getCluster() == null){
+			return;
+		}
+		List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
+		if (goodEvents.isEmpty()) {
+			return;
+		}
+		ArrayList<Double> mags = new ArrayList<>();
+		for (Event e : goodEvents) {
+			double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
+					e.getLatFromStation(), e.getLonFromStation());
+			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
+					-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
+			long expectedSArrival = (long) (earthquake.getOrigin()
+					+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
+					* 1000);
+			long lastRecord = ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
+			// *0.5 because s wave is stronger
+			double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
+			mags.add(IntensityTable.getMagnitude(distGE, e.getMaxRatio() * mul));
+		}
+		Collections.sort(mags);
+		synchronized (earthquake.magsLock) {
+			earthquake.setMags(mags);
+			earthquake.setMag(mags.get((int) ((mags.size() - 1) * 0.5)));
 
-			}
 		}
 	}
 
