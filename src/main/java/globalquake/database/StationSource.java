@@ -5,7 +5,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 public final class StationSource implements Serializable {
     @Serial
@@ -13,14 +12,11 @@ public final class StationSource implements Serializable {
     private static final long UPDATE_INTERVAL_DAYS = 14;
     private final String name;
     private final String url;
-    private final UUID uuid;
-
     private LocalDateTime lastUpdate = null;
 
     private transient JProgressBar status;
 
     public StationSource(String name, String url) {
-        uuid = UUID.randomUUID();
         this.name = name;
         this.url = url;
     }
@@ -38,12 +34,12 @@ public final class StationSource implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StationSource that = (StationSource) o;
-        return Objects.equals(name, that.name) && Objects.equals(url, that.url) && Objects.equals(uuid, that.uuid);
+        return Objects.equals(name, that.name) && Objects.equals(url, that.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, url, uuid);
+        return Objects.hash(name, url);
     }
 
     @Override
@@ -51,10 +47,6 @@ public final class StationSource implements Serializable {
         return "StationSource[" +
                 "name=" + name + ", " +
                 "url=" + url + ']';
-    }
-
-    public UUID getUuid() {
-        return uuid;
     }
 
     public LocalDateTime getLastUpdate() {

@@ -167,6 +167,7 @@ public class StationDatabaseManager {
         }).start();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isUpdating() {
         return updating;
     }

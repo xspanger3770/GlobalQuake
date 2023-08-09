@@ -86,7 +86,7 @@ public class SeedlinkServersPanel extends JPanel {
         return table;
     }
 
-    private void rowSelectionChanged(ListSelectionEvent event) {
+    private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
         var count = table.getSelectionModel().getSelectedItemsCount();
         editSeedlinkNetworkAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());

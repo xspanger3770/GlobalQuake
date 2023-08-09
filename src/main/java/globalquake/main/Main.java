@@ -8,7 +8,6 @@ import globalquake.exception.FatalIOException;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.database.DatabaseMonitorFrame;
-import globalquake.ui.globe.GeoPolygonsLoader;
 import globalquake.utils.Scale;
 
 import java.io.File;
@@ -63,7 +62,6 @@ public class Main {
         databaseMonitorFrame.getMainProgressBar().setString("Loading regions...");
         databaseMonitorFrame.getMainProgressBar().setValue(0);
         Regions.init();
-        GeoPolygonsLoader.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
         databaseMonitorFrame.getMainProgressBar().setValue(20);
         Scale.load();

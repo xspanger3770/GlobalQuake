@@ -18,6 +18,7 @@ abstract class Column<E, T> {
         this.renderer = Objects.requireNonNull(renderer, "renderer cannot be null");
     }	
 
+    @SuppressWarnings("unused")
     public static <E, T> Column<E, T> editable(String name, Class<T> columnClass, Function<E, T> valueGetter,
                                                BiConsumer<E, T> valueSetter, TableCellRendererAdapter<E, ?> renderer) {
         return new Editable<>(name, columnClass, valueGetter, valueSetter, renderer);
@@ -64,6 +65,7 @@ abstract class Column<E, T> {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class Editable<E, T> extends Column<E, T> {
 
         private final BiConsumer<E, T> valueSetter;

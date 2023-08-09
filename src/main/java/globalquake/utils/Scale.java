@@ -73,6 +73,7 @@ public class Scale {
 		System.out.println("maxMag = " + maxMag);
 	}
 
+	@SuppressWarnings("unused")
 	public static Color getColorLevel(int level) {
 		if(level==4) {
 			return Color.magenta;

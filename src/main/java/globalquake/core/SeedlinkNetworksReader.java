@@ -41,6 +41,7 @@ public class SeedlinkNetworksReader {
 
 	private void runSeedlinkThread(SeedlinkNetwork seedlinkNetwork) {
 		Thread seedlinkThread = new Thread("Seedlink Network Thread - " + seedlinkNetwork.getHost()) {
+			@SuppressWarnings("BusyWait")
 			@Override
 			public void run() {
 				while (true) {

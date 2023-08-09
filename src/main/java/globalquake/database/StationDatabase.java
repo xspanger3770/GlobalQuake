@@ -10,6 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@SuppressWarnings("CommentedOutCode")
 public class StationDatabase implements Serializable {
 
     private final List<Network> networks = new ArrayList<>();
@@ -38,6 +39,7 @@ public class StationDatabase implements Serializable {
     /**
      * COMMENTED SERVERS WERE UNRELIABLE
      */
+    @SuppressWarnings("HttpUrlsUsage")
     private void addDefaults() {
         stationSources.add(new StationSource("BGR", "http://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
@@ -138,6 +140,7 @@ public class StationDatabase implements Serializable {
         return null;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate, StationSource stationSource) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
@@ -210,6 +213,7 @@ public class StationDatabase implements Serializable {
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public Channel acceptChannel(Network network, Station station, Channel channel) {
         Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getDescription());
         Station stationFound = getOrCreateStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLatitude(), station.getLongitude(), station.getAlt());

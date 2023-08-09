@@ -67,7 +67,7 @@ public class SeedlinkCommunicator {
         }
     }
 
-    private static void addAvailableChannel(String networkCode, String stationCode, String channelName, String locationCode, long delay, SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) {
+    private static void addAvailableChannel(String networkCode, String stationCode, String channelName, String locationCode, @SuppressWarnings("unused") long delay, SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) {
         stationDatabase.getDatabaseWriteLock().lock();
         try {
             Channel channel = StationDatabase.getChannel(stationDatabase.getNetworks(), networkCode, stationCode, channelName, locationCode);

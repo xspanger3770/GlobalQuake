@@ -7,6 +7,7 @@ public class LastUpdateRenderer<E> extends TableCellRendererAdapter<E, LocalDate
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
+	@SuppressWarnings("unused")
 	@Override
 	public String getText(E entity, LocalDateTime value) {
 		if(value == null){

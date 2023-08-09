@@ -80,6 +80,7 @@ public class StationCountPanel extends JPanel {
             label.setText("%d %s".formatted(count, name));
         }
 
+        @SuppressWarnings("unused")
         public int getCount() {
             return count;
         }

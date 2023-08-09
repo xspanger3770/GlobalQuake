@@ -19,6 +19,7 @@ public class Cluster {
 	private long lastUpdate;
 
 	private Earthquake earthquake;
+	@SuppressWarnings("unused")
 	public final double bestAngle;
 	private Hypocenter previousHypocenter;
 
@@ -164,6 +165,7 @@ public class Cluster {
 		return rootLon;
 	}
 
+	@SuppressWarnings("unused")
 	public double getSize() {
 		return size;
 	}
@@ -190,6 +192,7 @@ public class Cluster {
 		this.earthquake = earthquake;
 	}
 
+	@SuppressWarnings("unused")
 	public int getLevel() {
 		return earthquake == null ? level : (int) Math.max(0, Math.min(4, earthquake.getMag() / 2.0));
 	}

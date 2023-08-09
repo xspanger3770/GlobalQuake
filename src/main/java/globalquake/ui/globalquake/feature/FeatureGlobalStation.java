@@ -42,7 +42,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             elementStationSquare.setPolygon(new Polygon3D());
         }
 
-        double size = Math.min(50, renderer.pxToDeg(7.0));
+        double size = Math.min(36, renderer.pxToDeg(7.0));
 
         renderer.createCircle(elementStationCircle.getPolygon(),
                 entity.getOriginal().getLatitude(),

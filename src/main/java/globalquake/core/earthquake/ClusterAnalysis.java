@@ -306,13 +306,4 @@ public class ClusterAnalysis {
         return clusters;
     }
 
-    public boolean clusterExists(int id) {
-        for (Cluster c : clusters) {
-            if (c.getId() == id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

@@ -31,7 +31,6 @@ import java.util.Locale;
 public class GlobalQuakePanel extends GlobePanel {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    public static final DecimalFormat format = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final Color neutralColor = new Color(20, 20, 160);
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
@@ -94,6 +93,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void drawEarthquakesBox(Graphics2D g, int x, int y) {
         List<Earthquake> quakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes();
         int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));

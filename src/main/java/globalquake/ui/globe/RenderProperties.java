@@ -1,6 +1,7 @@
 package globalquake.ui.globe;
 
-public class RenderProperties implements Cloneable{
+@SuppressWarnings("ClassCanBeRecord")
+public class RenderProperties{
     public final double centerLat;
     public final double centerLon;
     public final double scroll;

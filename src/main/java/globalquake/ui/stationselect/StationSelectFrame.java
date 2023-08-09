@@ -16,6 +16,7 @@ public class StationSelectFrame extends JFrame {
     private JToggleButton selectButton;
     private JToggleButton deselectButton;
     private DragMode dragMode = DragMode.NONE;
+    private final JCheckBox chkBoxShowUnavailable;
 
     public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
         setLayout(new BorderLayout());
@@ -23,13 +24,20 @@ public class StationSelectFrame extends JFrame {
 
         stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager());
 
-        setPreferredSize(new Dimension(1000, 800));
+        setPreferredSize(new Dimension(1100, 800));
+
+        chkBoxShowUnavailable = new JCheckBox("Show Unavailable Stations");
+        chkBoxShowUnavailable.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                stationSelectPanel.showUnavailable = chkBoxShowUnavailable.isSelected();
+                stationSelectPanel.updateAllStations();
+            }
+        });
 
         add(stationSelectPanel, BorderLayout.CENTER);
         add(createToolbar(), BorderLayout.PAGE_START);
         add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
-
-        setJMenuBar(createMenuBar());
 
         pack();
         setLocationRelativeTo(databaseMonitorFrame);
@@ -42,26 +50,6 @@ public class StationSelectFrame extends JFrame {
                 stationSelectPanel.repaint();
             }
         }, 0, 1000 / 40);
-    }
-
-    private JMenuBar createMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu menuOptions = new JMenu("Options");
-        JCheckBox chkBoxShowUnavailable = new JCheckBox("Show Unavailable Stations");
-        chkBoxShowUnavailable.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                stationSelectPanel.showUnavailable = chkBoxShowUnavailable.isSelected();
-                stationSelectPanel.updateAllStations();
-            }
-        });
-
-        menuOptions.add(chkBoxShowUnavailable);
-
-        menuBar.add(menuOptions);
-
-        return menuBar;
     }
 
     private JToolBar createToolbar() {
@@ -104,6 +92,8 @@ public class StationSelectFrame extends JFrame {
         toolBar.addSeparator();
 
         toolBar.add(new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this)));
+
+        toolBar.add(chkBoxShowUnavailable);
 
         return toolBar;
     }

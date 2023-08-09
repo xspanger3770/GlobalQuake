@@ -84,7 +84,7 @@ public class StationSourcesPanel extends JPanel {
         return table;
     }
 
-    private void rowSelectionChanged(ListSelectionEvent event) {
+    private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
         var count = table.getSelectionModel().getSelectedItemsCount();
         editStationSourceAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());

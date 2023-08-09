@@ -1,10 +1,10 @@
 package globalquake.ui.globe;
 
 import globalquake.geo.GeoUtils;
+import globalquake.regions.Regions;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
 import globalquake.ui.globe.feature.RenderEntity;
-import globalquake.ui.globe.feature.RenderFeature;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import javax.swing.*;
@@ -106,9 +106,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         renderer.addFeature(new FeatureHorizon(new Point2D(centerLat, centerLon), 1));
 
-        renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsMD, 0.5, Double.MAX_VALUE));
-        renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsHD, 0.12, 0.5));
-        renderer.addFeature(new FeatureGeoPolygons(GeoPolygonsLoader.polygonsUHD, 0, 0.12));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsMD, 0.5, Double.MAX_VALUE));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHD, 0.12, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
     }
 
     public boolean interactionAllowed() {

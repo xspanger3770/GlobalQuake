@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+@SuppressWarnings("unused")
 public abstract class FilterableTableModel<E> extends AbstractTableModel {
 
 	@Serial
@@ -27,10 +28,12 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 		super.fireTableDataChanged();
 	}
 
+	@SuppressWarnings("SameReturnValue")
 	public boolean accept(E entity) {
 		return true;
 	}
 
+	@SuppressWarnings("EmptyMethod")
 	public void dataUpdated() {
 
 	}

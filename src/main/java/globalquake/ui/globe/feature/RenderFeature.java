@@ -101,9 +101,7 @@ public abstract class RenderFeature<E> {
 
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
         if(isVisible(properties)){
-            getEntities().forEach(entity -> {
-                render(renderer, graphics, entity);
-            });
+            getEntities().forEach(entity -> render(renderer, graphics, entity));
         }
     }
 

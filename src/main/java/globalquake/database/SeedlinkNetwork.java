@@ -16,10 +16,6 @@ public final class SeedlinkNetwork implements Serializable {
 
     public transient int availableStations;
 
-    public int getAvailableStations() {
-        return availableStations;
-    }
-
     public SeedlinkNetwork(String name, String host, int port) {
         this.name = name;
         this.host = host;

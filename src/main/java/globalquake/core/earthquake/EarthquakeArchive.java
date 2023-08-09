@@ -8,7 +8,6 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EarthquakeArchive {
 

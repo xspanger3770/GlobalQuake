@@ -2,6 +2,7 @@ package globalquake.exception;
 
 public class FatalApplicationException extends Exception implements FatalError {
 
+	@SuppressWarnings("unused")
 	public FatalApplicationException(Throwable cause) {
 		super(cause);
 	}

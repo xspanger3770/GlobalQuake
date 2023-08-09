@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MonitorableCopyOnWriteArrayList<E> extends CopyOnWriteArrayList<E> implements Monitorable {
 
+    @SuppressWarnings("unused")
     public MonitorableCopyOnWriteArrayList(List<E> tmpList) {
         super(tmpList);
     }

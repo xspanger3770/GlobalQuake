@@ -2,36 +2,24 @@ package globalquake.ui.debug;
 
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
-import globalquake.ui.globe.GeoPolygonsLoader;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
-import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.Scale;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public class GlobePanelDebug extends JFrame {
 
 	private final GlobePanel panel;
 	private final JPanel list;
 	private final JPanel mainPanel;
-	private final MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
 	protected boolean hideList;
 	private boolean _containsListToggle;
 	private boolean _containsSettings;
@@ -65,6 +53,7 @@ public class GlobePanelDebug extends JFrame {
 			}
 		};
 		Random r = new Random();
+		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
 		for(int i = 0; i < 50; i++) {
 			double x = 50 + r.nextDouble() * 10 - 5;
 			double y = 17 + r.nextDouble() * 20 - 10;
@@ -147,9 +136,7 @@ public class GlobePanelDebug extends JFrame {
 			Regions.init();
 			Scale.load();
 			Sounds.load();
-			GeoPolygonsLoader.init();
 		} catch (Exception e) {
-			e.printStackTrace();
 			return;
 		}
 		EventQueue.invokeLater(() -> new GlobePanelDebug().setVisible(true));

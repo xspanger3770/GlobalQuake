@@ -270,6 +270,7 @@ public class GlobeRenderer {
         return result;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void bowAlgorithm(Point2D point2D, Path2D.Float result, Vector3D bowStart, Vector3D bowEnd, boolean bow) {
         project(point2D, bowStart.getX(), bowStart.getY(), bowStart.getZ(),
                 GeoUtils.EARTH_RADIUS + camera_altitude,

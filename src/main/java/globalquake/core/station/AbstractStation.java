@@ -66,6 +66,7 @@ public abstract class AbstractStation {
 		return analysis;
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hasData() {
 		return getDelayMS() != -1 && getDelayMS() < 2 * 60 * 1000;
 	}

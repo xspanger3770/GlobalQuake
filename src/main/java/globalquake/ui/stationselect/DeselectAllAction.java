@@ -1,7 +1,6 @@
 package globalquake.ui.stationselect;
 
 import globalquake.database.Network;
-import globalquake.database.Station;
 import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;

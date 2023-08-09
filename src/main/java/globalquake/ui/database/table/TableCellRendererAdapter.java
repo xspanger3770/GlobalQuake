@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
+@SuppressWarnings("unused")
 public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
 
     public TableCellRendererAdapter() {
@@ -50,6 +51,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
         return getForeground();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public Color getBackground(E entity, T value) {
         return null;
     }
