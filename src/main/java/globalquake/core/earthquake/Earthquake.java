@@ -68,24 +68,8 @@ public class Earthquake {
 		this.reportID = reportID;
 	}
 
-	public void setLat(double lat) {
-		this.lat = lat;
-	}
-
-	public void setLon(double lon) {
-		this.lon = lon;
-	}
-
-	public void setOrigin(long origin) {
-		this.origin = origin;
-	}
-
 	public long getLastUpdate() {
 		return lastUpdate;
-	}
-
-	public void setRegion(String region) {
-		this.region = region;
 	}
 
 	public double getDepth() {

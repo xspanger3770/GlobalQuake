@@ -94,7 +94,7 @@ public class Regions {
 		return name;
 	}
 
-	private static void loadPolygons(String name, ArrayList<Polygon> raw, ArrayList<Region> regions) throws IOException {
+	public static void loadPolygons(String name, ArrayList<Polygon> raw, ArrayList<Region> regions) throws IOException {
 		URL resource = ClassLoader.getSystemClassLoader().getResource(name);
 		if(resource == null){
 			throw new IOException("Unable to load polygons: %s".formatted(name));
@@ -108,7 +108,7 @@ public class Regions {
 			GeoJsonObject o = f.getGeometry();
 			if (o instanceof org.geojson.Polygon) {
 				raw.add((org.geojson.Polygon) o);
-				createRegion(regions, f, (org.geojson.Polygon) o);
+
 			} else if (o instanceof MultiPolygon mp) {
 				createRegion(regions, f, mp);
 
@@ -130,15 +130,6 @@ public class Regions {
 			paths.add(toPath(pol));
 			raws.add(pol);
 		}
-		regions.add(new Region(f.getProperty("name_long"), paths, raws));
-	}
-
-	private static void createRegion(ArrayList<Region> regions, Feature f, Polygon o) {
-		ArrayList<Path2D.Double> paths = new ArrayList<>();
-		paths.add(toPath(o));
-
-		ArrayList<Polygon> raws = new ArrayList<>();
-		raws.add(o);
 		regions.add(new Region(f.getProperty("name_long"), paths, raws));
 	}
 

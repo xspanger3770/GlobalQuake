@@ -733,6 +733,7 @@ public class TravelTimeTable {
 	 * -1 WHEN IT HASN'T OCCURRED YET +INFINITY WHEN IT ALREADY PASSED THE EARTH
 	 **/
 
+	@SuppressWarnings("unused")
 	public static double getPKPWaveTravelAngle(double depth, double ageSec) {
 		depth = Math.max(0, Math.min(DEPTHS_PKP[DEPTHS_PKP.length - 1], depth));
 		int d = 0;
@@ -877,6 +878,7 @@ public class TravelTimeTable {
 		return hi + r;
 	}
 
+	@SuppressWarnings("unused")
 	public static double getEpicenterDistance(double depth, double deltaT) {
 		double max = 20000;
 		int runs = 20;

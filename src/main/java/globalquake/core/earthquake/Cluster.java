@@ -19,6 +19,7 @@ public class Cluster {
 	private long lastUpdate;
 
 	private Earthquake earthquake;
+	@SuppressWarnings("unused")
 	public final double bestAngle;
 	private Hypocenter previousHypocenter;
 
@@ -104,8 +105,8 @@ public class Cluster {
 		int r1024 = 0;
 		int r8192 = 0;
 		for (Event e : assignedEvents) {
-			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLat(),
-					e.getAnalysis().getStation().getLon());
+			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
+					e.getAnalysis().getStation().getLongitude());
 			if (dist > _size) {
 				_size = dist;
 			}
@@ -144,8 +145,8 @@ public class Cluster {
 		double sumLat = 0;
 		double sumLon = 0;
 		for (Event e : assignedEvents) {
-			sumLat += e.getAnalysis().getStation().getLat();
-			sumLon += e.getAnalysis().getStation().getLon();
+			sumLat += e.getAnalysis().getStation().getLatitude();
+			sumLon += e.getAnalysis().getStation().getLongitude();
 			n++;
 		}
 		if (n > 0) {
@@ -164,6 +165,7 @@ public class Cluster {
 		return rootLon;
 	}
 
+	@SuppressWarnings("unused")
 	public double getSize() {
 		return size;
 	}
@@ -190,6 +192,7 @@ public class Cluster {
 		this.earthquake = earthquake;
 	}
 
+	@SuppressWarnings("unused")
 	public int getLevel() {
 		return earthquake == null ? level : (int) Math.max(0, Math.min(4, earthquake.getMag() / 2.0));
 	}
