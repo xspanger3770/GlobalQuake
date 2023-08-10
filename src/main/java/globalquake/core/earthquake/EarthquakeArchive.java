@@ -67,8 +67,7 @@ public class EarthquakeArchive {
 	public void archiveQuakeAndSave(Earthquake earthquake) {
 		new Thread("Archive Thread") {
 			public void run() {
-				ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
-				archivedQuakes.add(archivedQuake);
+				archiveQuake(earthquake);
 
 				saveArchive();
 				if(Settings.reportsEnabled) {
