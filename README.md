@@ -15,7 +15,7 @@ It can also quickly estimate the earthquake magnitude using some empirical metho
 
 Project is in early development state and there is quite some room for improvement in many of the features.
 
-Any kind of feedback is highly appreciated.
+### Any kind of feedback is highly appreciated
 
 ## Special thanks to
 
@@ -23,4 +23,5 @@ Any kind of feedback is highly appreciated.
  
 ## Preview
 
-![GlobalQuake](https://user-images.githubusercontent.com/100421968/232611747-0a24cf9d-a7b0-4e47-8b2f-9dc1f31d7bfd.png)
+![GlobalQuake 0 9 0](https://github.com/xspanger3770/GlobalQuake/assets/100421968/6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40)
+![StationDatabase](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322)
