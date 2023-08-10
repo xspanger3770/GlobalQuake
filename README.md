@@ -24,4 +24,4 @@ Project is in early development state and there is quite some room for improveme
 ## Preview
 
 ![GlobalQuake 0 9 0](https://github.com/xspanger3770/GlobalQuake/assets/100421968/6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40)
-![StationDatabase](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322)
+![StationManager](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322)
