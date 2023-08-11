@@ -13,6 +13,7 @@
 
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
 <img alt="StationManager" title="StationManager" src="https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322" style="width: 49%; height: auto;" />
+<img alt="SourceManager" title="SourceManager" src="https://i.imgur.com/T1tmMtN.png" style="width: 49%; height: auto;" />
 </div>
 
 ## Description
