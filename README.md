@@ -1,4 +1,19 @@
-# GlobalQuake
+<!--<p align="center">
+  <img width="128" align="center" src="...">
+</p>-->
+<h1 align="center">
+  GlobalQuake
+</h1>
+
+> [!NOTE]<br>
+> GlobalQuake 0.9.0 has just been released!
+> Read about the new features in the [releases section](https://github.com/xspanger3770/GlobalQuake/releases)
+
+![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
+
+<div style="display: grid; grid-template-columns: 1fr 1fr;">
+<img alt="StationManager" title="StationManager" src="https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322" style="width: 49%; height: auto;" />
+</div>
 
 ## Description
 
@@ -42,9 +57,4 @@ Any contributions, including feedback and suggestions are highly appreciated! Se
 
 ## Special thanks to
 
-![JQuake](https://jquake.net/) - inspiration for the layout, intensity scale and more
- 
-## Preview
-
-![GlobalQuake 0 9 0](https://github.com/xspanger3770/GlobalQuake/assets/100421968/6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40)
-![StationManager](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322)
+![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - inspiration for the layout, intensity scale and more
