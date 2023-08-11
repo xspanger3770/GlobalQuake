@@ -11,7 +11,7 @@ I appreciate your feedback and will do my best to respond in a timely manner.
 
 ### Making Pull Requests
 
-I recommend to contribute your enhancements and bug fixes by submitting pull requests:
+I recommend to contribute your enhancements and bug fixes by submitting pull requests against `develop` branch:
 
 1. Fork the repository.
 2. Create a new branch from the `develop` branch: `git checkout -b your-feature-branch develop`
@@ -19,9 +19,13 @@ I recommend to contribute your enhancements and bug fixes by submitting pull req
 4. Push your branch to your forked repository.
 5. Create a pull request against the `develop` branch of the main repository.
 
+## Code Style
+
+Code style guidelines haven't been established yet, but simply following your IDE's warnings and suggestions, ideally from Intellij, is good enough.
+
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the project's license.
+By contributing to this project, you agree that your contributions will be licensed under the project's license(s).
 
 ## Questions
 
