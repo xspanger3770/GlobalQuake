@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -19,9 +21,23 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private double dragStartLat;
     private double dragStartLon;
     private double scroll = 0.45;
-
     private Point dragStart;
     private Point lastMouse;
+    
+    private Date dragStartTime;
+
+    private LinkedList<Double> recentSpeeds = new LinkedList<>();
+    private int maxRecentSpeeds = 20; // a smaller number will average more of the end of the drag
+
+    private double spinDeceleration = 0.98;
+    private double spinSpeed = 0;
+    private double spinDirection = 1;
+
+    private double SPINDAMPENER = 2;
+    
+    final private Object spinLock = new Object();
+
+    private boolean mouseDown;
 
     private final GlobeRenderer renderer;
 
@@ -30,6 +46,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.updateCamera(createRenderProperties());
         setLayout(null);
         setBackground(Color.black);
+
+        spinThread();
         addMouseMotionListener(new MouseMotionListener() {
 
             @Override
@@ -52,6 +70,17 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 double deltaX = (lastMouse.getX() - dragStart.getX());
                 double deltaY = (lastMouse.getY() - dragStart.getY());
 
+                Date now = new Date();
+                long timeElapsed = now.getTime() - dragStartTime.getTime();
+
+                double instantaneousSpeed = deltaX / timeElapsed;
+                recentSpeeds.addLast(instantaneousSpeed);
+                
+                // Maintain the size of the recent speeds queue
+                if (recentSpeeds.size() > maxRecentSpeeds) {
+                    recentSpeeds.removeFirst();
+                }
+
                 centerLon = dragStartLon - deltaX * 0.15 * scroll / (renderer.getRenderProperties().width / 1000.0);
                 centerLat = Math.max(-90, Math.min(90, dragStartLat + deltaY * 0.10 * scroll / (createRenderProperties().height / 1000.0)));
 
@@ -63,9 +92,24 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                mouseDown = true;
+                dragStartTime = new Date();
+                spinSpeed = 0; //Prevent Jittering
+
                 dragStart = e.getPoint();
                 dragStartLat = centerLat;
                 dragStartLon = centerLon;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mouseDown = false;
+
+                double toAdd = calculateSpin();
+                addSpin(toAdd);
+                synchronized (spinLock) {
+                    spinLock.notify();
+                }
             }
 
             @Override
@@ -111,6 +155,43 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
     }
 
+    private double calculateSpin()
+    {
+        Date now = new Date();
+        long timeElapsed = now.getTime() - dragStartTime.getTime();
+
+        //If the user has been dragging for more then 600ms, don't spin
+        if(timeElapsed > 600)
+        {
+            return 0;
+        }
+
+
+        //Calculate direction
+        double deltaX = (lastMouse.getX() - dragStart.getX());
+        spinDirection = deltaX < 0 ? 1 : -1;
+
+        double sum = 0.0;
+        for (Double speed : recentSpeeds) {
+            sum += speed;
+        }
+        double averageSpeed = sum / recentSpeeds.size();
+
+        // Clear the recent speeds queue
+        recentSpeeds.clear();
+        
+        //Spin less if the user is zoomed in
+        return (Math.abs(averageSpeed))*(scroll/SPINDAMPENER); //The division is a dampener.
+    }
+
+    private void addSpin(double speed) {
+        if(mouseDown)
+        {
+            return;
+        }
+        spinSpeed += speed;
+    }
+
     public boolean interactionAllowed() {
         return true;
     }
@@ -151,6 +232,51 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     public GlobeRenderer getRenderer() {
         return renderer;
+    }
+
+    public void spinThread() {
+        new Thread(() -> {
+            while (true) {
+
+                try {
+                    if(spinSpeed == 0){
+                        synchronized (spinLock) {
+                            spinLock.wait(); //Wait for a spin to be added
+                        }
+                    } else {
+                        //TODO: A DeltaTime here would prevent inconsistent spin speeds when the framerate drops.
+                        Thread.sleep(10);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(!interactionAllowed()){continue;}
+
+                if(Math.abs(spinSpeed) >= 999999999){ //infinity-ish
+                    spinSpeed = 6; //Relatively fast
+                }
+
+                if (spinSpeed == 0) {continue;}
+                spinSpeed *= spinDeceleration;
+                if (Math.abs(spinSpeed) < 0.01) { //Stop Spinning once number is small enough
+                    spinSpeed = 0;
+                    continue;
+                }
+
+                //TODO: This is a hack. Fix it. Prevent spinSpeed from being NaN.
+                String ss = String.valueOf(spinSpeed);
+                if(ss=="NaN"){
+                    spinSpeed = 0;
+                    continue;
+                }
+
+                centerLon += Math.abs(spinSpeed) * spinDirection;
+                renderer.updateCamera(createRenderProperties());
+                repaint();
+                
+            }
+        }).start();
     }
 
     @Override
