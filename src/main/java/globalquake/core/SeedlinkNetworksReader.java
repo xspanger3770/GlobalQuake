@@ -44,6 +44,7 @@ public class SeedlinkNetworksReader {
 			@SuppressWarnings("BusyWait")
 			@Override
 			public void run() {
+				int reconnectDelay = RECONNECT_DELAY;
 				while (true) {
 					SeedlinkReader reader = null;
 					try {
@@ -51,6 +52,8 @@ public class SeedlinkNetworksReader {
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 
 						int connected = 0;
+
+						reconnectDelay = RECONNECT_DELAY;
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
@@ -85,10 +88,13 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
-						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + RECONNECT_DELAY
+						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
-							sleep(RECONNECT_DELAY * 1000);
+							sleep(reconnectDelay * 1000L);
+							if(reconnectDelay < 60 * 5) {
+								reconnectDelay *= 2;
+							}
 						} catch (InterruptedException e1) {
 							break;
 						}

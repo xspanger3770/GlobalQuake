@@ -45,3 +45,5 @@ GlobalQuake/
 old/
 science/
 .idea/
+/src/main/resources/META-INF/MANIFEST.MF
+/screenshots/
