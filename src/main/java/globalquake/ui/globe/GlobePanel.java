@@ -10,9 +10,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.Timer;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -26,15 +25,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
     
     private Date dragStartTime;
 
-    private LinkedList<Double> recentSpeeds = new LinkedList<>();
-    private int maxRecentSpeeds = 20; // a smaller number will average more of the end of the drag
+    private final LinkedList<Double> recentSpeeds = new LinkedList<>();
+    private final int maxRecentSpeeds = 20; // a smaller number will average more of the end of the drag
 
-    private double spinDeceleration = 0.98;
+    private final double spinDeceleration = 0.98;
     private double spinSpeed = 0;
     private double spinDirection = 1;
 
-    private double SPINDAMPENER = 2;
-    
     final private Object spinLock = new Object();
 
     private boolean mouseDown;
@@ -73,9 +70,12 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 Date now = new Date();
                 long timeElapsed = now.getTime() - dragStartTime.getTime();
 
-                double instantaneousSpeed = deltaX / timeElapsed;
-                recentSpeeds.addLast(instantaneousSpeed);
-                
+                // to prevent Infinity/NaN glitch
+                if(timeElapsed > 5) {
+                    double instantaneousSpeed = deltaX / timeElapsed;
+                    recentSpeeds.addLast(instantaneousSpeed);
+                }
+
                 // Maintain the size of the recent speeds queue
                 if (recentSpeeds.size() > maxRecentSpeeds) {
                     recentSpeeds.removeFirst();
@@ -160,8 +160,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
         Date now = new Date();
         long timeElapsed = now.getTime() - dragStartTime.getTime();
 
-        //If the user has been dragging for more then 600ms, don't spin
-        if(timeElapsed > 600)
+        //If the user has been dragging for more than 300ms, don't spin
+        if(timeElapsed > 300)
         {
             return 0;
         }
@@ -171,17 +171,28 @@ public class GlobePanel extends JPanel implements GeoUtils {
         double deltaX = (lastMouse.getX() - dragStart.getX());
         spinDirection = deltaX < 0 ? 1 : -1;
 
+        // Do not spin if the drag is very small
+        if(Math.abs(deltaX) < 25){
+            return 0;
+        }
+
+        if(recentSpeeds.isEmpty()){
+            return 0;
+        }
+
         double sum = 0.0;
         for (Double speed : recentSpeeds) {
             sum += speed;
         }
+
         double averageSpeed = sum / recentSpeeds.size();
 
         // Clear the recent speeds queue
         recentSpeeds.clear();
         
         //Spin less if the user is zoomed in
-        return (Math.abs(averageSpeed))*(scroll/SPINDAMPENER); //The division is a dampener.
+        double SPIN_DAMPENER = 2;
+        return (Math.abs(averageSpeed)) * (scroll / SPIN_DAMPENER); //The division is a dampener.
     }
 
     private void addSpin(double speed) {
@@ -192,6 +203,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         spinSpeed += speed;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean interactionAllowed() {
         return true;
     }
@@ -235,48 +247,33 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     public void spinThread() {
-        new Thread(() -> {
-            while (true) {
-
+        java.util.Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
                 try {
-                    if(spinSpeed == 0){
+                    if(spinSpeed == 0) {
                         synchronized (spinLock) {
                             spinLock.wait(); //Wait for a spin to be added
                         }
-                    } else {
-                        //TODO: A DeltaTime here would prevent inconsistent spin speeds when the framerate drops.
-                        Thread.sleep(10);
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    return;
                 }
 
-                if(!interactionAllowed()){continue;}
+                if(!interactionAllowed()){return;}
 
-                if(Math.abs(spinSpeed) >= 999999999){ //infinity-ish
-                    spinSpeed = 6; //Relatively fast
-                }
-
-                if (spinSpeed == 0) {continue;}
+                if (spinSpeed == 0) {return;}
                 spinSpeed *= spinDeceleration;
-                if (Math.abs(spinSpeed) < 0.01) { //Stop Spinning once number is small enough
+                if (Math.abs(spinSpeed) < 0.01 * scroll) { //Stop Spinning once number is small enough
                     spinSpeed = 0;
-                    continue;
-                }
-
-                //TODO: This is a hack. Fix it. Prevent spinSpeed from being NaN.
-                String ss = String.valueOf(spinSpeed);
-                if(ss=="NaN"){
-                    spinSpeed = 0;
-                    continue;
+                    return;
                 }
 
                 centerLon += Math.abs(spinSpeed) * spinDirection;
                 renderer.updateCamera(createRenderProperties());
                 repaint();
-                
             }
-        }).start();
+        }, 0, 10);
     }
 
     @Override
