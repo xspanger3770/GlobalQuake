@@ -91,7 +91,7 @@ public class SeedlinkNetworksReader {
 						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
-							sleep(reconnectDelay * 1000);
+							sleep(reconnectDelay * 1000L);
 							if(reconnectDelay < 60 * 5) {
 								reconnectDelay *= 2;
 							}
