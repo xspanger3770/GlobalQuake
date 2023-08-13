@@ -135,6 +135,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             dragStartLon = centerLon;
             dragStartLat = centerLat;
 
+
             renderer.updateCamera(createRenderProperties());
             repaint();
         });
