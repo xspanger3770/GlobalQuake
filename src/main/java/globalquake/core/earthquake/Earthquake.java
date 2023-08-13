@@ -16,7 +16,7 @@ public class Earthquake {
 	private final Cluster cluster;
 	private double mag;
 	private ArrayList<Double> mags;
-	private String region;
+	private String region = "Pending...";
 	private double pct;
 	private int reportID;
 
@@ -31,7 +31,6 @@ public class Earthquake {
 		this.cluster = cluster;
 		this.mags = new ArrayList<>();
 		this.magsLock = new Object();
-		this.region = Regions.getRegion(getLat(), getLon());
 		updateRegion();
 		this.lastUpdate = System.currentTimeMillis();
 	}
@@ -104,6 +103,7 @@ public class Earthquake {
 	private boolean regionUpdateRunning;
 
 	private void updateRegion() {
+		this.region = Regions.getRegion(getLat(), getLon());
 		if (regionUpdateRunning) {
 			return;
 		}
@@ -124,10 +124,6 @@ public class Earthquake {
 	}
 
 	public String getRegion() {
-		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION)) {
-			updateRegion();
-			return "Loading...";
-		}
 		return region;
 	}
 

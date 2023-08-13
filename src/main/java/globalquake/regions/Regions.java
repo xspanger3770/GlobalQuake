@@ -33,7 +33,7 @@ public class Regions {
 	}
 
 	//
-	public static String downloadRegion(double lat, double lon) {
+	public static synchronized String downloadRegion(double lat, double lon) {
 		try {
 			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
 					lat, lon);
