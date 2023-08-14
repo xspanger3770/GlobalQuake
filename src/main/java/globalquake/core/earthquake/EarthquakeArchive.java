@@ -94,6 +94,8 @@ public class EarthquakeArchive {
 	public void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuakes.add(0, archivedQuake);
+		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
+		Collections.reverse(archivedQuakes);
 	}
 
 	public void update() {
