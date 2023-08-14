@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class AbstractStation {
 
-	private static final int RATIO_HISTORY_SECONDS = 120;
+	private static final int RATIO_HISTORY_SECONDS = 60;
 	private final String networkCode;
 	private final String stationCode;
 	private final String channelName;
