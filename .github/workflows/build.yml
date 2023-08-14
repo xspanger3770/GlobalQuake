@@ -3,7 +3,12 @@ name: Java CI
 on:
   push:
     branches:
-      - actions_test
+      - 'main'
+      - 'develop'
+  pull_request:
+    branches:
+      - 'main'
+      - 'develop'
 
 jobs:
   build:
