@@ -36,6 +36,8 @@ public class DatabaseMonitorFrame extends JFrame {
         this.restoreDatabaseAction = new RestoreDatabaseAction(this, manager);
         restoreDatabaseAction.setEnabled(false);
 
+        manager.addStatusListener(() -> restoreDatabaseAction.setEnabled(!manager.isUpdating()));
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
         contentPane.setPreferredSize(new Dimension(900, 600));
