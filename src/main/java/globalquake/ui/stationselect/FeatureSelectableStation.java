@@ -19,7 +19,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     private final MonitorableCopyOnWriteArrayList<Station> allStationsList;
     private final StationSelectPanel stationSelectPanel;
 
-    public FeatureSelectableStation(MonitorableCopyOnWriteArrayList<Station> allStationsList, StationSelectPanel stationSelectPanel){
+    public FeatureSelectableStation(MonitorableCopyOnWriteArrayList<Station> allStationsList, StationSelectPanel stationSelectPanel) {
         super(1);
         this.allStationsList = allStationsList;
         this.stationSelectPanel = stationSelectPanel;
@@ -37,7 +37,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Station> entity, RenderProperties renderProperties) {
-        if(entity.getRenderElement(0).getPolygon() == null){
+        if (entity.getRenderElement(0).getPolygon() == null) {
             entity.getRenderElement(0).setPolygon(new Polygon3D());
         }
 
@@ -55,29 +55,50 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Station> entity) {
         entity.getRenderElement(0).getShape().reset();
-        entity.getRenderElement(0).shouldDraw =  renderer.project3D(entity.getRenderElement(0).getShape(), entity.getRenderElement(0).getPolygon(), true);
+        entity.getRenderElement(0).shouldDraw = renderer.project3D(entity.getRenderElement(0).getShape(), entity.getRenderElement(0).getPolygon(), true);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Station> entity) {
         RenderElement element = entity.getRenderElement(0);
-        if(!element.shouldDraw){
+        if (!element.shouldDraw) {
             return;
         }
         graphics.setColor(getDisplayedColor(entity.getOriginal()));
         graphics.fill(element.getShape());
         graphics.setColor(Color.BLACK);
         graphics.draw(element.getShape());
-        if(renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1
-                || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())){
+
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1;
+
+        if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())) {
             graphics.setColor(Color.yellow);
             graphics.draw(element.getShape());
         }
+
+        if(mouseNearby){
+            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+            var centerPonint = renderer.projectPoint(point3D);
+            drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
+        }
+    }
+
+    private void drawInfo(Graphics2D g, int x, int y, Station original) {
+        g.setColor(Color.white);
+
+        String str = original.getNetwork().getNetworkCode()+" "+original.getStationCode();
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
+
+        str = original.getNetwork().getDescription();
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+
+        str = original.getStationSite();
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
     }
 
     private Color getDisplayedColor(Station original) {
         Channel selectedChannel = original.getSelectedChannel();
-        if(selectedChannel != null){
+        if (selectedChannel != null) {
             return selectedChannel.isAvailable() ? StationColor.SELECTED : StationColor.UNAVAILABLE;
         }
 
@@ -86,6 +107,6 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return new Point2D(((Station)(entity.getOriginal())).getLatitude(), ((Station)(entity.getOriginal())).getLongitude());
+        return new Point2D(((Station) (entity.getOriginal())).getLatitude(), ((Station) (entity.getOriginal())).getLongitude());
     }
 }
