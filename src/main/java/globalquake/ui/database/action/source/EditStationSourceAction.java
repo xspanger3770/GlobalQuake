@@ -36,7 +36,7 @@ public class EditStationSourceAction extends AbstractAction {
         }
         int modelRow = table.convertRowIndexToModel(selectedRows[0]);
         StationSource stationSource = tableModel.getEntity(modelRow);
-        new EditStationSourceDialog(parent, databaseManager, tableModel, stationSource);
+        new EditStationSourceDialog(parent, databaseManager, stationSource);
     }
 
     public void setTableModel(FilterableTableModel<StationSource> tableModel) {

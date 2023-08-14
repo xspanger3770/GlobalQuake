@@ -57,7 +57,7 @@ public class RemoveStationSourceAction extends AbstractAction {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 
-        tableModel.applyFilter();
+        databaseManager.fireUpdateEvent();
     }
 
     public void setTableModel(FilterableTableModel<StationSource> tableModel) {

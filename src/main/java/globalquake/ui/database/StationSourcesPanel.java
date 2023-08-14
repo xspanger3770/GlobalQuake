@@ -20,7 +20,7 @@ public class StationSourcesPanel extends JPanel {
     private final JTable table;
     private StationSourcesTableModel tableModel;
 
-    public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame) {
+    public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
         this.databaseMonitorFrame = databaseMonitorFrame;
         this.addStationSourceAction = new AddStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
         this.editStationSourceAction = new EditStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
@@ -30,13 +30,12 @@ public class StationSourcesPanel extends JPanel {
         setLayout(new BorderLayout());
 
         JPanel actionsWrapPanel = new JPanel();
-        JPanel actionsPanel = createActionsPanel();
+        JPanel actionsPanel = createActionsPanel(restoreDatabaseAction);
         actionsWrapPanel.add(actionsPanel);
         add(actionsWrapPanel, BorderLayout.NORTH);
 
         add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
 
-        this.addStationSourceAction.setTableModel(tableModel);
         this.editStationSourceAction.setTableModel(tableModel);
         this.editStationSourceAction.setTable(table);
         this.editStationSourceAction.setEnabled(false);
@@ -48,12 +47,13 @@ public class StationSourcesPanel extends JPanel {
         this.updateStationSourceAction.setEnabled(false);
 
         databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
+        databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
     }
 
-    private JPanel createActionsPanel() {
+    private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
         JPanel actionsPanel = new JPanel();
 
-        GridLayout gridLayout = new GridLayout(1,4);
+        GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(5);
 
         actionsPanel.setLayout(gridLayout);
@@ -62,6 +62,7 @@ public class StationSourcesPanel extends JPanel {
         actionsPanel.add(new JButton(editStationSourceAction));
         actionsPanel.add(new JButton(removeStationSourceAction));
         actionsPanel.add(new JButton(updateStationSourceAction));
+        actionsPanel.add(new JButton(restoreDatabaseAction));
 
         return actionsPanel;
     }

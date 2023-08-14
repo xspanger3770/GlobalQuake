@@ -57,7 +57,7 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 
-        tableModel.applyFilter();
+        databaseManager.fireUpdateEvent();
     }
 
     public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {

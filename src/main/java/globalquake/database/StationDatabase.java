@@ -13,6 +13,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings("CommentedOutCode")
 public class StationDatabase implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = -679301102141884137L;
+
     private final List<Network> networks = new ArrayList<>();
     private final List<SeedlinkNetwork> seedlinkNetworks = new ArrayList<>();
     private final List<StationSource> stationSources = new ArrayList<>();
@@ -37,7 +40,7 @@ public class StationDatabase implements Serializable {
     }
 
     @SuppressWarnings("HttpUrlsUsage")
-    private void addDefaults() {
+    public void addDefaults() {
         // todo some fdsnws servers are also available with https
         stationSources.add(new StationSource("BGR", "https://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
@@ -228,4 +231,5 @@ public class StationDatabase implements Serializable {
 
         return channel;
     }
+
 }

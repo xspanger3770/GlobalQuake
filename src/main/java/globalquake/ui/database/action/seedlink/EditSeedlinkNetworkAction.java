@@ -36,7 +36,7 @@ public class EditSeedlinkNetworkAction extends AbstractAction {
         }
         int modelRow = table.convertRowIndexToModel(selectedRows[0]);
         SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(modelRow);
-        new EditSeedlinkNetworkDialog(parent, databaseManager, tableModel, seedlinkNetwork);
+        new EditSeedlinkNetworkDialog(parent, databaseManager, seedlinkNetwork);
     }
 
     public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {
