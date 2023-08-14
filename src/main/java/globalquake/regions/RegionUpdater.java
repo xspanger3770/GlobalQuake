@@ -10,7 +10,7 @@ public class RegionUpdater {
     private boolean regionUpdateRunning = false;
 
     public RegionUpdater(Regional target) {
-        this.target=target;
+        this.target = target;
         if(target.getRegion() == null) {
             target.setRegion(DEFAULT_REGION);
         }
@@ -20,11 +20,13 @@ public class RegionUpdater {
         if (regionUpdateRunning) {
             return;
         }
+
+        target.setRegion(Regions.getRegion(target.getLat(), target.getLon()));
+
         new Thread("Region Search") {
             public void run() {
                 regionUpdateRunning = true;
                 try {
-                    target.setRegion(Regions.getRegion(target.getLat(), target.getLon()));
                     String newRegion = Regions.downloadRegion(target.getLat(), target.getLon());
                     if (!Objects.equals(newRegion, Regions.UNKNOWN_REGION)) {
                         target.setRegion(newRegion);

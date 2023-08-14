@@ -32,7 +32,8 @@ public class Regions {
 		loadPolygons("polygons/countriesUHD.json", raw_polygonsUHD, regionsUHD);
 	}
 
-	//
+	public static synchronized void awaitDownload(){};
+
 	public static synchronized String downloadRegion(double lat, double lon) {
 		try {
 			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
@@ -107,8 +108,16 @@ public class Regions {
 		for (Feature f : featureCollection.getFeatures()) {
 			GeoJsonObject o = f.getGeometry();
 			if (o instanceof org.geojson.Polygon) {
-				raw.add((org.geojson.Polygon) o);
+				Polygon pol = (org.geojson.Polygon) o;
+				raw.add(pol);
 
+				ArrayList<Path2D.Double> paths = new ArrayList<>();
+				ArrayList<Polygon> raws = new ArrayList<>();
+
+				raws.add(pol);
+				paths.add(toPath(pol));
+
+				regions.add(new Region(f.getProperty("name_long"), paths, raws));
 			} else if (o instanceof MultiPolygon mp) {
 				createRegion(regions, f, mp);
 

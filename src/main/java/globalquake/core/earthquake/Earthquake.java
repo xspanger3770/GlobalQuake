@@ -2,7 +2,6 @@ package globalquake.core.earthquake;
 
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
-import globalquake.regions.Regions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +92,13 @@ public class Earthquake implements Regional {
 		return origin;
 	}
 
-	public void update(Earthquake earthquake) {
+	public void update(Earthquake newEarthquake) {
 		double lastLat = lat;
 		double lastLon = lon;
-		this.lat = earthquake.getLat();
-		this.lon = earthquake.getLon();
-		this.depth = earthquake.getDepth();
-		this.origin = earthquake.getOrigin();
+		this.lat = newEarthquake.getLat();
+		this.lon = newEarthquake.getLon();
+		this.depth = newEarthquake.getDepth();
+		this.origin = newEarthquake.getOrigin();
 		if (this.lat != lastLat || this.lon != lastLon) {
 			regionUpdater.updateRegion();
 		}
@@ -112,9 +111,6 @@ public class Earthquake implements Regional {
 
 	@Override
 	public String getRegion() {
-		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION) || region.equals(RegionUpdater.DEFAULT_REGION)) {
-			regionUpdater.updateRegion();
-		}
 		return region;
 	}
 

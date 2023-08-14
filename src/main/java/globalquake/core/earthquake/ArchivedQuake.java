@@ -2,7 +2,6 @@ package globalquake.core.earthquake;
 
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
-import globalquake.regions.Regions;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -111,9 +110,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 
 	@Override
 	public String getRegion() {
-		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION) || region.equals(RegionUpdater.DEFAULT_REGION)) {
-			regionUpdater.updateRegion();
-		}
 		return region;
 	}
 
