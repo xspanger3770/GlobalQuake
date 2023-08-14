@@ -99,6 +99,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return archivedEvents == null ? 0 : archivedEvents.size();
 	}
 
+	@SuppressWarnings("unused")
 	public ArrayList<ArchivedEvent> getArchivedEvents() {
 		return archivedEvents;
 	}
@@ -126,6 +127,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.wrong = wrong;
 	}
 
+	@SuppressWarnings("unused")
 	public int getAbandonedCount() {
 		return abandonedCount;
 	}
