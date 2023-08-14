@@ -1,13 +1,15 @@
 package globalquake.core.earthquake;
 
+import globalquake.regions.RegionUpdater;
+import globalquake.regions.Regional;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Objects;
 
-import globalquake.regions.Regions;
-
-public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
+public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
 	@Serial
 	private static final long serialVersionUID = 6690311245585670539L;
@@ -25,8 +27,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 	private int abandonedCount;
 	private boolean wrong;
 
-	// !!! wrong is user selectable boolean
-	// abandoned is old name for wrong
+	private transient RegionUpdater regionUpdater;
+
+	@Serial
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+
+		regionUpdater = new RegionUpdater(this);
+	}
 
 	public ArchivedQuake(Earthquake earthquake) {
 		this(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
@@ -55,25 +63,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		}
 	}
 
-	private boolean regionUpdateRunning;
-
-	private void updateRegion() {
-		if (regionUpdateRunning) {
-			return;
-		}
-		new Thread("Region Search") {
-			public void run() {
-				regionUpdateRunning = true;
-				region = Regions.getRegion(getLat(), getLon());
-				String newRegion = Regions.downloadRegion(getLat(), getLon());
-				if(!Objects.equals(newRegion, Regions.UNKNOWN_REGION)) {
-					region = newRegion;
-				}
-				regionUpdateRunning = false;
-			}
-        }.start();
-	}
-
 	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin) {
 		this.lat = lat;
 		this.lon = lon;
@@ -81,7 +70,8 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		this.mag = mag;
 		this.origin = origin;
 		this.archivedEvents = new ArrayList<>();
-		updateRegion();
+		regionUpdater = new RegionUpdater(this);
+		regionUpdater.updateRegion();
 	}
 
 	public double getDepth() {
@@ -118,12 +108,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake> {
 		return maxRatio;
 	}
 
+	@Override
 	public String getRegion() {
-		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION)) {
-			updateRegion();
-			return "Loading...";
-		}
 		return region;
+	}
+
+	@Override
+	public void setRegion(String newRegion) {
+		this.region = newRegion;
 	}
 
 	public boolean isWrong() {

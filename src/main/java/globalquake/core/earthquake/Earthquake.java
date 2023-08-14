@@ -1,12 +1,12 @@
 package globalquake.core.earthquake;
 
+import globalquake.regions.RegionUpdater;
+import globalquake.regions.Regional;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import globalquake.regions.Regions;
-
-public class Earthquake {
+public class Earthquake implements Regional {
 
 	private double lat;
 	private double lon;
@@ -16,12 +16,14 @@ public class Earthquake {
 	private final Cluster cluster;
 	private double mag;
 	private ArrayList<Double> mags;
-	private String region;
 	private double pct;
 	private int reportID;
 
 	public final Object magsLock;
 	public int nextReport;
+	private String region;
+
+	private final RegionUpdater regionUpdater;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
 		this.lat = lat;
@@ -31,8 +33,10 @@ public class Earthquake {
 		this.cluster = cluster;
 		this.mags = new ArrayList<>();
 		this.magsLock = new Object();
-		this.region = Regions.getRegion(getLat(), getLon());
-		updateRegion();
+		this.regionUpdater = new RegionUpdater(this);
+
+		regionUpdater.updateRegion();
+
 		this.lastUpdate = System.currentTimeMillis();
 	}
 
@@ -88,47 +92,31 @@ public class Earthquake {
 		return origin;
 	}
 
-	public void update(Earthquake earthquake) {
+	public void update(Earthquake newEarthquake) {
 		double lastLat = lat;
 		double lastLon = lon;
-		this.lat = earthquake.getLat();
-		this.lon = earthquake.getLon();
-		this.depth = earthquake.getDepth();
-		this.origin = earthquake.getOrigin();
+		this.lat = newEarthquake.getLat();
+		this.lon = newEarthquake.getLon();
+		this.depth = newEarthquake.getDepth();
+		this.origin = newEarthquake.getOrigin();
 		if (this.lat != lastLat || this.lon != lastLon) {
-			updateRegion();
+			regionUpdater.updateRegion();
 		}
 		this.lastUpdate = System.currentTimeMillis();
-	}
-
-	private boolean regionUpdateRunning;
-
-	private void updateRegion() {
-		if (regionUpdateRunning) {
-			return;
-		}
-		new Thread("Region Search") {
-			public void run() {
-				regionUpdateRunning = true;
-				String newRegion = Regions.downloadRegion(getLat(), getLon());
-				if(!Objects.equals(newRegion, Regions.UNKNOWN_REGION)) {
-					region = newRegion;
-				}
-				regionUpdateRunning = false;
-			}
-        }.start();
 	}
 
 	public Cluster getCluster() {
 		return cluster;
 	}
 
+	@Override
 	public String getRegion() {
-		if (region == null || region.isEmpty() || region.equals(Regions.UNKNOWN_REGION)) {
-			updateRegion();
-			return "Loading...";
-		}
 		return region;
+	}
+
+	@Override
+	public void setRegion(String newRegion) {
+		this.region = newRegion;
 	}
 
 }
