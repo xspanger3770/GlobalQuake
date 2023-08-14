@@ -47,7 +47,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         renderer.createCircle(elementStationCircle.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size, 0, GlobeRenderer.QUALITY_LOW);
+                size, 0, 30);
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
