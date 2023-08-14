@@ -87,7 +87,13 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         g.setColor(Color.white);
 
         String str = original.getNetwork().getNetworkCode()+" "+original.getStationCode();
-        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 12);
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
+
+        str = original.getNetwork().getDescription();
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+
+        str = original.getStationSite();
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
     }
 
     private Color getDisplayedColor(Station original) {
