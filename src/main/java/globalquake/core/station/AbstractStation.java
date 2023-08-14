@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class AbstractStation {
 
-	private static final int RATIO_HISTORY_SECONDS = 60;
+	private static final int RATIO_HISTORY_SECONDS = 120;
 	private final String networkCode;
 	private final String stationCode;
 	private final String channelName;
@@ -21,6 +21,9 @@ public abstract class AbstractStation {
 	private final BetterAnalysis analysis;
 	private final int id;
 	private final SeedlinkNetwork seedlinkNetwork;
+
+	private final Queue<Double> ratioHistory = new ConcurrentLinkedQueue<>();
+	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, double lat, double lon, double alt,
@@ -71,15 +74,12 @@ public abstract class AbstractStation {
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hasData() {
-		return getDelayMS() != -1 && getDelayMS() < 2 * 60 * 1000;
+		return getDelayMS() != -1 && getDelayMS() < 5 * 60 * 1000;
 	}
 
 	public abstract boolean hasNoDisplayableData() ;
 	
 	public abstract long getDelayMS();
-	
-	private final Queue<Double> ratioHistory = new ConcurrentLinkedQueue<>();
-	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public void second() {
 		if (getAnalysis()._maxRatio > 0) {
