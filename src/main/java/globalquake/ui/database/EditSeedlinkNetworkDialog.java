@@ -3,7 +3,6 @@ package globalquake.ui.database;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.StationDatabaseManager;
 import globalquake.exception.RuntimeApplicationException;
-import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,16 +10,14 @@ import java.awt.*;
 
 public class EditSeedlinkNetworkDialog extends JDialog {
     private final StationDatabaseManager databaseManager;
-    private final FilterableTableModel<?> tableModel;
     private final JTextField portField;
     private final JTextField nameField;
     private final JTextField hostField;
 
-    public EditSeedlinkNetworkDialog(Window parent, StationDatabaseManager databaseManager, FilterableTableModel<?> tableModel, SeedlinkNetwork seedlinkNetwork) {
+    public EditSeedlinkNetworkDialog(Window parent, StationDatabaseManager databaseManager, SeedlinkNetwork seedlinkNetwork) {
         super(parent);
         setModal(true);
 
-        this.tableModel = tableModel;
         this.databaseManager = databaseManager;
         setLayout(new BorderLayout());
 
@@ -78,9 +75,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 
-        if(tableModel != null) {
-            tableModel.applyFilter();
-        }
+        databaseManager.fireUpdateEvent();
 
         this.dispose();
     }

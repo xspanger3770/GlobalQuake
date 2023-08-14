@@ -3,6 +3,7 @@ package globalquake.ui.database;
 import globalquake.database.StationDatabaseManager;
 import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
+import globalquake.ui.database.action.RestoreDatabaseAction;
 import globalquake.ui.stationselect.StationSelectFrame;
 
 import javax.swing.*;
@@ -22,6 +23,8 @@ public class DatabaseMonitorFrame extends JFrame {
     private JButton btnSelectStations;
     private JButton btnLaunch;
 
+    private final AbstractAction restoreDatabaseAction;
+
     public JProgressBar getMainProgressBar() {
         return mainProgressBar;
     }
@@ -29,6 +32,11 @@ public class DatabaseMonitorFrame extends JFrame {
     public DatabaseMonitorFrame(StationDatabaseManager manager, Runnable onLauch) {
         this.manager = manager;
         this.onLaunch = onLauch;
+
+        this.restoreDatabaseAction = new RestoreDatabaseAction(this, manager);
+        restoreDatabaseAction.setEnabled(false);
+
+        manager.addStatusListener(() -> restoreDatabaseAction.setEnabled(!manager.isUpdating()));
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
@@ -85,8 +93,8 @@ public class DatabaseMonitorFrame extends JFrame {
 
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this));
-        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this));
+        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this,restoreDatabaseAction));
+        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this,restoreDatabaseAction));
         return tabbedPane;
     }
 
@@ -149,5 +157,6 @@ public class DatabaseMonitorFrame extends JFrame {
     public void initDone() {
         btnSelectStations.setEnabled(true);
         btnLaunch.setEnabled(true);
+        restoreDatabaseAction.setEnabled(true);
     }
 }

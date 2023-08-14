@@ -2,7 +2,6 @@ package globalquake.ui.database.action.seedlink;
 
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.database.EditSeedlinkNetworkDialog;
-import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +11,6 @@ public class AddSeedlinkNetworkAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
     private final Window parent;
-    private FilterableTableModel<?> tableModel;
 
     public AddSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager){
         super("Add");
@@ -24,10 +22,7 @@ public class AddSeedlinkNetworkAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        new EditSeedlinkNetworkDialog(parent, databaseManager, tableModel, null);
+        new EditSeedlinkNetworkDialog(parent, databaseManager, null);
     }
 
-    public void setTableModel(FilterableTableModel<?> tableModel) {
-        this.tableModel = tableModel;
-    }
 }

@@ -2,7 +2,6 @@ package globalquake.ui.database;
 
 import globalquake.database.StationDatabaseManager;
 import globalquake.database.StationSource;
-import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,15 +10,13 @@ import java.awt.*;
 public class EditStationSourceDialog extends JDialog {
     private final StationDatabaseManager databaseManager;
     private final StationSource stationSource;
-    private final FilterableTableModel<?> tableModel;
     private final JTextField nameField;
     private final JTextField urlField;
 
-    public EditStationSourceDialog(Window parent, StationDatabaseManager databaseManager, FilterableTableModel<?> tableModel, StationSource stationSource) {
+    public EditStationSourceDialog(Window parent, StationDatabaseManager databaseManager, StationSource stationSource) {
         super(parent);
         setModal(true);
 
-        this.tableModel = tableModel;
         this.databaseManager = databaseManager;
         this.stationSource = stationSource;
         setLayout(new BorderLayout());
@@ -69,9 +66,7 @@ public class EditStationSourceDialog extends JDialog {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 
-        if(tableModel != null) {
-            tableModel.applyFilter();
-        }
+        databaseManager.fireUpdateEvent();
 
         this.dispose();
     }

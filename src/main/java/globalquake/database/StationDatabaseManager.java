@@ -172,6 +172,18 @@ public class StationDatabaseManager {
         return updating;
     }
 
+    public void restore() {
+        getStationDatabase().getDatabaseWriteLock().lock();
+        try {
+            removeAllSeedlinks(getStationDatabase().getSeedlinkNetworks());
+            removeAllStationSources(getStationDatabase().getStationSources());
+            getStationDatabase().addDefaults();
+            fireUpdateEvent();
+        }finally {
+            getStationDatabase().getDatabaseWriteLock().unlock();
+        }
+    }
+
     public void removeAllSeedlinks(List<SeedlinkNetwork> toBeRemoved) {
         for(Network network: getStationDatabase().getNetworks()){
             for(Station station: network.getStations()){

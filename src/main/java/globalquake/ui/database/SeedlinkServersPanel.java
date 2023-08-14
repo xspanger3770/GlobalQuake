@@ -21,7 +21,7 @@ public class SeedlinkServersPanel extends JPanel {
     private final RemoveSeedlinkNetworkAction removeSeedlinkNetworkAction;
     private final UpdateSeedlinkNetworkAction updateSeedlinkNetworkAction;
 
-    public SeedlinkServersPanel(DatabaseMonitorFrame databaseMonitorFrame) {
+    public SeedlinkServersPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
         this.databaseMonitorFrame = databaseMonitorFrame;
 
         this.addSeedlinkNetworkAction = new AddSeedlinkNetworkAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
@@ -32,13 +32,12 @@ public class SeedlinkServersPanel extends JPanel {
         setLayout(new BorderLayout());
 
         JPanel actionsWrapPanel = new JPanel();
-        JPanel actionsPanel = createActionsPanel();
+        JPanel actionsPanel = createActionsPanel(restoreDatabaseAction);
         actionsWrapPanel.add(actionsPanel);
         add(actionsWrapPanel, BorderLayout.NORTH);
 
         add(new JScrollPane(table = createTable()), BorderLayout.CENTER);
 
-        this.addSeedlinkNetworkAction.setTableModel(tableModel);
         this.editSeedlinkNetworkAction.setTableModel(tableModel);
         this.editSeedlinkNetworkAction.setTable(table);
         this.editSeedlinkNetworkAction.setEnabled(false);
@@ -50,9 +49,10 @@ public class SeedlinkServersPanel extends JPanel {
         this.updateSeedlinkNetworkAction.setEnabled(false);
 
         databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
+        databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
     }
 
-    private JPanel createActionsPanel() {
+    private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
         JPanel actionsPanel = new JPanel();
 
         GridLayout gridLayout = new GridLayout(1,4);
@@ -64,6 +64,7 @@ public class SeedlinkServersPanel extends JPanel {
         actionsPanel.add(new JButton(editSeedlinkNetworkAction));
         actionsPanel.add(new JButton(removeSeedlinkNetworkAction));
         actionsPanel.add(new JButton(updateSeedlinkNetworkAction));
+        actionsPanel.add(new JButton(restoreDatabaseAction));
 
         return actionsPanel;
     }

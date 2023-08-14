@@ -2,7 +2,6 @@ package globalquake.ui.database.action.source;
 
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.database.EditStationSourceDialog;
-import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +11,6 @@ public class AddStationSourceAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
     private final Window parent;
-    private FilterableTableModel<?> tableModel;
 
     public AddStationSourceAction(Window parent, StationDatabaseManager databaseManager){
         super("Add");
@@ -24,10 +22,6 @@ public class AddStationSourceAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        new EditStationSourceDialog(parent, databaseManager, tableModel, null);
-    }
-
-    public void setTableModel(FilterableTableModel<?> tableModel) {
-        this.tableModel = tableModel;
+        new EditStationSourceDialog(parent, databaseManager, null);
     }
 }

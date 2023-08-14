@@ -114,14 +114,6 @@ public class EarthquakeListPanel extends JPanel {
             g.setColor(Color.WHITE);
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
 
-            if (!quake.getArchivedEvents().isEmpty()) {
-                double pct = 100 * (quake.getArchivedEvents().size() - quake.getAbandonedCount())
-                        / (double) quake.getArchivedEvents().size();
-                //str = quake.getArchivedEvents().size() + " / " + (int) (pct) + "%";
-                str = (int) (pct) + "%";
-                g.setFont(new Font("Calibri", Font.PLAIN, 14));
-                g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 16);
-            }
             str = "";
             if (shindo != null) {
                 str = shindo.name();
