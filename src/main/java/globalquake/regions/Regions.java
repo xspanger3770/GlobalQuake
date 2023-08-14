@@ -32,7 +32,8 @@ public class Regions {
 		loadPolygons("polygons/countriesUHD.json", raw_polygonsUHD, regionsUHD);
 	}
 
-	public static synchronized void awaitDownload(){};
+	@SuppressWarnings("EmptyMethod")
+	public static synchronized void awaitDownload(){}
 
 	public static synchronized String downloadRegion(double lat, double lon) {
 		try {
