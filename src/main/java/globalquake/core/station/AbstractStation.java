@@ -5,9 +5,12 @@ import globalquake.core.analysis.BetterAnalysis;
 import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class AbstractStation {
 
+	private static final int RATIO_HISTORY_SECONDS = 60;
 	private final String networkCode;
 	private final String stationCode;
 	private final String channelName;
@@ -75,40 +78,29 @@ public abstract class AbstractStation {
 	
 	public abstract long getDelayMS();
 	
-	private final ArrayList<Double> ratioHistory = new ArrayList<>();
-	private final Object ratioLock = new Object();
+	private final Queue<Double> ratioHistory = new ConcurrentLinkedQueue<>();
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public void second() {
-		synchronized (ratioLock) {
-			if (getAnalysis()._maxRatio > 0) {
-				ratioHistory.add(0, getAnalysis()._maxRatio);
-				getAnalysis()._maxRatioReset = true;
+		if (getAnalysis()._maxRatio > 0) {
+			ratioHistory.add(getAnalysis()._maxRatio);
+			getAnalysis()._maxRatioReset = true;
 
-				if (ratioHistory.size() >= 60) {
-					ratioHistory.remove(ratioHistory.size() - 1);
-				}
+			if (ratioHistory.size() >= RATIO_HISTORY_SECONDS) {
+				ratioHistory.remove();
 			}
 		}
+
 		getAnalysis().second();
 	}
 
 	public double getMaxRatio60S() {
-		double max = 0.0;
-		synchronized (ratioLock) {
-            for (double d : ratioHistory) {
-				if (d > max) {
-					max = d;
-				}
-			}
-		}
-		return max;
+		var opt = ratioHistory.stream().max(Double::compareTo);
+		return opt.orElse(0.0);
 	}
 
 	public void reset() {
-		synchronized (ratioLock) {
-			ratioHistory.clear();
-		}
+		ratioHistory.clear();
 	}
 
 	public int getId() {
