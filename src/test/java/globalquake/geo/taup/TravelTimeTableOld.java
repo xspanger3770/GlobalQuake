@@ -1,7 +1,5 @@
 package globalquake.geo.taup;
 
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-
 import java.util.ArrayList;
 
 @SuppressWarnings("unused")
