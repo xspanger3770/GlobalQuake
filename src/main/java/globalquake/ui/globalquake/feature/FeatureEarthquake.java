@@ -2,7 +2,7 @@ package globalquake.ui.globalquake.feature;
 
 import globalquake.core.earthquake.Earthquake;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.TravelTimeTable;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
@@ -42,9 +42,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         Earthquake e = entity.getOriginal();
 
         long age = System.currentTimeMillis() - e.getOrigin();
-        double pDist = TravelTimeTable.getPWaveTravelAngle(e.getDepth(), age / 1000.0, false) / 360.0
+        double pDist = TauPTravelTimeCalculator.getPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
-        double sDist = TravelTimeTable.getSWaveTravelAngle(e.getDepth(), age / 1000.0, false) / 360.0
+        double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
 
         renderer.createCircle(elementPWave.getPolygon(),

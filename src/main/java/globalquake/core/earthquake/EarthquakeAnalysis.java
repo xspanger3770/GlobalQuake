@@ -4,7 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;
-import globalquake.geo.TravelTimeTable;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.sounds.Sounds;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
@@ -272,7 +272,7 @@ public class EarthquakeAnalysis {
 		for (Event e : events) {
 			double distGC = GeoUtils.greatCircleDistance(e.getAnalysis().getStation().getLatitude(),
 					e.getAnalysis().getStation().getLongitude(), hyp.lat, hyp.lon);
-			double travelTime = TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC));
+			double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC));
 			origins.add(e.getpWave() - ((long) travelTime * 1000));
 		}
 	
@@ -286,7 +286,7 @@ public class EarthquakeAnalysis {
 		for (Event e : events) {
 			double distGC = GeoUtils.greatCircleDistance(hyp.lat, hyp.lon, e.getAnalysis().getStation().getLatitude(),
 					e.getAnalysis().getStation().getLongitude());
-			double expectedDT = TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC));
+			double expectedDT = TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC));
 			double actualTravel = Math.abs((e.getpWave() - hyp.origin) / 1000.0);
 			double _err = Math.abs(expectedDT - actualTravel);
 			if (_err < TIME_DIFFERENCE_TRESHOLD) {
@@ -370,7 +370,7 @@ public class EarthquakeAnalysis {
 		for (Event e : c.getSelected()) {
 			double distGC = GeoUtils.greatCircleDistance(e.getLatFromStation(), e.getLonFromStation(), hyp.lat,
 					hyp.lon);
-			long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(hyp.depth, TravelTimeTable.toAngle(distGC))
+			long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC))
 					* 1000);
 			long actualTravel = Math.abs(e.getpWave() - hyp.origin);
 			boolean wrong = e.getpWave() < hyp.origin
@@ -411,7 +411,7 @@ public class EarthquakeAnalysis {
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
 					-earthquake.getDepth(), e.getLatFromStation(), e.getLonFromStation(), e.getAnalysis().getStation().getAlt() / 1000.0);
 			long expectedSArrival = (long) (earthquake.getOrigin()
-					+ TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(), TravelTimeTable.toAngle(distGC))
+					+ TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC))
 					* 1000);
 			long lastRecord = ((BetterAnalysis) e.getAnalysis()).getLatestLogTime();
 			// *0.5 because s wave is stronger

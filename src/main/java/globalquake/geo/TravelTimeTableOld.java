@@ -1,8 +1,10 @@
 package globalquake.geo;
 
+import globalquake.geo.taup.TauPTravelTimeCalculator;
+
 import java.util.ArrayList;
 
-public class TravelTimeTable {
+public class TravelTimeTableOld {
 
 	public static final double[] DEPTHS = { 0, 15, 35, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650,
 			700 };
@@ -892,16 +894,12 @@ public class TravelTimeTable {
 
 		for (int i = 0; i < runs; i++) {
 			double v = current + (max / Math.pow(2, i + 1)); // distance
-			double dt = Math.abs(getSWaveTravelTime(depth, toAngle(v)) - getPWaveTravelTime(depth, toAngle(v)));
+			double dt = Math.abs(getSWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(v)) - getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(v)));
 			if (dt < deltaT) {
 				current += (max / Math.pow(2, i + 1));
 			}
 		}
 		return current;
-	}
-
-	public static double toAngle(double km) {
-		return (km / GeoUtils.EARTH_CIRCUMFERENCE) * 360.0;
 	}
 
 }
