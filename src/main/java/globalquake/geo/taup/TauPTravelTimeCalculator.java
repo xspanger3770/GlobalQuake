@@ -1,6 +1,5 @@
 package globalquake.geo.taup;
 
-import edu.sc.seis.TauP.TauP_GUI;
 import globalquake.exception.FatalApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
@@ -52,9 +51,7 @@ public class TauPTravelTimeCalculator {
         return res;
     }
 
-    public static void main(String[] args) {
-        new TauP_GUI().setVisible(true);
-    }
+
 
     public static double getPWaveTravelTime(double depth, double angle){
         return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle);
