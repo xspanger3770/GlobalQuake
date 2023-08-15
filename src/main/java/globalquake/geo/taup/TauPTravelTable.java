@@ -61,11 +61,13 @@ public class TauPTravelTable implements Serializable {
                 for (double ang = minAngle; ang <= maxAngle; ang += TauPTravelTimeCalculator.ANG_RESOLUTION) {
                     timeTool.setSourceDepth(depth);
                     timeTool.calculate(ang);
+                    int x = (int) Math.round(depth / TauPTravelTimeCalculator.DEPTH_RESOLUTION);
+                    int y = (int) Math.round((ang - minAngle) / TauPTravelTimeCalculator.ANG_RESOLUTION);
                     if (timeTool.getNumArrivals() > 0) {
                         Arrival arrival = timeTool.getArrival(0);
-                        array[(int) (depth / TauPTravelTimeCalculator.DEPTH_RESOLUTION)][(int) ((ang - minAngle) / TauPTravelTimeCalculator.ANG_RESOLUTION)] = (float) arrival.getTime();
+                        array[x][y] = (float) arrival.getTime();
                     } else {
-                        array[(int) (depth / TauPTravelTimeCalculator.DEPTH_RESOLUTION)][(int) ((ang - minAngle) / TauPTravelTimeCalculator.ANG_RESOLUTION)] = TauPTravelTimeCalculator.NO_ARRIVAL;
+                        array[x][y] = TauPTravelTimeCalculator.NO_ARRIVAL;
                     }
                 }
             } catch (Exception e) {
@@ -76,9 +78,12 @@ public class TauPTravelTable implements Serializable {
     }
 
     private static float[][] createArray(double minAng, double maxAng) {
-        int count = ((int) (TauPTravelTimeCalculator.MAX_DEPTH / TauPTravelTimeCalculator.DEPTH_RESOLUTION) + 1) * ((int) ((maxAng - minAng) / TauPTravelTimeCalculator.ANG_RESOLUTION) + 1);
+        int width = ((int) Math.round(TauPTravelTimeCalculator.MAX_DEPTH / TauPTravelTimeCalculator.DEPTH_RESOLUTION) + 1);
+        int height = (int) Math.round((maxAng - minAng) / TauPTravelTimeCalculator.ANG_RESOLUTION) + 1;
+
+        int count = width * height;
         double size = (count * Float.BYTES) / (1024.0 * 1024.0);
         System.out.printf("Filling array size %,d (%.3fMB)%n", count, size);
-        return new float[(int) (TauPTravelTimeCalculator.MAX_DEPTH / TauPTravelTimeCalculator.DEPTH_RESOLUTION) + 1][(int) ((maxAng - minAng) / TauPTravelTimeCalculator.ANG_RESOLUTION) + 1];
+        return new float[width][height];
     }
 }

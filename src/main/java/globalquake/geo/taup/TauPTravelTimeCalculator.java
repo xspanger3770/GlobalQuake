@@ -1,5 +1,6 @@
 package globalquake.geo.taup;
 
+import edu.sc.seis.TauP.TauP_GUI;
 import globalquake.exception.FatalApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
@@ -50,18 +51,7 @@ public class TauPTravelTimeCalculator {
     }
 
     public static void main(String[] args) throws Exception{
-        init();
-
-        long a = System.currentTimeMillis();
-        int c= 0;
-
-        while(System.currentTimeMillis() - a < 1000){
-            getPKIKPWaveTravelAngle(100, 100);
-            //TravelTimeTable.getPWaveTravelAngle(0,0,true);
-            c++;
-        }
-
-        System.out.printf("%,d %n%n", c);
+        new TauP_GUI().setVisible(true);
     }
 
     public static double getPWaveTravelTime(double depth, double angle){
@@ -81,22 +71,22 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
-        return binarySearchTime((angle) -> getPWaveTravelTime(depth, angle), timeSeconds, 1e-6,
+        return binarySearchTime((angle) -> getPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
     }
 
     public static double getSWaveTravelAngle(double depth, double timeSeconds) {
-        return binarySearchTime((angle) -> getSWaveTravelTime(depth, angle), timeSeconds, 1e-6,
+        return binarySearchTime((angle) -> getSWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
     }
 
     public static double getPKIKPWaveTravelAngle(double depth, double timeSeconds) {
-        return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-6,
+        return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE);
     }
 
     public static double getPKPWaveTravelAngle(double depth, double timeSeconds) {
-        return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-6,
+        return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE);
     }
 
@@ -107,8 +97,8 @@ public class TauPTravelTimeCalculator {
 
         while (right - left > epsilon) {
             double mid = left + (right - left) / 2.0;
-            double midValue = func.apply(mid);
 
+            double midValue = func.apply(mid);
             if(midValue == NO_ARRIVAL){
                 return NO_ARRIVAL;
             }
