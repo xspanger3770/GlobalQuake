@@ -121,7 +121,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         });
 
         addMouseWheelListener(e -> {
-            boolean down = e.getWheelRotation() < 0;
+            boolean down = e.getPreciseWheelRotation() < 0;
             double mul = down ? (1 / 1.15) : 1.15;
 
             if (down) {
