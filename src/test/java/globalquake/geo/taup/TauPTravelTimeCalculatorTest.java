@@ -52,7 +52,7 @@ public class TauPTravelTimeCalculatorTest {
         for(double depth = 0; depth < 600; depth += 1) {
             for (double ang = 0; ang < 150; ang += 1) {
                 assertEquals("%s˚ %skm".formatted(ang, depth), ang, TauPTravelTimeCalculator.getPWaveTravelAngle(depth, TauPTravelTimeCalculator.getPWaveTravelTime(depth, ang)),
-                         0.01);
+                         1e-4);
             }
         }
     }

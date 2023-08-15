@@ -8,6 +8,7 @@ import globalquake.geo.GeoUtils;
 import java.io.*;
 import java.util.function.Function;
 
+@SuppressWarnings("unused")
 public class TauPTravelTimeCalculator {
 
     public static final double ANG_RESOLUTION = 0.05;
@@ -33,6 +34,7 @@ public class TauPTravelTimeCalculator {
         out.close();
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static TauPTravelTable loadTravelTable(String path) throws FatalIOException {
         var url = ClassLoader.getSystemClassLoader().getResource(path);
         if(url == null){
@@ -50,7 +52,7 @@ public class TauPTravelTimeCalculator {
         return res;
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) {
         new TauP_GUI().setVisible(true);
     }
 
