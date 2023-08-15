@@ -11,13 +11,13 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.AlertManager;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.GlobalQuake;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
 import globalquake.geo.Level;
 import globalquake.geo.Shindo;
-import globalquake.geo.TravelTimeTable;
 
 public class ClusterAnalysis {
 
@@ -52,8 +52,8 @@ public class ClusterAnalysis {
                         }
                         double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
                                 event.getLatFromStation(), event.getLonFromStation());
-                        long expectedTravel = (long) (TravelTimeTable.getPWaveTravelTime(earthquake.getDepth(),
-                                TravelTimeTable.toAngle(distGC)) * 1000);
+                        long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                                TauPTravelTimeCalculator.toAngle(distGC)) * 1000);
                         long actualTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
                         boolean abandon = event.getpWave() < earthquake.getOrigin()
                                 || Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
@@ -261,8 +261,8 @@ public class ClusterAnalysis {
             if (info.maxPGAHome >= Shindo.ZERO.pga()) {
                 double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
 
-                double sTravel = (long) (TravelTimeTable.getSWaveTravelTime(quake.getDepth(),
-                        TravelTimeTable.toAngle(distGC)));
+                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
+                        TauPTravelTimeCalculator.toAngle(distGC)));
                 int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
 
                 int soundIndex = -1;

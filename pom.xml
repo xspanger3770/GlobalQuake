@@ -28,7 +28,12 @@
 			<artifactId>seedCodec</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/edu.sc.seis/TauP -->
+		<dependency>
+			<groupId>edu.sc.seis</groupId>
+			<artifactId>TauP</artifactId>
+			<version>2.6.1</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/uk.me.berndporr/iirj -->
 		<dependency>

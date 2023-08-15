@@ -18,11 +18,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import globalquake.core.earthquake.Earthquake;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.Level;
 import globalquake.geo.Shindo;
-import globalquake.geo.TravelTimeTable;
 
 public class AlertWindow extends JFrame {
 
@@ -77,10 +77,10 @@ public class AlertWindow extends JFrame {
 			return;
 		}
 
-		double pTravel = (long) (TravelTimeTable.getPWaveTravelTime(earthquake.getDepth(),
-				TravelTimeTable.toAngle(distGC)));
-		double sTravel = (long) (TravelTimeTable.getSWaveTravelTime(earthquake.getDepth(),
-				TravelTimeTable.toAngle(distGC)));
+		double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+				TauPTravelTimeCalculator.toAngle(distGC)));
+		double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+				TauPTravelTimeCalculator.toAngle(distGC)));
 
 		int secondsP = (int) Math.max(0, Math.ceil(pTravel - age));
 		int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
