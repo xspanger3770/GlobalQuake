@@ -32,7 +32,7 @@ public class FDSNWSDownloader {
         downloadWadl(dummy);
     }
 
-    private static void downloadWadl(StationSource stationSource) throws Exception {
+    private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -54,12 +54,7 @@ public class FDSNWSDownloader {
             }
         }
 
-        // Print the extracted param names
-        for (String paramName : paramNames) {
-            System.out.println(paramName);
-        }
-
-        System.out.println();
+        return paramNames;
     }
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
@@ -70,7 +65,14 @@ public class FDSNWSDownloader {
     }
 
     public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon) throws Exception {
-        URL url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
+        List<String> supportedAttributes = downloadWadl(stationSource);
+        URL url;
+        if(supportedAttributes.contains("endafter")){
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
+        } else {
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon));
+        }
+
 
         System.out.println("Connecting to " + url);
 
@@ -124,17 +126,13 @@ public class FDSNWSDownloader {
     private static void parseNetworks(List<Network> result, StationSource stationSource, Element root) {
         NodeList networks = root.getElementsByTagName("Network");
         for (int i = 0; i < networks.getLength(); i++) {
-            try {
-                String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
-                if (networkCode.equalsIgnoreCase("unknown")) {
-                    System.err.println("ERR: no network code wtf.");
-                    continue;
-                }
-                String networkDescription = obtainElement(networks.item(i), "Description", "");
-                parseStations(result, stationSource, networks, i, networkCode, networkDescription);
-            } catch (Exception e) {
-                Main.getErrorHandler().handleException(e);
+            String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
+            if (networkCode.equalsIgnoreCase("unknown")) {
+                System.err.println("ERR: no network code wtf.");
+                continue;
             }
+            String networkDescription = obtainElement(networks.item(i), "Description", "");
+            parseStations(result, stationSource, networks, i, networkCode, networkDescription);
         }
     }
 
@@ -164,8 +162,15 @@ public class FDSNWSDownloader {
                     ((Element) channelNode).getElementsByTagName("Longitude").item(0).getTextContent());
             double alt = Double.parseDouble(
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
-            double sampleRate = Double.parseDouble(((Element) channelNode)
-                    .getElementsByTagName("SampleRate").item(0).getTextContent());
+
+            var item = ((Element) channelNode)
+                    .getElementsByTagName("SampleRate").item(0);
+
+            double sampleRate = -1;
+            if(item != null){
+                sampleRate = Double.parseDouble(((Element) channelNode)
+                        .getElementsByTagName("SampleRate").item(0).getTextContent());
+            }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate);
