@@ -22,15 +22,15 @@ public class StationDatabaseManager {
     private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
     private boolean updating = false;
 
-    public void load() throws FatalIOException{
+    public void load() throws FatalIOException {
         File file = getDatabaseFile();
         if (!file.getParentFile().exists()) {
-            if(!file.getParentFile().mkdirs()){
-               throw new FatalIOException("Unable to create database file directory!", null);
+            if (!file.getParentFile().mkdirs()) {
+                throw new FatalIOException("Unable to create database file directory!", null);
             }
         }
 
-        if(file.exists()){
+        if (file.exists()) {
             try {
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
                 stationDatabase = (StationDatabase) in.readObject();
@@ -42,53 +42,53 @@ public class StationDatabaseManager {
             }
         }
 
-        if(stationDatabase == null){
+        if (stationDatabase == null) {
             System.out.println("A new database created");
             stationDatabase = new StationDatabase();
         }
 
     }
 
-    public void save() throws FatalIOException{
+    public void save() throws FatalIOException {
         File file = getDatabaseFile();
         if (!file.getParentFile().exists()) {
-            if(!file.getParentFile().mkdirs()){
+            if (!file.getParentFile().mkdirs()) {
                 throw new FatalIOException("Unable to create database file directory!", null);
             }
         }
 
-        if(stationDatabase == null){
+        if (stationDatabase == null) {
             return;
         }
 
         stationDatabase.getDatabaseReadLock().lock();
-        try{
+        try {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
             out.writeObject(stationDatabase);
             out.close();
-        }catch(IOException e){
+        } catch (IOException e) {
             throw new FatalIOException("Unable to save station database!", e);
         } finally {
             stationDatabase.getDatabaseReadLock().unlock();
         }
     }
 
-    public void addUpdateListener(Runnable runnable){
+    public void addUpdateListener(Runnable runnable) {
         this.updateListeners.add(runnable);
     }
 
-    public void addStatusListener(Runnable runnable){
+    public void addStatusListener(Runnable runnable) {
         this.statusListeners.add(runnable);
     }
 
-    public void fireUpdateEvent(){
-        for(Runnable runnable: updateListeners){
+    public void fireUpdateEvent() {
+        for (Runnable runnable : updateListeners) {
             runnable.run();
         }
     }
 
-    private void fireStatusChangeEvent(){
-        for(Runnable runnable: statusListeners){
+    private void fireStatusChangeEvent() {
+        for (Runnable runnable : statusListeners) {
             runnable.run();
         }
     }
@@ -104,13 +104,14 @@ public class StationDatabaseManager {
             });
             toBeUpdated.parallelStream().forEach(stationSource -> {
                 try {
+                    stationSource.getStatus().setString("Updating...");
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
                     StationDatabaseManager.this.acceptNetworks(networkList);
                     stationSource.getStatus().setString("Done");
                     stationSource.getStatus().setValue(100);
                     stationSource.setLastUpdate(LocalDateTime.now());
-                } catch(SocketTimeoutException e){
+                } catch (SocketTimeoutException e) {
                     Logger.error(e);
                     stationSource.getStatus().setString("Timed out!");
                     stationSource.getStatus().setValue(0);
@@ -122,7 +123,7 @@ public class StationDatabaseManager {
                     Logger.error(e);
                     stationSource.getStatus().setString("Error!");
                     stationSource.getStatus().setValue(0);
-                }finally {
+                } finally {
                     fireUpdateEvent();
                 }
             });
@@ -137,15 +138,15 @@ public class StationDatabaseManager {
 
     private void acceptNetworks(List<Network> networkList) {
         stationDatabase.getDatabaseWriteLock().lock();
-        try{
-            for(Network network:networkList){
-                for(Station station: network.getStations()){
-                    for(Channel channel:station.getChannels()){
+        try {
+            for (Network network : networkList) {
+                for (Station station : network.getStations()) {
+                    for (Channel channel : station.getChannels()) {
                         stationDatabase.acceptChannel(network, station, channel);
                     }
                 }
             }
-        }finally {
+        } finally {
             System.out.println(stationDatabase.getNetworks().size());
             stationDatabase.getDatabaseWriteLock().unlock();
         }
@@ -168,13 +169,17 @@ public class StationDatabaseManager {
         fireStatusChangeEvent();
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-                        try {
-                            SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                        } catch (Exception e) {
-                            seedlinkNetwork.getStatus().setString("Error!");
-                            seedlinkNetwork.getStatus().setValue(0);
-                        }finally {
-                            fireUpdateEvent();
+                        for (int attempt = 1; attempt <= 3; attempt++) {
+                            try {
+                                seedlinkNetwork.getStatus().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                break;
+                            } catch (Exception e) {
+                                seedlinkNetwork.getStatus().setString("Error!");
+                                seedlinkNetwork.getStatus().setValue(0);
+                            } finally {
+                                fireUpdateEvent();
+                            }
                         }
                     }
             );
@@ -198,15 +203,15 @@ public class StationDatabaseManager {
             removeAllStationSources(getStationDatabase().getStationSources());
             getStationDatabase().addDefaults();
             fireUpdateEvent();
-        }finally {
+        } finally {
             getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }
 
     public void removeAllSeedlinks(List<SeedlinkNetwork> toBeRemoved) {
-        for(Network network: getStationDatabase().getNetworks()){
-            for(Station station: network.getStations()){
-                for(Channel channel: station.getChannels()){
+        for (Network network : getStationDatabase().getNetworks()) {
+            for (Station station : network.getStations()) {
+                for (Channel channel : station.getChannels()) {
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
                 }
             }
@@ -218,7 +223,7 @@ public class StationDatabaseManager {
     public void removeAllStationSources(List<StationSource> toBeRemoved) {
         for (Iterator<Network> networkIterator = getStationDatabase().getNetworks().iterator(); networkIterator.hasNext(); ) {
             Network network = networkIterator.next();
-            for(Iterator<Station> stationIterator = network.getStations().iterator(); stationIterator.hasNext(); ){
+            for (Iterator<Station> stationIterator = network.getStations().iterator(); stationIterator.hasNext(); ) {
                 Station station = stationIterator.next();
                 for (Iterator<Channel> channelIterator = station.getChannels().iterator(); channelIterator.hasNext(); ) {
                     Channel channel = channelIterator.next();
@@ -227,15 +232,15 @@ public class StationDatabaseManager {
                         channelIterator.remove();
                     }
                 }
-                if(station.getChannels().isEmpty()){
+                if (station.getChannels().isEmpty()) {
                     stationIterator.remove();
-                } else if(station.getSelectedChannel() != null){
-                    if(!station.getChannels().contains(station.getSelectedChannel())){
+                } else if (station.getSelectedChannel() != null) {
+                    if (!station.getChannels().contains(station.getSelectedChannel())) {
                         station.selectBestAvailableChannel();
                     }
                 }
             }
-            if(network.getStations().isEmpty()){
+            if (network.getStations().isEmpty()) {
                 networkIterator.remove();
             }
         }
