@@ -1,15 +1,18 @@
 package globalquake.database;
 
-import globalquake.main.Main;
+import globalquake.exception.FdnwsDownloadException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,24 +20,78 @@ import java.util.List;
 
 public class FDSNWSDownloader {
 
-    private static final String CHANNELS = "EHZ,SHZ,HHZ,BHZ";
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private static final int TIMEOUT_SECONDS = 10;
+    private static final int TIMEOUT_SECONDS = 20;
 
-    public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
-        List<Network> result = new ArrayList<>();
+    private static List<String> downloadWadl(StationSource stationSource) throws Exception {
+        URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
 
-        URL url = new URL("%squery?level=channel&endafter=%s&includerestricted=false&format=xml&channel=%s".formatted(stationSource.getUrl(), format1.format(new Date()), CHANNELS));
-
-        System.out.println("Connecting to " + stationSource.getName());
-        stationSource.getStatus().setString("Connecting to " + stationSource.getName());
-        stationSource.getStatus().setValue(0);
-
-        URLConnection con = url.openConnection();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
         con.setReadTimeout(TIMEOUT_SECONDS * 1000);
         InputStream inp = con.getInputStream();
 
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inp);
+        doc.getDocumentElement().normalize();
+
+        List<String> paramNames = new ArrayList<>();
+        NodeList paramNodes = doc.getElementsByTagName("param");
+        for (int i = 0; i < paramNodes.getLength(); i++) {
+            Node paramNode = paramNodes.item(i);
+            if (paramNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element paramElement = (Element) paramNode;
+                String paramName = paramElement.getAttribute("name");
+                paramNames.add(paramName);
+            }
+        }
+
+        return paramNames;
+    }
+
+    public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
+        List<Network> result = new ArrayList<>();
+        downloadFDSNWS(stationSource, result, -180, 180);
+        System.out.printf("%d Networks downloaded.%n", result.size());
+        return result;
+    }
+
+    public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon) throws Exception {
+        List<String> supportedAttributes = downloadWadl(stationSource);
+        URL url;
+        if(supportedAttributes.contains("endafter")){
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
+        } else {
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon));
+        }
+
+
+        System.out.println("Connecting to " + url);
+
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
+        con.setReadTimeout(TIMEOUT_SECONDS * 1000);
+
+        int response = con.getResponseCode();
+
+        if (response == 413) {
+            System.err.println("413! Splitting...");
+            stationSource.getStatus().setString("Splitting...");
+            if(maxLon - minLon < 0.1){
+                System.err.println("This can't go forewer");
+                return;
+            }
+
+            downloadFDSNWS(stationSource, result, minLon, (minLon + maxLon) / 2.0);
+            downloadFDSNWS(stationSource, result, (minLon + maxLon) / 2.0, maxLon);
+        } else if(response / 100 == 2) {
+            InputStream inp = con.getInputStream();
+            downloadFDSNWS(stationSource, result, inp);
+        } else {
+            throw new FdnwsDownloadException("HTTP Status %d!".formatted(response));
+        }
+    }
+
+    private static void downloadFDSNWS(StationSource stationSource, List<Network> result, InputStream inp) throws Exception {
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
         f.setNamespaceAware(false);
         f.setValidating(false);
@@ -42,37 +99,31 @@ public class FDSNWSDownloader {
 
         in.setEvent(() ->  stationSource.getStatus().setString("Downloading %dkB".formatted(in.getCount() / 1024)));
 
-        stationSource.getStatus().setValue(25);
-        System.out.printf("Downloading stations from %s (%s)%n", stationSource.getName(), url);
+        String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+        // some FDSNWS providers send empty document if no stations found by given parameters
+        if(text.isEmpty()){
+            return;
+        }
+
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(text)));
 
         doc.getDocumentElement().normalize();
 
         Element root = doc.getDocumentElement();
-
-        stationSource.getStatus().setValue(50);
-        stationSource.getStatus().setString("Parsing networks...");
         parseNetworks(result, stationSource, root);
-
-        stationSource.getStatus().setValue(75);
-        return result;
     }
 
     private static void parseNetworks(List<Network> result, StationSource stationSource, Element root) {
         NodeList networks = root.getElementsByTagName("Network");
         for (int i = 0; i < networks.getLength(); i++) {
-            try {
-                String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
-                if (networkCode.equalsIgnoreCase("unknown")) {
-                    System.err.println("ERR: no network code wtf.");
-                    continue;
-                }
-                String networkDescription = obtainElement(networks.item(i), "Description", "");
-                parseStations(result, stationSource, networks, i, networkCode, networkDescription);
-            } catch (Exception e) {
-                Main.getErrorHandler().handleException(e);
+            String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
+            if (networkCode.equalsIgnoreCase("unknown")) {
+                System.err.println("ERR: no network code wtf.");
+                continue;
             }
+            String networkDescription = obtainElement(networks.item(i), "Description", "");
+            parseStations(result, stationSource, networks, i, networkCode, networkDescription);
         }
     }
 
@@ -102,8 +153,18 @@ public class FDSNWSDownloader {
                     ((Element) channelNode).getElementsByTagName("Longitude").item(0).getTextContent());
             double alt = Double.parseDouble(
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
-            double sampleRate = Double.parseDouble(((Element) channelNode)
-                    .getElementsByTagName("SampleRate").item(0).getTextContent());
+
+            var item = ((Element) channelNode)
+                    .getElementsByTagName("SampleRate").item(0);
+
+            // sample rate is not actually required as it is provided by the seedlink protocol itself
+            double sampleRate = -1;
+            if(item != null){
+                sampleRate = Double.parseDouble(((Element) channelNode)
+                        .getElementsByTagName("SampleRate").item(0).getTextContent());
+            }
+
+            // todo filter low sample rate channels
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate);
