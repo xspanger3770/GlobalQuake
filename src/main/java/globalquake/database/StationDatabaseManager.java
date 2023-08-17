@@ -98,9 +98,11 @@ public class StationDatabaseManager {
         fireStatusChangeEvent();
 
         new Thread(() -> {
-            toBeUpdated.parallelStream().forEach(stationSource -> {
-                stationSource.getStatus().setString("Updating...");
+            toBeUpdated.forEach(stationSource -> {
+                stationSource.getStatus().setString("Queued...");
                 stationSource.getStatus().setValue(0);
+            });
+            toBeUpdated.parallelStream().forEach(stationSource -> {
                 try {
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
@@ -159,6 +161,10 @@ public class StationDatabaseManager {
 
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
+        toBeUpdated.forEach(seedlinkNetwork -> {
+            seedlinkNetwork.getStatus().setString("Queued...");
+            seedlinkNetwork.getStatus().setValue(0);
+        });
         fireStatusChangeEvent();
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {

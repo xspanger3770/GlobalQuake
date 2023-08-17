@@ -43,6 +43,7 @@ public class FDSNWSDownloader {
 
         if (response == 413) {
             System.err.println("413! Splitting...");
+            stationSource.getStatus().setString("Splitting...");
             if(maxLon - minLon < 0.1){
                 System.err.println("This can't go forewer");
                 return;
