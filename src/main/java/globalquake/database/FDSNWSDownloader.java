@@ -22,7 +22,7 @@ public class FDSNWSDownloader {
 
     private static final String CHANNELS = "EHZ,SHZ,HHZ,BHZ";
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private static final int TIMEOUT_SECONDS = 10;
+    private static final int TIMEOUT_SECONDS = 20;
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
