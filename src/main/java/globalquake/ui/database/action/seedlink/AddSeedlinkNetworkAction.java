@@ -18,6 +18,11 @@ public class AddSeedlinkNetworkAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Add New Seedlink Network");
+
+        ImageIcon addIcon = new ImageIcon(getClass().getResource("/image_icons/add.png"));
+        Image image = addIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override

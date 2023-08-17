@@ -24,6 +24,11 @@ public class RemoveStationSourceAction extends AbstractAction {
         this.databaseManager = databaseManager;
 
         putValue(SHORT_DESCRIPTION, "Remove Station Sources");
+
+        ImageIcon removeIcon = new ImageIcon(getClass().getResource("/image_icons/remove.png"));
+        Image image = removeIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override
