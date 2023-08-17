@@ -108,7 +108,7 @@ public class StationDatabaseManager {
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
                     StationDatabaseManager.this.acceptNetworks(networkList);
-                    stationSource.getStatus().setString("Done");
+                    stationSource.getStatus().setString(networkList.size()+" Networks Downloaded");
                     stationSource.getStatus().setValue(100);
                     stationSource.setLastUpdate(LocalDateTime.now());
                 } catch (SocketTimeoutException e) {

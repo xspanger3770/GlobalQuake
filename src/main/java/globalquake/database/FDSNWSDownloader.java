@@ -7,12 +7,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,13 +23,14 @@ import java.util.List;
 
 public class FDSNWSDownloader {
 
-    private static final String CHANNELS = "EHZ,SHZ,HHZ,BHZ";
+    private static final String CHANNELS = "?HZ";
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 20;
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
         downloadFDSNWS(stationSource, result, -180, 180);
+        System.out.printf("%d Networks downloaded.%n", result.size());
         return result;
     }
 
@@ -67,13 +71,14 @@ public class FDSNWSDownloader {
 
         in.setEvent(() ->  stationSource.getStatus().setString("Downloading %dkB".formatted(in.getCount() / 1024)));
 
-        Document doc;
-        try {
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-        }catch(SAXParseException e){
-            Logger.error(e);
+        String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+
+        // some FDSNWS providers send empty document if no stations found by given parameters
+        if(text.isEmpty()){
             return;
         }
+
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(text)));
 
         doc.getDocumentElement().normalize();
 
