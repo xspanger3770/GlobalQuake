@@ -24,7 +24,7 @@ public class FDSNWSDownloader {
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
 
-        URL url = new URL("%squery?level=channel&endafter=%s&includerestricted=false&format=xml&channel=%s".formatted(stationSource.getUrl(), format1.format(new Date()), CHANNELS));
+        URL url = new URL("%squery?level=channel&endafter=%s&format=xml&channel=%s".formatted(stationSource.getUrl(), format1.format(new Date()), CHANNELS));
 
         System.out.println("Connecting to " + stationSource.getName());
         stationSource.getStatus().setString("Connecting to " + stationSource.getName());
