@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -23,9 +24,43 @@ import java.util.List;
 
 public class FDSNWSDownloader {
 
-    private static final String CHANNELS = "?HZ";
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 20;
+
+    public static void main(String[] args) throws Exception{
+        StationSource dummy = new StationSource("S", "http://service.iris.edu/fdsnws/station/1/");
+        downloadWadl(dummy);
+    }
+
+    private static void downloadWadl(StationSource stationSource) throws Exception {
+        URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
+
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
+        con.setReadTimeout(TIMEOUT_SECONDS * 1000);
+        InputStream inp = con.getInputStream();
+
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inp);
+        doc.getDocumentElement().normalize();
+
+        List<String> paramNames = new ArrayList<>();
+        NodeList paramNodes = doc.getElementsByTagName("param");
+        for (int i = 0; i < paramNodes.getLength(); i++) {
+            Node paramNode = paramNodes.item(i);
+            if (paramNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element paramElement = (Element) paramNode;
+                String paramName = paramElement.getAttribute("name");
+                paramNames.add(paramName);
+            }
+        }
+
+        // Print the extracted param names
+        for (String paramName : paramNames) {
+            System.out.println(paramName);
+        }
+
+        System.out.println();
+    }
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
@@ -35,7 +70,7 @@ public class FDSNWSDownloader {
     }
 
     public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon) throws Exception {
-        URL url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date()), CHANNELS));
+        URL url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
 
         System.out.println("Connecting to " + url);
 
