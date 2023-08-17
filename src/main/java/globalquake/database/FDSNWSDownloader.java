@@ -1,20 +1,16 @@
 package globalquake.database;
 
 import globalquake.exception.FdnwsDownloadException;
-import globalquake.main.Main;
-import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -26,11 +22,6 @@ public class FDSNWSDownloader {
 
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 20;
-
-    public static void main(String[] args) throws Exception{
-        StationSource dummy = new StationSource("S", "http://service.iris.edu/fdsnws/station/1/");
-        downloadWadl(dummy);
-    }
 
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
@@ -166,11 +157,14 @@ public class FDSNWSDownloader {
             var item = ((Element) channelNode)
                     .getElementsByTagName("SampleRate").item(0);
 
+            // sample rate is not actually required as it is provided by the seedlink protocol itself
             double sampleRate = -1;
             if(item != null){
                 sampleRate = Double.parseDouble(((Element) channelNode)
                         .getElementsByTagName("SampleRate").item(0).getTextContent());
             }
+
+            // todo filter low sample rate channels
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate);
