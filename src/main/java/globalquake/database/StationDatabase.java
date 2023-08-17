@@ -55,7 +55,7 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("NOA", "http://eida.gein.noa.gr/fdsnws/station/1/"));
         stationSources.add(new StationSource("ORFEUS", "http://www.orfeus-eu.org/fdsnws/station/1/"));
         stationSources.add(new StationSource("RESIF", "http://ws.resif.fr/fdsnws/station/1/"));
-        //stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
+        stationSources.add(new StationSource("SNAC NOA", "http://snac.gein.noa.gr:8080/fdsnws/station/1/"));
         stationSources.add(new StationSource("IRIS DMC", "http://service.iris.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("NCEDC", "https://service.ncedc.org/fdsnws/station/1"));
         stationSources.add(new StationSource("SCEDC", "http://service.scedc.caltech.edu/fdsnws/station/1/"));

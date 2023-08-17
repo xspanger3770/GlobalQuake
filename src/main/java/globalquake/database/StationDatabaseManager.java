@@ -1,9 +1,12 @@
 package globalquake.database;
 
 import globalquake.exception.FatalIOException;
+import globalquake.exception.FdnwsDownloadException;
 import globalquake.main.Main;
+import org.tinylog.Logger;
 
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -97,6 +100,7 @@ public class StationDatabaseManager {
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(stationSource -> {
                 stationSource.getStatus().setString("Updating...");
+                stationSource.getStatus().setValue(0);
                 try {
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
                     stationSource.getStatus().setString("Updating database...");
@@ -104,8 +108,16 @@ public class StationDatabaseManager {
                     stationSource.getStatus().setString("Done");
                     stationSource.getStatus().setValue(100);
                     stationSource.setLastUpdate(LocalDateTime.now());
+                } catch(SocketTimeoutException e){
+                    Logger.error(e);
+                    stationSource.getStatus().setString("Timed out!");
+                    stationSource.getStatus().setValue(0);
+                } catch (FdnwsDownloadException e) {
+                    Logger.error(e);
+                    stationSource.getStatus().setString(e.getUserMessage());
+                    stationSource.getStatus().setValue(0);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.error(e);
                     stationSource.getStatus().setString("Error!");
                     stationSource.getStatus().setValue(0);
                 }finally {

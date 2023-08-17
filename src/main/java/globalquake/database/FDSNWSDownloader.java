@@ -1,5 +1,6 @@
 package globalquake.database;
 
+import globalquake.exception.FdnwsDownloadException;
 import globalquake.main.Main;
 import org.tinylog.Logger;
 import org.w3c.dom.Document;
@@ -14,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class FDSNWSDownloader {
@@ -22,12 +24,6 @@ public class FDSNWSDownloader {
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 10;
 
-    public static void main(String[] args) throws Exception {
-        String host = "https://geof.bmkg.go.id/fdsnws/station/1/";
-        StationSource dummy = new StationSource("Test", host);
-        downloadFDSNWS(dummy);
-    }
-
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
         downloadFDSNWS(stationSource, result, -180, 180);
@@ -35,7 +31,7 @@ public class FDSNWSDownloader {
     }
 
     public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon) throws Exception {
-        URL url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=%s".formatted(stationSource.getUrl(), minLon, maxLon, CHANNELS));
+        URL url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date()), CHANNELS));
 
         System.out.println("Connecting to " + url);
 
@@ -54,11 +50,11 @@ public class FDSNWSDownloader {
 
             downloadFDSNWS(stationSource, result, minLon, (minLon + maxLon) / 2.0);
             downloadFDSNWS(stationSource, result, (minLon + maxLon) / 2.0, maxLon);
-        } else if(response == 200) {
+        } else if(response / 100 == 2) {
             InputStream inp = con.getInputStream();
             downloadFDSNWS(stationSource, result, inp);
         } else {
-            throw new RuntimeException();
+            throw new FdnwsDownloadException("HTTP Status %d!".formatted(response));
         }
     }
 
