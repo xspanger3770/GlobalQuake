@@ -6,6 +6,9 @@
 </h1>
 
 > [!NOTE]<br>
+> If you have a problem where you see 0 available stations, even though the download finished successfully, you can try temporatily switching your timezone (UTC or UTC+2). There is currently a timezone issue affecting some users. A fix will be released asap.
+
+> [!NOTE]<br>
 > GlobalQuake 0.9.1 has just been released!
 > Read about the new features in the [releases section](https://github.com/xspanger3770/GlobalQuake/releases)
 
