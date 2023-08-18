@@ -124,7 +124,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             double rotation = e.getPreciseWheelRotation();
             boolean down = rotation < 0;
 
-            double delta = 1 + Math.abs(rotation) * 0.05;
+            double delta = 1 + Math.abs(rotation) * 0.12;
             double mul = down ? 1 / delta : delta;
 
             if (down) {
