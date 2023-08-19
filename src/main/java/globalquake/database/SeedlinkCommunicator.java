@@ -59,9 +59,12 @@ public class SeedlinkCommunicator {
                 Calendar end = Calendar.getInstance();
                 end.setTime(endDate.contains("-") ? format2.parse(endDate) : format3.parse(endDate));
                 long delay = System.currentTimeMillis() - end.getTimeInMillis() - TimeFixer.offset();
-                if (delay > 1000 * 60 * 15) {
+
+                // HOTFIX before better timezone handling is implemented
+
+                /*if (delay > 1000 * 60 * 15) {
                     continue;
-                }
+                }*/
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
             }
         }
