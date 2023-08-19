@@ -1,7 +1,7 @@
 package globalquake.sounds;
 
-import globalquake.exception.FatalIOException;
 import globalquake.ui.settings.Settings;
+import org.tinylog.Logger;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -27,17 +27,21 @@ public class Sounds {
 	public static final Clip[] countdowns = new Clip[countdown_levels.length];
 
 	public static final boolean soundsEnabled = true;
+	public static boolean soundsAvailable = true;
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
 
-	private static Clip loadSound(String res) throws FatalIOException {
+	private static Clip loadSound(String res) {
 		try {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(res)));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
 		} catch(Exception e){
-			throw new FatalIOException("Cannot load sound: "+res, e);
+			Logger.error("failed to load sound");
+			Logger.error(e);
+			soundsAvailable = false;
+			return null;
 		}
 	}
 
@@ -51,6 +55,12 @@ public class Sounds {
 		eew_warning = loadSound("sounds/eew_warning.wav");
 		felt = loadSound("sounds/felt.wav");
 		dong = loadSound("sounds/dong.wav");
+
+		if(!soundsAvailable)
+		{
+			Logger.info("An error occurred while loading sounds. Sounds will be disabled.");
+			return;
+		}
 
 		for (int i = 0; i < shindoNames.length; i++) {
 			Clip first = loadSound("sounds/levels/level_" + shindoNames[i] + ".wav");
@@ -75,7 +85,8 @@ public class Sounds {
 	}
 
 	public static void playSound(Clip clip) {
-		if(!Settings.enableSound) {
+		if(!Settings.enableSound || !soundsAvailable) {
+			Logger.debug(clip.toString() + " not played. Sound disabled.");
 			return;
 		}
 		if (soundsEnabled && clip != null) {
