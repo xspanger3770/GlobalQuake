@@ -175,6 +175,7 @@ public class StationDatabaseManager {
                                 SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
                                 break;
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 seedlinkNetwork.getStatus().setString("Error!");
                                 seedlinkNetwork.getStatus().setValue(0);
                             } finally {
