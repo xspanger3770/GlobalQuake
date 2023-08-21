@@ -47,6 +47,15 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 		}
 	}
 
+	public synchronized void handleWarning(Throwable e) {
+		System.err.println((e instanceof RuntimeApplicationException) + ", " + e.getCause());
+		showWarning(e.getMessage());
+	}
+
+	private void showWarning(String message) {
+		JOptionPane.showMessageDialog(parent, message, "Warning", JOptionPane.WARNING_MESSAGE);
+	}
+
 	private void showDetailedError(Throwable e) {
 		errorCount++;
 		if (errorCount == 2) {

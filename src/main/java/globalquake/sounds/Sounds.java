@@ -1,5 +1,6 @@
 package globalquake.sounds;
 
+import globalquake.exception.FatalIOException;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
@@ -31,17 +32,15 @@ public class Sounds {
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
 
-	private static Clip loadSound(String res) {
+	private static Clip loadSound(String res) throws FatalIOException {
 		try {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(res)));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
 		} catch(Exception e){
-			Logger.error("failed to load sound");
-			Logger.error(e);
 			soundsAvailable = false;
-			return null;
+			throw new FatalIOException("Failed to load sound: "+res, e);
 		}
 	}
 
@@ -55,12 +54,6 @@ public class Sounds {
 		eew_warning = loadSound("sounds/eew_warning.wav");
 		felt = loadSound("sounds/felt.wav");
 		dong = loadSound("sounds/dong.wav");
-
-		if(!soundsAvailable)
-		{
-			Logger.info("An error occurred while loading sounds. Sounds will be disabled.");
-			return;
-		}
 
 		for (int i = 0; i < shindoNames.length; i++) {
 			Clip first = loadSound("sounds/levels/level_" + shindoNames[i] + ".wav");

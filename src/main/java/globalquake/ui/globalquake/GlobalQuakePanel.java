@@ -115,7 +115,7 @@ public class GlobalQuakePanel extends GlobePanel {
         //If sound is not available, set a special message
         if(!Sounds.soundsAvailable)
         {
-            settingsStrings.add("Sound Alarm unavailable: See log");
+            settingsStrings.add("Sound Alarms unavailable");
         }
         else{
             settingsStrings.add("Sound Alarms: %s (S)".formatted(Settings.enableSound ? "Enabled" : "Disabled"));
