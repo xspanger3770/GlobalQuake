@@ -1,7 +1,6 @@
 package globalquake.database;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
-import globalquake.utils.TimeFixer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,11 +12,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class SeedlinkCommunicator {
 
-    private static final SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final SimpleDateFormat format3 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
+    private static final SimpleDateFormat FORMAT_UTC_SHORT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat FORMAT_UTC_LONG = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
+    private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
+
+    static{
+        FORMAT_UTC_SHORT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        FORMAT_UTC_LONG.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
@@ -57,11 +63,14 @@ public class SeedlinkCommunicator {
                 String channelName = channel.getAttributes().getNamedItem("seedname").getTextContent();
                 String endDate = channel.getAttributes().getNamedItem("end_time").getTextContent();
                 Calendar end = Calendar.getInstance();
-                end.setTime(endDate.contains("-") ? format2.parse(endDate) : format3.parse(endDate));
-                long delay = System.currentTimeMillis() - end.getTimeInMillis() - TimeFixer.offset();
-                if (delay > 1000 * 60 * 15) {
+                end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.parse(endDate) : FORMAT_UTC_LONG.parse(endDate));
+
+                long delay = System.currentTimeMillis() - end.getTimeInMillis();
+
+                if(delay > MAX_DELAY_MS){
                     continue;
                 }
+
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
             }
         }

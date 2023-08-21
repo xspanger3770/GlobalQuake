@@ -64,6 +64,12 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("BMKG", "https://geof.bmkg.go.id/fdsnws/station/1/"));
         stationSources.add(new StationSource("AusPass", "http://auspass.edu.au:8080/fdsnws/station/1/"));
 
+        // 0.9.3
+        stationSources.add(new StationSource("ESM", "https://esm-db.eu/fdsnws/station/1/"));
+        stationSources.add(new StationSource("GeoNet", "https://service.geonet.org.nz/fdsnws/station/1/"));
+        stationSources.add(new StationSource("Haiti", "https://ayiti.unice.fr/ayiti-seismes/fdsnws/station/1/"));
+        stationSources.add(new StationSource("SismoAzur", "https://sismoazur.oca.eu/fdsnws/station/1/"));
+
         // COMMENTED SERVERS WERE UNRELIABLE
 
         seedlinkNetworks.add(new SeedlinkNetwork("AusPass", "auspass.edu.au", 18000));

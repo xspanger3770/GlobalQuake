@@ -23,6 +23,8 @@ public class FDSNWSDownloader {
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 20;
 
+    public static final List<String> SUPPORTED_CHANNELS = List.of("HHZ", "BHZ", "EHZ", "SHZ");
+
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
 
@@ -164,7 +166,9 @@ public class FDSNWSDownloader {
                         .getElementsByTagName("SampleRate").item(0).getTextContent());
             }
 
-            // todo filter low sample rate channels
+            if(!SUPPORTED_CHANNELS.contains(channel)){
+                continue;
+            }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate);
