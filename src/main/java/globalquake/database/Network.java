@@ -11,7 +11,7 @@ public class Network implements Serializable {
 
     private final String networkCode;
     private final String description;
-    private final Collection<Station> stations;
+    private final List<Station> stations;
 
     public Network(String networkCode, String description) {
         this.networkCode = networkCode;
@@ -27,7 +27,20 @@ public class Network implements Serializable {
         return description;
     }
 
-    public Collection<Station> getStations() {
+    public List<Station> getStations() {
         return stations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Network network = (Network) o;
+        return Objects.equals(networkCode, network.networkCode) && Objects.equals(description, network.description) && Objects.equals(stations, network.stations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(networkCode, description, stations);
     }
 }

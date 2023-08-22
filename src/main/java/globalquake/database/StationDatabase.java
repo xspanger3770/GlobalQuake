@@ -168,7 +168,7 @@ public class StationDatabase implements Serializable {
             return null;
         }
 
-        Station station = getStation(network, stationCode);
+        Station station = findStation(network, stationCode);
         if(station == null){
             return null;
         }
@@ -176,7 +176,7 @@ public class StationDatabase implements Serializable {
         return getChannel(station, channelName, locationCode);
     }
 
-    private static Station getStation(Network network, String stationCode) {
+    private static Station findStation(Network network, String stationCode) {
         for(Station station: network.getStations()){
             if(station.getStationCode().equals(stationCode)){
                 return station;
@@ -187,7 +187,7 @@ public class StationDatabase implements Serializable {
 
 
     public static Station getOrCreateStation(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
-        Station station = getStation(network, stationCode);
+        Station station = findStation(network, stationCode);
         if(station != null){
             return station;
         }
@@ -197,6 +197,17 @@ public class StationDatabase implements Serializable {
         network.getStations().add(station);
 
         return station;
+    }
+
+    public static Station getOrInsertStation(Network network, Station stationNew) {
+        Station station = findStation(network, stationNew.getStationCode());
+        if(station != null){
+            return station;
+        }
+
+        network.getStations().add(stationNew);
+
+        return stationNew;
     }
 
     public static Network getNetwork(List<Network> networks, String networkCode) {
@@ -221,11 +232,22 @@ public class StationDatabase implements Serializable {
         return resultNetwork;
     }
 
+    public static Network getOrInsertNetwork(List<Network> networks, Network network) {
+        Network resultNetwork = getNetwork(networks, network.getNetworkCode());
+        if(resultNetwork != null) {
+            return resultNetwork;
+        }
+
+        networks.add(network);
+
+        return network;
+    }
+
 
     @SuppressWarnings("UnusedReturnValue")
     public Channel acceptChannel(Network network, Station station, Channel channel) {
-        Network networkFound = getOrCreateNetwork(networks, network.getNetworkCode(), network.getDescription());
-        Station stationFound = getOrCreateStation(networkFound, station.getStationCode(), station.getStationSite(), station.getLatitude(), station.getLongitude(), station.getAlt());
+        Network networkFound = getOrInsertNetwork(networks, network);
+        Station stationFound = getOrInsertStation(networkFound, station);
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
         if(channelFound != null){
             stationFound.getChannels().remove(channelFound);

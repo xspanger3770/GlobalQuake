@@ -22,6 +22,12 @@ public class StationDatabaseManager {
     private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
     private boolean updating = false;
 
+    public StationDatabaseManager(){};
+
+    public StationDatabaseManager(StationDatabase stationDatabase){
+        this.stationDatabase = stationDatabase;
+    }
+
     public void load() throws FatalIOException {
         File file = getDatabaseFile();
         if (!file.getParentFile().exists()) {
