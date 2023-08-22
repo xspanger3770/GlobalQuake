@@ -2,6 +2,7 @@ package globalquake.sounds;
 
 import globalquake.exception.FatalIOException;
 import globalquake.ui.settings.Settings;
+import org.tinylog.Logger;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -27,6 +28,7 @@ public class Sounds {
 	public static final Clip[] countdowns = new Clip[countdown_levels.length];
 
 	public static final boolean soundsEnabled = true;
+	public static boolean soundsAvailable = true;
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
 
@@ -37,7 +39,8 @@ public class Sounds {
 			clip.open(audioIn);
 			return clip;
 		} catch(Exception e){
-			throw new FatalIOException("Cannot load sound: "+res, e);
+			soundsAvailable = false;
+			throw new FatalIOException("Failed to load sound: "+res, e);
 		}
 	}
 
@@ -75,7 +78,8 @@ public class Sounds {
 	}
 
 	public static void playSound(Clip clip) {
-		if(!Settings.enableSound) {
+		if(!Settings.enableSound || !soundsAvailable) {
+			Logger.debug(clip.toString() + " not played. Sound disabled.");
 			return;
 		}
 		if (soundsEnabled && clip != null) {

@@ -8,6 +8,7 @@ import globalquake.core.station.GlobalStation;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.Level;
 import globalquake.geo.Shindo;
+import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
@@ -110,7 +111,16 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
 
         List<String> settingsStrings = new ArrayList<>();
-        settingsStrings.add("Sound Alarms: %s (S)".formatted(Settings.enableSound ? "Enabled" : "Disabled"));
+
+        //If sound is not available, set a special message
+        if(!Sounds.soundsAvailable)
+        {
+            settingsStrings.add("Sound Alarms unavailable");
+        }
+        else{
+            settingsStrings.add("Sound Alarms: %s (S)".formatted(Settings.enableSound ? "Enabled" : "Disabled"));
+        }
+
         settingsStrings.add("Earthquakes: %s (E)".formatted(Settings.displayArchivedQuakes ? "Enabled" : "Disabled"));
         int _y = getHeight() - 6;
         g.setColor(Color.MAGENTA);
