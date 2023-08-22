@@ -15,6 +15,7 @@ public final class Channel implements Serializable {
     private final double latitude;
     private final double longitude;
     private final double elevation;
+    public transient long delay;
 
     private transient Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
 

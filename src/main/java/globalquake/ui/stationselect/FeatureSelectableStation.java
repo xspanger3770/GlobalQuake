@@ -76,15 +76,23 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
             graphics.draw(element.getShape());
         }
 
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D);
+
         if(mouseNearby){
-            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D);
             drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
+        } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
+                && entity.getOriginal().getSelectedChannel().delay > 5 * 60 * 1000L
+                && renderer.getRenderProperties().scroll < 0.75){
+            graphics.setColor(Color.red);
+            graphics.setFont(new Font("Calibri", Font.BOLD, 14));
+            graphics.drawString("!", (int)centerPonint.x + 10, (int)centerPonint.y + 9);
         }
     }
 
     private void drawInfo(Graphics2D g, int x, int y, Station original) {
         g.setColor(Color.white);
+        g.setFont(new Font("Calibri", Font.PLAIN, 12));
 
         String str = original.getNetwork().getNetworkCode()+" "+original.getStationCode();
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
@@ -94,6 +102,43 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
         str = original.getStationSite();
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+
+        if(original.getSelectedChannel() != null && original.getSelectedChannel().isAvailable()) {
+            drawDelay(g, x, y + 46, original.getSelectedChannel().delay);
+        }
+    }
+
+    private static String getDelayString(long delay){
+        if(delay <= 60 * 1000L){
+            return "%.1fs".formatted(delay / 1000.0);
+        } else if (delay < 60 * 60 * 1000L) {
+            return "%d:%02d".formatted(delay / (1000 * 60), (delay / 1000) % 60);
+        }
+        return "%d:%02d:%02d".formatted(delay / (1000 * 60 * 60) % 60, delay / (1000 * 60) % 60, (delay / 1000) % 60);
+    }
+
+    public static void drawDelay(Graphics2D g, int x, int y, long delay) {
+        String delayString = getDelayString(delay);
+        String prefix = "Delay: ";
+
+        String str = prefix + delayString;
+        int _x =  x - g.getFontMetrics().stringWidth(str) / 2;
+        g.drawString(prefix, _x, y);
+        _x += g.getFontMetrics().stringWidth(prefix);
+        g.setColor(getColorDelay(delay));
+        g.drawString(delayString, _x, y);
+    }
+
+    private static Color getColorDelay(long delay) {
+        if(delay <= 16 * 1000L){
+            return Color.green;
+        } else if(delay <= 60 * 1000L){
+            return Color.YELLOW;
+        } else if(delay <= 5 * 60 * 1000L){
+            return Color.ORANGE;
+        }
+
+        return Color.RED;
     }
 
     private Color getDisplayedColor(Station original) {
