@@ -104,7 +104,7 @@ public class Station implements Serializable {
     }
 
     public void selectBestAvailableChannel() {
-        if (!channels.contains(selectedChannel)) {
+        if (!channels.contains(selectedChannel) || (selectedChannel != null && !selectedChannel.isAvailable())) {
             selectedChannel = null;
         }
 

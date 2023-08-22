@@ -218,7 +218,25 @@ public class StationDatabaseManagerTest {
 
     @Test
     public void testChannelDeselectWhenRemoveAllSeedlinks(){
-        assertTrue(false);
+        SeedlinkNetwork seedlinkNetwork = new SeedlinkNetwork("dummy", "D", 5);
+        Network dummyNetwork = new Network("coolNetwork", "");
+        Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null);
+
+        dummyNetwork.getStations().add(dummyStation);
+        dummyStation.getChannels().add(dummyChannel);
+        dummyStation.getChannels().add(dummyChannelNew);
+
+        StationDatabaseManager databaseManager = new StationDatabaseManager(new StationDatabase());
+        databaseManager.acceptNetworks(List.of(dummyNetwork));
+
+        dummyChannel.getSeedlinkNetworks().put(seedlinkNetwork, 0L);
+        dummyStation.setSelectedChannel(dummyChannel);
+
+        databaseManager.removeAllSeedlinks(List.of(seedlinkNetwork));
+        assertTrue(dummyChannel.getSeedlinkNetworks().isEmpty());
+        assertNull(dummyStation.getSelectedChannel());
     }
 
 

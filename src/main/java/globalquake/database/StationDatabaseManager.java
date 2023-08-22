@@ -235,6 +235,9 @@ public class StationDatabaseManager {
                 for (Channel channel : station.getChannels()) {
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
                 }
+                if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
+                    station.selectBestAvailableChannel();
+                }
             }
         }
 
