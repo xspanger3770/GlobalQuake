@@ -80,12 +80,12 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("GEONET", "link.geonet.org.nz", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Geoscience Australia", "seis-pub.ga.gov.au", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("GSRAS (?)", "89.22.182.133", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("Helsinki", "finseis.seismo.helsinki.fi", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("Haiti", "ayiti.unice.fr", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Helsinki", "finseis.seismo.helsinki.fi", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("Haiti", "ayiti.unice.fr", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("ICGC", "ws.icgc.cat", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("IDA Project", "rtserve.ida.ucsd.edu", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("IFZ", "data.ifz.ru", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("IPGP", "rtserver.ipgp.fr", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("IPGP", "rtserver.ipgp.fr", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("IRIS DMC", "rtserve.iris.washington.edu", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("IRIS Jamaseis", "jamaseis.iris.edu", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("ISNET - UNINA Università degli Studi di Napoli Federico II", "185.15.171.86", 18000));
@@ -106,7 +106,7 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("Seisme IRD", "rtserve.ird.nc", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Staneo", "vibrato.staneo.fr", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("SNAC NOA", "snac.gein.noa.gr", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Thai Meteorological Department", "119.46.126.38", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("UFRN (Universidade Federal do Rio Grande do Norte)", "sislink.geofisica.ufrn.br", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
