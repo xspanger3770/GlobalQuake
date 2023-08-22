@@ -10,7 +10,7 @@ import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 public class StationDatabaseManager {
 
@@ -178,10 +178,24 @@ public class StationDatabaseManager {
                         for (int attempt = 1; attempt <= 3; attempt++) {
                             try {
                                 seedlinkNetwork.getStatus().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
-                                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+
+                                ExecutorService executor = Executors.newSingleThreadExecutor();
+
+                                Callable<Void> task = () -> {
+                                    SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                    return null;
+                                };
+
+                                Future<Void> future = executor.submit(task);
+                                future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+                                break;
+                            } catch(TimeoutException e){
+                                seedlinkNetwork.getStatus().setString("Timed out!");
+                                seedlinkNetwork.getStatus().setValue(0);
                                 break;
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.error(e);
                                 seedlinkNetwork.getStatus().setString("Error!");
                                 seedlinkNetwork.getStatus().setValue(0);
                             } finally {

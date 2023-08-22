@@ -21,6 +21,7 @@ public class SeedlinkCommunicator {
     private static final SimpleDateFormat FORMAT_UTC_SHORT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat FORMAT_UTC_LONG = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
+    public static final int SEEDLINK_TIMEOUT_SECONDS = 10;
 
     static{
         FORMAT_UTC_SHORT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -30,7 +31,7 @@ public class SeedlinkCommunicator {
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
         seedlinkNetwork.getStatus().setValue(0);
-        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 10, false);
+        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT_SECONDS, false);
 
         seedlinkNetwork.getStatus().setString("Downloading...");
         seedlinkNetwork.getStatus().setValue(33);
