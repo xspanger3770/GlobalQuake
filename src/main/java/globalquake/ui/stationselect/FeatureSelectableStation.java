@@ -1,6 +1,7 @@
 package globalquake.ui.stationselect;
 
 import globalquake.database.Channel;
+import globalquake.database.SeedlinkCommunicator;
 import globalquake.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -117,7 +118,9 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     }
 
     private static String getDelayString(long delay){
-        if(delay <= 60 * 1000L){
+        if(delay == SeedlinkCommunicator.UNKNOWN_DELAY){
+            return "???";
+        } else if(delay <= 60 * 1000L){
             return "%.1fs".formatted(delay / 1000.0);
         } else if (delay < 60 * 60 * 1000L) {
             return "%d:%02d".formatted(delay / (1000 * 60), (delay / 1000) % 60);

@@ -1,6 +1,7 @@
 package globalquake.database;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,6 +17,7 @@ import java.util.TimeZone;
 
 public class SeedlinkCommunicator {
 
+    public static final long UNKNOWN_DELAY = Long.MIN_VALUE;
     private static final SimpleDateFormat FORMAT_UTC_SHORT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat FORMAT_UTC_LONG = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
@@ -62,13 +64,21 @@ public class SeedlinkCommunicator {
                 String locationCode = channel.getAttributes().getNamedItem("location").getTextContent();
                 String channelName = channel.getAttributes().getNamedItem("seedname").getTextContent();
                 String endDate = channel.getAttributes().getNamedItem("end_time").getTextContent();
-                Calendar end = Calendar.getInstance();
-                end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.parse(endDate) : FORMAT_UTC_LONG.parse(endDate));
 
-                long delay = System.currentTimeMillis() - end.getTimeInMillis();
+                long delay = UNKNOWN_DELAY;
 
-                if(delay > MAX_DELAY_MS){
-                    continue;
+                try {
+                    Calendar end = Calendar.getInstance();
+                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.parse(endDate) : FORMAT_UTC_LONG.parse(endDate));
+
+                    delay = System.currentTimeMillis() - end.getTimeInMillis();
+
+                    if (delay > MAX_DELAY_MS) {
+                        continue;
+                    }
+
+                } catch(NumberFormatException e){
+                    Logger.warn(new RuntimeException("Failed to get delay from %s, %s: %s".formatted(stationCode, seedlinkNetwork.getHost(), e.getMessage())));
                 }
 
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
