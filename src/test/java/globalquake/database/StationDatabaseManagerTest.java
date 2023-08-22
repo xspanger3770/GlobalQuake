@@ -169,8 +169,6 @@ public class StationDatabaseManagerTest {
 
         stationDatabaseManager.removeAllSeedlinks(List.of(dummySeedlinkNetwork));
 
-        System.out.println(dummyChannel.getSeedlinkNetworks());
-
         assertFalse(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork));
         assertTrue(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork2));
 
