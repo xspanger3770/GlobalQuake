@@ -2,6 +2,7 @@ package globalquake.ui.stationselect;
 
 import globalquake.database.Channel;
 import globalquake.database.Station;
+import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -76,14 +77,15 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
             graphics.draw(element.getShape());
         }
 
-        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerCoords = getCenterCoords(entity);
+        var point3D = GlobeRenderer.createVec3D(centerCoords);
         var centerPonint = renderer.projectPoint(point3D);
 
         if(mouseNearby){
             drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
         } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
                 && entity.getOriginal().getSelectedChannel().delay > 5 * 60 * 1000L
-                && renderer.getRenderProperties().scroll < 0.75){
+                && renderer.getAngularDistance(centerCoords) < 25.0 && renderer.getRenderProperties().scroll < 0.75) {
             graphics.setColor(Color.red);
             graphics.setFont(new Font("Calibri", Font.BOLD, 14));
             graphics.drawString("!", (int)centerPonint.x + 10, (int)centerPonint.y + 9);
