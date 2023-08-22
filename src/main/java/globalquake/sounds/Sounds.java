@@ -39,7 +39,7 @@ public class Sounds {
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
 
-	public static boolean ENABLE_EXTREME_ALARMS = false;
+	public static final boolean ENABLE_EXTREME_ALARMS = false;
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {

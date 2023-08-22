@@ -8,16 +8,11 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.station.AbstractStation;
-import globalquake.core.AlertManager;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.core.GlobalQuake;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.ui.settings.Settings;
 import globalquake.sounds.Sounds;
 import globalquake.geo.GeoUtils;
-import globalquake.sounds.SoundsInfo;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
 
 public class ClusterAnalysis {
 

@@ -22,7 +22,7 @@ public class StationDatabaseManager {
     private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
     private boolean updating = false;
 
-    public StationDatabaseManager(){};
+    public StationDatabaseManager(){}
 
     public StationDatabaseManager(StationDatabase stationDatabase){
         this.stationDatabase = stationDatabase;
