@@ -216,5 +216,10 @@ public class StationDatabaseManagerTest {
         databaseManager.acceptNetworks(List.of(dummyNetwork));
     }
 
+    @Test
+    public void testChannelDeselectWhenRemoveAllSeedlinks(){
+        assertTrue(false);
+    }
+
 
 }
