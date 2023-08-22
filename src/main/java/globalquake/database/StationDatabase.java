@@ -101,7 +101,7 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("Red Sìsmica Baru", "helis.redsismicabaru.com", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("RESIF", "rtserve.resif.fr", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("SANET", "147.213.113.73", 18000));
-        seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
+        //seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("SCSN-USC (South Carolina Seismic Network)", "eeyore.seis.sc.edu", 6382));
         seedlinkNetworks.add(new SeedlinkNetwork("Seisme IRD", "rtserve.ird.nc", 18000));
         //seedlinkNetworks.add(new SeedlinkNetwork("Staneo", "vibrato.staneo.fr", 18000));
