@@ -6,10 +6,7 @@
 </h1>
 
 > [!NOTE]<br>
-> If you have a problem where you see 0 available stations, even though the download finished successfully, you can try temporatily switching your timezone (UTC or UTC+2). There is currently a timezone issue affecting some users. A fix will be released asap.
-
-> [!NOTE]<br>
-> GlobalQuake 0.9.1 has just been released!
+> GlobalQuake 0.9.3 has just been released!
 > Read about the new features in the [releases section](https://github.com/xspanger3770/GlobalQuake/releases)
 
 ![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
@@ -41,6 +38,10 @@ Project is in early development state and there is quite some room for improveme
 * Larger earthquakes (M6+) that often trigger false detections or show duplicated earthquakes
 * Multiple earthquakes from the same place in short time interval
 * Distant earthquakes - the further the earthquake is from the stations, the less accurate the calculated epicenter will be
+
+## Disclaimer
+
+- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can be inaccurate sometimes
 
 ## Running GlobalQuake
 
