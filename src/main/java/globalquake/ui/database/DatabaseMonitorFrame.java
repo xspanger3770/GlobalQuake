@@ -40,7 +40,7 @@ public class DatabaseMonitorFrame extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel();
-        contentPane.setPreferredSize(new Dimension(900, 600));
+        contentPane.setPreferredSize(new Dimension(1000, 600));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
