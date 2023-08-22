@@ -1,8 +1,6 @@
 package globalquake.ui.globe;
 
-import globalquake.database.Station;
 import globalquake.geo.GeoUtils;
-import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;

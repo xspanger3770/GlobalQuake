@@ -11,6 +11,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UpdateSeedlinkNetworkAction extends AbstractAction {
 
@@ -25,7 +26,7 @@ public class UpdateSeedlinkNetworkAction extends AbstractAction {
 
         putValue(SHORT_DESCRIPTION, "Update Seedlink Networks");
 
-        ImageIcon updateIcon = new ImageIcon(getClass().getResource("/image_icons/update.png"));
+        ImageIcon updateIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/update.png")));
         Image image = updateIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(image);
         putValue(Action.SMALL_ICON, scaledIcon);

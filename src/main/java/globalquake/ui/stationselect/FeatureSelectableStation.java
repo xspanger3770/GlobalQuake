@@ -2,7 +2,6 @@ package globalquake.ui.stationselect;
 
 import globalquake.database.Channel;
 import globalquake.database.Station;
-import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
