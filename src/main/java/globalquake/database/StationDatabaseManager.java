@@ -220,10 +220,14 @@ public class StationDatabaseManager {
         for (Network network : getStationDatabase().getNetworks()) {
             for (Station station : network.getStations()) {
                 for (Channel channel : station.getChannels()) {
+                    System.out.println(channel.getSeedlinkNetworks());
+                    System.out.println(toBeRemoved);
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
+                    System.out.println("RESULT: "+channel.getSeedlinkNetworks());
                 }
             }
         }
+
         getStationDatabase().getSeedlinkNetworks().removeAll(toBeRemoved);
         fireUpdateEvent();
     }

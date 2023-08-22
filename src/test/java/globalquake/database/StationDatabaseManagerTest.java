@@ -108,8 +108,9 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testSelectedChannel(){
+    public void testBasicallyEverything(){
         SeedlinkNetwork dummySeedlinkNetwork = new SeedlinkNetwork("dummy", "", 5);
+        SeedlinkNetwork dummySeedlinkNetwork2 = new SeedlinkNetwork("dummy2", "", 5);
         StationSource stationSource1 = new StationSource("1", "");
         StationSource stationSource2 = new StationSource("2", "");
         Network dummyNetwork = new Network("coolNetwork", "");
@@ -117,15 +118,18 @@ public class StationDatabaseManagerTest {
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1);
         Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2);
         Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2);
-        dummyChannel2.getSeedlinkNetworks().put(dummySeedlinkNetwork, 0L);
-        dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork, 0L);
+        dummyChannel2.getSeedlinkNetworks().put(dummySeedlinkNetwork, 1000L);
+        dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork, 500L);
+        dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork2, 100L);
+        assertEquals(dummySeedlinkNetwork2, dummyChannel.selectBestSeedlinkNetwork());
 
         StationDatabase stationDatabase = new StationDatabase();
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
 
         stationDatabase.getStationSources().add(stationSource1);
-        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannelDup);
+        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
+        assertEquals(dummyChannel, stationDatabaseManager.getStationDatabase().getNetworks().get(0).getStations().get(0).getChannels().get(0));
 
         assertEquals(1, stationDatabase.getNetworks().size());
         assertEquals(1, stationDatabase.getNetworks().get(0).getStations().size());
@@ -139,7 +143,6 @@ public class StationDatabaseManagerTest {
 
         dummyStation.setSelectedChannel(dummyChannel2);
         assertEquals(dummyChannel2, dummyStation.getSelectedChannel());
-        assertEquals(dummyStation, dummyStation);
         assertEquals(dummyStation, stationDatabase.getNetworks().get(0).getStations().get(0));
         assertEquals(dummyChannel2, stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel());
 
@@ -158,6 +161,41 @@ public class StationDatabaseManagerTest {
 
         assertEquals(1, stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().size());
         assertEquals(dummyChannel, stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel());
+
+        // TEST REMOVE SEEDLINK NETWORK
+        assertTrue(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork));
+        assertTrue(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork2));
+
+        stationDatabaseManager.removeAllSeedlinks(List.of(dummySeedlinkNetwork));
+
+        System.out.println(dummyChannel.getSeedlinkNetworks());
+
+        assertFalse(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork));
+        assertTrue(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork2));
+
+        stationDatabaseManager.removeAllSeedlinks(List.of(dummySeedlinkNetwork2));
+        assertFalse(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork));
+        assertFalse(dummyChannel.getSeedlinkNetworks().containsKey(dummySeedlinkNetwork2));
+        assertNull(dummyChannel.selectBestSeedlinkNetwork());
+    }
+
+    @Test
+    public void testChannelUpdate(){
+        Network dummyNetwork = new Network("coolNetwork", "");
+        Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null);
+
+        StationDatabase stationDatabase = new StationDatabase();
+        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
+
+        dummyStation.setSelectedChannel(dummyChannel);
+        assertEquals(dummyChannel, stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel());
+        assertTrue(stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().contains(stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel()));
+
+        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannelNew);
+        assertEquals(50, stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().get(0).getLatitude(), 1e-6);
+        assertTrue(stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().contains(stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel()));
     }
 
 

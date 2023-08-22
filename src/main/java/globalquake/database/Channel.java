@@ -62,21 +62,16 @@ public final class Channel implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Channel) obj;
-        return Objects.equals(this.code, that.code) &&
-                Objects.equals(this.locationCode, that.locationCode) &&
-                Double.doubleToLongBits(this.sampleRate) == Double.doubleToLongBits(that.sampleRate) &&
-                Double.doubleToLongBits(this.latitude) == Double.doubleToLongBits(that.latitude) &&
-                Double.doubleToLongBits(this.longitude) == Double.doubleToLongBits(that.longitude) &&
-                Double.doubleToLongBits(this.elevation) == Double.doubleToLongBits(that.elevation);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Channel channel = (Channel) o;
+        return Double.compare(sampleRate, channel.sampleRate) == 0 && Double.compare(latitude, channel.latitude) == 0 && Double.compare(longitude, channel.longitude) == 0 && Double.compare(elevation, channel.elevation) == 0 && Objects.equals(code, channel.code) && Objects.equals(locationCode, channel.locationCode) && Objects.equals(seedlinkNetworks, channel.seedlinkNetworks) && Objects.equals(stationSources, channel.stationSources);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, locationCode, sampleRate, latitude, longitude, elevation);
+        return Objects.hash(code, locationCode, sampleRate, latitude, longitude, elevation, seedlinkNetworks, stationSources);
     }
 
     @Override
@@ -92,10 +87,6 @@ public final class Channel implements Serializable {
         return seedlinkNetworks;
     }
 
-    public void addSeedlinkNetwork(SeedlinkNetwork seedlinkNetwork, long delay){
-        seedlinkNetworks.put(seedlinkNetwork, delay);
-    }
-
     public Set<StationSource> getStationSources() {
         return stationSources;
     }
@@ -106,8 +97,8 @@ public final class Channel implements Serializable {
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork(){
-        var leastStations = getSeedlinkNetworks().keySet().stream().min(Comparator.comparing(seedlinkNetwork -> seedlinkNetwork.availableStations));
-        return leastStations.orElse(null);
+        var leastStations = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
+        return leastStations.map(Map.Entry::getKey).orElse(null);
     }
 
 }

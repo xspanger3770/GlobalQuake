@@ -253,6 +253,9 @@ public class StationDatabase implements Serializable {
             stationFound.getChannels().remove(channelFound);
             stationFound.getChannels().add(channel);
             channel.merge(channelFound);
+            if (stationFound.getSelectedChannel() != null && stationFound.getSelectedChannel().equals(channelFound)) {
+                stationFound.setSelectedChannel(channel);
+            }
         } else {
             stationFound.getChannels().add(channel);
         }
