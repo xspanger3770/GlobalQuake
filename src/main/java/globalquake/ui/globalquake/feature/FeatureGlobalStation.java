@@ -11,6 +11,7 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.ui.stationselect.FeatureSelectableStation;
 import globalquake.utils.Scale;
 
 import java.awt.*;
@@ -119,9 +120,17 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);
             String str = station.toString();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 10);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
             str = station.getSeedlinkNetwork() == null ? "NONE!" : station.getSeedlinkNetwork().getName();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 28);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
+
+            if(station.hasNoDisplayableData()){
+                str = "No data";
+                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+            } else {
+                long delay = station.getDelayMS();
+                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
+            }
         }
         if (scroll < 0.4) {
             g.setColor(Color.white);

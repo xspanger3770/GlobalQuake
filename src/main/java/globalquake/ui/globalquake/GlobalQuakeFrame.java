@@ -69,7 +69,7 @@ public class GlobalQuakeFrame extends JFrame {
 
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
-		mainPanel.setPreferredSize(new Dimension(800, 600));
+		mainPanel.setPreferredSize(new Dimension(1000, 700));
 		mainPanel.add(panel, BorderLayout.CENTER);
 		mainPanel.add(list, BorderLayout.EAST);
 

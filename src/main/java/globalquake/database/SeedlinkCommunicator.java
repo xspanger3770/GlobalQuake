@@ -1,7 +1,7 @@
 package globalquake.database;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
-import globalquake.utils.TimeFixer;
+import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,16 +13,25 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class SeedlinkCommunicator {
 
-    private static final SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final SimpleDateFormat format3 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
+    public static final long UNKNOWN_DELAY = Long.MIN_VALUE;
+    private static final SimpleDateFormat FORMAT_UTC_SHORT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat FORMAT_UTC_LONG = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
+    private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
+    public static final int SEEDLINK_TIMEOUT_SECONDS = 10;
+
+    static{
+        FORMAT_UTC_SHORT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        FORMAT_UTC_LONG.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
         seedlinkNetwork.getStatus().setValue(0);
-        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 10, false);
+        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT_SECONDS, false);
 
         seedlinkNetwork.getStatus().setString("Downloading...");
         seedlinkNetwork.getStatus().setValue(33);
@@ -56,18 +65,29 @@ public class SeedlinkCommunicator {
                 String locationCode = channel.getAttributes().getNamedItem("location").getTextContent();
                 String channelName = channel.getAttributes().getNamedItem("seedname").getTextContent();
                 String endDate = channel.getAttributes().getNamedItem("end_time").getTextContent();
-                Calendar end = Calendar.getInstance();
-                end.setTime(endDate.contains("-") ? format2.parse(endDate) : format3.parse(endDate));
-                long delay = System.currentTimeMillis() - end.getTimeInMillis() - TimeFixer.offset();
-                if (delay > 1000 * 60 * 15) {
-                    continue;
+
+                long delay = UNKNOWN_DELAY;
+
+                try {
+                    Calendar end = Calendar.getInstance();
+                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.parse(endDate) : FORMAT_UTC_LONG.parse(endDate));
+
+                    delay = System.currentTimeMillis() - end.getTimeInMillis();
+
+                    if (delay > MAX_DELAY_MS) {
+                        continue;
+                    }
+
+                } catch(NumberFormatException e){
+                    Logger.warn(new RuntimeException("Failed to get delay from %s, %s: %s".formatted(stationCode, seedlinkNetwork.getHost(), e.getMessage())));
                 }
+
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
             }
         }
     }
 
-    private static void addAvailableChannel(String networkCode, String stationCode, String channelName, String locationCode, @SuppressWarnings("unused") long delay, SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) {
+    private static void addAvailableChannel(String networkCode, String stationCode, String channelName, String locationCode, long delay, SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) {
         stationDatabase.getDatabaseWriteLock().lock();
         try {
             Channel channel = StationDatabase.getChannel(stationDatabase.getNetworks(), networkCode, stationCode, channelName, locationCode);
@@ -76,7 +96,7 @@ public class SeedlinkCommunicator {
             }
 
             seedlinkNetwork.availableStations++;
-            channel.getSeedlinkNetworks().add(seedlinkNetwork);
+            channel.getSeedlinkNetworks().put(seedlinkNetwork, delay);
         }finally {
             stationDatabase.getDatabaseWriteLock().unlock();
         }

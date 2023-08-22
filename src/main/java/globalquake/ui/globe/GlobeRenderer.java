@@ -476,4 +476,10 @@ public class GlobeRenderer {
         lastMouse = e.getPoint();
     }
 
+    public double getAngularDistance(Point2D centerCoords) {
+        if(centerCoords == null){
+            return Double.NaN;
+        }
+        return GeoUtils.greatCircleDistance(centerCoords.x, centerCoords.y, getRenderProperties().centerLat, getRenderProperties().centerLon) / GeoUtils.EARTH_CIRCUMFERENCE * 360.0;
+    }
 }

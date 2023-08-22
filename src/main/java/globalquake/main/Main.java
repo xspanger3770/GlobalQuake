@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.database.StationDatabaseManager;
 import globalquake.database.StationSource;
 import globalquake.exception.ApplicationErrorHandler;
+import globalquake.exception.RuntimeApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;
@@ -18,7 +19,7 @@ public class Main {
 
     private static ApplicationErrorHandler errorHandler;
 
-    public static final String version = "0.9.1";
+    public static final String version = "0.9.3";
     public static final String fullName = "GlobalQuake " + version;
 
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
@@ -68,7 +69,13 @@ public class Main {
         Scale.load();
         databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) (2 / 6.0 * 100.0));
-        Sounds.load();
+        try{
+            //Sound may fail to load for a variety of reasons. If it does, this method disables sound.
+            Sounds.load();
+        } catch (Exception e){
+            RuntimeApplicationException error = new RuntimeApplicationException("Failed to load sounds. Sound will be disabled", e);
+            getErrorHandler().handleWarning(error);
+        }
         databaseMonitorFrame.getMainProgressBar().setString("Loading travel table...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) (3 / 6.0 * 100.0));
         TauPTravelTimeCalculator.init();
