@@ -129,7 +129,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
             } else {
                 long delay = station.getDelayMS();
-                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"");
+                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
             }
         }
         if (scroll < 0.4) {

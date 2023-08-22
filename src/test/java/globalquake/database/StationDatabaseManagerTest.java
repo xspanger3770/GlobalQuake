@@ -128,8 +128,8 @@ public class StationDatabaseManagerTest {
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
 
         stationDatabase.getStationSources().add(stationSource1);
-        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannelDup);
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
+        stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannelDup);
         assertEquals(dummyChannel, stationDatabaseManager.getStationDatabase().getNetworks().get(0).getStations().get(0).getChannels().get(0));
 
         assertEquals(1, stationDatabase.getNetworks().size());
@@ -185,6 +185,10 @@ public class StationDatabaseManagerTest {
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null);
         Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null);
 
+        dummyNetwork.getStations().add(dummyStation);
+        dummyStation.getChannels().add(dummyChannel);
+        dummyStation.getChannels().add(dummyChannelNew);
+
         StationDatabase stationDatabase = new StationDatabase();
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
 
@@ -195,6 +199,21 @@ public class StationDatabaseManagerTest {
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannelNew);
         assertEquals(50, stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().get(0).getLatitude(), 1e-6);
         assertTrue(stationDatabase.getNetworks().get(0).getStations().get(0).getChannels().contains(stationDatabase.getNetworks().get(0).getStations().get(0).getSelectedChannel()));
+    }
+
+    @Test
+    public void testAcceptNetworks(){
+        Network dummyNetwork = new Network("coolNetwork", "");
+        Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null);
+
+        dummyNetwork.getStations().add(dummyStation);
+        dummyStation.getChannels().add(dummyChannel);
+        dummyStation.getChannels().add(dummyChannelNew);
+
+        StationDatabaseManager databaseManager = new StationDatabaseManager(new StationDatabase());
+        databaseManager.acceptNetworks(List.of(dummyNetwork));
     }
 
 

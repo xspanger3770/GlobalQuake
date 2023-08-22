@@ -11,10 +11,10 @@ public final class Channel implements Serializable {
     private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
-    private final double sampleRate;
-    private final double latitude;
-    private final double longitude;
-    private final double elevation;
+    private double sampleRate;
+    private double latitude;
+    private double longitude;
+    private double elevation;
     private transient Map<SeedlinkNetwork, Long> seedlinkNetworks = new HashMap<>();
 
     private final Set<StationSource> stationSources = new HashSet<>();
@@ -94,6 +94,10 @@ public final class Channel implements Serializable {
     public void merge(Channel newChannel) {
         this.getStationSources().addAll(newChannel.getStationSources());
         this.getSeedlinkNetworks().putAll(newChannel.getSeedlinkNetworks());
+        this.sampleRate = newChannel.sampleRate;
+        this.latitude = newChannel.latitude;
+        this.longitude = newChannel.longitude;
+        this.elevation = newChannel.elevation;
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork(){

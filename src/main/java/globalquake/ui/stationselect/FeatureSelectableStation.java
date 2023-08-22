@@ -127,7 +127,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     public static void drawDelay(Graphics2D g, int x, int y, long delay, String prefix) {
         String delayString = getDelayString(delay);
-        String fullPrefix = prefix + ": ";
+        String fullPrefix = prefix == null ? "" : prefix + ": ";
 
         String str = fullPrefix + delayString;
         int _x =  x - g.getFontMetrics().stringWidth(str) / 2;

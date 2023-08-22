@@ -142,7 +142,7 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private void acceptNetworks(List<Network> networkList) {
+    protected void acceptNetworks(List<Network> networkList) {
         stationDatabase.getDatabaseWriteLock().lock();
         try {
             for (Network network : networkList) {
@@ -153,7 +153,6 @@ public class StationDatabaseManager {
                 }
             }
         } finally {
-            System.out.println(stationDatabase.getNetworks().size());
             stationDatabase.getDatabaseWriteLock().unlock();
         }
     }
