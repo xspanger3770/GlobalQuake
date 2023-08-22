@@ -13,6 +13,7 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import java.awt.*;
 import java.util.Collection;
+import java.util.Optional;
 
 public class FeatureSelectableStation extends RenderFeature<Station> {
 
@@ -83,11 +84,13 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         if(mouseNearby){
             drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
         } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
-                && entity.getOriginal().getSelectedChannel().delay > 5 * 60 * 1000L
                 && renderer.getAngularDistance(centerCoords) < 25.0 && renderer.getRenderProperties().scroll < 0.75) {
-            graphics.setColor(Color.red);
-            graphics.setFont(new Font("Calibri", Font.BOLD, 14));
-            graphics.drawString("!", (int)centerPonint.x + 10, (int)centerPonint.y + 9);
+            Optional<Long> minDelay = entity.getOriginal().getSelectedChannel().getSeedlinkNetworks().values().stream().min(Long::compare);
+            if(minDelay.isPresent() && minDelay.get() > 5 * 60 * 1000L) {
+                graphics.setColor(Color.red);
+                graphics.setFont(new Font("Calibri", Font.BOLD, 14));
+                graphics.drawString("!", (int) centerPonint.x + 10, (int) centerPonint.y + 9);
+            }
         }
     }
 
@@ -105,7 +108,11 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
 
         if(original.getSelectedChannel() != null && original.getSelectedChannel().isAvailable()) {
-            drawDelay(g, x, y + 46, original.getSelectedChannel().delay);
+            int _y = y + 46;
+            for(var availableSeedlinkNetwork : original.getSelectedChannel().getSeedlinkNetworks().entrySet()) {
+                drawDelay(g, x, _y, availableSeedlinkNetwork.getValue(), availableSeedlinkNetwork.getKey().getName());
+                _y += 13;
+            }
         }
     }
 
@@ -118,14 +125,15 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         return "%d:%02d:%02d".formatted(delay / (1000 * 60 * 60) % 60, delay / (1000 * 60) % 60, (delay / 1000) % 60);
     }
 
-    public static void drawDelay(Graphics2D g, int x, int y, long delay) {
+    public static void drawDelay(Graphics2D g, int x, int y, long delay, String prefix) {
         String delayString = getDelayString(delay);
-        String prefix = "Delay: ";
+        String fullPrefix = prefix + ": ";
 
-        String str = prefix + delayString;
+        String str = fullPrefix + delayString;
         int _x =  x - g.getFontMetrics().stringWidth(str) / 2;
-        g.drawString(prefix, _x, y);
-        _x += g.getFontMetrics().stringWidth(prefix);
+        g.setColor(Color.magenta);
+        g.drawString(fullPrefix, _x, y);
+        _x += g.getFontMetrics().stringWidth(fullPrefix);
         g.setColor(getColorDelay(delay));
         g.drawString(delayString, _x, y);
     }

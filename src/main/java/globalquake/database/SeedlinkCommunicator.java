@@ -84,10 +84,8 @@ public class SeedlinkCommunicator {
                 return;
             }
 
-            channel.delay = delay;
-
             seedlinkNetwork.availableStations++;
-            channel.getSeedlinkNetworks().add(seedlinkNetwork);
+            channel.getSeedlinkNetworks().put(seedlinkNetwork, delay);
         }finally {
             stationDatabase.getDatabaseWriteLock().unlock();
         }

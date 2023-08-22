@@ -15,9 +15,7 @@ public final class Channel implements Serializable {
     private final double latitude;
     private final double longitude;
     private final double elevation;
-    public transient long delay;
-
-    private transient Set<SeedlinkNetwork> seedlinkNetworks = new HashSet<>();
+    private transient Map<SeedlinkNetwork, Long> seedlinkNetworks = new HashMap<>();
 
     private final Set<StationSource> stationSources = new HashSet<>();
 
@@ -25,7 +23,7 @@ public final class Channel implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        seedlinkNetworks = new HashSet<>();
+        seedlinkNetworks = new HashMap<>();
     }
 
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
@@ -90,8 +88,12 @@ public final class Channel implements Serializable {
         return !seedlinkNetworks.isEmpty();
     }
 
-    public Set<SeedlinkNetwork> getSeedlinkNetworks() {
+    public Map<SeedlinkNetwork, Long> getSeedlinkNetworks() {
         return seedlinkNetworks;
+    }
+
+    public void addSeedlinkNetwork(SeedlinkNetwork seedlinkNetwork, long delay){
+        seedlinkNetworks.put(seedlinkNetwork, delay);
     }
 
     public Set<StationSource> getStationSources() {
@@ -100,11 +102,11 @@ public final class Channel implements Serializable {
 
     public void merge(Channel newChannel) {
         this.getStationSources().addAll(newChannel.getStationSources());
-        this.getSeedlinkNetworks().addAll(newChannel.getSeedlinkNetworks());
+        this.getSeedlinkNetworks().putAll(newChannel.getSeedlinkNetworks());
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork(){
-        var leastStations = getSeedlinkNetworks().stream().min(Comparator.comparing(seedlinkNetwork -> seedlinkNetwork.availableStations));
+        var leastStations = getSeedlinkNetworks().keySet().stream().min(Comparator.comparing(seedlinkNetwork -> seedlinkNetwork.availableStations));
         return leastStations.orElse(null);
     }
 

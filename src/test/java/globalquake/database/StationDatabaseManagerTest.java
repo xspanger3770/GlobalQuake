@@ -117,8 +117,8 @@ public class StationDatabaseManagerTest {
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1);
         Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2);
         Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2);
-        dummyChannel2.getSeedlinkNetworks().add(dummySeedlinkNetwork);
-        dummyChannel.getSeedlinkNetworks().add(dummySeedlinkNetwork);
+        dummyChannel2.getSeedlinkNetworks().put(dummySeedlinkNetwork, 0L);
+        dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork, 0L);
 
         StationDatabase stationDatabase = new StationDatabase();
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
