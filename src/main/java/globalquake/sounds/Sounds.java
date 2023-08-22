@@ -1,6 +1,13 @@
 package globalquake.sounds;
 
+import globalquake.core.AlertManager;
+import globalquake.core.earthquake.Cluster;
+import globalquake.core.earthquake.Earthquake;
 import globalquake.exception.FatalIOException;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.Level;
+import globalquake.geo.Shindo;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
@@ -31,6 +38,8 @@ public class Sounds {
 	public static boolean soundsAvailable = true;
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
+
+	public static boolean ENABLE_EXTREME_ALARMS = false;
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
@@ -95,6 +104,97 @@ public class Sounds {
 			}
 		}
 		return -1;
+	}
+
+	public static void determineSounds(Cluster c) {
+		SoundsInfo info = c.soundsInfo;
+
+		if (!info.firstSound) {
+			Sounds.playSound(Sounds.weak);
+			info.firstSound = true;
+		}
+
+		int level = c.getActuallLevel();
+		if (level > info.maxLevel) {
+			if (level >= 1 && info.maxLevel < 1) {
+				Sounds.playSound(Sounds.shindo1);
+			}
+			if (level >= 2 && info.maxLevel < 2) {
+				Sounds.playSound(Sounds.shindo5);
+			}
+			if (level >= 3 && info.maxLevel < 3) {
+				Sounds.playSound(Sounds.warning);
+			}
+			info.maxLevel = level;
+		}
+		Earthquake quake = c.getEarthquake();
+
+		if (quake != null) {
+			boolean meets = AlertManager.meetsConditions(quake);
+			if (meets && !info.meets) {
+				Sounds.playSound(Sounds.eew);
+				info.meets = true;
+			}
+			double pga = GeoUtils.pgaFunctionGen1(c.getEarthquake().getMag(), c.getEarthquake().getDepth());
+			if (info.maxPGA < pga) {
+
+				info.maxPGA = pga;
+				if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
+					Sounds.playSound(Sounds.eew_warning);
+					info.warningPlayed = true;
+				}
+			}
+
+			double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
+					Settings.homeLat, Settings.homeLon, 0.0);
+			double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
+					Settings.homeLon);
+			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
+
+			if (info.maxPGAHome < pgaHome) {
+				Level shindoLast = Shindo.getLevel(info.maxPGAHome);
+				Level shindoNow = Shindo.getLevel(pgaHome);
+				if (shindoLast != shindoNow && (shindoNow != null ? shindoNow.index() : 0) > 0 && ENABLE_EXTREME_ALARMS) {
+					Sounds.playSound(Sounds.nextLevelBeginsWith1(shindoNow.index() - 1));
+				}
+
+				if (pgaHome >= Shindo.ZERO.pga() && info.maxPGAHome < Shindo.ZERO.pga()) {
+					Sounds.playSound(Sounds.felt);
+				}
+				info.maxPGAHome = pgaHome;
+			}
+
+			if (info.maxPGAHome >= Shindo.ZERO.pga()) {
+				double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
+
+				double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
+						TauPTravelTimeCalculator.toAngle(distGC)));
+				int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
+
+				int soundIndex = -1;
+
+				if (info.lastCountdown == -1) {
+					soundIndex = Sounds.getLastCountdown(secondsS);
+				} else {
+					int si = Sounds.getLastCountdown(secondsS);
+					if (si < info.lastCountdown) {
+						soundIndex = si;
+					}
+				}
+
+				if (info.lastCountdown == 0) {
+					info.lastCountdown = -999;
+					Sounds.playSound(Sounds.dong);
+				}
+
+				if (soundIndex != -1) {
+					if(ENABLE_EXTREME_ALARMS) {
+						Sounds.playSound(Sounds.countdowns[soundIndex]);
+					}
+					info.lastCountdown = soundIndex;
+				}
+			}
+		}
 	}
 	
 }
