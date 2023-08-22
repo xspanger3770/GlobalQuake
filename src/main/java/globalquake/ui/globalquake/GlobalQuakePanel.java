@@ -110,25 +110,44 @@ public class GlobalQuakePanel extends GlobePanel {
         }
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
 
-        List<String> settingsStrings = new ArrayList<>();
+        List<SettingInfo> settingsStrings = new ArrayList<>();
+
+        settingsStrings.add(new SettingInfo("Archived Earthquakes (E): ", Settings.displayArchivedQuakes ? "Shown" : "Hidden", Settings.displayArchivedQuakes ? Color.green:Color.red));
 
         //If sound is not available, set a special message
         if(!Sounds.soundsAvailable)
         {
-            settingsStrings.add("Sound Alarms unavailable");
+            settingsStrings.add(new SettingInfo("Sound Alarms unavailable", null, null));
         }
         else{
-            settingsStrings.add("Sound Alarms: %s (S)".formatted(Settings.enableSound ? "Enabled" : "Disabled"));
+            settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
         }
 
-        settingsStrings.add("Earthquakes: %s (E)".formatted(Settings.displayArchivedQuakes ? "Enabled" : "Disabled"));
         int _y = getHeight() - 6;
-        g.setColor(Color.MAGENTA);
         g.setFont(new Font("Calibri", Font.PLAIN, 14));
 
-        for(String str2 : settingsStrings){
-            g.drawString(str2, 5, _y);
+        for(SettingInfo settingInfo : settingsStrings){
+            int _x = 5;
+            g.setColor(Color.MAGENTA);
+            g.drawString(settingInfo.name, _x, _y);
+            if(settingInfo.value != null){
+                _x += g.getFontMetrics().stringWidth(settingInfo.name);
+                g.setColor(settingInfo.color);
+                g.drawString(settingInfo.value, _x, _y);
+            }
             _y -= 16;
+        }
+    }
+
+    static class SettingInfo{
+        public String name;
+        public String value;
+        public Color color;
+
+        public SettingInfo(String name, String value, Color color) {
+            this.name = name;
+            this.value = value;
+            this.color = color;
         }
     }
 
