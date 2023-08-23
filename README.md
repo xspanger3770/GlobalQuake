@@ -18,10 +18,10 @@
 
 ## Description
 
-GlobalQuake is my experimental Java application that can be used to monitor earthquakes world-wide in real time
+GlobalQuake is an experimental Java application that can be used to monitor earthquakes world-wide in near real time
 
 Enables selection of seismic stations from publicly available seismic networks - `fdsnws services`. \
-Real time data is supplied by `seedlink` networks. \
+Real time data is supplied from `seedlink` servers. \
 The program then uses the data to detect earthquakes and visualize them on 3D global interactive map \
 It can also quickly estimate the earthquake magnitude using some empirical methods, but this only works for small and medium quakes up to magnitude 5-6
 
@@ -41,20 +41,23 @@ Project is in early development state and there is quite some room for improveme
 
 ## Disclaimer
 
-- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can be inaccurate sometimes
+- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can be sometimes inaccurate
+- Please be aware that playing some of the included alarm sounds in public places can be considered in some countries as fearmongering/panic spreading
+- I do not control any of the seedlink servers included in GlobalQuake. They can stop working at any time without notice
 
 ## Running GlobalQuake
 
 * GlobalQuake comes as a standard executable JAR file. You can download the lastest version [here](https://github.com/xspanger3770/GlobalQuake/releases)
 * Make sure you have the latest version of Java installed. [Download Java](https://www.oracle.com/java/technologies/downloads/)
 * Put the JAR file to the location where you want the application data to be stored
-* Run GlobalQuake by executing `java -jar [filename].jar` using your terminal/command line. You can also include `-Xms8G -Xmx8G` parameters to allow more memory allocation
+* Run GlobalQuake by executing `java -jar [filename].jar` using your terminal/command line or simply double click it (Windows)
 
 ## System Requirements
 
-The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage\
-You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world \
-Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 2,000 stations (in version 0.9.0)
+- The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage
+- You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world
+- Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations (in version 0.9.3)
+- If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system and you need to select less stations
 
 ## Contributing
 
@@ -62,4 +65,5 @@ Any contributions, including feedback and suggestions are highly appreciated! Se
 
 ## Special thanks to
 
-![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - inspiration for the layout, intensity scale and more
+![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - Inspiration for the layout, intensity scale, sound alarms and more\
+![Philip Crotwell](https://github.com/crotwell) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Really good and easy to use libraries. GlobalQuake wouldn't be possible without these
