@@ -59,7 +59,15 @@ public abstract class Analysis {
 		}
 		int[] data;
 		try {
+			if(!dataRecord.isDecompressable()){
+				Logger.warn("Not Decompressable!");
+				return;
+			}
 			data = dataRecord.decompress().getAsInt();
+			if(data == null){
+				Logger.warn("Decompressed array is null!");
+				return;
+			}
 			for (int v : data) {
 				nextSample(v, time);
 				time += (long) (1000 / getSampleRate());

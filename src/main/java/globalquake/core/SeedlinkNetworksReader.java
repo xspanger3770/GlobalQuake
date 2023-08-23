@@ -1,6 +1,7 @@
 package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
@@ -45,11 +46,15 @@ public class SeedlinkNetworksReader {
 			@Override
 			public void run() {
 				int reconnectDelay = RECONNECT_DELAY;
-				while (true) {
+
+				boolean useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");
+
+                while (true) {
 					SeedlinkReader reader = null;
 					try {
 						System.out.println("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+						reader.sendHello();
 
 						int connected = 0;
 
@@ -60,6 +65,9 @@ public class SeedlinkNetworksReader {
                                 System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
+								if(useDATA) {
+									reader.sendCmd("DATA");
+								}
 								connected++;
 							}
 						}
@@ -69,7 +77,17 @@ public class SeedlinkNetworksReader {
 							break;
 						}
 
-						reader.startData("", "");
+						try {
+							reader.startData();
+						}catch(SeedlinkException e){
+							if(!useDATA){
+								throw e;
+							}
+
+							System.err.println("Trying without DATA...");
+							useDATA = false;
+							continue;
+						}
 						while (reader.hasNext()) {
 							SeedlinkPacket slp = reader.readPacket();
 							try {
@@ -88,6 +106,8 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
+
+						useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");;
 						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {

@@ -95,21 +95,21 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("USGS", "cwbpub.cr.usgs.gov", 18000));
 
         // Seedlink Networks with ISSUE #22 (No support for multi station?)
-        //seedlinkNetworks.add(new SeedlinkNetwork("BGR", "eida.bgr.de", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("ENS", "ephesite.ens.fr", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("Helsinki", "finseis.seismo.helsinki.fi", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("Haiti", "ayiti.unice.fr", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("ICGC", "ws.icgc.cat", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("IPGP", "rtserver.ipgp.fr", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("LMU", "erde.geophysik.uni-muenchen.de", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("NIGGG", "195.96.231.100", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("ORFEUS", "eida.orfeus-eu.org", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("PLSN (IGF Poland)", "hudson.igf.edu.pl", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("SANET", "147.213.113.73", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("Thai Meteorological Department", "119.46.126.38", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("UNIV-AGUniversité des Antilles", "seedsrv0.ovmp.martinique.univ-ag.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("BGR", "eida.bgr.de", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("ENS", "ephesite.ens.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Helsinki", "finseis.seismo.helsinki.fi", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Haiti", "ayiti.unice.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("ICGC", "ws.icgc.cat", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("IPGP", "rtserver.ipgp.fr", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("TexNet", "rtserve.beg.utexas.edu", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("LMU", "erde.geophysik.uni-muenchen.de", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("NIGGG", "195.96.231.100", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("ORFEUS", "eida.orfeus-eu.org", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("PLSN (IGF Poland)", "hudson.igf.edu.pl", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("SANET", "147.213.113.73", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Thai Meteorological Department", "119.46.126.38", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("UNIV-AGUniversité des Antilles", "seedsrv0.ovmp.martinique.univ-ag.fr", 18000));
 
         // NO DATA AT ALL / CRASHES / BIG DELAY
         //seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
