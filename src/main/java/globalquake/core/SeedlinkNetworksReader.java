@@ -1,7 +1,6 @@
 package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
@@ -19,6 +18,16 @@ public class SeedlinkNetworksReader {
 	private Instant lastData;
 
     private long lastReceivedRecord;
+
+	public static void main(String[] args) throws Exception{
+		SeedlinkReader reader = new SeedlinkReader("rtserve.resif.fr", 18000);
+		reader.select("FR", "AGO", "00", "HHZ");
+		reader.sendCmd("DATA");
+		reader.select("FR", "CHLF", "00", "HHZ");
+		reader.sendCmd("DATA");
+		reader.select("FR", "PLDF", "00", "HHZ");
+		reader.startData();
+	}
 
 	public void run() {
 		createCache();
@@ -47,8 +56,6 @@ public class SeedlinkNetworksReader {
 			public void run() {
 				int reconnectDelay = RECONNECT_DELAY;
 
-				boolean useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");
-
                 while (true) {
 					SeedlinkReader reader = null;
 					try {
@@ -59,15 +66,18 @@ public class SeedlinkNetworksReader {
 						int connected = 0;
 
 						reconnectDelay = RECONNECT_DELAY;
+						boolean first = true;
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
                                 System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
+								if(!first) {
+									reader.sendCmd("DATA");
+								} else{
+									first = false;
+								}
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
-								if(useDATA) {
-									reader.sendCmd("DATA");
-								}
 								connected++;
 							}
 						}
@@ -77,17 +87,8 @@ public class SeedlinkNetworksReader {
 							break;
 						}
 
-						try {
-							reader.startData();
-						}catch(SeedlinkException e){
-							if(!useDATA){
-								throw e;
-							}
+						reader.startData();
 
-							System.err.println("Trying without DATA...");
-							useDATA = false;
-							continue;
-						}
 						while (reader.hasNext()) {
 							SeedlinkPacket slp = reader.readPacket();
 							try {
@@ -107,7 +108,6 @@ public class SeedlinkNetworksReader {
 							}
 						}
 
-						useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");
 						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
