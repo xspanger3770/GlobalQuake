@@ -147,7 +147,6 @@ public class DatabaseMonitorFrame extends JFrame {
         buttonsOutsidePanel.add(buttonsPanel);
         buttonsOutsidePanel.add(mainProgressBar);
         
-
         bottomPanel.add(buttonsOutsidePanel);
         return bottomPanel;
     }
