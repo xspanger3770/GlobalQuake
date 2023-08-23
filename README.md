@@ -39,7 +39,7 @@ Project is in early development state and there is quite some room for improveme
 * Multiple earthquakes from the same place in short time interval
 * Distant earthquakes - the further the earthquake is from the stations, the less accurate the calculated epicenter will be
 
-## Disclaimer
+## :warning: Disclaimer
 
 - Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can be sometimes inaccurate
 - Please be aware that playing some of the included alarm sounds in public places can be considered in some countries as fearmongering/panic spreading
