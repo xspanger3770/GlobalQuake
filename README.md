@@ -41,8 +41,8 @@ Project is in early development state and there is quite some room for improveme
 
 ## :warning: Disclaimer
 
-- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can be sometimes inaccurate
-- Please be aware that playing some of the included alarm sounds in public places can be considered in some countries as fearmongering/panic spreading
+- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can sometimes be inaccurate
+- Please be aware that playing some of the included alarm sounds in public areas can be considered in some countries as a form of fearmongering/panic spreading
 - I do not control any of the seedlink servers included in GlobalQuake. They can stop working at any time without notice
 
 ## Running GlobalQuake
