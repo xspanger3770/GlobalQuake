@@ -107,7 +107,7 @@ public class SeedlinkNetworksReader {
 							}
 						}
 
-						useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");;
+						useDATA = !seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu");
 						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {

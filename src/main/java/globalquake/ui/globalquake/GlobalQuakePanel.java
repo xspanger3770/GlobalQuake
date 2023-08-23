@@ -110,18 +110,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
 
-        List<SettingInfo> settingsStrings = new ArrayList<>();
-
-        settingsStrings.add(new SettingInfo("Archived Earthquakes (E): ", Settings.displayArchivedQuakes ? "Shown" : "Hidden", Settings.displayArchivedQuakes ? Color.green:Color.red));
-
-        //If sound is not available, set a special message
-        if(!Sounds.soundsAvailable)
-        {
-            settingsStrings.add(new SettingInfo("Sound Alarms: ", "Unavailable", Color.red));
-        }
-        else{
-            settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
-        }
+        List<SettingInfo> settingsStrings = createSettingInfos();
 
         int _y = getHeight() - 6;
         g.setFont(new Font("Calibri", Font.PLAIN, 14));
@@ -139,16 +128,23 @@ public class GlobalQuakePanel extends GlobePanel {
         }
     }
 
-    static class SettingInfo{
-        public String name;
-        public String value;
-        public Color color;
+    private static List<SettingInfo> createSettingInfos() {
+        List<SettingInfo> settingsStrings = new ArrayList<>();
 
-        public SettingInfo(String name, String value, Color color) {
-            this.name = name;
-            this.value = value;
-            this.color = color;
+        settingsStrings.add(new SettingInfo("Archived Earthquakes (E): ", Settings.displayArchivedQuakes ? "Shown" : "Hidden", Settings.displayArchivedQuakes ? Color.green:Color.red));
+
+        //If sound is not available, set a special message
+        if(!Sounds.soundsAvailable)
+        {
+            settingsStrings.add(new SettingInfo("Sound Alarms: ", "Unavailable", Color.red));
         }
+        else{
+            settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
+        }
+        return settingsStrings;
+    }
+
+    record SettingInfo(String name, String value, Color color) {
     }
 
     @SuppressWarnings("SameParameterValue")
