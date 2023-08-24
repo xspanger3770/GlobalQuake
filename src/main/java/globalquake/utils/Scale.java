@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Scale {
 
 	public static final double RATIO_TRESHOLD = 50_000.0;
-	public static final double EXPONENT = 0.266;
+	public static final double EXPONENT = 0.27;
 
 	public static final boolean ENABLE_INTERPOLATION = true;
 
