@@ -231,7 +231,6 @@ public class BetterAnalysis extends Analysis {
                 long age = System.currentTimeMillis() - event.getEnd();
                 if (age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
-                    System.out.println("Removed old event at station " + getStation().getStationCode());
                 }
             }
         }
