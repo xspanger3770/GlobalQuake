@@ -111,9 +111,9 @@ public class StationDatabase implements Serializable {
         seedlinkNetworks.add(new SeedlinkNetwork("Unical Universita Della Calabria", "www.sismocal.org", 18000));
         seedlinkNetworks.add(new SeedlinkNetwork("UNIV-AGUniversité des Antilles", "seedsrv0.ovmp.martinique.univ-ag.fr", 18000));
 
-        // NO DATA AT ALL / CRASHES / BIG DELAY
-        //seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
-        //seedlinkNetworks.add(new SeedlinkNetwork("USP-IAG", "seisrequest.iag.usp.br", 18000));
+        // POSSIBLY NO DATA AT ALL / CRASHES / BIG DELAY
+        seedlinkNetworks.add(new SeedlinkNetwork("RSIS", "rsis1.on.br", 18000));
+        seedlinkNetworks.add(new SeedlinkNetwork("USP-IAG", "seisrequest.iag.usp.br", 18000));
 
         // NOT RESPONDING / TIMEOUT
         //seedlinkNetworks.add(new SeedlinkNetwork("CISMID", "www.cismid.uni.edu.pe", 18000));
