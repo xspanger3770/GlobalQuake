@@ -20,10 +20,12 @@ import java.util.List;
 
 public class FDSNWSDownloader {
 
+    // TODO ThreadLocal!!
     private static final SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final int TIMEOUT_SECONDS = 20;
 
-    public static final List<String> SUPPORTED_CHANNELS = List.of("HHZ", "BHZ", "EHZ", "SHZ");
+    public static List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B');
+    public static List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N');
 
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
@@ -61,9 +63,9 @@ public class FDSNWSDownloader {
         List<String> supportedAttributes = downloadWadl(stationSource);
         URL url;
         if(supportedAttributes.contains("endafter")){
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(new Date())));
         } else {
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=?HZ".formatted(stationSource.getUrl(), minLon, maxLon));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
         }
 
 
@@ -166,13 +168,25 @@ public class FDSNWSDownloader {
                         .getElementsByTagName("SampleRate").item(0).getTextContent());
             }
 
-            if(!SUPPORTED_CHANNELS.contains(channel)){
+            if(!isSupported(channel)){
                 continue;
             }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate);
         }
+    }
+
+    private static boolean isSupported(String channel) {
+        char band = channel.charAt(0);
+        char instrument = channel.charAt(1);
+
+        if(!(SUPPORTED_BANDS.contains(band))){
+            return false;
+        }
+
+
+        return SUPPORTED_INSTRUMENTS.contains(instrument);
     }
 
     private static void addChannel(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, String stationCode, String stationSite, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
