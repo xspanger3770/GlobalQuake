@@ -32,11 +32,19 @@ public class DistanceFilterAction extends AbstractAction {
         double minDist = 10;
         if (input != null) { // Check if user clicked OK or Cancel
             try {
-                minDist = Double.parseDouble(input);
+                if(Double.parseDouble(input) > 0){
+                    minDist = Double.parseDouble(input);
+                }
+                else{
+                    throw new NumberFormatException();
+                }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(parent, "Invalid input. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+        }
+        else{
+            return;
         }
 
         minDist = Math.max(0.1, minDist);
