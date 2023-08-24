@@ -3,6 +3,7 @@ package globalquake.core;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.core.analysis.Log;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
@@ -132,7 +133,12 @@ public class SeedlinkNetworksReader {
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
-		stationCache.get("%s %s".formatted(network, station)).addRecord(dr);
+		var globalStation = stationCache.get("%s %s".formatted(network, station));
+		if(globalStation == null){
+			Logger.warn("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
+		}else {
+			globalStation.addRecord(dr);
+		}
 	}
 
     public long getLastReceivedRecord() {
