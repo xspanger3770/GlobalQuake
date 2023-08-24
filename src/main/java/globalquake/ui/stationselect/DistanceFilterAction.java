@@ -22,6 +22,8 @@ public class DistanceFilterAction extends AbstractAction {
         super("Apply Distance Filter");
         this.stationDatabaseManager=stationDatabaseManager;
         this.parent=parent;
+
+        putValue(SHORT_DESCRIPTION, "Select Stations with Minimum Distance Between Channels");
     }
 
     @Override
