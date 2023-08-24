@@ -101,7 +101,7 @@ public class GlobalQuakeFrame extends JFrame {
 		settings.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				SettingsFrame.show();
+				new SettingsFrame(GlobalQuakeFrame.this);
 			}
 		});
 

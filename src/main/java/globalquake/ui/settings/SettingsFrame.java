@@ -12,9 +12,7 @@ import javax.swing.JTabbedPane;
 
 import org.tinylog.Logger;
 
-public class SettingsFrame {
-
-	private JFrame frame;
+public class SettingsFrame extends JFrame{
 
 	private final List<SettingsPanel> panels = new LinkedList<>();
 	private JTabbedPane tabbedPane;
@@ -22,8 +20,7 @@ public class SettingsFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
             try {
-                SettingsFrame window = new SettingsFrame(null);
-                window.frame.setVisible(true);
+                new SettingsFrame(null).setVisible(true);
             } catch (Exception e) {
 				Logger.error(e);
             }
@@ -35,11 +32,11 @@ public class SettingsFrame {
 	}
 
 	private void initialize(Component parent) {
-		frame = new JFrame("GlobalQuake Settings");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setMinimumSize(new Dimension(400, 300));
+		setTitle("GlobalQuake Settings");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setMinimumSize(new Dimension(400, 300));
 		JPanel panel = new JPanel(new BorderLayout());
-		frame.setContentPane(panel);
+		setContentPane(panel);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		panel.add(tabbedPane, BorderLayout.CENTER);
@@ -50,7 +47,7 @@ public class SettingsFrame {
 		JButton btnCancel = new JButton("Cancel");
 		panel_1.add(btnCancel);
 
-		btnCancel.addActionListener(e -> frame.dispose());
+		btnCancel.addActionListener(e -> dispose());
 
 		JButton btnSave = new JButton("Save");
 		panel_1.add(btnSave);
@@ -65,16 +62,17 @@ public class SettingsFrame {
                 }
             }
             Settings.save();
+			dispose();
         });
 
 		addPanels();
 
-		frame.pack();
-		frame.setLocationRelativeTo(parent);
+		pack();
+		setLocationRelativeTo(parent);
 	}
 
 	protected void error(Exception e) {
-		JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	private void addPanels() {
@@ -83,10 +81,6 @@ public class SettingsFrame {
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);
 		}
-	}
-
-	public static void show() {
-		main(null);
 	}
 
 }
