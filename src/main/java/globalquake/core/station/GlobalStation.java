@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 public class GlobalStation extends AbstractStation {
 
-	private static final long MAX_GAP = 3 * 60;
+	private static final long MAX_STRETCH_SECONDS = 60;
 	private final Object recordsQueueLock = new Object();
 
 	private final SortedSet<DataRecord> records;
@@ -54,7 +54,7 @@ public class GlobalStation extends AbstractStation {
                 } else {
 					long gapSeconds = nextExpectedLog.until(startTime, ChronoUnit.SECONDS);
 					long stretchSeconds = startTime.until(records.last().getPredictedNextStartBtime().toInstant(), ChronoUnit.SECONDS);
-					if(gapSeconds > MAX_GAP || stretchSeconds > MAX_GAP){
+					if(gapSeconds > MAX_STRETCH_SECONDS || stretchSeconds > MAX_STRETCH_SECONDS){
 						records.remove(oldest);
 						process(oldest);
 						continue;
