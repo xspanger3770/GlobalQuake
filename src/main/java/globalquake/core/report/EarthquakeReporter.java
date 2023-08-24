@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -27,7 +28,7 @@ import org.tinylog.Logger;
 
 public class EarthquakeReporter {
 	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
-	public static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss");
+	public static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss").withZone(ZoneId.systemDefault());
 	private static double centerLat = 49.7;
 	private static double centerLon = 15.65;
 	private static double scroll = 8;
