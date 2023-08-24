@@ -1,6 +1,7 @@
 package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
@@ -8,9 +9,10 @@ import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
 import org.tinylog.Logger;
 
+import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SeedlinkNetworksReader {
 
@@ -20,13 +22,26 @@ public class SeedlinkNetworksReader {
     private long lastReceivedRecord;
 
 	public static void main(String[] args) throws Exception{
-		SeedlinkReader reader = new SeedlinkReader("rtserve.resif.fr", 18000);
-		reader.select("FR", "AGO", "00", "HHZ");
-		reader.sendCmd("DATA");
-		reader.select("FR", "CHLF", "00", "HHZ");
-		reader.sendCmd("DATA");
-		reader.select("FR", "PLDF", "00", "HHZ");
+		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
+		reader.select("AK", "DIV", "", "BHZ");
 		reader.startData();
+
+		SortedSet<DataRecord> set = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
+
+		while(reader.hasNext() && set.size() < 10){
+			SeedlinkPacket pack = reader.readPacket();
+			DataRecord dataRecord = pack.getMiniSeed();
+			System.out.println(pack.getMiniSeed().getStartTime()+" - "+pack.getMiniSeed().getLastSampleTime()+" x "+pack.getMiniSeed().getEndTime()+" @ "+pack.getMiniSeed().getSampleRate());
+			if(!set.add(dataRecord)){
+				System.out.println("ERR ALREADY CONTAINS");
+			}
+		}
+
+		reader.close();
+		for(DataRecord dataRecord : set){
+			System.err.println(dataRecord.getStartTime()+" - "+dataRecord.getLastSampleTime()+" x "+dataRecord.getEndTime()+" @ "+dataRecord.getSampleRate());
+			System.err.println(dataRecord.getPredictedNextStartBtime());
+		}
 	}
 
 	public void run() {

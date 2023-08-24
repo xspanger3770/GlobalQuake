@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Scale {
 
 	public static final double RATIO_TRESHOLD = 50_000.0;
-	public static final double EXPONENT = 0.27;
+	public static final double EXPONENT = 0.25;
 
 	public static final boolean ENABLE_INTERPOLATION = true;
 
@@ -19,7 +19,11 @@ public class Scale {
 	}
 
 	public static Color getColorRatio(double ratio) {
-		double pct = Math.pow(ratio, EXPONENT) / Math.pow(RATIO_TRESHOLD, EXPONENT);
+		if(ratio < 1){
+			return new Color(pgaScale.getRGB(0, 0));
+		}
+
+		double pct = Math.pow(ratio - 1.0, EXPONENT) / Math.pow(RATIO_TRESHOLD, EXPONENT);
 
 		int i1 = (int)(pct * (pgaScale.getHeight() - 1));
 		int i2 = i1 + 1;
