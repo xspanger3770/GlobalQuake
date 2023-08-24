@@ -3,7 +3,6 @@ package globalquake.core;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
-import globalquake.core.analysis.Log;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
