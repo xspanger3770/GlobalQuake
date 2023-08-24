@@ -11,6 +11,8 @@ public class Scale {
 	public static final double RATIO_TRESHOLD = 50_000.0;
 	public static final double EXPONENT = 0.266;
 
+	public static final boolean ENABLE_INTERPOLATION = true;
+
 	private static BufferedImage pgaScale;
 	public static void load() throws IOException, NullPointerException {
 		pgaScale = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("scales/pgaScale3.png")));
@@ -26,6 +28,10 @@ public class Scale {
 			return new Color(pgaScale.getRGB(0, 0));
 		} else if (i1 >= pgaScale.getHeight() - 1){
 			return new Color(pgaScale.getRGB(0, pgaScale.getHeight() - 1));
+		}
+
+		if(!ENABLE_INTERPOLATION){
+			return new Color(pgaScale.getRGB(0, i1));
 		}
 
 		double weight = (pct * (pgaScale.getHeight() - 1)) - i1;
