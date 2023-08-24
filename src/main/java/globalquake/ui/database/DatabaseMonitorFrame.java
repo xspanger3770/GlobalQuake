@@ -160,7 +160,6 @@ public class DatabaseMonitorFrame extends JFrame {
         buttonsOutsidePanel.setLayout(new GridLayout(1, 1));
         buttonsOutsidePanel.revalidate();
         buttonsOutsidePanel.repaint();
-        btnLaunch.setEnabled(!manager.isUpdating());
         restoreDatabaseAction.setEnabled(true);
     }
 
