@@ -42,7 +42,6 @@ public class SettingsFrame {
 		frame.setContentPane(panel);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setPreferredSize(new Dimension(600, 400));
 		panel.add(tabbedPane, BorderLayout.CENTER);
 
 		JPanel panel_1 = new JPanel();
@@ -80,8 +79,6 @@ public class SettingsFrame {
 
 	private void addPanels() {
 		panels.add(new GeneralSettingsPanel());
-		panels.add(new HypocenterAnalysisPanel());
-		panels.add(new AlertsPanel());
 
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);
