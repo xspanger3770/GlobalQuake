@@ -1,7 +1,6 @@
 package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
@@ -9,8 +8,6 @@ import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
 import org.tinylog.Logger;
 
-import javax.xml.crypto.Data;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
