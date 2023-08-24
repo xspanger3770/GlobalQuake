@@ -26,20 +26,20 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 public class GlobalQuakePanel extends GlobePanel {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     private static final Color neutralColor = new Color(20, 20, 160);
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     public GlobalQuakePanel(JFrame frame) {
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
@@ -101,9 +101,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
         if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
-            Calendar c = Calendar.getInstance();
-            c.setTimeInMillis(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord());
-            str = formatNice.format(c.getTime());
+            str = formatNice.format(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
             if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
                 g.setColor(Color.white);
             }
@@ -180,10 +178,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.drawString(quake.getRegion(), y + 3, x + 44);
             g.setFont(new Font("Calibri", Font.BOLD, 18));
 
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(quake.getOrigin());
-
-            g.drawString(DATE_FORMAT.format(cal.getTime()), x + 3, y + 66);
+            g.drawString(DATE_FORMAT.format(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
 
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);

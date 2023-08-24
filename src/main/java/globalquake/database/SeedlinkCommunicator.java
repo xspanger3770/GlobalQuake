@@ -23,11 +23,6 @@ public class SeedlinkCommunicator {
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
     public static final int SEEDLINK_TIMEOUT_SECONDS = 10;
 
-    static{
-        FORMAT_UTC_SHORT.get();
-
-    }
-
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
         seedlinkNetwork.getStatus().setValue(0);
