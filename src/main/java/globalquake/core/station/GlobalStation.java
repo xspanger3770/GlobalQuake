@@ -46,11 +46,11 @@ public class GlobalStation extends AbstractStation {
 					continue;
 				}
 
-				if(startTime.isBefore(nextExpectedLog)){
-					records.remove(oldest);
-                } else if(startTime.equals(nextExpectedLog)){
+				if(Math.abs(ChronoUnit.MILLIS.between(startTime, nextExpectedLog)) < 60) {
 					records.remove(oldest);
 					process(oldest);
+				}else if(startTime.isBefore(nextExpectedLog)){
+					records.remove(oldest);
                 } else {
 					long gapSeconds = nextExpectedLog.until(startTime, ChronoUnit.SECONDS);
 					long stretchSeconds = startTime.until(records.last().getPredictedNextStartBtime().toInstant(), ChronoUnit.SECONDS);

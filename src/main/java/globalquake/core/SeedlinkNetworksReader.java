@@ -20,7 +20,7 @@ public class SeedlinkNetworksReader {
 
 	public static void main(String[] args) throws Exception{
 		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
-		reader.select("AK", "DIV", "", "BHZ");
+		reader.select("AK", "D25K", "", "BHZ");
 		reader.startData();
 
 		SortedSet<DataRecord> set = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
@@ -29,6 +29,7 @@ public class SeedlinkNetworksReader {
 			SeedlinkPacket pack = reader.readPacket();
 			DataRecord dataRecord = pack.getMiniSeed();
 			System.out.println(pack.getMiniSeed().getStartTime()+" - "+pack.getMiniSeed().getLastSampleTime()+" x "+pack.getMiniSeed().getEndTime()+" @ "+pack.getMiniSeed().getSampleRate());
+			System.out.println(pack.getMiniSeed().getControlHeader().getSequenceNum());
 			if(!set.add(dataRecord)){
 				System.out.println("ERR ALREADY CONTAINS");
 			}
@@ -37,7 +38,7 @@ public class SeedlinkNetworksReader {
 		reader.close();
 		for(DataRecord dataRecord : set){
 			System.err.println(dataRecord.getStartTime()+" - "+dataRecord.getLastSampleTime()+" x "+dataRecord.getEndTime()+" @ "+dataRecord.getSampleRate());
-			System.err.println(dataRecord.getPredictedNextStartBtime());
+			System.err.println(dataRecord.oneLineSummary());
 		}
 	}
 
