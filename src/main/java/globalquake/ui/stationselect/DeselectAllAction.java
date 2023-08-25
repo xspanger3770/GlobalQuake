@@ -14,7 +14,7 @@ public class DeselectAllAction extends AbstractAction {
         super("Deselect All");
         this.stationDatabaseManager=stationDatabaseManager;
 
-        putValue(SHORT_DESCRIPTION, "Deselect All Available Stations");
+        putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
     }
 
     @Override

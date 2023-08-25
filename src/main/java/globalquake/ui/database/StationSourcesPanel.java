@@ -19,8 +19,6 @@ public class StationSourcesPanel extends JPanel {
     private final UpdateStationSourceAction updateStationSourceAction;
     private final JTable table;
     private StationSourcesTableModel tableModel;
-    private JButton btnSelectStations;
-    private JButton btnLaunch;
 
     public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
         this.databaseMonitorFrame = databaseMonitorFrame;
@@ -90,13 +88,11 @@ public class StationSourcesPanel extends JPanel {
 
     private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
         var count = table.getSelectionModel().getSelectedItemsCount();
-        this.btnSelectStations = databaseMonitorFrame.getBtnSelectStations();
-        this.btnLaunch = databaseMonitorFrame.getBtnLaunch();
         editStationSourceAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         updateStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         addStationSourceAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        btnSelectStations.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        btnLaunch.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
     }
 }

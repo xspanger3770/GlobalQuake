@@ -20,8 +20,6 @@ public class SeedlinkServersPanel extends JPanel {
     private final EditSeedlinkNetworkAction editSeedlinkNetworkAction;
     private final RemoveSeedlinkNetworkAction removeSeedlinkNetworkAction;
     private final UpdateSeedlinkNetworkAction updateSeedlinkNetworkAction;
-    private JButton btnSelectStations;
-    private JButton btnLaunch;
 
     public SeedlinkServersPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
         this.databaseMonitorFrame = databaseMonitorFrame;
@@ -91,14 +89,12 @@ public class SeedlinkServersPanel extends JPanel {
     }
 
     private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
-        this.btnSelectStations = databaseMonitorFrame.getBtnSelectStations();
-        this.btnLaunch = databaseMonitorFrame.getBtnLaunch();
         var count = table.getSelectionModel().getSelectedItemsCount();
         editSeedlinkNetworkAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         updateSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         addSeedlinkNetworkAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        btnSelectStations.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        btnLaunch.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
     }
 }
