@@ -165,7 +165,6 @@ public class StationDatabaseManager {
         return stationDatabase;
     }
 
-    @SuppressWarnings("CallToPrintStackTrace")
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
         toBeUpdated.forEach(seedlinkNetwork -> {
