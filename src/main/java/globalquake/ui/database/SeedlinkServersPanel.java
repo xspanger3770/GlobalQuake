@@ -47,6 +47,7 @@ public class SeedlinkServersPanel extends JPanel {
         this.updateSeedlinkNetworkAction.setTableModel(tableModel);
         this.updateSeedlinkNetworkAction.setTable(table);
         this.updateSeedlinkNetworkAction.setEnabled(false);
+        this.addSeedlinkNetworkAction.setEnabled(false);
 
         databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
         databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
@@ -92,5 +93,8 @@ public class SeedlinkServersPanel extends JPanel {
         editSeedlinkNetworkAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         updateSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
+        addSeedlinkNetworkAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
     }
 }
