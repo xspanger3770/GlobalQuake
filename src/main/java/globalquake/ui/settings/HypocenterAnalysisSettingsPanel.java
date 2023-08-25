@@ -22,7 +22,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         add(new JScrollPane(contentPanel), BorderLayout.CENTER);
     }
 
-    private Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
+    public static Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createRaisedBevelBorder());
 
@@ -31,9 +31,12 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
         topPanel.add(label, BorderLayout.NORTH);
         topPanel.add(slider, BorderLayout.CENTER);
-        JLabel labelDefault = new JLabel("Default value: "+defaultValue);
-        labelDefault.setBorder(new EmptyBorder(8,2,0,0));
-        topPanel.add(labelDefault, BorderLayout.SOUTH);
+
+        if(defaultValue != null) {
+            JLabel labelDefault = new JLabel("Default value: " + defaultValue);
+            labelDefault.setBorder(new EmptyBorder(8, 2, 0, 0));
+            topPanel.add(labelDefault, BorderLayout.SOUTH);
+        }
 
         JTextArea textAreaExplanation = new JTextArea(explanation);
         textAreaExplanation.setBorder(new EmptyBorder(5,5,5,5));
@@ -46,7 +49,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         return panel;
     }
 
-    private JSlider createSettingsSlider(int min, int max, int major, int minor){
+    public static JSlider createSettingsSlider(int min, int max, int major, int minor){
         JSlider slider = new JSlider();
         slider.setMinimum(min);
         slider.setMaximum(max);

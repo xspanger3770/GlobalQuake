@@ -10,8 +10,6 @@ import java.util.Properties;
 
 public final class Settings {
 
-	public static final double pWaveInaccuracyTresholdDefault = 1200;
-	public static final double hypocenterCorrectTresholdDefault = 40;
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
 	private static final Properties properties = new Properties();
 	public static Boolean enableAlarmDialogs;
@@ -19,8 +17,13 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 
+	public static final double pWaveInaccuracyTresholdDefault = 1200;
 	public static Double pWaveInaccuracyTreshold;
+	public static final double hypocenterCorrectTresholdDefault = 40;
 	public static Double hypocenterCorrectTreshold;
+
+	public static final double hypocenterDetectionResolutionDefault = 40;
+	public static Double hypocenterDetectionResolution;
 
 	public static Boolean displayArchivedQuakes;
 	
@@ -47,6 +50,7 @@ public final class Settings {
 
 		pWaveInaccuracyTreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTresholdDefault)));
 		hypocenterCorrectTreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTresholdDefault)));
+		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
 		save();
 	}
 	
@@ -61,6 +65,7 @@ public final class Settings {
 
 		properties.setProperty("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTreshold));
 		properties.setProperty("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTreshold));
+		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {
