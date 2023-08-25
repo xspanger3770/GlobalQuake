@@ -46,7 +46,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		JPanel alertsDialogPanel = new JPanel(new GridLayout(2, 1));
 		alertsDialogPanel.setBorder(BorderFactory.createTitledBorder("Alert dialogs settings"));
 
-		chkBoxAlertDialogs = new JCheckBox("Enable alert dialogs (experimental)");
+		chkBoxAlertDialogs = new JCheckBox("Enable alert dialogs");
 		chkBoxAlertDialogs.setBounds(8, 8, 250, 23);
 		chkBoxAlertDialogs.setSelected(Settings.enableAlarmDialogs);
 

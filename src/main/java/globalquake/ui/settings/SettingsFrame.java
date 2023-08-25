@@ -34,7 +34,7 @@ public class SettingsFrame extends JFrame{
 	private void initialize(Component parent) {
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setMinimumSize(new Dimension(400, 300));
+		setMinimumSize(new Dimension(500, 400));
 		JPanel panel = new JPanel(new BorderLayout());
 		setContentPane(panel);
 
@@ -77,6 +77,7 @@ public class SettingsFrame extends JFrame{
 
 	private void addPanels() {
 		panels.add(new GeneralSettingsPanel());
+		panels.add(new HypocenterAnalysisSettingsPanel());
 
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);
