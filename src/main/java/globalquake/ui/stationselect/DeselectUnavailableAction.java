@@ -13,6 +13,8 @@ public class DeselectUnavailableAction extends AbstractAction {
     public DeselectUnavailableAction(StationDatabaseManager stationDatabaseManager) {
         super("Deselect Unavailable");
         this.stationDatabaseManager=stationDatabaseManager;
+
+        putValue(SHORT_DESCRIPTION, "Deselects All Unavailable Stations");
     }
 
     @Override

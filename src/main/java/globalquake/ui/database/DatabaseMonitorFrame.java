@@ -24,6 +24,7 @@ public class DatabaseMonitorFrame extends JFrame {
     private JButton btnLaunch;
 
     private final AbstractAction restoreDatabaseAction;
+    private JComponent buttonsOutsidePanel;
 
     public JProgressBar getMainProgressBar() {
         return mainProgressBar;
@@ -104,7 +105,7 @@ public class DatabaseMonitorFrame extends JFrame {
 
         GridLayout grid = new GridLayout(2, 1);
         grid.setVgap(5);
-        JPanel buttonsOutsidePanel = new JPanel(grid);
+        buttonsOutsidePanel = new JPanel(grid);
         buttonsOutsidePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         JPanel buttonsPanel = new JPanel();
@@ -143,9 +144,9 @@ public class DatabaseMonitorFrame extends JFrame {
         mainProgressBar.setStringPainted(true);
         mainProgressBar.setString("Init...");
 
-        buttonsOutsidePanel.add(mainProgressBar);
         buttonsOutsidePanel.add(buttonsPanel);
-
+        buttonsOutsidePanel.add(mainProgressBar);
+        
         bottomPanel.add(buttonsOutsidePanel);
         return bottomPanel;
     }
@@ -155,8 +156,18 @@ public class DatabaseMonitorFrame extends JFrame {
     }
 
     public void initDone() {
-        btnSelectStations.setEnabled(true);
-        btnLaunch.setEnabled(true);
+        buttonsOutsidePanel.remove(mainProgressBar);
+        buttonsOutsidePanel.setLayout(new GridLayout(1, 1));
+        buttonsOutsidePanel.revalidate();
+        buttonsOutsidePanel.repaint();
         restoreDatabaseAction.setEnabled(true);
+    }
+
+    public JButton getBtnSelectStations() {
+        return btnSelectStations;  
+    }
+
+    public JButton getBtnLaunch() {
+        return btnLaunch;
     }
 }

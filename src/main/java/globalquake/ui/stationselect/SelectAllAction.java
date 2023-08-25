@@ -14,6 +14,8 @@ public class SelectAllAction extends AbstractAction {
     public SelectAllAction(StationDatabaseManager stationDatabaseManager) {
         super("Select All");
         this.stationDatabaseManager=stationDatabaseManager;
+
+        putValue(SHORT_DESCRIPTION, "Select All Available Stations");
     }
 
     @Override

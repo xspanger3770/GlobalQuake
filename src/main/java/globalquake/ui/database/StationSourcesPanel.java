@@ -45,6 +45,7 @@ public class StationSourcesPanel extends JPanel {
         this.updateStationSourceAction.setTableModel(tableModel);
         this.updateStationSourceAction.setTable(table);
         this.updateStationSourceAction.setEnabled(false);
+        this.addStationSourceAction.setEnabled(false);
 
         databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
         databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
@@ -90,5 +91,8 @@ public class StationSourcesPanel extends JPanel {
         editStationSourceAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
         removeStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
         updateStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
+        addStationSourceAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
     }
 }
