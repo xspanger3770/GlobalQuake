@@ -22,7 +22,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     private final List<AbstractStation> globalStations;
 
-    private static final double RATIO_GREEN = 200.0;
     public static final double RATIO_YELLOW = 2000.0;
     public static final double RATIO_RED = 20000.0;
 
@@ -99,8 +98,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
-        if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)
-                && event.getMaxRatio() > RATIO_GREEN) {
+        if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
             if (event.getMaxRatio() >= RATIO_YELLOW) {
