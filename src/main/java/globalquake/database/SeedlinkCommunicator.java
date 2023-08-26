@@ -36,7 +36,12 @@ public class SeedlinkCommunicator {
         seedlinkNetwork.getStatus().setValue(66);
         parseAvailability(infoString, stationDatabase, seedlinkNetwork);
 
+        seedlinkNetwork.getStatus().setString("Finishing...");
+        seedlinkNetwork.getStatus().setValue(80);
         reader.close();
+
+        seedlinkNetwork.getStatus().setString("Done");
+        seedlinkNetwork.getStatus().setValue(99);
     }
 
     private static void parseAvailability(String infoString, StationDatabase stationDatabase, SeedlinkNetwork seedlinkNetwork) throws Exception {

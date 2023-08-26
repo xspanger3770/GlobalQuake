@@ -266,7 +266,7 @@ public class GlobalQuakePanel extends GlobePanel {
         String str = "Magnitude";
         g.drawString(str, 10, startY - 5);
 
-        int ww = g.getFontMetrics().stringWidth(str) + 10;
+        int ww = g.getFontMetrics().stringWidth(str) - 12;
 
         g.drawRect(startX, startY, ww, hh);
 
