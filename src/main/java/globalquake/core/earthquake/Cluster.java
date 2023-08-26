@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import edu.sc.seis.seisFile.fdsnws.quakeml.Pick;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;

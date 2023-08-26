@@ -1,7 +1,5 @@
 package globalquake.core.earthquake;
 
-import java.util.ArrayList;
-
 public class Hypocenter {
 	public double totalErr;
 	private int wrongEventsCount;
