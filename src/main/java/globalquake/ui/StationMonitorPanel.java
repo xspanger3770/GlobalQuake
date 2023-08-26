@@ -233,7 +233,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, yA, x2, yA));
 
-				for (double d : Event.RECALCULATE_P_WAVE_TRESHOLDS) {
+				for (double d : Event.RECALCULATE_P_WAVE_THRESHOLDS) {
 					double _y = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - d) / (maxRatio);
 					if (_y > getHeight() * 0.70) {
 						g.setColor(Color.magenta);

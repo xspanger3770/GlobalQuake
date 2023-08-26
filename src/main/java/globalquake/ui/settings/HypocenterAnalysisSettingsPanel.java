@@ -65,16 +65,16 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderCorrectness = createSettingsSlider(20, 90, 10, 2);
 
         JLabel label = new JLabel();
-        sliderCorrectness.addChangeListener(changeEvent -> label.setText("Hypocenter correctness treshold: %d %%".formatted(sliderCorrectness.getValue())));
+        sliderCorrectness.addChangeListener(changeEvent -> label.setText("Hypocenter Correctness Threshold: %d %%".formatted(sliderCorrectness.getValue())));
 
-        sliderCorrectness.setValue(Settings.hypocenterCorrectTreshold.intValue());
+        sliderCorrectness.setValue(Settings.hypocenterCorrectThreshold.intValue());
 
-        return createCoolLayout(sliderCorrectness, label, "%s %%".formatted(Settings.hypocenterCorrectTresholdDefault),
+        return createCoolLayout(sliderCorrectness, label, "%s %%".formatted(Settings.hypocenterCorrectThresholdDefault),
                 """
-                        This value determines the treshold when a hypocenter is considered
+                        This value determines the threshold when a hypocenter is considered
                         correct or not.
                         The correctness is calculated as the % of stations that have arrival
-                        within the Inaccuracy treshold and total number of stations used by
+                        within the Inaccuracy threshold and total number of stations used by
                         the hypocenter locating algoritgm.
                         If hypocenter is marked as incorrect, the earthquake will not
                         be displayed on the map.
@@ -87,13 +87,13 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderPWaveInaccuracy = createSettingsSlider(400, 2500, 200, 100);
 
         JLabel label = new JLabel();
-        sliderPWaveInaccuracy.addChangeListener(changeEvent -> label.setText("P Wave Arrival Inaccuracy Treshold: %d ms".formatted(sliderPWaveInaccuracy.getValue())));
+        sliderPWaveInaccuracy.addChangeListener(changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue())));
 
-        sliderPWaveInaccuracy.setValue(Settings.pWaveInaccuracyTreshold.intValue());
+        sliderPWaveInaccuracy.setValue(Settings.pWaveInaccuracyThreshold.intValue());
 
-        return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyTresholdDefault),
+        return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyThresholdDefault),
                 """
-                This value determines the treshold value when the hypocenter finding\s
+                This value determines the threshold value when the hypocenter finding\s
                 algorithm considers the arrival from current point to a station correct \s
                 or incorrect\s
                 Higher values are less restrictive and will lead to more false positives.
@@ -104,8 +104,8 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
     @Override
     public void save() {
-        Settings.pWaveInaccuracyTreshold = (double) sliderPWaveInaccuracy.getValue();
-        Settings.hypocenterCorrectTreshold = (double) sliderCorrectness.getValue();
+        Settings.pWaveInaccuracyThreshold = (double) sliderPWaveInaccuracy.getValue();
+        Settings.hypocenterCorrectThreshold = (double) sliderCorrectness.getValue();
     }
 
     @Override

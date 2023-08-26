@@ -20,7 +20,7 @@ public class EarthquakeAnalysis {
 
     public static final int QUADRANTS = 16;
 
-    private static final long DELTA_P_TRESHOLD = 2200;
+    private static final long DELTA_P_THRESHOLD = 2200;
 
     private final List<Earthquake> earthquakes;
 
@@ -69,10 +69,10 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        double ratioPercentileTreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
+        double ratioPercentileThreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
 
-        // remove events that are weaker than the treshold and keep at least 8 events
-        while (pickedEvents.get(0).maxRatio() < ratioPercentileTreshold && pickedEvents.size() > 8) {
+        // remove events that are weaker than the threshold and keep at least 8 events
+        while (pickedEvents.get(0).maxRatio() < ratioPercentileThreshold && pickedEvents.size() > 8) {
             pickedEvents.remove(0);
         }
 
@@ -101,7 +101,7 @@ public class EarthquakeAnalysis {
     }
 
     private HypocenterFinderSettings createSettings() {
-        return new HypocenterFinderSettings(Settings.pWaveInaccuracyTreshold, Settings.hypocenterCorrectTreshold, Settings.hypocenterDetectionResolution);
+        return new HypocenterFinderSettings(Settings.pWaveInaccuracyThreshold, Settings.hypocenterCorrectThreshold, Settings.hypocenterDetectionResolution);
     }
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
@@ -152,7 +152,7 @@ public class EarthquakeAnalysis {
         long deltaP = events.get((int) ((events.size() - 1) * 0.9)).pWave()
                 - events.get((int) ((events.size() - 1) * 0.1)).pWave();
 
-        return deltaP >= DELTA_P_TRESHOLD;
+        return deltaP >= DELTA_P_THRESHOLD;
     }
 
     @SuppressWarnings("unused")
@@ -309,7 +309,7 @@ public class EarthquakeAnalysis {
             double expectedDT = TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC));
             double actualTravel = Math.abs((event.pWave() - hyp.origin) / 1000.0);
             double _err = Math.abs(expectedDT - actualTravel);
-            if (_err < finderSettings.pWaveInaccuracyTreshold()) {
+            if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc++;
             }
             err += _err * _err;
@@ -350,7 +350,7 @@ public class EarthquakeAnalysis {
         double pct = 100 * ((cluster.getSelected().size() - wrongAmount) / (double) cluster.getSelected().size());
         System.out.println("PCT = " + (int) (pct) + "%, " + wrongAmount + "/" + cluster.getSelected().size() + " = "
                 + bestHypocenter.correctStations + " w " + events.size());
-        boolean valid = pct > finderSettings.correctnessTreshold();
+        boolean valid = pct > finderSettings.correctnessThreshold();
         if (!valid && cluster.getEarthquake() != null) {
             GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
             cluster.setEarthquake(null);
@@ -393,7 +393,7 @@ public class EarthquakeAnalysis {
                     * 1000);
             long actualTravel = Math.abs(event.pWave() - hyp.origin);
             boolean wrong = event.pWave() < hyp.origin
-                    || Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyTreshold();
+                    || Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
             if (wrong) {
                 list.add(event);
             }

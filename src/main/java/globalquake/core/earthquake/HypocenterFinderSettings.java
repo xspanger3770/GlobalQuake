@@ -1,4 +1,4 @@
 package globalquake.core.earthquake;
 
-public record HypocenterFinderSettings(double pWaveInaccuracyTreshold, double correctnessTreshold, double resolution) {
+public record HypocenterFinderSettings(double pWaveInaccuracyThreshold, double correctnessThreshold, double resolution) {
 }

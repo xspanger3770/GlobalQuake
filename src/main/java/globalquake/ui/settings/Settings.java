@@ -17,10 +17,10 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 
-	public static final double pWaveInaccuracyTresholdDefault = 1000;
-	public static Double pWaveInaccuracyTreshold;
-	public static final double hypocenterCorrectTresholdDefault = 40;
-	public static Double hypocenterCorrectTreshold;
+	public static final double pWaveInaccuracyThresholdDefault = 1000;
+	public static Double pWaveInaccuracyThreshold;
+	public static final double hypocenterCorrectThresholdDefault = 40;
+	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
 	public static Double hypocenterDetectionResolution;
@@ -48,8 +48,8 @@ public final class Settings {
 		displayArchivedQuakes = Boolean.valueOf((String) properties.getOrDefault("displayArchivedQuakes", "true"));
 		enableSound = Boolean.valueOf((String) properties.getOrDefault("enableSound", "true"));
 
-		pWaveInaccuracyTreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTresholdDefault)));
-		hypocenterCorrectTreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTresholdDefault)));
+		pWaveInaccuracyThreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault)));
+		hypocenterCorrectThreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault)));
 		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
 		save();
 	}
@@ -63,8 +63,8 @@ public final class Settings {
 		properties.setProperty("displayArchivedQuakes", String.valueOf(displayArchivedQuakes));
 		properties.setProperty("enableSound", String.valueOf(enableSound));
 
-		properties.setProperty("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTreshold));
-		properties.setProperty("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTreshold));
+		properties.setProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThreshold));
+		properties.setProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThreshold));
 		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
