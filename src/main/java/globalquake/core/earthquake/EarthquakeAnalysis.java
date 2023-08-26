@@ -163,7 +163,9 @@ public class EarthquakeAnalysis {
         double smallestError = Double.MAX_VALUE;
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
-        long xx = System.currentTimeMillis();
+
+        long timeMillis = System.currentTimeMillis();
+        long startTime = timeMillis;
 
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
@@ -178,8 +180,8 @@ public class EarthquakeAnalysis {
         // phase 1 search nearby
         int correctLimit = previousHypocenter == null ? 0 : previousHypocenter.correctStations;
         bestHypocenter = scanArea(events, null, 8 + iterationsDifference, 500, _lat, _lon, correctLimit, 10.0 / universalMultiplier, maxDepth, 10, finderSettings);
-        System.out.println("CLOSE: " + (System.currentTimeMillis() - xx));
-        xx = System.currentTimeMillis();
+        System.out.println("CLOSE: " + (System.currentTimeMillis() - timeMillis));
+        timeMillis = System.currentTimeMillis();
 
         // phase 2 search far
         if (previousHypocenter == null || previousHypocenter.correctStations < 12) {
@@ -189,18 +191,17 @@ public class EarthquakeAnalysis {
         // phase 3 find exact area
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        System.out.println("FAR: " + (System.currentTimeMillis() - xx));
-        xx = System.currentTimeMillis();
+        System.out.println("FAR: " + (System.currentTimeMillis() - timeMillis));
+        timeMillis = System.currentTimeMillis();
         bestHypocenter = scanArea(events, bestHypocenter, 8 + iterationsDifference, 100, _lat, _lon, correctLimit, 10.0 / universalMultiplier, maxDepth, 3, finderSettings);
-        System.out.println("EXACT: " + (System.currentTimeMillis() - xx));
-        xx = System.currentTimeMillis();
+        System.out.println("EXACT: " + (System.currentTimeMillis() - timeMillis));
+        timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
 
         // phase 4 find exact depth
         bestHypocenter = scanArea(events, bestHypocenter, 6 + iterationsDifference, 50, _lat, _lon, correctLimit, 1.0 / universalMultiplier, maxDepth, 2, finderSettings);
-        System.out.println("DEPTH: " + (System.currentTimeMillis() - xx));
-        xx = System.currentTimeMillis();
+        System.out.println("DEPTH: " + (System.currentTimeMillis() - timeMillis));
 
         HypocenterCondition result;
         if ((result = checkConditions(events, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
@@ -209,7 +210,7 @@ public class EarthquakeAnalysis {
             System.err.println(result);
         }
 
-        System.out.println("FINISH: " + (System.currentTimeMillis() - xx));
+        System.out.printf("Hypocenter finding finished in: %d ms%n", System.currentTimeMillis() - startTime);
     }
 
     private Hypocenter scanArea(ArrayList<PickedEvent> events, Hypocenter bestHypocenter, int iterations, double maxDist,
