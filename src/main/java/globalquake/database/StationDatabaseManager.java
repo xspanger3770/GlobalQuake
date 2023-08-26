@@ -188,6 +188,9 @@ public class StationDatabaseManager {
                                 Future<Void> future = executor.submit(task);
                                 future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
+                                seedlinkNetwork.getStatus().setString("Done");
+                                seedlinkNetwork.getStatus().setValue(100);
+
                                 break;
                             } catch(TimeoutException e){
                                 seedlinkNetwork.getStatus().setString("Timed out!");
