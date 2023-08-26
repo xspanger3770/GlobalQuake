@@ -31,7 +31,7 @@ public class Cluster {
 	public final SoundsInfo soundsInfo;
 	private double anchorLon;
 	private double anchorLat;
-	public int reportID;
+	public int revisionID;
 
 	public static final double NONE = -999;
 	public final Object selectedEventsLock;
@@ -128,10 +128,10 @@ public class Cluster {
 		if (r128 > 8 || r1024 > 2) {
 			_level = 1;
 		}
-		if (r1024 > 8 || r8192 > 2) {
+		if (r1024 > 6 || r8192 > 2) {
 			_level = 2;
 		}
-		if (r8192 > 8 || r32K >= 2) {
+		if (r8192 > 4 || r32K >= 2) {
 			_level = 3;
 		}
 		if (r32K > 3) {
@@ -191,11 +191,6 @@ public class Cluster {
 
 	public void setEarthquake(Earthquake earthquake) {
 		this.earthquake = earthquake;
-	}
-
-	@SuppressWarnings("unused")
-	public int getLevel() {
-		return earthquake == null ? level : (int) Math.max(0, Math.min(4, earthquake.getMag() / 2.0));
 	}
 
 	public int getActualLevel() {

@@ -185,7 +185,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
             g.drawString(f1d.format(quake.getDepth()) + "km Deep", x + 3, y + 104);
-            str = "Revision no. " + quake.getReportID();
+            str = "Revision no. " + quake.getRevisionID();
             g.drawString(str, x + 3, y + 125);
             str = (int) quake.getPct() + "%";
             g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);

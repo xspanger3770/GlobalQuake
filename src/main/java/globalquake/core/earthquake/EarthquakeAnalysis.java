@@ -370,8 +370,8 @@ public class EarthquakeAnalysis {
                 cluster.updateAnchor(bestHypocenter);
             }
             cluster.getEarthquake().setPct(pct);
-            cluster.reportID += 1;
-            cluster.getEarthquake().setReportID(cluster.reportID);
+            cluster.revisionID += 1;
+            cluster.getEarthquake().setRevisionID(cluster.revisionID);
             bestHypocenter.setWrongEventsCount(wrongEvents.size());
             if (previousHypocenter != null && previousHypocenter.correctStations < 12
                     && bestHypocenter.correctStations >= 12) {
