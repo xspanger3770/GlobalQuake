@@ -41,8 +41,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                         at the cost of increased demand on your CPU. If you experience
                         significant lags while there is an earthquake happening on the map,
                         you should decrease this value.
-                        Also the resolution setting is pretty sensitive so there is
-                        probably no need to change it too much.
                         """);
     }
 
