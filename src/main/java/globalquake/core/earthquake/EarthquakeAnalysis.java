@@ -13,7 +13,8 @@ import java.util.*;
 
 public class EarthquakeAnalysis {
 
-    public static final double MIN_RATIO = 10.0;
+    private static final int MIN_EVENTS = 5;
+    public static final double MIN_RATIO = 16.0;
 
     public static final int TARGET_EVENTS = 30;
 
@@ -54,14 +55,12 @@ public class EarthquakeAnalysis {
             }
         }
 
-        // TODO this part probably makes no sense as it will never happen
-        {
-            if (cluster.lastEpicenterUpdate == cluster.updateCount) {
-                return;
-            }
-
-            cluster.lastEpicenterUpdate = cluster.updateCount;
+        if (cluster.lastEpicenterUpdate == cluster.updateCount) {
+            return;
         }
+
+        cluster.lastEpicenterUpdate = cluster.updateCount;
+
 
         pickedEvents.sort(Comparator.comparing(PickedEvent::maxRatio));
 
@@ -78,7 +77,7 @@ public class EarthquakeAnalysis {
         }
 
         // if in the end there is less than N events, abort
-        if (pickedEvents.size() < 4) {
+        if (pickedEvents.size() < MIN_EVENTS) {
             return;
         }
 
