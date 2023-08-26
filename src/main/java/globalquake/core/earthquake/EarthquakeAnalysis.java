@@ -173,6 +173,9 @@ public class EarthquakeAnalysis {
 		int iterationsDifference = (int)Math.round((finderSettings.resolution() - 40.0) / 14.0);
 		double universalMultiplier = getUniversalResolutionMultiplier(finderSettings);
 
+		System.out.println("Universal multiplier is "+universalMultiplier);
+		System.out.println("Iterations difference: "+iterationsDifference);
+
 		// phase 1 search nearby
 		int correctLimit = previousHypocenter == null ? 0 : previousHypocenter.correctStations;
         bestHypocenter = scanArea(events, null, 8 + iterationsDifference, 500, _lat, _lon, correctLimit, 10.0 / universalMultiplier, maxDepth, 10, finderSettings);
@@ -280,7 +283,7 @@ public class EarthquakeAnalysis {
 		// 100% when 40.0 (default) selected
 		// 550% when 100 (max) selected
 		double x = finderSettings.resolution();
-		return ((x*x+600) / 1900.0);
+		return ((x*x + 600) / 2200.0);
 	}
 
 	private long findBestOrigin(Hypocenter hyp, ArrayList<PickedEvent> events) {

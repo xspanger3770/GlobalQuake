@@ -37,14 +37,16 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, Settings.hypocenterDetectionResolutionDefault+"",
                 """
                         By increasing the Hypocenter Finding Resolution, you can\s
-                        enhance the accuracy at which GlobalQuake detects hypocenters
+                        enhance the accuracy at which GlobalQuake locates hypocenters
                         at the cost of increased demand on your CPU. If you experience
                         significant lags while there is an earthquake happening on the map,
                         you should decrease this value.
+                        Also the resolution setting is pretty sensitive so there is
+                        probably no need to change it too much.
                         """);
     }
 
-    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Default", "Increased", "High", "Very High", "Insane"};
+    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Insane"};
 
     private String getNameForResolution(int value) {
         return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / 100.0) * (RESOLUTION_NAMES.length))))];
