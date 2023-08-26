@@ -106,15 +106,15 @@ public class Sounds {
 		return -1;
 	}
 
-	public static void determineSounds(Cluster c) {
-		SoundsInfo info = c.soundsInfo;
+	public static void determineSounds(Cluster cluster) {
+		SoundsInfo info = cluster.soundsInfo;
 
 		if (!info.firstSound) {
 			Sounds.playSound(Sounds.weak);
 			info.firstSound = true;
 		}
 
-		int level = c.getActuallLevel();
+		int level = cluster.getActualLevel();
 		if (level > info.maxLevel) {
 			if (level >= 1 && info.maxLevel < 1) {
 				Sounds.playSound(Sounds.shindo1);
@@ -127,7 +127,7 @@ public class Sounds {
 			}
 			info.maxLevel = level;
 		}
-		Earthquake quake = c.getEarthquake();
+		Earthquake quake = cluster.getEarthquake();
 
 		if (quake != null) {
 			boolean meets = AlertManager.meetsConditions(quake);
@@ -135,7 +135,7 @@ public class Sounds {
 				Sounds.playSound(Sounds.eew);
 				info.meets = true;
 			}
-			double pga = GeoUtils.pgaFunctionGen1(c.getEarthquake().getMag(), c.getEarthquake().getDepth());
+			double pga = GeoUtils.pgaFunctionGen1(cluster.getEarthquake().getMag(), cluster.getEarthquake().getDepth());
 			if (info.maxPGA < pga) {
 
 				info.maxPGA = pga;

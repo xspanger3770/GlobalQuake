@@ -123,6 +123,7 @@ public class Cluster {
 				r32K++;
 			}
 		}
+
 		int _level = 0;
 		if (r128 > 8 || r1024 > 2) {
 			_level = 1;
@@ -197,7 +198,7 @@ public class Cluster {
 		return earthquake == null ? level : (int) Math.max(0, Math.min(4, earthquake.getMag() / 2.0));
 	}
 
-	public int getActuallLevel() {
+	public int getActualLevel() {
 		return level;
 	}
 
