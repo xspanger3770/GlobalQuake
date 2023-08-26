@@ -185,7 +185,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
             g.drawString(f1d.format(quake.getDepth()) + "km Deep", x + 3, y + 104);
-            str = "Report no." + quake.getReportID();
+            str = "Revision no. " + quake.getReportID();
             g.drawString(str, x + 3, y + 125);
             str = (int) quake.getPct() + "%";
             g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
@@ -261,10 +261,12 @@ public class GlobalQuakePanel extends GlobePanel {
         int startY = baseHeight + 115;
         int startX = 16;
         int hh = 200;
-        int ww = 60;
 
         g.setFont(new Font("Calibri", Font.BOLD, 12));
-        g.drawString("Ratio Mag", 10, startY - 5);
+        String str = "Magnitude";
+        g.drawString(str, 10, startY - 5);
+
+        int ww = g.getFontMetrics().stringWidth(str) + 10;
 
         g.drawRect(startX, startY, ww, hh);
 
