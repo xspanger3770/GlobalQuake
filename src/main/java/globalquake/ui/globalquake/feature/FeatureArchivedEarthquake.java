@@ -68,7 +68,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(getColor(entity.getOriginal()));
-        graphics.setStroke(new BasicStroke((float) (1 + entity.getOriginal().getMag() * 0.6)));
+        graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }

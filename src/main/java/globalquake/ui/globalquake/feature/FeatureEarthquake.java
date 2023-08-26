@@ -113,7 +113,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         RenderElement elementCross = entity.getRenderElement(2);
         if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
-            graphics.setColor(Color.YELLOW);
+            graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
             graphics.setStroke(new BasicStroke(4f));
             graphics.draw(elementCross.getShape());
 
@@ -132,6 +132,25 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private Color getCrossColor(double mag) {
+        if (mag < 3) {
+            return Color.lightGray;
+        }
+        if (mag < 4) {
+            return Color.green;
+        }
+        if (mag < 5) {
+            return Color.yellow;
+        }
+        if (mag < 6) {
+            return Color.orange;
+        }
+        if(mag < 7){
+            return Color.red;
+        }
+        return Color.magenta;
     }
 
 

@@ -31,13 +31,13 @@ public class Cluster {
 	public final SoundsInfo soundsInfo;
 	private double anchorLon;
 	private double anchorLat;
-	public int reportID;
+	public int revisionID;
 
 	public static final double NONE = -999;
 	public final Object selectedEventsLock;
 
 	// 20 selected
-	private ArrayList<Event> selected = new ArrayList<>();
+	private List<PickedEvent> selected = new ArrayList<>();
 
 	public Cluster(int id) {
 		this.id = id;
@@ -100,18 +100,15 @@ public class Cluster {
 
 	private void calculateSize() {
 		double _size = 0;
-		int r32 = 0;
 		int r128 = 0;
 		int r1024 = 0;
 		int r8192 = 0;
+		int r32K = 0;
 		for (Event e : assignedEvents) {
 			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
 					e.getAnalysis().getStation().getLongitude());
 			if (dist > _size) {
 				_size = dist;
-			}
-			if (e.getMaxRatio() >= 32.0) {
-				r32++;
 			}
 			if (e.getMaxRatio() >= 128) {
 				r128++;
@@ -122,18 +119,22 @@ public class Cluster {
 			if (e.getMaxRatio() >= 8192) {
 				r8192++;
 			}
+			if (e.getMaxRatio() >= 32768) {
+				r32K++;
+			}
 		}
+
 		int _level = 0;
-		if (r32 > 8 || r128 > 2) {
+		if (r128 > 8 || r1024 > 2) {
 			_level = 1;
 		}
-		if (r128 > 6 || r1024 > 2) {
+		if (r1024 > 6 || r8192 > 2) {
 			_level = 2;
 		}
-		if (r1024 > 5 || r8192 >= 2) {
+		if (r8192 > 4 || r32K >= 2) {
 			_level = 3;
 		}
-		if (r8192 > 3) {
+		if (r32K > 3) {
 			_level = 4;
 		}
 		level = _level;
@@ -192,12 +193,7 @@ public class Cluster {
 		this.earthquake = earthquake;
 	}
 
-	@SuppressWarnings("unused")
-	public int getLevel() {
-		return earthquake == null ? level : (int) Math.max(0, Math.min(4, earthquake.getMag() / 2.0));
-	}
-
-	public int getActuallLevel() {
+	public int getActualLevel() {
 		return level;
 	}
 
@@ -222,11 +218,11 @@ public class Cluster {
 	 * 
 	 * @return list of events that were selected for hypocenter search last time
 	 */
-	public ArrayList<Event> getSelected() {
+	public List<PickedEvent> getSelected() {
 		return selected;
 	}
 
-	public void setSelected(ArrayList<Event> selected) {
+	public void setSelected(List<PickedEvent> selected) {
 		this.selected = selected;
 	}
 

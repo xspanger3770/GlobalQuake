@@ -18,15 +18,10 @@ import java.util.TimeZone;
 public class SeedlinkCommunicator {
 
     public static final long UNKNOWN_DELAY = Long.MIN_VALUE;
-    private static final SimpleDateFormat FORMAT_UTC_SHORT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final SimpleDateFormat FORMAT_UTC_LONG = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS");
+    private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_SHORT = new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG = new ThreadLocal<>();
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
-    public static final int SEEDLINK_TIMEOUT_SECONDS = 10;
-
-    static{
-        FORMAT_UTC_SHORT.setTimeZone(TimeZone.getTimeZone("UTC"));
-        FORMAT_UTC_LONG.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    public static final int SEEDLINK_TIMEOUT_SECONDS = 20;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");
@@ -41,9 +36,12 @@ public class SeedlinkCommunicator {
         seedlinkNetwork.getStatus().setValue(66);
         parseAvailability(infoString, stationDatabase, seedlinkNetwork);
 
+        seedlinkNetwork.getStatus().setString("Finishing...");
+        seedlinkNetwork.getStatus().setValue(80);
         reader.close();
+
         seedlinkNetwork.getStatus().setString("Done");
-        seedlinkNetwork.getStatus().setValue(100);
+        seedlinkNetwork.getStatus().setValue(99);
     }
 
     private static void parseAvailability(String infoString, StationDatabase stationDatabase, SeedlinkNetwork seedlinkNetwork) throws Exception {
@@ -69,8 +67,16 @@ public class SeedlinkCommunicator {
                 long delay = UNKNOWN_DELAY;
 
                 try {
+                    if(FORMAT_UTC_LONG.get() == null || FORMAT_UTC_SHORT.get() == null){
+                        FORMAT_UTC_SHORT.set(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+                        FORMAT_UTC_SHORT.get().setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                        FORMAT_UTC_LONG.set(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS"));
+                        FORMAT_UTC_LONG.get().setTimeZone(TimeZone.getTimeZone("UTC"));
+                    }
+
                     Calendar end = Calendar.getInstance();
-                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.parse(endDate) : FORMAT_UTC_LONG.parse(endDate));
+                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.get().parse(endDate) : FORMAT_UTC_LONG.get().parse(endDate));
 
                     delay = System.currentTimeMillis() - end.getTimeInMillis();
 

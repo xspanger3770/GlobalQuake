@@ -1,7 +1,7 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.core.GlobalQuake;
+import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.Level;
 import globalquake.geo.Shindo;
@@ -14,15 +14,17 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class EarthquakeListPanel extends JPanel {
     private int scroll = 0;
     protected int mouseY;
 
-    private static final SimpleDateFormat formatNice = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
@@ -154,10 +156,7 @@ public class EarthquakeListPanel extends JPanel {
             g.setColor(Color.white);
             g.drawString(str, 52, y + 18);
 
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(quake.getOrigin());
-
-            str = formatNice.format(cal.getTime());
+            str = formatNice.format(Instant.ofEpochMilli(quake.getOrigin()));
             g.setFont(new Font("Calibri", Font.PLAIN, 16));
             g.setColor(Color.white);
             g.drawString(str, 52, y + 42);

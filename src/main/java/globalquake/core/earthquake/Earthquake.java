@@ -17,10 +17,9 @@ public class Earthquake implements Regional {
 	private double mag;
 	private ArrayList<Double> mags;
 	private double pct;
-	private int reportID;
-
+	private int revisionID;
 	public final Object magsLock;
-	public int nextReport;
+	public int nextReportEventCount;
 	private String region;
 
 	private final RegionUpdater regionUpdater;
@@ -64,12 +63,12 @@ public class Earthquake implements Regional {
 		this.pct = pct;
 	}
 
-	public int getReportID() {
-		return reportID;
+	public int getRevisionID() {
+		return revisionID;
 	}
 
-	public void setReportID(int reportID) {
-		this.reportID = reportID;
+	public void setRevisionID(int revisionID) {
+		this.revisionID = revisionID;
 	}
 
 	public long getLastUpdate() {

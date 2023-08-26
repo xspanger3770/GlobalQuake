@@ -1,10 +1,8 @@
 package globalquake.core.earthquake;
 
-import java.util.ArrayList;
-
 public class Hypocenter {
-	private ArrayList<Event> wrongEvents;
 	public double totalErr;
+	private int wrongEventsCount;
 
 	public Hypocenter(double lat, double lon, double depth, long origin) {
 		this.lat = lat;
@@ -19,15 +17,11 @@ public class Hypocenter {
 	long origin;
 	public int correctStations;
 
-	public void setWrongEvents(ArrayList<Event> wrongEvents) {
-		this.wrongEvents = wrongEvents;
+	public void setWrongEventsCount(int count) {
+		this.wrongEventsCount = count;
 	}
 
-	public ArrayList<Event> getWrongEvents() {
-		return wrongEvents;
-	}
-
-	public int getWrongCount() {
-		return wrongEvents == null ? 0 : wrongEvents.size();
+	public int getWrongEventsCount() {
+		return wrongEventsCount;
 	}
 }

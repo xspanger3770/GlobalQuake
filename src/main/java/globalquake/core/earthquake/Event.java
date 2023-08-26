@@ -140,6 +140,10 @@ public class Event implements Serializable {
 		return getAnalysis().getStation().getLongitude();
 	}
 
+	public double getElevationFromStation(){
+		return getAnalysis().getStation().getAlt();
+	}
+
 	public void log(Log currentLog) {
 		synchronized (logsLock) {
 			logs.add(0, currentLog);

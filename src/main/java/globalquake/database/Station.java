@@ -113,7 +113,7 @@ public class Station implements Serializable {
         }
 
         for(Channel channel : getChannels()){
-            if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() > selectedChannel.getSampleRate())) {
+            if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() < selectedChannel.getSampleRate())) {
                 selectedChannel = channel;
             }
         }

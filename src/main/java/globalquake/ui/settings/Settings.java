@@ -17,6 +17,14 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 
+	public static final double pWaveInaccuracyTresholdDefault = 1000;
+	public static Double pWaveInaccuracyTreshold;
+	public static final double hypocenterCorrectTresholdDefault = 40;
+	public static Double hypocenterCorrectTreshold;
+
+	public static final double hypocenterDetectionResolutionDefault = 40;
+	public static Double hypocenterDetectionResolution;
+
 	public static Boolean displayArchivedQuakes;
 	
 	public static final boolean reportsEnabled = false; // not available ATM
@@ -39,6 +47,10 @@ public final class Settings {
 		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "0.0"));
 		displayArchivedQuakes = Boolean.valueOf((String) properties.getOrDefault("displayArchivedQuakes", "true"));
 		enableSound = Boolean.valueOf((String) properties.getOrDefault("enableSound", "true"));
+
+		pWaveInaccuracyTreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTresholdDefault)));
+		hypocenterCorrectTreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTresholdDefault)));
+		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
 		save();
 	}
 	
@@ -50,8 +62,12 @@ public final class Settings {
 		properties.setProperty("homeLon", String.valueOf(homeLon));
 		properties.setProperty("displayArchivedQuakes", String.valueOf(displayArchivedQuakes));
 		properties.setProperty("enableSound", String.valueOf(enableSound));
+
+		properties.setProperty("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTreshold));
+		properties.setProperty("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTreshold));
+		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
 		try {
-			properties.store(new FileOutputStream(optionsFile), "magic");
+			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {
 			Main.getErrorHandler().handleException(e);
 		}

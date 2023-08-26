@@ -29,7 +29,7 @@ public class DistanceFilterAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         String input = JOptionPane.showInputDialog(parent, "Enter distance in kilometers:", "Distance Input", JOptionPane.PLAIN_MESSAGE);
-        double minDist = 10;
+        double minDist;
         if (input != null) { // Check if user clicked OK or Cancel
             try {
                 if(Double.parseDouble(input) > 0){
