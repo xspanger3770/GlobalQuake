@@ -20,7 +20,7 @@ public class Earthquake implements Regional {
 	private int reportID;
 
 	public final Object magsLock;
-	public int nextReport;
+	public int nextReportEventCount;
 	private String region;
 
 	private final RegionUpdater regionUpdater;

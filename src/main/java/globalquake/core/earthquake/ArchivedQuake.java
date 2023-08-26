@@ -47,17 +47,16 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 			return;
 		}
 		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
-		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
+		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null) {
 			return;
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = previousHypocenter.getWrongEvents().size();
+		this.abandonedCount = previousHypocenter.getWrongEventsCount();
 		for (Event e : earthquake.getCluster().getAssignedEvents()) {
-			boolean aba = previousHypocenter.getWrongEvents().contains(e);
 			archivedEvents.add(
-					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), aba));
-			if (!aba && e.maxRatio > this.maxRatio) {
+					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), false));
+			if (e.maxRatio > this.maxRatio) {
 				this.maxRatio = e.getMaxRatio();
 			}
 		}

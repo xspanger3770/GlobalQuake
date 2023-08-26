@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import edu.sc.seis.seisFile.fdsnws.quakeml.Pick;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
@@ -37,7 +38,7 @@ public class Cluster {
 	public final Object selectedEventsLock;
 
 	// 20 selected
-	private ArrayList<Event> selected = new ArrayList<>();
+	private List<PickedEvent> selected = new ArrayList<>();
 
 	public Cluster(int id) {
 		this.id = id;
@@ -222,11 +223,11 @@ public class Cluster {
 	 * 
 	 * @return list of events that were selected for hypocenter search last time
 	 */
-	public ArrayList<Event> getSelected() {
+	public List<PickedEvent> getSelected() {
 		return selected;
 	}
 
-	public void setSelected(ArrayList<Event> selected) {
+	public void setSelected(List<PickedEvent> selected) {
 		this.selected = selected;
 	}
 
