@@ -168,15 +168,20 @@ public class EarthquakeAnalysis {
 
 		Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
+		double maxDepth = 700;
+
+		int iterationsDifference = (int)Math.round((finderSettings.resolution() - 40.0) / 14.0);
+		double universalMultiplier = getUniversalResolutionMultiplier(finderSettings);
+
 		// phase 1 search nearby
 		int correctLimit = previousHypocenter == null ? 0 : previousHypocenter.correctStations;
-        bestHypocenter = scanArea(events, null, 9, 500, _lat, _lon, correctLimit, 10, 10, finderSettings);
+        bestHypocenter = scanArea(events, null, 8 + iterationsDifference, 500, _lat, _lon, correctLimit, 10.0 / universalMultiplier, maxDepth, 10, finderSettings);
         System.out.println("CLOSE: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
 
 		// phase 2 search far
 		if (previousHypocenter == null || previousHypocenter.correctStations < 12) {
-			bestHypocenter = scanArea(events, bestHypocenter, 9, 14000, _lat, _lon, correctLimit, 50, 100, finderSettings);
+			bestHypocenter = scanArea(events, bestHypocenter, 8 + iterationsDifference, 14000, _lat, _lon, correctLimit, 50.0 / universalMultiplier, maxDepth, 100, finderSettings);
 		}
 
 		// phase 3 find exact area
@@ -184,14 +189,14 @@ public class EarthquakeAnalysis {
 		_lon = bestHypocenter.lon;
 		System.out.println("FAR: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
-        bestHypocenter = scanArea(events, bestHypocenter, 9, 100, _lat, _lon, correctLimit, 10, 3, finderSettings);
+        bestHypocenter = scanArea(events, bestHypocenter, 8 + iterationsDifference, 100, _lat, _lon, correctLimit, 10.0 / universalMultiplier, maxDepth, 3, finderSettings);
         System.out.println("EXACT: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
 		_lat = bestHypocenter.lat;
 		_lon = bestHypocenter.lon;
 
 		// phase 4 find exact depth
-        bestHypocenter = scanArea(events, bestHypocenter, 8, 50, _lat, _lon, correctLimit, 1, 2, finderSettings);
+        bestHypocenter = scanArea(events, bestHypocenter, 6 + iterationsDifference, 50, _lat, _lon, correctLimit, 1.0 / universalMultiplier, maxDepth, 2, finderSettings);
         System.out.println("DEPTH: " + (System.currentTimeMillis() - xx));
 		xx = System.currentTimeMillis();
 	
@@ -206,17 +211,18 @@ public class EarthquakeAnalysis {
 	}
 
 	private Hypocenter scanArea(ArrayList<PickedEvent> events, Hypocenter bestHypocenter, int iterations, double maxDist,
-			double _lat, double _lon, int correctLimit, double depthAccuracy, double distHorizontal, HypocenterFinderSettings finderSettings) {
+			double _lat, double _lon, int correctLimit, double depthAccuracy, double maxDepth, double distHorizontal, HypocenterFinderSettings finderSettings) {
 		double lowerBound = 0;
 		double upperBound = maxDist;
 		boolean previousUp = false;
 		double distFromAnchor = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
-		Hypocenter previous = getBestAtDist(distFromAnchor, distHorizontal, _lat, _lon, events, depthAccuracy,
-				bestHypocenter, finderSettings);
+		Hypocenter previous = getBestAtDist(distFromAnchor, distHorizontal, _lat, _lon, events, depthAccuracy, maxDepth,
+				finderSettings);
+
 		for (int iteration = 0; iteration < iterations; iteration++) {
 			distFromAnchor = lowerBound + (upperBound - lowerBound) * ((previousUp ? 2 : 1) / 3.0);
-			Hypocenter _comparing = getBestAtDist(distFromAnchor, distHorizontal, _lat, _lon, events, depthAccuracy,
-					bestHypocenter, finderSettings);
+			Hypocenter _comparing = getBestAtDist(distFromAnchor, distHorizontal, _lat, _lon, events, depthAccuracy, maxDepth,
+					finderSettings);
 			double mid = (upperBound + lowerBound) / 2.0;
 			boolean go_down = (_comparing.totalErr > previous.totalErr) == previousUp;
 	
@@ -239,16 +245,16 @@ public class EarthquakeAnalysis {
 	}
 
 	private Hypocenter getBestAtDist(double distFromAnchor, double distHorizontal, double _lat, double _lon,
-			ArrayList<PickedEvent> events, double depthAccuracy, Hypocenter prevBest, HypocenterFinderSettings finderSettings) {
+									 ArrayList<PickedEvent> events, double depthAccuracy, double depthEnd, HypocenterFinderSettings finderSettings) {
 		Hypocenter bestHypocenter = null;
+
 		double smallestError = Double.MAX_VALUE;
 		double depthStart = 0;
-		double depthEnd = 400;
-		if (depthAccuracy < 10 && prevBest != null) {
-			depthStart = Math.max(0, prevBest.depth - 35);
-			depthEnd = depthStart + 70;
-		}
-		for (double ang = 0; ang < 360; ang += (distHorizontal * 360) / (5 * distFromAnchor)) {
+
+		double angularResolution = (distHorizontal * 360) / (5 * distFromAnchor);
+		angularResolution /= getUniversalResolutionMultiplier(finderSettings);
+
+		for (double ang = 0; ang < 360; ang += angularResolution) {
 			double[] vs = GeoUtils.moveOnGlobe(_lat, _lon, distFromAnchor, ang);
 			double lat = vs[0];
 			double lon = vs[1];
@@ -267,6 +273,14 @@ public class EarthquakeAnalysis {
 			}
 		}
 		return bestHypocenter;
+	}
+
+	private double getUniversalResolutionMultiplier(HypocenterFinderSettings finderSettings) {
+		// 30% when 0.0 (min) selected
+		// 100% when 40.0 (default) selected
+		// 550% when 100 (max) selected
+		double x = finderSettings.resolution();
+		return ((x*x+600) / 1900.0);
 	}
 
 	private long findBestOrigin(Hypocenter hyp, ArrayList<PickedEvent> events) {
