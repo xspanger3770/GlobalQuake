@@ -6,7 +6,7 @@
 </h1>
 
 > [!NOTE]<br>
-> GlobalQuake 0.9.3 has just been released!
+> GlobalQuake 0.9.4 has just been released!
 > Read about the new features in the [releases section](https://github.com/xspanger3770/GlobalQuake/releases)
 
 ![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
@@ -20,8 +20,8 @@
 
 GlobalQuake is an experimental Java application that can be used to monitor earthquakes world-wide in near real time
 
-Enables selection of seismic stations from publicly available seismic networks - `fdsnws services`. \
-Real time data is supplied from `seedlink` servers. \
+Enables selection of seismic stations from publicly available seismic networks - `fdsnws services` and the real time data is supplied from `seedlink servers`.\
+You can find the list of these providers here: [EarthquakeDataCenters](https://github.com/YacineBoussoufa/EarthquakeDataCenters)\
 The program then uses the data to detect earthquakes and visualize them on 3D global interactive map \
 It can also quickly estimate the earthquake magnitude using some empirical methods, but this only works for small and medium quakes up to magnitude 5-6
 
@@ -57,13 +57,17 @@ Project is in early development state and there is quite some room for improveme
 - The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage
 - You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world
 - Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations (in version 0.9.3)
-- If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system and you need to select less stations
+- If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations
 
 ## Contributing
 
 Any contributions, including feedback and suggestions are highly appreciated! See [Contributing guidelines](https://github.com/xspanger3770/GlobalQuake/blob/main/CONTRIBUTING.md)
 
+## Project Licensing
+
+This project is released under the terms of the MIT License. However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses. The sound effects with the `LICENSE_J` designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the `LICENSE_K` designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/). It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.
+
 ## Special thanks to
 
 ![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - Inspiration for the layout, intensity scale, sound alarms and more\
-![Philip Crotwell](https://github.com/crotwell) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Really good and easy to use libraries. GlobalQuake wouldn't be possible without these
+![Philip Crotwell](https://github.com/crotwell) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Great and easy to use libraries. GlobalQuake wouldn't be possible without these
