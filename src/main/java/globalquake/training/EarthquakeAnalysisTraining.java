@@ -22,7 +22,8 @@ public class EarthquakeAnalysisTraining {
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
 
-        Settings.hypocenterDetectionResolution = 100.0;
+        Settings.hypocenterDetectionResolution = 50.0;
+        Settings.parallelHypocenterLocations = true;
         long sum = 0;
         long n = 0;
         long a  =System.currentTimeMillis();

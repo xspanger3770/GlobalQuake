@@ -1,6 +1,5 @@
 package globalquake.core.earthquake;
 
-import edu.sc.seis.seisFile.fdsnws.quakeml.Pick;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
@@ -167,8 +166,6 @@ public class EarthquakeAnalysis {
         System.out.println("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
 
         Hypocenter bestHypocenter = null;
-        double _lat = cluster.getAnchorLat();
-        double _lon = cluster.getAnchorLon();
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
@@ -182,37 +179,49 @@ public class EarthquakeAnalysis {
         long timeMillis = System.currentTimeMillis();
         long startTime = timeMillis;
 
-        // phase 2 search far
-        Hypocenter hyp = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 4 + iterationsDifference, maxDepth, 75, finderSettings);
+        // phase 1 search far
+        double _lat = cluster.getAnchorLat();
+        double _lon = cluster.getAnchorLon();
+        Hypocenter hyp = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 4 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        _lat = bestHypocenter.lat;
-        _lon = bestHypocenter.lon;
         System.out.println("FAR: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
-        // phase 1 search nearby
+        // phase 2 search nearby that far
         timeMillis = System.currentTimeMillis();
-        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 15, finderSettings);
-        bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        System.out.println("CLOSE: " + (System.currentTimeMillis() - timeMillis)+", "+bestHypocenter.totalErr);
+        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
+        System.out.println("CLOSE: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
-        // phase 3 find exact area
+        // phase 3 search nearby of anchor
         timeMillis = System.currentTimeMillis();
+        _lat = cluster.getAnchorLat();
+        _lon = cluster.getAnchorLon();
+        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
+        System.out.println("CLOSE TO ANCHOR: " + (System.currentTimeMillis() - timeMillis));
+        System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
+
+
+        // phase 4 find exact area
+        timeMillis = System.currentTimeMillis();
+        _lat = bestHypocenter.lat;
+        _lon = bestHypocenter.lon;
         hyp = scanArea(events, 2.0 / universalMultiplier, 100.0, _lat, _lon, 7 + iterationsDifference, maxDepth, 2, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        _lat = bestHypocenter.lat;
-        _lon = bestHypocenter.lon;
-        System.out.println("EXACT: " + (System.currentTimeMillis() - timeMillis)+", "+bestHypocenter.totalErr);
+        System.out.println("EXACT: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
-        // phase 4 find exact depth
+        // phase 5 find exact depth
         timeMillis = System.currentTimeMillis();
-        hyp = scanArea(events, 1.0 / universalMultiplier, 10.0, _lat, _lon, 10 + iterationsDifference, maxDepth, 2, finderSettings);
+        _lat = bestHypocenter.lat;
+        _lon = bestHypocenter.lon;
+        hyp = scanArea(events, 1.0 / universalMultiplier, 10.0, _lat, _lon, 10 + iterationsDifference, maxDepth, 0.4 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        System.out.println("DEPTH: " + (System.currentTimeMillis() - timeMillis)+", "+bestHypocenter.totalErr);
+        System.out.println("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
 
@@ -259,7 +268,7 @@ public class EarthquakeAnalysis {
                                      List<PickedEvent> events, int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings) {
         double depthStart = 0;
 
-        double angularResolution = (distHorizontal * 360) / (5 * distFromAnchor);
+        double angularResolution = (distHorizontal * 360) / (5 * distFromAnchor + 10);
         angularResolution /= getUniversalResolutionMultiplier(finderSettings);
 
         GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
@@ -368,7 +377,7 @@ public class EarthquakeAnalysis {
             double distGC = event instanceof ExactPickedEvent ? ((ExactPickedEvent)event).distGC :
                     GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat, hyp.lon);
             double expectedDT = TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC));
-            double actualTravel = Math.abs((event.pWave() - hyp.origin) / 1000.0);
+            double actualTravel = (event.pWave() - hyp.origin) / 1000.0;
             double _err = expectedDT == TauPTravelTimeCalculator.NO_ARRIVAL ? 9999 : Math.abs(expectedDT - actualTravel);
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc++;
@@ -396,8 +405,8 @@ public class EarthquakeAnalysis {
         if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
             return HypocenterCondition.TOO_SHALLOW_ANGLE;
         }
-        if (previousHypocenter != null
-                && (bestHypocenter.correctStations < previousHypocenter.correctStations)) {
+
+        if (selectBetterHypocenter(previousHypocenter, bestHypocenter) == previousHypocenter) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }
 
@@ -460,9 +469,8 @@ public class EarthquakeAnalysis {
                     hyp.lon);
             long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC))
                     * 1000);
-            long actualTravel = Math.abs(event.pWave() - hyp.origin);
-            boolean wrong = event.pWave() < hyp.origin
-                    || Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
+            long actualTravel =event.pWave() - hyp.origin;
+            boolean wrong = Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
             if (wrong) {
                 list.add(event);
             }

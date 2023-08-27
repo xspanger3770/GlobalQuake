@@ -57,7 +57,7 @@ public final class Settings {
 		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
 
 		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
-		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "true"));
+		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
 
 		save();
 	}
