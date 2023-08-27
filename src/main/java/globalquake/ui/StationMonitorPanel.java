@@ -1,11 +1,6 @@
 package globalquake.ui;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -46,6 +41,13 @@ public class StationMonitorPanel extends JPanel {
 		Graphics2D g = img.createGraphics();
 		g.setColor(Color.white);
 		g.fillRect(0, 0, w, h);
+
+		g.setColor(Color.black);
+		g.setFont(new Font("Calibri", Font.BOLD, 14));
+		g.drawString("Raw Data", 4, 14);
+		g.drawString("Band Pass %sHz - %sHz".formatted(BetterAnalysis.min_frequency, BetterAnalysis.max_frequency), 4, (int) (h * 0.2 + 14));
+		g.drawString("Running Averages", 4, (int) (h * 0.4 + 14));
+		g.drawString("Averages Ratio", 4, (int) (h * 0.7 + 14));
 
 		long upperMinute = (long) (Math.ceil(System.currentTimeMillis() / (1000 * 60.0) + 1) * (1000L * 60L));
 		for (int deltaSec = 0; deltaSec <= BetterAnalysis.LOGS_STORE_TIME + 80; deltaSec += 10) {
