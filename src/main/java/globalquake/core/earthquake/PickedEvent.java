@@ -9,6 +9,8 @@ public class PickedEvent {
     private final double elevation;
     private final double maxRatio;
 
+    public ThreadLocal<Double> distGC = new ThreadLocal<>();
+
     public PickedEvent(long pWave, double lat, double lon, double elevation, double maxRatio) {
         this.pWave = pWave;
         this.lat = lat;

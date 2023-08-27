@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
-    private static final double RESOLUTION_MAX = 180.0;
+    private static final double RESOLUTION_MAX = 100.0;
     private JSlider sliderResolution;
 
     public PerformanceSettingsPanel() {

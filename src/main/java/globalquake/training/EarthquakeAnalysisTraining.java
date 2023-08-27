@@ -15,9 +15,9 @@ import java.util.Random;
 public class EarthquakeAnalysisTraining {
 
     public static final int STATIONS = 50;
-    public static final double DIST = 10.0;
+    public static final double DIST = 300;
 
-    public static double INACCURACY = 0;
+    public static double INACCURACY = 2000;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -29,8 +29,10 @@ public class EarthquakeAnalysisTraining {
         for(int i = 0; i < 10; i++) {
             long err = runTest();
             System.err.printf("Error: %,d ms%n", err);
-            sum+= err;
-            n++;
+            if(err != -1) {
+                sum += err;
+                n++;
+            }
         }
 
         System.err.println("============================================");
@@ -58,7 +60,7 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(0, 0 + r.nextDouble() * 3, r.nextDouble() * 200, 0);
+        Hypocenter absolutetyCorrect = new Hypocenter(0, 10 + r.nextDouble() * 3, r.nextDouble() * 200, 0);
 
         for(FakeStation fakeStation:fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -73,9 +75,11 @@ public class EarthquakeAnalysisTraining {
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
         if(cluster.getEarthquake()!=null) {
+            double dist = GeoUtils.greatCircleDistance(cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon(), absolutetyCorrect.lat, absolutetyCorrect.lon);
+            System.err.printf("%.2f km from epi%n", dist);
             return Math.abs(cluster.getEarthquake().getOrigin());
         } else{
-            return 100000;
+            return -1;
         }
     }
 
