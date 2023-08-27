@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
+    private static final double RESOLUTION_MAX = 180.0;
     private JSlider sliderResolution;
 
     public PerformanceSettingsPanel() {
@@ -24,7 +25,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingAccuracy() {
-        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, 100, 10, 2);
+        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) RESOLUTION_MAX, 20, 5);
         sliderResolution.setPaintLabels(false);
 
         JLabel label = new JLabel();
@@ -47,7 +48,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Insane"};
 
     private String getNameForResolution(int value) {
-        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / 100.0) * (RESOLUTION_NAMES.length))))];
+        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / RESOLUTION_MAX) * (RESOLUTION_NAMES.length))))];
     }
 
     @Override
