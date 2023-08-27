@@ -181,7 +181,7 @@ public class EarthquakeAnalysis {
         // phase 1 search far
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
-        Hypocenter bestHypocenter = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 4 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
+        Hypocenter bestHypocenter = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 5 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
         System.out.println("FAR: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
@@ -189,18 +189,18 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        Hypocenter hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        Hypocenter hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         System.out.println("CLOSE: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
-        // phase 3 search nearby of anchor
+        // phase 3 search nearby of root
         timeMillis = System.currentTimeMillis();
-        _lat = cluster.getAnchorLat();
-        _lon = cluster.getAnchorLon();
-        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        _lat = cluster.getRootLat();
+        _lon = cluster.getRootLon();
+        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        System.out.println("CLOSE TO ANCHOR: " + (System.currentTimeMillis() - timeMillis));
+        System.out.println("CLOSE TO ROOT: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
 
