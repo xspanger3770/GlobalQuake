@@ -14,7 +14,7 @@ public class Hypocenter {
 	public final double lat;
 	public final double lon;
 	public final double depth;
-	public long origin;
+	public final long origin;
 	public int correctStations;
 
 	public void setWrongEventsCount(int count) {

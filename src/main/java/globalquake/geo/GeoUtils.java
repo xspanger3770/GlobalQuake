@@ -3,8 +3,6 @@ package globalquake.geo;
 import globalquake.ui.globe.Point2D;
 import org.apache.commons.math3.util.FastMath;
 
-import java.awt.image.LookupTable;
-
 @SuppressWarnings("unused")
 public interface GeoUtils {
 	double EARTH_CIRCUMFERENCE = 40082;

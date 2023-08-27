@@ -17,7 +17,7 @@ public class EarthquakeAnalysisTraining {
     public static final int STATIONS = 50;
     public static final double DIST = 300;
 
-    public static double INACCURACY = 2000;
+    public static final double INACCURACY = 2000;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -42,7 +42,7 @@ public class EarthquakeAnalysisTraining {
         System.err.println("============================================");
     }
 
-    public static long runTest() throws Exception {
+    public static long runTest() {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 

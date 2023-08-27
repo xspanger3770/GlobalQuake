@@ -165,7 +165,6 @@ public class EarthquakeAnalysis {
 
         System.out.println("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
 
-        Hypocenter bestHypocenter = null;
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
@@ -182,8 +181,7 @@ public class EarthquakeAnalysis {
         // phase 1 search far
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
-        Hypocenter hyp = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 4 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
-        bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
+        Hypocenter bestHypocenter = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 4 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
         System.out.println("FAR: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
 
@@ -191,7 +189,7 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        Hypocenter hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 5 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         System.out.println("CLOSE: " + (System.currentTimeMillis() - timeMillis));
         System.out.println(bestHypocenter.correctStations+" / "+bestHypocenter.totalErr);
