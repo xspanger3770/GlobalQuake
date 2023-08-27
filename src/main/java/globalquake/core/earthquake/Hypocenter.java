@@ -11,10 +11,10 @@ public class Hypocenter {
 		this.origin = origin;
 	}
 
-	final double lat;
-	final double lon;
-	final double depth;
-	long origin;
+	public final double lat;
+	public final double lon;
+	public final double depth;
+	public long origin;
 	public int correctStations;
 
 	public void setWrongEventsCount(int count) {
@@ -23,5 +23,17 @@ public class Hypocenter {
 
 	public int getWrongEventsCount() {
 		return wrongEventsCount;
+	}
+
+	@Override
+	public String toString() {
+		return "Hypocenter{" +
+				"totalErr=" + totalErr +
+				", lat=" + lat +
+				", lon=" + lon +
+				", depth=" + depth +
+				", origin=" + origin +
+				", correctStations=" + correctStations +
+				'}';
 	}
 }
