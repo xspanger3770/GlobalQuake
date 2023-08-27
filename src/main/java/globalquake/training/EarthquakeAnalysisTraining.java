@@ -1,22 +1,45 @@
 package globalquake.training;
 
-import globalquake.core.earthquake.*;
-import globalquake.exception.FatalApplicationException;
+import globalquake.core.earthquake.Cluster;
+import globalquake.core.earthquake.EarthquakeAnalysis;
+import globalquake.core.earthquake.Hypocenter;
+import globalquake.core.earthquake.PickedEvent;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTable;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.ui.globe.Point2D;
 import globalquake.ui.settings.Settings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class EarthquakeAnalysisTraining {
 
     public static final int STATIONS = 50;
     public static final double DIST = 10.0;
 
-    public static void main(String[] args) throws FatalApplicationException {
+    public static double INACCURACY = 0;
+
+    public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+
+        Settings.hypocenterDetectionResolution = 100.0;
+        long sum = 0;
+        long n = 0;
+        long a  =System.currentTimeMillis();
+        for(int i = 0; i < 10; i++) {
+            long err = runTest();
+            System.err.printf("Error: %,d ms%n", err);
+            sum+= err;
+            n++;
+        }
+
+        System.err.println("============================================");
+        System.err.printf("AVERAGE = %,d ms%n", sum / n);
+        System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
+        System.err.println("============================================");
+    }
+
+    public static long runTest() throws Exception {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 
@@ -35,7 +58,7 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(0, 30, 20, 0);
+        Hypocenter absolutetyCorrect = new Hypocenter(0, 0 + r.nextDouble() * 3, r.nextDouble() * 200, 0);
 
         for(FakeStation fakeStation:fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -43,22 +66,17 @@ public class EarthquakeAnalysisTraining {
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
-
-            System.out.println("it will arrive at "+fakeStation+ " at "+time);
-
+            time += (long) (r.nextDouble() * INACCURACY);
             pickedEvents.add(new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100));
         }
 
-        System.out.println(Arrays.toString(EarthquakeAnalysis.analyseHypocenter(absolutetyCorrect, pickedEvents, EarthquakeAnalysis.createSettings())));
-
-        Settings.hypocenterDetectionResolution = 40.0;
-
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
-        System.out.println(cluster.getEarthquake());
-        System.out.println(Arrays.toString(EarthquakeAnalysis.analyseHypocenter(absolutetyCorrect, pickedEvents, EarthquakeAnalysis.createSettings())));
-        System.out.println(Arrays.toString(EarthquakeAnalysis.analyseHypocenter(cluster.getPreviousHypocenter(), pickedEvents, EarthquakeAnalysis.createSettings())));
-
+        if(cluster.getEarthquake()!=null) {
+            return Math.abs(cluster.getEarthquake().getOrigin());
+        } else{
+            return 100000;
+        }
     }
 
     record FakeStation(double lat, double lon){

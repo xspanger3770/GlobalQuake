@@ -3,6 +3,8 @@ package globalquake.geo;
 import globalquake.ui.globe.Point2D;
 import org.apache.commons.math3.util.FastMath;
 
+import java.awt.image.LookupTable;
+
 @SuppressWarnings("unused")
 public interface GeoUtils {
 	double EARTH_CIRCUMFERENCE = 40082;
@@ -103,12 +105,21 @@ public interface GeoUtils {
 	}
 
 	static double greatCircleDistance(double lat1, double lon1, double lat2, double lon2) {
+		// Convert latitude and longitude from degrees to radians
 		lat1 = Math.toRadians(lat1);
 		lon1 = Math.toRadians(lon1);
 		lat2 = Math.toRadians(lat2);
 		lon2 = Math.toRadians(lon2);
-		return EARTH_RADIUS
-				* FastMath.acos(FastMath.sin(lat1) *FastMath.sin(lat2) +FastMath.cos(lat1) *FastMath.cos(lat2) *FastMath.cos(lon1 - lon2));
+
+		// Compute differences in latitudes and longitudes
+		double dlat = lat2 - lat1;
+		double dlon = lon2 - lon1;
+
+		// Haversine formula
+		double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2), 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		return EARTH_RADIUS * c; // Angular distance in radians
 	}
 
 	static double calculateAngle(double lat1, double lon1, double lat2, double lon2) {
