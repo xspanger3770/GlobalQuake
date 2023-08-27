@@ -1,5 +1,6 @@
 package globalquake.training;
 
+import edu.sc.seis.seisFile.fdsnws.quakeml.Pick;
 import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.Hypocenter;
@@ -17,7 +18,7 @@ public class EarthquakeAnalysisTraining {
     public static final int STATIONS = 50;
     public static final double DIST = 300;
 
-    public static final double INACCURACY = 2000;
+    public static final double INACCURACY = 0;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -42,6 +43,8 @@ public class EarthquakeAnalysisTraining {
         System.err.println("============================================");
     }
 
+    public static Hypocenter hint = null;
+
     public static long runTest() {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
@@ -62,6 +65,7 @@ public class EarthquakeAnalysisTraining {
         cluster.updateCount = 6543541;
 
         Hypocenter absolutetyCorrect = new Hypocenter(0, 10 + r.nextDouble() * 3, r.nextDouble() * 200, 0);
+        hint = absolutetyCorrect;
 
         for(FakeStation fakeStation:fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -69,7 +73,9 @@ public class EarthquakeAnalysisTraining {
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
-            time += (long) (r.nextDouble() * INACCURACY);
+            if(r.nextDouble() < 0.1){
+                time += (long) (r.nextDouble() * 10 - 5) * 1000;
+            }
             pickedEvents.add(new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100));
         }
 
