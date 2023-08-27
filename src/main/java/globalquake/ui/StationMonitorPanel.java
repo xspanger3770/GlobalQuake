@@ -13,11 +13,15 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.earthquake.Earthquake;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
 import globalquake.core.analysis.Log;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 
 public class StationMonitorPanel extends JPanel {
 
@@ -253,6 +257,16 @@ public class StationMonitorPanel extends JPanel {
 
 			double x2 = getX(e.getsWave());
 			g.setColor(Color.red);
+			g.setStroke(new BasicStroke(2f));
+			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
+		}
+
+		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
+			long arrival = (long) (earthquake.getOrigin() + 1000 * TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC)));
+
+			double x2 = getX(arrival);
+			g.setColor(Color.magenta);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
 		}
