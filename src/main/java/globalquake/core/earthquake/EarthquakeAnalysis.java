@@ -253,9 +253,9 @@ public class EarthquakeAnalysis {
             return hypocenter1;
         }
 
-        if(hypocenter1.correctStations > hypocenter2.correctStations){
+        if(hypocenter1.correctStations > 1.2 * hypocenter2.correctStations){
             return hypocenter1;
-        } else if(hypocenter2.correctStations > hypocenter1.correctStations){
+        } else if(hypocenter2.correctStations > 1.2 * hypocenter1.correctStations){
             return hypocenter2;
         } else {
             return hypocenter1.totalErr < hypocenter2.totalErr ? hypocenter1 : hypocenter2;
