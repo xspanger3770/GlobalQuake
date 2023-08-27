@@ -1,5 +1,7 @@
 package globalquake.utils;
 
+import globalquake.ui.settings.Settings;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,7 +20,16 @@ public class Scale {
 		pgaScale = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("scales/pgaScale3.png")));
 	}
 
-	public static Color getColorRatio(double ratio) {
+	public static Color getColorRatio(double ratio){
+		return Settings.useOldColorScheme ? getColorRatioOld(ratio) : getColorRatioNew(ratio);
+	}
+
+	public static Color getColorRatioOld(double ratio) {
+		int i = (int) (Math.log10(ratio) * 20.0);
+		return new Color(pgaScale.getRGB(0, Math.max(0, Math.min(pgaScale.getHeight() - 1, i))));
+	}
+
+	public static Color getColorRatioNew(double ratio) {
 		if(ratio < 1){
 			return new Color(pgaScale.getRGB(0, 0));
 		}

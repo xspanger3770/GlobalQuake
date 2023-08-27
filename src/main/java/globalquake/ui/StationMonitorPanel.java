@@ -17,6 +17,7 @@ import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.ui.settings.Settings;
 
 public class StationMonitorPanel extends JPanel {
 
@@ -266,11 +267,16 @@ public class StationMonitorPanel extends JPanel {
 		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
 			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
 			long arrival = (long) (earthquake.getOrigin() + 1000 * TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC)));
-
-			double x2 = getX(arrival);
+			double x = getX(arrival);
 			g.setColor(Color.magenta);
-			g.setStroke(new BasicStroke(2f));
-			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
+			g.setStroke(dashed);
+			g.draw(new Line2D.Double(x, 0, x, getHeight()));
+
+			double x1 = getX((long) (arrival - Settings.pWaveInaccuracyThreshold));
+			double x2 = getX((long) (arrival + Settings.pWaveInaccuracyThreshold));
+
+			g.setColor(new Color(255, 0, 0, 100));
+			g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
 		}
 
 		g.setColor(Color.black);

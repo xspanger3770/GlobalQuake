@@ -234,7 +234,7 @@ public class EarthquakeAnalysis {
             distances.add(dist);
         }
 
-        return distances.parallelStream().map(
+        return (Settings.parallelHypocenterLocations ? distances.parallelStream() : distances.stream()).map(
                 distance -> getBestAtDist(distance, distHorizontal, _lat, _lon, events, depthIterations, maxDepth, finderSettings))
                 .reduce(EarthquakeAnalysis::selectBetterHypocenter).orElse(null);
     }
