@@ -371,6 +371,9 @@ public class EarthquakeAnalysis {
     public static void analyseHypocenter(Hypocenter hyp, List<PickedEvent> events, HypocenterFinderSettings finderSettings) {
         double err = 0;
         int acc = 0;
+
+        List<Double> errList = new ArrayList<>(events.size());
+
         for (PickedEvent event : events) {
             double distGC = event instanceof ExactPickedEvent ? ((ExactPickedEvent)event).distGC :
                     GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat, hyp.lon);
@@ -380,10 +383,12 @@ public class EarthquakeAnalysis {
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc++;
             }
-            err += _err * _err;
+            errList.add(_err);
         }
 
-        hyp.totalErr = err;
+        Collections.sort(errList);
+
+        hyp.totalErr = errList.get((int) ((errList.size() - 1) * 0.5));
         hyp.correctStations = acc;
     }
 
