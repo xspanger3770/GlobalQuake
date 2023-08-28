@@ -331,6 +331,11 @@ public class EarthquakeAnalysis {
                 lowerBound = (upperBound + lowerBound) / 2.0;
             }
         }
+
+        // additionally check 0km and 10 km
+        bestHypocenter = selectBetterHypocenter(bestHypocenter, createHypocenter(lat, lon, 0, pickedEvents, finderSettings));
+        bestHypocenter = selectBetterHypocenter(bestHypocenter, createHypocenter(lat, lon, 10, pickedEvents, finderSettings));
+
         return bestHypocenter;
     }
 
