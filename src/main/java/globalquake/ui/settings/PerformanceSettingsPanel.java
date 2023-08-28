@@ -1,6 +1,7 @@
 package globalquake.ui.settings;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
@@ -29,11 +30,14 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         sliderResolution.setPaintLabels(false);
 
         JLabel label = new JLabel();
-        sliderResolution.addChangeListener(changeEvent -> label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
+        ChangeListener changeListener = changeEvent -> label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
                 sliderResolution.getValue() / 100.0,
-                getNameForResolution(sliderResolution.getValue()))));
+                getNameForResolution(sliderResolution.getValue())));
+
+        sliderResolution.addChangeListener(changeListener);
 
         sliderResolution.setValue(Settings.hypocenterDetectionResolution.intValue());
+        changeListener.stateChanged(null);
 
         return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, Settings.hypocenterDetectionResolutionDefault+"",
                 """

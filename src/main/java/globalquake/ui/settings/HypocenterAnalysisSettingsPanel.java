@@ -2,6 +2,7 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
@@ -65,9 +66,13 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderCorrectness = createSettingsSlider(20, 90, 10, 2);
 
         JLabel label = new JLabel();
-        sliderCorrectness.addChangeListener(changeEvent -> label.setText("Hypocenter Correctness Threshold: %d %%".formatted(sliderCorrectness.getValue())));
 
+        ChangeListener upd = changeEvent -> label.setText("Hypocenter Correctness Threshold: %d %%".formatted(sliderCorrectness.getValue()));
+
+        sliderCorrectness.addChangeListener(upd);
         sliderCorrectness.setValue(Settings.hypocenterCorrectThreshold.intValue());
+
+        upd.stateChanged(null);
 
         return createCoolLayout(sliderCorrectness, label, "%s %%".formatted(Settings.hypocenterCorrectThresholdDefault),
                 """
@@ -87,9 +92,11 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderPWaveInaccuracy = createSettingsSlider(400, 2500, 200, 100);
 
         JLabel label = new JLabel();
-        sliderPWaveInaccuracy.addChangeListener(changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue())));
+        ChangeListener changeListener = changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue()));
+        sliderPWaveInaccuracy.addChangeListener(changeListener);
 
         sliderPWaveInaccuracy.setValue(Settings.pWaveInaccuracyThreshold.intValue());
+        changeListener.stateChanged(null);
 
         return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyThresholdDefault),
                 """
