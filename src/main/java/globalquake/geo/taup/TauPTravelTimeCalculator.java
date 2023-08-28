@@ -54,19 +54,23 @@ public class TauPTravelTimeCalculator {
 
 
     public static double getPWaveTravelTime(double depth, double angle){
-        return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle);
+        return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, false);
+    }
+
+    public static double getPWaveTravelTimeFast(double depth, double angle){
+        return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, true);
     }
 
     public static double getSWaveTravelTime(double depth, double angle){
-        return interpolateWaves(travelTable.s_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle);
+        return interpolateWaves(travelTable.s_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, false);
     }
 
     public static double getPKIKPWaveTravelTime(double depth, double angle){
-        return interpolateWaves(travelTable.pkikp_travel_table, TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE, depth, angle);
+        return interpolateWaves(travelTable.pkikp_travel_table, TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE, depth, angle, false);
     }
 
     public static double getPKPWaveTravelTime(double depth, double angle){
-        return interpolateWaves(travelTable.pkp_travel_table, TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE, depth, angle);
+        return interpolateWaves(travelTable.pkp_travel_table, TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE, depth, angle, false);
     }
 
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
@@ -113,10 +117,27 @@ public class TauPTravelTimeCalculator {
     }
 
 
-    private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle){
+    private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle, boolean fast){
         double x = (depth / MAX_DEPTH) * (array.length - 1);
         double y = ((angle - minAng) / (maxAng - minAng)) * (array[0].length - 1);
-        return bilinearInterpolation(array, x, y);
+        return fast? fastbilinearInterpolation(array, x, y):bilinearInterpolation(array, x, y);
+    }
+
+    private static double fastbilinearInterpolation(float[][] array, double x, double y) {
+        int x0 = (int) x;
+        int x1 = x0 + 1;
+        int y0 = (int) y;
+        int y1 = y0 + 1;
+
+        float q11 = array[x0][y0];
+        float q21 = array[x1][y0];
+        float q12 = array[x0][y1];
+        float q22 = array[x1][y1];
+
+        double tx = x - x0;
+        double ty = y - y0;
+
+        return (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q21 + (1 - tx) * ty * q12 + tx * ty * q22;
     }
 
     private static double bilinearInterpolation(float[][] array, double x, double y) {
@@ -124,9 +145,9 @@ public class TauPTravelTimeCalculator {
             return NO_ARRIVAL;
         }
 
-        int x0 = (int) Math.floor(x);
+        int x0 = (int) x;
         int x1 = x0 + 1;
-        int y0 = (int) Math.floor(y);
+        int y0 = (int) y;
         int y1 = y0 + 1;
 
         if (x1 >= array.length || y1 >= array[0].length) {
@@ -138,7 +159,7 @@ public class TauPTravelTimeCalculator {
         float q12 = array[x0][y1];
         float q22 = array[x1][y1];
 
-        if (q11 == NO_ARRIVAL || q21 == NO_ARRIVAL || q12 == NO_ARRIVAL || q22 == NO_ARRIVAL) {
+        if (q11 < 0 || q21 < 0 || q12 < 0 || q22 < 0) {
             return NO_ARRIVAL;
         }
 

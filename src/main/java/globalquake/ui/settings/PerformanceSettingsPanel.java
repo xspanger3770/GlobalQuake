@@ -63,7 +63,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         sliderResolution.setValue(Settings.hypocenterDetectionResolution.intValue());
         changeListener.stateChanged(null);
 
-        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, Settings.hypocenterDetectionResolutionDefault+"",
+        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, "%.2f".formatted(Settings.hypocenterDetectionResolutionDefault / 100.0),
                 """
                         By increasing the Hypocenter Finding Resolution, you can\s
                         enhance the accuracy at which GlobalQuake locates hypocenters

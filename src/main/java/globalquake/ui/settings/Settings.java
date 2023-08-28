@@ -17,9 +17,9 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 
-	public static final double pWaveInaccuracyThresholdDefault = 1000;
+	public static final double pWaveInaccuracyThresholdDefault = 1800;
 	public static Double pWaveInaccuracyThreshold;
-	public static final double hypocenterCorrectThresholdDefault = 40;
+	public static final double hypocenterCorrectThresholdDefault = 50;
 	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
