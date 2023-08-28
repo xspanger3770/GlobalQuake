@@ -4,15 +4,19 @@ import globalquake.database.Network;
 import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;
+
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 public class DeselectAllAction extends AbstractAction {
 
     private final StationDatabaseManager stationDatabaseManager;
+    private final Window parent;
 
-    public DeselectAllAction(StationDatabaseManager stationDatabaseManager) {
+    public DeselectAllAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Deselect All");
         this.stationDatabaseManager=stationDatabaseManager;
+        this.parent=parent;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
     }
@@ -32,7 +36,7 @@ public class DeselectAllAction extends AbstractAction {
                 network.getStations().forEach(station -> station.setSelectedChannel(null));
             }
             if(alreadyDeselected){
-                JOptionPane.showMessageDialog(null, "All Stations Already Deselected");
+                JOptionPane.showMessageDialog(parent, "All Stations Already Deselected");
             }
             stationDatabaseManager.fireUpdateEvent();
         }finally {

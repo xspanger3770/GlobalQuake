@@ -80,7 +80,7 @@ public class StationSelectFrame extends JFrame {
 
         CenterPanel.add(togglePanel, gbc);
 
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.BOTH;
@@ -138,13 +138,13 @@ public class StationSelectFrame extends JFrame {
 
         toolBar.setFloatable(false);
         toolBar.add(selectButton);
-        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager())));
+        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager(), this)));
 
         toolBar.addSeparator();
 
         toolBar.add(deselectButton);
-        toolBar.add(new JButton(new DeselectAllAction(databaseMonitorFrame.getManager())));
-        toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager())));
+        toolBar.add(new JButton(new DeselectAllAction(databaseMonitorFrame.getManager(), this)));
+        toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager(), this)));
 
         toolBar.addSeparator();
 

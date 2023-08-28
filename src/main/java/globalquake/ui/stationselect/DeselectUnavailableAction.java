@@ -4,15 +4,19 @@ import globalquake.database.Network;
 import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;
+
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 public class DeselectUnavailableAction extends AbstractAction {
 
     private final StationDatabaseManager stationDatabaseManager;
+    private final Window parent;
 
-    public DeselectUnavailableAction(StationDatabaseManager stationDatabaseManager) {
+    public DeselectUnavailableAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Deselect Unavailable");
         this.stationDatabaseManager=stationDatabaseManager;
+        this.parent=parent;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Unavailable Stations");
     }
@@ -36,7 +40,7 @@ public class DeselectUnavailableAction extends AbstractAction {
                 });
             }
             if(alreadyDeselected){
-                JOptionPane.showMessageDialog(null, "All Unavailable Stations Already Deselected");
+                JOptionPane.showMessageDialog(parent, "All Unavailable Stations Already Deselected");
             }
             stationDatabaseManager.fireUpdateEvent();
         }finally {
