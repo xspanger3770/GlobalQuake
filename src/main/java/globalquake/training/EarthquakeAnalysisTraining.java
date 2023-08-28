@@ -42,7 +42,11 @@ public class EarthquakeAnalysisTraining {
         }
 
         System.err.println("============================================");
-        System.err.printf("AVERAGE = %,d ms%n", sum / n);
+        if(n == 0){
+            System.err.println("NO CORRECT!");
+        } else {
+            System.err.printf("AVERAGE = %,d ms%n", sum / n);
+        }
         System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
         System.err.printf("FAILURES = %d%n", fails);
         System.err.println("============================================");
