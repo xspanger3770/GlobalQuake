@@ -21,6 +21,27 @@ public class StationSelectFrame extends JFrame {
     public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
         setLayout(new BorderLayout());
         this.databaseMonitorFrame = databaseMonitorFrame;
+        
+        JPanel togglePanel = new JPanel(new GridLayout(5,1));
+        JButton toggleButton = new JButton("<");
+        JPanel filler1 = new JPanel();
+        JPanel filler2 = new JPanel();
+        JPanel filler3 = new JPanel();
+        JPanel filler4 = new JPanel();
+
+        filler1.setOpaque(false);
+        filler2.setOpaque(false);
+        filler3.setOpaque(false);
+        filler4.setOpaque(false);
+
+        togglePanel.add(filler1);
+        togglePanel.add(filler2);
+        togglePanel.add(toggleButton);
+        togglePanel.add(filler3);
+        togglePanel.add(filler4);
+
+        toggleButton.setToolTipText("Toggle Toolbar");
+        toggleButton.setBackground(Color.GRAY);
 
         stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager());
 
@@ -35,8 +56,41 @@ public class StationSelectFrame extends JFrame {
             }
         });
 
-        add(stationSelectPanel, BorderLayout.CENTER);
-        add(createToolbar(), BorderLayout.WEST);
+        JToolBar toolBar = createToolbar();
+        toggleButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (toolBar.isVisible()) {
+                    toolBar.setVisible(false);
+                    toggleButton.setText(">");
+                } else {
+                    toolBar.setVisible(true);
+                    toggleButton.setText("<");
+                }
+            }
+        });
+        JPanel CenterPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.weighty = 1.0;
+
+        CenterPanel.add(togglePanel, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        CenterPanel.add(stationSelectPanel, gbc);
+
+        add(CenterPanel, BorderLayout.CENTER);
+        add(toolBar, BorderLayout.WEST);
         add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
 
         pack();
@@ -52,15 +106,8 @@ public class StationSelectFrame extends JFrame {
         }, 0, 1000 / 40);
     }
 
-    private JPanel createToolbar() {
-        JPanel toolBarPanel = new JPanel(new BorderLayout());
-
+    private JToolBar createToolbar() {
         JToolBar toolBar = new JToolBar("Tools", JToolBar.VERTICAL);
-        JButton toggleButton = new JButton("<");
-
-        toggleButton.setLocation(toolBar.getWidth(),0);
-        toggleButton.setToolTipText("Toggle Toolbar");
-        toggleButton.setBackground(Color.GRAY);
 
         selectButton = new JToggleButton("Select Region");
         selectButton.setToolTipText("Select All Available Stations in Region");
@@ -89,19 +136,6 @@ public class StationSelectFrame extends JFrame {
             }
         });
 
-        toggleButton.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (toolBar.isVisible()) {
-                    toolBar.setVisible(false);
-                    toggleButton.setText(">");
-                } else {
-                    toolBar.setVisible(true);
-                    toggleButton.setText("<");
-                }
-            }
-        });
-
         toolBar.setFloatable(false);
         toolBar.add(selectButton);
         toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager())));
@@ -120,10 +154,7 @@ public class StationSelectFrame extends JFrame {
 
         toolBar.add(chkBoxShowUnavailable);
 
-        toolBarPanel.add(toolBar, BorderLayout.CENTER);
-        toolBarPanel.add(toggleButton, BorderLayout.EAST);
-
-        return toolBarPanel;
+        return toolBar;
     }
 
     public void setDragMode(DragMode dragMode) {
