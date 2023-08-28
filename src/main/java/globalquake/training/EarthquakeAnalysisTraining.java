@@ -38,6 +38,7 @@ public class EarthquakeAnalysisTraining {
                 n++;
             } else{
                 fails++;
+                throw new IllegalStateException();
             }
         }
 

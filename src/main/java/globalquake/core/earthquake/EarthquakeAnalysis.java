@@ -242,7 +242,7 @@ public class EarthquakeAnalysis {
             distances.add(dist);
         }
 
-       return (Settings.parallelHypocenterLocations ? distances.stream() : distances.stream()).map(
+       return (Settings.parallelHypocenterLocations ? distances.parallelStream() : distances.stream()).map(
                 distance -> {
                     List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(events);
                     HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
@@ -313,21 +313,22 @@ public class EarthquakeAnalysis {
             createHypocenter(threadData.hypocenterA, lat, lon, depthA, pickedEvents, finderSettings, threadData);
             createHypocenter(threadData.hypocenterB, lat, lon, depthB, pickedEvents, finderSettings, threadData);
 
-            boolean goUp = selectBetterHypocenter(threadData.hypocenterA, threadData.hypocenterB) == threadData.hypocenterA;
+            PreliminaryHypocenter better = selectBetterHypocenter(threadData.hypocenterA, threadData.hypocenterB);
+            threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, better));
+
+            boolean goUp = better == threadData.hypocenterA;
             if (goUp) {
-                threadData.bestHypocenter = threadData.hypocenterA;
                 upperBound = (upperBound + lowerBound) / 2.0;
             } else {
-                threadData.bestHypocenter = threadData.hypocenterB;
                 lowerBound = (upperBound + lowerBound) / 2.0;
             }
         }
 
         // additionally check 0km and 10 km
         createHypocenter(threadData.hypocenterA, lat, lon, 0, pickedEvents, finderSettings, threadData);
-        threadData.bestHypocenter = selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA);
+        threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
         createHypocenter(threadData.hypocenterA, lat, lon, 10, pickedEvents, finderSettings, threadData);
-        threadData.bestHypocenter = selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA);
+        threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
     }
 
     private void createHypocenter(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> pickedEvents,
@@ -347,6 +348,16 @@ public class EarthquakeAnalysis {
             origins = new long[size];
             hypocenterA = new PreliminaryHypocenter();
             hypocenterB = new PreliminaryHypocenter();
+            bestHypocenter = new PreliminaryHypocenter();
+        }
+
+        public void setBest(PreliminaryHypocenter preliminaryHypocenter) {
+            bestHypocenter.lat = preliminaryHypocenter.lat;
+            bestHypocenter.lon = preliminaryHypocenter.lon;
+            bestHypocenter.depth=  preliminaryHypocenter.depth;
+            bestHypocenter.origin = preliminaryHypocenter.origin;
+            bestHypocenter.correctStations = preliminaryHypocenter.correctStations;
+            bestHypocenter.err = preliminaryHypocenter.err;
         }
     }
 
