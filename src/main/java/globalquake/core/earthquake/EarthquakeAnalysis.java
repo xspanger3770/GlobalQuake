@@ -6,7 +6,6 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.IntensityTable;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.sounds.Sounds;
-import globalquake.training.EarthquakeAnalysisTraining;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -275,18 +274,14 @@ public class EarthquakeAnalysis {
             return hypocenter1;
         }
 
-        if(true){
+        if(hypocenter1.correctStations > (int)(hypocenter2.correctStations * 1.3)){
+            return hypocenter1;
+        } else if(hypocenter2.correctStations > (int)(hypocenter1.correctStations * 1.3)){
+            return hypocenter2;
+        } else {
             return (hypocenter1.correctStations / (Math.pow(hypocenter1.totalErr, 2) + 2.0)) >
                     (hypocenter2.correctStations / (Math.pow(hypocenter2.totalErr, 2) + 2.0))
                     ? hypocenter1 : hypocenter2;
-        }
-
-        if(hypocenter1.correctStations > hypocenter2.correctStations){
-            return hypocenter1;
-        } else if(hypocenter2.correctStations > hypocenter1.correctStations){
-            return hypocenter2;
-        } else {
-            return hypocenter1.totalErr < hypocenter2.totalErr ? hypocenter1 : hypocenter2;
         }
     }
 
@@ -310,33 +305,40 @@ public class EarthquakeAnalysis {
 
             List<PickedEvent> pickedEvents = createListOfExactPickedEvents(lat, lon, events);
 
-            double lowerBound = depthStart; // 0
-            double upperBound = depthEnd; // 600
+            bestHypocenter = getBestAtDepth(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, pickedEvents, bestHypocenter);
+        }
+        return bestHypocenter;
+    }
 
-            for (int iteration = 0; iteration < depthIterations; iteration++) {
-                double depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
-                double depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
+    private Hypocenter getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings, double depthStart, double lat, double lon, List<PickedEvent> pickedEvents, Hypocenter bestHypocenter) {
+        double lowerBound = depthStart; // 0
+        double upperBound = depthEnd; // 600
 
-                Hypocenter hypocenterA = createHypocenter(lat, lon, depthA, pickedEvents, finderSettings);
-                Hypocenter hypocenterB = createHypocenter(lat, lon, depthB, pickedEvents, finderSettings);
+        for (int iteration = 0; iteration < depthIterations; iteration++) {
+            double depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
+            double depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
 
-                Hypocenter better = selectBetterHypocenter(hypocenterA, hypocenterB);
-                bestHypocenter = selectBetterHypocenter(better, bestHypocenter);
+            Hypocenter hypocenterA = createHypocenter(lat, lon, depthA, pickedEvents, finderSettings);
+            Hypocenter hypocenterB = createHypocenter(lat, lon, depthB, pickedEvents, finderSettings);
 
-                boolean goUp = better == hypocenterA;
-                if (goUp) {
-                    upperBound = (upperBound + lowerBound) / 2.0;
-                } else {
-                    lowerBound = (upperBound + lowerBound) / 2.0;
-                }
+            Hypocenter better = selectBetterHypocenter(hypocenterA, hypocenterB);
+            bestHypocenter = selectBetterHypocenter(better, bestHypocenter);
+
+            boolean goUp = better == hypocenterA;
+            if (goUp) {
+                upperBound = (upperBound + lowerBound) / 2.0;
+            } else {
+                lowerBound = (upperBound + lowerBound) / 2.0;
             }
-
         }
         return bestHypocenter;
     }
 
     private Hypocenter createHypocenter(double lat, double lon, double depth, List<PickedEvent> pickedEvents, HypocenterFinderSettings finderSettings) {
         long bestOrigin = findBestOrigin(lat,lon,depth, pickedEvents);
+        if(bestOrigin == -1){
+            return null;
+        }
 
         Hypocenter hyp = new Hypocenter(lat, lon, depth, bestOrigin);
         analyseHypocenter(hyp, pickedEvents, finderSettings);
@@ -372,58 +374,6 @@ public class EarthquakeAnalysis {
     }
 
 
-    public class EfficientMedianCalculator {
-        public static long findMedian(long[] nums) {
-            int n = nums.length;
-            if (n % 2 == 0) {
-                int k1 = n / 2;
-                int k2 = k1 - 1;
-                return (quickselect(nums, k1) + quickselect(nums, k2)) / 2;
-            } else {
-                int k = n / 2;
-                return quickselect(nums, k);
-            }
-        }
-
-        public static long quickselect(long[] nums, int k) {
-            int low = 0, high = nums.length - 1;
-
-            while (low <= high) {
-                int pivotIndex = partition(nums, low, high);
-                if (pivotIndex == k) {
-                    return nums[pivotIndex];
-                } else if (pivotIndex < k) {
-                    low = pivotIndex + 1;
-                } else {
-                    high = pivotIndex - 1;
-                }
-            }
-
-            return -1; // Error case
-        }
-
-        public static int partition(long[] nums, int low, int high) {
-            long pivot = nums[high];
-            int i = low;
-
-            for (int j = low; j < high; j++) {
-                if (nums[j] <= pivot) {
-                    swap(nums, i, j);
-                    i++;
-                }
-            }
-
-            swap(nums, i, high);
-            return i;
-        }
-
-        public static void swap(long[] nums, int i, int j) {
-            long temp = nums[i];
-            nums[i] = nums[j];
-            nums[j] = temp;
-        }
-    }
-
     private long findBestOrigin(double lat, double lon, double depth, List<PickedEvent> events) {
         long[] origins;
         if(USE_MEDIAN_FOR_ORIGIN){
@@ -438,7 +388,7 @@ public class EarthquakeAnalysis {
                     GeoUtils.greatCircleDistance(event.lat(), event.lon(), lat, lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(distGC));
             if(travelTime == TauPTravelTimeCalculator.NO_ARRIVAL){
-                continue;
+                return -1;
             }
 
             long origin = event.pWave() - ((long) (travelTime * 1000));
