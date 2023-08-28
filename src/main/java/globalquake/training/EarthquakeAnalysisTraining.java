@@ -18,32 +18,38 @@ public class EarthquakeAnalysisTraining {
     public static final int STATIONS = 50;
     public static final double DIST = 300;
 
-    public static final double INACCURACY = 0;
+    public static final double INACCURACY = 1000;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
 
-        Settings.hypocenterDetectionResolution = 50.0;
+        Settings.hypocenterDetectionResolution = 40.0;
+        Settings.pWaveInaccuracyThreshold = 2000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
         long n = 0;
         long a  =System.currentTimeMillis();
-        for(int i = 0; i < 10; i++) {
+        int fails = 0;
+        for(int i = 0; i < 50; i++) {
             long err = runTest();
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;
                 n++;
+            } else{
+                fails++;
             }
         }
 
         System.err.println("============================================");
         System.err.printf("AVERAGE = %,d ms%n", sum / n);
         System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
+        System.err.printf("FAILURES = %d%n", fails);
         System.err.println("============================================");
     }
 
     public static Hypocenter hint = null;
+    private static int run = 0;
 
     public static long runTest() {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
@@ -51,7 +57,7 @@ public class EarthquakeAnalysisTraining {
 
         List<FakeStation> fakeStations = new ArrayList<>();
 
-        Random r = new Random();
+        Random r = new Random(453 + (run++));
 
         for(int i = 0; i < STATIONS; i++){
             double ang = r.nextDouble() * 360.0;
@@ -73,6 +79,7 @@ public class EarthquakeAnalysisTraining {
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
+            time += (long)((r.nextDouble() - 0.5) * INACCURACY);
             if(r.nextDouble() < 0.1){
                 time += (long) (r.nextDouble() * 10 - 5) * 1000;
             }

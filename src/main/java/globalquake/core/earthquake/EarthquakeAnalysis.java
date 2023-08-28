@@ -24,6 +24,8 @@ public class EarthquakeAnalysis {
 
     private static final long DELTA_P_THRESHOLD = 2200;
 
+    public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
+
     private final List<Earthquake> earthquakes;
 
     public boolean testing = false;
@@ -273,9 +275,19 @@ public class EarthquakeAnalysis {
             return hypocenter1;
         }
 
-        return (hypocenter1.correctStations / (hypocenter1.totalErr + 1.0)) >
-                (hypocenter2.correctStations / (hypocenter2.totalErr + 1.0))
-                ? hypocenter1 : hypocenter2;
+        if(true){
+            return (hypocenter1.correctStations / (Math.pow(hypocenter1.totalErr, 2) + 2.0)) >
+                    (hypocenter2.correctStations / (Math.pow(hypocenter2.totalErr, 2) + 2.0))
+                    ? hypocenter1 : hypocenter2;
+        }
+
+        if(hypocenter1.correctStations > hypocenter2.correctStations){
+            return hypocenter1;
+        } else if(hypocenter2.correctStations > hypocenter1.correctStations){
+            return hypocenter2;
+        } else {
+            return hypocenter1.totalErr < hypocenter2.totalErr ? hypocenter1 : hypocenter2;
+        }
     }
 
     private Hypocenter getBestAtDist(double distFromAnchor, double distHorizontal, double _lat, double _lon,
@@ -359,8 +371,67 @@ public class EarthquakeAnalysis {
         return ((x * x + 600) / 2200.0);
     }
 
+
+    public class EfficientMedianCalculator {
+        public static long findMedian(long[] nums) {
+            int n = nums.length;
+            if (n % 2 == 0) {
+                int k1 = n / 2;
+                int k2 = k1 - 1;
+                return (quickselect(nums, k1) + quickselect(nums, k2)) / 2;
+            } else {
+                int k = n / 2;
+                return quickselect(nums, k);
+            }
+        }
+
+        public static long quickselect(long[] nums, int k) {
+            int low = 0, high = nums.length - 1;
+
+            while (low <= high) {
+                int pivotIndex = partition(nums, low, high);
+                if (pivotIndex == k) {
+                    return nums[pivotIndex];
+                } else if (pivotIndex < k) {
+                    low = pivotIndex + 1;
+                } else {
+                    high = pivotIndex - 1;
+                }
+            }
+
+            return -1; // Error case
+        }
+
+        public static int partition(long[] nums, int low, int high) {
+            long pivot = nums[high];
+            int i = low;
+
+            for (int j = low; j < high; j++) {
+                if (nums[j] <= pivot) {
+                    swap(nums, i, j);
+                    i++;
+                }
+            }
+
+            swap(nums, i, high);
+            return i;
+        }
+
+        public static void swap(long[] nums, int i, int j) {
+            long temp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = temp;
+        }
+    }
+
     private long findBestOrigin(double lat, double lon, double depth, List<PickedEvent> events) {
-        List<Long> origins = new ArrayList<>(events.size());
+        long[] origins;
+        if(USE_MEDIAN_FOR_ORIGIN){
+            origins = new long[(events.size())];
+        }
+
+        long sum = 0;
+        int c = 0;
 
         for (PickedEvent event : events) {
             double distGC = event instanceof ExactPickedEvent ? ((ExactPickedEvent)event).distGC :
@@ -372,15 +443,19 @@ public class EarthquakeAnalysis {
 
             long origin = event.pWave() - ((long) (travelTime * 1000));
 
-            origins.add(origin);
+            if(USE_MEDIAN_FOR_ORIGIN) {
+                origins[c] = origin;
+            } else{
+                sum += origin;
+            }
+            c++;
         }
 
-        if(origins.isEmpty()){
-            throw new IllegalStateException();
+        if(USE_MEDIAN_FOR_ORIGIN) {
+            return EfficientMedianCalculator.findMedian(origins);
+        }else {
+            return sum / c;
         }
-
-        Collections.sort(origins);
-        return origins.get((origins.size() - 1) / 2);
     }
 
     public static void analyseHypocenter(Hypocenter hyp, List<PickedEvent> events, HypocenterFinderSettings finderSettings) {
@@ -390,13 +465,18 @@ public class EarthquakeAnalysis {
         for (PickedEvent event : events) {
             double distGC = event instanceof ExactPickedEvent ? ((ExactPickedEvent)event).distGC :
                     GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat, hyp.lon);
+
+            // All times in SECONSDS
             double expectedDT = TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC));
             double actualTravel = (event.pWave() - hyp.origin) / 1000.0;
             double _err = expectedDT == TauPTravelTimeCalculator.NO_ARRIVAL ? 9999 : Math.abs(expectedDT - actualTravel);
             if (_err < finderSettings.pWaveInaccuracyThreshold() / 1000.0) {
                 acc++;
-                err += _err * _err;
+            } else {
+                _err = finderSettings.pWaveInaccuracyThreshold() / 1000.0;
             }
+
+            err += _err * _err;
         }
 
         hyp.totalErr = err;
