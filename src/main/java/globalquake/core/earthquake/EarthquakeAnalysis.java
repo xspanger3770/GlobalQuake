@@ -290,6 +290,7 @@ public class EarthquakeAnalysis {
         Point2D point2D = new Point2D();
         GeoUtils.precomputeMoveOnGlobe(precomputed, _lat, _lon, distFromAnchor);
 
+
         for (double ang = 0; ang < 360; ang += angularResolution) {
             GeoUtils.moveOnGlobe(precomputed, point2D, ang);
             double lat = point2D.x;
@@ -390,7 +391,7 @@ public class EarthquakeAnalysis {
         int c=  0;
 
         for (ExactPickedEvent event : events) {
-            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(event.distGC));
+            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, TauPTravelTimeCalculator.toAngle(event.distGC));
             if(travelTime == TauPTravelTimeCalculator.NO_ARRIVAL){
                 return;
             }
@@ -400,17 +401,18 @@ public class EarthquakeAnalysis {
             c++;
         }
 
-        long bestOrigin = EfficientMedianCalculator.findMedian(threadData.origins);
+        Arrays.sort(threadData.origins);
+        long bestOrigin = threadData.origins[(threadData.origins.length-1)/2];
 
         double err = 0;
         int acc = 0;
 
         for(long orign: threadData.origins){
-            double _err = Math.abs(orign - bestOrigin) / 1000.0;
-            if (_err < finderSettings.pWaveInaccuracyThreshold() / 1000.0) {
+            double _err = Math.abs(orign - bestOrigin);
+            if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc++;
             } else {
-                _err = finderSettings.pWaveInaccuracyThreshold() / 1000.0;
+                _err = finderSettings.pWaveInaccuracyThreshold();
             }
 
             err += _err * _err;
@@ -446,41 +448,6 @@ public class EarthquakeAnalysis {
         // 550% when 100 (max) selected
         double x = finderSettings.resolution();
         return ((x * x + 600) / 2200.0);
-    }
-
-
-    private long findBestOrigin(double lat, double lon, double depth, List<PickedEvent> events) {
-        long[] origins;
-        if(USE_MEDIAN_FOR_ORIGIN){
-            origins = new long[(events.size())];
-        }
-
-        long sum = 0;
-        int c = 0;
-
-        for (PickedEvent event : events) {
-            double distGC = event instanceof ExactPickedEvent ? ((ExactPickedEvent)event).distGC :
-                    GeoUtils.greatCircleDistance(event.lat(), event.lon(), lat, lon);
-            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(distGC));
-            if(travelTime == TauPTravelTimeCalculator.NO_ARRIVAL){
-                return -1;
-            }
-
-            long origin = event.pWave() - ((long) (travelTime * 1000));
-
-            if(USE_MEDIAN_FOR_ORIGIN) {
-                origins[c] = origin;
-            } else{
-                sum += origin;
-            }
-            c++;
-        }
-
-        if(USE_MEDIAN_FOR_ORIGIN) {
-            return EfficientMedianCalculator.findMedian(origins);
-        }else {
-            return sum / c;
-        }
     }
 
     private HypocenterCondition checkConditions(List<PickedEvent> events, PreliminaryHypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
