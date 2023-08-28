@@ -34,9 +34,11 @@ public class Earthquake implements Regional {
 		this.magsLock = new Object();
 		this.regionUpdater = new RegionUpdater(this);
 
-		regionUpdater.updateRegion();
-
 		this.lastUpdate = System.currentTimeMillis();
+	}
+
+	public void uppdateRegion(){
+		regionUpdater.updateRegion();
 	}
 
 	public double getMag() {
@@ -118,4 +120,16 @@ public class Earthquake implements Regional {
 		this.region = newRegion;
 	}
 
+	@Override
+	public String toString() {
+		return "Earthquake{" +
+				"lat=" + lat +
+				", lon=" + lon +
+				", depth=" + depth +
+				", origin=" + origin +
+				", mag=" + mag +
+				", pct=" + pct +
+				", revisionID=" + revisionID +
+				'}';
+	}
 }

@@ -25,7 +25,11 @@ public final class Settings {
 	public static final double hypocenterDetectionResolutionDefault = 40;
 	public static Double hypocenterDetectionResolution;
 
+	public static Boolean parallelHypocenterLocations;
+
 	public static Boolean displayArchivedQuakes;
+
+	public static Boolean useOldColorScheme;
 	
 	public static final boolean reportsEnabled = false; // not available ATM
 	public static Boolean enableSound = true;
@@ -51,6 +55,10 @@ public final class Settings {
 		pWaveInaccuracyThreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault)));
 		hypocenterCorrectThreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault)));
 		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
+
+		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
+		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
+
 		save();
 	}
 	
@@ -66,6 +74,9 @@ public final class Settings {
 		properties.setProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThreshold));
 		properties.setProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThreshold));
 		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
+
+		properties.setProperty("useOldColorScheme", String.valueOf(useOldColorScheme));
+		properties.setProperty("parallelHypocenterLocations", String.valueOf(parallelHypocenterLocations));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {

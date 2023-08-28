@@ -180,7 +180,6 @@ public class StationDatabaseManager {
 
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
-                                System.err.println("HERE 2 !!!!");
                                 Callable<Void> task = () -> {
                                     SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
                                     return null;
@@ -188,8 +187,6 @@ public class StationDatabaseManager {
 
                                 Future<Void> future = executor.submit(task);
                                 future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-                                System.err.println("HERE!!!!");
 
                                 seedlinkNetwork.getStatus().setString("Done");
                                 seedlinkNetwork.getStatus().setValue(100);
