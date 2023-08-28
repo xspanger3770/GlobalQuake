@@ -36,7 +36,7 @@ public class StationSelectFrame extends JFrame {
         });
 
         add(stationSelectPanel, BorderLayout.CENTER);
-        add(createToolbar(), BorderLayout.PAGE_START);
+        add(createToolbar(), BorderLayout.WEST);
         add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
 
         pack();
@@ -52,8 +52,15 @@ public class StationSelectFrame extends JFrame {
         }, 0, 1000 / 40);
     }
 
-    private JToolBar createToolbar() {
-        JToolBar toolBar = new JToolBar("Tools");
+    private JPanel createToolbar() {
+        JPanel toolBarPanel = new JPanel(new BorderLayout());
+
+        JToolBar toolBar = new JToolBar("Tools", JToolBar.VERTICAL);
+        JButton toggleButton = new JButton("<");
+
+        toggleButton.setLocation(toolBar.getWidth(),0);
+        toggleButton.setToolTipText("Toggle Toolbar");
+        toggleButton.setBackground(Color.GRAY);
 
         selectButton = new JToggleButton("Select Region");
         selectButton.setToolTipText("Select All Available Stations in Region");
@@ -82,22 +89,41 @@ public class StationSelectFrame extends JFrame {
             }
         });
 
+        toggleButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (toolBar.isVisible()) {
+                    toolBar.setVisible(false);
+                    toggleButton.setText(">");
+                } else {
+                    toolBar.setVisible(true);
+                    toggleButton.setText("<");
+                }
+            }
+        });
+
+        toolBar.setFloatable(false);
         toolBar.add(selectButton);
-        toolBar.add(deselectButton);
+        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager())));
 
         toolBar.addSeparator();
 
-        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager())));
+        toolBar.add(deselectButton);
         toolBar.add(new JButton(new DeselectAllAction(databaseMonitorFrame.getManager())));
         toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager())));
 
         toolBar.addSeparator();
 
         toolBar.add(new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this)));
+        
+        toolBar.addSeparator();
 
         toolBar.add(chkBoxShowUnavailable);
 
-        return toolBar;
+        toolBarPanel.add(toolBar, BorderLayout.CENTER);
+        toolBarPanel.add(toggleButton, BorderLayout.EAST);
+
+        return toolBarPanel;
     }
 
     public void setDragMode(DragMode dragMode) {

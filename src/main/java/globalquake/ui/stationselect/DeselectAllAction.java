@@ -19,10 +19,20 @@ public class DeselectAllAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        boolean alreadyDeselected = true;
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
+                for(globalquake.database.Station station : network.getStations()){
+                    if(station.getSelectedChannel() != null){
+                        alreadyDeselected = false;
+                        break;
+                    }
+                }
                 network.getStations().forEach(station -> station.setSelectedChannel(null));
+            }
+            if(alreadyDeselected){
+                JOptionPane.showMessageDialog(null, "All Stations Already Deselected");
             }
             stationDatabaseManager.fireUpdateEvent();
         }finally {
