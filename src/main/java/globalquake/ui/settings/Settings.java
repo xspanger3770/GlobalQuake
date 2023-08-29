@@ -30,6 +30,8 @@ public final class Settings {
 	public static Boolean displayArchivedQuakes;
 
 	public static Boolean useOldColorScheme;
+
+	public static Boolean displayHomeLocation;
 	
 	public static final boolean reportsEnabled = false; // not available ATM
 	public static Boolean enableSound = true;
@@ -58,6 +60,7 @@ public final class Settings {
 
 		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
 		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
+		displayHomeLocation = Boolean.valueOf((String) properties.getOrDefault("displayHomeLocation", "true"));
 
 		save();
 	}
@@ -77,6 +80,7 @@ public final class Settings {
 
 		properties.setProperty("useOldColorScheme", String.valueOf(useOldColorScheme));
 		properties.setProperty("parallelHypocenterLocations", String.valueOf(parallelHypocenterLocations));
+		properties.setProperty("displayHomeLocation", String.valueOf(displayHomeLocation));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {

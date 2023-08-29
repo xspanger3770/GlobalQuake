@@ -13,6 +13,7 @@ import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
 import globalquake.ui.globalquake.feature.FeatureGlobalStation;
+import globalquake.ui.globalquake.feature.FeatureHomeLoc;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.settings.Settings;
@@ -47,6 +48,7 @@ public class GlobalQuakePanel extends GlobePanel {
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+        getRenderer().addFeature(new FeatureHomeLoc());
 
         frame.addKeyListener(new KeyAdapter() {
             @Override
