@@ -1,6 +1,7 @@
 package globalquake.ui.settings;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class AppearanceSettingsPanel extends SettingsPanel{
 
@@ -10,6 +11,7 @@ public class AppearanceSettingsPanel extends SettingsPanel{
 
     public AppearanceSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(new EmptyBorder(5,5,5,5));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);

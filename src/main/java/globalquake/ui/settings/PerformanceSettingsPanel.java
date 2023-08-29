@@ -26,6 +26,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     @SuppressWarnings("ExtractMethodRecommender")
     private JPanel createSettingParalell() {
         JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createRaisedBevelBorder());
         panel.setLayout(new BorderLayout());
         chkBoxParalell = new JCheckBox("Use all CPU cores");
         chkBoxParalell.setSelected(Settings.parallelHypocenterLocations);
