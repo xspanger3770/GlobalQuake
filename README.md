@@ -51,6 +51,8 @@ Project is in early development state and there is quite some room for improveme
 * Make sure you have the latest version of Java installed. [Download Java](https://www.oracle.com/java/technologies/downloads/)
 * Put the JAR file to the location where you want the application data to be stored
 * Run GlobalQuake by executing `java -jar [filename].jar` using your terminal/command line or simply double click it (Windows)
+* You can also add `-Xms8G -Xmx8G` parameters to specify the maximum RAM allocation
+* Experimental: by adding `-Dsun.java2d.opengl=True`, you can improve your FPS
 
 ## System Requirements
 
