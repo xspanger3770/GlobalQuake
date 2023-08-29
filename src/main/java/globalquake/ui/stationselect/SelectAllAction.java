@@ -19,7 +19,7 @@ public class SelectAllAction extends AbstractAction {
         this.stationDatabaseManager=stationDatabaseManager;
         this.parent=parent;
 
-        putValue(SHORT_DESCRIPTION, "Select All Available Stations");
+        putValue(SHORT_DESCRIPTION, "Selects All Available Stations");
     }
 
     @Override
@@ -33,9 +33,10 @@ public class SelectAllAction extends AbstractAction {
                         continue;
                     }
                     if(station.getSelectedChannel() == null){
-                        System.out.println("Selecting " + station.getStationCode());
                         alreadySelected = false;
-                        break;
+                    }
+                    else{
+                        alreadySelected = true;
                     }
                 }
                 network.getStations().forEach(Station::selectBestAvailableChannel);

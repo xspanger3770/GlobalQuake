@@ -39,6 +39,8 @@ public class StationSelectFrame extends JFrame {
         togglePanel.add(toggleButton);
         togglePanel.add(filler3);
         togglePanel.add(filler4);
+        togglePanel.setOpaque(false);
+        toggleButton.setDoubleBuffered(true);
 
         toggleButton.setToolTipText("Toggle Toolbar");
         toggleButton.setBackground(Color.GRAY);
@@ -80,7 +82,7 @@ public class StationSelectFrame extends JFrame {
 
         CenterPanel.add(togglePanel, gbc);
 
-        gbc.gridx = 1;
+        gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.BOTH;
@@ -98,9 +100,12 @@ public class StationSelectFrame extends JFrame {
         setResizable(true);
         setTitle("Select Stations");
 
+        stationSelectPanel.setDoubleBuffered(true);
+
         java.util.Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
+                toggleButton.repaint();
                 stationSelectPanel.repaint();
             }
         }, 0, 1000 / 40);
