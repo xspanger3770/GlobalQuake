@@ -130,7 +130,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
     }
 
-    private static List<SettingInfo> createSettingInfos() {
+    private List<SettingInfo> createSettingInfos() {
         List<SettingInfo> settingsStrings = new ArrayList<>();
 
         settingsStrings.add(new SettingInfo("Archived Earthquakes (E): ", Settings.displayArchivedQuakes ? "Shown" : "Hidden", Settings.displayArchivedQuakes ? Color.green:Color.red));
@@ -143,6 +143,8 @@ public class GlobalQuakePanel extends GlobePanel {
         else{
             settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
         }
+
+        settingsStrings.add(new SettingInfo("FPS: ", "%.1f".formatted(getLastFPS()), Color.YELLOW));
         return settingsStrings;
     }
 

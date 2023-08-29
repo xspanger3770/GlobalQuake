@@ -237,6 +237,7 @@ public class GlobeRenderer {
             }
         }
 
+
         if(canClip && mask != 0){
             return false;
         }
@@ -354,6 +355,8 @@ public class GlobeRenderer {
 
 
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
+        graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
         renderFeatures.forEach(feature -> feature.process(this, props));
         renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
     }
@@ -418,6 +421,7 @@ public class GlobeRenderer {
 
             ang += 90;
         }
+        polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
 
         polygon3D.finish();
     }

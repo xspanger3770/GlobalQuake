@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -38,6 +40,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private final GlobeRenderer renderer;
 
+    private AtomicInteger frameCount = new AtomicInteger(0);
+
+    private AtomicLong frameTime = new AtomicLong(0);
+    private double lastFPS;
+
     public GlobePanel() {
         renderer = new GlobeRenderer();
         renderer.updateCamera(createRenderProperties());
@@ -45,6 +52,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         setBackground(Color.black);
 
         spinThread();
+        fpsThread();
         addMouseMotionListener(new MouseMotionListener() {
 
             @Override
@@ -156,6 +164,23 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsMD, 0.5, Double.MAX_VALUE));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHD, 0.12, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
+    }
+
+    public double getLastFPS() {
+        return lastFPS;
+    }
+
+    private void fpsThread() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                long time = frameTime.getAndSet(0);
+                int count = frameCount.getAndSet(0);
+                lastFPS = 1000.0 / (time / (double)count);
+            }
+        }, 0, 1000);
+
     }
 
     private double calculateSpin()
@@ -281,6 +306,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     @Override
     public void paint(Graphics gr) {
+        long a = System.currentTimeMillis();
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
@@ -288,6 +314,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         g.fillRect(0, 0, getWidth(), getHeight());
 
         renderer.render(g, renderer.getRenderProperties());
+
+        long time = System.currentTimeMillis() - a;
+
+        frameCount.incrementAndGet();
+        frameTime.addAndGet(time);
     }
 
 }

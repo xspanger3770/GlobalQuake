@@ -61,13 +61,11 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<LocationPlaceholder> entity) {
         RenderElement elementCross = entity.getRenderElement(0);
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (elementCross.shouldDraw && Settings.displayHomeLocation) {
             graphics.setColor(Color.magenta);
             graphics.setStroke(new BasicStroke(3f));
             graphics.draw(elementCross.getShape());
         }
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     @Override
