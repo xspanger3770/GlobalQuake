@@ -117,10 +117,13 @@ public class TauPTravelTimeCalculator {
     }
 
 
-    private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle, boolean fast){
+    private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle, boolean fast) {
         double x = (depth / MAX_DEPTH) * (array.length - 1);
         double y = ((angle - minAng) / (maxAng - minAng)) * (array[0].length - 1);
-        return fast? fastbilinearInterpolation(array, x, y):bilinearInterpolation(array, x, y);
+        if(x < 0 || y < 0 || x >= array.length - 1 || y >= array[0].length - 1){
+            return NO_ARRIVAL;
+        }
+        return fast? fastbilinearInterpolation(array, x, y) : bilinearInterpolation(array, x, y);
     }
 
     private static double fastbilinearInterpolation(float[][] array, double x, double y) {
