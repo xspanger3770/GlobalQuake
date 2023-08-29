@@ -1,6 +1,5 @@
 package globalquake.training;
 
-import edu.sc.seis.seisFile.fdsnws.quakeml.Pick;
 import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.Hypocenter;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
     public static final int STATIONS = 50;
@@ -37,7 +37,7 @@ public class EarthquakeAnalysisTraining {
                 sum += err;
                 n++;
             } else{
-                fails++;
+                // fails++;
                 throw new IllegalStateException();
             }
         }
@@ -75,7 +75,7 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(0, 10 + r.nextDouble() * 3, r.nextDouble() * 200, 0);
+        Hypocenter absolutetyCorrect = new Hypocenter(0, 10 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0);
         hint = absolutetyCorrect;
 
         for(FakeStation fakeStation:fakeStations){

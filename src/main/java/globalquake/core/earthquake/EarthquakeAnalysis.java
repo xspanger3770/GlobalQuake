@@ -338,56 +338,6 @@ public class EarthquakeAnalysis {
         analyseHypocenter(hypocenter, lat, lon, depth, pickedEvents, finderSettings, threadData);
     }
 
-    static class HypocenterFinderThreadData{
-        public final long[] origins;
-
-        public PreliminaryHypocenter hypocenterA;
-
-        public PreliminaryHypocenter hypocenterB;
-        public PreliminaryHypocenter bestHypocenter;
-
-        public HypocenterFinderThreadData(int size) {
-            origins = new long[size];
-            hypocenterA = new PreliminaryHypocenter();
-            hypocenterB = new PreliminaryHypocenter();
-            bestHypocenter = new PreliminaryHypocenter();
-        }
-
-        public void setBest(PreliminaryHypocenter preliminaryHypocenter) {
-            bestHypocenter.lat = preliminaryHypocenter.lat;
-            bestHypocenter.lon = preliminaryHypocenter.lon;
-            bestHypocenter.depth=  preliminaryHypocenter.depth;
-            bestHypocenter.origin = preliminaryHypocenter.origin;
-            bestHypocenter.correctStations = preliminaryHypocenter.correctStations;
-            bestHypocenter.err = preliminaryHypocenter.err;
-        }
-    }
-
-    private static class PreliminaryHypocenter {
-        public double lat;
-        public double lon;
-        public double depth;
-        public long origin;
-
-        public double err = 0;
-        public int correctStations = 0;
-
-        public PreliminaryHypocenter(double lat, double lon, double depth, long origin) {
-            this.lat = lat;
-            this.lon = lon;
-            this.depth = depth;
-            this.origin = origin;
-        }
-
-        public PreliminaryHypocenter() {
-
-        }
-
-        public Hypocenter finish() {
-            return new Hypocenter(lat, lon, depth, origin);
-        }
-    }
-
     public static void analyseHypocenter(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> events, HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
         int c=  0;
 
@@ -402,8 +352,13 @@ public class EarthquakeAnalysis {
             c++;
         }
 
-        Arrays.sort(threadData.origins);
-        long bestOrigin = threadData.origins[(threadData.origins.length-1)/2];
+        long bestOrigin;
+        if(USE_MEDIAN_FOR_ORIGIN) {
+            Arrays.sort(threadData.origins);
+            bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
+        }else {
+            bestOrigin = threadData.origins[0];
+        }
 
         double err = 0;
         int acc = 0;
@@ -479,7 +434,7 @@ public class EarthquakeAnalysis {
         if(previousHypocenter == null){
             return null;
         }
-        return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin);
+        return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctStations);
     }
 
     private void updateHypocenter(List<PickedEvent> events, Cluster cluster, Hypocenter bestHypocenter, Hypocenter previousHypocenter, HypocenterFinderSettings finderSettings) {

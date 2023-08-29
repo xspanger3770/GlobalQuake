@@ -23,6 +23,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         add(new JScrollPane(contentPanel), BorderLayout.CENTER);
     }
 
+    @SuppressWarnings("ExtractMethodRecommender")
     private JPanel createSettingParalell() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
