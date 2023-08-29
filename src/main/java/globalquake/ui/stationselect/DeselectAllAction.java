@@ -5,8 +5,10 @@ import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;
 
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 public class DeselectAllAction extends AbstractAction {
 
@@ -19,6 +21,11 @@ public class DeselectAllAction extends AbstractAction {
         this.parent=parent;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
+
+        ImageIcon deselectAllIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/deselectAll.png")));
+        Image image = deselectAllIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override
