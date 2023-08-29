@@ -22,25 +22,36 @@ public class StationSelectFrame extends JFrame {
         setLayout(new BorderLayout());
         this.databaseMonitorFrame = databaseMonitorFrame;
         
-        JPanel togglePanel = new JPanel(new GridLayout(5,1));
+        JPanel togglePanel = new JPanel(new GridLayout(9,1));
         JButton toggleButton = new JButton("<");
         JPanel filler1 = new JPanel();
         JPanel filler2 = new JPanel();
         JPanel filler3 = new JPanel();
         JPanel filler4 = new JPanel();
+        JPanel filler5 = new JPanel();
+        JPanel filler6 = new JPanel();
+        JPanel filler7 = new JPanel();
+        JPanel filler8 = new JPanel();
 
         filler1.setOpaque(false);
         filler2.setOpaque(false);
         filler3.setOpaque(false);
         filler4.setOpaque(false);
+        filler5.setOpaque(false);
+        filler6.setOpaque(false);
+        filler7.setOpaque(false);
+        filler8.setOpaque(false);
 
         togglePanel.add(filler1);
         togglePanel.add(filler2);
-        togglePanel.add(toggleButton);
         togglePanel.add(filler3);
         togglePanel.add(filler4);
+        togglePanel.add(toggleButton);
+        togglePanel.add(filler5);
+        togglePanel.add(filler6);
+        togglePanel.add(filler7);
+        togglePanel.add(filler8);
         togglePanel.setOpaque(false);
-        toggleButton.setDoubleBuffered(true);
 
         toggleButton.setToolTipText("Toggle Toolbar");
         toggleButton.setBackground(Color.GRAY);
@@ -100,7 +111,8 @@ public class StationSelectFrame extends JFrame {
         setResizable(true);
         setTitle("Select Stations");
 
-        stationSelectPanel.setDoubleBuffered(true);
+        toggleButton.setDoubleBuffered(true);
+        togglePanel.setDoubleBuffered(true);
 
         java.util.Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -108,7 +120,7 @@ public class StationSelectFrame extends JFrame {
                 toggleButton.repaint();
                 stationSelectPanel.repaint();
             }
-        }, 0, 1000 / 40);
+        }, 0, 1000 / 20);
     }
 
     private JToolBar createToolbar() {
