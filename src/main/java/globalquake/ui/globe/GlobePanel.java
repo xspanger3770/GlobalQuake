@@ -40,9 +40,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private final GlobeRenderer renderer;
 
-    private AtomicInteger frameCount = new AtomicInteger(0);
+    private final AtomicInteger frameCount = new AtomicInteger(0);
 
-    private AtomicLong frameTime = new AtomicLong(0);
+    private final AtomicLong frameTime = new AtomicLong(0);
     private double lastFPS;
 
     public GlobePanel() {
