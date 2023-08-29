@@ -1,36 +1,53 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.station.NearbyStationDistanceInfo;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.sounds.Sounds;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import globalquake.core.station.AbstractStation;
-import globalquake.core.station.NearbyStationDistanceInfo;
-import globalquake.core.GlobalQuake;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.sounds.Sounds;
-import globalquake.geo.GeoUtils;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
+
+    private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
+
+    private final Lock clustersReadLock = clustersLock.readLock();
+    private final Lock clustersWriteLock = clustersLock.writeLock();
 
     private final List<Cluster> clusters;
     private int nextClusterId;
 
     public ClusterAnalysis() {
-        clusters = new CopyOnWriteArrayList<>();
+        clusters = new ArrayList<>();
         this.nextClusterId = 0;
+    }
+
+    public Lock getClustersReadLock() {
+        return clustersReadLock;
     }
 
     public void run() {
         if (GlobalQuake.instance.getEarthquakeAnalysis() == null) {
             return;
         }
-        expandExistingClusters();
-        createNewClusters();
-        updateClusters();
+
+        clustersWriteLock.lock();
+        try {
+            expandExistingClusters();
+            createNewClusters();
+            updateClusters();
+        }finally {
+            clustersWriteLock.unlock();
+        }
     }
 
     @SuppressWarnings({"unused"})
