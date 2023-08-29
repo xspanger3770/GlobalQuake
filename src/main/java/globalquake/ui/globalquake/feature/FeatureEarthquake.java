@@ -51,12 +51,12 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pDist, 0, GlobeRenderer.QUALITY_LOW);
+                pDist, 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementSWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                sDist, 0, GlobeRenderer.QUALITY_LOW);
+                sDist, 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
@@ -94,7 +94,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (entity.getOriginal().getMag())), 2) * 40);
 
         if (age / 1000.0 < maxDisplayTimeSec) {
-            float thickness = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
+            float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
             RenderElement elementPWave = entity.getRenderElement(0);
             RenderElement elementSWave = entity.getRenderElement(1);
 
@@ -102,13 +102,13 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
             if (elementPWave.shouldDraw) {
                 graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(thickness));
+                graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
                 graphics.draw(elementPWave.getShape());
             }
 
             if (elementSWave.shouldDraw) {
                 graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-                graphics.setStroke(new BasicStroke(thickness));
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
                 graphics.draw(elementSWave.getShape());
             }
         }
@@ -137,7 +137,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     private Color getColorSWave(double mag) {
-        double weight = Math.max(0, Math.min(1, mag / 6.0));
+        double weight = Math.max(0, Math.min(1, (mag - 2.0) / 4.0));
         return Scale.interpolateColors(Color.yellow, Color.red, weight);
     }
 
