@@ -98,7 +98,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             RenderElement elementPWave = entity.getRenderElement(0);
             RenderElement elementSWave = entity.getRenderElement(1);
 
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
             if (elementPWave.shouldDraw) {
                 graphics.setColor(Color.BLUE);
