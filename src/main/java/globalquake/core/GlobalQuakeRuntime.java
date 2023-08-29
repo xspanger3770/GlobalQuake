@@ -24,8 +24,6 @@ public class GlobalQuakeRuntime {
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("1-Second Loop Thread"));
         ScheduledExecutorService execClusters = Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("Cluster Analysis Thread"));
-        ScheduledExecutorService execGC = Executors
-                .newSingleThreadScheduledExecutor(new NamedThreadFactory("Garbage Collector Thread"));
         ScheduledExecutorService execQuake = Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("Hypocenter Location Thread"));
 
@@ -53,17 +51,6 @@ public class GlobalQuakeRuntime {
                 Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);
-
-        execGC.scheduleAtFixedRate(() -> {
-            try {
-                long a = System.currentTimeMillis();
-                System.gc();
-                lastGC = System.currentTimeMillis() - a;
-            } catch (Exception e) {
-                System.err.println("Exception in garbage collector");
-                Main.getErrorHandler().handleException(e);
-            }
-        }, 0, 10, TimeUnit.SECONDS);
 
         execClusters.scheduleAtFixedRate(() -> {
             try {

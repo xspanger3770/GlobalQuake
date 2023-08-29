@@ -144,6 +144,12 @@ public class GlobalQuakePanel extends GlobePanel {
             settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
         }
 
+        double GB = 1024 * 1024 * 1024.0;
+
+        long maxMem = Runtime.getRuntime().maxMemory();
+        long usedMem = maxMem - Runtime.getRuntime().freeMemory();
+
+        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), Color.YELLOW));
         settingsStrings.add(new SettingInfo("FPS: ", "%.1f".formatted(getLastFPS()), Color.YELLOW));
         return settingsStrings;
     }
