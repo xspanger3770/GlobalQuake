@@ -9,6 +9,7 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.utils.Scale;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -93,6 +94,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (entity.getOriginal().getMag())), 2) * 40);
 
         if (age / 1000.0 < maxDisplayTimeSec) {
+            float thickness = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
             RenderElement elementPWave = entity.getRenderElement(0);
             RenderElement elementSWave = entity.getRenderElement(1);
 
@@ -100,13 +102,13 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
             if (elementPWave.shouldDraw) {
                 graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(4f));
+                graphics.setStroke(new BasicStroke(thickness));
                 graphics.draw(elementPWave.getShape());
             }
 
             if (elementSWave.shouldDraw) {
-                graphics.setColor(Color.RED);
-                graphics.setStroke(new BasicStroke(4f));
+                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+                graphics.setStroke(new BasicStroke(thickness));
                 graphics.draw(elementSWave.getShape());
             }
         }
@@ -132,6 +134,11 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private Color getColorSWave(double mag) {
+        double weight = Math.max(0, Math.min(1, mag / 6.0));
+        return Scale.interpolateColors(Color.yellow, Color.red, weight);
     }
 
     private Color getCrossColor(double mag) {
