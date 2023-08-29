@@ -38,6 +38,7 @@ public class EarthquakeAnalysis {
     }
 
     public void run() {
+        // TODO java.lang.ArrayIndexOutOfBoundsException HERE!
         GlobalQuake.instance.getClusterAnalysis().getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
         getEarthquakes().parallelStream().forEach(this::calculateMagnitude);
     }

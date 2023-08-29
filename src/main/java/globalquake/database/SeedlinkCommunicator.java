@@ -21,7 +21,7 @@ public class SeedlinkCommunicator {
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_SHORT = new ThreadLocal<>();
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG = new ThreadLocal<>();
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
-    public static final int SEEDLINK_TIMEOUT_SECONDS = 20;
+    public static final int SEEDLINK_TIMEOUT_SECONDS = 120;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.getStatus().setString("Connecting...");

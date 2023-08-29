@@ -22,7 +22,7 @@ import java.util.List;
 public class FDSNWSDownloader {
 
     private static final DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(ZoneId.systemDefault());
-    private static final int TIMEOUT_SECONDS = 20;
+    private static final int TIMEOUT_SECONDS = 120;
 
     public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B');
     public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N');
