@@ -61,7 +61,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
-                        .pxToDeg(16));
+                        .pxToDeg(16), 45.0);
     }
 
     @Override

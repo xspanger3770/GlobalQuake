@@ -33,7 +33,7 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
-                        .pxToDeg(10));
+                        .pxToDeg(8), 0.0);
     }
 
     @Override
@@ -61,12 +61,13 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<LocationPlaceholder> entity) {
         RenderElement elementCross = entity.getRenderElement(0);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (elementCross.shouldDraw && Settings.displayHomeLocation) {
             graphics.setColor(Color.magenta);
-            graphics.setStroke(new BasicStroke(2f));
+            graphics.setStroke(new BasicStroke(3f));
             graphics.draw(elementCross.getShape());
         }
-
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     @Override
