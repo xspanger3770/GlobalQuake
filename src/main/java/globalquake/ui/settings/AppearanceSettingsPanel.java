@@ -21,7 +21,7 @@ public class AppearanceSettingsPanel extends SettingsPanel{
         chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
         add(chkBoxHomeLoc);
 
-        chkBoxAntialiasing = new JCheckBox("Enable antialiasing");
+        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
         chkBoxAntialiasing.setSelected(Settings.antialiasing);
         add(chkBoxAntialiasing);
     }
