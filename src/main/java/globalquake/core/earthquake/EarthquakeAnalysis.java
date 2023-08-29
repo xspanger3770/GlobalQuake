@@ -21,8 +21,6 @@ public class EarthquakeAnalysis {
 
     public static final int QUADRANTS = 16;
 
-    private static final long DELTA_P_THRESHOLD = 2200;
-
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
 
     private final List<Earthquake> earthquakes;
@@ -101,13 +99,15 @@ public class EarthquakeAnalysis {
             cluster.setSelected(selectedEvents);
         }
 
+        HypocenterFinderSettings finderSettings = createSettings();
+
         // There has to be at least some difference in the picked pWave times
-        if (!checkDeltaP(selectedEvents)) {
+        if (!checkDeltaP(selectedEvents, finderSettings)) {
             System.err.println("Not Enough Delta-P");
             return;
         }
 
-        findHypocenter(selectedEvents, cluster, createSettings());
+        findHypocenter(selectedEvents, cluster, finderSettings);
     }
 
     public static HypocenterFinderSettings createSettings() {
@@ -156,13 +156,13 @@ public class EarthquakeAnalysis {
         }
     }
 
-    private boolean checkDeltaP(ArrayList<PickedEvent> events) {
+    private boolean checkDeltaP(ArrayList<PickedEvent> events, HypocenterFinderSettings finderSettings) {
         events.sort(Comparator.comparing(PickedEvent::pWave));
 
         long deltaP = events.get((int) ((events.size() - 1) * 0.9)).pWave()
                 - events.get((int) ((events.size() - 1) * 0.1)).pWave();
 
-        return deltaP >= DELTA_P_THRESHOLD;
+        return deltaP >= Math.max(2000, finderSettings.pWaveInaccuracyThreshold() * 1.75);
     }
 
     public void findHypocenter(List<PickedEvent> events, Cluster cluster, HypocenterFinderSettings finderSettings) {
