@@ -12,7 +12,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
     public HypocenterAnalysisSettingsPanel() {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(400, 300));
+        setPreferredSize(new Dimension(0, 350));
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));

@@ -147,11 +147,24 @@ public class GlobalQuakePanel extends GlobePanel {
         double GB = 1024 * 1024 * 1024.0;
 
         long maxMem = Runtime.getRuntime().maxMemory();
-        long usedMem = maxMem - Runtime.getRuntime().freeMemory();
+        long usedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), Color.YELLOW));
-        settingsStrings.add(new SettingInfo("FPS: ", "%.1f".formatted(getLastFPS()), Color.YELLOW));
+        double pctUsed = usedMem / (double)maxMem;
+
+        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorRAM(pctUsed)));
+        settingsStrings.add(new SettingInfo("FPS: ", "%.1f".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
+    }
+
+    private Color getColorRAM(double pct) {
+        if(pct <= 0.5){
+            return Scale.interpolateColors(Color.green, Color.yellow, pct * 2.0);
+        }
+        return Scale.interpolateColors(Color.yellow, Color.red, (pct - 0.5) * 2.0);
+    }
+
+    private Color getColorFPS(double lastFPS) {
+        return getColorRAM(1 - lastFPS / 60.0);
     }
 
     record SettingInfo(String name, String value, Color color) {
