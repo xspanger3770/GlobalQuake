@@ -191,6 +191,10 @@ public class GlobePanel extends JPanel implements GeoUtils {
             return 0;
         }
 
+        if(lastMouse == null || dragStart == null){
+            return 0;
+        }
+
 
         //Calculate direction
         double deltaX = (lastMouse.getX() - dragStart.getX());

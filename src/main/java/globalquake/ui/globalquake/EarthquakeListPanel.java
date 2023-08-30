@@ -22,14 +22,17 @@ import java.util.Locale;
 
 public class EarthquakeListPanel extends JPanel {
     private int scroll = 0;
-    protected int mouseY;
+    protected int mouseY = -999;
 
     private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
 
-    public EarthquakeListPanel() {
+    private final List<ArchivedQuake> archivedQuakes;
+
+    public EarthquakeListPanel(List<ArchivedQuake> archivedQuakes) {
+        this.archivedQuakes = archivedQuakes;
         setBackground(Color.gray);
         setForeground(Color.gray);
 
@@ -37,7 +40,7 @@ public class EarthquakeListPanel extends JPanel {
             boolean down = e.getWheelRotation() < 0;
             if (!down) {
                 scroll += 25;
-                int maxScroll = GlobalQuake.instance.getArchive().getArchivedQuakes().size() * cell_height
+                int maxScroll = archivedQuakes.size() * cell_height
                         - getHeight();
                 maxScroll = Math.max(0, maxScroll);
                 scroll = Math.min(scroll, maxScroll);
@@ -52,7 +55,6 @@ public class EarthquakeListPanel extends JPanel {
             public void mousePressed(MouseEvent e) {
                 int y = e.getY();
                 int i = (y + scroll) / cell_height;
-                List<ArchivedQuake> archivedQuakes = GlobalQuake.instance.getArchive().getArchivedQuakes();
                 if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
                     return;
                 }
@@ -64,6 +66,10 @@ public class EarthquakeListPanel extends JPanel {
                 }
             }
 
+            @Override
+            public void mouseExited(MouseEvent e) {
+                mouseY = -999;
+            }
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -78,24 +84,23 @@ public class EarthquakeListPanel extends JPanel {
     public void paint(Graphics gr) {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
-        if (GlobalQuake.instance.getArchive() == null) {
-            return;
-        }
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        List<ArchivedQuake> archivedQuakes = GlobalQuake.instance.getArchive().getArchivedQuakes();
         int i = 0;
         for (ArchivedQuake quake : archivedQuakes) {
             int y = i * cell_height - scroll;
             if (y > getHeight()) {
                 break;
             }
-            Color col = new Color(140,140,140);
+            Color col = IntensityScales.getIntensityScale().getLevels().get(IntensityScales.getIntensityScale().getLevels().size() - 1).getColor();
             Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
             if (level != null) {
                 col = level.getColor();
-                col = new Color((int) (col.getRed() * 0.65), (int) (col.getGreen() * 0.65),
-                        (int) (col.getBlue() * 0.65));
             }
+
+            col = new Color(
+                    (int) (col.getRed() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                    (int) (col.getGreen() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                    (int) (col.getBlue() * IntensityScales.getIntensityScale().getDarkeningFactor()));
 
             Rectangle2D.Double rect = new Rectangle2D.Double(0, y, getWidth(), cell_height);
 
@@ -112,7 +117,6 @@ public class EarthquakeListPanel extends JPanel {
 
             String str = "M" + f1d.format(quake.getMag());
             g.setFont(new Font("Calibri", Font.BOLD, 20));
-            g.setColor(quake.getMag() >= 6 ? new Color(200, 0, 0) : Color.white);
             g.setColor(Color.WHITE);
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
 

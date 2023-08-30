@@ -1,7 +1,9 @@
 package globalquake.ui.debug;
 
+import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
+import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
 import globalquake.utils.Scale;
@@ -11,20 +13,23 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Random;
+import java.util.*;
+import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class GlobePanelDebug extends JFrame {
 
 	private final GlobePanel panel;
 	private final JPanel list;
 	private final JPanel mainPanel;
+	private List<ArchivedQuake> archivedQuakes;
 	protected boolean hideList;
 	private boolean _containsListToggle;
 	private boolean _containsSettings;
 
 	public GlobePanelDebug() {
+		createArchived();
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
@@ -91,8 +96,7 @@ public class GlobePanelDebug extends JFrame {
 			
 		});
 
-		list = new JPanel();
-		list.setBackground(Color.darkGray);
+		list = new EarthquakeListPanel(archivedQuakes);
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -115,6 +119,15 @@ public class GlobePanelDebug extends JFrame {
 				mainPanel.repaint();
 			}
 		}, 0, 1000 / 40);
+	}
+
+	private void createArchived() {
+		archivedQuakes = new ArrayList<>();
+		Random r = new Random();
+		for(double mag = 0.5; mag <= 30; mag += 0.5) {
+			archivedQuakes.add(new ArchivedQuake(0, 0, 0, r.nextDouble() * r.nextDouble() * 9.0, r.nextLong()));
+		}
+		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}
 
 	protected void toggleList() {

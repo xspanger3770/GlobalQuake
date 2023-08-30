@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
@@ -63,7 +64,7 @@ public class GlobalQuakeFrame extends JFrame {
 			}
 		});
 
-		list = new EarthquakeListPanel();
+		list = new EarthquakeListPanel(GlobalQuake.instance.getArchive().getArchivedQuakes());
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 

@@ -24,7 +24,7 @@ public class ShindoIntensityScale implements IntensityScale{
 		levels.add(SAN = new Level("3", 8, new Color(19, 154, 76)));
 		levels.add(YON = new Level("4", 25, new Color(220, 165, 0)));
 		levels.add(GO_JAKU = new Level("5","-", 80, new Color(241, 138, 46)));
-		levels.add(GO_KYOU = new Level("5","+", 140, new Color(209, 106, 14)));
+		levels.add(GO_KYOU = new Level("5","+", 140, new Color(216, 78, 14)));
 		levels.add(ROKU_JAKU = new Level("6","-", 250, new Color(235, 26, 0)));
 		levels.add(ROKU_KYOU = new Level("6","+", 315, new Color(165, 2, 7)));
 		levels.add(NANA = new Level("7", 400, new Color(150, 0, 150)));
@@ -35,6 +35,11 @@ public class ShindoIntensityScale implements IntensityScale{
 	@Override
 	public List<Level> getLevels() {
 		return levels;
+	}
+
+	@Override
+	public double getDarkeningFactor() {
+		return 0.9;
 	}
 
 }

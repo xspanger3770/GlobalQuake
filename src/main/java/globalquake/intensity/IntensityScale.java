@@ -9,6 +9,8 @@ public interface IntensityScale {
      */
     List<Level> getLevels();
 
+    double getDarkeningFactor();
+
     default Level getLevel(double pga){
         for(Level level : getLevels()){
             if(pga > level.getPga()){

@@ -26,19 +26,23 @@ public class MMIIntensityScale implements IntensityScale{
 	public static final Level IX;
 
 	public static final Level X;
+	public static final Level XI;
+	public static final Level XII;
 	private static final List<Level> levels = new ArrayList<>();
 
 	static {
-		levels.add(I = new Level("I", 0.5, Color.white));
-		levels.add(II = new Level("II", 1.7, new Color(191, 204, 255)));
-		levels.add(III = new Level("III", 7.0, new Color(153, 153, 255)));
-		levels.add(IV = new Level("IV", 14.0, new Color(136, 255, 255)));
-		levels.add(V = new Level("V", 39.0, new Color(122, 255, 147)));
-		levels.add(VI = new Level("VI", 92.0, new Color(255, 255, 0)));
-		levels.add(VII = new Level("VII", 180.0, new Color(255, 200, 0)));
-		levels.add(VIII = new Level("VIII", 340.0, new Color(255, 145, 0)));
-		levels.add(IX = new Level("IX", 650.0, new Color(255, 0, 0)));
-		levels.add(X = new Level("X", 1240.0, new Color(200, 0, 0)));
+		levels.add(I = new Level("I", 0.0, new Color(190,190,190)));
+		levels.add(II = new Level("II", 1.0, new Color(180, 190, 240)));
+		levels.add(III = new Level("III", 2.1, new Color(132, 162, 232)));
+		levels.add(IV = new Level("IV", 5.0, new Color(136, 214, 220)));
+		levels.add(V = new Level("V", 10.0, new Color(85, 242, 15)));
+		levels.add(VI = new Level("VI", 21.0, new Color(255, 255, 0)));
+		levels.add(VII = new Level("VII", 44.0, new Color(255, 200, 0)));
+		levels.add(VIII = new Level("VIII", 94.0, new Color(255, 120, 0)));
+		levels.add(IX = new Level("IX", 202.0, new Color(255, 0, 0)));
+		levels.add(X = new Level("X", 432.0, new Color(190, 0, 0)));
+		levels.add(XI = new Level("XI", 923.0, new Color(130, 0, 0)));
+		levels.add(XII = new Level("XII", 1972.0, new Color(80, 0, 0)));
 
 		levels.sort(Comparator.comparing(level -> -level.getPga()));
 	}
@@ -46,6 +50,11 @@ public class MMIIntensityScale implements IntensityScale{
 	@Override
 	public List<Level> getLevels() {
 		return levels;
+	}
+
+	@Override
+	public double getDarkeningFactor() {
+		return 0.70;
 	}
 
 }
