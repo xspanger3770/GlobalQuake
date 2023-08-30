@@ -89,12 +89,12 @@ public class EarthquakeListPanel extends JPanel {
             if (y > getHeight()) {
                 break;
             }
-            Color col = Color.GRAY;
+            Color col = new Color(140,140,140);
             Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
             if (level != null) {
                 col = level.getColor();
-                col = new Color((int) (col.getRed() * 0.8), (int) (col.getGreen() * 0.8),
-                        (int) (col.getBlue() * 0.8));
+                col = new Color((int) (col.getRed() * 0.65), (int) (col.getGreen() * 0.65),
+                        (int) (col.getBlue() * 0.65));
             }
 
             Rectangle2D.Double rect = new Rectangle2D.Double(0, y, getWidth(), cell_height);
@@ -120,7 +120,7 @@ public class EarthquakeListPanel extends JPanel {
             if (level != null) {
                 str = level.getName();
             } else {
-                str = "*";
+                str = "-";
             }
 
             if (level != null) {
@@ -130,9 +130,9 @@ public class EarthquakeListPanel extends JPanel {
 
             }
 
-            g.setFont(new Font("Calibri", Font.PLAIN, 30));
+            g.setFont(new Font("Calibri", Font.PLAIN, 26));
             g.setColor(Color.white);
-            g.drawString(str, 16, y + 30);
+            g.drawString(str, 27-g.getFontMetrics().stringWidth(str) / 2, y + 30);
 
             str = ((int) quake.getDepth()) + "km";
             g.setFont(new Font("Calibri", Font.BOLD, 12));
