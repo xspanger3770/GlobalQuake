@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class StationSelectFrame extends JFrame implements ActionListener {
 
@@ -136,6 +137,14 @@ public class StationSelectFrame extends JFrame implements ActionListener {
                 }
             }
         });
+        
+        ImageIcon selectRegion = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectRegion.png")));
+        Image image = selectRegion.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        selectButton.setIcon(new ImageIcon(image));
+
+        ImageIcon deselectRegion = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/deselectRegion.png")));
+        image = deselectRegion.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        deselectButton.setIcon(new ImageIcon(image));
 
         toolBar.setFloatable(false);
         toolBar.add(selectButton);

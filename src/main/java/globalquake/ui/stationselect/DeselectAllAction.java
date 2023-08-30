@@ -20,7 +20,7 @@ public class DeselectAllAction extends AbstractAction {
         putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
 
         ImageIcon deselectAllIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/deselectAll.png")));
-        Image image = deselectAllIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        Image image = deselectAllIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(image);
         putValue(Action.SMALL_ICON, scaledIcon);
     }

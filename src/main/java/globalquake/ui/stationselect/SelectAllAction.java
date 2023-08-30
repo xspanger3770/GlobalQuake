@@ -21,7 +21,7 @@ public class SelectAllAction extends AbstractAction {
         putValue(SHORT_DESCRIPTION, "Selects All Available Stations");
 
         ImageIcon selectAllIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectAll.png")));
-        Image image = selectAllIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        Image image = selectAllIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(image);
         putValue(Action.SMALL_ICON, scaledIcon);
     }
