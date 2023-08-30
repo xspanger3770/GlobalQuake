@@ -154,13 +154,13 @@ public class Sounds {
 			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
 			if (info.maxPGAHome < pgaHome) {
-				if (pgaHome >= ShindoIntensityScale.ZERO.getPga() && info.maxPGAHome < ShindoIntensityScale.ZERO.getPga()) {
+				if (pgaHome >= ShindoIntensityScale.ICHI.getPga() && info.maxPGAHome < ShindoIntensityScale.ICHI.getPga()) {
 					Sounds.playSound(Sounds.felt);
 				}
 				info.maxPGAHome = pgaHome;
 			}
 
-			if (info.maxPGAHome >= ShindoIntensityScale.ZERO.getPga()) {
+			if (info.maxPGAHome >= ShindoIntensityScale.ICHI.getPga()) {
 				double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
 
 				double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),

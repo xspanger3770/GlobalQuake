@@ -7,7 +7,6 @@ import java.util.List;
 
 public class ShindoIntensityScale implements IntensityScale{
 
-	public static final Level ZERO;
 	public static final Level ICHI;
 	public static final Level NI;
 	public static final Level SAN;
@@ -20,7 +19,6 @@ public class ShindoIntensityScale implements IntensityScale{
 	private static final List<Level> levels = new ArrayList<>();
 
 	static {
-		levels.add(ZERO = new Level("0", 0.25, Color.WHITE));
 		levels.add(ICHI = new Level("1", 0.8, new Color(120, 135, 135)));
 		levels.add(NI = new Level("2", 2.5, new Color(20, 135, 205)));
 		levels.add(SAN = new Level("3", 8, new Color(19, 154, 76)));
