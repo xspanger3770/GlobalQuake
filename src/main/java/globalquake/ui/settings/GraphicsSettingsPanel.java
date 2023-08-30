@@ -3,15 +3,18 @@ package globalquake.ui.settings;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class AppearanceSettingsPanel extends SettingsPanel{
+public class GraphicsSettingsPanel extends SettingsPanel{
 
     private final JCheckBox chkBoxScheme;
     private final JCheckBox chkBoxHomeLoc;
     private final JCheckBox chkBoxAntialiasing;
+    private JSlider sliderFpsIdle;
 
-    public AppearanceSettingsPanel() {
+    public GraphicsSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(5,5,5,5));
+
+        createFpsSlider();
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
@@ -26,6 +29,24 @@ public class AppearanceSettingsPanel extends SettingsPanel{
         add(chkBoxAntialiasing);
     }
 
+    private void createFpsSlider() {
+        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 90, Settings.fpsIdle);
+        sliderFpsIdle.setPaintLabels(true);
+        sliderFpsIdle.setPaintTicks(true);
+        sliderFpsIdle.setMajorTickSpacing(10);
+        sliderFpsIdle.setMinorTickSpacing(5);
+        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+
+        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+
+        sliderFpsIdle.addChangeListener(changeEvent -> {
+            label.setText("FPS at idle: "+sliderFpsIdle.getValue());;
+        });
+
+        add(label);
+        add(sliderFpsIdle);
+    }
+
     @Override
     public void save() {
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
@@ -35,6 +56,6 @@ public class AppearanceSettingsPanel extends SettingsPanel{
 
     @Override
     public String getTitle() {
-        return "Appearance";
+        return "Graphics";
     }
 }

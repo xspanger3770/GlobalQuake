@@ -42,7 +42,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private final AtomicInteger frameCount = new AtomicInteger(0);
 
-    private final AtomicLong frameTime = new AtomicLong(0);
     private double lastFPS;
 
     public GlobePanel() {
@@ -175,9 +174,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                long time = frameTime.getAndSet(0);
-                int count = frameCount.getAndSet(0);
-                lastFPS = 1000.0 / (time / (double)count);
+                lastFPS = frameCount.getAndSet(0);
             }
         }, 0, 1000);
 
@@ -306,7 +303,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     @Override
     public void paint(Graphics gr) {
-        long a = System.currentTimeMillis();
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
@@ -315,10 +311,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         renderer.render(g, renderer.getRenderProperties());
 
-        long time = System.currentTimeMillis() - a;
-
         frameCount.incrementAndGet();
-        frameTime.addAndGet(time);
     }
 
 }

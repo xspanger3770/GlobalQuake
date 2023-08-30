@@ -1,6 +1,7 @@
 package globalquake.ui.globalquake;
 
 import globalquake.main.Main;
+import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;
@@ -8,12 +9,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GlobalQuakeFrame extends JFrame {
-
-	private static final int FPS = 20;
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
@@ -83,12 +83,19 @@ public class GlobalQuakeFrame extends JFrame {
 		setResizable(true);
 		setTitle(Main.fullName);
 
-		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+		// Initial delay before the task starts
+		long initialDelay = 0;
+
+		// Schedule the task
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override
 			public void run() {
 				mainPanel.repaint();
+				scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.SECONDS);
 			}
-		}, 0, 1000 / FPS);
+		}, initialDelay, 0, TimeUnit.MILLISECONDS);
 	}
 
 	private JMenuBar createJMenuBar() {
