@@ -7,19 +7,16 @@ import globalquake.database.StationDatabaseManager;
 import javax.swing.*;
 
 import java.awt.Image;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.Objects;
 
 public class SelectAllAction extends AbstractAction {
 
     private final StationDatabaseManager stationDatabaseManager;
-    private final Window parent;
 
-    public SelectAllAction(StationDatabaseManager stationDatabaseManager, Window parent) {
+    public SelectAllAction(StationDatabaseManager stationDatabaseManager) {
         super("Select All");
         this.stationDatabaseManager=stationDatabaseManager;
-        this.parent=parent;
 
         putValue(SHORT_DESCRIPTION, "Selects All Available Stations");
 
@@ -31,25 +28,10 @@ public class SelectAllAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        boolean alreadySelected = true;
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
-                for(Station station : network.getStations()){
-                    if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
-                        continue;
-                    }
-                    if(station.getSelectedChannel() == null){
-                        alreadySelected = false;
-                    }
-                    else{
-                        alreadySelected = true;
-                    }
-                }
                 network.getStations().forEach(Station::selectBestAvailableChannel);
-            }
-            if(alreadySelected){
-                JOptionPane.showMessageDialog(parent, "All Stations Already Selected");
             }
             stationDatabaseManager.fireUpdateEvent();
         }finally {

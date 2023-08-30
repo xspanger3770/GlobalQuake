@@ -6,15 +6,17 @@ import globalquake.ui.database.StationCountPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.awt.event.ActionListener;
 
-public class StationSelectFrame extends JFrame {
+public class StationSelectFrame extends JFrame implements ActionListener {
 
     private final StationSelectPanel stationSelectPanel;
     private final DatabaseMonitorFrame databaseMonitorFrame;
     private JToggleButton selectButton;
     private JToggleButton deselectButton;
+    private JButton selectAll;
+    private JButton deselectAll;
+    private boolean stationRepaint = false;
     private DragMode dragMode = DragMode.NONE;
     private final JCheckBox chkBoxShowUnavailable;
 
@@ -24,6 +26,10 @@ public class StationSelectFrame extends JFrame {
         
         JPanel togglePanel = new JPanel(new GridLayout(9,1));
         JButton toggleButton = new JButton("<");
+        selectAll = new JButton(new SelectAllAction(databaseMonitorFrame.getManager()));
+        deselectAll = new JButton(new DeselectAllAction(databaseMonitorFrame.getManager()));
+        selectAll.addActionListener(this);
+        deselectAll.addActionListener(this);
         JPanel filler1 = new JPanel();
         JPanel filler2 = new JPanel();
         JPanel filler3 = new JPanel();
@@ -111,16 +117,15 @@ public class StationSelectFrame extends JFrame {
         setResizable(true);
         setTitle("Select Stations");
 
-        toggleButton.setDoubleBuffered(true);
-        togglePanel.setDoubleBuffered(true);
-
-        java.util.Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                toggleButton.repaint();
+        javax.swing.Timer timer = new javax.swing.Timer(16, actionEvent -> {
+            if(stationRepaint){
                 stationSelectPanel.repaint();
             }
-        }, 0, 1000 / 20);
+            else{
+                toggleButton.repaint();
+            }
+        });
+        timer.start();
     }
 
     private JToolBar createToolbar() {
@@ -130,13 +135,17 @@ public class StationSelectFrame extends JFrame {
         selectButton.setToolTipText("Select All Available Stations in Region");
         deselectButton = new JToggleButton("Deselect Region");
         deselectButton.setToolTipText("Deselect All Available Stations in Region");
+        selectButton.addActionListener(this);
+        deselectButton.addActionListener(this);
 
         selectButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if(selectButton.isSelected()){
+                    stationRepaint = true;
                     setDragMode(DragMode.SELECT);
                 } else {
+                    stationRepaint = false;
                     setDragMode(DragMode.NONE);
                 }
             }
@@ -146,8 +155,10 @@ public class StationSelectFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if(deselectButton.isSelected()){
+                    stationRepaint = true;
                     setDragMode(DragMode.DESELECT);
                 } else {
+                    stationRepaint = false;
                     setDragMode(DragMode.NONE);
                 }
             }
@@ -155,12 +166,12 @@ public class StationSelectFrame extends JFrame {
 
         toolBar.setFloatable(false);
         toolBar.add(selectButton);
-        toolBar.add(new JButton(new SelectAllAction(databaseMonitorFrame.getManager(), this)));
+        toolBar.add(selectAll);
 
         toolBar.addSeparator();
 
         toolBar.add(deselectButton);
-        toolBar.add(new JButton(new DeselectAllAction(databaseMonitorFrame.getManager(), this)));
+        toolBar.add(deselectAll);
         toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager(), this)));
 
         toolBar.addSeparator();
@@ -182,5 +193,29 @@ public class StationSelectFrame extends JFrame {
 
     public DragMode getDragMode() {
         return dragMode;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if(e.getSource() == deselectAll){
+            selectAll.setEnabled(true);
+            selectButton.setEnabled(true);
+            deselectAll.setEnabled(false);
+            deselectButton.setEnabled(false);
+        }
+        else if(e.getSource() == selectAll){
+            selectAll.setEnabled(false);
+            selectButton.setEnabled(false);
+            deselectAll.setEnabled(true);
+            deselectButton.setEnabled(true);
+        }
+        else{
+            selectAll.setEnabled(true);
+            selectButton.setEnabled(true);
+            deselectAll.setEnabled(true);
+            deselectButton.setEnabled(true);
+        }
+        stationSelectPanel.repaint();
     }
 }
