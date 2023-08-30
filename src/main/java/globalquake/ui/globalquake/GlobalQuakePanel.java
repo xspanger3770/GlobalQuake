@@ -6,8 +6,8 @@ import globalquake.core.earthquake.Hypocenter;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
+import globalquake.intensity.IntensityScales;
+import globalquake.intensity.Level;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
@@ -116,6 +116,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         int _y = getHeight() - 6;
         g.setFont(new Font("Calibri", Font.PLAIN, 14));
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         for(SettingInfo settingInfo : settingsStrings){
             int _x = 5;
@@ -128,6 +129,8 @@ public class GlobalQuakePanel extends GlobePanel {
             }
             _y -= 16;
         }
+
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     private List<SettingInfo> createSettingInfos() {
@@ -228,7 +231,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private static void drawIntensityBox(Graphics2D g, Earthquake quake, int baseHeight) {
-        Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+        Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
 
         g.setFont(new Font("Calibri", Font.BOLD, 10));
         int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
@@ -236,11 +239,8 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setStroke(new BasicStroke(1f));
         Color col = neutralColor;
 
-        if (shindo != null) {
-            col = Shindo.getColorShindo(shindo);
-            if (shindo == Shindo.ZERO) {
-                col = Shindo.getColorShindo(Shindo.ICHI);
-            }
+        if (level != null) {
+            col = level.getColor();
         }
 
         g.setColor(col);
@@ -251,28 +251,20 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString("Max Intensity", 2, baseHeight + 12);
 
         String str3 = "";
-        if (shindo != null) {
-            str3 = shindo.name();
+        if (level != null) {
+            str3 = level.getName();
         }
-        boolean plus = str3.endsWith("+");
-        boolean minus = str3.endsWith("-");
-        if (plus || minus) {
-            str3 = str3.charAt(0) + " ";
-        }
+
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.PLAIN, 64));
         g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
-        if (plus) {
+
+        if(level != null && level.getSuffix() != null) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", Font.PLAIN, 36));
-            g.drawString("+", 48, baseHeight + 50);
+            g.drawString(level.getSuffix(), 48, baseHeight + 50);
+        }
 
-        }
-        if (minus) {
-            g.setColor(Color.white);
-            g.setFont(new Font("Arial", Font.PLAIN, 48));
-            g.drawString("-", 52, baseHeight + 50);
-        }
 
         drawMags(g, quake, baseHeight);
     }

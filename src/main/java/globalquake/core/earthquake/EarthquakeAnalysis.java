@@ -3,7 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.IntensityTable;
+import globalquake.intensity.IntensityTable;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.sounds.Sounds;
 import globalquake.ui.globe.Point2D;

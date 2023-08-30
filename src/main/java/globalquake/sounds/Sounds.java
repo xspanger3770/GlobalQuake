@@ -5,8 +5,10 @@ import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
+import globalquake.intensity.IntensityScale;
+import globalquake.intensity.IntensityScales;
+import globalquake.intensity.Level;
+import globalquake.intensity.ShindoIntensityScale;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
@@ -152,19 +154,13 @@ public class Sounds {
 			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
 			if (info.maxPGAHome < pgaHome) {
-				Level shindoLast = Shindo.getLevel(info.maxPGAHome);
-				Level shindoNow = Shindo.getLevel(pgaHome);
-				if (shindoLast != shindoNow && (shindoNow != null ? shindoNow.index() : 0) > 0 && ENABLE_EXTREME_ALARMS) {
-					Sounds.playSound(Sounds.nextLevelBeginsWith1(shindoNow.index() - 1));
-				}
-
-				if (pgaHome >= Shindo.ZERO.pga() && info.maxPGAHome < Shindo.ZERO.pga()) {
+				if (pgaHome >= ShindoIntensityScale.ZERO.getPga() && info.maxPGAHome < ShindoIntensityScale.ZERO.getPga()) {
 					Sounds.playSound(Sounds.felt);
 				}
 				info.maxPGAHome = pgaHome;
 			}
 
-			if (info.maxPGAHome >= Shindo.ZERO.pga()) {
+			if (info.maxPGAHome >= ShindoIntensityScale.ZERO.getPga()) {
 				double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
 
 				double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),

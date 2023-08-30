@@ -3,8 +3,8 @@ package globalquake.ui.globalquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
+import globalquake.intensity.IntensityScales;
+import globalquake.intensity.Level;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,9 +90,9 @@ public class EarthquakeListPanel extends JPanel {
                 break;
             }
             Color col = Color.GRAY;
-            Level shindo = Shindo.getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
-            if (shindo != null && shindo != Shindo.ZERO) {
-                col = Shindo.getColorShindo(shindo);
+            Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+            if (level != null) {
+                col = level.getColor();
                 col = new Color((int) (col.getRed() * 0.8), (int) (col.getGreen() * 0.8),
                         (int) (col.getBlue() * 0.8));
             }
@@ -117,29 +117,17 @@ public class EarthquakeListPanel extends JPanel {
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
 
             str = "";
-            if (shindo != null) {
-                str = shindo.name();
+            if (level != null) {
+                str = level.getName();
+            } else {
+                str = "*";
             }
 
-            boolean plus = str.endsWith("+");
-            boolean minus = str.endsWith("-");
-            if (plus || minus) {
-                str = str.charAt(0) + " ";
-            }
-            if (plus) {
+            if (level != null) {
                 g.setColor(Color.white);
                 g.setFont(new Font("Arial", Font.PLAIN, 20));
-                g.drawString("+", 32, y + 21);
+                g.drawString(level.getSuffix(), 32, y + 21);
 
-            }
-            if (minus) {
-                g.setColor(Color.white);
-                g.setFont(new Font("Arial", Font.PLAIN, 26));
-                g.drawString("-", 30, y + 21);
-            }
-
-            if (shindo == null) {
-                str = "*";
             }
 
             g.setFont(new Font("Calibri", Font.PLAIN, 30));

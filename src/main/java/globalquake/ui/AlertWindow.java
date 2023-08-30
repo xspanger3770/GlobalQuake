@@ -1,9 +1,14 @@
 package globalquake.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityScales;
+import globalquake.intensity.Level;
+import globalquake.ui.settings.Settings;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
@@ -11,18 +16,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
-import globalquake.core.earthquake.Earthquake;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.ui.settings.Settings;
-import globalquake.geo.GeoUtils;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
 
 public class AlertWindow extends JFrame {
 
@@ -92,18 +85,18 @@ public class AlertWindow extends JFrame {
 		lblSSec.setText(secondsS + "s");
 
 		double pga = GeoUtils.pgaFunctionGen1(earthquake.getMag(), distGEO);
-		Level shindo = Shindo.getLevel(pga);
+		Level level = IntensityScales.getIntensityScale().getLevel(pga);
 
 		Color c = Color.LIGHT_GRAY;
 		String str = "-";
 
-		boolean chill = shindo == null;
+		boolean chill = level == null;
 
 		contentPane.setBackground(chill ? chillColor : strongColor);
 
 		if (!chill) {
-			c = Shindo.getColorShindo(shindo);
-			str = shindo.name();
+			c = level.getColor();
+			str = level.getName() + level.getSuffix();
 		}
 
 		lblShindo.setText(str);
