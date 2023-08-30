@@ -152,7 +152,7 @@ public class GlobalQuakePanel extends GlobePanel {
         double pctUsed = usedMem / (double)maxMem;
 
         settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorRAM(pctUsed)));
-        settingsStrings.add(new SettingInfo("FPS: ", "%.1f".formatted(getLastFPS()), getColorFPS(getLastFPS())));
+        settingsStrings.add(new SettingInfo("FPS: ", "%d".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
     }
 

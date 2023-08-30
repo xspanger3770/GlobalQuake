@@ -42,7 +42,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private final AtomicInteger frameCount = new AtomicInteger(0);
 
-    private double lastFPS;
+    private int lastFPS;
 
     public GlobePanel() {
         renderer = new GlobeRenderer();
@@ -165,7 +165,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
     }
 
-    public double getLastFPS() {
+    public int getLastFPS() {
         return lastFPS;
     }
 
