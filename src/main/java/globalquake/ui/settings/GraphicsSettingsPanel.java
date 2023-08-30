@@ -52,6 +52,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
         Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
         Settings.antialiasing = chkBoxAntialiasing.isSelected();
+        Settings.fpsIdle = sliderFpsIdle.getValue();
     }
 
     @Override

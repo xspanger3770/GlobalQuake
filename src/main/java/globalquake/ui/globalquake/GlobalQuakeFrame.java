@@ -85,17 +85,14 @@ public class GlobalQuakeFrame extends JFrame {
 
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-		// Initial delay before the task starts
-		long initialDelay = 0;
-
 		// Schedule the task
-		scheduler.scheduleAtFixedRate(new Runnable() {
+		scheduler.schedule(new Runnable() {
 			@Override
 			public void run() {
 				mainPanel.repaint();
-				scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.SECONDS);
+				scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.MILLISECONDS);
 			}
-		}, initialDelay, 0, TimeUnit.MILLISECONDS);
+		}, 1, TimeUnit.SECONDS);
 	}
 
 	private JMenuBar createJMenuBar() {
