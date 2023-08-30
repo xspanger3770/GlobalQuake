@@ -10,10 +10,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -24,7 +23,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private double scroll = 0.45;
     private Point dragStart;
     private Point lastMouse;
-    
+
     private Date dragStartTime;
 
     private final LinkedList<Double> recentSpeeds = new LinkedList<>();
@@ -64,7 +63,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             public void mouseDragged(MouseEvent e) {
                 lastMouse = e.getPoint();
                 renderer.mouseMoved(e);
-                if(!interactionAllowed()){
+                if (!interactionAllowed()) {
                     return;
                 }
                 if (dragStart == null) {
@@ -78,7 +77,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 long timeElapsed = now.getTime() - dragStartTime.getTime();
 
                 // to prevent Infinity/NaN glitch
-                if(timeElapsed > 5) {
+                if (timeElapsed > 5) {
                     double instantaneousSpeed = deltaX / timeElapsed;
                     recentSpeeds.addLast(instantaneousSpeed);
                 }
@@ -121,7 +120,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(e.getButton() == MouseEvent.BUTTON1) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     handleClick(e.getX(), e.getY());
                 }
             }
@@ -180,18 +179,16 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     }
 
-    private double calculateSpin()
-    {
+    private double calculateSpin() {
         Date now = new Date();
         long timeElapsed = now.getTime() - dragStartTime.getTime();
 
         //If the user has been dragging for more than 300ms, don't spin
-        if(timeElapsed > 300)
-        {
+        if (timeElapsed > 300) {
             return 0;
         }
 
-        if(lastMouse == null || dragStart == null){
+        if (lastMouse == null || dragStart == null) {
             return 0;
         }
 
@@ -201,11 +198,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         spinDirection = deltaX < 0 ? 1 : -1;
 
         // Do not spin if the drag is very small
-        if(Math.abs(deltaX) < 25){
+        if (Math.abs(deltaX) < 25) {
             return 0;
         }
 
-        if(recentSpeeds.isEmpty()){
+        if (recentSpeeds.isEmpty()) {
             return 0;
         }
 
@@ -218,15 +215,14 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         // Clear the recent speeds queue
         recentSpeeds.clear();
-        
+
         //Spin less if the user is zoomed in
         double SPIN_DAMPENER = 2;
         return (Math.abs(averageSpeed)) * (scroll / SPIN_DAMPENER); //The division is a dampener.
     }
 
     private void addSpin(double speed) {
-        if(mouseDown)
-        {
+        if (mouseDown) {
             return;
         }
         spinSpeed += speed;
@@ -240,7 +236,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private void handleClick(int x, int y) {
         ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
-            for(RenderEntity<?> e: feature.getEntities()) {
+            for (RenderEntity<?> e : feature.getEntities()) {
                 Point2D centerCoords = feature.getCenterCoords(e);
                 if (centerCoords != null) {
                     Vector3D pos = new Vector3D(GlobeRenderer.getX_3D(centerCoords.x, centerCoords.y, 0),
@@ -280,7 +276,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         timer.schedule(new TimerTask() {
             public void run() {
                 try {
-                    if(spinSpeed == 0) {
+                    if (spinSpeed == 0) {
                         synchronized (spinLock) {
                             spinLock.wait(); //Wait for a spin to be added
                         }
@@ -289,9 +285,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     return;
                 }
 
-                if(!interactionAllowed()){return;}
+                if (!interactionAllowed()) {
+                    return;
+                }
 
-                if (spinSpeed == 0) {return;}
+                if (spinSpeed == 0) {
+                    return;
+                }
                 spinSpeed *= spinDeceleration;
                 if (Math.abs(spinSpeed) < 0.01 * scroll) { //Stop Spinning once number is small enough
                     spinSpeed = 0;

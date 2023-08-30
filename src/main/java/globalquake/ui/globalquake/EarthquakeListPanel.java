@@ -1,6 +1,5 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
@@ -120,7 +119,6 @@ public class EarthquakeListPanel extends JPanel {
             g.setColor(Color.WHITE);
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 3, y + 44);
 
-            str = "";
             if (level != null) {
                 str = level.getName();
             } else {

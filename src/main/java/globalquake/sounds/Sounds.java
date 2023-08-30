@@ -5,9 +5,6 @@ import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
-import globalquake.intensity.IntensityScale;
-import globalquake.intensity.IntensityScales;
-import globalquake.intensity.Level;
 import globalquake.intensity.ShindoIntensityScale;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
@@ -84,9 +81,11 @@ public class Sounds {
 		}
 	}
 
-	public static Clip nextLevelBeginsWith1(int i) {
-		return levelsNext[i];
-	}
+// --Commented out by Inspection START (30/08/2023, 6:38 pm):
+//	public static Clip nextLevelBeginsWith1(int i) {
+//		return levelsNext[i];
+//	}
+// --Commented out by Inspection STOP (30/08/2023, 6:38 pm)
 
 	public static void playSound(Clip clip) {
 		if(!Settings.enableSound || !soundsAvailable) {

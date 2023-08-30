@@ -1,7 +1,6 @@
 package globalquake.intensity;
 
 import java.awt.*;
-import java.util.Objects;
 
 public final class Level {
     private final String name;

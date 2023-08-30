@@ -39,9 +39,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
 
-        sliderFpsIdle.addChangeListener(changeEvent -> {
-            label.setText("FPS at idle: "+sliderFpsIdle.getValue());;
-        });
+        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
 
         add(label);
         add(sliderFpsIdle);
