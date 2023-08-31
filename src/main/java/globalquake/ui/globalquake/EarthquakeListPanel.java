@@ -99,16 +99,19 @@ public class EarthquakeListPanel extends JPanel {
             if (y > getHeight()) {
                 break;
             }
-            Color col = IntensityScales.getIntensityScale().getLevels().get(IntensityScales.getIntensityScale().getLevels().size() - 1).getColor();
+            Color col;
             Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
             if (level != null) {
                 col = level.getColor();
-            }
 
-            col = new Color(
-                    (int) (col.getRed() * IntensityScales.getIntensityScale().getDarkeningFactor()),
-                    (int) (col.getGreen() * IntensityScales.getIntensityScale().getDarkeningFactor()),
-                    (int) (col.getBlue() * IntensityScales.getIntensityScale().getDarkeningFactor()));
+
+                col = new Color(
+                        (int) (col.getRed() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                        (int) (col.getGreen() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                        (int) (col.getBlue() * IntensityScales.getIntensityScale().getDarkeningFactor()));
+            }else {
+                 col = new Color(150,150,150);
+            }
 
             Rectangle2D.Double rect = new Rectangle2D.Double(0, y, getWidth(), cell_height);
 

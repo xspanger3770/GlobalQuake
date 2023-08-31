@@ -258,7 +258,7 @@ public class GlobalQuakePanel extends GlobePanel {
         String str1 = "Estimated";
         g.drawString(str1, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str1)), baseHeight + 26);
 
-        String str3 = "";
+        String str3 = "-";
         if (level != null) {
             str3 = level.getName();
         }

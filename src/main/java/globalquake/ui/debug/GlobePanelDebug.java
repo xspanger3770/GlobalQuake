@@ -6,6 +6,7 @@ import globalquake.sounds.Sounds;
 import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
@@ -124,10 +125,12 @@ public class GlobePanelDebug extends JFrame {
 	private void createArchived() {
 		archivedQuakes = new ArrayList<>();
 		Random r = new Random();
-		for(double mag = 0.5; mag <= 11; mag += 0.5) {
+		Settings.oldEventsTimeFilterEnabled = false;
+		Settings.oldEventsMagnitudeFilterEnabled = false;
+		for(double mag = 0.5; mag <= 11; mag += 0.2) {
 			archivedQuakes.add(new ArchivedQuake(0, 0, 0, mag, r.nextLong() % System.currentTimeMillis()));
 		}
-		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
+		//archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}
 
 	protected void toggleList() {
