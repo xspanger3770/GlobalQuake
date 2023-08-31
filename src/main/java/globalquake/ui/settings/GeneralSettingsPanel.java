@@ -10,6 +10,8 @@ import java.awt.*;
 public class GeneralSettingsPanel extends SettingsPanel {
 	private final JCheckBox chkBoxAlertDialogs;
 	private JComboBox<IntensityScale> comboBoxScale;
+	private final JCheckBox chkBoxHomeLoc;
+
 
 	public GeneralSettingsPanel() {
 		setLayout(new GridLayout(3, 1));
@@ -42,8 +44,13 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		infoLocation.setEditable(false);
 		infoLocation.setBackground(homeLocationPanel.getBackground());
 
+		chkBoxHomeLoc = new JCheckBox("Display home location");
+		chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
+		add(chkBoxHomeLoc);
+
 		outsidePanel.add(homeLocationPanel, BorderLayout.NORTH);
 		outsidePanel.add(infoLocation, BorderLayout.CENTER);
+		outsidePanel.add(chkBoxHomeLoc, BorderLayout.SOUTH);
 
 		add(outsidePanel);
 
@@ -102,6 +109,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.homeLon = Double.valueOf(textFieldLon.getText());
 		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
+		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 	}
 
 	@Override

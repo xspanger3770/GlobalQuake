@@ -6,7 +6,6 @@ import javax.swing.border.EmptyBorder;
 public class GraphicsSettingsPanel extends SettingsPanel{
 
     private final JCheckBox chkBoxScheme;
-    private final JCheckBox chkBoxHomeLoc;
     private final JCheckBox chkBoxAntialiasing;
     private JSlider sliderFpsIdle;
 
@@ -19,10 +18,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
         add(chkBoxScheme);
-
-        chkBoxHomeLoc = new JCheckBox("Display home location");
-        chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
-        add(chkBoxHomeLoc);
 
         chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
         chkBoxAntialiasing.setSelected(Settings.antialiasing);
@@ -48,7 +43,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     @Override
     public void save() {
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
-        Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
         Settings.antialiasing = chkBoxAntialiasing.isSelected();
         Settings.fpsIdle = sliderFpsIdle.getValue();
     }
