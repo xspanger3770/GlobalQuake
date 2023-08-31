@@ -4,6 +4,7 @@ import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.ui.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,13 +39,13 @@ public class EarthquakeListPanel extends JPanel {
         addMouseWheelListener(e -> {
             boolean down = e.getWheelRotation() < 0;
             if (!down) {
-                scroll += 25;
+                scroll += e.getPreciseWheelRotation() * 30.0;
                 int maxScroll = archivedQuakes.size() * cell_height
                         - getHeight();
                 maxScroll = Math.max(0, maxScroll);
                 scroll = Math.min(scroll, maxScroll);
             } else {
-                scroll -= 25;
+                scroll += e.getPreciseWheelRotation() * 30.0;
                 scroll = Math.max(0, scroll);
             }
         });
@@ -86,6 +87,14 @@ public class EarthquakeListPanel extends JPanel {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         int i = 0;
         for (ArchivedQuake quake : archivedQuakes) {
+            if(Settings.oldEventsMagnitudeFilterEnabled && quake.getMag() < Settings.oldEventsMagnitudeFilter){
+                continue;
+            }
+
+            if(Settings.oldEventsTimeFilterEnabled && (System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L *Settings.oldEventsTimeFilter){
+                continue;
+            }
+
             int y = i * cell_height - scroll;
             if (y > getHeight()) {
                 break;
@@ -161,6 +170,19 @@ public class EarthquakeListPanel extends JPanel {
 
             i++;
         }
+
+        if(i == 0){
+            g.setFont(new Font("Calibri", Font.BOLD, 16));
+            g.setColor(Color.white);
+            String str = "No earthquakes archived";
+            g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, 22);
+        }
+
+        // workaround for max scroll
+        int maxScroll = i * cell_height
+                - getHeight();
+        maxScroll = Math.max(0, maxScroll);
+        scroll = Math.min(scroll, maxScroll);
     }
 
 }
