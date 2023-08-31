@@ -1,4 +1,4 @@
-package globalquake.geo;
+package globalquake.intensity;
 
 public class IntensityTable {
 

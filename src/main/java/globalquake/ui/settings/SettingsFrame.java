@@ -78,6 +78,7 @@ public class SettingsFrame extends JFrame{
 	private void addPanels() {
 		panels.add(new GeneralSettingsPanel());
 		panels.add(new PerformanceSettingsPanel());
+		panels.add(new GraphicsSettingsPanel());
 		panels.add(new HypocenterAnalysisSettingsPanel());
 
 		for (SettingsPanel panel : panels) {

@@ -1,5 +1,7 @@
 package globalquake.utils;
 
+import globalquake.ui.settings.Settings;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -8,7 +10,7 @@ import java.util.Objects;
 
 public class Scale {
 
-	public static final double RATIO_TRESHOLD = 50_000.0;
+	public static final double RATIO_THRESHOLD = 50_000.0;
 	public static final double EXPONENT = 0.25;
 
 	public static final boolean ENABLE_INTERPOLATION = true;
@@ -18,12 +20,21 @@ public class Scale {
 		pgaScale = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("scales/pgaScale3.png")));
 	}
 
-	public static Color getColorRatio(double ratio) {
+	public static Color getColorRatio(double ratio){
+		return Settings.useOldColorScheme ? getColorRatioOld(ratio) : getColorRatioNew(ratio);
+	}
+
+	public static Color getColorRatioOld(double ratio) {
+		int i = (int) (Math.log10(ratio) * 20.0);
+		return new Color(pgaScale.getRGB(0, Math.max(0, Math.min(pgaScale.getHeight() - 1, i))));
+	}
+
+	public static Color getColorRatioNew(double ratio) {
 		if(ratio < 1){
 			return new Color(pgaScale.getRGB(0, 0));
 		}
 
-		double pct = Math.pow(ratio - 1.0, EXPONENT) / Math.pow(RATIO_TRESHOLD, EXPONENT);
+		double pct = Math.pow(ratio - 1.0, EXPONENT) / Math.pow(RATIO_THRESHOLD, EXPONENT);
 
 		int i1 = (int)(pct * (pgaScale.getHeight() - 1));
 		int i2 = i1 + 1;

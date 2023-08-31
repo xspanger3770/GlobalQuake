@@ -17,18 +17,41 @@ public final class Settings {
 	public static Double homeLat;
 	public static Double homeLon;
 
-	public static final double pWaveInaccuracyTresholdDefault = 1000;
-	public static Double pWaveInaccuracyTreshold;
-	public static final double hypocenterCorrectTresholdDefault = 40;
-	public static Double hypocenterCorrectTreshold;
+	public static final double pWaveInaccuracyThresholdDefault = 1800;
+	public static Double pWaveInaccuracyThreshold;
+	public static final double hypocenterCorrectThresholdDefault = 50;
+	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
 	public static Double hypocenterDetectionResolution;
 
+	public static Boolean parallelHypocenterLocations;
+	public static final int minimumStationsForEEWDefault = 5;
+
+	public static Integer minimumStationsForEEW;
+
 	public static Boolean displayArchivedQuakes;
+
+	public static Boolean useOldColorScheme;
+
+	public static Boolean displayHomeLocation;
+
+	public static Boolean antialiasing;
+
+	public static Integer fpsIdle;
+
+	public static Integer intensityScaleIndex;
 	
 	public static final boolean reportsEnabled = false; // not available ATM
 	public static Boolean enableSound = true;
+	public static Boolean oldEventsTimeFilterEnabled;
+	public static Double oldEventsTimeFilter;
+	public static Boolean oldEventsMagnitudeFilterEnabled;
+	public static Double oldEventsMagnitudeFilter;
+
+	public static int changes = 0;
+
+	public static Double oldEventsOpacity;
 
 	static {
 		load();
@@ -48,14 +71,33 @@ public final class Settings {
 		displayArchivedQuakes = Boolean.valueOf((String) properties.getOrDefault("displayArchivedQuakes", "true"));
 		enableSound = Boolean.valueOf((String) properties.getOrDefault("enableSound", "true"));
 
-		pWaveInaccuracyTreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTresholdDefault)));
-		hypocenterCorrectTreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTresholdDefault)));
+		pWaveInaccuracyThreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault)));
+		hypocenterCorrectThreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault)));
 		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
+		minimumStationsForEEW = Integer.valueOf((String) properties.getOrDefault("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault)));
+
+		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
+		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
+		displayHomeLocation = Boolean.valueOf((String) properties.getOrDefault("displayHomeLocation", "true"));
+		antialiasing = Boolean.valueOf((String) properties.getOrDefault("antialiasing", "false"));
+		fpsIdle = Integer.valueOf((String) properties.getOrDefault("fpsIdle", "30"));
+
+		intensityScaleIndex = Integer.valueOf((String) properties.getOrDefault("intensityScaleIndex", "0"));
+
+		oldEventsTimeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsTimeFilterEnabled", "false"));
+		oldEventsTimeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsTimeFilter", "24.0"));
+
+		oldEventsMagnitudeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilterEnabled", "false"));
+		oldEventsMagnitudeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilter", "4.0"));
+
+		oldEventsOpacity = Double.valueOf((String) properties.getOrDefault("oldEventsOpacity", "100.0"));
+
 		save();
 	}
 	
 	
 	public static void save() {
+		changes++;
 		properties.setProperty("enableAlarmDialogs", String.valueOf(enableAlarmDialogs));
 		
 		properties.setProperty("homeLat", String.valueOf(homeLat));
@@ -63,9 +105,26 @@ public final class Settings {
 		properties.setProperty("displayArchivedQuakes", String.valueOf(displayArchivedQuakes));
 		properties.setProperty("enableSound", String.valueOf(enableSound));
 
-		properties.setProperty("pWaveInaccuracyTreshold", String.valueOf(pWaveInaccuracyTreshold));
-		properties.setProperty("hypocenterCorrectTreshold", String.valueOf(hypocenterCorrectTreshold));
+		properties.setProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThreshold));
+		properties.setProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThreshold));
 		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
+		properties.setProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEW));
+
+		properties.setProperty("useOldColorScheme", String.valueOf(useOldColorScheme));
+		properties.setProperty("parallelHypocenterLocations", String.valueOf(parallelHypocenterLocations));
+		properties.setProperty("displayHomeLocation", String.valueOf(displayHomeLocation));
+		properties.setProperty("antialiasing", String.valueOf(antialiasing));
+		properties.setProperty("fpsIdle", String.valueOf(fpsIdle));
+
+		properties.setProperty("intensityScaleIndex", String.valueOf(intensityScaleIndex));
+
+		properties.setProperty("oldEventsTimeFilterEnabled", String.valueOf(oldEventsTimeFilterEnabled));
+		properties.setProperty("oldEventsTimeFilter", String.valueOf(oldEventsTimeFilter));
+		properties.setProperty("oldEventsMagnitudeFilterEnabled", String.valueOf(oldEventsMagnitudeFilterEnabled));
+		properties.setProperty("oldEventsMagnitudeFilter", String.valueOf(oldEventsMagnitudeFilter));
+
+		properties.setProperty("oldEventsOpacity", String.valueOf(oldEventsOpacity));
+
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {
