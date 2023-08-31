@@ -16,36 +16,39 @@
 <img alt="SourceManager" title="SourceManager" src="https://i.imgur.com/T1tmMtN.png" style="width: 49%; height: auto;" />
 </div>
 
-## Description
+## Introduction
 
-GlobalQuake is an experimental Java application that can be used to monitor earthquakes world-wide in near real time
+GlobalQuake is an experimental Java application that can be used to monitor earthquakes world-wide in near real time.
 
-Enables selection of seismic stations from publicly available seismic networks - `fdsnws services` and the real time data is supplied from `seedlink servers`.\
-You can find the list of these providers here: [EarthquakeDataCenters](https://github.com/YacineBoussoufa/EarthquakeDataCenters)\
-The program then uses the data to detect earthquakes and visualize them on 3D global interactive map \
-It can also quickly estimate the earthquake magnitude using some empirical methods, but this only works for small and medium quakes up to magnitude 5-6
+It enables selection of seismic stations downloaded from publicly available seismic networks via `fdsnws services` supllied by real time data from publicly available `seedlink servers`.\
+The program uses this data to detect earthquakes and visualize them on an interactive 3D globe.\
+It can also, estimate the earthquake magnitude using some empirical methods, but at the moment it can only work for small and medium size earthquakes, up to magnitude 5 or 6.
 
-Project is in early development state and there is quite some room for improvement in many of the features
+> [!WARNING]<br>
+> Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes, as the displayed information can be inaccurate or completly wrong.
+> Please be also aware that playing some of the included alarm sounds in public areas can be considered in some countries a form of fearmongering and illegal.
+> GlobalQuake doesn't own any form of data, and the respective owners can stop sharing them via Seedlink Server and/or FDSNWS at any moment without notice.
 
-### What is GlobalQuake good at
+### What GlobalQuake is good at?
 
-* Easily select publicly available seismic stations you wish to monitor
-* Visualise detected earthquakes on 3D global interactive map
-* Quickly estimate small and moderate earthquake magnitude, location and depth
+* It can easily select publicly available seismic stations.
+* It can visualise detected earthquakes on a 3D global interactive map.
+* It can quickly estimate small and moderate earthquake's magnitude, location and depth.
 
-### What GlobalQuake struggles with currently
+### What GlobalQuake is struggling with?
 
-* Larger earthquakes (M6+) that often trigger false detections or show duplicated earthquakes
-* Multiple earthquakes from the same place in short time interval
-* Distant earthquakes - the further the earthquake is from the stations, the less accurate the calculated epicenter will be
+* Larger earthquakes (M6+) often trigger false detections or show duplicated earthquakes.
+* Unable to detect multiple earthquakes in the same epicenter in short period of time.
+* Calculation of distant earthquakes from a certain set of station is always less accurate than a local earthquake.
 
-## :warning: Disclaimer
+## System Requirements
 
-- Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes as the displayed information can sometimes be inaccurate
-- Please be aware that playing some of the included alarm sounds in public areas can be considered in some countries as a form of fearmongering/panic spreading
-- I do not control any of the seedlink servers included in GlobalQuake. They can stop working at any time without notice
+- The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage.
+- You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world.
+- Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations.
+- If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations.
 
-## Running GlobalQuake
+## Download
 
 * GlobalQuake comes as a standard executable JAR file. You can download the lastest version [here](https://github.com/xspanger3770/GlobalQuake/releases)
 * Make sure you have the latest version of Java installed. [Download Java](https://www.oracle.com/java/technologies/downloads/)
@@ -54,25 +57,21 @@ Project is in early development state and there is quite some room for improveme
 * You can also add `-Xms8G -Xmx8G` parameters and specify the maximum RAM allocation in gigabytes (replace the `8` with suitable value)
 * Experimental: by adding `-Dsun.java2d.opengl=True`, you can improve your FPS
 
-## System Requirements
-
-- The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage
-- You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world
-- Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations (in version 0.9.3)
-- If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations
-
 ## Contributing
 
 Any contributions, including feedback and suggestions are highly appreciated! See [Contributing guidelines](https://github.com/xspanger3770/GlobalQuake/blob/main/CONTRIBUTING.md)
 
 ## Project Licensing
 
-This project is released under the terms of the MIT License. However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses. The sound effects with the `LICENSE_J` designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the `LICENSE_K` designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/). It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.
+This project is released under the terms of the MIT License.\
+However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses.\
+The sound effects with the `LICENSE_J` designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the `LICENSE_K` designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/).\
+It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.
 
 ## Special thanks to
 
 ![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - Inspiration for the layout, intensity scale, sound alarms and more\
-![Philip Crotwell](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/127367?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [Philip Crotwell](https://github.com/crotwell/) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Great and easy to use libraries. GlobalQuake wouldn't be possible without these\
+![Philip Crotwell](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/127367?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [Philip Crotwell](https://github.com/crotwell/) ([seisFile](http://crotwell.github.io/seisFile/), [TauP](http://crotwell.github.io/TauP/)) - Great and easy to use libraries. GlobalQuake wouldn't be possible without these\
 ![Yacine Boussoufa](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/46266665?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [Yacine Boussoufa](https://github.com/YacineBoussoufa/) ([EarthquakeDataCenters](https://github.com/YacineBoussoufa/EarthquakeDataCenters)) - List of data providers for Seedlink and FDSNWS
 
 ### Contributors
