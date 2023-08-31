@@ -6,6 +6,7 @@ import globalquake.ui.database.EditStationSourceDialog;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 public class AddStationSourceAction extends AbstractAction {
 
@@ -18,6 +19,11 @@ public class AddStationSourceAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Add New Station Source");
+
+        ImageIcon addIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/add.png")));
+        Image image = addIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override

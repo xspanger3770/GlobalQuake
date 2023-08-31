@@ -6,9 +6,12 @@ import globalquake.exception.RuntimeApplicationException;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;
+
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UpdateStationSourceAction extends AbstractAction {
 
@@ -22,6 +25,11 @@ public class UpdateStationSourceAction extends AbstractAction {
         this.databaseManager = databaseManager;
 
         putValue(SHORT_DESCRIPTION, "Update Station Sources");
+
+        ImageIcon updateIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/update.png")));
+        Image image = updateIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override

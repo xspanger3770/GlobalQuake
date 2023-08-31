@@ -9,8 +9,7 @@ import globalquake.database.SeedlinkNetwork;
 import org.tinylog.Logger;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SeedlinkNetworksReader {
 
@@ -18,6 +17,30 @@ public class SeedlinkNetworksReader {
 	private Instant lastData;
 
     private long lastReceivedRecord;
+
+	public static void main(String[] args) throws Exception{
+		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
+		reader.select("AK", "D25K", "", "BHZ");
+		reader.startData();
+
+		SortedSet<DataRecord> set = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
+
+		while(reader.hasNext() && set.size() < 10){
+			SeedlinkPacket pack = reader.readPacket();
+			DataRecord dataRecord = pack.getMiniSeed();
+			System.out.println(pack.getMiniSeed().getStartTime()+" - "+pack.getMiniSeed().getLastSampleTime()+" x "+pack.getMiniSeed().getEndTime()+" @ "+pack.getMiniSeed().getSampleRate());
+			System.out.println(pack.getMiniSeed().getControlHeader().getSequenceNum());
+			if(!set.add(dataRecord)){
+				System.out.println("ERR ALREADY CONTAINS");
+			}
+		}
+
+		reader.close();
+		for(DataRecord dataRecord : set){
+			System.err.println(dataRecord.getStartTime()+" - "+dataRecord.getLastSampleTime()+" x "+dataRecord.getEndTime()+" @ "+dataRecord.getSampleRate());
+			System.err.println(dataRecord.oneLineSummary());
+		}
+	}
 
 	public void run() {
 		createCache();
@@ -45,19 +68,27 @@ public class SeedlinkNetworksReader {
 			@Override
 			public void run() {
 				int reconnectDelay = RECONNECT_DELAY;
-				while (true) {
+
+                while (true) {
 					SeedlinkReader reader = null;
 					try {
 						System.out.println("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+						reader.sendHello();
 
 						int connected = 0;
 
 						reconnectDelay = RECONNECT_DELAY;
+						boolean first = true;
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
                                 System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
+								if(!first) {
+									reader.sendCmd("DATA");
+								} else{
+									first = false;
+								}
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
 								connected++;
@@ -69,7 +100,8 @@ public class SeedlinkNetworksReader {
 							break;
 						}
 
-						reader.startData("", "");
+						reader.startData();
+
 						while (reader.hasNext()) {
 							SeedlinkPacket slp = reader.readPacket();
 							try {
@@ -88,6 +120,7 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
+
 						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
@@ -112,7 +145,12 @@ public class SeedlinkNetworksReader {
 		}
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
-		stationCache.get("%s %s".formatted(network, station)).addRecord(dr);
+		var globalStation = stationCache.get("%s %s".formatted(network, station));
+		if(globalStation == null){
+			Logger.warn("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
+		}else {
+			globalStation.addRecord(dr);
+		}
 	}
 
     public long getLastReceivedRecord() {

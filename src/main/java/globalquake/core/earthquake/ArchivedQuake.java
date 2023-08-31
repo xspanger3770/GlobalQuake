@@ -42,22 +42,25 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		copyEvents(earthquake);
 	}
 
+	public void updateRegion(){
+		regionUpdater.updateRegion();
+	}
+
 	private void copyEvents(Earthquake earthquake) {
 		if(earthquake.getCluster() == null){
 			return;
 		}
 		Hypocenter previousHypocenter = earthquake.getCluster().getPreviousHypocenter();
-		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null || previousHypocenter.getWrongEvents() == null) {
+		if (earthquake.getCluster().getAssignedEvents() == null || previousHypocenter == null) {
 			return;
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = previousHypocenter.getWrongEvents().size();
+		this.abandonedCount = previousHypocenter.getWrongEventsCount();
 		for (Event e : earthquake.getCluster().getAssignedEvents()) {
-			boolean aba = previousHypocenter.getWrongEvents().contains(e);
 			archivedEvents.add(
-					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), aba));
-			if (!aba && e.maxRatio > this.maxRatio) {
+					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), false));
+			if (e.maxRatio > this.maxRatio) {
 				this.maxRatio = e.getMaxRatio();
 			}
 		}
@@ -71,7 +74,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.origin = origin;
 		this.archivedEvents = new ArrayList<>();
 		regionUpdater = new RegionUpdater(this);
-		regionUpdater.updateRegion();
 	}
 
 	public double getDepth() {

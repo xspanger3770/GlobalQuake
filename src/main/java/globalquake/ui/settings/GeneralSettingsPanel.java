@@ -1,30 +1,103 @@
 package globalquake.ui.settings;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+
+import globalquake.intensity.IntensityScale;
+import globalquake.intensity.IntensityScales;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class GeneralSettingsPanel extends SettingsPanel {
+	private final JCheckBox chkBoxAlertDialogs;
+	private JComboBox<IntensityScale> comboBoxScale;
+	private final JCheckBox chkBoxHomeLoc;
+
+
 	public GeneralSettingsPanel() {
-		setLayout(null);
+		setLayout(new GridLayout(3, 1));
+
+		JPanel outsidePanel = new JPanel(new BorderLayout());
+		outsidePanel.setBorder(BorderFactory.createTitledBorder("Home location settings"));
+
+		JPanel homeLocationPanel = new JPanel();
+		homeLocationPanel.setLayout(new GridLayout(2,2));
 		
-		JLabel lblLat = new JLabel("Home Lat");
-		lblLat.setBounds(12, 12, 70, 15);
-		add(lblLat);
-		
-		JLabel lblLon = new JLabel("Home Lon");
-		lblLon.setBounds(12, 39, 70, 15);
-		add(lblLon);
-		
+		JLabel lblLat = new JLabel("Home Latitude: ");
+		JLabel lblLon = new JLabel("Home Longitude: ");
+
 		textFieldLat = new JTextField();
-		textFieldLat.setBounds(100, 10, 114, 19);
-		textFieldLat.setText(Settings.homeLat+"");
-		add(textFieldLat);
+		textFieldLat.setText("%s".formatted(Settings.homeLat));
 		textFieldLat.setColumns(10);
 		
 		textFieldLon = new JTextField();
-		textFieldLon.setBounds(100, 37, 114, 19);
-		textFieldLon.setText(Settings.homeLon+"");
-		add(textFieldLon);
+		textFieldLon.setText("%s".formatted(Settings.homeLon));
 		textFieldLon.setColumns(10);
+
+		homeLocationPanel.add(lblLat);
+		homeLocationPanel.add(textFieldLat);
+		homeLocationPanel.add(lblLon);
+		homeLocationPanel.add(textFieldLon);
+
+		JTextArea infoLocation = new JTextArea("Home location will be used for playing additional alarm \n sounds if an earthquake occurs nearby");
+		infoLocation.setBorder(new EmptyBorder(5,5,5,5));
+		infoLocation.setLineWrap(true);
+		infoLocation.setEditable(false);
+		infoLocation.setBackground(homeLocationPanel.getBackground());
+
+		chkBoxHomeLoc = new JCheckBox("Display home location");
+		chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
+		add(chkBoxHomeLoc);
+
+		outsidePanel.add(homeLocationPanel, BorderLayout.NORTH);
+		outsidePanel.add(infoLocation, BorderLayout.CENTER);
+		outsidePanel.add(chkBoxHomeLoc, BorderLayout.SOUTH);
+
+		add(outsidePanel);
+
+		JPanel alertsDialogPanel = new JPanel(new GridLayout(2, 1));
+		alertsDialogPanel.setBorder(BorderFactory.createTitledBorder("Alert dialogs settings"));
+
+		chkBoxAlertDialogs = new JCheckBox("Enable alert dialogs");
+		chkBoxAlertDialogs.setBounds(8, 8, 250, 23);
+		chkBoxAlertDialogs.setSelected(Settings.enableAlarmDialogs);
+
+		JTextArea textAreaDialogs = new JTextArea(
+                """
+                        Alert dialog will show if an earthquake occurs\s
+                         nearby your home location and will display P and S wave\s
+                         arrival time and estimated intensity (in Shindo)""");
+
+		textAreaDialogs.setBorder(new EmptyBorder(0,5,5,5));
+		textAreaDialogs.setLineWrap(true);
+		textAreaDialogs.setEditable(false);
+		textAreaDialogs.setBackground(homeLocationPanel.getBackground());
+
+		alertsDialogPanel.add(chkBoxAlertDialogs);
+		alertsDialogPanel.add(textAreaDialogs);
+
+		add(alertsDialogPanel);
+		add(createIntensitySettingsPanel());
+	}
+
+	private JPanel createIntensitySettingsPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
+
+		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES.toArray(new IntensityScale[0]));
+		comboBoxScale.setSelectedIndex(Settings.intensityScaleIndex);
+
+		JPanel div = new JPanel();
+		div.add(comboBoxScale);
+		panel.add(div, BorderLayout.CENTER);
+
+		JLabel lbl = new JLabel();
+		lbl.setFont(new Font("Calibri", Font.PLAIN, 13));
+		lbl.setText("Keep in mind that the displayed intensities are estimated, not measured");
+
+
+		panel.add(lbl, BorderLayout.SOUTH);
+
+		return panel;
 	}
 
 	private final JTextField textFieldLat;
@@ -34,6 +107,9 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	public void save() {
 		Settings.homeLat = Double.valueOf(textFieldLat.getText());
 		Settings.homeLon = Double.valueOf(textFieldLon.getText());
+		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
+		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
+		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 	}
 
 	@Override

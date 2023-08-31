@@ -3,6 +3,7 @@ package globalquake.ui.globe.feature;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.Monitorable;
 
 import java.awt.*;
@@ -15,6 +16,7 @@ public abstract class RenderFeature<E> {
     private final int renderElements;
     private int lastHash = -651684313; // random
     private RenderProperties lastProperties;
+    private int settingsChanges = 0;
 
     public abstract Collection<E> getElements();
 
@@ -70,17 +72,19 @@ public abstract class RenderFeature<E> {
 
     public final void process(GlobeRenderer renderer, RenderProperties renderProperties) {
         boolean entitiesUpdated = false;
-        if(needsUpdateEntities()) {
+        boolean settingsChanged = Settings.changes != settingsChanges;
+        settingsChanges = Settings.changes;
+        if(needsUpdateEntities() || settingsChanged) {
             entitiesUpdated = updateEntities();
         }
 
-        boolean propertiesChanged = propertiesChanged(renderProperties);
+        boolean propertiesChanged = propertiesChanged(renderProperties) || settingsChanged;
 
         boolean finalEntitiesUpdated = entitiesUpdated;
         getEntities().parallelStream().forEach(entity -> {
-            if(finalEntitiesUpdated || needsCreatePolygon(entity, propertiesChanged))
+            if(finalEntitiesUpdated || settingsChanged || needsCreatePolygon(entity, propertiesChanged))
                 createPolygon(renderer, entity, renderProperties);
-            if(finalEntitiesUpdated || needsProject(entity, propertiesChanged))
+            if(finalEntitiesUpdated || settingsChanged || needsProject(entity, propertiesChanged))
                 project(renderer, entity);
         });
     }

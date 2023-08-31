@@ -1,41 +1,53 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.station.NearbyStationDistanceInfo;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.sounds.Sounds;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import globalquake.core.station.AbstractStation;
-import globalquake.core.AlertManager;
-import globalquake.core.station.NearbyStationDistanceInfo;
-import globalquake.core.GlobalQuake;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.ui.settings.Settings;
-import globalquake.sounds.Sounds;
-import globalquake.geo.GeoUtils;
-import globalquake.sounds.SoundsInfo;
-import globalquake.geo.Level;
-import globalquake.geo.Shindo;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
+
+    private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
+
+    private final Lock clustersReadLock = clustersLock.readLock();
+    private final Lock clustersWriteLock = clustersLock.writeLock();
 
     private final List<Cluster> clusters;
     private int nextClusterId;
 
     public ClusterAnalysis() {
-        clusters = new CopyOnWriteArrayList<>();
+        clusters = new ArrayList<>();
         this.nextClusterId = 0;
+    }
+
+    public Lock getClustersReadLock() {
+        return clustersReadLock;
     }
 
     public void run() {
         if (GlobalQuake.instance.getEarthquakeAnalysis() == null) {
             return;
         }
-        expandExistingClusters();
-        createNewClusters();
-        updateClusters();
+
+        clustersWriteLock.lock();
+        try {
+            expandExistingClusters();
+            createNewClusters();
+            updateClusters();
+        }finally {
+            clustersWriteLock.unlock();
+        }
     }
 
     @SuppressWarnings({"unused"})
@@ -193,100 +205,11 @@ public class ClusterAnalysis {
             } else {
                 c.tick();
             }
-            sounds(c);
+
+            Sounds.determineSounds(c);
         }
 
         clusters.removeAll(toBeRemoved);
-    }
-
-    private void sounds(Cluster c) {
-        SoundsInfo info = c.soundsInfo;
-
-        if (!info.firstSound) {
-            Sounds.playSound(Sounds.weak);
-            info.firstSound = true;
-        }
-
-        int level = c.getActuallLevel();
-        if (level > info.maxLevel) {
-            if (level >= 1 && info.maxLevel < 1) {
-                Sounds.playSound(Sounds.shindo1);
-            }
-            if (level >= 2 && info.maxLevel < 2) {
-                Sounds.playSound(Sounds.shindo5);
-            }
-            if (level >= 3 && info.maxLevel < 3) {
-                Sounds.playSound(Sounds.warning);
-            }
-            info.maxLevel = level;
-        }
-        Earthquake quake = c.getEarthquake();
-
-        if (quake != null) {
-
-            boolean meets = AlertManager.meetsConditions(quake);
-            if (meets && !info.meets) {
-                Sounds.playSound(Sounds.eew);
-                info.meets = true;
-            }
-            double pga = GeoUtils.pgaFunctionGen1(c.getEarthquake().getMag(), c.getEarthquake().getDepth());
-            if (info.maxPGA < pga) {
-
-                info.maxPGA = pga;
-                if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
-                    Sounds.playSound(Sounds.eew_warning);
-                    info.warningPlayed = true;
-                }
-            }
-
-            double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
-                    Settings.homeLat, Settings.homeLon, 0.0);
-            double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
-                    Settings.homeLon);
-            double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
-
-            if (info.maxPGAHome < pgaHome) {
-                Level shindoLast = Shindo.getLevel(info.maxPGAHome);
-                Level shindoNow = Shindo.getLevel(pgaHome);
-                if (shindoLast != shindoNow && (shindoNow != null ? shindoNow.index() : 0) > 0) {
-                    Sounds.playSound(Sounds.nextLevelBeginsWith1(shindoNow.index() - 1));
-                }
-
-                if (pgaHome >= Shindo.ZERO.pga() && info.maxPGAHome < Shindo.ZERO.pga()) {
-                    Sounds.playSound(Sounds.felt);
-                }
-                info.maxPGAHome = pgaHome;
-            }
-
-            if (info.maxPGAHome >= Shindo.ZERO.pga()) {
-                double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
-
-                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
-                        TauPTravelTimeCalculator.toAngle(distGC)));
-                int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
-
-                int soundIndex = -1;
-
-                if (info.lastCountdown == -1) {
-                    soundIndex = Sounds.getLastCountdown(secondsS);
-                } else {
-                    int si = Sounds.getLastCountdown(secondsS);
-                    if (si < info.lastCountdown) {
-                        soundIndex = si;
-                    }
-                }
-
-                if (info.lastCountdown == 0) {
-                    info.lastCountdown = -999;
-                    Sounds.playSound(Sounds.dong);
-                }
-
-                if (soundIndex != -1) {
-                    Sounds.playSound(Sounds.countdowns[soundIndex]);
-                    info.lastCountdown = soundIndex;
-                }
-            }
-        }
     }
 
     private Cluster createCluster(ArrayList<Event> validEvents) {

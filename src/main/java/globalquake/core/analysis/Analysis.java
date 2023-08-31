@@ -54,12 +54,20 @@ public abstract class Analysis {
 	private void decode(DataRecord dataRecord) {
 		long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
 		long gap = lastRecord != 0 ? (time - lastRecord) : -1;
-		if (gap > getGapTreshold()) {
+		if (gap > getGapThreshold()) {
 			reset();
 		}
 		int[] data;
 		try {
+			if(!dataRecord.isDecompressable()){
+				Logger.warn("Not Decompressable!");
+				return;
+			}
 			data = dataRecord.decompress().getAsInt();
+			if(data == null){
+				Logger.warn("Decompressed array is null!");
+				return;
+			}
 			for (int v : data) {
 				nextSample(v, time);
 				time += (long) (1000 / getSampleRate());
@@ -73,7 +81,7 @@ public abstract class Analysis {
 	public abstract void nextSample(int v, long time);
 
 	@SuppressWarnings("SameReturnValue")
-	public abstract long getGapTreshold();
+	public abstract long getGapThreshold();
 
 	public void reset() {
 		station.reset();

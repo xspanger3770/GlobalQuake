@@ -15,6 +15,7 @@ import java.util.List;
 
 public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
+    private static final long HOURS = 1000 * 60 * 60L;
     private final List<ArchivedQuake> earthquakes;
 
     public FeatureArchivedEarthquake(List<ArchivedQuake> earthquakes) {
@@ -57,26 +58,40 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity) {
         RenderElement element = entity.getRenderElement(0);
-        element.getShape().reset();
-        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
+        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        if(Settings.oldEventsMagnitudeFilterEnabled) {
+            displayed &= (entity.getOriginal().getMag() >= Settings.oldEventsMagnitudeFilter);
+        }
+
+        if(Settings.oldEventsTimeFilterEnabled) {
+            displayed &= (System.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
+        }
+
+        if(displayed) {
+            element.getShape().reset();
+            element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
+        }else {
+            element.shouldDraw = false;
+        }
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
-        if (!entity.getRenderElement(0).shouldDraw || entity.getOriginal().isWrong() || !Settings.displayArchivedQuakes) {
+        if (!entity.getRenderElement(0).shouldDraw) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(getColor(entity.getOriginal()));
-        graphics.setStroke(new BasicStroke((float) (1 + entity.getOriginal().getMag() * 0.6)));
+        graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     private Color getColor(ArchivedQuake quake) {
         double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
-        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : Color.red)
-                : ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
+        int alpha = (int) Math.max(0, Math.min(255, Settings.oldEventsOpacity / 100.0 * 255.0));
+        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0, alpha) : new Color(255, 0, 0, alpha))
+                : ageInHRS < 24 ? new Color(255, 140, 0, alpha) : new Color(255,255,0, alpha);
     }
 
 

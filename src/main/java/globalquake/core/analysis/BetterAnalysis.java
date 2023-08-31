@@ -11,11 +11,11 @@ import java.util.List;
 
 public class BetterAnalysis extends Analysis {
 
-    public static final int GAP_TRESHOLD = 1000;
+    public static final int GAP_THRESHOLD = 1000;
     public static final int INIT_OFFSET_CALCULATION = 4000;
     public static final int INIT_AVERAGE_RATIO = 10 * 1000;
 
-    public static final double EVENT_TRESHOLD = 4.75;
+    public static final double EVENT_THRESHOLD = 4.75;
 
     private int initProgress = 0;
     private double initialOffsetSum;
@@ -111,8 +111,8 @@ public class BetterAnalysis extends Analysis {
             }
             double ratio = shortAverage / longAverage;
             if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty()) {
-                boolean cond1 = shortAverage / longAverage >= EVENT_TRESHOLD * 1.5 && time - eventTimer > 200;
-                boolean cond2 = shortAverage / longAverage >= EVENT_TRESHOLD * 2.25 && time - eventTimer > 100;
+                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.5 && time - eventTimer > 200;
+                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.25 && time - eventTimer > 100;
                 boolean condMain = shortAverage / thirdAverage > 2;
                 if (condMain && (cond1 || cond2)) {
                     ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
@@ -123,7 +123,7 @@ public class BetterAnalysis extends Analysis {
                     }
                 }
             }
-            if (shortAverage / longAverage < EVENT_TRESHOLD) {
+            if (shortAverage / longAverage < EVENT_THRESHOLD) {
                 eventTimer = time;
             }
 
@@ -195,8 +195,8 @@ public class BetterAnalysis extends Analysis {
     }
 
     @Override
-    public long getGapTreshold() {
-        return GAP_TRESHOLD;
+    public long getGapThreshold() {
+        return GAP_THRESHOLD;
     }
 
     @Override
@@ -231,7 +231,6 @@ public class BetterAnalysis extends Analysis {
                 long age = System.currentTimeMillis() - event.getEnd();
                 if (age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
-                    System.out.println("Removed old event at station " + getStation().getStationCode());
                 }
             }
         }

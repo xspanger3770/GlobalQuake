@@ -8,6 +8,7 @@ import globalquake.ui.database.table.FilterableTableModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 public class EditSeedlinkNetworkAction extends AbstractAction {
 
@@ -23,6 +24,11 @@ public class EditSeedlinkNetworkAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Edit Seedlink Network");
+
+        ImageIcon editIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/edit.png")));
+        Image image = editIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override

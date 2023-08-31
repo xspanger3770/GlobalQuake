@@ -11,6 +11,8 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.ui.settings.Settings;
+import globalquake.ui.stationselect.FeatureSelectableStation;
 import globalquake.utils.Scale;
 
 import java.awt.*;
@@ -20,6 +22,9 @@ import java.util.List;
 public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     private final List<AbstractStation> globalStations;
+
+    public static final double RATIO_YELLOW = 2000.0;
+    public static final double RATIO_RED = 20000.0;
 
     public FeatureGlobalStation(List<AbstractStation> globalStations) {
         super(2);
@@ -81,7 +86,8 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         RenderElement elementStationSquare = entity.getRenderElement(1);
 
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                Settings.antialiasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
@@ -96,14 +102,17 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
-            if (event.getMaxRatio() >= 64) {
+
+            if (event.getMaxRatio() >= RATIO_YELLOW) {
                 c = Color.yellow;
             }
-            if (event.getMaxRatio() >= 512) {
+
+            if (event.getMaxRatio() >= RATIO_RED) {
                 c = Color.red;
             }
 
             graphics.setColor(c);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics.draw(elementStationSquare.getShape());
 
         }
@@ -119,11 +128,19 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);
             String str = station.toString();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 10);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
             str = station.getSeedlinkNetwork() == null ? "NONE!" : station.getSeedlinkNetwork().getName();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 28);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
+
+            if(station.hasNoDisplayableData()){
+                str = "No data";
+                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+            } else {
+                long delay = station.getDelayMS();
+                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
+            }
         }
-        if (scroll < 0.4) {
+        if (scroll < 0.10 || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));

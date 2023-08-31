@@ -14,12 +14,12 @@ public class Event implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 2303478912602245970L;
-	public static final double[] RECALCULATE_P_WAVE_TRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
+	public static final double[] RECALCULATE_P_WAVE_THRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
-	public static final double[] SLOW_TRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
+	public static final double[] SLOW_THRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
 
 	private long start;// time when first detected
-	private long end;// time when end treshold reached
+	private long end;// time when end threshold reached
 	private long pWave;
 	private long sWave;
 	private long firstLogTime;// first log time (now 90 seconds before event start)
@@ -89,7 +89,7 @@ public class Event implements Serializable {
 
 	/**
 	 * 
-	 * @return time in milliseconds when the event treshold was reached
+	 * @return time in milliseconds when the event threshold was reached
 	 */
 	public long getStart() {
 		return start;
@@ -97,7 +97,7 @@ public class Event implements Serializable {
 
 	/**
 	 * 
-	 * @return time in millisecond when the event reached termination treshold
+	 * @return time in millisecond when the event reached termination threshold
 	 */
 	public long getEnd() {
 		return end;
@@ -140,6 +140,10 @@ public class Event implements Serializable {
 		return getAnalysis().getStation().getLongitude();
 	}
 
+	public double getElevationFromStation(){
+		return getAnalysis().getStation().getAlt();
+	}
+
 	public void log(Log currentLog) {
 		synchronized (logsLock) {
 			logs.add(0, currentLog);
@@ -151,9 +155,9 @@ public class Event implements Serializable {
 
 		boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
 		if (eligible) {
-			if (nextPWaveCalc <= RECALCULATE_P_WAVE_TRESHOLDS.length - 1) {
-				double treshold = nextPWaveCalc < 0 ? -1 : RECALCULATE_P_WAVE_TRESHOLDS[nextPWaveCalc];
-				if (maxRatio >= treshold) {
+			if (nextPWaveCalc <= RECALCULATE_P_WAVE_THRESHOLDS.length - 1) {
+				double threshold = nextPWaveCalc < 0 ? -1 : RECALCULATE_P_WAVE_THRESHOLDS[nextPWaveCalc];
+				if (maxRatio >= threshold) {
 					nextPWaveCalc++;
 					findPWaveMethod1();
 				}
@@ -206,20 +210,20 @@ public class Event implements Serializable {
 		double slow15Pct = slows.get((int) ((slows.size() - 1) * 0.175));
 
 		double mul = SPECIAL_PERCENTILE[strenghtLevel] * 1.1;
-		double specialTreshold = maxSpecial * mul + (1 - mul) * minSpecial;
+		double specialThreshold = maxSpecial * mul + (1 - mul) * minSpecial;
 
-		double slowTresholdMultiplier = SLOW_TRESHOLD_MULTIPLIERS[strenghtLevel];
+		double slowThresholdMultiplier = SLOW_THRESHOLD_MULTIPLIERS[strenghtLevel];
 
-		// double slowTreshold = (0.2 * slowRatioAtTheBeginning + 0.8 * slow15Pct) *
-		// slowTresholdMultiplier;
+		// double slowThreshold = (0.2 * slowRatioAtTheBeginning + 0.8 * slow15Pct) *
+		// slowThresholdMultiplier;
 
 		// DEPRECATED, again
 		long pWave = -1;
 		for (Log l : logs) {
 			long time = l.getTime();
-			// l.getMediumRatio() <= slowTreshold;
-			boolean ratioOK = l.getRatio() <= slow15Pct * (slowTresholdMultiplier * 1.25);
-			boolean specialOK = l.getSpecialRatio() <= specialTreshold;
+			// l.getMediumRatio() <= slowThreshold;
+			boolean ratioOK = l.getRatio() <= slow15Pct * (slowThresholdMultiplier * 1.25);
+			boolean specialOK = l.getSpecialRatio() <= specialThreshold;
 			if (time >= lookBack && time <= getStart()) {
                 if (ratioOK && specialOK) {
                     pWave = time;

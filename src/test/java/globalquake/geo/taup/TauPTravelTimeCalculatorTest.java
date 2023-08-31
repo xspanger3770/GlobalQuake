@@ -57,4 +57,16 @@ public class TauPTravelTimeCalculatorTest {
         }
     }
 
+    @Test
+    public void testNoCrash() throws Exception{
+        TauPTravelTimeCalculator.init();
+
+        for(double depth = -20; depth <= 1000; depth += 0.04){
+            for(double ang = -20; ang <= 200; ang += 0.04){
+                TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, ang);
+                TauPTravelTimeCalculator.getPWaveTravelTime(depth, ang);
+            }
+        }
+    }
+
 }

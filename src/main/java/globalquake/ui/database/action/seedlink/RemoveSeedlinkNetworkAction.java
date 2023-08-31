@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RemoveSeedlinkNetworkAction extends AbstractAction {
 
@@ -24,6 +25,11 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
         this.databaseManager = databaseManager;
 
         putValue(SHORT_DESCRIPTION, "Remove Seedlink Network");
+
+        ImageIcon removeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/remove.png")));
+        Image image = removeIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override

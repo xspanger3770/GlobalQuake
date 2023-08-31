@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.database.StationDatabaseManager;
 import globalquake.database.StationSource;
 import globalquake.exception.ApplicationErrorHandler;
+import globalquake.exception.RuntimeApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;
@@ -18,7 +19,7 @@ public class Main {
 
     private static ApplicationErrorHandler errorHandler;
 
-    public static final String version = "0.9.1";
+    public static final String version = "0.9.5";
     public static final String fullName = "GlobalQuake " + version;
 
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
@@ -64,30 +65,40 @@ public class Main {
         databaseMonitorFrame.getMainProgressBar().setValue(0);
         Regions.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (1 / 6.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) (1 / 7.0 * 100.0));
         Scale.load();
         databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (2 / 6.0 * 100.0));
-        Sounds.load();
+        databaseMonitorFrame.getMainProgressBar().setValue((int) (2 / 7.0 * 100.0));
+        try{
+            //Sound may fail to load for a variety of reasons. If it does, this method disables sound.
+            Sounds.load();
+        } catch (Exception e){
+            RuntimeApplicationException error = new RuntimeApplicationException("Failed to load sounds. Sound will be disabled", e);
+            getErrorHandler().handleWarning(error);
+        }
         databaseMonitorFrame.getMainProgressBar().setString("Loading travel table...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (3 / 6.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) (3 / 7.0 * 100.0));
         TauPTravelTimeCalculator.init();
         databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (4 / 6.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) (4 / 7.0 * 100.0));
         databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
                     databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
-                    databaseMonitorFrame.getMainProgressBar().setValue((int) (5 / 6.0 * 100.0));
+                    databaseMonitorFrame.getMainProgressBar().setValue((int) (5 / 7.0 * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
-                        databaseMonitorFrame.getMainProgressBar().setString("Done");
-                        databaseMonitorFrame.getMainProgressBar().setValue(100);
+                        databaseMonitorFrame.getMainProgressBar().setString("Saving...");
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) (6 / 7.0 * 100.0));
+
                         try {
                             databaseManager.save();
                         } catch (FatalIOException e) {
                             getErrorHandler().handleException(new RuntimeException(e));
                         }
                         databaseMonitorFrame.initDone();
+
+                        databaseMonitorFrame.getMainProgressBar().setString("Done");
+                        databaseMonitorFrame.getMainProgressBar().setValue(100);
                     });
                 });
     }

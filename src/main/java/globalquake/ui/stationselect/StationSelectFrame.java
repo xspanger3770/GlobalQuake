@@ -56,7 +56,9 @@ public class StationSelectFrame extends JFrame {
         JToolBar toolBar = new JToolBar("Tools");
 
         selectButton = new JToggleButton("Select Region");
+        selectButton.setToolTipText("Select All Available Stations in Region");
         deselectButton = new JToggleButton("Deselect Region");
+        deselectButton.setToolTipText("Deselect All Available Stations in Region");
 
         selectButton.addActionListener(new AbstractAction() {
             @Override

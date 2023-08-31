@@ -4,7 +4,7 @@ package globalquake.database;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class Station implements Serializable {
@@ -20,7 +20,7 @@ public class Station implements Serializable {
 
     private final String stationCode;
     private final String stationSite;
-    private final Collection<Channel> channels;
+    private final List<Channel> channels;
     private final Network network;
     private Channel selectedChannel = null;
 
@@ -38,7 +38,7 @@ public class Station implements Serializable {
         return network;
     }
 
-    public Collection<Channel> getChannels() {
+    public List<Channel> getChannels() {
         return channels;
     }
 
@@ -80,12 +80,12 @@ public class Station implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Station station = (Station) o;
-        return Double.compare(lat, station.lat) == 0 && Double.compare(lon, station.lon) == 0 && Double.compare(alt, station.alt) == 0 && Objects.equals(stationCode, station.stationCode) && Objects.equals(stationSite, station.stationSite);
+        return getChannels().equals(station.getChannels()) && Double.compare(lat, station.lat) == 0 && Double.compare(lon, station.lon) == 0 && Double.compare(alt, station.alt) == 0 && Objects.equals(stationCode, station.stationCode) && Objects.equals(stationSite, station.stationSite);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lat, lon, alt, stationCode, stationSite);
+        return Objects.hash(lat, lon, alt, stationCode, stationSite, channels);
     }
 
     public boolean hasAvailableChannel() {
@@ -104,12 +104,16 @@ public class Station implements Serializable {
     }
 
     public void selectBestAvailableChannel() {
+        if (!channels.contains(selectedChannel) || (selectedChannel != null && !selectedChannel.isAvailable())) {
+            selectedChannel = null;
+        }
+
         if(selectedChannel != null){
             return;
         }
 
         for(Channel channel : getChannels()){
-            if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() > selectedChannel.getSampleRate())) {
+            if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() < selectedChannel.getSampleRate())) {
                 selectedChannel = channel;
             }
         }
