@@ -1,13 +1,13 @@
-<!--<p align="center">
-  <img width="128" align="center" src="...">
-</p>-->
 <h1 align="center">
   GlobalQuake
 </h1>
 
-> [!NOTE]<br>
-> GlobalQuake 0.9.4 has just been released!
-> Read about the new features in the [releases section](https://github.com/xspanger3770/GlobalQuake/releases)
+<!--<p align="center">
+  <img src="" alt="GlobalQuake icon" title="GlobalQuake" />
+</p>-->
+<p align="center">
+  <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <!--<a href="">--><img src="https://img.shields.io/badge/discord-Coming%20Soon...-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
+</p>
 
 ![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
 
@@ -72,4 +72,11 @@ This project is released under the terms of the MIT License. However, please not
 ## Special thanks to
 
 ![JQuake](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26931126?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [François Le Neindre](https://github.com/fleneindre) ([JQuake](https://jquake.net/en/)) - Inspiration for the layout, intensity scale, sound alarms and more\
-![Philip Crotwell](https://github.com/crotwell) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Great and easy to use libraries. GlobalQuake wouldn't be possible without these
+![Philip Crotwell](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/127367?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [Philip Crotwell](https://github.com/crotwell/) ([seisFile](https://github.com/crotwell/seisFile), [TauP](https://github.com/crotwell/TauP)) - Great and easy to use libraries. GlobalQuake wouldn't be possible without these\
+![Yacine Boussoufa](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/46266665?v=4&h=20&w=20&fit=cover&mask=circle&maxage=7d) [Yacine Boussoufa](https://github.com/YacineBoussoufa/) ([EarthquakeDataCenters](https://github.com/YacineBoussoufa/EarthquakeDataCenters)) - List of data providers for Seedlink and FDSNWS
+
+### Contributors
+
+<a href="https://github.com/xspanger3770/GlobalQuake/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=xspanger3770/GlobalQuake" />
+</a>
