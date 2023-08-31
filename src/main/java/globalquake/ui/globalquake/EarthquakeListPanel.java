@@ -44,11 +44,7 @@ public class EarthquakeListPanel extends JPanel {
                 return false;
             }
 
-            if (Settings.oldEventsTimeFilterEnabled && (System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter) {
-                return false;
-            }
-
-            return true;
+            return !Settings.oldEventsTimeFilterEnabled || !((System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
         }).collect(Collectors.toList());
     }
 
