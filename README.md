@@ -25,8 +25,8 @@ The program uses this data to detect earthquakes and visualize them on an intera
 It can also, estimate the earthquake magnitude using some empirical methods, but at the moment it can only work for small and medium size earthquakes, up to magnitude 5 or 6.
 
 > [!WARNING]<br>
-> Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes, as the displayed information can be inaccurate or completly wrong.
-> Please be also aware that playing some of the included alarm sounds in public areas can be considered in some countries a form of fearmongering and illegal.
+> Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes, as the displayed information can be inaccurate or completly wrong.\
+> Please be also aware that playing some of the included alarm sounds in public areas can be considered in some countries a form of fearmongering and illegal.\
 > GlobalQuake doesn't own any form of data, and the respective owners can stop sharing them via Seedlink Server and/or FDSNWS at any moment without notice.
 
 ### What GlobalQuake is good at?
@@ -65,7 +65,7 @@ Any contributions, including feedback and suggestions are highly appreciated! Se
 
 This project is released under the terms of the MIT License.\
 However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses.\
-The sound effects with the `LICENSE_J` designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the `LICENSE_K` designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/).\
+The sound effects with the [`LICENSE_J`](https://github.com/xspanger3770/GlobalQuake/blob/main/LICENSE_J) designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the [`LICENSE_K`](https://github.com/xspanger3770/GlobalQuake/blob/main/LICENSE_K) designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/).\
 It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.
 
 ## Special thanks to
