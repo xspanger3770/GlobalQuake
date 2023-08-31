@@ -26,7 +26,7 @@ public final class Settings {
 	public static Double hypocenterDetectionResolution;
 
 	public static Boolean parallelHypocenterLocations;
-	public static int minimumStationsForEEWDefault = 5;
+	public static final int minimumStationsForEEWDefault = 5;
 
 	public static Integer minimumStationsForEEW;
 
@@ -51,7 +51,6 @@ public final class Settings {
 
 	public static int changes = 0;
 
-	// TODO
 	public static Double oldEventsOpacity;
 
 	static {

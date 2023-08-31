@@ -10,6 +10,7 @@ public interface IntensityScale {
     List<Level> getLevels();
 
     String getNameShort();
+    @SuppressWarnings("unused")
     String getNameLong();
 
     double getDarkeningFactor();

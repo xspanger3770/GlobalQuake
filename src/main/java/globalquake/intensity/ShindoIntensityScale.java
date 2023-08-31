@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ShindoIntensityScale implements IntensityScale{
 
 	public static final Level ICHI;

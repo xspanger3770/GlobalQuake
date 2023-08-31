@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class EarthquakeListPanel extends JPanel {
-    private int scroll = 0;
+    private double scroll = 0;
     protected int mouseY = -999;
 
     private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
@@ -54,7 +54,7 @@ public class EarthquakeListPanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 int y = e.getY();
-                int i = (y + scroll) / cell_height;
+                int i = (int) ((y + scroll) / cell_height);
                 if (archivedQuakes == null || i < 0 || i >= archivedQuakes.size()) {
                     return;
                 }
@@ -95,7 +95,7 @@ public class EarthquakeListPanel extends JPanel {
                 continue;
             }
 
-            int y = i * cell_height - scroll;
+            int y = (int) (i * cell_height - scroll);
             if (y > getHeight()) {
                 break;
             }
