@@ -45,7 +45,14 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         toggleButton.setToolTipText("Toggle Toolbar");
         toggleButton.setBackground(Color.GRAY);
 
-        stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager());
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager()){
+            @Override
+            public void paint(Graphics gr) {
+                super.paint(gr);
+                centerPanel.repaint();
+            }
+        };
 
         setPreferredSize(new Dimension(1100, 800));
 
@@ -71,7 +78,6 @@ public class StationSelectFrame extends JFrame implements ActionListener {
                 }
             }
         });
-        JPanel centerPanel = new JPanel(new GridBagLayout());
 
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -100,10 +106,6 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         setResizable(true);
         setTitle("Select Stations");
 
-        javax.swing.Timer timer = new javax.swing.Timer(16, actionEvent -> {
-            centerPanel.repaint();
-        });
-        timer.start();
     }
 
     private JToolBar createToolbar() {
