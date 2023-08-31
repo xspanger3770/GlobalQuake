@@ -119,13 +119,17 @@ public class EarthquakeListPanel extends JPanel {
 
         goUpRectangle = new Rectangle2D.Double(getWidth() / 2.0 - 30, 0, 60, 26);
         Graphics2D g = (Graphics2D) gr;
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         int i = 0;
         if(getFiltered() != null) {
             for (ArchivedQuake quake : getFiltered()) {
                 int y = (int) (i * cell_height - scroll);
                 if (y > getHeight()) {
                     break;
+                }
+                if(y < -cell_height){
+                    i++;
+                    continue;
                 }
                 Color col;
                 Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));

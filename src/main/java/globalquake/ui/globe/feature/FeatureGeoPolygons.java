@@ -75,6 +75,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
         if(!element.shouldDraw){
             return;
         }
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         graphics.setColor(landColor);
         graphics.fill(element.getShape());
         graphics.setColor(borderColor);
