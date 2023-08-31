@@ -112,6 +112,11 @@ public class EarthquakeListPanel extends JPanel {
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
+
+        if(getWidth() <= 60){
+            return;
+        }
+
         goUpRectangle = new Rectangle2D.Double(getWidth() / 2.0 - 30, 0, 60, 26);
         Graphics2D g = (Graphics2D) gr;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
