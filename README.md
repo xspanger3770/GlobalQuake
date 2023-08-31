@@ -9,7 +9,8 @@
   <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <a href="https://discord.gg/9SQHtkKcy"><img src="https://img.shields.io/badge/discord-Join Now-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
 </p>
 
-![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
+![GlobalQuake_0.9.5](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a2dc2ed7-9c28-47ab-aaa7-f76318d22a1e)
+
 
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
 <img alt="StationManager" title="StationManager" src="https://github.com/xspanger3770/GlobalQuake/assets/100421968/a37319ec-2132-426a-b095-2e6a9e064322" style="width: 49%; height: auto;" />
