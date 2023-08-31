@@ -233,14 +233,20 @@ public class GlobalQuakePanel extends GlobePanel {
     private static void drawIntensityBox(Graphics2D g, Earthquake quake, int baseHeight) {
         Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
 
+        String maxInt = "Maximum Intensity";
+
         g.setFont(new Font("Calibri", Font.BOLD, 10));
-        int _ww = g.getFontMetrics().stringWidth("Max Intensity") + 6;
-        Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 95);
+        int _ww = g.getFontMetrics().stringWidth(maxInt) + 6;
+        Rectangle2D.Double rectShindo = new Rectangle2D.Double(0, baseHeight, _ww, 105);
         g.setStroke(new BasicStroke(1f));
         Color col = neutralColor;
 
         if (level != null) {
             col = level.getColor();
+            col = new Color(
+                    (int) (col.getRed() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                    (int) (col.getGreen() * IntensityScales.getIntensityScale().getDarkeningFactor()),
+                    (int) (col.getBlue() * IntensityScales.getIntensityScale().getDarkeningFactor()));
         }
 
         g.setColor(col);
@@ -248,7 +254,9 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setColor(Color.white);
         g.setFont(new Font("Calibri", Font.BOLD, 10));
-        g.drawString("Max Intensity", 2, baseHeight + 12);
+        g.drawString(maxInt, 2, baseHeight + 12);
+        String str1 = "Estimated";
+        g.drawString(str1, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str1)), baseHeight + 26);
 
         String str3 = "";
         if (level != null) {
@@ -256,17 +264,22 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         g.setColor(Color.white);
-        g.setFont(new Font("Arial", Font.PLAIN, 64));
-        g.drawString(str3, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3)), baseHeight + 75);
+        g.setFont(new Font("Arial", Font.PLAIN, 56));
+        int x3 = (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3));
+        g.drawString(str3, x3, baseHeight + 80);
 
         if(level != null && level.getSuffix() != null) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", Font.PLAIN, 36));
-            g.drawString(level.getSuffix(), 48, baseHeight + 50);
+            g.drawString(level.getSuffix(), x3 + 16, baseHeight + 50);
         }
 
+        g.setColor(Color.white);
+        g.setFont(new Font("Calibri", Font.BOLD, 11));
+        String str = IntensityScales.getIntensityScale().getNameShort();
+        g.drawString(str, (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str)), baseHeight + 100);
 
-        drawMags(g, quake, baseHeight);
+        drawMags(g, quake, baseHeight + 10);
     }
 
     private static void drawMags(Graphics2D g, Earthquake quake, int baseHeight) {

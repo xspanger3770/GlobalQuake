@@ -1,14 +1,18 @@
 package globalquake.ui.settings;
 
+import globalquake.intensity.IntensityScale;
+import globalquake.intensity.IntensityScales;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private final JCheckBox chkBoxAlertDialogs;
+	private JComboBox<IntensityScale> comboBoxScale;
 
 	public GeneralSettingsPanel() {
-		setLayout(new GridLayout(2, 1));
+		setLayout(new GridLayout(3, 1));
 
 		JPanel outsidePanel = new JPanel(new BorderLayout());
 		outsidePanel.setBorder(BorderFactory.createTitledBorder("Home location settings"));
@@ -65,6 +69,28 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		alertsDialogPanel.add(textAreaDialogs);
 
 		add(alertsDialogPanel);
+		add(createIntensitySettingsPanel());
+	}
+
+	private JPanel createIntensitySettingsPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
+
+		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES.toArray(new IntensityScale[0]));
+		comboBoxScale.setSelectedIndex(Settings.intensityScaleIndex);
+
+		JPanel div = new JPanel();
+		div.add(comboBoxScale);
+		panel.add(div, BorderLayout.CENTER);
+
+		JLabel lbl = new JLabel();
+		lbl.setFont(new Font("Calibri", Font.PLAIN, 13));
+		lbl.setText("Keep in mind that the displayed intensities are estimated, not measured");
+
+
+		panel.add(lbl, BorderLayout.SOUTH);
+
+		return panel;
 	}
 
 	private final JTextField textFieldLat;
@@ -75,6 +101,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.homeLat = Double.valueOf(textFieldLat.getText());
 		Settings.homeLon = Double.valueOf(textFieldLon.getText());
 		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
+		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 	}
 
 	@Override

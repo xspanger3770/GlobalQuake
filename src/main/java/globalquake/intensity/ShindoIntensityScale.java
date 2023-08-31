@@ -38,8 +38,22 @@ public class ShindoIntensityScale implements IntensityScale{
 	}
 
 	@Override
+	public String getNameShort() {
+		return "Shindo";
+	}
+
+	@Override
+	public String getNameLong() {
+		return "Shindo intensity scale";
+	}
+
+	@Override
 	public double getDarkeningFactor() {
 		return 0.9;
 	}
 
+	@Override
+	public String toString() {
+		return getNameLong();
+	}
 }

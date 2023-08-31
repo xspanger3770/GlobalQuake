@@ -9,18 +9,45 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
     private JSlider sliderPWaveInaccuracy;
     private JSlider sliderCorrectness;
+    private JSlider sliderMinStations;
 
     public HypocenterAnalysisSettingsPanel() {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(0, 350));
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
+        contentPanel.add(createMinStationsSetting());
         contentPanel.add(createSettingPWave());
         contentPanel.add(createSettingCorrectness());
 
-        add(new JScrollPane(contentPanel), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setPreferredSize(new Dimension(300, 300));
+
+        javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+
+        add(scrollPane);
+    }
+
+    private Component createMinStationsSetting() {
+        sliderMinStations = createSettingsSlider(4, 16, 1, 1);
+
+        JLabel label = new JLabel();
+
+        ChangeListener upd = changeEvent -> label.setText("Minimum number of stations: %d".formatted(sliderMinStations.getValue()));
+
+        sliderMinStations.addChangeListener(upd);
+        sliderMinStations.setValue(Settings.minimumStationsForEEW);
+
+        upd.stateChanged(null);
+
+        return createCoolLayout(sliderMinStations, label, "%s".formatted(Settings.minimumStationsForEEWDefault),
+                """
+                        Here you can set the minimum number of stations that need to pick\s
+                        up the earthquake for the EEW to be issued.\s
+                        Increasing the number can greatly reduce the number of false alarms,\s
+                        but may also cause EEW's to not appear in areas with less stations.
+                        """);
     }
 
     public static Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
@@ -113,6 +140,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
     public void save() {
         Settings.pWaveInaccuracyThreshold = (double) sliderPWaveInaccuracy.getValue();
         Settings.hypocenterCorrectThreshold = (double) sliderCorrectness.getValue();
+        Settings.minimumStationsForEEW = sliderMinStations.getValue();
     }
 
     @Override

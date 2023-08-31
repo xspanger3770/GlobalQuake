@@ -9,6 +9,9 @@ public interface IntensityScale {
      */
     List<Level> getLevels();
 
+    String getNameShort();
+    String getNameLong();
+
     double getDarkeningFactor();
 
     default Level getLevel(double pga){
@@ -20,4 +23,5 @@ public interface IntensityScale {
 
         return null;
     }
+
 }

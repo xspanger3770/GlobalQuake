@@ -140,7 +140,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
             }
         }
-        if (scroll < 0.10 || mouseNearby) {
+        if (scroll < 0.10 || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));

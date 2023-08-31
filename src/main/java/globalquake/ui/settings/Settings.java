@@ -26,6 +26,9 @@ public final class Settings {
 	public static Double hypocenterDetectionResolution;
 
 	public static Boolean parallelHypocenterLocations;
+	public static int minimumStationsForEEWDefault = 5;
+
+	public static Integer minimumStationsForEEW;
 
 	public static Boolean displayArchivedQuakes;
 
@@ -36,6 +39,8 @@ public final class Settings {
 	public static Boolean antialiasing;
 
 	public static Integer fpsIdle;
+
+	public static Integer intensityScaleIndex;
 	
 	public static final boolean reportsEnabled = false; // not available ATM
 	public static Boolean enableSound = true;
@@ -61,12 +66,15 @@ public final class Settings {
 		pWaveInaccuracyThreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault)));
 		hypocenterCorrectThreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault)));
 		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
+		minimumStationsForEEW = Integer.valueOf((String) properties.getOrDefault("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault)));
 
 		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
 		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
 		displayHomeLocation = Boolean.valueOf((String) properties.getOrDefault("displayHomeLocation", "true"));
 		antialiasing = Boolean.valueOf((String) properties.getOrDefault("antialiasing", "false"));
 		fpsIdle = Integer.valueOf((String) properties.getOrDefault("fpsIdle", "30"));
+
+		intensityScaleIndex = Integer.valueOf((String) properties.getOrDefault("intensityScaleIndex", "0"));
 
 		save();
 	}
@@ -83,12 +91,15 @@ public final class Settings {
 		properties.setProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThreshold));
 		properties.setProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThreshold));
 		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
+		properties.setProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEW));
 
 		properties.setProperty("useOldColorScheme", String.valueOf(useOldColorScheme));
 		properties.setProperty("parallelHypocenterLocations", String.valueOf(parallelHypocenterLocations));
 		properties.setProperty("displayHomeLocation", String.valueOf(displayHomeLocation));
 		properties.setProperty("antialiasing", String.valueOf(antialiasing));
 		properties.setProperty("fpsIdle", String.valueOf(fpsIdle));
+
+		properties.setProperty("intensityScaleIndex", String.valueOf(intensityScaleIndex));
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {

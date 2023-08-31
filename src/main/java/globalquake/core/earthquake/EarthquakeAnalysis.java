@@ -14,7 +14,6 @@ import java.util.*;
 
 public class EarthquakeAnalysis {
 
-    private static final int MIN_EVENTS = 5;
     public static final double MIN_RATIO = 16.0;
 
     public static final int TARGET_EVENTS = 30;
@@ -83,8 +82,10 @@ public class EarthquakeAnalysis {
             pickedEvents.remove(0);
         }
 
+        HypocenterFinderSettings finderSettings = createSettings();
+
         // if in the end there is less than N events, abort
-        if (pickedEvents.size() < MIN_EVENTS) {
+        if (pickedEvents.size() < finderSettings.minStations()) {
             return;
         }
 
@@ -99,7 +100,6 @@ public class EarthquakeAnalysis {
             cluster.setSelected(selectedEvents);
         }
 
-        HypocenterFinderSettings finderSettings = createSettings();
 
         // There has to be at least some difference in the picked pWave times
         if (!checkDeltaP(selectedEvents, finderSettings)) {
@@ -111,7 +111,8 @@ public class EarthquakeAnalysis {
     }
 
     public static HypocenterFinderSettings createSettings() {
-        return new HypocenterFinderSettings(Settings.pWaveInaccuracyThreshold, Settings.hypocenterCorrectThreshold, Settings.hypocenterDetectionResolution);
+        return new HypocenterFinderSettings(Settings.pWaveInaccuracyThreshold, Settings.hypocenterCorrectThreshold,
+                Settings.hypocenterDetectionResolution, Settings.minimumStationsForEEW);
     }
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {

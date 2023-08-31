@@ -53,8 +53,23 @@ public class MMIIntensityScale implements IntensityScale{
 	}
 
 	@Override
+	public String getNameShort() {
+		return "MMI";
+	}
+
+	@Override
+	public String getNameLong() {
+		return "Modified Mercalli intensity scale";
+	}
+
+	@Override
 	public double getDarkeningFactor() {
 		return 0.70;
+	}
+
+	@Override
+	public String toString() {
+		return getNameLong();
 	}
 
 }
