@@ -89,8 +89,9 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     private Color getColor(ArchivedQuake quake) {
         double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
-        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : Color.red)
-                : ageInHRS < 24 ? new Color(255, 140, 0) : Color.yellow;
+        int alpha = (int) Math.max(0, Math.min(255, Settings.oldEventsOpacity / 100.0 * 255.0));
+        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0, alpha) : new Color(255, 0, 0, alpha))
+                : ageInHRS < 24 ? new Color(255, 140, 0, alpha) : new Color(255,255,0, alpha);
     }
 
 

@@ -51,6 +51,9 @@ public final class Settings {
 
 	public static int changes = 0;
 
+	// TODO
+	public static Double oldEventsOpacity;
+
 	static {
 		load();
 	}
@@ -88,6 +91,8 @@ public final class Settings {
 		oldEventsMagnitudeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilterEnabled", "false"));
 		oldEventsMagnitudeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilter", "4.0"));
 
+		oldEventsOpacity = Double.valueOf((String) properties.getOrDefault("oldEventsOpacity", "100.0"));
+
 		save();
 	}
 	
@@ -118,6 +123,8 @@ public final class Settings {
 		properties.setProperty("oldEventsTimeFilter", String.valueOf(oldEventsTimeFilter));
 		properties.setProperty("oldEventsMagnitudeFilterEnabled", String.valueOf(oldEventsMagnitudeFilterEnabled));
 		properties.setProperty("oldEventsMagnitudeFilter", String.valueOf(oldEventsMagnitudeFilter));
+
+		properties.setProperty("oldEventsOpacity", String.valueOf(oldEventsOpacity));
 
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");

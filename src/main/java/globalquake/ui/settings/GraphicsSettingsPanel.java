@@ -16,6 +16,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
     private JCheckBox chkBoxEnableMagnitudeFilter;
     private JTextField textFieldMagnitudeFilter;
+    private JSlider sliderOpacity;
 
 
     public GraphicsSettingsPanel() {
@@ -50,10 +51,11 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private void createEventsSettings() {
         JPanel eventsPanel = new JPanel();
         eventsPanel.setBorder(BorderFactory.createTitledBorder("Old events settings"));
-        eventsPanel.setLayout(new GridLayout(2,1));
+        eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
 
         JPanel timePanel = new JPanel();
         timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
+        timePanel.setBorder(new EmptyBorder(5,5,5,5));
 
         chkBoxEnableTimeFilter = new JCheckBox("Don't display events older than (hours): ");
         chkBoxEnableTimeFilter.setSelected(Settings.oldEventsTimeFilterEnabled);
@@ -64,11 +66,12 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         chkBoxEnableTimeFilter.addChangeListener(changeEvent -> textFieldTimeFilter.setEnabled(chkBoxEnableTimeFilter.isSelected()));
 
         timePanel.add(chkBoxEnableTimeFilter);
-        timePanel.add(textFieldTimeFilter);
+        timePanel.add((textFieldTimeFilter));
 
         eventsPanel.add(timePanel);
 
         JPanel magnitudePanel = new JPanel();
+        magnitudePanel.setBorder(new EmptyBorder(5,5,5,5));
         magnitudePanel.setLayout(new BoxLayout(magnitudePanel, BoxLayout.X_AXIS));
 
         chkBoxEnableMagnitudeFilter = new JCheckBox("Don't display events smaller than (magnitude): ");
@@ -80,9 +83,30 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         chkBoxEnableMagnitudeFilter.addChangeListener(changeEvent -> textFieldMagnitudeFilter.setEnabled(chkBoxEnableMagnitudeFilter.isSelected()));
 
         magnitudePanel.add(chkBoxEnableMagnitudeFilter);
-        magnitudePanel.add(textFieldMagnitudeFilter);
+        magnitudePanel.add((textFieldMagnitudeFilter));
 
         eventsPanel.add(magnitudePanel);
+
+        JPanel opacityPanel = new JPanel();
+        opacityPanel.setBorder(new EmptyBorder(5,5,5,5));
+        opacityPanel.setLayout(new BoxLayout(opacityPanel, BoxLayout.X_AXIS));
+
+        sliderOpacity = new JSlider(JSlider.HORIZONTAL,0,100, Settings.oldEventsOpacity.intValue());
+        sliderOpacity.setMajorTickSpacing(10);
+        sliderOpacity.setMinorTickSpacing(2);
+        sliderOpacity.setPaintTicks(true);
+        sliderOpacity.setPaintLabels(true);
+        sliderOpacity.setPaintTrack(true);
+
+        sliderOpacity.addChangeListener(changeEvent -> {
+            Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
+            Settings.changes++;
+        });
+
+        opacityPanel.add(new JLabel("Old events opacity: "));
+        opacityPanel.add(sliderOpacity);
+
+        eventsPanel.add(opacityPanel);
 
         add(eventsPanel);
     }
@@ -120,6 +144,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
         Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
+
+        Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
     }
 
     @Override
