@@ -44,6 +44,12 @@ public final class Settings {
 	
 	public static final boolean reportsEnabled = false; // not available ATM
 	public static Boolean enableSound = true;
+	public static Boolean oldEventsTimeFilterEnabled;
+	public static Double oldEventsTimeFilter;
+	public static Boolean oldEventsMagnitudeFilterEnabled;
+	public static Double oldEventsMagnitudeFilter;
+
+	public static int changes = 0;
 
 	static {
 		load();
@@ -76,11 +82,18 @@ public final class Settings {
 
 		intensityScaleIndex = Integer.valueOf((String) properties.getOrDefault("intensityScaleIndex", "0"));
 
+		oldEventsTimeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsTimeFilterEnabled", "false"));
+		oldEventsTimeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsTimeFilter", "24.0"));
+
+		oldEventsMagnitudeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilterEnabled", "false"));
+		oldEventsMagnitudeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilter", "4.0"));
+
 		save();
 	}
 	
 	
 	public static void save() {
+		changes++;
 		properties.setProperty("enableAlarmDialogs", String.valueOf(enableAlarmDialogs));
 		
 		properties.setProperty("homeLat", String.valueOf(homeLat));
@@ -100,6 +113,12 @@ public final class Settings {
 		properties.setProperty("fpsIdle", String.valueOf(fpsIdle));
 
 		properties.setProperty("intensityScaleIndex", String.valueOf(intensityScaleIndex));
+
+		properties.setProperty("oldEventsTimeFilterEnabled", String.valueOf(oldEventsTimeFilterEnabled));
+		properties.setProperty("oldEventsTimeFilter", String.valueOf(oldEventsTimeFilter));
+		properties.setProperty("oldEventsMagnitudeFilterEnabled", String.valueOf(oldEventsMagnitudeFilterEnabled));
+		properties.setProperty("oldEventsMagnitudeFilter", String.valueOf(oldEventsMagnitudeFilter));
+
 		try {
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {
