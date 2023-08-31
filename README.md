@@ -24,9 +24,12 @@ It enables selection of seismic stations downloaded from publicly available seis
 The program uses this data to detect earthquakes and visualize them on an interactive 3D globe.\
 It can also, estimate the earthquake magnitude using some empirical methods, but at the moment it can only work for small and medium size earthquakes, up to magnitude 5 or 6.
 
-> [!WARNING]<br>
+> [!IMPORTANT]<br>
 > Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes, as the displayed information can be inaccurate or completly wrong.\
+> \
 > Please be also aware that playing some of the included alarm sounds in public areas can be considered in some countries a form of fearmongering and illegal.\
+
+> [!NOTE]<br>
 > GlobalQuake doesn't own any form of data, and the respective owners can stop sharing them via Seedlink Server and/or FDSNWS at any moment without notice.
 
 ### What GlobalQuake is good at?
