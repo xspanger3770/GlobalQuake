@@ -6,7 +6,7 @@
   <img src="" alt="GlobalQuake icon" title="GlobalQuake" />
 </p>-->
 <p align="center">
-  <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <!--<a href="">--><img src="https://img.shields.io/badge/discord-Coming%20Soon...-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
+  <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <a href="https://discord.gg/9SQHtkKcy"><img src="https://img.shields.io/badge/discord-Join Now-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
 </p>
 
 ![GlobalQuake 0.9.0](https://github-production-user-asset-6210df.s3.amazonaws.com/100421968/259861791-6c41b8e4-d33c-44bc-a8ca-4f2ad7ecac40.png)
