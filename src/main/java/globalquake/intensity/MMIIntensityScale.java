@@ -31,10 +31,10 @@ public class MMIIntensityScale implements IntensityScale{
 	private static final List<Level> levels = new ArrayList<>();
 
 	static {
-		levels.add(I = new Level("I", 0.0, new Color(190,190,190)));
-		levels.add(II = new Level("II", 1.0, new Color(180, 190, 240)));
+		levels.add(I = new Level("I", 0.5, new Color(190,190,190)));
+		levels.add(II = new Level("II", 1.0, new Color(210, 190, 240)));
 		levels.add(III = new Level("III", 2.1, new Color(132, 162, 232)));
-		levels.add(IV = new Level("IV", 5.0, new Color(136, 214, 220)));
+		levels.add(IV = new Level("IV", 5.0, new Color(136, 214, 255)));
 		levels.add(V = new Level("V", 10.0, new Color(85, 242, 15)));
 		levels.add(VI = new Level("VI", 21.0, new Color(255, 255, 0)));
 		levels.add(VII = new Level("VII", 44.0, new Color(255, 200, 0)));

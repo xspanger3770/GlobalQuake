@@ -124,8 +124,8 @@ public class GlobePanelDebug extends JFrame {
 	private void createArchived() {
 		archivedQuakes = new ArrayList<>();
 		Random r = new Random();
-		for(double mag = 0.5; mag <= 30; mag += 0.5) {
-			archivedQuakes.add(new ArchivedQuake(0, 0, 0, r.nextDouble() * r.nextDouble() * 9.0, r.nextLong()));
+		for(double mag = 0.5; mag <= 11; mag += 0.5) {
+			archivedQuakes.add(new ArchivedQuake(0, 0, 0, mag, r.nextLong() % System.currentTimeMillis()));
 		}
 		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}

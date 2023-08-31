@@ -90,7 +90,7 @@ public class AlertWindow extends JFrame {
 		Color c = Color.LIGHT_GRAY;
 		String str = "-";
 
-		boolean chill = level == null;
+		boolean chill = pga < 1;
 
 		contentPane.setBackground(chill ? chillColor : strongColor);
 
