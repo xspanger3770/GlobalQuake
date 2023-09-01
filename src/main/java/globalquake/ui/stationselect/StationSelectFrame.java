@@ -17,6 +17,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
     private JToggleButton deselectButton;
     private final JButton selectAll;
     private final JButton deselectAll;
+    private final JTextField searchBar;
     private DragMode dragMode = DragMode.NONE;
     private final JCheckBox chkBoxShowUnavailable;
 
@@ -28,6 +29,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         JButton toggleButton = new JButton("<");
         selectAll = new JButton(new SelectAllAction(databaseMonitorFrame.getManager()));
         deselectAll = new JButton(new DeselectAllAction(databaseMonitorFrame.getManager()));
+        searchBar = new SearchBar();
         selectAll.addActionListener(this);
         deselectAll.addActionListener(this);
 
@@ -139,7 +141,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
                 }
             }
         });
-        
+
         ImageIcon selectRegion = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectRegion.png")));
         Image image = selectRegion.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         selectButton.setIcon(new ImageIcon(image));
@@ -149,6 +151,11 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         deselectButton.setIcon(new ImageIcon(image));
 
         toolBar.setFloatable(false);
+
+        searchBar.setMaximumSize(new Dimension(375,40));
+        toolBar.add(searchBar);
+        toolBar.addSeparator();
+
         toolBar.add(selectButton);
         toolBar.add(selectAll);
 
@@ -165,6 +172,8 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         toolBar.addSeparator();
 
         toolBar.add(chkBoxShowUnavailable);
+
+        toolBar.setPreferredSize(new Dimension(225, 300));
 
         return toolBar;
     }
