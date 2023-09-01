@@ -77,7 +77,8 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
-        if (!entity.getRenderElement(0).shouldDraw) {
+        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        if (!entity.getRenderElement(0).shouldDraw || !displayed) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
