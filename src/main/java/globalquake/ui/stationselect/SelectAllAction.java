@@ -5,7 +5,10 @@ import globalquake.database.Station;
 import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;
+
+import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 public class SelectAllAction extends AbstractAction {
 
@@ -15,7 +18,12 @@ public class SelectAllAction extends AbstractAction {
         super("Select All");
         this.stationDatabaseManager=stationDatabaseManager;
 
-        putValue(SHORT_DESCRIPTION, "Select All Available Stations");
+        putValue(SHORT_DESCRIPTION, "Selects All Available Stations");
+
+        ImageIcon selectAllIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectAll.png")));
+        Image image = selectAllIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override
