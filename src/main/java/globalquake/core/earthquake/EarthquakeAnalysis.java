@@ -347,7 +347,7 @@ public class EarthquakeAnalysis {
         int c = 0;
 
         for (ExactPickedEvent event : events) {
-            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, TauPTravelTimeCalculator.toAngle(event.distGC));
+            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, TauPTravelTimeCalculator.toAngle(event.distGC)) + getElevationCorrection(event.elevation());
             if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
                 return;
             }
@@ -385,6 +385,10 @@ public class EarthquakeAnalysis {
         hypocenter.origin = bestOrigin;
         hypocenter.err = err;
         hypocenter.correctStations = acc;
+    }
+
+    private static double getElevationCorrection(double elevation) {
+        return elevation / 6000.0;
     }
 
     private void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
@@ -496,7 +500,7 @@ public class EarthquakeAnalysis {
         for (PickedEvent event : c.getSelected()) {
             double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat,
                     hyp.lon);
-            long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC))
+            long expectedTravel = (long) ((TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC)) + getElevationCorrection(event.elevation()))
                     * 1000);
             long actualTravel = event.pWave() - hyp.origin;
             boolean wrong = Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
