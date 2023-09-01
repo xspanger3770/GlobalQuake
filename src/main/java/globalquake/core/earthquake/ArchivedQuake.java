@@ -42,6 +42,10 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		copyEvents(earthquake);
 	}
 
+	public void updateRegion(){
+		regionUpdater.updateRegion();
+	}
+
 	private void copyEvents(Earthquake earthquake) {
 		if(earthquake.getCluster() == null){
 			return;
@@ -70,7 +74,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.origin = origin;
 		this.archivedEvents = new ArrayList<>();
 		regionUpdater = new RegionUpdater(this);
-		regionUpdater.updateRegion();
 	}
 
 	public double getDepth() {

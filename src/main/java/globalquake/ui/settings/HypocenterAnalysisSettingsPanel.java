@@ -2,24 +2,52 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
     private JSlider sliderPWaveInaccuracy;
     private JSlider sliderCorrectness;
+    private JSlider sliderMinStations;
 
     public HypocenterAnalysisSettingsPanel() {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(400, 300));
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
+        contentPanel.add(createMinStationsSetting());
         contentPanel.add(createSettingPWave());
         contentPanel.add(createSettingCorrectness());
 
-        add(new JScrollPane(contentPanel), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setPreferredSize(new Dimension(300, 300));
+
+        javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+
+        add(scrollPane);
+    }
+
+    private Component createMinStationsSetting() {
+        sliderMinStations = createSettingsSlider(4, 16, 1, 1);
+
+        JLabel label = new JLabel();
+
+        ChangeListener upd = changeEvent -> label.setText("Minimum number of stations: %d".formatted(sliderMinStations.getValue()));
+
+        sliderMinStations.addChangeListener(upd);
+        sliderMinStations.setValue(Settings.minimumStationsForEEW);
+
+        upd.stateChanged(null);
+
+        return createCoolLayout(sliderMinStations, label, "%s".formatted(Settings.minimumStationsForEEWDefault),
+                """
+                        Here you can set the minimum number of stations that need to pick\s
+                        up the earthquake for the EEW to be issued.\s
+                        Increasing the number can greatly reduce the number of false alarms,\s
+                        but may also cause EEW's to not appear in areas with less stations.
+                        """);
     }
 
     public static Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
@@ -65,16 +93,20 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderCorrectness = createSettingsSlider(20, 90, 10, 2);
 
         JLabel label = new JLabel();
-        sliderCorrectness.addChangeListener(changeEvent -> label.setText("Hypocenter correctness treshold: %d %%".formatted(sliderCorrectness.getValue())));
 
-        sliderCorrectness.setValue(Settings.hypocenterCorrectTreshold.intValue());
+        ChangeListener upd = changeEvent -> label.setText("Hypocenter Correctness Threshold: %d %%".formatted(sliderCorrectness.getValue()));
 
-        return createCoolLayout(sliderCorrectness, label, "%s %%".formatted(Settings.hypocenterCorrectTresholdDefault),
+        sliderCorrectness.addChangeListener(upd);
+        sliderCorrectness.setValue(Settings.hypocenterCorrectThreshold.intValue());
+
+        upd.stateChanged(null);
+
+        return createCoolLayout(sliderCorrectness, label, "%s %%".formatted(Settings.hypocenterCorrectThresholdDefault),
                 """
-                        This value determines the treshold when a hypocenter is considered
+                        This value determines the threshold when a hypocenter is considered
                         correct or not.
                         The correctness is calculated as the % of stations that have arrival
-                        within the Inaccuracy treshold and total number of stations used by
+                        within the Inaccuracy threshold and total number of stations used by
                         the hypocenter locating algoritgm.
                         If hypocenter is marked as incorrect, the earthquake will not
                         be displayed on the map.
@@ -87,13 +119,15 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         sliderPWaveInaccuracy = createSettingsSlider(400, 2500, 200, 100);
 
         JLabel label = new JLabel();
-        sliderPWaveInaccuracy.addChangeListener(changeEvent -> label.setText("P Wave Arrival Inaccuracy Treshold: %d ms".formatted(sliderPWaveInaccuracy.getValue())));
+        ChangeListener changeListener = changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue()));
+        sliderPWaveInaccuracy.addChangeListener(changeListener);
 
-        sliderPWaveInaccuracy.setValue(Settings.pWaveInaccuracyTreshold.intValue());
+        sliderPWaveInaccuracy.setValue(Settings.pWaveInaccuracyThreshold.intValue());
+        changeListener.stateChanged(null);
 
-        return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyTresholdDefault),
+        return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyThresholdDefault),
                 """
-                This value determines the treshold value when the hypocenter finding\s
+                This value determines the threshold value when the hypocenter finding\s
                 algorithm considers the arrival from current point to a station correct \s
                 or incorrect\s
                 Higher values are less restrictive and will lead to more false positives.
@@ -104,8 +138,9 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
     @Override
     public void save() {
-        Settings.pWaveInaccuracyTreshold = (double) sliderPWaveInaccuracy.getValue();
-        Settings.hypocenterCorrectTreshold = (double) sliderCorrectness.getValue();
+        Settings.pWaveInaccuracyThreshold = (double) sliderPWaveInaccuracy.getValue();
+        Settings.hypocenterCorrectThreshold = (double) sliderCorrectness.getValue();
+        Settings.minimumStationsForEEW = sliderMinStations.getValue();
     }
 
     @Override

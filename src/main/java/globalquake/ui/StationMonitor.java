@@ -4,10 +4,7 @@ import globalquake.core.station.AbstractStation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,9 +30,19 @@ public class StationMonitor extends JFrame {
 		}, 0, 1000);
 
 		addWindowListener(new WindowAdapter() {
+
 			@Override
 			public void windowClosing(WindowEvent e) {
 				timer.cancel();
+			}
+		});
+
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+					dispose();
+				}
 			}
 		});
 

@@ -76,10 +76,16 @@ public final class Channel implements Serializable {
 
     @Override
     public String toString() {
-        return "%s %s %dsps".formatted(getCode(), getLocationCode(), (int)getSampleRate());
+        if (seedlinkNetworks.isEmpty()) {
+            return "%s %s %dsps (unavailable)".formatted(getCode(), getLocationCode(), (int) getSampleRate());
+        } else if (seedlinkNetworks.size() == 1) {
+            return "%s %s %dsps (%d seedlink)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+        } else {
+            return "%s %s %dsps (%d seedlinks)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+        }
     }
 
-    public boolean isAvailable(){
+    public boolean isAvailable() {
         return !seedlinkNetworks.isEmpty();
     }
 
@@ -100,7 +106,7 @@ public final class Channel implements Serializable {
         this.elevation = newChannel.elevation;
     }
 
-    public SeedlinkNetwork selectBestSeedlinkNetwork(){
+    public SeedlinkNetwork selectBestSeedlinkNetwork() {
         var leastStations = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
         return leastStations.map(Map.Entry::getKey).orElse(null);
     }

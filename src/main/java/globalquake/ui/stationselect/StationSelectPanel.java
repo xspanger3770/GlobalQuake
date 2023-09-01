@@ -119,7 +119,7 @@ public class StationSelectPanel extends GlobePanel {
         if(clickedStations.size() == 1){
             selectedStation = clickedStations.get(0);
         } else {
-            selectedStation = (Station) JOptionPane.showInputDialog(this, "Select station to edit:", "Station selection",
+            selectedStation = (Station) JOptionPane.showInputDialog(this, "Select station:", "Station selection",
                     JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
         }
 

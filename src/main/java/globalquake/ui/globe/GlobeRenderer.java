@@ -237,6 +237,7 @@ public class GlobeRenderer {
             }
         }
 
+
         if(canClip && mask != 0){
             return false;
         }
@@ -354,6 +355,8 @@ public class GlobeRenderer {
 
 
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
+        graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
         renderFeatures.forEach(feature -> feature.process(this, props));
         renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
     }
@@ -393,7 +396,7 @@ public class GlobeRenderer {
     }
 
 
-    public void createCross(Polygon3D polygon3D, double lat, double lon, double radius) {
+    public void createCross(Polygon3D polygon3D, double lat, double lon, double radius, double offset) {
         polygon3D.reset();
         Point2D point = new Point2D();
 
@@ -401,7 +404,9 @@ public class GlobeRenderer {
         GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
 
         Vector3D centerPoint = createVec3D(new Point2D(lat, lon));
-        double ang = 45;
+        double ang = offset;
+
+        polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
 
         for (int i = 0; i < 2; i++) {
             polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
@@ -414,7 +419,6 @@ public class GlobeRenderer {
             vector3D = createVec3D(point);
             polygon3D.addPoint(vector3D);
 
-            polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
             ang += 90;
         }
         polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));

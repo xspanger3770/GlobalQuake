@@ -1,6 +1,8 @@
 package globalquake.ui.globalquake;
 
+import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
+import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;
@@ -8,12 +10,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GlobalQuakeFrame extends JFrame {
-
-	private static final int FPS = 20;
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
@@ -63,7 +64,7 @@ public class GlobalQuakeFrame extends JFrame {
 			}
 		});
 
-		list = new EarthquakeListPanel();
+		list = new EarthquakeListPanel(GlobalQuake.instance.getArchive().getArchivedQuakes());
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -83,12 +84,16 @@ public class GlobalQuakeFrame extends JFrame {
 		setResizable(true);
 		setTitle(Main.fullName);
 
-		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+		// Schedule the task
+		scheduler.schedule(new Runnable() {
+			@Override
 			public void run() {
 				mainPanel.repaint();
+				scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.MILLISECONDS);
 			}
-		}, 0, 1000 / FPS);
+		}, 1, TimeUnit.SECONDS);
 	}
 
 	private JMenuBar createJMenuBar() {
