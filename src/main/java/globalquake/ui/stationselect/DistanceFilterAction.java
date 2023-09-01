@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class DistanceFilterAction extends AbstractAction {
 
@@ -24,6 +25,11 @@ public class DistanceFilterAction extends AbstractAction {
         this.parent=parent;
 
         putValue(SHORT_DESCRIPTION, "Select Stations with Minimum Distance Between Channels");
+
+        ImageIcon distanceFilter = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/distanceFilter.png")));
+        Image image = distanceFilter.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(image);
+        putValue(Action.SMALL_ICON, scaledIcon);
     }
 
     @Override
