@@ -21,6 +21,7 @@ public class EarthquakeAnalysis {
     public static final int QUADRANTS = 16;
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
+    private static final boolean REMOVE_WEAKEST = false;
 
     private final List<Earthquake> earthquakes;
 
@@ -75,11 +76,13 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        double ratioPercentileThreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
+        if(REMOVE_WEAKEST) {
+            double ratioPercentileThreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
 
-        // remove events that are weaker than the threshold and keep at least 8 events
-        while (pickedEvents.get(0).maxRatio() < ratioPercentileThreshold && pickedEvents.size() > 8) {
-            pickedEvents.remove(0);
+            // remove events that are weaker than the threshold and keep at least 8 events
+            while (pickedEvents.get(0).maxRatio() < ratioPercentileThreshold && pickedEvents.size() > 8) {
+                pickedEvents.remove(0);
+            }
         }
 
         HypocenterFinderSettings finderSettings = createSettings();
