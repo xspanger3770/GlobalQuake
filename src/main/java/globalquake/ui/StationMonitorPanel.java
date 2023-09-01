@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
 import globalquake.core.analysis.Log;
@@ -266,7 +267,8 @@ public class StationMonitorPanel extends JPanel {
 
 		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
 			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
-			long arrival = (long) (earthquake.getOrigin() + 1000 * TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC)));
+			long arrival = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
 			double x = getX(arrival);
 			g.setColor(Color.magenta);
 			g.setStroke(dashed);

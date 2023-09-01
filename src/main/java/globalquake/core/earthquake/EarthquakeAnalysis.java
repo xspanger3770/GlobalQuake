@@ -347,10 +347,12 @@ public class EarthquakeAnalysis {
         int c = 0;
 
         for (ExactPickedEvent event : events) {
-            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, TauPTravelTimeCalculator.toAngle(event.distGC)) + getElevationCorrection(event.elevation());
+            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, TauPTravelTimeCalculator.toAngle(event.distGC));
             if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
                 return;
             }
+
+            travelTime += getElevationCorrection(event.elevation());
 
             long origin = event.pWave() - ((long) (travelTime * 1000));
             threadData.origins[c] = origin;
@@ -387,7 +389,7 @@ public class EarthquakeAnalysis {
         hypocenter.correctStations = acc;
     }
 
-    private static double getElevationCorrection(double elevation) {
+    public static double getElevationCorrection(double elevation) {
         return elevation / 6000.0;
     }
 
