@@ -29,7 +29,7 @@ public class GlobalQuake {
 
 	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
-		this.stationDatabaseManager =stationDatabaseManager;
+		this.stationDatabaseManager = stationDatabaseManager;
 
 		clusterAnalysis = new ClusterAnalysis();
 		earthquakeAnalysis = new EarthquakeAnalysis();

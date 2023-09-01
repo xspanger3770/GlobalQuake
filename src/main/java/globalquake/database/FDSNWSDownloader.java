@@ -171,7 +171,7 @@ public class FDSNWSDownloader {
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
 
             double gcd = GeoUtils.greatCircleDistance(lat, lon, stationLat, stationLon);
-            if(gcd > 1.0){
+            if(gcd > 10.0){
                 Logger.warn("Station [%s %s] has a channel [%s %s] that is %.1f km away from it!!\n".formatted(networkCode, stationCode, channel, locationCode, gcd));
             }
 
