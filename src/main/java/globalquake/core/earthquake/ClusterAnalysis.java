@@ -107,10 +107,11 @@ public class ClusterAnalysis {
 
         double pct = correct / (double)cluster.getAssignedEvents().size();
 
-        return pct > 0.6;
+        return pct > 0.45;
     }
 
-    private static final double DISTANCE_INACCURACY_MULTIPLIER = 2.0;
+    private static final double DISTANCE_INACCURACY_MULTIPLIER = 0.025;
+    private static final long DISTANCE_INACCURACY_BASE = 5000;
 
     private void assignEventsToExistingEarthquakeClusters() {
         for (AbstractStation station : stations) {
@@ -155,7 +156,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 2500 + expectedTravel * 0.02) {
+            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }
         }
@@ -165,7 +166,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
             long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 2500 + expectedTravel * 0.02) {
+            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }
         }
@@ -175,7 +176,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 2500 + expectedTravel * 0.02) {
+            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }
         }

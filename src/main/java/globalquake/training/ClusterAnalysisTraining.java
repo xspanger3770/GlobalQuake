@@ -41,6 +41,8 @@ public class ClusterAnalysisTraining {
 
     record SimulatedEarthquake(double lat, double lon, double depth, long origin, double mag){};
 
+    private static final long INACCURACY = 1000;
+
     public static void main(String[] args) throws Exception {
         System.out.println("Init...");
         TauPTravelTimeCalculator.init();
@@ -108,7 +110,7 @@ public class ClusterAnalysisTraining {
         SimulatedEarthquake earthquake = new SimulatedEarthquake(lat, lon, depth, origin, mag);
 
         while (time < maxTime) {
-            createEvents(stations, earthquake, time);
+            createEvents(stations, earthquake, time, r);
 
             clusterAnalysis.run();
             earthquakeAnalysis.run();
@@ -163,7 +165,7 @@ public class ClusterAnalysisTraining {
 
     private static int eventC = 0;
 
-    private static void createEvents(List<AbstractStation> stations, SimulatedEarthquake earthquake, long time) {
+    private static void createEvents(List<AbstractStation> stations, SimulatedEarthquake earthquake, long time, Random r) {
         for(AbstractStation abstractStation : stations){
             SimulatedStation station = (SimulatedStation) abstractStation;
 
@@ -190,7 +192,7 @@ public class ClusterAnalysisTraining {
                 if(expectedRatio > 8.0) {
                     Event event = new Event(station.getAnalysis());
                     event.maxRatio = expectedRatio;
-                    event.setpWave(earthquake.origin + expectedTravelP);
+                    event.setpWave(earthquake.origin + expectedTravelP + r.nextLong(INACCURACY * 2) - INACCURACY);
 
                     station.getAnalysis().getDetectedEvents().add(event);
                     eventC++;
@@ -206,7 +208,7 @@ public class ClusterAnalysisTraining {
                 if(expectedRatio > 8.0) {
                     Event event = new Event(station.getAnalysis());
                     event.maxRatio = expectedRatio;
-                    event.setpWave(earthquake.origin + expectedTravelP);
+                    event.setpWave(earthquake.origin + expectedTravelP + r.nextLong(INACCURACY * 2) - INACCURACY);
 
                     station.getAnalysis().getDetectedEvents().add(event);
                     eventC++;
