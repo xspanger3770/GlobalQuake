@@ -104,9 +104,17 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D);
+
         if(DEBUG_CLUSTERS){
-          if(event.assignedCluster != null){
+          if(event != null && event.assignedCluster != null){
               Color c = event.assignedCluster.color;
+
+              graphics.setColor(c);
+              graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+              graphics.draw(elementStationSquare.getShape());
+              graphics.drawString("Cluster #"+event.assignedCluster.getId(), (int) centerPonint.x, (int) centerPonint.y);
           }
         } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
@@ -125,8 +133,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         }
 
-        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-        var centerPonint = renderer.projectPoint(point3D);
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         drawDetails(mouseNearby, renderer.getRenderProperties().scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());

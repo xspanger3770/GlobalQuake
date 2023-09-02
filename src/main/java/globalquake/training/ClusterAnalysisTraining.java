@@ -56,7 +56,7 @@ public class ClusterAnalysisTraining {
         long maxTime = 21 * MINUTE;
         long step = 1000;
 
-        Random r = new Random(0);
+        Random r = new Random(100);
 
         List<AbstractStation> stations = new ArrayList<>();
 
