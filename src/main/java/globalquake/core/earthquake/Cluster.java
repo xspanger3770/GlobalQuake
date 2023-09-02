@@ -1,7 +1,9 @@
 package globalquake.core.earthquake;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import globalquake.core.station.AbstractStation;
@@ -35,6 +37,20 @@ public class Cluster {
 
 	public static final double NONE = -999;
 	public final Object selectedEventsLock;
+
+	public Color color = randomColor();
+
+	private Color randomColor() {
+		Random random = new Random();
+
+		// Generate random values for the red, green, and blue components
+		int red = random.nextInt(256); // 0-255
+		int green = random.nextInt(256); // 0-255
+		int blue = random.nextInt(256); // 0-255
+
+		// Create a new Color object with the random values
+		return new Color(red, green, blue);
+	}
 
 	// 20 selected
 	private List<PickedEvent> selected = new ArrayList<>();

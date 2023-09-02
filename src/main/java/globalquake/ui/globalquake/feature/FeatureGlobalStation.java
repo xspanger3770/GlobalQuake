@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.earthquake.Event;
 import globalquake.core.station.AbstractStation;
@@ -25,6 +26,9 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     public static final double RATIO_YELLOW = 2000.0;
     public static final double RATIO_RED = 20000.0;
+
+    // TODO dont forget to turn off!!!
+    private static final boolean DEBUG_CLUSTERS = true;
 
     public FeatureGlobalStation(List<AbstractStation> globalStations) {
         super(2);
@@ -100,7 +104,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
-        if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+        if(DEBUG_CLUSTERS){
+          if(event.assignedCluster != null){
+              Color c = event.assignedCluster.color;
+          }
+        } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
             if (event.getMaxRatio() >= RATIO_YELLOW) {

@@ -61,7 +61,7 @@ public class ClusterAnalysis {
     private void assignEventsToExistingEarthquakeClusters() {
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
-                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
+                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster == null) {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
                     for (Earthquake earthquake : earthquakes) {
@@ -126,7 +126,7 @@ public class ClusterAnalysis {
                     if (!c.containsStation(info.station()) && !_contains(newEvents, info.station())) {
                         double dist = info.dist();
                         for (Event ev : info.station().getAnalysis().getDetectedEvents()) {
-                            if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster < 0) {
+                            if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster == null) {
                                 long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
                                         - 2500;
                                 long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
@@ -165,7 +165,7 @@ public class ClusterAnalysis {
                 System.err.println("Error: cluster " + cluster.getId() + " already contains "
                         + ev.getAnalysis().getStation().getStationCode());
             } else {
-                ev.assignedCluster = cluster.getId();
+                ev.assignedCluster = cluster;
                 cluster.addEvent(ev);
             }
         }
@@ -174,7 +174,7 @@ public class ClusterAnalysis {
     private void createNewClusters() {
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
-                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
+                if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster == null) {
                     // so we have eligible event
                     ArrayList<Event> validEvents = new ArrayList<>();
                     closestLoop:
@@ -182,7 +182,7 @@ public class ClusterAnalysis {
                         AbstractStation close = info.station();
                         double dist = info.dist();
                         for (Event e : close.getAnalysis().getDetectedEvents()) {
-                            if (!e.isBroken() && e.getpWave() > 0 && e.assignedCluster < 0) {
+                            if (!e.isBroken() && e.getpWave() > 0 && e.assignedCluster == null) {
                                 long earliestPossibleTimeOfThatEvent = event.getpWave()
                                         - (long) ((dist * 1000.0) / 5.0) - 2500;
                                 long latestPossibleTimeOfThatEvent = event.getpWave()
@@ -235,7 +235,7 @@ public class ClusterAnalysis {
     private Cluster createCluster(ArrayList<Event> validEvents) {
         Cluster cluster = new Cluster(nextClusterId);
         for (Event ev : validEvents) {
-            ev.assignedCluster = cluster.getId();
+            ev.assignedCluster = cluster;
             cluster.addEvent(ev);
         }
         System.out.println("New Cluster #" + cluster.getId() + " Has been created. It contains "
