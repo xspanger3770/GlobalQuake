@@ -206,6 +206,7 @@ public class ClusterAnalysis {
             append(c, newEvents);
             return;
         }
+
         ArrayList<Event> list = new ArrayList<>(c.getAssignedEvents());
         while (!list.isEmpty()) {
             ArrayList<Event> newEvents = new ArrayList<>();
@@ -215,16 +216,9 @@ public class ClusterAnalysis {
                     if (!c.containsStation(info.station()) && !_contains(newEvents, info.station())) {
                         double dist = info.dist();
                         for (Event ev : info.station().getAnalysis().getDetectedEvents()) {
-                            if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster == null) {
-                                long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
-                                        - 2500;
-                                long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
-                                        + 2500;
-                                if (ev.getpWave() >= earliestPossibleTimeOfThatEvent
-                                        && ev.getpWave() <= latestPossibleTimeOfThatEvent) {
-                                    newEvents.add(ev);
-                                    continue mainLoop;
-                                }
+                            if(potentialArrival(ev, e, dist)){
+                                newEvents.add(ev);
+                                continue mainLoop;
                             }
                         }
                     }
@@ -234,6 +228,21 @@ public class ClusterAnalysis {
             list.clear();
             list.addAll(newEvents);
         }
+    }
+
+    private boolean potentialArrival(Event ev, Event e, double dist) {
+        if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster == null) {
+            long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
+                    - 2500;
+            long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
+                    + 2500;
+            if (ev.getpWave() >= earliestPossibleTimeOfThatEvent
+                    && ev.getpWave() <= latestPossibleTimeOfThatEvent) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean _contains(ArrayList<Event> newEvents, AbstractStation station) {
