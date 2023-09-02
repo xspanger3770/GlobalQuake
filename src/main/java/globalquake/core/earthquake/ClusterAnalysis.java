@@ -24,11 +24,19 @@ public class ClusterAnalysis {
     private final Lock clustersWriteLock = clustersLock.writeLock();
 
     private final List<Cluster> clusters;
+    private final List<Earthquake> earthquakes;
+    private final List<AbstractStation> stations;
     private int nextClusterId;
 
-    public ClusterAnalysis() {
+    public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
+        this.earthquakes = earthquakes;
+        this.stations = stations;
         clusters = new ArrayList<>();
         this.nextClusterId = 0;
+    }
+
+    public ClusterAnalysis(){
+        this(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes(), GlobalQuake.instance.getStationManager().getStations());
     }
 
     public Lock getClustersReadLock() {
@@ -36,10 +44,6 @@ public class ClusterAnalysis {
     }
 
     public void run() {
-        if (GlobalQuake.instance.getEarthquakeAnalysis() == null) {
-            return;
-        }
-
         clustersWriteLock.lock();
         try {
             expandExistingClusters();
@@ -52,13 +56,12 @@ public class ClusterAnalysis {
 
     @SuppressWarnings({"unused"})
     private void assignEventsToExistingEarthquakeClusters() {
-        for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
+        for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
-                    List<Earthquake> quakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes();
-                    for (Earthquake earthquake : quakes) {
+                    for (Earthquake earthquake : earthquakes) {
                         if (!earthquake.getCluster().isActive()) {
                             continue;
                         }
@@ -152,7 +155,7 @@ public class ClusterAnalysis {
     }
 
     private void createNewClusters() {
-        for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
+        for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
                 if (!event.isBroken() && event.getpWave() > 0 && event.assignedCluster < 0) {
                     // so we have eligible event
