@@ -52,15 +52,6 @@ It can also, estimate the earthquake magnitude using some empirical methods, but
 - Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations.
 - If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations.
 
-## Download
-
-* GlobalQuake comes as a standard executable JAR file. You can download the lastest version [here](https://github.com/xspanger3770/GlobalQuake/releases)
-* Make sure you have the latest version of Java installed. [Download Java](https://www.oracle.com/java/technologies/downloads/)
-* Put the JAR file to the location where you want the application data to be stored
-* Run GlobalQuake by executing `java -jar [filename].jar` using your terminal/command line or simply double click it (Windows)
-* You can also add `-Xms8G -Xmx8G` parameters and specify the maximum RAM allocation in gigabytes (replace the `8` with suitable value)
-* Experimental: by adding `-Dsun.java2d.opengl=True`, you can improve your FPS
-
 ## Contributing
 
 Any contributions, including feedback and suggestions are highly appreciated! See [Contributing guidelines](https://github.com/xspanger3770/GlobalQuake/blob/main/CONTRIBUTING.md)
