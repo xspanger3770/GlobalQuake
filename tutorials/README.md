@@ -33,11 +33,11 @@ For Windows either the x64 Installer or x64 MSI Installer is fine to use.
 
 #### Linux
 <a name="JavaDownloadLinux"></a>
-For Linux it highly depends on the distribution you are running. If you are running Debian, or a distribution based on Debian like Ubuntu, download the **_x64 Debian Package_**. If your distro is based off of Red Hat like Rocky Linux, AlmaLinux etc, use the "**_x64 RPM Package_**".
+For Linux it highly depends on the distribution you are running. If you are running Debian, or a distribution based on Debian like Ubuntu, download the "**_x64 Debian Package_**". If your distro is based off of Red Hat like Rocky Linux, AlmaLinux etc, use the "x64 RPM Package_**".
 
 #### MacOS
 <a name="JavaDownloadMacOS"></a>
-For MacOS download the "**_x64 DMG Installer_**".
+For MacOS download the "x64 DMG Installer_**".
 
 ### Installing
 <a name="JavaInstall"></a>
@@ -45,9 +45,9 @@ For MacOS download the "**_x64 DMG Installer_**".
 <a name="JavaInstallWindows"></a>
 1. Download the installer
 2. Open the installer
-3. Click the "**_Next_**" button on the first Screen
+3. Click the "Next_**" button on the first Screen
 4. Choosing a custom install location (if you don't want a custom install location skip to step )
-5. Go to the location you want to install Java with the file explorer. You can choose another drive by clicking the topdown menu at the top with the little downwards arrow on it. You can add folders using the button on the top right with the folder and shine icon. For example I went to my D drive and created a folder called JDKs and a sub folder called 17, for the JDK 17 version, for the path of **_D:\JDKs\17_**, you can however install it wherever and name the folders whatever you like.
+5. Go to the location you want to install Java with the file explorer. You can choose another drive by clicking the topdown menu at the top with the little downwards arrow on it. You can add folders using the button on the top right with the folder and shine icon. For example I went to my D drive and created a folder called JDKs and a sub folder called 17, for the JDK 17 version, for the path of "**_D:\JDKs\17_**", you can however install it wherever and name the folders whatever you like.
 6. After creating the folders and sub-folders you want click on the folder you want to install to and click the "**_OK_**" button
 7. Click the "**_Next_**" button
 8. Wait for it install
@@ -75,7 +75,7 @@ To add Java to system variables follow these steps:
 2. Click the "**_Environment Variables_**" button on the bottom right of the new window
 3. On the buttom half of this new windows, under "**_System_**" variables, find the "**_Path_**" variable and open it by double click it or clicking the "**_Edit..._**" button
 4. On this new windows click the "**_New_**" button
-5. In the textbox that appears enter the location you installed your java to. For example I installed it in **_D:\JDKs\17_**, so I would put **_D:\JDKs\17_** in the text box.
+5. In the textbox that appears enter the location you installed your java to. For example I installed it in "**_D:\JDKs\17_**", so I would put "**_D:\JDKs\17_**" in the text box.
 6. Click the "**_OK_**" button on all of the previous 3 windows that opened.
 
 #### Linux
