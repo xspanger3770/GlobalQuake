@@ -15,6 +15,7 @@ import java.util.concurrent.*;
 public class StationDatabaseManager {
 
     private static final File STATIONS_FOLDER = new File(Main.MAIN_FOLDER, "/stationDatabase/");
+    private static final int ATTEMPTS = 3;
     private StationDatabase stationDatabase;
 
     private final List<Runnable> updateListeners = new CopyOnWriteArrayList<>();
@@ -174,13 +175,12 @@ public class StationDatabaseManager {
         fireStatusChangeEvent();
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-                        for (int attempt = 1; attempt <= 3; attempt++) {
+                        for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
                             try {
                                 seedlinkNetwork.getStatus().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
 
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
-                                System.err.println("HERE 2 !!!!");
                                 Callable<Void> task = () -> {
                                     SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
                                     return null;
@@ -188,8 +188,6 @@ public class StationDatabaseManager {
 
                                 Future<Void> future = executor.submit(task);
                                 future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-                                System.err.println("HERE!!!!");
 
                                 seedlinkNetwork.getStatus().setString("Done");
                                 seedlinkNetwork.getStatus().setValue(100);

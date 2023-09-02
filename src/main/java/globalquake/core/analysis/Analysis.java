@@ -54,7 +54,7 @@ public abstract class Analysis {
 	private void decode(DataRecord dataRecord) {
 		long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
 		long gap = lastRecord != 0 ? (time - lastRecord) : -1;
-		if (gap > getGapTreshold()) {
+		if (gap > getGapThreshold()) {
 			reset();
 		}
 		int[] data;
@@ -81,7 +81,7 @@ public abstract class Analysis {
 	public abstract void nextSample(int v, long time);
 
 	@SuppressWarnings("SameReturnValue")
-	public abstract long getGapTreshold();
+	public abstract long getGapThreshold();
 
 	public void reset() {
 		station.reset();

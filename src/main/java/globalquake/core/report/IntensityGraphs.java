@@ -1,6 +1,6 @@
 package globalquake.core.report;
 
-import globalquake.geo.IntensityTable;
+import globalquake.intensity.IntensityTable;
 import globalquake.utils.Scale;
 
 import java.awt.BasicStroke;
