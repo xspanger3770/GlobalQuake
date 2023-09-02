@@ -3,15 +3,14 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
-import globalquake.intensity.IntensityTable;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.sounds.Sounds;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EarthquakeAnalysis {
 
@@ -26,12 +25,12 @@ public class EarthquakeAnalysis {
 
     private final List<Earthquake> earthquakes;
 
-    private final ClusterAnalysis clusterAnalysis;
+    private ClusterAnalysis clusterAnalysis;
 
     public boolean testing = false;
 
-    public EarthquakeAnalysis(ClusterAnalysis clusterAnalysis) {
-       this(clusterAnalysis, new MonitorableCopyOnWriteArrayList<>());
+    public EarthquakeAnalysis() {
+        earthquakes = new MonitorableCopyOnWriteArrayList<>();
     }
 
     public EarthquakeAnalysis(ClusterAnalysis clusterAnalysis, List<Earthquake> earthquakes){
@@ -44,6 +43,13 @@ public class EarthquakeAnalysis {
     }
 
     public void run() {
+        if(clusterAnalysis == null){
+            if(GlobalQuake.instance == null){
+                return;
+            } else {
+                clusterAnalysis = GlobalQuake.instance.getClusterAnalysis();
+            }
+        }
         clusterAnalysis.getClustersReadLock().lock();
         try {
             clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));

@@ -69,9 +69,8 @@ public class ClusterAnalysis {
                                 event.getLatFromStation(), event.getLonFromStation());
                         long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                                 TauPTravelTimeCalculator.toAngle(distGC)) * 1000);
-                        long actualTravel = Math.abs(event.getpWave() - earthquake.getOrigin());
-                        boolean abandon = event.getpWave() < earthquake.getOrigin()
-                                || Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
+                        long actualTravel = event.getpWave() - earthquake.getOrigin();
+                        boolean abandon = Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
                         if (!abandon) {
                             map.put(earthquake, event);
                             break;

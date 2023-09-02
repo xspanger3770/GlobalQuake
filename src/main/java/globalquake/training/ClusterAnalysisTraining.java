@@ -27,6 +27,7 @@ public class ClusterAnalysisTraining {
         public double sensitivityMultiplier = 1;
 
         public List<SimulatedEarthquake> passedPWaves = new ArrayList<>();
+        public List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
 
         public SimulatedStation(double lat, double lon, double alt) {
             super("", "", "", "", lat, lon, alt, nextId++, null);
@@ -42,15 +43,17 @@ public class ClusterAnalysisTraining {
         Regions.enabled = false;
 
         System.out.println("Running");
+        long a = System.currentTimeMillis();
         runTest(1000);
+        System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis()-a) / 1000.0);
     }
 
     public static void runTest(int numStations) {
         long time = 0;
-        long maxTime = 20 * MINUTE;
+        long maxTime = 21 * MINUTE;
         long step = 1000;
 
-        Random r = new Random(11);
+        Random r = new Random(0);
 
         List<AbstractStation> stations = new ArrayList<>();
 
@@ -121,6 +124,7 @@ public class ClusterAnalysisTraining {
         System.out.println("\n========== SUMMARY ==========");
         System.out.printf("Counts: %d | %d | %d%n", notDetected, oneDetected, tooManyDetected);
         System.err.println("Final cluster count: "+clusterAnalysis.getClusters().size());
+        System.err.println("Final quakes count: "+earthquakes.size());
         System.out.println("Average err: "+(errSum / errC)+" ms");
         if(!errs.isEmpty()) {
             errs.sort(Long::compare);
@@ -141,19 +145,20 @@ public class ClusterAnalysisTraining {
             SimulatedStation station = (SimulatedStation) abstractStation;
 
             double distGC = GeoUtils.greatCircleDistance(earthquake.lat, earthquake.lon, station.getLatitude(), station.getLongitude());
-            double rawTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.depth, TauPTravelTimeCalculator.toAngle(distGC));
+            double rawTravelP = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.depth, TauPTravelTimeCalculator.toAngle(distGC));
+            double rawTravelPKIKP = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(earthquake.depth, TauPTravelTimeCalculator.toAngle(distGC));
 
-            if(rawTravel == TauPTravelTimeCalculator.NO_ARRIVAL){
-                continue;
-            }
+            long expectedTravelP = (long) ((rawTravelP
+                    + EarthquakeAnalysis.getElevationCorrection(station.getAlt()))
+                    * 1000);
 
-            long expectedTravel = (long) ((rawTravel
+            long expectedTravelPKIKP = (long) ((rawTravelPKIKP
                     + EarthquakeAnalysis.getElevationCorrection(station.getAlt()))
                     * 1000);
 
             long actualTravel = time - earthquake.origin;
 
-            if(actualTravel >= expectedTravel && !station.passedPWaves.contains(earthquake)){
+            if(rawTravelP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelP && !station.passedPWaves.contains(earthquake)){
                 station.passedPWaves.add(earthquake);
 
                 double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC);
@@ -162,7 +167,24 @@ public class ClusterAnalysisTraining {
                 if(expectedRatio > 8.0) {
                     Event event = new Event(station.getAnalysis());
                     event.maxRatio = expectedRatio;
-                    event.setpWave(earthquake.origin + expectedTravel);
+                    event.setpWave(earthquake.origin + expectedTravelP);
+
+                    station.getAnalysis().getDetectedEvents().add(event);
+                    eventC++;
+                }
+            }
+
+
+            if(rawTravelPKIKP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelPKIKP && !station.passedPKIKPWaves.contains(earthquake)){
+                station.passedPKIKPWaves.add(earthquake);
+
+                double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC) * 1.5;
+                expectedRatio *= station.sensitivityMultiplier;
+
+                if(expectedRatio > 8.0) {
+                    Event event = new Event(station.getAnalysis());
+                    event.maxRatio = expectedRatio;
+                    event.setpWave(earthquake.origin + expectedTravelP);
 
                     station.getAnalysis().getDetectedEvents().add(event);
                     eventC++;

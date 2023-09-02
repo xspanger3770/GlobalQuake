@@ -57,7 +57,7 @@ public class EarthquakeAnalysisTraining {
     private static int run = 0;
 
     public static long runTest() {
-        EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis(null);
+        EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 
         List<FakeStation> fakeStations = new ArrayList<>();
