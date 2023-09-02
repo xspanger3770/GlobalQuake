@@ -49,10 +49,10 @@ public class ClusterAnalysisTraining {
         Settings.hypocenterDetectionResolution = 40.0;
 
         System.out.println("Running");
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 1; i++) {
             SimulatedStation.nextId = 0;
             long a = System.currentTimeMillis();
-            runTest(100);
+            runTest(3000);
             System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis() - a) / 1000.0);
             Thread.sleep(2000);
         }
@@ -67,7 +67,7 @@ public class ClusterAnalysisTraining {
 
         List<AbstractStation> stations = new ArrayList<>();
 
-        double maxDist = 180.0;
+        double maxDist = 180;
 
         for(int i  =0; i < numStations; i++){
             double dist = r.nextDouble() * maxDist / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE;
@@ -91,7 +91,7 @@ public class ClusterAnalysisTraining {
         long origin = 0;
         double lat = 0;
         double lon = 0;
-        double depth = 500;
+        double depth = 0;
         double mag = 6.0;
 
         int notDetected = 0;

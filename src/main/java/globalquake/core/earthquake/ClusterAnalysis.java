@@ -190,6 +190,22 @@ public class ClusterAnalysis {
     }
 
     private void expandCluster(Cluster c) {
+        if(c.getEarthquake() != null){
+            ArrayList<Event> newEvents = new ArrayList<>();
+
+            mainLoop:
+            for(AbstractStation station : stations){
+                for(Event event:station.getAnalysis().getDetectedEvents()){
+                    if(!c.containsStation(station) && couldBeArrival(event, c.getEarthquake())){
+                        newEvents.add(event);
+                        continue mainLoop;
+                    }
+                }
+            }
+
+            append(c, newEvents);
+            return;
+        }
         ArrayList<Event> list = new ArrayList<>(c.getAssignedEvents());
         while (!list.isEmpty()) {
             ArrayList<Event> newEvents = new ArrayList<>();
@@ -218,8 +234,6 @@ public class ClusterAnalysis {
             list.clear();
             list.addAll(newEvents);
         }
-
-        // c.removeShittyEvents();
     }
 
     private boolean _contains(ArrayList<Event> newEvents, AbstractStation station) {
