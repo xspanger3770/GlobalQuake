@@ -130,6 +130,8 @@ public class ClusterAnalysis {
             list.clear();
             list.addAll(newEvents);
         }
+
+        System.out.printf("Cluster #%d now contains %d events%n", c.getId(), c.getAssignedEvents().size());
         // c.removeShittyEvents();
     }
 

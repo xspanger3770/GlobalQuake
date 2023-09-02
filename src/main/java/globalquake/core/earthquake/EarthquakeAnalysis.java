@@ -11,6 +11,7 @@ import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EarthquakeAnalysis {
 
@@ -25,10 +26,17 @@ public class EarthquakeAnalysis {
 
     private final List<Earthquake> earthquakes;
 
+    private final ClusterAnalysis clusterAnalysis;
+
     public boolean testing = false;
 
-    public EarthquakeAnalysis() {
-        this.earthquakes = new MonitorableCopyOnWriteArrayList<>();
+    public EarthquakeAnalysis(ClusterAnalysis clusterAnalysis) {
+       this(clusterAnalysis, new MonitorableCopyOnWriteArrayList<>());
+    }
+
+    public EarthquakeAnalysis(ClusterAnalysis clusterAnalysis, List<Earthquake> earthquakes){
+        this.clusterAnalysis = clusterAnalysis;
+        this.earthquakes = earthquakes;
     }
 
     public List<Earthquake> getEarthquakes() {
@@ -36,11 +44,11 @@ public class EarthquakeAnalysis {
     }
 
     public void run() {
-        GlobalQuake.instance.getClusterAnalysis().getClustersReadLock().lock();
+        clusterAnalysis.getClustersReadLock().lock();
         try {
-            GlobalQuake.instance.getClusterAnalysis().getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
+            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
         } finally {
-            GlobalQuake.instance.getClusterAnalysis().getClustersReadLock().unlock();
+            clusterAnalysis.getClustersReadLock().unlock();
         }
         getEarthquakes().parallelStream().forEach(this::calculateMagnitude);
     }
@@ -462,7 +470,7 @@ public class EarthquakeAnalysis {
                 + bestHypocenter.correctStations + " w " + events.size() + " err " + bestHypocenter.totalErr);
         boolean valid = pct > finderSettings.correctnessThreshold();
         if (!valid && cluster.getEarthquake() != null) {
-            GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
+            getEarthquakes().remove(cluster.getEarthquake());
             cluster.setEarthquake(null);
         }
 
@@ -470,7 +478,7 @@ public class EarthquakeAnalysis {
             if (cluster.getEarthquake() == null) {
                 if (!testing) {
                     Sounds.playSound(Sounds.incoming);
-                    GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+                    getEarthquakes().add(earthquake);
                 }
                 cluster.setEarthquake(earthquake);
             } else {
@@ -570,7 +578,9 @@ public class EarthquakeAnalysis {
                     Math.min(STORE_TABLE.length - 1, (int) earthquake.getMag()))];
             if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                     && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
-                GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
+                if(GlobalQuake.instance != null) {
+                    GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
+                }
                 toBeRemoved.add(earthquake);
             }
         }

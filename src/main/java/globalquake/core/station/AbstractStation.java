@@ -77,9 +77,9 @@ public abstract class AbstractStation {
 		return getDelayMS() != -1 && getDelayMS() < 5 * 60 * 1000;
 	}
 
-	public abstract boolean hasNoDisplayableData() ;
+	public boolean hasNoDisplayableData() { return true; };
 	
-	public abstract long getDelayMS();
+	public  long getDelayMS() { return 0;};
 
 	public void second() {
 		if (getAnalysis()._maxRatio > 0) {
@@ -115,7 +115,7 @@ public abstract class AbstractStation {
 		return nearbyStations;
 	}
 
-	public abstract void analyse();
+	public void analyse() {};
 
 	public SeedlinkNetwork getSeedlinkNetwork() {
 		return seedlinkNetwork;

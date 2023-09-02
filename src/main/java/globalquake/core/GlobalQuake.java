@@ -32,7 +32,7 @@ public class GlobalQuake {
 		this.stationDatabaseManager = stationDatabaseManager;
 
 		clusterAnalysis = new ClusterAnalysis();
-		earthquakeAnalysis = new EarthquakeAnalysis();
+		earthquakeAnalysis = new EarthquakeAnalysis(clusterAnalysis);
 		alertManager = new AlertManager();
 		archive = new EarthquakeArchive();
 		globalStationManager = new GlobalStationManager();
