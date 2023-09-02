@@ -5,6 +5,7 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.sounds.Sounds;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class ClusterAnalysis {
         this.nextClusterId = 0;
     }
 
-    public ClusterAnalysis(){
+    public ClusterAnalysis() {
         this(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes(), GlobalQuake.instance.getStationManager().getStations());
     }
 
@@ -46,15 +47,17 @@ public class ClusterAnalysis {
     public void run() {
         clustersWriteLock.lock();
         try {
+            assignEventsToExistingEarthquakeClusters();
             expandExistingClusters();
             createNewClusters();
             updateClusters();
-        }finally {
+        } finally {
             clustersWriteLock.unlock();
         }
     }
 
-    @SuppressWarnings({"unused"})
+    private static final double DISTANCE_INACCURACY_MULTIPLIER = 2.0;
+
     private void assignEventsToExistingEarthquakeClusters() {
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
@@ -62,20 +65,34 @@ public class ClusterAnalysis {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
                     for (Earthquake earthquake : earthquakes) {
-                        if (!earthquake.getCluster().isActive()) {
-                            continue;
-                        }
+                        long actualTravel = event.getpWave() - earthquake.getOrigin();
+
                         double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
                                 event.getLatFromStation(), event.getLonFromStation());
-                        long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-                                TauPTravelTimeCalculator.toAngle(distGC)) * 1000);
-                        long actualTravel = event.getpWave() - earthquake.getOrigin();
-                        boolean abandon = Math.abs(expectedTravel - actualTravel) > 2500 + distGC * 2.0;
-                        if (!abandon) {
-                            map.put(earthquake, event);
-                            break;
+                        double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                                TauPTravelTimeCalculator.toAngle(distGC));
+
+                        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
+                        if(expectedIntensity < 1){
+                            continue;
                         }
 
+                        if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+                            long expectedTravelP = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
+                            if (Math.abs(expectedTravelP - actualTravel) < 2500 + distGC * DISTANCE_INACCURACY_MULTIPLIER) {
+                                map.put(earthquake, event);
+                            }
+                        }
+
+                        double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(earthquake.getDepth(),
+                                TauPTravelTimeCalculator.toAngle(distGC));
+
+                        if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+                            long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
+                            if (Math.abs(expectedTravel - actualTravel) < 2500 + distGC * DISTANCE_INACCURACY_MULTIPLIER) {
+                                map.put(earthquake, event);
+                            }
+                        }
                     }
 
                     for (Entry<Earthquake, Event> entry : map.entrySet()) {
@@ -100,7 +117,6 @@ public class ClusterAnalysis {
     }
 
     private void expandCluster(Cluster c) {
-        // no need to sync here
         ArrayList<Event> list = new ArrayList<>(c.getAssignedEvents());
         while (!list.isEmpty()) {
             ArrayList<Event> newEvents = new ArrayList<>();
