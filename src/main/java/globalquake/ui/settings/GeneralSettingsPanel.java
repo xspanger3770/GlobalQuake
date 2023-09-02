@@ -65,7 +65,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
                 """
                         Alert dialog will show if an earthquake occurs\s
                          nearby your home location and will display P and S wave\s
-                         arrival time and estimated intensity (in Shindo)""");
+                         arrival time and estimated intensity""");
 
 		textAreaDialogs.setBorder(new EmptyBorder(0,5,5,5));
 		textAreaDialogs.setLineWrap(true);
