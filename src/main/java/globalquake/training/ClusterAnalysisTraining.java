@@ -10,6 +10,7 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
 import globalquake.regions.Regions;
+import globalquake.ui.settings.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class ClusterAnalysisTraining {
 
     static class SimulatedStation extends AbstractStation {
 
-        private static int nextId = 0;
+        public static int nextId = 0;
 
         public double sensitivityMultiplier = 1;
 
@@ -44,11 +45,17 @@ public class ClusterAnalysisTraining {
         System.out.println("Init...");
         TauPTravelTimeCalculator.init();
         Regions.enabled = false;
+        Settings.parallelHypocenterLocations = true;
+        Settings.hypocenterDetectionResolution = 40.0;
 
         System.out.println("Running");
-        long a = System.currentTimeMillis();
-        runTest(1000);
-        System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis()-a) / 1000.0);
+        for(int i = 0; i < 10; i++) {
+            SimulatedStation.nextId = 0;
+            long a = System.currentTimeMillis();
+            runTest(100);
+            System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis() - a) / 1000.0);
+            Thread.sleep(2000);
+        }
     }
 
     public static void runTest(int numStations) {
@@ -56,7 +63,7 @@ public class ClusterAnalysisTraining {
         long maxTime = 21 * MINUTE;
         long step = 1000;
 
-        Random r = new Random(100);
+        Random r = new Random();
 
         List<AbstractStation> stations = new ArrayList<>();
 
@@ -84,7 +91,7 @@ public class ClusterAnalysisTraining {
         long origin = 0;
         double lat = 0;
         double lon = 0;
-        double depth = 0;
+        double depth = 500;
         double mag = 6.0;
 
         int notDetected = 0;
@@ -96,6 +103,7 @@ public class ClusterAnalysisTraining {
         List<Long> errs = new ArrayList<>();
 
         int maxQuakes = 0;
+        int maxClusters = 0;
 
         SimulatedEarthquake earthquake = new SimulatedEarthquake(lat, lon, depth, origin, mag);
 
@@ -119,6 +127,10 @@ public class ClusterAnalysisTraining {
                 maxQuakes = earthquakes.size();
             }
 
+            if(clusterAnalysis.getClusters().size() > maxClusters){
+                maxClusters = clusterAnalysis.getClusters().size();
+            }
+
             for(Earthquake earthquake1:earthquakes){
                 long err = Math.abs(earthquake.origin - earthquake1.getOrigin());
                 errSum+=err;
@@ -126,13 +138,14 @@ public class ClusterAnalysisTraining {
                 errs.add(err);
             }
 
-            time += step * 5;
+            time += step;
         }
 
         System.out.println("Total Events: "+eventC);
         System.out.println("\n========== SUMMARY ==========");
         System.out.printf("Counts: %d | %d | %d%n", notDetected, oneDetected, tooManyDetected);
         System.err.println("Final cluster count: "+clusterAnalysis.getClusters().size());
+        System.err.println("Max clusters count: "+maxClusters);
         System.err.println("Final quakes count: "+earthquakes.size());
         System.err.println("Max quakes count: "+maxQuakes);
         System.out.println("Average err: "+(errSum / errC)+" ms");

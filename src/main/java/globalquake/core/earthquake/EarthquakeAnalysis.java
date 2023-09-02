@@ -573,7 +573,7 @@ public class EarthquakeAnalysis {
         }
     }
 
-    public static final int[] STORE_TABLE = {3, 3, 3, 5, 7, 10, 15, 25, 40, 40};
+    public static final int[] STORE_TABLE = {3, 3, 3, 5, 7, 30};
 
     public void second() {
         Iterator<Earthquake> it = earthquakes.iterator();

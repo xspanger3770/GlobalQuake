@@ -47,7 +47,7 @@ public class ClusterAnalysis {
     public void run() {
         clustersWriteLock.lock();
         try {
-            assignEventsToExistingEarthquakeClusters();
+            //assignEventsToExistingEarthquakeClusters(); VERY CONTROVERSIAL
             expandExistingClusters();
             createNewClusters();
             mergeClusters();
@@ -144,8 +144,9 @@ public class ClusterAnalysis {
 
         double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
                 event.getLatFromStation(), event.getLonFromStation());
+        double angle = TauPTravelTimeCalculator.toAngle(distGC);
         double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(distGC));
+                angle);
 
         double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
         if(expectedIntensity < 1){
@@ -159,8 +160,18 @@ public class ClusterAnalysis {
             }
         }
 
+        double expectedTravelPKPRaw = TauPTravelTimeCalculator.getPKPWaveTravelTime(earthquake.getDepth(),
+                angle);
+
+        if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
+            long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
+            if (Math.abs(expectedTravel - actualTravel) < 2500 + expectedTravel * 0.02) {
+                return true;
+            }
+        }
+
         double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(distGC));
+                angle);
 
         if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
@@ -208,7 +219,6 @@ public class ClusterAnalysis {
             list.addAll(newEvents);
         }
 
-        System.out.printf("Cluster #%d now contains %d events%n", c.getId(), c.getAssignedEvents().size());
         // c.removeShittyEvents();
     }
 

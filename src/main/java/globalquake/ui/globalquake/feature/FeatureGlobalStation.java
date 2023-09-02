@@ -107,15 +107,22 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
         var centerPonint = renderer.projectPoint(point3D);
 
-        if(DEBUG_CLUSTERS){
-          if(event != null && event.assignedCluster != null){
-              Color c = event.assignedCluster.color;
+        graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
-              graphics.setColor(c);
-              graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-              graphics.draw(elementStationSquare.getShape());
-              graphics.drawString("Cluster #"+event.assignedCluster.getId(), (int) centerPonint.x, (int) centerPonint.y);
-          }
+        if(DEBUG_CLUSTERS){
+            int _y = (int) centerPonint.y + 4;
+            for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
+                if(event2.assignedCluster != null){
+                    Color c = event2.assignedCluster.color;
+
+                    graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+                    graphics.setColor(c);
+                    graphics.draw(elementStationSquare.getShape());
+                    graphics.drawString("Cluster #"+event2.assignedCluster.getId(), (int) centerPonint.x + 12, _y);
+                    _y += 16;
+                }
+            }
         } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
@@ -130,7 +137,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             graphics.setColor(c);
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics.draw(elementStationSquare.getShape());
-
         }
 
 

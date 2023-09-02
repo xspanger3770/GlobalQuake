@@ -45,11 +45,10 @@ public class Cluster {
 
 		// Generate random values for the red, green, and blue components
 		int red = random.nextInt(256); // 0-255
-		int green = random.nextInt(256); // 0-255
 		int blue = random.nextInt(256); // 0-255
 
 		// Create a new Color object with the random values
-		return new Color(red, green, blue);
+		return new Color(red, 255, blue);
 	}
 
 	// 20 selected
