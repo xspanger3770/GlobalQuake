@@ -267,18 +267,30 @@ public class StationMonitorPanel extends JPanel {
 
 		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
 			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
-			long arrival = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+			long arrivalP = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
 					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
-			double x = getX(arrival);
+
+			long arrivalS = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
+
+			double xP = getX(arrivalP);
+			double xS = getX(arrivalS);
+
 			g.setColor(Color.magenta);
 			g.setStroke(dashed);
-			g.draw(new Line2D.Double(x, 0, x, getHeight()));
+			g.draw(new Line2D.Double(xP, 0, xP, getHeight()));
+			g.draw(new Line2D.Double(xS, 0, xS, getHeight()));
 
-			double x1 = getX((long) (arrival - Settings.pWaveInaccuracyThreshold));
-			double x2 = getX((long) (arrival + Settings.pWaveInaccuracyThreshold));
+			double x1 = getX((long) (arrivalP - Settings.pWaveInaccuracyThreshold));
+			double x2 = getX((long) (arrivalP + Settings.pWaveInaccuracyThreshold));
+			double x3 = getX((long) (arrivalS - Settings.pWaveInaccuracyThreshold));
+			double x4 = getX((long) (arrivalS + Settings.pWaveInaccuracyThreshold));
 
-			g.setColor(new Color(255, 0, 0, 100));
+			g.setColor(new Color(0, 0, 255, 80));
 			g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
+
+			g.setColor(new Color(255, 0, 0, 80));
+			g.fill(new Rectangle2D.Double(x3, 0, x4 - x3, h));
 		}
 
 		g.setColor(Color.black);

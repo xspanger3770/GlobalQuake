@@ -130,6 +130,7 @@ public class ClusterAnalysis {
                         Event event2 = entry.getValue();
                         if (!cluster.containsStation(event2.getAnalysis().getStation())) {
                             cluster.getAssignedEvents().putIfAbsent(station, event2);
+                            event2.assignedCluster = cluster;
                         }
                     }
                 }
@@ -196,6 +197,7 @@ public class ClusterAnalysis {
                 for(Event event:station.getAnalysis().getDetectedEvents()){
                     if(!c.containsStation(station) && couldBeArrival(event, c.getEarthquake())){
                         c.getAssignedEvents().putIfAbsent(station, event);
+                        event.assignedCluster = c;
                         continue mainLoop;
                     }
                 }
@@ -224,6 +226,7 @@ public class ClusterAnalysis {
 
             for(Event event:newEvents){
                 c.getAssignedEvents().putIfAbsent(event.getAnalysis().getStation(), event);
+                event.assignedCluster = c;
             }
 
             list.clear();
