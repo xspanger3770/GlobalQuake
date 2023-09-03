@@ -19,10 +19,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class EarthquakeReporter {
 	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
+	private static final DateTimeFormatter fileFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd_HH:mm:ss").withZone(ZoneId.systemDefault());
 	private static double centerLat = 49.7;
 	private static double centerLon = 15.65;
 	private static double scroll = 8;
@@ -35,7 +38,7 @@ public class EarthquakeReporter {
 
 	public static void report(Earthquake earthquake) {
 		File folder = new File(ANALYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
-				earthquake.getRegion().replace(' ', '_'), Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
+				earthquake.getRegion().replace(' ', '_'), fileFormat.format(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
 		if (!folder.exists()) {
 			if(!folder.mkdirs()){
 				return;
