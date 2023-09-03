@@ -188,7 +188,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 18);
 
-                str = Settings.selectedDateTimeFormat().format(Instant.ofEpochMilli(quake.getOrigin()));
+                str = Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()));
                 g.setFont(new Font("Calibri", Font.PLAIN, 16));
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 42);

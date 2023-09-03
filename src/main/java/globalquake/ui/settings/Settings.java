@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
@@ -48,7 +49,7 @@ public final class Settings {
 
 	public static Integer intensityScaleIndex;
 	
-	public static final boolean reportsEnabled = false; // not available ATM
+	public static Boolean reportsEnabled = false;
 	public static Boolean enableSound = true;
 	public static Boolean oldEventsTimeFilterEnabled;
 	public static Double oldEventsTimeFilter;
@@ -59,17 +60,28 @@ public final class Settings {
 
 	public static Double oldEventsOpacity;
 
-	// TODO
 	public static Boolean displayClusters;
 	public static Integer selectedDateFormatIndex;
+
 	public static final DateTimeFormatter[] DATE_FORMATS = {
-			DateTimeFormatter.ofPattern("dd.MM.yyyy_HH:mm:ss").withZone(ZoneId.systemDefault()),
-			DateTimeFormatter.ofPattern("MM.dd.yyyy_HH:mm:ss").withZone(ZoneId.systemDefault()),
-			DateTimeFormatter.ofPattern("yyyy.MM.dd_HH:mm:ss").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()),
 	};
+
+	public static Boolean use24HFormat;
 	public static Double stationIntensityVisibilityZoomLevel;
 
-	public static DateTimeFormatter selectedDateTimeFormat(){
+	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
+
+	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+        return selectedDateTimeFormat().format(temporalAccessor) +
+				" " +
+				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
+	}
+
+	private static DateTimeFormatter selectedDateTimeFormat(){
 		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
 		return DATE_FORMATS[i];
 	}
@@ -85,9 +97,11 @@ public final class Settings {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
 
+		loadProperty("reportsEnabled", "false");
 		loadProperty("displayClusters", "false");
 		loadProperty("selectedDateFormatIndex", "0");
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
+		loadProperty("use24HFormat", "true");
 
 		loadProperty("enableAlarmDialogs", "false");
 		loadProperty("homeLat", "0.0");

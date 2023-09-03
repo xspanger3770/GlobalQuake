@@ -1,30 +1,25 @@
 package globalquake.core.report;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.Event;
+import globalquake.core.station.AbstractStation;
+import globalquake.geo.GeoUtils;
+import globalquake.main.Main;
+import globalquake.regions.Regions;
+import globalquake.ui.settings.Settings;
+import globalquake.utils.Scale;
+import org.geojson.LngLatAlt;
+import org.tinylog.Logger;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
-
-import globalquake.regions.Regions;
-import org.geojson.LngLatAlt;
-
-import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Event;
-import globalquake.main.Main;
-import globalquake.geo.GeoUtils;
-import globalquake.utils.Scale;
-import org.tinylog.Logger;
 
 public class EarthquakeReporter {
 	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
@@ -40,7 +35,7 @@ public class EarthquakeReporter {
 
 	public static void report(Earthquake earthquake) {
 		File folder = new File(ANALYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
-				earthquake.getRegion().replace(' ', '_'), dateFormat.format(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
+				earthquake.getRegion().replace(' ', '_'), Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
 		if (!folder.exists()) {
 			if(!folder.mkdirs()){
 				return;

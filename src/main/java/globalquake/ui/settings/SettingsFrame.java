@@ -80,6 +80,7 @@ public class SettingsFrame extends JFrame{
 		panels.add(new PerformanceSettingsPanel());
 		panels.add(new GraphicsSettingsPanel());
 		panels.add(new HypocenterAnalysisSettingsPanel());
+		panels.add(new DebugSettingsPanel());
 
 		for (SettingsPanel panel : panels) {
 			tabbedPane.addTab(panel.getTitle(), panel);

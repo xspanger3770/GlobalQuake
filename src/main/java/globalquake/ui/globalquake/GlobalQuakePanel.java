@@ -102,7 +102,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
         if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
-            str = Settings.selectedDateTimeFormat().format(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
+            str = Settings.formatDateTime(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
             if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
                 g.setColor(Color.white);
             }
@@ -203,7 +203,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.drawString(quake.getRegion(), y + 3, x + 44);
             g.setFont(new Font("Calibri", Font.BOLD, 18));
 
-            g.drawString(Settings.selectedDateTimeFormat().format(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
+            g.drawString(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
 
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);

@@ -14,7 +14,7 @@ public class LastUpdateRenderer<E> extends TableCellRendererAdapter<E, LocalDate
 		if(value == null){
 			return "Never";
 		}
-		return Settings.selectedDateTimeFormat().format(value);
+		return Settings.formatDateTime(value);
 	}
 
 }

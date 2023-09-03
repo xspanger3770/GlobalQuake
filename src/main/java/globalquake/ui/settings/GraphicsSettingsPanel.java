@@ -3,6 +3,8 @@ package globalquake.ui.settings;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 public class GraphicsSettingsPanel extends SettingsPanel{
 
@@ -15,6 +17,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxEnableMagnitudeFilter;
     private JTextField textFieldMagnitudeFilter;
     private JSlider sliderOpacity;
+    private JComboBox<String> comboBoxDateFormat;
+    private JCheckBox chkBox24H;
 
 
     public GraphicsSettingsPanel() {
@@ -24,11 +28,29 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         createFpsSlider();
         createEventsSettings();
         createOtherSettings();
+        createDateSettings();
 
         // fillers
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 4; i++){
             add(new JPanel());
         }
+    }
+
+    private void createDateSettings() {
+        JPanel dateFormatPanel = new JPanel();
+        dateFormatPanel.setBorder(BorderFactory.createTitledBorder("Date and Time setting"));
+
+        comboBoxDateFormat = new JComboBox<>();
+        Instant now = Instant.now();
+        for(DateTimeFormatter formatter: Settings.DATE_FORMATS){
+            comboBoxDateFormat.addItem(formatter.format(now));
+        }
+
+        dateFormatPanel.add(new JLabel("Preferred date format: "));
+        dateFormatPanel.add(comboBoxDateFormat);
+        dateFormatPanel.add(chkBox24H = new JCheckBox("Use 24 hours format", Settings.use24HFormat));
+
+        add(dateFormatPanel);
     }
 
     private void createOtherSettings() {
@@ -144,6 +166,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
+        Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
+        Settings.use24HFormat = chkBox24H.isSelected();
     }
 
     @Override
