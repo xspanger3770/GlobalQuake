@@ -20,6 +20,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
     private final JTextField searchBar;
     private DragMode dragMode = DragMode.NONE;
     private final JCheckBox chkBoxShowUnavailable;
+    public static JPanel suggestionPanel = new JPanel();
 
     public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
         setLayout(new BorderLayout());
@@ -32,6 +33,9 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         searchBar = new SearchBar();
         selectAll.addActionListener(this);
         deselectAll.addActionListener(this);
+        suggestionPanel.setVisible(false);
+        suggestionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        suggestionPanel.setPreferredSize(new Dimension(375, 50));
 
         togglePanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -154,6 +158,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
 
         searchBar.setMaximumSize(new Dimension(375,40));
         toolBar.add(searchBar);
+        toolBar.add(suggestionPanel);
         toolBar.addSeparator();
 
         toolBar.add(selectButton);
