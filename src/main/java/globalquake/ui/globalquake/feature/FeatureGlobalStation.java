@@ -1,6 +1,5 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.earthquake.Event;
 import globalquake.core.station.AbstractStation;
@@ -26,9 +25,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     public static final double RATIO_YELLOW = 2000.0;
     public static final double RATIO_RED = 20000.0;
-
-    // TODO dont forget to turn off!!!
-    private static final boolean DEBUG_CLUSTERS = true;
 
     public FeatureGlobalStation(List<AbstractStation> globalStations) {
         super(2);
@@ -109,7 +105,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
-        if(true){
+        if(Settings.displayClusters){
             int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
                 if(event2.assignedCluster != null){
@@ -160,7 +156,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
             }
         }
-        if (scroll < 0.10 || (mouseNearby && scroll < 1)) {
+        if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));

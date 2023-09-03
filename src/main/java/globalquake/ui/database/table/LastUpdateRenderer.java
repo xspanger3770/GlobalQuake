@@ -1,12 +1,12 @@
 package globalquake.ui.database.table;
 
+import globalquake.ui.settings.Settings;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class LastUpdateRenderer<E> extends TableCellRendererAdapter<E, LocalDateTime> {
-
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(ZoneId.systemDefault());
 
 	@SuppressWarnings("unused")
 	@Override
@@ -14,7 +14,7 @@ public class LastUpdateRenderer<E> extends TableCellRendererAdapter<E, LocalDate
 		if(value == null){
 			return "Never";
 		}
-		return formatter.format(value);
+		return Settings.selectedDateTimeFormat().format(value);
 	}
 
 }

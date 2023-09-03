@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
@@ -57,6 +59,21 @@ public final class Settings {
 
 	public static Double oldEventsOpacity;
 
+	// TODO
+	public static Boolean displayClusters;
+	public static Integer selectedDateFormatIndex;
+	public static final DateTimeFormatter[] DATE_FORMATS = {
+			DateTimeFormatter.ofPattern("dd.MM.yyyy_HH:mm:ss").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("MM.dd.yyyy_HH:mm:ss").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("yyyy.MM.dd_HH:mm:ss").withZone(ZoneId.systemDefault()),
+	};
+	public static Double stationIntensityVisibilityZoomLevel;
+
+	public static DateTimeFormatter selectedDateTimeFormat(){
+		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
+		return DATE_FORMATS[i];
+	}
+
 	static {
 		load();
 	}
@@ -67,6 +84,10 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("displayClusters", "false");
+		loadProperty("selectedDateFormatIndex", "0");
+		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
 
 		loadProperty("enableAlarmDialogs", "false");
 		loadProperty("homeLat", "0.0");
