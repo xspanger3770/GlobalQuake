@@ -75,6 +75,8 @@ public class StationMonitor extends GQFrame {
 			}
 		});
 
+		panel.add(chkBoxDisable);
+
 		return panel;
 	}
 
