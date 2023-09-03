@@ -113,6 +113,7 @@ public class ClusterAnalysis {
     private static final double DISTANCE_INACCURACY_MULTIPLIER = 0.01;
     private static final long DISTANCE_INACCURACY_BASE = 5000;
 
+    @SuppressWarnings("unused")
     private void assignEventsToExistingEarthquakeClusters() {
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
@@ -139,6 +140,7 @@ public class ClusterAnalysis {
 
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     private boolean couldBeArrival(Event event, Earthquake earthquake) {
         long actualTravel = event.getpWave() - earthquake.getOrigin();
 
@@ -234,6 +236,7 @@ public class ClusterAnalysis {
         }
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     private boolean potentialArrival(Event ev, Event e, double dist) {
         if (!ev.isBroken() && ev.getpWave() > 0 && ev.assignedCluster == null) {
             long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
@@ -305,7 +308,6 @@ public class ClusterAnalysis {
                     numberOfActiveEvents++;
                 }
             }
-            c.active = numberOfActiveEvents >= minimum;
             if (numberOfActiveEvents < minimum && System.currentTimeMillis() - c.getLastUpdate() > 2 * 60 * 1000) {
                 System.out.println("Cluster #" + c.getId() + " died");
                 toBeRemoved.add(c);

@@ -12,21 +12,11 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
     private JSlider sliderMinStations;
 
     public HypocenterAnalysisSettingsPanel() {
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-        contentPanel.add(createMinStationsSetting());
-        contentPanel.add(createSettingPWave());
-        contentPanel.add(createSettingCorrectness());
-
-        JScrollPane scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setPreferredSize(new Dimension(300, 300));
-
-        javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
-
-        add(scrollPane);
+        add(createMinStationsSetting());
+        add(createSettingPWave());
+        add(createSettingCorrectness());
     }
 
     private Component createMinStationsSetting() {

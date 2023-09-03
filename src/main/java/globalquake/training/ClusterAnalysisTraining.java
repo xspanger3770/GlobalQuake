@@ -15,6 +15,7 @@ import globalquake.ui.settings.Settings;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@SuppressWarnings("unused")
 public class ClusterAnalysisTraining {
 
     private static final int MINUTE = 1000 * 60;
@@ -28,8 +29,8 @@ public class ClusterAnalysisTraining {
 
         public double sensitivityMultiplier = 1;
 
-        public List<SimulatedEarthquake> passedPWaves = new ArrayList<>();
-        public List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
+        public final List<SimulatedEarthquake> passedPWaves = new ArrayList<>();
+        public final List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
 
         public SimulatedStation(double lat, double lon, double alt) {
             super("", "", "", "", lat, lon, alt, nextId++, null);
@@ -37,6 +38,7 @@ public class ClusterAnalysisTraining {
 
     }
 
+    @SuppressWarnings("unused")
     static final class SimulatedEarthquake {
         private final double lat;
         private final double lon;

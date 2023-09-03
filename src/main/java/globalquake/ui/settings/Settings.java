@@ -1,6 +1,5 @@
 package globalquake.ui.settings;
 
-import globalquake.core.analysis.Log;
 import globalquake.main.Main;
 import org.tinylog.Logger;
 
@@ -71,6 +70,7 @@ public final class Settings {
 
 	public static Boolean use24HFormat;
 	public static Double stationIntensityVisibilityZoomLevel;
+	public static Boolean hideDeadStations;
 
 	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
@@ -102,6 +102,7 @@ public final class Settings {
 		loadProperty("selectedDateFormatIndex", "0");
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
 		loadProperty("use24HFormat", "true");
+		loadProperty("hideDeadStations", "false");
 
 		loadProperty("enableAlarmDialogs", "false");
 		loadProperty("homeLat", "0.0");

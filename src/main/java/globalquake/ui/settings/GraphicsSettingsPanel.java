@@ -19,21 +19,17 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JSlider sliderOpacity;
     private JComboBox<String> comboBoxDateFormat;
     private JCheckBox chkBox24H;
+    private JCheckBox chkBoxDeadStations;
+    private JSlider sliderIntensityZoom;
 
 
     public GraphicsSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(new EmptyBorder(5,5,5,5));
 
         createFpsSlider();
         createEventsSettings();
-        createOtherSettings();
         createDateSettings();
-
-        // fillers
-        for(int i = 0; i < 4; i++){
-            add(new JPanel());
-        }
+        createOtherSettings();
     }
 
     private void createDateSettings() {
@@ -54,16 +50,34 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     }
 
     private void createOtherSettings() {
-        JPanel otherSettingsPanel = new JPanel(new GridLayout(2, 1));
+        JPanel otherSettingsPanel = new JPanel();
+        otherSettingsPanel.setLayout(new BoxLayout(otherSettingsPanel, BoxLayout.Y_AXIS));
         otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Appearance"));
+
+        JPanel checkBoxes = new JPanel(new GridLayout(3,1));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
-        otherSettingsPanel.add(chkBoxScheme);
+        checkBoxes.add(chkBoxScheme);
 
         chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
         chkBoxAntialiasing.setSelected(Settings.antialiasing);
-        otherSettingsPanel.add(chkBoxAntialiasing);
+        checkBoxes.add(chkBoxAntialiasing);
+
+        checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
+
+        otherSettingsPanel.add(checkBoxes);
+
+        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
+        intensityPanel.add(new JLabel("Display station's intensity at zoom level:"));
+
+        sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
+        sliderIntensityZoom.setMajorTickSpacing(20);
+        sliderIntensityZoom.setMinorTickSpacing(5);
+        sliderIntensityZoom.setPaintTicks(true);
+
+        intensityPanel.add(sliderIntensityZoom);
+        otherSettingsPanel.add(intensityPanel);
 
         add(otherSettingsPanel);
     }
@@ -77,7 +91,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
         timePanel.setBorder(new EmptyBorder(5,5,5,5));
 
-        chkBoxEnableTimeFilter = new JCheckBox("Don't display events older than (hours): ");
+        chkBoxEnableTimeFilter = new JCheckBox("Don't display older than (hours): ");
         chkBoxEnableTimeFilter.setSelected(Settings.oldEventsTimeFilterEnabled);
 
         textFieldTimeFilter = new JTextField(Settings.oldEventsTimeFilter.toString(), 12);
@@ -94,7 +108,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         magnitudePanel.setBorder(new EmptyBorder(5,5,5,5));
         magnitudePanel.setLayout(new BoxLayout(magnitudePanel, BoxLayout.X_AXIS));
 
-        chkBoxEnableMagnitudeFilter = new JCheckBox("Don't display events smaller than (magnitude): ");
+        chkBoxEnableMagnitudeFilter = new JCheckBox("Don't display smaller than (magnitude): ");
         chkBoxEnableMagnitudeFilter.setSelected(Settings.oldEventsMagnitudeFilterEnabled);
 
         textFieldMagnitudeFilter = new JTextField(Settings.oldEventsMagnitudeFilter.toString(), 12);
@@ -168,6 +182,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
         Settings.use24HFormat = chkBox24H.isSelected();
+
+        Settings.hideDeadStations = chkBoxDeadStations.isSelected();
+        Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
     }
 
     @Override

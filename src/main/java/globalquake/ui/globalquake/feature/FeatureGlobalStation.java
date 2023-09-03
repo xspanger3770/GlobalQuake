@@ -78,6 +78,10 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
+        if(Settings.hideDeadStations && !entity.getOriginal().hasData()){
+            return;
+        }
+
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
         if(!elementStationCircle.shouldDraw){

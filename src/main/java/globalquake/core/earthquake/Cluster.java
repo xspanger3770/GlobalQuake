@@ -26,7 +26,6 @@ public class Cluster {
 
 	private int level;
 
-	public boolean active;
 	public int lastEpicenterUpdate;
 
 	public final SoundsInfo soundsInfo;
@@ -37,7 +36,7 @@ public class Cluster {
 	public static final double NONE = -999;
 	public final Object selectedEventsLock;
 
-	public Color color = randomColor();
+	public final Color color = randomColor();
 
 	private Color randomColor() {
 		Random random = new Random();
@@ -184,6 +183,7 @@ public class Cluster {
 		return size;
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	protected boolean containsStation(AbstractStation station) {
 		return getAssignedEvents().containsKey(station);
 	}
@@ -202,10 +202,6 @@ public class Cluster {
 
 	public int getActualLevel() {
 		return level;
-	}
-
-	public boolean isActive() {
-		return active;
 	}
 
 	public void updateAnchor(Hypocenter bestHypocenter) {
