@@ -48,7 +48,7 @@ public class EarthquakeReporter {
 			}
 		}
 
-		for (Event e : earthquake.getCluster().getAssignedEvents()) {
+		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			AbstractStation station = e.getAnalysis().getStation();
 			e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
 					station.getChannelName(), station.getLocationCode(), station.getLatitude(), station.getLongitude(),
@@ -72,7 +72,7 @@ public class EarthquakeReporter {
 		Graphics2D g = img.createGraphics();
 
 		ArrayList<DistanceIntensityRecord> recs = new ArrayList<>();
-		for (Event event : earthquake.getCluster().getAssignedEvents()) {
+		for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
 			double lat = event.report.lat();
 			double lon = event.report.lon();
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
@@ -136,7 +136,7 @@ public class EarthquakeReporter {
 		}
 
 		g.setStroke(new BasicStroke(1f));
-		for (Event event : earthquake.getCluster().getAssignedEvents()) {
+		for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
 			double x = getX(event.report.lon());
 			double y = getY(event.report.lat());
 			double r = 12;

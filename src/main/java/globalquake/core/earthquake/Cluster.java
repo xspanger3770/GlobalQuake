@@ -1,19 +1,18 @@
 package globalquake.core.earthquake;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
 
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Cluster {
 
 	private final int id;
-	private final List<Event> assignedEvents;
+	private final Map<AbstractStation, Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -56,7 +55,7 @@ public class Cluster {
 
 	public Cluster(int id) {
 		this.id = id;
-		this.assignedEvents = new CopyOnWriteArrayList<>();
+		this.assignedEvents = new ConcurrentHashMap<>();
 		this.selectedEventsLock = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;
@@ -79,8 +78,7 @@ public class Cluster {
 		return id;
 	}
 
-	public void addEvent(Event ev) {
-		this.assignedEvents.add(ev);
+	public void addEvent() {
 		lastUpdate = System.currentTimeMillis();
 	}
 
@@ -88,7 +86,7 @@ public class Cluster {
 	 * 
 	 * @return all events that were added to this cluster
 	 */
-	public List<Event> getAssignedEvents() {
+	public Map<AbstractStation, Event> getAssignedEvents() {
 		return assignedEvents;
 	}
 
@@ -105,7 +103,7 @@ public class Cluster {
 
 	private boolean checkForUpdates() {
 		int upd = 0;
-		for (Event e : getAssignedEvents()) {
+		for (Event e : getAssignedEvents().values()) {
 			upd += e.getUpdatesCount();
 		}
 		boolean b = (upd != updateCount);
@@ -119,7 +117,7 @@ public class Cluster {
 		int r1024 = 0;
 		int r8192 = 0;
 		int r32K = 0;
-		for (Event e : assignedEvents) {
+		for (Event e : getAssignedEvents().values()) {
 			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
 					e.getAnalysis().getStation().getLongitude());
 			if (dist > _size) {
@@ -160,7 +158,7 @@ public class Cluster {
 		int n = 0;
 		double sumLat = 0;
 		double sumLon = 0;
-		for (Event e : assignedEvents) {
+		for (Event e : getAssignedEvents().values()) {
 			sumLat += e.getAnalysis().getStation().getLatitude();
 			sumLon += e.getAnalysis().getStation().getLongitude();
 			n++;
@@ -187,13 +185,7 @@ public class Cluster {
 	}
 
 	protected boolean containsStation(AbstractStation station) {
-		for (Event e : getAssignedEvents()) {
-			if (e.getAnalysis().getStation().getId() == station.getId()) {
-				return true;
-			}
-		}
-
-		return false;
+		return getAssignedEvents().containsKey(station);
 	}
 
 	public long getLastUpdate() {

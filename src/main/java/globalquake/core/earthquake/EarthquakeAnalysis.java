@@ -134,7 +134,7 @@ public class EarthquakeAnalysis {
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
         List<PickedEvent> result = new ArrayList<>();
-        for (Event event : cluster.getAssignedEvents()) {
+        for (Event event : cluster.getAssignedEvents().values()) {
             result.add(new PickedEvent(event.getpWave(), event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.maxRatio));
         }
 
@@ -548,7 +548,7 @@ public class EarthquakeAnalysis {
         if (earthquake.getCluster() == null) {
             return;
         }
-        List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
+        Collection<Event> goodEvents = earthquake.getCluster().getAssignedEvents().values();
         if (goodEvents.isEmpty()) {
             return;
         }

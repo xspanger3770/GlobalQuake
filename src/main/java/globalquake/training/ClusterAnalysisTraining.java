@@ -41,7 +41,7 @@ public class ClusterAnalysisTraining {
 
     record SimulatedEarthquake(double lat, double lon, double depth, long origin, double mag){};
 
-    private static final long INACCURACY = 1000;
+    private static final long INACCURACY = 2500;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Init...");
@@ -93,8 +93,8 @@ public class ClusterAnalysisTraining {
         long origin = 0;
         double lat = 0;
         double lon = 0;
-        double depth = 0;
-        double mag = 6.0;
+        double depth = 200;
+        double mag = 7.1;
 
         int notDetected = 0;
         int oneDetected = 0;

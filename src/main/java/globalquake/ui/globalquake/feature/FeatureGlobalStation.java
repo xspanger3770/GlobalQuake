@@ -109,7 +109,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
-        if(DEBUG_CLUSTERS){
+        if(true){
             int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
                 if(event2.assignedCluster != null){
