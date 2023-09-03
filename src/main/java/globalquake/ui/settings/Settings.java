@@ -62,6 +62,8 @@ public final class Settings {
 	public static Boolean displayClusters;
 	public static Integer selectedDateFormatIndex;
 
+	public static Integer maxArchivedQuakes;
+
 	public static final DateTimeFormatter[] DATE_FORMATS = {
 			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
 			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
@@ -103,6 +105,7 @@ public final class Settings {
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
+		loadProperty("maxArchivedQuakes", "100");
 
 		loadProperty("enableAlarmDialogs", "false");
 		loadProperty("homeLat", "0.0");

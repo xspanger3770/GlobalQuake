@@ -5,10 +5,9 @@ import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
-import globalquake.intensity.ShindoIntensityScale;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.ShindoIntensityScale;
 import globalquake.ui.settings.Settings;
-import org.tinylog.Logger;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -33,7 +32,6 @@ public class Sounds {
 	public static final Clip[] levelsNext = new Clip[9];
 	public static final Clip[] countdowns = new Clip[countdown_levels.length];
 
-	public static final boolean soundsEnabled = true;
 	public static boolean soundsAvailable = true;
 
 	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
@@ -88,14 +86,12 @@ public class Sounds {
 // --Commented out by Inspection STOP (30/08/2023, 6:38 pm)
 
 	public static void playSound(Clip clip) {
-		if(!Settings.enableSound || !soundsAvailable) {
-			Logger.debug(clip.toString() + " not played. Sound disabled.");
+		if(!Settings.enableSound || !soundsAvailable || clip == null) {
 			return;
 		}
-		if (soundsEnabled && clip != null) {
-			clip.setFramePosition(0);
-			clip.start();
-		}
+
+		clip.setFramePosition(0);
+		clip.start();
 	}
 
 	public static int getLastCountdown(int secondsS) {

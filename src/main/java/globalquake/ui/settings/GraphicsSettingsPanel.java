@@ -23,6 +23,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBox24H;
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
+    private JTextField textFieldMaxArchived;
 
 
     public GraphicsSettingsPanel() {
@@ -130,6 +131,18 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         eventsPanel.add(magnitudePanel);
 
+        JPanel removeOldPanel = new JPanel();
+        removeOldPanel.setLayout(new BoxLayout(removeOldPanel, BoxLayout.X_AXIS));
+        removeOldPanel.setBorder(new EmptyBorder(5,5,5,5));
+
+        textFieldMaxArchived = new JTextField(Settings.maxArchivedQuakes.toString(), 12);
+
+        removeOldPanel.add(new JLabel("Maximum total number of archived earthquakes: "));
+        removeOldPanel.add(textFieldMaxArchived);
+
+        eventsPanel.add(removeOldPanel);
+
+
         JPanel opacityPanel = new JPanel();
         opacityPanel.setBorder(new EmptyBorder(5,5,5,5));
         opacityPanel.setLayout(new BoxLayout(opacityPanel, BoxLayout.X_AXIS));
@@ -194,6 +207,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+
+        Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
     }
 
     @Override
