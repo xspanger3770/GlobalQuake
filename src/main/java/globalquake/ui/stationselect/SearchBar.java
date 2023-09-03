@@ -21,16 +21,20 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.Timer;
 
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.json.simple.parser.JSONParser;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class SearchBar extends JTextField{
     
@@ -56,6 +60,7 @@ public class SearchBar extends JTextField{
         iconSearch = new javax.swing.ImageIcon(getClass().getResource("/image_icons/search_icons/search.png"));
         iconClose = new javax.swing.ImageIcon(getClass().getResource("/image_icons/search_icons/close.png"));
         iconLoading = new javax.swing.ImageIcon(getClass().getResource("/image_icons/search_icons/loading.gif"));
+        
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -91,6 +96,43 @@ public class SearchBar extends JTextField{
                         }
                         parseSearch(search);
                     }
+                }
+            }
+        });
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                StationSelectFrame.suggestionPanel.removeAll();
+                StationSelectFrame.suggestionPanel.revalidate();
+                String phrase = getText().trim();
+                if(phrase.length()>0){
+                    StationSelectFrame.suggestionPanel.setVisible(true);
+                    String[] phrasesToList = generatePredictedText(phrase);
+                    for(int i = 0; i < phrasesToList.length; i++){
+                        JButton button = new JButton(phrasesToList[i]);
+                        button.setPreferredSize(new Dimension(375, 25));
+                        button.setBorderPainted(false);
+                        button.setFocusPainted(false);
+                        button.setContentAreaFilled(false);
+                        button.addMouseListener(new java.awt.event.MouseAdapter() {
+                            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                                button.setContentAreaFilled(true);
+                            }
+                            public void mouseExited(java.awt.event.MouseEvent evt) {
+                                button.setContentAreaFilled(false);
+                            }
+                        });
+                        button.addActionListener(new java.awt.event.ActionListener() {
+                            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                setText(button.getText());
+                                StationSelectFrame.suggestionPanel.setVisible(false);
+                            }
+                        });
+                        StationSelectFrame.suggestionPanel.add(button);
+                    }
+                }
+                else{
+                    StationSelectFrame.suggestionPanel.setVisible(false);
                 }
             }
         });
@@ -195,6 +237,9 @@ public class SearchBar extends JTextField{
         return alpha;
     }
     private boolean checkMouseOver(Point mouse){
+        if(mouse==null){
+            return false;
+        }
         int width = getWidth();
         int height = getHeight();
         int buttonSize = height - 5 *2;
@@ -229,4 +274,44 @@ public class SearchBar extends JTextField{
         }
     }
     
+    private String[] generatePredictedText(String input){
+        String[] listOfAllPhrases = getWords("src/main/resources/search_suggestions/countries.txt");
+
+        return generatePhraseList(input, listOfAllPhrases);
+    }
+
+    private String[] generatePhraseList(String input, String[] listOfPhrases){
+        ArrayList<String> phrases = new ArrayList<String>();
+
+        for(int i = 0; i < listOfPhrases.length; i++){
+            if(listOfPhrases[i].toLowerCase().startsWith(input.toLowerCase())){
+                phrases.add(listOfPhrases[i]);
+            }
+        }
+
+        return phrases.toArray(new String[0]);
+    }
+
+    private String[] getWords(String filepath){
+        ArrayList<String> phrases = new ArrayList<String>();
+
+        try{
+            FileReader fileReader = new FileReader(filepath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            String line;
+            while((line = bufferedReader.readLine()) != null){
+                phrases.add(line);
+            }
+            bufferedReader.close();
+            fileReader.close();
+
+            Collections.sort(phrases);
+        }
+        catch(Exception e){
+            phrases.add(e.toString());
+        }
+
+        return phrases.toArray(new String[0]);
+    }
 }
