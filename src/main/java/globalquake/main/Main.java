@@ -12,7 +12,11 @@ import globalquake.sounds.Sounds;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.utils.Scale;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.ImageObserver;
 import java.io.File;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -25,6 +29,8 @@ public class Main {
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
+
+    public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
 
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();

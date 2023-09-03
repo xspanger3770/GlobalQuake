@@ -3,6 +3,7 @@ package globalquake.ui.debug;
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
+import globalquake.ui.GQFrame;
 import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
@@ -18,7 +19,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
-public class GlobePanelDebug extends JFrame {
+public class GlobePanelDebug extends GQFrame {
 
 	private final GlobePanel panel;
 	private final JPanel list;

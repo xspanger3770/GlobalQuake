@@ -8,7 +8,7 @@ import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StationMonitor extends JFrame {
+public class StationMonitor extends GQFrame {
 
 	private final AbstractStation station;
 
