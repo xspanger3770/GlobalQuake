@@ -35,7 +35,7 @@ public class Event implements Serializable {
 
 	private boolean broken;
 
-	public int assignedCluster;
+	public Cluster assignedCluster;
 	private int updatesCount;
 	private final transient Analysis analysis;
 	public StationReport report;
@@ -54,7 +54,7 @@ public class Event implements Serializable {
 		this.maxRatio = 0;
 		this.broken = false;
 		this.analysis = analysis;
-		this.assignedCluster = -1;
+		this.assignedCluster = null;
 		this.updatesCount = 1;
 	}
 

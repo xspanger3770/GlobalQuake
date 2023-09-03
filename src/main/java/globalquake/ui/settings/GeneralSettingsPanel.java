@@ -65,7 +65,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
                 """
                         Alert dialog will show if an earthquake occurs\s
                          nearby your home location and will display P and S wave\s
-                         arrival time and estimated intensity (in Shindo)""");
+                         arrival time and estimated intensity""");
 
 		textAreaDialogs.setBorder(new EmptyBorder(0,5,5,5));
 		textAreaDialogs.setLineWrap(true);
@@ -80,7 +80,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	}
 
 	private JPanel createIntensitySettingsPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
+		JPanel panel = new JPanel(new GridLayout(2,1));
 		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
 
 		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES.toArray(new IntensityScale[0]));

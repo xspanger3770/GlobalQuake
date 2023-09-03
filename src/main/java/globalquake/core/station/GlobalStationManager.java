@@ -35,11 +35,11 @@ public class GlobalStationManager {
             databaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }
 
-        createListOfClosestStations();
+        createListOfClosestStations(stations);
         System.out.println("Initialized " + stations.size() + " Stations.");
     }
 
-    private void createListOfClosestStations() {
+    public static void createListOfClosestStations(List<AbstractStation> stations) {
         for (AbstractStation stat : stations) {
             ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<>();
             for (int i = 0; i < RAYS; i++) {
@@ -83,7 +83,7 @@ public class GlobalStationManager {
                     for (int j = 0; j <= Math.min(1, rays.get(i).size() - 1); j++) {
                         if (!closestStations.contains(rays.get(i).get(j).id)) {
                             closestStations.add(rays.get(i).get(j).id);
-                            nearbys.add(new NearbyStationDistanceInfo(getStationById(rays.get(i).get(j).id),
+                            nearbys.add(new NearbyStationDistanceInfo(getStationById(stations, rays.get(i).get(j).id),
                                     rays.get(i).get(j).dist, rays.get(i).get(j).ang));
                         }
                     }
@@ -104,7 +104,7 @@ public class GlobalStationManager {
         return stations;
     }
 
-    public AbstractStation getStationById(int id) {
+    public static AbstractStation getStationById(List<AbstractStation> stations, int id) {
         return stations.get(id);
     }
 

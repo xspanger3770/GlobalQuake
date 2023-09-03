@@ -31,12 +31,15 @@ public class GlobalQuake {
 		instance = this;
 		this.stationDatabaseManager = stationDatabaseManager;
 
-		clusterAnalysis = new ClusterAnalysis();
-		earthquakeAnalysis = new EarthquakeAnalysis();
-		alertManager = new AlertManager();
-		archive = new EarthquakeArchive();
 		globalStationManager = new GlobalStationManager();
 		globalStationManager.initStations(stationDatabaseManager);
+
+		earthquakeAnalysis = new EarthquakeAnalysis();
+		clusterAnalysis = new ClusterAnalysis();
+
+		alertManager = new AlertManager();
+		archive = new EarthquakeArchive();
+
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
 	}

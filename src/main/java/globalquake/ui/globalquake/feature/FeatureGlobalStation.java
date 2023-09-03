@@ -78,6 +78,10 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
+        if(Settings.hideDeadStations && entity.getOriginal().hasNoDisplayableData()){
+            return;
+        }
+
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
         if(!elementStationCircle.shouldDraw){
@@ -100,7 +104,26 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
-        if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D);
+
+        graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
+
+        if(Settings.displayClusters){
+            int _y = (int) centerPonint.y + 4;
+            for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
+                if(event2.assignedCluster != null){
+                    Color c = event2.assignedCluster.color;
+
+                    graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+                    graphics.setColor(c);
+                    graphics.draw(elementStationSquare.getShape());
+                    graphics.drawString("Cluster #"+event2.assignedCluster.getId(), (int) centerPonint.x + 12, _y);
+                    _y += 16;
+                }
+            }
+        } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
             if (event.getMaxRatio() >= RATIO_YELLOW) {
@@ -114,11 +137,8 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             graphics.setColor(c);
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics.draw(elementStationSquare.getShape());
-
         }
 
-        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-        var centerPonint = renderer.projectPoint(point3D);
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         drawDetails(mouseNearby, renderer.getRenderProperties().scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());
@@ -140,7 +160,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
             }
         }
-        if (scroll < 0.10 || (mouseNearby && scroll < 1)) {
+        if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));

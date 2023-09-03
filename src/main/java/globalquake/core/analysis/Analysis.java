@@ -120,4 +120,5 @@ public abstract class Analysis {
 	public void setStatus(AnalysisStatus status) {
 		this.status = status;
 	}
+
 }

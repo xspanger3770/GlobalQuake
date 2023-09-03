@@ -175,6 +175,10 @@ public class FDSNWSDownloader {
                 Logger.warn("Station [%s %s] has a channel [%s %s] that is %.1f km away from it!!\n".formatted(networkCode, stationCode, channel, locationCode, gcd));
             }
 
+            if(alt > 4000 || stationAlt > 4000){
+                Logger.warn("WTF ALT: %.1f %.1f at [%s %s %s %s] from %s".formatted(alt, stationAlt, networkCode, stationCode, channel, locationCode, stationSource));
+            }
+
             var item = ((Element) channelNode)
                     .getElementsByTagName("SampleRate").item(0);
 

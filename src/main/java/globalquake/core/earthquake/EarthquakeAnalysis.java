@@ -3,8 +3,8 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
-import globalquake.intensity.IntensityTable;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.sounds.Sounds;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.settings.Settings;
@@ -21,13 +21,21 @@ public class EarthquakeAnalysis {
     public static final int QUADRANTS = 16;
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
+    private static final boolean REMOVE_WEAKEST = false;
 
     private final List<Earthquake> earthquakes;
+
+    private ClusterAnalysis clusterAnalysis;
 
     public boolean testing = false;
 
     public EarthquakeAnalysis() {
-        this.earthquakes = new MonitorableCopyOnWriteArrayList<>();
+        earthquakes = new MonitorableCopyOnWriteArrayList<>();
+    }
+
+    public EarthquakeAnalysis(ClusterAnalysis clusterAnalysis, List<Earthquake> earthquakes){
+        this.clusterAnalysis = clusterAnalysis;
+        this.earthquakes = earthquakes;
     }
 
     public List<Earthquake> getEarthquakes() {
@@ -35,11 +43,18 @@ public class EarthquakeAnalysis {
     }
 
     public void run() {
-        GlobalQuake.instance.getClusterAnalysis().getClustersReadLock().lock();
+        if(clusterAnalysis == null){
+            if(GlobalQuake.instance == null){
+                return;
+            } else {
+                clusterAnalysis = GlobalQuake.instance.getClusterAnalysis();
+            }
+        }
+        clusterAnalysis.getClustersReadLock().lock();
         try {
-            GlobalQuake.instance.getClusterAnalysis().getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
+            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
         } finally {
-            GlobalQuake.instance.getClusterAnalysis().getClustersReadLock().unlock();
+            clusterAnalysis.getClustersReadLock().unlock();
         }
         getEarthquakes().parallelStream().forEach(this::calculateMagnitude);
     }
@@ -75,11 +90,13 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        double ratioPercentileThreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
+        if(REMOVE_WEAKEST) {
+            double ratioPercentileThreshold = pickedEvents.get((int) ((pickedEvents.size() - 1) * 0.35)).maxRatio();
 
-        // remove events that are weaker than the threshold and keep at least 8 events
-        while (pickedEvents.get(0).maxRatio() < ratioPercentileThreshold && pickedEvents.size() > 8) {
-            pickedEvents.remove(0);
+            // remove events that are weaker than the threshold and keep at least 8 events
+            while (pickedEvents.get(0).maxRatio() < ratioPercentileThreshold && pickedEvents.size() > 8) {
+                pickedEvents.remove(0);
+            }
         }
 
         HypocenterFinderSettings finderSettings = createSettings();
@@ -117,7 +134,7 @@ public class EarthquakeAnalysis {
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
         List<PickedEvent> result = new ArrayList<>();
-        for (Event event : cluster.getAssignedEvents()) {
+        for (Event event : cluster.getAssignedEvents().values()) {
             result.add(new PickedEvent(event.getpWave(), event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.maxRatio));
         }
 
@@ -352,6 +369,8 @@ public class EarthquakeAnalysis {
                 return;
             }
 
+            travelTime += getElevationCorrection(event.elevation());
+
             long origin = event.pWave() - ((long) (travelTime * 1000));
             threadData.origins[c] = origin;
             c++;
@@ -385,6 +404,10 @@ public class EarthquakeAnalysis {
         hypocenter.origin = bestOrigin;
         hypocenter.err = err;
         hypocenter.correctStations = acc;
+    }
+
+    public static double getElevationCorrection(double elevation) {
+        return elevation / 6000.0;
     }
 
     private void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
@@ -453,7 +476,7 @@ public class EarthquakeAnalysis {
                 + bestHypocenter.correctStations + " w " + events.size() + " err " + bestHypocenter.totalErr);
         boolean valid = pct > finderSettings.correctnessThreshold();
         if (!valid && cluster.getEarthquake() != null) {
-            GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().remove(cluster.getEarthquake());
+            getEarthquakes().remove(cluster.getEarthquake());
             cluster.setEarthquake(null);
         }
 
@@ -461,7 +484,7 @@ public class EarthquakeAnalysis {
             if (cluster.getEarthquake() == null) {
                 if (!testing) {
                     Sounds.playSound(Sounds.incoming);
-                    GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+                    getEarthquakes().add(earthquake);
                 }
                 cluster.setEarthquake(earthquake);
             } else {
@@ -496,7 +519,7 @@ public class EarthquakeAnalysis {
         for (PickedEvent event : c.getSelected()) {
             double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat,
                     hyp.lon);
-            long expectedTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC))
+            long expectedTravel = (long) ((TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC)) + getElevationCorrection(event.elevation()))
                     * 1000);
             long actualTravel = event.pWave() - hyp.origin;
             boolean wrong = Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
@@ -525,7 +548,7 @@ public class EarthquakeAnalysis {
         if (earthquake.getCluster() == null) {
             return;
         }
-        List<Event> goodEvents = earthquake.getCluster().getAssignedEvents();
+        Collection<Event> goodEvents = earthquake.getCluster().getAssignedEvents().values();
         if (goodEvents.isEmpty()) {
             return;
         }
@@ -550,7 +573,7 @@ public class EarthquakeAnalysis {
         }
     }
 
-    public static final int[] STORE_TABLE = {3, 3, 3, 5, 7, 10, 15, 25, 40, 40};
+    public static final int[] STORE_TABLE = {3, 3, 3, 5, 7, 30};
 
     public void second() {
         Iterator<Earthquake> it = earthquakes.iterator();
@@ -561,7 +584,9 @@ public class EarthquakeAnalysis {
                     Math.min(STORE_TABLE.length - 1, (int) earthquake.getMag()))];
             if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                     && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
-                GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
+                if(GlobalQuake.instance != null) {
+                    GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
+                }
                 toBeRemoved.add(earthquake);
             }
         }

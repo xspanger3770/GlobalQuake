@@ -4,11 +4,7 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 
 import org.tinylog.Logger;
 
@@ -34,7 +30,7 @@ public class SettingsFrame extends JFrame{
 	private void initialize(Component parent) {
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setMinimumSize(new Dimension(500, 400));
+
 		JPanel panel = new JPanel(new BorderLayout());
 		setContentPane(panel);
 
@@ -80,9 +76,14 @@ public class SettingsFrame extends JFrame{
 		panels.add(new PerformanceSettingsPanel());
 		panels.add(new GraphicsSettingsPanel());
 		panels.add(new HypocenterAnalysisSettingsPanel());
+		panels.add(new DebugSettingsPanel());
 
 		for (SettingsPanel panel : panels) {
-			tabbedPane.addTab(panel.getTitle(), panel);
+			JScrollPane scrollPane = new JScrollPane(panel);
+			scrollPane.setPreferredSize(new Dimension(600, 460));
+			tabbedPane.addTab(panel.getTitle(), scrollPane);
+
+			javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
 		}
 	}
 

@@ -48,6 +48,19 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
 
+        if(sDist < 0){
+            sDist = 0;
+        }
+
+        if(pDist < 0){
+            double pkikp = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                    * GeoUtils.EARTH_CIRCUMFERENCE;
+
+            if(pkikp > 0){
+                pDist = pkikp;
+            }
+        }
+
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),

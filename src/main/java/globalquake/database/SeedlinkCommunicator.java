@@ -13,7 +13,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SeedlinkCommunicator {
 

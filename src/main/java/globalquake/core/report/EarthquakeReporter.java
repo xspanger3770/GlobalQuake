@@ -1,34 +1,28 @@
 package globalquake.core.report;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.Event;
+import globalquake.core.station.AbstractStation;
+import globalquake.geo.GeoUtils;
+import globalquake.main.Main;
+import globalquake.regions.Regions;
+import globalquake.ui.settings.Settings;
+import globalquake.utils.Scale;
+import org.geojson.LngLatAlt;
+import org.tinylog.Logger;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
-
-import globalquake.regions.Regions;
-import org.geojson.LngLatAlt;
-
-import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Event;
-import globalquake.main.Main;
-import globalquake.geo.GeoUtils;
-import globalquake.utils.Scale;
-import org.tinylog.Logger;
 
 public class EarthquakeReporter {
 	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
-	public static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss").withZone(ZoneId.systemDefault());
 	private static double centerLat = 49.7;
 	private static double centerLon = 15.65;
 	private static double scroll = 8;
@@ -41,14 +35,14 @@ public class EarthquakeReporter {
 
 	public static void report(Earthquake earthquake) {
 		File folder = new File(ANALYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
-				earthquake.getRegion().replace(' ', '_'), dateFormat.format(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
+				earthquake.getRegion().replace(' ', '_'), Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
 		if (!folder.exists()) {
 			if(!folder.mkdirs()){
 				return;
 			}
 		}
 
-		for (Event e : earthquake.getCluster().getAssignedEvents()) {
+		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			AbstractStation station = e.getAnalysis().getStation();
 			e.report = new StationReport(station.getNetworkCode(), station.getStationCode(),
 					station.getChannelName(), station.getLocationCode(), station.getLatitude(), station.getLongitude(),
@@ -72,7 +66,7 @@ public class EarthquakeReporter {
 		Graphics2D g = img.createGraphics();
 
 		ArrayList<DistanceIntensityRecord> recs = new ArrayList<>();
-		for (Event event : earthquake.getCluster().getAssignedEvents()) {
+		for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
 			double lat = event.report.lat();
 			double lon = event.report.lon();
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
@@ -136,7 +130,7 @@ public class EarthquakeReporter {
 		}
 
 		g.setStroke(new BasicStroke(1f));
-		for (Event event : earthquake.getCluster().getAssignedEvents()) {
+		for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
 			double x = getX(event.report.lon());
 			double y = getY(event.report.lat());
 			double r = 12;

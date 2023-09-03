@@ -46,7 +46,6 @@ public class BetterAnalysis extends Analysis {
 
     public BetterAnalysis(AbstractStation station) {
         super(station);
-
     }
 
 
