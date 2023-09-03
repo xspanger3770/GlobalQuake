@@ -43,14 +43,15 @@ For MacOS download the "**_x64 DMG Installer_**".
 
 #### Windows
 <a name="JavaInstallWindows"></a>
-1. Download the installer
-2. Open the installer
-3. Click the "**_Next_**" button on the first Screen
-4. Choosing a custom install location (if you don't want a custom install location skip to step )
-5. Go to the location you want to install Java with the file explorer. You can choose another drive by clicking the topdown menu at the top with the little downwards arrow on it. You can add folders using the button on the top right with the folder and shine icon. For example I went to my D drive and created a folder called JDKs and a sub folder called 17, for the JDK 17 version, for the path of "**_D:\JDKs\17_**", you can however install it wherever and name the folders whatever you like.
-6. After creating the folders and sub-folders you want click on the folder you want to install to and click the "**_OK_**" button
-7. Click the "**_Next_**" button
-8. Wait for it install
+1. Download the installer <br> ![1](https://github.com/CentreMetre/GlobalQuake/assets/61330791/f03fee45-0d24-4639-90e3-0b764d9a1c88)
+2. Open the installer <br> ![2](https://github.com/CentreMetre/GlobalQuake/assets/61330791/73733a36-1aeb-44f7-95e5-787bfc2b2a54)
+3. Click the "**_Next_**" button on the first Screen <br> ![3](https://github.com/CentreMetre/GlobalQuake/assets/61330791/db959e76-b6a0-4456-b1f8-3f93ad5262a4)
+4. Choosing a custom install location (if you don't want a custom install location skip to step [7](#JavaInstallWindowsStep7) <br> ![4](https://github.com/CentreMetre/GlobalQuake/assets/61330791/9892291c-c544-4562-ad49-ef5f5cfdd1c2)
+5. Go to the location you want to install Java with the file explorer. You can choose another drive by clicking the topdown menu at the top with the little downwards arrow on it. You can add folders using the button on the top right with the folder and shine icon. For example I went to my D drive and created a folder called JDKs and a sub folder called 17, for the JDK 17 version, for the path of "**_D:\JDKs\17_**", you can however install it wherever and name the folders whatever you like. <br> ![5 1](https://github.com/CentreMetre/GlobalQuake/assets/61330791/a1572ff9-452f-4dc8-bc62-3a765dd662cd)
+6. After creating the folders and sub-folders you want click on the folder you want to install to and click the "**_OK_**" button <br> ![5](https://github.com/CentreMetre/GlobalQuake/assets/61330791/77fd9f61-926c-44f9-82ed-48efe21e3cdc)
+<a name="JavaInstallWindowsStep7"></a>
+7. Click the "**_Next_**" button <br> ![6](https://github.com/CentreMetre/GlobalQuake/assets/61330791/6ae625da-a3c6-4a10-a2e9-febde88c1a86)
+8. Wait for it install <br> ![7](https://github.com/CentreMetre/GlobalQuake/assets/61330791/fdaf1359-5731-49fe-a5a1-c9836630b11a)
 9. Click the "**_Close_**" button
 
 > [!IMPORTANT]  
