@@ -5,7 +5,6 @@ import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.ShindoIntensityScale;
 import globalquake.ui.settings.Settings;
 
@@ -26,17 +25,7 @@ public class Sounds {
 	public static Clip felt;
 	public static Clip dong;
 
-	public static final int[] countdown_levels = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 120, 180 };
-
-	public static final Clip[] levelsFirst = new Clip[10];
-	public static final Clip[] levelsNext = new Clip[9];
-	public static final Clip[] countdowns = new Clip[countdown_levels.length];
-
 	public static boolean soundsAvailable = true;
-
-	private static final String[] shindoNames = { "0", "1", "2", "3", "4", "5minus", "5plus", "6minus", "6plus", "7" };
-
-	public static final boolean ENABLE_EXTREME_ALARMS = false;
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
@@ -61,29 +50,7 @@ public class Sounds {
 		felt = loadSound("sounds/felt.wav");
 		dong = loadSound("sounds/dong.wav");
 
-		for (int i = 0; i < shindoNames.length; i++) {
-			Clip first = loadSound("sounds/levels/level_" + shindoNames[i] + ".wav");
-			levelsFirst[i] = first;
-
-			if (i != shindoNames.length - 1) {
-				Clip next = loadSound("sounds/levels/up_to_" + shindoNames[i + 1] + ".wav");
-				levelsNext[i] = next;
-			}
-		}
-
-		for (int i = 0; i < countdown_levels.length; i++) {
-			int j = countdown_levels[i];
-			String str = j < 10 ? "0" + j : j + "";
-			Clip count = loadSound("sounds/countdown/countdown_" + str + ".wav");
-			countdowns[i] = count;
-		}
 	}
-
-// --Commented out by Inspection START (30/08/2023, 6:38 pm):
-//	public static Clip nextLevelBeginsWith1(int i) {
-//		return levelsNext[i];
-//	}
-// --Commented out by Inspection STOP (30/08/2023, 6:38 pm)
 
 	public static void playSound(Clip clip) {
 		if(!Settings.enableSound || !soundsAvailable || clip == null) {
@@ -92,15 +59,6 @@ public class Sounds {
 
 		clip.setFramePosition(0);
 		clip.start();
-	}
-
-	public static int getLastCountdown(int secondsS) {
-		for (int i = 0; i <= countdown_levels.length - 1; i++) {
-			if (countdown_levels[i] >= secondsS) {
-				return i;
-			}
-		}
-		return -1;
 	}
 
 	public static void determineSounds(Cluster cluster) {
@@ -144,8 +102,6 @@ public class Sounds {
 
 			double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
 					Settings.homeLat, Settings.homeLon, 0.0);
-			double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
-					Settings.homeLon);
 			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
 			if (info.maxPGAHome < pgaHome) {
@@ -156,33 +112,9 @@ public class Sounds {
 			}
 
 			if (info.maxPGAHome >= ShindoIntensityScale.ICHI.getPga()) {
-				double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
-
-				double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
-						TauPTravelTimeCalculator.toAngle(distGC)));
-				int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
-
-				int soundIndex = -1;
-
-				if (info.lastCountdown == -1) {
-					soundIndex = Sounds.getLastCountdown(secondsS);
-				} else {
-					int si = Sounds.getLastCountdown(secondsS);
-					if (si < info.lastCountdown) {
-						soundIndex = si;
-					}
-				}
-
 				if (info.lastCountdown == 0) {
 					info.lastCountdown = -999;
 					Sounds.playSound(Sounds.dong);
-				}
-
-				if (soundIndex != -1) {
-					if(ENABLE_EXTREME_ALARMS) {
-						Sounds.playSound(Sounds.countdowns[soundIndex]);
-					}
-					info.lastCountdown = soundIndex;
 				}
 			}
 		}
