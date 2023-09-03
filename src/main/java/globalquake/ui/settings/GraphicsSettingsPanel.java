@@ -2,6 +2,8 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +44,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
             comboBoxDateFormat.addItem(formatter.format(now));
         }
 
+        comboBoxDateFormat.setSelectedIndex(Settings.selectedDateFormatIndex);
+
         dateFormatPanel.add(new JLabel("Preferred date format: "));
         dateFormatPanel.add(comboBoxDateFormat);
         dateFormatPanel.add(chkBox24H = new JCheckBox("Use 24 hours format", Settings.use24HFormat));
@@ -75,6 +79,11 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         sliderIntensityZoom.setMajorTickSpacing(20);
         sliderIntensityZoom.setMinorTickSpacing(5);
         sliderIntensityZoom.setPaintTicks(true);
+
+        sliderIntensityZoom.addChangeListener(changeEvent -> {
+            Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+            Settings.changes++;
+        });
 
         intensityPanel.add(sliderIntensityZoom);
         otherSettingsPanel.add(intensityPanel);

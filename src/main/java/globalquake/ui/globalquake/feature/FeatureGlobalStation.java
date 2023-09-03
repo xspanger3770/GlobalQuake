@@ -78,7 +78,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
-        if(Settings.hideDeadStations && !entity.getOriginal().hasData()){
+        if(Settings.hideDeadStations && entity.getOriginal().hasNoDisplayableData()){
             return;
         }
 
