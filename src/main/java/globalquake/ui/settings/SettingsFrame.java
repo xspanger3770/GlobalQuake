@@ -1,14 +1,16 @@
 package globalquake.ui.settings;
 
+import globalquake.ui.GQFrame;
+import org.tinylog.Logger;
+
+import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.*;
+import globalquake.main.Main;
 
-import org.tinylog.Logger;
-
-public class SettingsFrame extends JFrame{
+public class SettingsFrame extends GQFrame {
 
 	private final List<SettingsPanel> panels = new LinkedList<>();
 	private JTabbedPane tabbedPane;
@@ -28,6 +30,8 @@ public class SettingsFrame extends JFrame{
 	}
 
 	private void initialize(Component parent) {
+		setIconImage(Main.LOGO);
+
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

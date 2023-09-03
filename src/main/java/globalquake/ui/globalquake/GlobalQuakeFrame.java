@@ -2,6 +2,7 @@ package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
+import globalquake.ui.GQFrame;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
@@ -10,11 +11,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class GlobalQuakeFrame extends JFrame {
+public class GlobalQuakeFrame extends GQFrame {
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;

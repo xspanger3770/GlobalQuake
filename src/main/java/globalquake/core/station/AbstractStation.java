@@ -23,6 +23,7 @@ public abstract class AbstractStation {
 	private final SeedlinkNetwork seedlinkNetwork;
 
 	private final Queue<Double> ratioHistory = new ConcurrentLinkedQueue<>();
+	public boolean disabled = false;
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
