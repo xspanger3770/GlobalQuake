@@ -1,6 +1,7 @@
 package globalquake.ui.stationselect;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -28,13 +29,21 @@ import javax.swing.border.EmptyBorder;
 
 import org.json.simple.parser.JSONParser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import globalquake.ui.globe.GlobeRenderer;
+
 import org.json.simple.JSONObject;
+import org.geojson.GeoJsonObject;
+import org.geojson.MultiPolygon;
+import org.geojson.Polygon;
 import org.json.simple.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class SearchBar extends JTextField{
     
@@ -49,6 +58,9 @@ public class SearchBar extends JTextField{
     private boolean show;
     private float speed = 8f;
     private float location = -1;
+    private boolean countryFound = false;
+    private GeoJsonObject foundCoordinates;
+
 
 
     public SearchBar(){
@@ -181,6 +193,40 @@ public class SearchBar extends JTextField{
         g2.setPaint(gp);
         g2.fillOval((width - height)+3, marginButton, buttonSize, buttonSize);
 
+        //Attempting to change the color of the country borders
+        if (countryFound && foundCoordinates != null) {
+            g2.setColor(Color.GREEN);
+            g2.setStroke(new BasicStroke(2)); 
+            ArrayList<Polygon> paths = new ArrayList<>();
+
+            if(foundCoordinates instanceof org.geojson.Polygon){
+                Polygon pol = (org.geojson.Polygon) foundCoordinates;
+                paths.add(pol);
+            }
+            else if(foundCoordinates instanceof org.geojson.MultiPolygon){
+                
+                MultiPolygon mp = (org.geojson.MultiPolygon) foundCoordinates;
+                List<List<List<org.geojson.LngLatAlt>>> polygons = mp.getCoordinates();
+                for (List<List<org.geojson.LngLatAlt>> polygon : polygons) {
+                    org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
+                    paths.add(pol);
+                }
+            }
+            g2.setColor(Color.GREEN);
+            for (Polygon polygon : paths) {
+                List<org.geojson.LngLatAlt> coordinates = polygon.getExteriorRing();
+                int[] xPoints = new int[coordinates.size()];
+                int[] yPoints = new int[coordinates.size()];
+                for (int i = 0; i < coordinates.size(); i++) {
+                    org.geojson.LngLatAlt point = coordinates.get(i);
+                    xPoints[i] = (int) point.getLongitude();
+                    yPoints[i] = (int) point.getLatitude();
+                }
+                g2.fillPolygon(xPoints, yPoints, coordinates.size());
+            }
+        }
+
+        g2.setColor(backgroundColor);
         //Create Animation
         if(location != -1){
             g2.fillRoundRect((int)location, 0, (int)(width-location), height, height, height);
@@ -262,9 +308,14 @@ public class SearchBar extends JTextField{
                 JSONObject countryObject = (JSONObject) obj;
                 JSONObject properties = (JSONObject) countryObject.get("properties");
                 String countryName = (String) properties.get("name");
+                JSONObject geoObject = (JSONObject) countryObject.get("geometry");
+
+                GeoJsonObject o = new ObjectMapper().readValue(geoObject.toJSONString(), GeoJsonObject.class);
 
                 if(countryName.equals(userInput)){
                     System.out.println("Found country: " + countryName);
+                    countryFound = true;
+                    foundCoordinates = o;
                 }
 
             }
