@@ -107,12 +107,14 @@ public class SeedlinkCommunicator {
                 channel = findChannelButDontUseLocationCode(station, channelName);
 
                 if(channel != null){
+                    var any = channel.getStationSources().stream().findAny();
+                    Channel newChannel = StationDatabase.getOrCreateChannel(station, channelName, locationCode, channel.getLatitude(), channel.getLongitude(), channel.getElevation(), channel.getSampleRate(), any.orElse(null));
                     Logger.warn("Did not find exact match for [%s %s %s `%s`], assuming the location code is `%s`\n".formatted(networkCode, stationCode, channelName, locationCode, channel.getLocationCode()));
+                    channel = newChannel;
                 }
             }
 
             if (channel == null) {
-
                 return;
             }
 
