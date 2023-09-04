@@ -47,7 +47,7 @@ public class AlertManager {
             return true;
         }
 
-        return quake.getMag() > Settings.alertGlobalMag;
+        return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
     }
 
 }
