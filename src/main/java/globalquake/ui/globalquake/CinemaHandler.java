@@ -57,6 +57,7 @@ public class CinemaHandler {
 
         var earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findFirst();
         if(earthquake.isPresent()) {
+            lastEarthquake = earthquake.get();
             return createTarget(earthquake.get());
         }
 
@@ -75,6 +76,7 @@ public class CinemaHandler {
 
         var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
         if(cluster.isPresent()) {
+            lastCluster = cluster.get();
             return createTarget(cluster.get());
         }
 
