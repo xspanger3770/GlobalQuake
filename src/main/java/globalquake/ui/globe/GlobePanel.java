@@ -311,6 +311,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         return true;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean _interactionAllowed(){
         return interactionAllowed() && !cinemaMode;
     }
@@ -400,6 +401,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         frameCount.incrementAndGet();
     }
 
+    @SuppressWarnings("unused")
     public double getScroll() {
         return scroll;
     }

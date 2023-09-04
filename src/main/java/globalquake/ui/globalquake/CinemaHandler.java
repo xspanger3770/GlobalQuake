@@ -26,9 +26,7 @@ public class CinemaHandler {
                 }
 
                 CinemaTarget target = selectNextTarget();
-                if(target != null) {
-                    globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
-                }
+                globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
             }
         }, 0, 10 * 1000);
     }

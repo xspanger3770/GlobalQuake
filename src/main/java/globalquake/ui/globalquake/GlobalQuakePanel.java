@@ -38,7 +38,6 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private CinemaHandler cinemaHandler;
 
     public GlobalQuakePanel(JFrame frame) {
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
@@ -63,7 +62,7 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         });
 
-        cinemaHandler = new CinemaHandler(this);
+        CinemaHandler cinemaHandler = new CinemaHandler(this);
         cinemaHandler.run();
     }
 
