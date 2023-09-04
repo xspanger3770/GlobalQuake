@@ -38,6 +38,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
+    private CinemaHandler cinemaHandler;
 
     public GlobalQuakePanel(JFrame frame) {
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
@@ -56,8 +57,14 @@ public class GlobalQuakePanel extends GlobePanel {
                     Settings.enableSound = !Settings.enableSound;
                     Settings.save();
                 }
+                if(e.getKeyCode() == KeyEvent.VK_C) {
+                    setCinemaMode(!isCinemaMode());
+                }
             }
         });
+
+        cinemaHandler = new CinemaHandler(this);
+        cinemaHandler.run();
     }
 
     @Override
@@ -141,6 +148,8 @@ public class GlobalQuakePanel extends GlobePanel {
         else{
             settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
         }
+
+        settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
         double GB = 1024 * 1024 * 1024.0;
 

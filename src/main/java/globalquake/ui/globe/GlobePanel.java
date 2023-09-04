@@ -43,6 +43,14 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private int lastFPS;
 
+    public void setCinemaMode(boolean cinemaMode) {
+        this.cinemaMode = cinemaMode;
+    }
+
+    private boolean cinemaMode = false;
+    private final Object animationLock = new Object();
+    private Animation nextAnimation;
+
     public GlobePanel() {
         renderer = new GlobeRenderer();
         renderer.updateCamera(createRenderProperties());
@@ -51,6 +59,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         spinThread();
         fpsThread();
+        animationThread();
         addMouseMotionListener(new MouseMotionListener() {
 
             @Override
@@ -63,7 +72,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
             public void mouseDragged(MouseEvent e) {
                 lastMouse = e.getPoint();
                 renderer.mouseMoved(e);
-                if (!interactionAllowed()) {
+                if(cinemaMode){
+                    System.err.println("Cinema mode disabled by dragging");
+                    cinemaMode = false;
+                }
+                if (!_interactionAllowed()) {
                     return;
                 }
                 if (dragStart == null) {
@@ -164,6 +177,71 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
     }
 
+    private void animationThread() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    synchronized (animationLock) {
+                        animationLock.wait();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                runAnimation(nextAnimation);
+            }
+        }, 0, 10);
+    }
+
+    private void runAnimation(Animation animation) {
+        int steps = 250;
+        final int[] step = {0};
+        Timer timer = new Timer();
+        double distGC = GeoUtils.greatCircleDistance(animation.initialLat(), animation.initialLon(), animation.targetLat(), animation.targetLon());
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if(!cinemaMode){
+                    System.err.println("Animation aborted!");
+                    this.cancel();
+                    return;
+                }
+                double t = (double) step[0] / steps;
+                double t1 = -Math.cos(t * Math.PI) * 0.5 + 0.5;
+                double t2 = Math.sin(t * Math.PI) * (animation.initialScroll() + animation.targetScroll()) * (distGC / 15000.0);
+                double currentScroll = t2 + animation.initialScroll() + t * (animation.targetScroll() - animation.initialScroll());
+                double currentLatitude = animation.initialLat() + t1 * (animation.targetLat() - animation.initialLat());
+                double currentLongitude = animation.initialLon() + t1 * (animation.targetLon() - animation.initialLon());
+                centerLat = currentLatitude;
+                centerLon = currentLongitude;
+                scroll = currentScroll;
+
+                renderer.updateCamera(createRenderProperties());
+
+                if(step[0] == steps){
+                    this.cancel();
+                }
+
+                step[0]++;
+            }
+        }, 0, 20);
+    }
+
+    public void smoothTransition(double targetLat, double targetLon, double targetScroll){
+        if(!cinemaMode){
+            return;
+        }
+
+        targetScroll = Math.max(0.05, targetScroll);
+
+        nextAnimation = new Animation(centerLat, centerLon, scroll, targetLat, targetLon, targetScroll);
+        synchronized (animationLock) {
+            animationLock.notify();
+        }
+    }
+
     public int getLastFPS() {
         return lastFPS;
     }
@@ -233,6 +311,10 @@ public class GlobePanel extends JPanel implements GeoUtils {
         return true;
     }
 
+    private boolean _interactionAllowed(){
+        return interactionAllowed() && !cinemaMode;
+    }
+
     private void handleClick(int x, int y) {
         ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
@@ -285,7 +367,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     return;
                 }
 
-                if (!interactionAllowed()) {
+                if (!_interactionAllowed()) {
                     return;
                 }
 
@@ -318,4 +400,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         frameCount.incrementAndGet();
     }
 
+    public double getScroll() {
+        return scroll;
+    }
+
+    public boolean isCinemaMode() {
+        return cinemaMode;
+    }
 }

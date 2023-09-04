@@ -13,6 +13,8 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -59,6 +61,19 @@ public class GlobePanelDebug extends GQFrame {
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
 			}
 		};
+
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_SPACE){
+					panel.smoothTransition(0,0,0.5);
+				}
+				if(e.getKeyCode() == KeyEvent.VK_C){
+					panel.setCinemaMode(!panel.isCinemaMode());
+				}
+			}
+		});
+
 		Random r = new Random();
 		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
 		for(int i = 0; i < 50; i++) {
