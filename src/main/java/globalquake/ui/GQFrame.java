@@ -12,6 +12,7 @@ public class GQFrame extends JFrame {
         setIconImage(Main.LOGO);
     }
 
+    @SuppressWarnings("unused")
     public GQFrame(String title) throws HeadlessException {
         super(title);
         setIconImage(Main.LOGO);

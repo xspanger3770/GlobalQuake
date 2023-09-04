@@ -14,7 +14,6 @@ import globalquake.utils.Scale;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.util.Objects;
 import java.util.stream.Collectors;

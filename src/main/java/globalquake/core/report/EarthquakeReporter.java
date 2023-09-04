@@ -6,7 +6,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.main.Main;
 import globalquake.regions.Regions;
-import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 import org.geojson.LngLatAlt;
 import org.tinylog.Logger;
