@@ -77,6 +77,7 @@ public class SettingsFrame extends GQFrame {
 
 	private void addPanels() {
 		panels.add(new GeneralSettingsPanel());
+		panels.add(new AlertSettingsPanel());
 		panels.add(new PerformanceSettingsPanel());
 		panels.add(new GraphicsSettingsPanel());
 		panels.add(new HypocenterAnalysisSettingsPanel());

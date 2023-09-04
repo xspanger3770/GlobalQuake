@@ -77,6 +77,14 @@ public final class Settings {
 	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
 
+	public static Boolean alertLocal;
+	public static Double alertLocalDist;
+	public static Boolean alertRegion;
+	public static Double alertRegionMag;
+	public static Double alertRegionDist;
+	public static Boolean alertGlobal;
+	public static Double alertGlobalMag;
+
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
@@ -98,6 +106,14 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("alertLocal", "true");
+		loadProperty("alertLocalDist", "200");
+		loadProperty("alertRegion", "true");
+		loadProperty("alertRegionMag", "3.5");
+		loadProperty("alertRegionDist", "1000");
+		loadProperty("alertGlobal", "true");
+		loadProperty("alertGlobalMag", "6.0");
 
 		loadProperty("reportsEnabled", "false");
 		loadProperty("displayClusters", "false");

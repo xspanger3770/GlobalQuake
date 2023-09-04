@@ -40,7 +40,7 @@ public abstract class Analysis {
 	}
 
 	public void analyse(DataRecord dr) {
-		if (sampleRate == -1) {
+		if (sampleRate <= 0) {
 			sampleRate = dr.getSampleRate();
 			reset();
 		}

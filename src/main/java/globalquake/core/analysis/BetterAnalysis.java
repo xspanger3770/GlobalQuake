@@ -82,8 +82,6 @@ public class BetterAnalysis extends Analysis {
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
 
-                // longAverage = initialRatioSum / initialRatioCnt;
-
                 shortAverage = longAverage;
                 mediumAverage = longAverage;
                 specialAverage = longAverage * 2.5;

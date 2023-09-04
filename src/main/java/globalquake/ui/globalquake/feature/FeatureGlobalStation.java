@@ -102,6 +102,10 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             graphics.draw(elementStationCircle.getShape());
         }
 
+        if(entity.getOriginal().disabled){
+            return;
+        }
+
         Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
@@ -170,6 +174,9 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     private Color getDisplayColor(AbstractStation station) {
+        if(station.disabled){
+            return Color.DARK_GRAY;
+        }
         if (!station.hasData()) {
             return Color.gray;
         }
