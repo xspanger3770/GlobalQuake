@@ -137,13 +137,13 @@ public class Cluster {
 		}
 
 		int _level = 0;
-		if (r128 > 8 || r1024 > 2) {
+		if (r128 > 8 || r1024 > 3) {
 			_level = 1;
 		}
-		if (r1024 > 6 || r8192 > 2) {
+		if (r1024 > 6 || r8192 > 3) {
 			_level = 2;
 		}
-		if (r8192 > 4 || r32K >= 2) {
+		if (r8192 > 4 || r32K >= 3) {
 			_level = 3;
 		}
 		if (r32K > 3) {

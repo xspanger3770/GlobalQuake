@@ -52,13 +52,10 @@ public class CinemaHandler {
             }
         }
 
-        if(next){
-            Earthquake earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().get(0);
-            if(earthquake != null) {
-                return createTarget(earthquake);
-            }
+        Earthquake earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().get(0);
+        if(earthquake != null) {
+            return createTarget(earthquake);
         }
-
 
         next = false;
         for(Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()){
@@ -70,12 +67,11 @@ public class CinemaHandler {
             }
         }
 
-        if(next){
-            Cluster cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().get(0);
-            if(cluster != null) {
-                return createTarget(cluster);
-            }
+        Cluster cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().get(0);
+        if(cluster != null) {
+            return createTarget(cluster);
         }
+
 
         return result;
     }
