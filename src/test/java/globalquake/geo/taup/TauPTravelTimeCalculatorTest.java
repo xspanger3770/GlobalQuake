@@ -69,4 +69,11 @@ public class TauPTravelTimeCalculatorTest {
         }
     }
 
+    @Test
+    public void testBigAngle() throws Exception{
+        TauPTravelTimeCalculator.init();
+
+        assertTrue(TauPTravelTimeCalculator.getPWaveTravelAngle(0, 40 * 60) < 0);
+    }
+
 }
