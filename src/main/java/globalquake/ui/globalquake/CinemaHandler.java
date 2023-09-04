@@ -50,9 +50,9 @@ public class CinemaHandler {
             }
         }
 
-        Earthquake earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().get(0);
-        if(earthquake != null) {
-            return createTarget(earthquake);
+        var earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findFirst();
+        if(earthquake.isPresent()) {
+            return createTarget(earthquake.get());
         }
 
         next = false;
@@ -68,11 +68,10 @@ public class CinemaHandler {
             }
         }
 
-        Cluster cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().get(0);
-        if(cluster != null) {
-            return createTarget(cluster);
+        var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
+        if(cluster.isPresent()) {
+            return createTarget(cluster.get());
         }
-
 
         return result;
     }
