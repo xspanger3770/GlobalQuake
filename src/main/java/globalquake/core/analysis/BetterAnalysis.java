@@ -127,13 +127,8 @@ public class BetterAnalysis extends Analysis {
                 eventTimer = time;
             }
 
-            if (getStatus() == AnalysisStatus.EVENT) {
-                Event latestEvent = getLatestEvent();
-                if (latestEvent == null) {
-                    reset();
-                    throw new IllegalStateException(
-                            "STATUS == EVENT, but latestEvent == null, " + getStation().getStationCode());
-                }
+            Event latestEvent = getLatestEvent();
+            if (getStatus() == AnalysisStatus.EVENT && latestEvent != null) {
                 long timeFromStart = time - latestEvent.getStart();
                 if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
                     setStatus(AnalysisStatus.IDLE);
