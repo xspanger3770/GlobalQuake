@@ -25,7 +25,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
-        super(3);
+        super(5);
         this.earthquakes = earthquakes;
     }
 
@@ -38,7 +38,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
         RenderElement elementPWave = entity.getRenderElement(0);
         RenderElement elementSWave = entity.getRenderElement(1);
-        RenderElement elementCross = entity.getRenderElement(2);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
+        RenderElement elementCross = entity.getRenderElement(4);
 
         Earthquake e = entity.getOriginal();
 
@@ -47,19 +49,11 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 * GeoUtils.EARTH_CIRCUMFERENCE;
         double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkpDist = TauPTravelTimeCalculator.getPKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkikpDist = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
 
-        if(sDist < 0){
-            sDist = 0;
-        }
-
-        if(pDist < 0){
-            double pkikp = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
-                    * GeoUtils.EARTH_CIRCUMFERENCE;
-
-            if(pkikp > 0){
-                pDist = pkikp;
-            }
-        }
 
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
@@ -70,6 +64,16 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
                 sDist, 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                pkpDist, 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKIKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                pkikpDist, 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
@@ -94,7 +98,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for (int i = 0; i <= 2; i++) {
+        for (int i = 0; i <= 4; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
@@ -110,6 +114,8 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
             RenderElement elementPWave = entity.getRenderElement(0);
             RenderElement elementSWave = entity.getRenderElement(1);
+            RenderElement elementPKPWave = entity.getRenderElement(2);
+            RenderElement elementPKIKPWave = entity.getRenderElement(3);
 
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -124,9 +130,21 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
                 graphics.draw(elementSWave.getShape());
             }
+
+            if (elementPKPWave.shouldDraw) {
+                graphics.setColor(Color.BLUE);
+                graphics.setStroke(new BasicStroke(1.0f));
+                graphics.draw(elementPKPWave.getShape());
+            }
+
+            if (elementPKIKPWave.shouldDraw) {
+                graphics.setColor(Color.MAGENTA);
+                graphics.setStroke(new BasicStroke(3.0f * thicknessMultiplier));
+                graphics.draw(elementPKIKPWave.getShape());
+            }
         }
 
-        RenderElement elementCross = entity.getRenderElement(2);
+        RenderElement elementCross = entity.getRenderElement(4);
         if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
             graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
             graphics.setStroke(new BasicStroke(4f));
