@@ -270,12 +270,13 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.PLAIN, 56));
         int x3 = (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3));
+        int w3 = g.getFontMetrics().stringWidth(str3);
         g.drawString(str3, x3, baseHeight + 80);
 
         if(level != null && level.getSuffix() != null) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", Font.PLAIN, 36));
-            g.drawString(level.getSuffix(), x3 + 16, baseHeight + 50);
+            g.drawString(level.getSuffix(), x3 + w3 + 4, baseHeight + 50);
         }
 
         g.setColor(Color.white);
