@@ -140,6 +140,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         });
 
         addMouseWheelListener(e -> {
+            if(cinemaMode){
+                System.err.println("Cinema mode disabled by scrolling");
+                cinemaMode = false;
+            }
+
             double rotation = e.getPreciseWheelRotation();
             boolean down = rotation < 0;
 

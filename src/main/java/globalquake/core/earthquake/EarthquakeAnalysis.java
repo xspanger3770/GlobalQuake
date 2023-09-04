@@ -573,7 +573,16 @@ public class EarthquakeAnalysis {
         }
     }
 
-    public static final int[] STORE_TABLE = {3, 3, 3, 5, 7, 30};
+    public static final int[] STORE_TABLE = {
+            3, 3, // M0
+            3, 3, // M1
+            3, 3, // M2
+            5, 6, // M3
+            8, 16, // M4
+            30, 30, // M5
+            30, 30, // M6
+            60, 60, // M7+
+    };
 
     public void second() {
         Iterator<Earthquake> it = earthquakes.iterator();
@@ -581,7 +590,7 @@ public class EarthquakeAnalysis {
         while (it.hasNext()) {
             Earthquake earthquake = it.next();
             int store_minutes = STORE_TABLE[Math.max(0,
-                    Math.min(STORE_TABLE.length - 1, (int) earthquake.getMag()))];
+                    Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
             if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                     && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
                 if(GlobalQuake.instance != null) {

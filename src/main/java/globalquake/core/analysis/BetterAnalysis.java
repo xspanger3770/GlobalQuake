@@ -107,7 +107,7 @@ public class BetterAnalysis extends Analysis {
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
             }
             double ratio = shortAverage / longAverage;
-            if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty()) {
+            if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
                 boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.5 && time - eventTimer > 200;
                 boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.25 && time - eventTimer > 100;
                 boolean condMain = shortAverage / thirdAverage > 2;
@@ -115,11 +115,8 @@ public class BetterAnalysis extends Analysis {
                     ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                     if (!_logs.isEmpty()) {
                         setStatus(AnalysisStatus.EVENT);
-
-                        if(!getStation().disabled) {
-                            Event event = new Event(this, time, _logs);
-                            getDetectedEvents().add(0, event);
-                        }
+                        Event event = new Event(this, time, _logs);
+                        getDetectedEvents().add(0, event);
                     }
                 }
             }
@@ -137,7 +134,7 @@ public class BetterAnalysis extends Analysis {
                 }
                 if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
                     System.err.println("Station " + getStation().getStationCode()
-                            + " for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
+                            + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
                     reset();
                     return;
                 }
