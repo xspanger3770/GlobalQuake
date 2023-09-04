@@ -5,6 +5,7 @@ import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.settings.Settings;
+import org.tinylog.Logger;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,8 +26,12 @@ public class CinemaHandler {
                     return;
                 }
 
-                CinemaTarget target = selectNextTarget();
-                globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
+                try {
+                    CinemaTarget target = selectNextTarget();
+                    globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
+                }catch(Exception e){
+                    Logger.error(e);
+                }
             }
         }, 0, 10 * 1000);
     }
