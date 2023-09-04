@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 public class EarthquakeReporter {
 	public static final File ANALYSIS_FOLDER = new File(Main.MAIN_FOLDER, "/events/");
-	private static final DateTimeFormatter fileFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd_HH:mm:ss").withZone(ZoneId.systemDefault());
+	private static final DateTimeFormatter fileFormat = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss").withZone(ZoneId.systemDefault());
 	private static double centerLat = 49.7;
 	private static double centerLon = 15.65;
 	private static double scroll = 8;
