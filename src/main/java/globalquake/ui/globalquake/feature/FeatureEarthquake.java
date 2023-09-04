@@ -54,26 +54,25 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         double pkikpDist = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
 
-
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, pDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementSWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                sDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, sDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementPKPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pkpDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, pkpDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementPKIKPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pkikpDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, pkikpDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),

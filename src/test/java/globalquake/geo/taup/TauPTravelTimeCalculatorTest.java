@@ -73,7 +73,10 @@ public class TauPTravelTimeCalculatorTest {
     public void testBigAngle() throws Exception{
         TauPTravelTimeCalculator.init();
 
-        assertTrue(TauPTravelTimeCalculator.getPWaveTravelAngle(0, 40 * 60) < 0);
+        assertEquals(TauPTravelTimeCalculator.NO_ARRIVAL, TauPTravelTimeCalculator.getPWaveTravelAngle(0, 40 * 60), 1e-6);
+        assertEquals(TauPTravelTimeCalculator.NO_ARRIVAL, TauPTravelTimeCalculator.getPWaveTravelAngle(0, -40 * 60), 1e-6);
+        assertEquals(TauPTravelTimeCalculator.NO_ARRIVAL,TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 2 * 60), 1e-6);
+        assertEquals(TauPTravelTimeCalculator.NO_ARRIVAL, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 2 * 60), 1e-6);
     }
 
 }

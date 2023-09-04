@@ -77,8 +77,13 @@ public class TauPTravelTimeCalculator {
         return table[0][table[0].length - 1];
     }
 
+    private static double getMinTime(float[][] table) {
+        return table[0][0];
+    }
+
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.p_travel_table)){
+        if(timeSeconds < getMinTime(travelTable.p_travel_table) ||
+                timeSeconds > getMaxTime(travelTable.p_travel_table)){
             return  NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
@@ -86,7 +91,7 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getSWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.s_travel_table)){
+        if(timeSeconds < getMinTime(travelTable.s_travel_table) || timeSeconds > getMaxTime(travelTable.s_travel_table)){
             return  NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getSWaveTravelTime(depth, angle), timeSeconds, 1e-4,
@@ -94,7 +99,7 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPKIKPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.pkikp_travel_table)){
+        if(timeSeconds < getMinTime(travelTable.pkikp_travel_table) || timeSeconds > getMaxTime(travelTable.pkikp_travel_table)){
             return  NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
@@ -102,7 +107,7 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPKPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.pkp_travel_table)){
+        if(timeSeconds < getMinTime(travelTable.pkp_travel_table) || timeSeconds > getMaxTime(travelTable.pkp_travel_table)){
             return  NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
