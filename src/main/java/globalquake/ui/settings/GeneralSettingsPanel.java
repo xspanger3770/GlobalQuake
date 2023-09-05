@@ -14,7 +14,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 
 	public GeneralSettingsPanel() {
-		setLayout(new GridLayout(3, 1));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		JPanel outsidePanel = new JPanel(new BorderLayout());
 		outsidePanel.setBorder(BorderFactory.createTitledBorder("Home location settings"));
@@ -77,6 +77,10 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 		add(alertsDialogPanel);
 		add(createIntensitySettingsPanel());
+
+		for(int i = 0; i < 16; i++){
+			add(new JPanel()); // fillers
+		}
 	}
 
 	private JPanel createIntensitySettingsPanel() {

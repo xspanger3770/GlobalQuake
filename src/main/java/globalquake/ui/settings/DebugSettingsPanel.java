@@ -3,6 +3,7 @@ package globalquake.ui.settings;
 import globalquake.core.report.EarthquakeReporter;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class DebugSettingsPanel extends SettingsPanel {
 
@@ -11,6 +12,7 @@ public class DebugSettingsPanel extends SettingsPanel {
 
     public DebugSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(new EmptyBorder(5,5,5,5));
         add(chkBoxClusters = new JCheckBox("Display Clusters", Settings.displayClusters));
 
         add(chkBoxReports = new JCheckBox("Enable Earthquake Reports", Settings.reportsEnabled));

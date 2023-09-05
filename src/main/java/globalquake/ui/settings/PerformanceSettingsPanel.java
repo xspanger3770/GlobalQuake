@@ -11,16 +11,14 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     private JCheckBox chkBoxParalell;
 
     public PerformanceSettingsPanel() {
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(400, 300));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        add(createSettingAccuracy());
+        add(createSettingParalell());
 
-        contentPanel.add(createSettingAccuracy());
-        contentPanel.add(createSettingParalell());
-
-        add(new JScrollPane(contentPanel), BorderLayout.CENTER);
+        for(int i = 0; i < 16; i++){
+            add(new JPanel()); // fillers
+        }
     }
 
     @SuppressWarnings("ExtractMethodRecommender")

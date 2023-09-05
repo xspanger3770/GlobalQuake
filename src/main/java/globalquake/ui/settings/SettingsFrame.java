@@ -31,6 +31,7 @@ public class SettingsFrame extends GQFrame {
 
 	private void initialize(Component parent) {
 		setIconImage(Main.LOGO);
+		setResizable(false);
 
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -80,12 +81,13 @@ public class SettingsFrame extends GQFrame {
 		panels.add(new AlertSettingsPanel());
 		panels.add(new PerformanceSettingsPanel());
 		panels.add(new GraphicsSettingsPanel());
+		panels.add(new CinemaModeSettingsPanel());
 		panels.add(new HypocenterAnalysisSettingsPanel());
 		panels.add(new DebugSettingsPanel());
 
 		for (SettingsPanel panel : panels) {
 			JScrollPane scrollPane = new JScrollPane(panel);
-			scrollPane.setPreferredSize(new Dimension(600, 460));
+			scrollPane.setPreferredSize(new Dimension(700, 500));
 			tabbedPane.addTab(panel.getTitle(), scrollPane);
 
 			javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));

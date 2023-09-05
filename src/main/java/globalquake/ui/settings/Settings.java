@@ -85,6 +85,9 @@ public final class Settings {
 	public static Boolean alertGlobal;
 	public static Double alertGlobalMag;
 
+	public static Integer cinemaModeSwitchTime;
+	public static Integer cinemaModeZoomMultiplier;
+
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
@@ -106,6 +109,9 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("cinemaModeSwitchTime", "10");
+		loadProperty("cinemaModeZoomMultiplier", "100");
 
 		loadProperty("alertLocal", "true");
 		loadProperty("alertLocalDist", "200");

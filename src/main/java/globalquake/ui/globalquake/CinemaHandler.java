@@ -35,7 +35,7 @@ public class CinemaHandler {
                         Logger.error(e);
                     }
                 } finally {
-                    scheduler[0].schedule(this, 10, TimeUnit.SECONDS);
+                    scheduler[0].schedule(this, Settings.cinemaModeSwitchTime, TimeUnit.SECONDS);
                 }
             }
         };
@@ -70,7 +70,7 @@ public class CinemaHandler {
             return;
         }
         long time = System.currentTimeMillis();
-        if(!bypass && Math.abs(time - lastAnim) < 5000){
+        if(Math.abs(time - lastAnim) < (bypass ? 2000 : 5000)){
             return;
         }
         lastAnim = time;
@@ -126,12 +126,12 @@ public class CinemaHandler {
     }
 
     private CinemaTarget createTarget(Cluster cluster) {
-        return new CinemaTarget(cluster.getAnchorLat(), cluster.getAnchorLon(), 0.25);
+        return new CinemaTarget(cluster.getAnchorLat(), cluster.getAnchorLon(), 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0));
     }
 
     private CinemaTarget createTarget(Earthquake earthquake) {
         double ageMin = (System.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
-        double zoom = Math.max(0.1, Math.min(0.8, ageMin / 5.0));
+        double zoom = Math.max(0.1, Math.min(0.8, ageMin / 5.0)) / (Settings.cinemaModeZoomMultiplier / 100.0);
         return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom);
     }
 }
