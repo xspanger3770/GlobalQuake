@@ -331,7 +331,9 @@ public class SearchBar extends JTextField{
 
             }
         }
-        catch(Exception e){}
+        catch(Exception e){
+            System.out.println("Search error:"+ e);
+        }
     }
     
     private String[] generatePredictedText(String input){
