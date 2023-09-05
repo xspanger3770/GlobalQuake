@@ -9,6 +9,10 @@ import org.tinylog.Logger;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class CinemaHandler {
     private final GlobePanel globePanel;
@@ -17,23 +21,64 @@ public class CinemaHandler {
         this.globePanel = globePanel;
     }
 
-    public void run(){
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+    public void run() {
+
+        final ScheduledExecutorService[] scheduler = {
+                Executors.newScheduledThreadPool(1),
+                Executors.newScheduledThreadPool(1)
+        };
+
+        Runnable task = new Runnable() {
             @Override
             public void run() {
-                if(!globePanel.isCinemaMode()){
-                    return;
-                }
-
                 try {
-                    CinemaTarget target = selectNextTarget();
-                    globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
-                }catch(Exception e){
-                    Logger.error(e);
+                    try {
+                        nextTarget();
+                    } catch (Exception e) {
+                        Logger.error(e);
+                    }
+                } finally {
+                    scheduler[0].schedule(this, 10, TimeUnit.SECONDS);
                 }
             }
-        }, 0, 10 * 1000);
+        };
+
+        scheduler[0].schedule(task, 0, TimeUnit.SECONDS);
+
+        final int[] quakeCount = {GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().size()};
+        final int[] clusterCount = {GlobalQuake.instance.getClusterAnalysis().getClusters().size()};
+
+        scheduler[1].scheduleAtFixedRate(
+                () -> {
+                        int currentQuakeCount = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().size();
+                        int currentClusterCount = GlobalQuake.instance.getClusterAnalysis().getClusters().size();
+                        try {
+                            if (currentQuakeCount != quakeCount[0] || currentClusterCount != clusterCount[0]) {
+                                nextTarget();
+                            }
+                        } finally {
+                            quakeCount[0] = currentQuakeCount;
+                            clusterCount[0] = currentClusterCount;
+                        }
+                },0,
+                100,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    private long lastAnim = 0;
+
+    private synchronized void nextTarget() {
+        if (!globePanel.isCinemaMode()) {
+            return;
+        }
+        long time = System.currentTimeMillis();
+        if(Math.abs(time - lastAnim) < 5000){
+            return;
+        }
+        lastAnim = time;
+        CinemaTarget target = selectNextTarget();
+        globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
     }
 
     private Earthquake lastEarthquake = null;
@@ -41,13 +86,13 @@ public class CinemaHandler {
 
     private CinemaTarget selectNextTarget() {
         CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5);
-        if(GlobalQuake.instance == null){
+        if (GlobalQuake.instance == null) {
             return result;
         }
 
         boolean next = false;
-        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-            if(next || lastEarthquake == null){
+        for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
+            if (next || lastEarthquake == null) {
                 lastEarthquake = earthquake;
                 return createTarget(earthquake);
             } else if (earthquake == lastEarthquake) {
@@ -56,17 +101,17 @@ public class CinemaHandler {
         }
 
         var earthquake = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findFirst();
-        if(earthquake.isPresent()) {
+        if (earthquake.isPresent()) {
             lastEarthquake = earthquake.get();
             return createTarget(earthquake.get());
         }
 
         next = false;
-        for(Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()){
-            if(System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60){
+        for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
+            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60) {
                 continue;
             }
-            if(next || lastCluster == null){
+            if (next || lastCluster == null) {
                 lastCluster = cluster;
                 return createTarget(cluster);
             } else if (cluster == lastCluster) {
@@ -75,7 +120,7 @@ public class CinemaHandler {
         }
 
         var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
-        if(cluster.isPresent()) {
+        if (cluster.isPresent()) {
             lastCluster = cluster.get();
             return createTarget(cluster.get());
         }

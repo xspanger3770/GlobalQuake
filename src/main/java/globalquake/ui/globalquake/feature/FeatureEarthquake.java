@@ -22,6 +22,8 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private final List<Earthquake> earthquakes;
 
+    public static final boolean DRAW_CORE_WAVES = false;
+
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
@@ -106,39 +108,36 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity) {
-        long age = System.currentTimeMillis() - entity.getOriginal().getOrigin();
-        double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (entity.getOriginal().getMag())), 2) * 40);
+        float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
+        RenderElement elementPWave = entity.getRenderElement(0);
+        RenderElement elementSWave = entity.getRenderElement(1);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
 
-        if (age / 1000.0 < maxDisplayTimeSec) {
-            float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
-            RenderElement elementPWave = entity.getRenderElement(0);
-            RenderElement elementSWave = entity.getRenderElement(1);
-            RenderElement elementPKPWave = entity.getRenderElement(2);
-            RenderElement elementPKIKPWave = entity.getRenderElement(3);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (elementPWave.shouldDraw) {
+            graphics.setColor(Color.BLUE);
+            graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
+            graphics.draw(elementPWave.getShape());
+        }
 
-            if (elementPWave.shouldDraw) {
-                graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
-                graphics.draw(elementPWave.getShape());
-            }
+        if (elementSWave.shouldDraw) {
+            graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementSWave.getShape());
+        }
 
-            if (elementSWave.shouldDraw) {
-                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-                graphics.draw(elementSWave.getShape());
-            }
-
+        if(DRAW_CORE_WAVES) {
             if (elementPKPWave.shouldDraw) {
-                graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(1.0f));
+                graphics.setColor(Color.MAGENTA);
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
                 graphics.draw(elementPKPWave.getShape());
             }
 
             if (elementPKIKPWave.shouldDraw) {
-                graphics.setColor(Color.MAGENTA);
-                graphics.setStroke(new BasicStroke(3.0f * thicknessMultiplier));
+                graphics.setColor(Color.GREEN);
+                graphics.setStroke(new BasicStroke(1.0f));
                 graphics.draw(elementPKIKPWave.getShape());
             }
         }
