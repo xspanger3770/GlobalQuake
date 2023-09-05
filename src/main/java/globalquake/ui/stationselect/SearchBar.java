@@ -23,6 +23,7 @@ import javax.swing.Timer;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -30,8 +31,6 @@ import javax.swing.border.EmptyBorder;
 import org.json.simple.parser.JSONParser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import globalquake.ui.globe.GlobeRenderer;
 
 import org.json.simple.JSONObject;
 import org.geojson.GeoJsonObject;
@@ -53,10 +52,10 @@ public class SearchBar extends JTextField{
     private final Icon iconClose;
     private final Icon iconLoading;
     private final String hintText = "Searching ... ";
+    private final Timer timer;
+    private final float speed = 8f;
     private String search = "";
-    private Timer timer;
     private boolean show;
-    private float speed = 8f;
     private float location = -1;
     private boolean countryFound = false;
     private GeoJsonObject foundCoordinates;
@@ -312,17 +311,27 @@ public class SearchBar extends JTextField{
 
                 GeoJsonObject o = new ObjectMapper().readValue(geoObject.toJSONString(), GeoJsonObject.class);
 
-                if(countryName.equals(userInput)){
-                    System.out.println("Found country: " + countryName);
+                if((countryName.toLowerCase()).equals(userInput.toLowerCase())){
+                    JLabel successLabel = new JLabel("Found country: " + countryName);
+                    StationSelectFrame.suggestionPanel.removeAll();
+                    StationSelectFrame.suggestionPanel.add(successLabel);
+                    StationSelectFrame.suggestionPanel.setVisible(true);
+                    StationSelectFrame.suggestionPanel.revalidate();
                     countryFound = true;
                     foundCoordinates = o;
+                    break;
+                }
+                else{
+                    JLabel errorLabel = new JLabel("Country '" + userInput + "' not found");
+                    StationSelectFrame.suggestionPanel.removeAll();
+                    StationSelectFrame.suggestionPanel.add(errorLabel);
+                    StationSelectFrame.suggestionPanel.setVisible(true);
+                    StationSelectFrame.suggestionPanel.revalidate();
                 }
 
             }
         }
-        catch(Exception e){
-            System.out.println("Error: " + e);
-        }
+        catch(Exception e){}
     }
     
     private String[] generatePredictedText(String input){

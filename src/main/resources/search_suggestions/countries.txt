@@ -1,11 +1,17 @@
 Afghanistan
+Aland
 Albania
 Algeria
+American Samoa
 Andorra
 Angola
-Antigua & Deps
+Anguilla
+Antarctica
+Antigua and Barb.
 Argentina
 Armenia
+Aruba
+Ashmore and Cartier Is.
 Australia
 Austria
 Azerbaijan
@@ -17,46 +23,56 @@ Belarus
 Belgium
 Belize
 Benin
+Bermuda
 Bhutan
 Bolivia
-Bosnia Herzegovina
+Bosnia and Herz.
 Botswana
 Brazil
+British Virgin Is.
 Brunei
 Bulgaria
-Burkina
+Burkina Faso
 Burundi
+Côte d'Ivoire
 Cambodia
 Cameroon
 Canada
 Cape Verde
-Central African Rep
+Cayman Is.
+Central African Rep.
 Chad
 Chile
 China
 Colombia
 Comoros
 Congo
-Congo {Democratic Rep}
+Cook Is.
 Costa Rica
 Croatia
 Cuba
+Curaçao
 Cyprus
-Czech Republic
+Czech Rep.
+Dem. Rep. Congo
+Dem. Rep. Korea
 Denmark
 Djibouti
 Dominica
-Dominican Republic
-East Timor
+Dominican Rep.
 Ecuador
 Egypt
 El Salvador
-Equatorial Guinea
+Eq. Guinea
 Eritrea
 Estonia
 Ethiopia
+Faeroe Is.
+Falkland Is.
 Fiji
 Finland
+Fr. Polynesia
+Fr. S. Antarctic Lands
 France
 Gabon
 Gambia
@@ -64,35 +80,40 @@ Georgia
 Germany
 Ghana
 Greece
+Greenland
 Grenada
+Guam
 Guatemala
+Guernsey
 Guinea
 Guinea-Bissau
 Guyana
 Haiti
 Honduras
+Hong Kong
 Hungary
 Iceland
 India
+Indian Ocean Ter.
 Indonesia
 Iran
 Iraq
-Ireland {Republic}
+Ireland
+Isle of Man
 Israel
 Italy
-Ivory Coast
 Jamaica
 Japan
+Jersey
 Jordan
 Kazakhstan
 Kenya
 Kiribati
-Korea North
-Korea South
+Korea
 Kosovo
 Kuwait
 Kyrgyzstan
-Laos
+Lao PDR
 Latvia
 Lebanon
 Lesotho
@@ -101,68 +122,81 @@ Libya
 Liechtenstein
 Lithuania
 Luxembourg
+Macao
 Macedonia
 Madagascar
 Malawi
 Malaysia
-Maldives
 Mali
 Malta
-Marshall Islands
+Marshall Is.
 Mauritania
-Mauritius
 Mexico
 Micronesia
 Moldova
 Monaco
 Mongolia
 Montenegro
+Montserrat
 Morocco
 Mozambique
-Myanmar, {Burma}
+Myanmar
+N. Cyprus
+N. Mariana Is.
 Namibia
 Nauru
 Nepal
 Netherlands
+New Caledonia
 New Zealand
 Nicaragua
 Niger
 Nigeria
+Niue
+Norfolk Island
 Norway
 Oman
 Pakistan
 Palau
+Palestine
 Panama
 Papua New Guinea
 Paraguay
 Peru
 Philippines
+Pitcairn Is.
 Poland
 Portugal
+Puerto Rico
 Qatar
 Romania
-Russian Federation
+Russia
 Rwanda
-St Kitts & Nevis
-St Lucia
-Saint Vincent & the Grenadines
+S. Sudan
+Sao Tome and Principe
+Saint Lucia
 Samoa
 San Marino
-Sao Tome & Principe
 Saudi Arabia
 Senegal
 Serbia
-Seychelles
+Siachen Glacier
 Sierra Leone
 Singapore
+Sint Maarten
 Slovakia
 Slovenia
-Solomon Islands
+Solomon Is.
 Somalia
+Somaliland
 South Africa
-South Sudan
 Spain
 Sri Lanka
+St-Barthélemy
+St-Martin
+St. Kitts and Nevis
+St. Pierre and Miquelon
+St. Vin. and Gren.
 Sudan
 Suriname
 Swaziland
@@ -173,13 +207,15 @@ Taiwan
 Tajikistan
 Tanzania
 Thailand
+Timor-Leste
 Togo
 Tonga
-Trinidad & Tobago
+Trinidad and Tobago
 Tunisia
 Turkey
 Turkmenistan
-Tuvalu
+Turks and Caicos Is.
+U.S. Virgin Is.
 Uganda
 Ukraine
 United Arab Emirates
@@ -188,9 +224,11 @@ United States
 Uruguay
 Uzbekistan
 Vanuatu
-Vatican City
+Vatican
 Venezuela
 Vietnam
+W. Sahara
+Wallis and Futuna Is.
 Yemen
 Zambia
 Zimbabwe
