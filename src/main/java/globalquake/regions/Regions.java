@@ -26,6 +26,8 @@ public class Regions {
 	public static final ArrayList<Region> regionsHD = new ArrayList<>();
 	public static final ArrayList<Region> regionsUHD = new ArrayList<>();
 
+	public static boolean enabled = true;
+
 	public static void init() throws IOException {
 		loadPolygons("polygons/countriesMD.json", raw_polygonsMD, regionsMD);
 		loadPolygons("polygons/countriesHD.json", raw_polygonsHD, regionsHD);
@@ -36,6 +38,9 @@ public class Regions {
 	public static synchronized void awaitDownload(){}
 
 	public static synchronized String downloadRegion(double lat, double lon) {
+		if(!enabled){
+			return UNKNOWN_REGION;
+		}
 		try {
 			String str = String.format("https://www.seismicportal.eu/fe_regions_ws/query?format=json&lat=%f&lon=%f",
 					lat, lon);

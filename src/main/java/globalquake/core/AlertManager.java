@@ -38,23 +38,16 @@ public class AlertManager {
     public static boolean meetsConditions(Earthquake quake) {
         double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
                 Settings.homeLon);
-        double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
-                Settings.homeLat, Settings.homeLon, 0.0);
-        double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
-        if (distGC < 400) {
+        if (Settings.alertLocal && distGC < Settings.alertLocalDist) {
             return true;
         }
 
-        if (distGC < 2000 && quake.getMag() >= 3.5) {
+        if (Settings.alertRegion && distGC < Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
             return true;
         }
 
-        if (quake.getMag() > 5.5) {
-            return true;
-        }
-
-        return pgaHome >= 0.1;
+        return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
     }
 
 }

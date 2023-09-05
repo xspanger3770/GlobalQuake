@@ -169,13 +169,17 @@ public class StationDatabase implements Serializable {
         return channel;
     }
 
-    public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
+    public static Station getStation(List<Network> networks, String networkCode, String stationCode) {
         Network network = getNetwork(networks, networkCode);
         if(network == null){
             return null;
         }
 
-        Station station = findStation(network, stationCode);
+        return findStation(network, stationCode);
+    }
+
+    public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
+        Station station = getStation(networks, networkCode, stationCode);
         if(station == null){
             return null;
         }

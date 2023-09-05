@@ -28,16 +28,11 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class GlobalQuakePanel extends GlobePanel {
-
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.systemDefault());
-    private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     private static final Color neutralColor = new Color(20, 20, 160);
 
@@ -61,8 +56,14 @@ public class GlobalQuakePanel extends GlobePanel {
                     Settings.enableSound = !Settings.enableSound;
                     Settings.save();
                 }
+                if(e.getKeyCode() == KeyEvent.VK_C) {
+                    setCinemaMode(!isCinemaMode());
+                }
             }
         });
+
+        CinemaHandler cinemaHandler = new CinemaHandler(this);
+        cinemaHandler.run();
     }
 
     @Override
@@ -105,7 +106,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
         if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
-            str = formatNice.format(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
+            str = Settings.formatDateTime(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
             if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
                 g.setColor(Color.white);
             }
@@ -146,6 +147,8 @@ public class GlobalQuakePanel extends GlobePanel {
         else{
             settingsStrings.add(new SettingInfo("Sound Alarms (S): ", Settings.enableSound ? "Enabled" : "Disabled", Settings.enableSound ? Color.green:Color.red));
         }
+
+        settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
         double GB = 1024 * 1024 * 1024.0;
 
@@ -206,7 +209,7 @@ public class GlobalQuakePanel extends GlobePanel {
             g.drawString(quake.getRegion(), y + 3, x + 44);
             g.setFont(new Font("Calibri", Font.BOLD, 18));
 
-            g.drawString(DATE_FORMAT.format(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
+            g.drawString(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
 
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
@@ -266,12 +269,13 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.PLAIN, 56));
         int x3 = (int) (_ww * 0.5 - 0.5 * g.getFontMetrics().stringWidth(str3));
+        int w3 = g.getFontMetrics().stringWidth(str3);
         g.drawString(str3, x3, baseHeight + 80);
 
         if(level != null && level.getSuffix() != null) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", Font.PLAIN, 36));
-            g.drawString(level.getSuffix(), x3 + 16, baseHeight + 50);
+            g.drawString(level.getSuffix(), x3 + w3 + 4, baseHeight + 50);
         }
 
         g.setColor(Color.white);

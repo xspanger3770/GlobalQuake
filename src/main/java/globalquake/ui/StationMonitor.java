@@ -8,14 +8,21 @@ import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StationMonitor extends JFrame {
+public class StationMonitor extends GQFrame {
+
+	private final AbstractStation station;
 
 	public StationMonitor(Component parent, AbstractStation station) {
+		this.station = station;
+		setLayout(new BorderLayout());
+
+		add(createControlPanel(), BorderLayout.NORTH);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		StationMonitorPanel panel = new StationMonitorPanel(station);
-		setContentPane(panel);
+		add(panel, BorderLayout.CENTER);
 
 		pack();
+
 		setLocationRelativeTo(parent);
 		setResizable(true);
 		setTitle("Station Monitor - " + station.getNetworkCode() + " " + station.getStationCode() + " "
@@ -55,6 +62,22 @@ public class StationMonitor extends JFrame {
 		});
 
 		setVisible(true);
+	}
+
+	private Component createControlPanel() {
+		JPanel panel = new JPanel();
+
+		JCheckBox chkBoxDisable = new JCheckBox("Disable event picking", station.disabled);
+		chkBoxDisable.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				station.disabled = chkBoxDisable.isSelected();
+			}
+		});
+
+		panel.add(chkBoxDisable);
+
+		return panel;
 	}
 
 }

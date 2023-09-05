@@ -1,5 +1,6 @@
 package globalquake.ui.stationselect;
 
+import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.database.StationCountPanel;
 
@@ -9,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
 
-public class StationSelectFrame extends JFrame implements ActionListener {
+public class StationSelectFrame extends GQFrame implements ActionListener {
 
     private final StationSelectPanel stationSelectPanel;
     private final DatabaseMonitorFrame databaseMonitorFrame;

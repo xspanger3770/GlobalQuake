@@ -73,22 +73,39 @@ public class TauPTravelTimeCalculator {
         return interpolateWaves(travelTable.pkp_travel_table, TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE, depth, angle, false);
     }
 
+    private static double getMaxTime(float[][] table) {
+        return table[0][table[0].length - 1];
+    }
+
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds < 0 ||
+                timeSeconds > getMaxTime(travelTable.p_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
     }
 
     public static double getSWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.s_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getSWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
     }
 
     public static double getPKIKPWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds > getMaxTime(travelTable.pkikp_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE);
     }
 
     public static double getPKPWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds > getMaxTime(travelTable.pkp_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE);
     }

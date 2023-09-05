@@ -14,29 +14,39 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 
 	public GeneralSettingsPanel() {
-		setLayout(new GridLayout(3, 1));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		JPanel outsidePanel = new JPanel(new BorderLayout());
 		outsidePanel.setBorder(BorderFactory.createTitledBorder("Home location settings"));
 
 		JPanel homeLocationPanel = new JPanel();
-		homeLocationPanel.setLayout(new GridLayout(2,2));
+		homeLocationPanel.setLayout(new GridLayout(2,1));
 		
 		JLabel lblLat = new JLabel("Home Latitude: ");
 		JLabel lblLon = new JLabel("Home Longitude: ");
 
-		textFieldLat = new JTextField();
+		textFieldLat = new JTextField(20);
 		textFieldLat.setText("%s".formatted(Settings.homeLat));
 		textFieldLat.setColumns(10);
 		
-		textFieldLon = new JTextField();
+		textFieldLon = new JTextField(20);
 		textFieldLon.setText("%s".formatted(Settings.homeLon));
 		textFieldLon.setColumns(10);
 
-		homeLocationPanel.add(lblLat);
-		homeLocationPanel.add(textFieldLat);
-		homeLocationPanel.add(lblLon);
-		homeLocationPanel.add(textFieldLon);
+		JPanel latPanel = new JPanel();
+		//latPanel.setLayout(new BoxLayout(latPanel, BoxLayout.X_AXIS));
+
+		latPanel.add(lblLat);
+		latPanel.add(textFieldLat);
+
+		JPanel lonPanel = new JPanel();
+		//lonPanel.setLayout(new BoxLayout(lonPanel, BoxLayout.X_AXIS));
+
+		lonPanel.add(lblLon);
+		lonPanel.add(textFieldLon);
+
+		homeLocationPanel.add(latPanel);
+		homeLocationPanel.add(lonPanel);
 
 		JTextArea infoLocation = new JTextArea("Home location will be used for playing additional alarm \n sounds if an earthquake occurs nearby");
 		infoLocation.setBorder(new EmptyBorder(5,5,5,5));
@@ -46,7 +56,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 		chkBoxHomeLoc = new JCheckBox("Display home location");
 		chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
-		add(chkBoxHomeLoc);
+		outsidePanel.add(chkBoxHomeLoc);
 
 		outsidePanel.add(homeLocationPanel, BorderLayout.NORTH);
 		outsidePanel.add(infoLocation, BorderLayout.CENTER);
@@ -65,7 +75,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
                 """
                         Alert dialog will show if an earthquake occurs\s
                          nearby your home location and will display P and S wave\s
-                         arrival time and estimated intensity (in Shindo)""");
+                         arrival time and estimated intensity""");
 
 		textAreaDialogs.setBorder(new EmptyBorder(0,5,5,5));
 		textAreaDialogs.setLineWrap(true);
@@ -77,10 +87,14 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 		add(alertsDialogPanel);
 		add(createIntensitySettingsPanel());
+
+		for(int i = 0; i < 8; i++){
+			add(new JPanel()); // fillers
+		}
 	}
 
 	private JPanel createIntensitySettingsPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
+		JPanel panel = new JPanel(new GridLayout(2,1));
 		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
 
 		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES.toArray(new IntensityScale[0]));

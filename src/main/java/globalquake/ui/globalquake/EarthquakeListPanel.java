@@ -15,8 +15,6 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -24,8 +22,6 @@ import java.util.stream.Collectors;
 public class EarthquakeListPanel extends JPanel {
     private double scroll = 0;
     protected int mouseY = -999;
-
-    private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
@@ -190,7 +186,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 18);
 
-                str = formatNice.format(Instant.ofEpochMilli(quake.getOrigin()));
+                str = Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()));
                 g.setFont(new Font("Calibri", Font.PLAIN, 16));
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 42);

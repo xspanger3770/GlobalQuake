@@ -3,6 +3,7 @@ package globalquake.ui.debug;
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
+import globalquake.ui.GQFrame;
 import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
@@ -12,13 +13,15 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
-public class GlobePanelDebug extends JFrame {
+public class GlobePanelDebug extends GQFrame {
 
 	private final GlobePanel panel;
 	private final JPanel list;
@@ -58,6 +61,19 @@ public class GlobePanelDebug extends JFrame {
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
 			}
 		};
+
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_SPACE){
+					panel.smoothTransition(0,0,0.5);
+				}
+				if(e.getKeyCode() == KeyEvent.VK_C){
+					panel.setCinemaMode(!panel.isCinemaMode());
+				}
+			}
+		});
+
 		Random r = new Random();
 		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
 		for(int i = 0; i < 50; i++) {

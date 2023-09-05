@@ -12,8 +12,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
+import java.util.*;
 
 public class SeedlinkCommunicator {
 
@@ -94,9 +93,27 @@ public class SeedlinkCommunicator {
     }
 
     private static void addAvailableChannel(String networkCode, String stationCode, String channelName, String locationCode, long delay, SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) {
+        locationCode = locationCode.trim();
         stationDatabase.getDatabaseWriteLock().lock();
         try {
+            Station station = StationDatabase.getStation(stationDatabase.getNetworks(), networkCode, stationCode);
+            if(station == null){
+                return; // :(
+            }
+
             Channel channel = StationDatabase.getChannel(stationDatabase.getNetworks(), networkCode, stationCode, channelName, locationCode);
+
+            if(channel == null){
+                channel = findChannelButDontUseLocationCode(station, channelName);
+
+                if(channel != null){
+                    var any = channel.getStationSources().stream().findAny();
+                    Channel newChannel = StationDatabase.getOrCreateChannel(station, channelName, locationCode, channel.getLatitude(), channel.getLongitude(), channel.getElevation(), channel.getSampleRate(), any.orElse(null));
+                    Logger.warn("Did not find exact match for [%s %s %s `%s`], assuming the location code is `%s`\n".formatted(networkCode, stationCode, channelName, locationCode, channel.getLocationCode()));
+                    channel = newChannel;
+                }
+            }
+
             if (channel == null) {
                 return;
             }
@@ -106,6 +123,15 @@ public class SeedlinkCommunicator {
         }finally {
             stationDatabase.getDatabaseWriteLock().unlock();
         }
+    }
+
+    private static Channel findChannelButDontUseLocationCode(Station station, String channelName) {
+        List<Channel> channels = new ArrayList<>(station.getChannels()).stream().filter(channel -> channel.getCode().equals(channelName)).sorted(Comparator.comparing(Channel::getLocationCode)).toList();
+        if(channels.isEmpty()){
+            return null;
+        }
+
+        return channels.get(0);
     }
 
 }

@@ -380,6 +380,9 @@ public class GlobeRenderer {
 
     public void createNGon(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double startAngle, double step) {
         polygon3D.reset();
+        if(radius < 1e-6){
+            return;
+        }
         Point2D point = new Point2D();
         GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
         GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);

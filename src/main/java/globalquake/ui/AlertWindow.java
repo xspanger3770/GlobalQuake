@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class AlertWindow extends JFrame {
+public class AlertWindow extends GQFrame {
 
 	private final JPanel contentPane;
 	private final JLabel lblMag;

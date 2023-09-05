@@ -3,6 +3,7 @@ package globalquake.ui.database;
 import globalquake.database.StationDatabaseManager;
 import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
+import globalquake.ui.GQFrame;
 import globalquake.ui.database.action.RestoreDatabaseAction;
 import globalquake.ui.stationselect.StationSelectFrame;
 
@@ -16,7 +17,7 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DatabaseMonitorFrame extends JFrame {
+public class DatabaseMonitorFrame extends GQFrame {
 
     private final StationDatabaseManager manager;
     private final Runnable onLaunch;

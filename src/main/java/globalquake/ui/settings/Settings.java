@@ -1,12 +1,18 @@
 package globalquake.ui.settings;
 
 import globalquake.main.Main;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
+
+import java.lang.reflect.Field;
 
 public final class Settings {
 
@@ -42,7 +48,7 @@ public final class Settings {
 
 	public static Integer intensityScaleIndex;
 	
-	public static final boolean reportsEnabled = false; // not available ATM
+	public static Boolean reportsEnabled = false;
 	public static Boolean enableSound = true;
 	public static Boolean oldEventsTimeFilterEnabled;
 	public static Double oldEventsTimeFilter;
@@ -52,6 +58,46 @@ public final class Settings {
 	public static int changes = 0;
 
 	public static Double oldEventsOpacity;
+
+	public static Boolean displayClusters;
+	public static Integer selectedDateFormatIndex;
+
+	public static Integer maxArchivedQuakes;
+
+	public static final DateTimeFormatter[] DATE_FORMATS = {
+			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
+			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()),
+	};
+
+	public static Boolean use24HFormat;
+	public static Double stationIntensityVisibilityZoomLevel;
+	public static Boolean hideDeadStations;
+
+	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
+
+	public static Boolean alertLocal;
+	public static Double alertLocalDist;
+	public static Boolean alertRegion;
+	public static Double alertRegionMag;
+	public static Double alertRegionDist;
+	public static Boolean alertGlobal;
+	public static Double alertGlobalMag;
+
+	public static Integer cinemaModeSwitchTime;
+	public static Integer cinemaModeZoomMultiplier;
+
+	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+        return selectedDateTimeFormat().format(temporalAccessor) +
+				" " +
+				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
+	}
+
+	private static DateTimeFormatter selectedDateTimeFormat(){
+		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
+		return DATE_FORMATS[i];
+	}
 
 	static {
 		load();
@@ -63,72 +109,120 @@ public final class Settings {
 		} catch (IOException e) {
 			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
-		
-		enableAlarmDialogs = Boolean.valueOf((String) properties.getOrDefault("enableAlarmDialogs", "false"));
-		
-		homeLat = Double.valueOf((String) properties.getOrDefault("homeLat", "0.0"));
-		homeLon = Double.valueOf((String) properties.getOrDefault("homeLon", "0.0"));
-		displayArchivedQuakes = Boolean.valueOf((String) properties.getOrDefault("displayArchivedQuakes", "true"));
-		enableSound = Boolean.valueOf((String) properties.getOrDefault("enableSound", "true"));
 
-		pWaveInaccuracyThreshold = Double.valueOf((String) properties.getOrDefault("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault)));
-		hypocenterCorrectThreshold = Double.valueOf((String) properties.getOrDefault("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault)));
-		hypocenterDetectionResolution = Double.valueOf((String) properties.getOrDefault("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault)));
-		minimumStationsForEEW = Integer.valueOf((String) properties.getOrDefault("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault)));
+		loadProperty("cinemaModeSwitchTime", "10");
+		loadProperty("cinemaModeZoomMultiplier", "100");
 
-		useOldColorScheme = Boolean.valueOf((String) properties.getOrDefault("useOldColorScheme", "false"));
-		parallelHypocenterLocations = Boolean.valueOf((String) properties.getOrDefault("parallelHypocenterLocations", "false"));
-		displayHomeLocation = Boolean.valueOf((String) properties.getOrDefault("displayHomeLocation", "true"));
-		antialiasing = Boolean.valueOf((String) properties.getOrDefault("antialiasing", "false"));
-		fpsIdle = Integer.valueOf((String) properties.getOrDefault("fpsIdle", "30"));
+		loadProperty("alertLocal", "true");
+		loadProperty("alertLocalDist", "200");
+		loadProperty("alertRegion", "true");
+		loadProperty("alertRegionMag", "3.5");
+		loadProperty("alertRegionDist", "1000");
+		loadProperty("alertGlobal", "true");
+		loadProperty("alertGlobalMag", "6.0");
 
-		intensityScaleIndex = Integer.valueOf((String) properties.getOrDefault("intensityScaleIndex", "0"));
+		loadProperty("reportsEnabled", "false");
+		loadProperty("displayClusters", "false");
+		loadProperty("selectedDateFormatIndex", "0");
+		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
+		loadProperty("use24HFormat", "true");
+		loadProperty("hideDeadStations", "false");
+		loadProperty("maxArchivedQuakes", "100");
 
-		oldEventsTimeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsTimeFilterEnabled", "false"));
-		oldEventsTimeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsTimeFilter", "24.0"));
-
-		oldEventsMagnitudeFilterEnabled = Boolean.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilterEnabled", "false"));
-		oldEventsMagnitudeFilter = Double.valueOf((String) properties.getOrDefault("oldEventsMagnitudeFilter", "4.0"));
-
-		oldEventsOpacity = Double.valueOf((String) properties.getOrDefault("oldEventsOpacity", "100.0"));
+		loadProperty("enableAlarmDialogs", "false");
+		loadProperty("homeLat", "0.0");
+		loadProperty("homeLon", "0.0");
+		loadProperty("displayArchivedQuakes", "true");
+		loadProperty("enableSound", "true");
+		loadProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault));
+		loadProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault));
+		loadProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault));
+		loadProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault));
+		loadProperty("useOldColorScheme", "false");
+		loadProperty("parallelHypocenterLocations", "false");
+		loadProperty("displayHomeLocation", "true");
+		loadProperty("antialiasing", "false");
+		loadProperty("fpsIdle", "30");
+		loadProperty("intensityScaleIndex", "0");
+		loadProperty("oldEventsTimeFilterEnabled", "false");
+		loadProperty("oldEventsTimeFilter", "24.0");
+		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
+		loadProperty("oldEventsMagnitudeFilter", "4.0");
+		loadProperty("oldEventsOpacity", "100.0");
 
 		save();
 	}
-	
+
+	private static void setProperty(Field field, Object value) {
+		try {
+			field.set(null, value);
+		} catch (Exception e) {
+			Logger.error(e);
+		}
+	}
+
+	private static void loadProperty(String name, String defaultVal){
+		try {
+			Field field = Settings.class.getDeclaredField(name);
+			field.setAccessible(true);
+			if (field.getType() == Boolean.class) {
+				boolean val;
+				try{
+					val = Boolean.parseBoolean((String) properties.getOrDefault(field.getName(), defaultVal));
+				}catch(Exception e){
+					Logger.error(e);
+					val = Boolean.parseBoolean(defaultVal);
+				}
+				setProperty(field, val);
+			} else if (field.getType() == Double.class) {
+				double val;
+				try{
+					val = Double.parseDouble((String) properties.getOrDefault(field.getName(), defaultVal));
+				}catch(Exception e){
+					Logger.error(e);
+					val = Double.parseDouble(defaultVal);
+				}
+				setProperty(field, val);
+			} else if (field.getType() == Integer.class) {
+				int val;
+				try{
+					val = Integer.parseInt((String) properties.getOrDefault(field.getName(), defaultVal));
+				}catch(Exception e){
+					Logger.error(e);
+					val = Integer.parseInt(defaultVal);
+				}
+				setProperty(field, val);
+			}
+		} catch (Exception e) {
+			Logger.error(e);
+		}
+	}
+
+	private static Object getPropertyValue(Field field){
+		try {
+			field.setAccessible(true);
+			return field.get(null);
+		} catch (Exception e) {
+			Logger.error(e);
+			return null;
+		}
+	}
 	
 	public static void save() {
 		changes++;
-		properties.setProperty("enableAlarmDialogs", String.valueOf(enableAlarmDialogs));
-		
-		properties.setProperty("homeLat", String.valueOf(homeLat));
-		properties.setProperty("homeLon", String.valueOf(homeLon));
-		properties.setProperty("displayArchivedQuakes", String.valueOf(displayArchivedQuakes));
-		properties.setProperty("enableSound", String.valueOf(enableSound));
-
-		properties.setProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThreshold));
-		properties.setProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThreshold));
-		properties.setProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolution));
-		properties.setProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEW));
-
-		properties.setProperty("useOldColorScheme", String.valueOf(useOldColorScheme));
-		properties.setProperty("parallelHypocenterLocations", String.valueOf(parallelHypocenterLocations));
-		properties.setProperty("displayHomeLocation", String.valueOf(displayHomeLocation));
-		properties.setProperty("antialiasing", String.valueOf(antialiasing));
-		properties.setProperty("fpsIdle", String.valueOf(fpsIdle));
-
-		properties.setProperty("intensityScaleIndex", String.valueOf(intensityScaleIndex));
-
-		properties.setProperty("oldEventsTimeFilterEnabled", String.valueOf(oldEventsTimeFilterEnabled));
-		properties.setProperty("oldEventsTimeFilter", String.valueOf(oldEventsTimeFilter));
-		properties.setProperty("oldEventsMagnitudeFilterEnabled", String.valueOf(oldEventsMagnitudeFilterEnabled));
-		properties.setProperty("oldEventsMagnitudeFilter", String.valueOf(oldEventsMagnitudeFilter));
-
-		properties.setProperty("oldEventsOpacity", String.valueOf(oldEventsOpacity));
 
 		try {
+			Field[] fields = Settings.class.getDeclaredFields();
+			for (Field field : fields) {
+				if (field.getType() == Boolean.class || field.getType() == Double.class || field.getType() == Integer.class) {
+					String value = String.valueOf(getPropertyValue(field));
+					properties.setProperty(field.getName(), value);
+				}
+			}
 			properties.store(new FileOutputStream(optionsFile), "Fun fact: I've never felt an earthquake in my life");
 		} catch (IOException e) {
 			Main.getErrorHandler().handleException(e);
 		}
+
 	}
 }

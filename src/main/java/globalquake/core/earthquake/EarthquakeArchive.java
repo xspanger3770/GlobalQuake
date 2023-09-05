@@ -37,8 +37,7 @@ public class EarthquakeArchive {
 			}
 		}
 
-		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
-		Collections.reverse(archivedQuakes);
+		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
 
 		saveArchive();
 	}
@@ -95,26 +94,16 @@ public class EarthquakeArchive {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
-		archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
-		Collections.reverse(archivedQuakes);
+		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
 	}
 
 	public void update() {
-		Iterator<ArchivedQuake> it = archivedQuakes.iterator();
-		List<ArchivedQuake> toBeRemoved = new ArrayList<>();
 		boolean save = false;
-		while (it.hasNext()) {
-			ArchivedQuake archivedQuake = it.next();
-			long age = System.currentTimeMillis() - archivedQuake.getOrigin();
-			if (age > 1000L * 60 * 60 * 24 * 3L) {
-				if (!save) {
-					save = true;
-				}
-				toBeRemoved.add(archivedQuake);
-			}
-		}
 
-		toBeRemoved.forEach(archivedQuakes::remove);
+		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
+			save = true;
+			archivedQuakes.remove(archivedQuakes.size() - 1);
+		}
 
 		if (save) {
 			new Thread("Archive Save Thread") {

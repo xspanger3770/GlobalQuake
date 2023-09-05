@@ -22,10 +22,12 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private final List<Earthquake> earthquakes;
 
+    public static final boolean DRAW_CORE_WAVES = false;
+
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
-        super(3);
+        super(5);
         this.earthquakes = earthquakes;
     }
 
@@ -38,7 +40,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
         RenderElement elementPWave = entity.getRenderElement(0);
         RenderElement elementSWave = entity.getRenderElement(1);
-        RenderElement elementCross = entity.getRenderElement(2);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
+        RenderElement elementCross = entity.getRenderElement(4);
 
         Earthquake e = entity.getOriginal();
 
@@ -47,16 +51,30 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 * GeoUtils.EARTH_CIRCUMFERENCE;
         double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkpDist = TauPTravelTimeCalculator.getPKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkikpDist = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
 
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, pDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementSWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                sDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, sDist), 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                Math.max(0, pkpDist), 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKIKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                Math.max(0, pkikpDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
@@ -81,7 +99,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for (int i = 0; i <= 2; i++) {
+        for (int i = 0; i <= 4; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
@@ -90,30 +108,41 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity) {
-        long age = System.currentTimeMillis() - entity.getOriginal().getOrigin();
-        double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (entity.getOriginal().getMag())), 2) * 40);
+        float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
+        RenderElement elementPWave = entity.getRenderElement(0);
+        RenderElement elementSWave = entity.getRenderElement(1);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
 
-        if (age / 1000.0 < maxDisplayTimeSec) {
-            float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
-            RenderElement elementPWave = entity.getRenderElement(0);
-            RenderElement elementSWave = entity.getRenderElement(1);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (elementPWave.shouldDraw) {
+            graphics.setColor(Color.BLUE);
+            graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
+            graphics.draw(elementPWave.getShape());
+        }
 
-            if (elementPWave.shouldDraw) {
-                graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
-                graphics.draw(elementPWave.getShape());
+        if (elementSWave.shouldDraw) {
+            graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementSWave.getShape());
+        }
+
+        if(DRAW_CORE_WAVES) {
+            if (elementPKPWave.shouldDraw) {
+                graphics.setColor(Color.MAGENTA);
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+                graphics.draw(elementPKPWave.getShape());
             }
 
-            if (elementSWave.shouldDraw) {
-                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-                graphics.draw(elementSWave.getShape());
+            if (elementPKIKPWave.shouldDraw) {
+                graphics.setColor(Color.GREEN);
+                graphics.setStroke(new BasicStroke(1.0f));
+                graphics.draw(elementPKIKPWave.getShape());
             }
         }
 
-        RenderElement elementCross = entity.getRenderElement(2);
+        RenderElement elementCross = entity.getRenderElement(4);
         if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
             graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
             graphics.setStroke(new BasicStroke(4f));

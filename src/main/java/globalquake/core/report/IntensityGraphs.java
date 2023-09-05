@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 public class IntensityGraphs {
 
 	public static void main(String[] args) throws IOException {
+		Scale.load();
 		int w = 800;
 		int h = 600;
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
@@ -40,7 +41,7 @@ public class IntensityGraphs {
 		recs.add(new DistanceIntensityRecord(6.5,7000,50));
 		
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa7.png"));
+		ImageIO.write(img, "PNG", new File("aaa8.png"));
 
 		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getMaxIntensity(5.7, 800));
 		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getMaxIntensity(5.7, 300));

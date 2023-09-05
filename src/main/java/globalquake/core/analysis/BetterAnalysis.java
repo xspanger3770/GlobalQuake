@@ -46,7 +46,6 @@ public class BetterAnalysis extends Analysis {
 
     public BetterAnalysis(AbstractStation station) {
         super(station);
-
     }
 
 
@@ -83,8 +82,6 @@ public class BetterAnalysis extends Analysis {
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
 
-                // longAverage = initialRatioSum / initialRatioCnt;
-
                 shortAverage = longAverage;
                 mediumAverage = longAverage;
                 specialAverage = longAverage * 2.5;
@@ -110,7 +107,7 @@ public class BetterAnalysis extends Analysis {
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
             }
             double ratio = shortAverage / longAverage;
-            if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty()) {
+            if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
                 boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.5 && time - eventTimer > 200;
                 boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.25 && time - eventTimer > 100;
                 boolean condMain = shortAverage / thirdAverage > 2;
@@ -127,13 +124,8 @@ public class BetterAnalysis extends Analysis {
                 eventTimer = time;
             }
 
-            if (getStatus() == AnalysisStatus.EVENT) {
-                Event latestEvent = getLatestEvent();
-                if (latestEvent == null) {
-                    reset();
-                    throw new IllegalStateException(
-                            "STATUS == EVENT, but latestEvent == null, " + getStation().getStationCode());
-                }
+            Event latestEvent = getLatestEvent();
+            if (getStatus() == AnalysisStatus.EVENT && latestEvent != null) {
                 long timeFromStart = time - latestEvent.getStart();
                 if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
                     setStatus(AnalysisStatus.IDLE);
@@ -142,7 +134,7 @@ public class BetterAnalysis extends Analysis {
                 }
                 if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
                     System.err.println("Station " + getStation().getStationCode()
-                            + " for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
+                            + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
                     reset();
                     return;
                 }

@@ -1,8 +1,11 @@
 package globalquake.geo.taup;
 
+import edu.sc.seis.TauP.TauP_GUI;
+
 public class DifferenceTest {
 
     public static void main(String[] args) throws Exception {
+        new TauP_GUI().setVisible(true);
         TauPTravelTimeCalculator.init();
 
         double ang = TauPTravelTimeCalculator.toAngle(8372.6);
