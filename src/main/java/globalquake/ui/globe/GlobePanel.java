@@ -6,6 +6,7 @@ import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
 import globalquake.ui.globe.feature.RenderEntity;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.tinylog.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.awt.event.*;
 import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
@@ -203,6 +205,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private void runAnimation(Animation animation) {
         int steps = 250;
         final int[] step = {0};
+
+        CountDownLatch latch = new CountDownLatch(1);
+
         Timer timer = new Timer();
         double distGC = GeoUtils.greatCircleDistance(animation.initialLat(), animation.initialLon(), animation.targetLat(), animation.targetLon());
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -211,6 +216,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 if(!cinemaMode){
                     System.err.println("Animation aborted!");
                     this.cancel();
+                    latch.countDown();
                     return;
                 }
                 double t = (double) step[0] / steps;
@@ -227,11 +233,19 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 if(step[0] == steps){
                     this.cancel();
+                    latch.countDown();
                 }
 
                 step[0]++;
             }
         }, 0, 20);
+
+        try {
+            // Block the main thread until the animation is finished to avoid multiple animations running at once
+            latch.await();
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 
     public void smoothTransition(double targetLat, double targetLon, double targetScroll){
