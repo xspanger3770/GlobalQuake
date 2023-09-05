@@ -1,13 +1,8 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.GlobalQuake;
-import org.tinylog.Logger;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.*;
 
 public class CinemaHandlerTest {
 

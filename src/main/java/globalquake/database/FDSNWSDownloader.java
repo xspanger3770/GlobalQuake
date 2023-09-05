@@ -1,8 +1,6 @@
 package globalquake.database;
 
 import globalquake.exception.FdnwsDownloadException;
-import globalquake.geo.GeoUtils;
-import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

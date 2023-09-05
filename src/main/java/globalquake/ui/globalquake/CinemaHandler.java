@@ -7,11 +7,8 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CinemaHandler {
@@ -33,7 +30,7 @@ public class CinemaHandler {
             public void run() {
                 try {
                     try {
-                        nextTarget();
+                        nextTarget(false);
                     } catch (Exception e) {
                         Logger.error(e);
                     }
@@ -53,8 +50,8 @@ public class CinemaHandler {
                         int currentQuakeCount = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().size();
                         int currentClusterCount = GlobalQuake.instance.getClusterAnalysis().getClusters().size();
                         try {
-                            if (currentQuakeCount != quakeCount[0] || currentClusterCount != clusterCount[0]) {
-                                nextTarget();
+                            if (currentQuakeCount != quakeCount[0] || (currentQuakeCount == 0 && currentClusterCount != clusterCount[0])) {
+                                nextTarget(true);
                             }
                         } finally {
                             quakeCount[0] = currentQuakeCount;
@@ -68,12 +65,12 @@ public class CinemaHandler {
 
     private long lastAnim = 0;
 
-    private synchronized void nextTarget() {
+    private synchronized void nextTarget(boolean bypass) {
         if (!globePanel.isCinemaMode()) {
             return;
         }
         long time = System.currentTimeMillis();
-        if(Math.abs(time - lastAnim) < 5000){
+        if(!bypass && Math.abs(time - lastAnim) < 5000){
             return;
         }
         lastAnim = time;
@@ -134,7 +131,7 @@ public class CinemaHandler {
 
     private CinemaTarget createTarget(Earthquake earthquake) {
         double ageMin = (System.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
-        double zoom = Math.max(0.1, Math.min(0.8, ageMin / 7.0));
+        double zoom = Math.max(0.1, Math.min(0.8, ageMin / 5.0));
         return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom);
     }
 }
