@@ -20,23 +20,33 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		outsidePanel.setBorder(BorderFactory.createTitledBorder("Home location settings"));
 
 		JPanel homeLocationPanel = new JPanel();
-		homeLocationPanel.setLayout(new GridLayout(2,2));
+		homeLocationPanel.setLayout(new GridLayout(2,1));
 		
 		JLabel lblLat = new JLabel("Home Latitude: ");
 		JLabel lblLon = new JLabel("Home Longitude: ");
 
-		textFieldLat = new JTextField();
+		textFieldLat = new JTextField(20);
 		textFieldLat.setText("%s".formatted(Settings.homeLat));
 		textFieldLat.setColumns(10);
 		
-		textFieldLon = new JTextField();
+		textFieldLon = new JTextField(20);
 		textFieldLon.setText("%s".formatted(Settings.homeLon));
 		textFieldLon.setColumns(10);
 
-		homeLocationPanel.add(lblLat);
-		homeLocationPanel.add(textFieldLat);
-		homeLocationPanel.add(lblLon);
-		homeLocationPanel.add(textFieldLon);
+		JPanel latPanel = new JPanel();
+		//latPanel.setLayout(new BoxLayout(latPanel, BoxLayout.X_AXIS));
+
+		latPanel.add(lblLat);
+		latPanel.add(textFieldLat);
+
+		JPanel lonPanel = new JPanel();
+		//lonPanel.setLayout(new BoxLayout(lonPanel, BoxLayout.X_AXIS));
+
+		lonPanel.add(lblLon);
+		lonPanel.add(textFieldLon);
+
+		homeLocationPanel.add(latPanel);
+		homeLocationPanel.add(lonPanel);
 
 		JTextArea infoLocation = new JTextArea("Home location will be used for playing additional alarm \n sounds if an earthquake occurs nearby");
 		infoLocation.setBorder(new EmptyBorder(5,5,5,5));
@@ -46,7 +56,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 		chkBoxHomeLoc = new JCheckBox("Display home location");
 		chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
-		add(chkBoxHomeLoc);
+		outsidePanel.add(chkBoxHomeLoc);
 
 		outsidePanel.add(homeLocationPanel, BorderLayout.NORTH);
 		outsidePanel.add(infoLocation, BorderLayout.CENTER);
@@ -78,7 +88,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		add(alertsDialogPanel);
 		add(createIntensitySettingsPanel());
 
-		for(int i = 0; i < 16; i++){
+		for(int i = 0; i < 8; i++){
 			add(new JPanel()); // fillers
 		}
 	}

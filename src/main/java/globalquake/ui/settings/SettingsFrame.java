@@ -31,7 +31,6 @@ public class SettingsFrame extends GQFrame {
 
 	private void initialize(Component parent) {
 		setIconImage(Main.LOGO);
-		setResizable(false);
 
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -70,6 +69,8 @@ public class SettingsFrame extends GQFrame {
 
 		pack();
 		setLocationRelativeTo(parent);
+
+		SwingUtilities.invokeLater(() -> setResizable(false));
 	}
 
 	protected void error(Exception e) {
