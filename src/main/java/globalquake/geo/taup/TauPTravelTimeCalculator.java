@@ -77,10 +77,6 @@ public class TauPTravelTimeCalculator {
         return table[0][table[0].length - 1];
     }
 
-    private static double getMinTime(float[][] table) {
-        return table[0][0];
-    }
-
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
         if(timeSeconds < 0 ||
                 timeSeconds > getMaxTime(travelTable.p_travel_table)){
@@ -99,11 +95,17 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPKIKPWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds > getMaxTime(travelTable.pkikp_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE);
     }
 
     public static double getPKPWaveTravelAngle(double depth, double timeSeconds) {
+        if(timeSeconds > getMaxTime(travelTable.pkp_travel_table)){
+            return  NO_ARRIVAL;
+        }
         return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE);
     }
