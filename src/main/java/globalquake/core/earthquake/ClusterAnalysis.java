@@ -192,7 +192,7 @@ public class ClusterAnalysis {
     }
 
     private void expandCluster(Cluster c) {
-        if(c.getEarthquake() != null && c.getEarthquake().getCluster() != null && c.getEarthquake().getCluster().getAssignedEvents().size() > 16){
+        if(c.getEarthquake() != null && c.getEarthquake().getCluster() != null && c.getEarthquake().getCluster().getAssignedEvents().size() > 12){
             mainLoop:
             for(AbstractStation station : stations){
                 for(Event event:station.getAnalysis().getDetectedEvents()){
