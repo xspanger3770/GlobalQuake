@@ -173,7 +173,6 @@ public class StationSelectPanel extends GlobePanel {
 
             allStationsList.clear();
             allStationsList.addAll(stations);
-            System.out.println(allStationsList.size());
         }finally {
             stationDatabaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }

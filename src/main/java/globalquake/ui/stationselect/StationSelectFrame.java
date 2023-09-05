@@ -189,12 +189,14 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
             selectButton.setEnabled(true);
             deselectAll.setEnabled(false);
             deselectButton.setEnabled(false);
+            setDragMode(DragMode.NONE);
         }
         else if(e.getSource() == selectAll){
             selectAll.setEnabled(false);
             selectButton.setEnabled(false);
             deselectAll.setEnabled(true);
             deselectButton.setEnabled(true);
+            setDragMode(DragMode.NONE);
         }
         else{
             selectAll.setEnabled(true);
