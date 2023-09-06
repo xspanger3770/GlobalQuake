@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -27,13 +28,12 @@ public class ClusterAnalysis {
     private final List<Cluster> clusters;
     private final List<Earthquake> earthquakes;
     private final List<AbstractStation> stations;
-    private int nextClusterId;
+    private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
     public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
         this.earthquakes = earthquakes;
         this.stations = stations;
         clusters = new ArrayList<>();
-        this.nextClusterId = 0;
     }
 
     public ClusterAnalysis() {
@@ -321,7 +321,7 @@ public class ClusterAnalysis {
     }
 
     private Cluster createCluster(ArrayList<Event> validEvents) {
-        Cluster cluster = new Cluster(nextClusterId);
+        Cluster cluster = new Cluster(nextClusterId.incrementAndGet());
         for (Event ev : validEvents) {
             ev.assignedCluster = cluster;
             cluster.addEvent();
@@ -329,7 +329,6 @@ public class ClusterAnalysis {
         }
         System.out.println("New Cluster #" + cluster.getId() + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
-        nextClusterId++;
         clusters.add(cluster);
         return cluster;
     }
