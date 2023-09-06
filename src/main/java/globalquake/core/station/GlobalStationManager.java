@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import globalquake.database.*;
 import globalquake.geo.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ public class GlobalStationManager {
         }
 
         createListOfClosestStations(stations);
-        System.out.println("Initialized " + stations.size() + " Stations.");
+        Logger.info("Initialized " + stations.size() + " Stations.");
     }
 
     public static void createListOfClosestStations(List<AbstractStation> stations) {

@@ -51,7 +51,7 @@ public class SeedlinkCommunicator {
         Document doc = db.parse(new InputSource(new StringReader(infoString)));
         doc.getDocumentElement().normalize();
         NodeList nodeList = doc.getElementsByTagName("station");
-        System.out.println("Found " + nodeList.getLength() + " available stations.");
+        Logger.info("Found %d available stations in seedlink %s".formatted(nodeList.getLength(), seedlinkNetwork.getName()));
         for (int itr = 0; itr < nodeList.getLength(); itr++) {
             Node node = nodeList.item(itr);
             String stationCode = node.getAttributes().getNamedItem("name").getTextContent();

@@ -3,6 +3,7 @@ package globalquake.core.analysis;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
+import org.tinylog.Logger;
 import uk.me.berndporr.iirj.Butterworth;
 
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class BetterAnalysis extends Analysis {
 
                 }
                 if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
-                    System.err.println("Station " + getStation().getStationCode()
+                    Logger.warn("Station " + getStation().getStationCode()
                             + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
                     reset();
                     return;

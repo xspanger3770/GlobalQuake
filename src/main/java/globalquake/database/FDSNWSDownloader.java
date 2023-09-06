@@ -1,6 +1,7 @@
 package globalquake.database;
 
 import globalquake.exception.FdnwsDownloadException;
+import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,7 +70,7 @@ public class FDSNWSDownloader {
         }
 
 
-        System.out.println("Connecting to " + url);
+        Logger.info("Connecting to " + url);
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
@@ -78,10 +79,9 @@ public class FDSNWSDownloader {
         int response = con.getResponseCode();
 
         if (response == 413) {
-            System.err.println("413! Splitting...");
+            Logger.debug("413! Splitting...");
             stationSource.getStatus().setString("Splitting...");
             if(maxLon - minLon < 0.1){
-                System.err.println("This can't go forewer");
                 return;
             }
 
@@ -123,7 +123,7 @@ public class FDSNWSDownloader {
         for (int i = 0; i < networks.getLength(); i++) {
             String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
             if (networkCode.equalsIgnoreCase("unknown")) {
-                System.err.println("ERR: no network code wtf.");
+                Logger.debug("ERR: no network code wtf.");
                 continue;
             }
             String networkDescription = obtainElement(networks.item(i), "Description", "");

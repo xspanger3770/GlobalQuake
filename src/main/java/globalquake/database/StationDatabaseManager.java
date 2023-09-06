@@ -43,14 +43,14 @@ public class StationDatabaseManager {
                 stationDatabase = (StationDatabase) in.readObject();
                 in.close();
 
-                System.out.println("Load successfull");
+                Logger.info("Database load successfull");
             } catch (ClassNotFoundException | IOException e) {
                 Main.getErrorHandler().handleException(new FatalIOException("Unable to read station database!", e));
             }
         }
 
         if (stationDatabase == null) {
-            System.out.println("A new database created");
+            Logger.info("A new database created");
             stationDatabase = new StationDatabase();
         }
 
@@ -73,6 +73,7 @@ public class StationDatabaseManager {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
             out.writeObject(stationDatabase);
             out.close();
+            Logger.info("Station database saved sucessfully");
         } catch (IOException e) {
             throw new FatalIOException("Unable to save station database!", e);
         } finally {

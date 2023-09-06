@@ -7,6 +7,7 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
 import globalquake.sounds.Sounds;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -314,7 +315,7 @@ public class ClusterAnalysis {
                 }
             }
             if (numberOfActiveEvents < minimum && System.currentTimeMillis() - c.getLastUpdate() > 2 * 60 * 1000) {
-                System.out.println("Cluster #" + c.getId() + " died");
+                Logger.debug("Cluster #" + c.getId() + " died");
                 toBeRemoved.add(c);
             } else {
                 c.tick();
@@ -334,7 +335,7 @@ public class ClusterAnalysis {
                 cluster.addEvent();
             }
         }
-        System.out.println("New Cluster #" + cluster.getId() + " Has been created. It contains "
+        Logger.debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
         return cluster;

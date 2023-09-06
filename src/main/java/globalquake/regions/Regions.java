@@ -47,7 +47,7 @@ public class Regions {
 			URL url = new URL(str);
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 
-			System.out.println("URL: " + url);
+			Logger.debug("URL: " + url);
 			StringBuilder result = new StringBuilder();
 			String inputLine;
 			while ((inputLine = in.readLine()) != null) {

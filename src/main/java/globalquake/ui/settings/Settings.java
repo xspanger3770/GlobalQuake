@@ -107,7 +107,7 @@ public final class Settings {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
-			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
+			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
 
 		loadProperty("cinemaModeSwitchTime", "10");

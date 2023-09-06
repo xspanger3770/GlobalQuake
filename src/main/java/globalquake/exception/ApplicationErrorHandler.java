@@ -33,7 +33,6 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	public synchronized void handleException(Throwable e) {
-		System.err.println((e instanceof RuntimeApplicationException) + ", " + e.getCause());
 		if (!(e instanceof RuntimeApplicationException)) {
 			showDetailedError(e);
 			return;
@@ -48,7 +47,6 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	public synchronized void handleWarning(Throwable e) {
-		System.err.println((e instanceof RuntimeApplicationException) + ", " + e.getCause());
 		showWarning(e.getMessage());
 	}
 

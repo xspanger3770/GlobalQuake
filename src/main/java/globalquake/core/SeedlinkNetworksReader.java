@@ -72,7 +72,7 @@ public class SeedlinkNetworksReader {
                 while (true) {
 					SeedlinkReader reader = null;
 					try {
-						System.out.println("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
+						Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 						reader.sendHello();
 
@@ -96,7 +96,7 @@ public class SeedlinkNetworksReader {
 						}
 
 						if(connected == 0){
-							System.out.println("No stations connected to "+seedlinkNetwork.getName());
+							Logger.info("No stations connected to "+seedlinkNetwork.getName());
 							break;
 						}
 
@@ -121,7 +121,7 @@ public class SeedlinkNetworksReader {
 							}
 						}
 
-						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
+						Logger.warn(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
 							sleep(reconnectDelay * 1000L);
