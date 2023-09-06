@@ -6,6 +6,7 @@ import globalquake.geo.GeoUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalStationManager {
 
@@ -13,7 +14,7 @@ public class GlobalStationManager {
 
     private static final int RAYS = 9;
 
-    private int nextID = 0;
+    private final AtomicInteger nextID = new AtomicInteger(0);
 
     public void initStations(StationDatabaseManager databaseManager) {
         if(databaseManager == null){
@@ -97,7 +98,7 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode(),
                 station.getStationCode(), ch.getCode(), ch.getLocationCode(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID++, ch.selectBestSeedlinkNetwork());
+                nextID.incrementAndGet(), ch.selectBestSeedlinkNetwork());
     }
 
     public List<AbstractStation> getStations() {
