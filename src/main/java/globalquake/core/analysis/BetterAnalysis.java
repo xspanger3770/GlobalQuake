@@ -215,13 +215,13 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void second() {
+    public void second(long time) {
         Iterator<Event> it = getDetectedEvents().iterator();
         List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded()) {
-                long age = System.currentTimeMillis() - event.getEnd();
+                long age = time - event.getEnd();
                 if (age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
                 }
@@ -229,7 +229,7 @@ public class BetterAnalysis extends Analysis {
         }
         getDetectedEvents().removeAll(toBeRemoved);
 
-        long oldestTime = (System.currentTimeMillis() - (long) (LOGS_STORE_TIME * 1000));
+        long oldestTime = (time - (long) (LOGS_STORE_TIME * 1000));
         synchronized (previousLogsLock) {
             while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).getTime() < oldestTime) {
                 getPreviousLogs().remove(getPreviousLogs().size() - 1);

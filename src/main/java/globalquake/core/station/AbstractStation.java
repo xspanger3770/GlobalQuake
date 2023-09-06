@@ -82,7 +82,7 @@ public abstract class AbstractStation {
 
     public  long getDelayMS() { return 0;}
 
-    public void second() {
+    public void second(long time) {
 		if (getAnalysis()._maxRatio > 0) {
 			ratioHistory.add(getAnalysis()._maxRatio);
 			getAnalysis()._maxRatioReset = true;
@@ -92,7 +92,7 @@ public abstract class AbstractStation {
 			}
 		}
 
-		getAnalysis().second();
+		getAnalysis().second(time);
 	}
 
 	public double getMaxRatio60S() {

@@ -42,7 +42,7 @@ public class GlobalQuakeRuntime {
         exec1Sec.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(AbstractStation::second);
+                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(station -> station.second(a));
                 if (GlobalQuake.instance.getEarthquakeAnalysis() != null) {
                     GlobalQuake.instance.getEarthquakeAnalysis().second();
                 }

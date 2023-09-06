@@ -95,7 +95,7 @@ public abstract class Analysis {
 		this.sampleRate = sampleRate;
 	}
 
-	public abstract void second();
+	public abstract void second(long time);
 
 	public List<Event> getDetectedEvents() {
 		return detectedEvents;

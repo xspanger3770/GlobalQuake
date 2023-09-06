@@ -1,7 +1,9 @@
 package globalquake.training;
 
 import globalquake.core.station.AbstractStation;
+import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.ui.StationMonitor;
 
 import javax.swing.*;
@@ -16,9 +18,9 @@ public class ArtificialWaveformGenerator {
 
     private static final int FREQ_COUNT = (int) ((SAMPLE_RATE / FREQ_STEP) + 1);
 
-    public static final int RAND_SEED = 65341;
+    public static final long RAND_SEED = System.currentTimeMillis();
 
-    public static final double NOISE = 1000.0;
+    public static final double NOISE = 100.0;
 
     static class ArtificalStation extends AbstractStation{
 
@@ -40,14 +42,17 @@ public class ArtificialWaveformGenerator {
 
         private final long sArrival;
 
+        private final double magRatio;
+
         ArtificalEarthquake(double dist, double depth, long origin, double mag) {
             this.dist = dist;
             this.depth = depth;
             this.origin = origin;
             this.mag = mag;
 
-            double pTravelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, dist);
-            double sTravelTime = TauPTravelTimeCalculator.getSWaveTravelTime(depth, dist);
+            double pTravelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(dist));
+            double sTravelTime = TauPTravelTimeCalculator.getSWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(dist));
+            magRatio = IntensityTable.getMaxIntensity(mag, GeoUtils.gcdToGeo(dist));
             if(pTravelTime == TauPTravelTimeCalculator.NO_ARRIVAL){
                 pArrival = -999;
             } else {
@@ -59,10 +64,41 @@ public class ArtificialWaveformGenerator {
             } else {
                 sArrival = origin + (long)(1000 * sTravelTime);
             }
+
+            System.out.println(origin+", " + pArrival + "/ "+ instance.simulationTime);
         }
 
         public double[] calculateIntensities(long time) {
-            return null;
+            double[] intensities = new double[FREQ_COUNT];
+            Arrays.fill(intensities, 0.0);
+            if(time > pArrival) {
+                long diff = time - pArrival;
+                for (int i = 0; i < FREQ_COUNT; i++) {
+                    intensities[i] += NOISE * magRatio * 0.3 * getDecayMul(diff) * getIMul(i);
+                }
+            }
+
+            if(time > sArrival) {
+                long diff = time - sArrival;
+                for (int i = 0; i < FREQ_COUNT; i++) {
+                    intensities[i] += NOISE * magRatio * 0.95 * getDecayMul(diff) * getIMul(i);
+                }
+            }
+
+            return intensities;
+        }
+
+        private double getIMul(int i) {
+            double pct = (double) i / FREQ_COUNT;
+            double coeff = dist + Math.pow(mag, 3.2);
+            return 1.0 / (pct * coeff + 1.0);
+        }
+
+        private double getDecayMul(long diff) {
+            double startMulCoeff = 500 + 30 * Math.pow(mag, 3);
+            double startMul = diff >= startMulCoeff ? 1 : diff / startMulCoeff;
+            double coeff = 2000 * Math.pow(mag, 3);
+            return coeff / (coeff + Math.pow(diff, 1.25)) * startMul;
         }
 
         public double dist() {
@@ -106,7 +142,14 @@ public class ArtificialWaveformGenerator {
                     "mag=" + mag + ']';
         }
 
+        public long getpArrival() {
+            return pArrival;
         }
+
+        public long getsArrival() {
+            return sArrival;
+        }
+    }
 
     static class WaveformBuffer{
         private final double step;
@@ -122,18 +165,29 @@ public class ArtificialWaveformGenerator {
             offsets = new double[count];
             Random r = new Random(RAND_SEED);
             for(int i = 0; i < count; i++){
-                intensities[i] = NOISE / (i + 1);
                 offsets[i] = r.nextDouble();
             }
         }
+        public synchronized int getValueAt(List<ArtificalEarthquake> artificalEarthquakes, long time) {
+            // NOISE
+            Arrays.fill(intensities, 0.0);
+            for(int i = 0; i < count; i++) {
+                intensities[i] += NOISE / (i + 1);
+            }
 
-        public synchronized int getValueAt(long time){
+            for(ArtificalEarthquake earthquake : artificalEarthquakes){
+                double[] quakeIntensities = earthquake.calculateIntensities(time);
+                for(int i = 0; i < count; i++) {
+                    intensities[i] += quakeIntensities[i];
+                }
+            }
+
             double result = 0.0;
             for(int i = 1; i < count; i++){
                 double freq = i * step;
                 double intensity = intensities[i];
 
-                result += Math.sin(((time) / 1000.0) * (2 * freq) * Math.PI + offsets[i] * 2 * Math.PI) * intensity;
+                result += Math.sin(((time) / 1000.0) * (2 * freq) * Math.PI + (offsets[i]) * 2 * Math.PI) * intensity;
             }
 
             return (int) result;
@@ -147,6 +201,8 @@ public class ArtificialWaveformGenerator {
     public long simulationTime = 0;
 
     public static ArtificialWaveformGenerator instance;
+
+    private final Object lock = new Object();
 
     public static void main(String[] args) throws Exception {
         new ArtificialWaveformGenerator();
@@ -165,16 +221,54 @@ public class ArtificialWaveformGenerator {
 
         List<ArtificalEarthquake> artificalEarthquakes = new ArrayList<>();
 
+        artificalEarthquakes.add(new ArtificalEarthquake(500,7,simulationTime + 90 * 1000,5.9));
 
+        Random quakeRandom = new Random(RAND_SEED);
         Timer timer = new Timer();
+        /*timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+            }
+        }, 0, 1);*/
+
+
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                abstractStation.getAnalysis().nextSample(abstractStation.waveformBuffer.getValueAt(simulationTime), simulationTime, simulationTime);
+                abstractStation.second(simulationTime);
 
-                simulationTime += (long) (1000 / SAMPLE_RATE);
+                synchronized (lock) {
+
+                    if (quakeRandom.nextDouble() < -0.05) {
+                        double mag = 2.0 + quakeRandom.nextDouble() * 3.0;
+                        double depth = Math.pow(quakeRandom.nextDouble(), 4) * 600.0;
+                        double dist = quakeRandom.nextDouble() * 1000.0;
+                        ArtificalEarthquake art = new ArtificalEarthquake(dist, depth, simulationTime, mag);
+
+                        System.out.println("added " + art);
+                        artificalEarthquakes.add(art);
+                    }
+
+                    for (Iterator<ArtificalEarthquake> iterator = artificalEarthquakes.iterator(); iterator.hasNext(); ) {
+                        ArtificalEarthquake artificalEarthquake = iterator.next();
+                        if (simulationTime - artificalEarthquake.sArrival > 5 * 60 * 1000) {
+                            iterator.remove();
+                        }
+                    }
+                }
             }
-        }, 0, 2);
+        }, 2000,100);
+
+        while(true){
+            synchronized (lock) {
+                abstractStation.getAnalysis().nextSample(abstractStation.waveformBuffer.getValueAt(artificalEarthquakes, simulationTime), simulationTime, simulationTime);
+            }
+
+            simulationTime += (long) (1000 / SAMPLE_RATE);
+
+            Thread.sleep(1);
+        }
     }
 
 }
