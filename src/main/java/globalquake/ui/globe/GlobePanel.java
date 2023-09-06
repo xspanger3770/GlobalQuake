@@ -182,7 +182,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsMD, 0.5, Double.MAX_VALUE));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHDFiltered, 0.25, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHDFiltered, 0, 0.25));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUS, 0, Double.MAX_VALUE));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUS, 0, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsAK, 0, Double.MAX_VALUE));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsJP, 0, 0.25));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsNZ, 0, 0.25));

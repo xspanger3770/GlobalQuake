@@ -118,8 +118,16 @@ public class Regions {
         String localName = getName(lat, lon, regionSearchHD);
         String globalName = getName(lat, lon, regionsUHD);
 
-        if(localName != null || globalName != null) {
-            return localName != null ? "%s, %s".formatted(localName, globalName) : globalName;
+        if(localName != null && globalName != null) {
+            return "%s, %s".formatted(localName, globalName);
+        }
+
+        if(localName != null){
+            return localName;
+        }
+
+        if(globalName != null){
+            return globalName;
         }
 
         return null;
@@ -147,16 +155,18 @@ public class Regions {
             }
         }
 
+        String closestNameExtended = closest;
+
         if(closestPoint != null) {
             String closestExtended = getExtendedName(closestPoint.getLatitude(), closestPoint.getLongitude());
             if(closestExtended != null){
-                closest = closestExtended;
+                closestNameExtended = closestExtended;
             }
         }
 
         String name;
-        if (closestDistance < 100) {
-            name = "Near The Coast Of " + closest;
+        if (closestDistance < 200) {
+            name = "Near The Coast Of " + closestNameExtended;
         } else if (closestDistance < 1500) {
             name = "Offshore " + closest;
         } else {

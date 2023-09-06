@@ -17,6 +17,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -59,6 +60,15 @@ public class GlobePanelDebug extends GQFrame {
 				g.setFont(new Font("Calibri", Font.BOLD, 16));
 				g.setColor(Color.black);
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
+
+				String region = Regions.getRegion(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon);
+				g.setColor(Color.white);
+				g.drawString(region, getWidth() / 2 - g.getFontMetrics().stringWidth(region), getHeight() - 16);
+
+				double x = getWidth() / 2.0;
+				double y = getHeight() / 2.0;
+				double r = 10.0;
+				g.draw(new Ellipse2D.Double(x - r/2, y - r/2, r, r));
 			}
 		};
 
