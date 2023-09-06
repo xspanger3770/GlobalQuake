@@ -209,7 +209,7 @@ public class Regions {
                 raw.add(pol);
                 regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
             } else if (o instanceof MultiPolygon mp) {
-                createRegion(regions, f, mp, name);
+                createRegion(regions, mp, name);
 
                 List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
                 for (List<List<LngLatAlt>> polygon : polygons) {
@@ -233,7 +233,7 @@ public class Regions {
         return null;
     }
 
-    private static void createRegion(ArrayList<Region> regions, Feature f, MultiPolygon mp, String name) {
+    private static void createRegion(ArrayList<Region> regions, MultiPolygon mp, String name) {
         ArrayList<Path2D.Double> paths = new ArrayList<>();
         List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
         ArrayList<Polygon> raws = new ArrayList<>();

@@ -2,7 +2,6 @@ package globalquake.regions;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.geojson.Polygon;

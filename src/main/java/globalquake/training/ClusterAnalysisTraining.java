@@ -26,7 +26,7 @@ public class ClusterAnalysisTraining {
 
     static class SimulatedStation extends AbstractStation {
 
-        public static AtomicInteger nextId = new AtomicInteger();
+        public static final AtomicInteger nextId = new AtomicInteger();
 
         public double sensitivityMultiplier = 1;
 
