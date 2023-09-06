@@ -235,7 +235,7 @@ public class Regions {
         }
     }
 
-    private static final String[] NAME_NAMES = {"name_long", "name", "NAME", "NAME_1"};
+    private static final String[] NAME_NAMES = {"name_long", "name", "NAME_2", "NAME_1", "NAME"};
 
     private static String fetchName(Feature f) {
         String name;
