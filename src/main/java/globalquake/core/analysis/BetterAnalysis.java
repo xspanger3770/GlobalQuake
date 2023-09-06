@@ -51,7 +51,7 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void nextSample(int v, long time) {
+    public void nextSample(int v, long time, long currentTime) {
         if (filter == null) {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
@@ -146,8 +146,8 @@ public class BetterAnalysis extends Analysis {
                 _maxRatioReset = false;
             }
 
-            if (time - System.currentTimeMillis() < 1000 * 10
-                    && System.currentTimeMillis() - time < 1000 * LOGS_STORE_TIME) {
+            if (time - currentTime < 1000 * 10
+                    && currentTime - time < 1000 * LOGS_STORE_TIME) {
                 Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
                         (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
                 synchronized (previousLogsLock) {

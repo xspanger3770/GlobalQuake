@@ -18,6 +18,7 @@ import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.training.ArtificialWaveformGenerator;
 import globalquake.ui.settings.Settings;
 
 public class StationMonitorPanel extends JPanel {
@@ -51,7 +52,7 @@ public class StationMonitorPanel extends JPanel {
 		g.drawString("Running Averages", 4, (int) (h * 0.4 + 14));
 		g.drawString("Averages Ratio", 4, (int) (h * 0.7 + 14));
 
-		long upperMinute = (long) (Math.ceil(System.currentTimeMillis() / (1000 * 60.0) + 1) * (1000L * 60L));
+		long upperMinute = (long) (Math.ceil(getTime()/ (1000 * 60.0) + 1) * (1000L * 60L));
 		for (int deltaSec = 0; deltaSec <= BetterAnalysis.LOGS_STORE_TIME + 80; deltaSec += 10) {
 			long time = upperMinute - deltaSec * 1000L;
 			boolean fullMinute = time % 60000 == 0;
@@ -265,32 +266,34 @@ public class StationMonitorPanel extends JPanel {
 			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
 		}
 
-		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
-			long arrivalP = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
+		if(GlobalQuake.instance != null) {
+			for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
+				double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
+				long arrivalP = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+						TauPTravelTimeCalculator.toAngle(distGC)) + EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
 
-			long arrivalS = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
-					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
+				long arrivalS = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+						TauPTravelTimeCalculator.toAngle(distGC)) + EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
 
-			double xP = getX(arrivalP);
-			double xS = getX(arrivalS);
+				double xP = getX(arrivalP);
+				double xS = getX(arrivalS);
 
-			g.setColor(Color.magenta);
-			g.setStroke(dashed);
-			g.draw(new Line2D.Double(xP, 0, xP, getHeight()));
-			g.draw(new Line2D.Double(xS, 0, xS, getHeight()));
+				g.setColor(Color.magenta);
+				g.setStroke(dashed);
+				g.draw(new Line2D.Double(xP, 0, xP, getHeight()));
+				g.draw(new Line2D.Double(xS, 0, xS, getHeight()));
 
-			double x1 = getX((long) (arrivalP - Settings.pWaveInaccuracyThreshold));
-			double x2 = getX((long) (arrivalP + Settings.pWaveInaccuracyThreshold));
-			double x3 = getX((long) (arrivalS - Settings.pWaveInaccuracyThreshold));
-			double x4 = getX((long) (arrivalS + Settings.pWaveInaccuracyThreshold));
+				double x1 = getX((long) (arrivalP - Settings.pWaveInaccuracyThreshold));
+				double x2 = getX((long) (arrivalP + Settings.pWaveInaccuracyThreshold));
+				double x3 = getX((long) (arrivalS - Settings.pWaveInaccuracyThreshold));
+				double x4 = getX((long) (arrivalS + Settings.pWaveInaccuracyThreshold));
 
-			g.setColor(new Color(0, 0, 255, 80));
-			g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
+				g.setColor(new Color(0, 0, 255, 80));
+				g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
 
-			g.setColor(new Color(255, 0, 0, 80));
-			g.fill(new Rectangle2D.Double(x3, 0, x4 - x3, h));
+				g.setColor(new Color(255, 0, 0, 80));
+				g.fill(new Rectangle2D.Double(x3, 0, x4 - x3, h));
+			}
 		}
 
 		g.setColor(Color.black);
@@ -304,6 +307,10 @@ public class StationMonitorPanel extends JPanel {
 		g.dispose();
 
 		this.image = img;
+	}
+
+	private long getTime() {
+		return ArtificialWaveformGenerator.instance != null ? ArtificialWaveformGenerator.instance.simulationTime : System.currentTimeMillis();
 	}
 
 	private Color getColorPhase(byte phase) {
@@ -320,7 +327,7 @@ public class StationMonitorPanel extends JPanel {
 	}
 
 	private double getX(long time) {
-		return getWidth() * (1 - (System.currentTimeMillis() - time) / (BetterAnalysis.LOGS_STORE_TIME * 1000.0));
+		return getWidth() * (1 - (getTime() - time) / (BetterAnalysis.LOGS_STORE_TIME * 1000.0));
 	}
 
 	@Override

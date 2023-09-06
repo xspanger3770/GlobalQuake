@@ -89,7 +89,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if(selectedStation != null)
-            new StationMonitor(this, selectedStation);
+            new StationMonitor(this, selectedStation, 500);
     }
 
     @Override
