@@ -473,7 +473,7 @@ public class EarthquakeAnalysis {
         Earthquake earthquake = new Earthquake(cluster, bestHypocenter.lat, bestHypocenter.lon, bestHypocenter.depth,
                 bestHypocenter.origin);
         double pct = 100 * ((cluster.getSelected().size() - wrongAmount) / (double) cluster.getSelected().size());
-        System.out.println("PCT = " + (int) (pct) + "%, " + wrongAmount + "/" + cluster.getSelected().size() + " = "
+        Logger.debug("PCT = " + (int) (pct) + "%, " + wrongAmount + "/" + cluster.getSelected().size() + " = "
                 + bestHypocenter.correctStations + " w " + events.size() + " err " + bestHypocenter.totalErr);
         boolean valid = pct > finderSettings.correctnessThreshold();
         if (!valid && cluster.getEarthquake() != null) {
@@ -506,10 +506,10 @@ public class EarthquakeAnalysis {
             bestHypocenter.setWrongEventsCount(wrongEvents.size());
             if (previousHypocenter != null && previousHypocenter.correctStations < 12
                     && bestHypocenter.correctStations >= 12) {
-                System.err.println("FAR DISABLED");
+                Logger.debug("FAR DISABLED");
             }
         } else {
-            System.err.println("NOT VALID");
+            Logger.debug("NOT VALID");
         }
 
         cluster.setPreviousHypocenter(bestHypocenter);

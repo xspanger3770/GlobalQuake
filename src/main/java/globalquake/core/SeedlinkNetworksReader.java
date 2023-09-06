@@ -83,7 +83,7 @@ public class SeedlinkNetworksReader {
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-                                System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
+                                Logger.trace("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
 								if(!first) {
 									reader.sendCmd("DATA");
 								} else{
@@ -147,7 +147,7 @@ public class SeedlinkNetworksReader {
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
 		var globalStation = stationCache.get("%s %s".formatted(network, station));
 		if(globalStation == null){
-			Logger.warn("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
+			Logger.debug("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
 		}else {
 			globalStation.addRecord(dr);
 		}
