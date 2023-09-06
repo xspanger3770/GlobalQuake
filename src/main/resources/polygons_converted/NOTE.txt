@@ -1,0 +1,3 @@
+All files in this directory were downloaded from https://github.com/deldersveld/topojson
+And coverted from topoJSON to geoJSON using this converter: https://mygeodata.cloud/converter/topojson-to-geojson
+Some files were also converted using this converter: https://jeffpaine.github.io/geojson-topojson/
