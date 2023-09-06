@@ -180,8 +180,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureHorizon(new Point2D(centerLat, centerLon), 1));
 
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsMD, 0.5, Double.MAX_VALUE));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHD, 0.12, 0.5));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHDFiltered, 0.25, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHDFiltered, 0, 0.25));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUS, 0, Double.MAX_VALUE));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsAK, 0, Double.MAX_VALUE));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsJP, 0, 0.25));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsNZ, 0, 0.25));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHW, 0, 0.5));
     }
 
     private void animationThread() {
