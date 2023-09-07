@@ -88,6 +88,8 @@ public final class Settings {
 	public static Integer cinemaModeSwitchTime;
 	public static Integer cinemaModeZoomMultiplier;
 
+	public static Long logsStoreTimeMinutes;
+
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
@@ -109,6 +111,7 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("logsStoreTimeMinutes", "5");
 
 		loadProperty("cinemaModeSwitchTime", "10");
 		loadProperty("cinemaModeZoomMultiplier", "100");

@@ -3,6 +3,7 @@ package globalquake.core.analysis;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
+import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 import uk.me.berndporr.iirj.Butterworth;
 
@@ -39,7 +40,6 @@ public class BetterAnalysis extends Analysis {
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
     public static final double EVENT_TOO_LONG_DURATION = 5 * 60.0;
     public static final double EVENT_STORE_TIME = 20 * 60.0;
-    public static final double LOGS_STORE_TIME = 5 * 60;
 
     private Butterworth filter;
     private double initialOffset;
@@ -151,7 +151,7 @@ public class BetterAnalysis extends Analysis {
             }
 
             if (time - currentTime < 1000 * 10
-                    && currentTime - time < 1000 * LOGS_STORE_TIME) {
+                    && currentTime - time < 1000 * 60 * Settings.logsStoreTimeMinutes) {
                 Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
                         (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
                 synchronized (previousLogsLock) {
@@ -234,7 +234,7 @@ public class BetterAnalysis extends Analysis {
         }
         getDetectedEvents().removeAll(toBeRemoved);
 
-        long oldestTime = (time - (long) (LOGS_STORE_TIME * 1000));
+        long oldestTime = (time - (long) (Settings.logsStoreTimeMinutes * 60 * 1000));
         synchronized (previousLogsLock) {
             while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).getTime() < oldestTime) {
                 getPreviousLogs().remove(getPreviousLogs().size() - 1);

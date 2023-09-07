@@ -53,7 +53,7 @@ public class StationMonitorPanel extends JPanel {
 		g.drawString("Averages Ratio", 4, (int) (h * 0.7 + 14));
 
 		long upperMinute = (long) (Math.ceil(getTime()/ (1000 * 60.0) + 1) * (1000L * 60L));
-		for (int deltaSec = 0; deltaSec <= BetterAnalysis.LOGS_STORE_TIME + 80; deltaSec += 10) {
+		for (int deltaSec = 0; deltaSec <= 60 * Settings.logsStoreTimeMinutes + 80; deltaSec += 10) {
 			long time = upperMinute - deltaSec * 1000L;
 			boolean fullMinute = time % 60000 == 0;
 			double x = getX(time);
@@ -311,21 +311,8 @@ public class StationMonitorPanel extends JPanel {
 		return ArtificialWaveformGenerator.instance != null ? ArtificialWaveformGenerator.instance.simulationTime : System.currentTimeMillis();
 	}
 
-	private Color getColorPhase(byte phase) {
-		if (phase == Log.P_WAVES) {
-			return new Color(0, 148, 255);
-		} else if (phase == Log.WAITING_FOR_S) {
-			return new Color(0, 200, 0);
-		} else if (phase == Log.S_WAVES) {
-			return Color.red;
-		} else if (phase == Log.DECAY) {
-			return Color.orange;
-		}
-		return Color.black;
-	}
-
 	private double getX(long time) {
-		return getWidth() * (1 - (getTime() - time) / (BetterAnalysis.LOGS_STORE_TIME * 1000.0));
+		return getWidth() * (1 - (getTime() - time) / (Settings.logsStoreTimeMinutes * 1000.0));
 	}
 
 	@Override
