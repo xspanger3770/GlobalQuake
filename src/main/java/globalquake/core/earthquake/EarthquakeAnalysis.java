@@ -255,7 +255,7 @@ public class EarthquakeAnalysis {
             Logger.debug(result);
         }
 
-        Logger.info("Hypocenter finding finished in: %d ms%n", System.currentTimeMillis() - startTime);
+        Logger.info("Hypocenter finding finished in: %d ms%n".formatted( System.currentTimeMillis() - startTime));
     }
 
     private PreliminaryHypocenter scanArea(List<PickedEvent> events, double distanceResolution, double maxDist,
