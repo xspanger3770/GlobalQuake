@@ -75,7 +75,7 @@ public class StationMonitorPanel extends JPanel {
 			double maxAverage = 0;
 			double maxRatio = 0;
 			for (Log l : logs) {
-				int v = l.getRawValue();
+				int v = l.rawValue();
 				if (v > maxValue) {
 					maxValue = v;
 				}
@@ -83,17 +83,17 @@ public class StationMonitorPanel extends JPanel {
 					minValue = v;
 				}
 
-				double fv = l.getFilteredV();
+				double fv = l.filteredV();
 				if (fv > maxFilteredValue) {
 					maxFilteredValue = fv;
 				}
 				if (fv < minFilteredValue) {
 					minFilteredValue = fv;
 				}
-				double shortAvg = l.getShortAverage();
-				double longAvg = l.getLongAverage();
-				double medAvg = l.getMediumAverage();
-				double specAvg = l.getSpecialAverage();
+				double shortAvg = l.shortAverage();
+				double longAvg = l.longAverage();
+				double medAvg = l.mediumAverage();
+				double specAvg = l.specialAverage();
 				if (shortAvg > maxAverage) {
 					maxAverage = shortAvg;
 				}
@@ -139,46 +139,46 @@ public class StationMonitorPanel extends JPanel {
 				Log a = logs.get(i);
 				Log b = logs.get(i + 1);
 
-				boolean gap = (a.getTime() - b.getTime()) > (1.0 / station.getAnalysis().getSampleRate() + 50);
+				boolean gap = (a.time() - b.time()) > (1.0 / station.getAnalysis().getSampleRate() + 50);
 				if (gap) {
 					continue;
 				}
 
-				double x1 = getX(a.getTime());
-				double x2 = getX(b.getTime());
+				double x1 = getX(a.time());
+				double x2 = getX(b.time());
 
-				double y1 = 0 + (getHeight() * 0.20) * (maxValue - a.getRawValue()) / (maxValue - minValue);
-				double y2 = 0 + (getHeight() * 0.20) * (maxValue - b.getRawValue()) / (maxValue - minValue);
+				double y1 = 0 + (getHeight() * 0.20) * (maxValue - a.rawValue()) / (maxValue - minValue);
+				double y2 = 0 + (getHeight() * 0.20) * (maxValue - b.rawValue()) / (maxValue - minValue);
 
-				double y3 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - a.getFilteredV())
+				double y3 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - a.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
-				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.getFilteredV())
+				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
 
 				double y5 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getShortAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.shortAverage()) / (maxAverage);
 				double y6 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getShortAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.shortAverage()) / (maxAverage);
 
 				double y7 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getLongAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.longAverage()) / (maxAverage);
 				double y8 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getLongAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.longAverage()) / (maxAverage);
 
 				double y9 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getMediumAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.mediumAverage()) / (maxAverage);
 				double y10 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getMediumAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.mediumAverage()) / (maxAverage);
 
 				double y9b = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getThirdAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.thirdAverage()) / (maxAverage);
 				double y10b = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getThirdAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.thirdAverage()) / (maxAverage);
 
 				double y9c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getSpecialAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.specialAverage()) / (maxAverage);
 				double y10c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getSpecialAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.specialAverage()) / (maxAverage);
 
 				double y11 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getRatio()) / (maxRatio);
 				double y12 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getRatio()) / (maxRatio);
@@ -218,7 +218,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y9c, x2, y10c));
 
-				g.setColor(a.getStatus() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y5, x2, y6));
 
@@ -234,7 +234,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13c, x2, y14c));
 
-				g.setColor(a.getStatus() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y11, x2, y12));
 

@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("all")
 public class ArtificialWaveformGenerator {
 
     private static final double SAMPLE_RATE = 50;

@@ -22,8 +22,6 @@ public class Event implements Serializable {
 	private long end;// time when end threshold reached
 	private long pWave;
 	private long firstLogTime;// first log time (now 90 seconds before event start)
-	private long lastLogTime;// last log time (increasing until 90 seconds after event end)
-	private long lastAnalysisTime;
 
 	private List<Log> logs;
 
@@ -42,7 +40,7 @@ public class Event implements Serializable {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
-		this.firstLogTime = logs.get(logs.size() - 1).getTime();
+		this.firstLogTime = logs.get(logs.size() - 1).time();
 		this.valid = true;
 	}
 
@@ -126,7 +124,6 @@ public class Event implements Serializable {
 
 	public void log(Log currentLog) {
 		logs.add(0, currentLog);
-		this.lastLogTime = currentLog.getTime();
 		if (currentLog.getRatio() > this.maxRatio) {
 			this.maxRatio = currentLog.getRatio();
 		}
@@ -149,7 +146,7 @@ public class Event implements Serializable {
 		// 0 - when first detected
 		// 1 - first upgrade etc...
 		int strenghtLevel = nextPWaveCalc;
-		Log logAtStart = getClosestLog(getStart() - 1, true);
+		Log logAtStart = getClosestLog(getStart() - 1);
 		if (logAtStart == null) {
 			return;
 		}
@@ -161,7 +158,7 @@ public class Event implements Serializable {
 		double minSpecial = Double.MAX_VALUE;
 
 		for (Log l : logs) {
-			long time = l.getTime();
+			long time = l.time();
 			if (time >= lookBack && time <= getStart()) {
 				slows.add(l.getMediumRatio());
 				double spec = l.getSpecialRatio();
@@ -194,7 +191,7 @@ public class Event implements Serializable {
 		// DEPRECATED, again
 		long pWave = -1;
 		for (Log l : logs) {
-			long time = l.getTime();
+			long time = l.time();
 			// l.getMediumRatio() <= slowThreshold;
 			boolean ratioOK = l.getRatio() <= slow15Pct * (slowThresholdMultiplier * 1.25);
 			boolean specialOK = l.getSpecialRatio() <= specialThreshold;
@@ -207,27 +204,26 @@ public class Event implements Serializable {
 		}
 
 		setpWave(pWave);
-		lastAnalysisTime = logs.get(0).getTime();
 	}
 
 	// halving method
 	// this was supposed to be binary search probably
-	private Log getClosestLog(long time, boolean returnNull) {
+	private Log getClosestLog(long time) {
 		if (logs.isEmpty()) {
 			return null;
 		}
-		if (time > logs.get(0).getTime()) {
-			return returnNull ? null : logs.get(0);
+		if (time > logs.get(0).time()) {
+			return null;
 		}
-		if (time < logs.get(logs.size() - 1).getTime()) {
-			return returnNull ? null : logs.get(logs.size() - 1);
+		if (time < logs.get(logs.size() - 1).time()) {
+			return null;
 		}
 
 		int lowerBound = 0;
 		int upperBound = logs.size() - 1;
 		while (upperBound - lowerBound > 1) {
 			int mid = (upperBound + lowerBound) / 2;
-			if (logs.get(mid).getTime() > time) {
+			if (logs.get(mid).time() > time) {
 				upperBound = mid;
 			} else {
 				lowerBound = mid;
@@ -235,8 +231,8 @@ public class Event implements Serializable {
 		}
 		Log up = logs.get(upperBound);
 		Log down = logs.get(lowerBound);
-		int diff1 = (int) Math.abs(up.getTime() - time);
-		int diff2 = (int) Math.abs(down.getTime() - time);
+		int diff1 = (int) Math.abs(up.time() - time);
+		int diff2 = (int) Math.abs(down.time() - time);
 		if (diff1 < diff2) {
 			return up;
 		} else {

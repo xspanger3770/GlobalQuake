@@ -172,7 +172,7 @@ public class BetterAnalysis extends Analysis {
         ArrayList<Log> logs = new ArrayList<>();
         synchronized (previousLogsLock) {
             for (Log l : getPreviousLogs()) {
-                long time = l.getTime();
+                long time = l.time();
                 if (time >= oldestLog && time <= newestLog) {
                     logs.add(l);
                 }
@@ -234,9 +234,9 @@ public class BetterAnalysis extends Analysis {
         }
         getDetectedEvents().removeAll(toBeRemoved);
 
-        long oldestTime = (time - (long) (Settings.logsStoreTimeMinutes * 60 * 1000));
+        long oldestTime = (time - (Settings.logsStoreTimeMinutes * 60 * 1000));
         synchronized (previousLogsLock) {
-            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).getTime() < oldestTime) {
+            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).time() < oldestTime) {
                 getPreviousLogs().remove(getPreviousLogs().size() - 1);
             }
         }
