@@ -138,6 +138,11 @@ public class BetterAnalysis extends Analysis {
                     reset();
                     return;
                 }
+
+                if(timeFromStart < 10 * 1000 && shortAverage < longAverage * 1.5){
+                    setStatus(AnalysisStatus.IDLE);
+                    latestEvent.endBadly(time);
+                }
             }
 
             if (ratio > _maxRatio || _maxRatioReset) {
@@ -154,10 +159,8 @@ public class BetterAnalysis extends Analysis {
                 }
                 // from latest event to the oldest event
                 for (Event e : getDetectedEvents()) {
-                    if (!e.isBroken()) {
-                        if (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000) {
-                            e.log(currentLog);
-                        }
+                    if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
+                        e.log(currentLog);
                     }
                 }
             }
@@ -224,6 +227,9 @@ public class BetterAnalysis extends Analysis {
                 if (age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
                 }
+            }
+            if(!event.isValid()){
+                toBeRemoved.add(event);
             }
         }
         getDetectedEvents().removeAll(toBeRemoved);

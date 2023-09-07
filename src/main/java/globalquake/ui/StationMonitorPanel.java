@@ -234,6 +234,10 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13c, x2, y14c));
 
+				g.setColor(a.getStatus() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setStroke(new BasicStroke(1f));
+				g.draw(new Line2D.Double(x1, y11, x2, y12));
+
 				g.setColor(Color.red);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, yA, x2, yA));
@@ -251,15 +255,13 @@ public class StationMonitorPanel extends JPanel {
 		}
 
 		for (Event e : station.getAnalysis().getDetectedEvents()) {
+			if(!e.isValid()){
+				continue;
+			}
 			double x = getX(e.getpWave());
 			g.setColor(Color.blue);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
-
-			double x2 = getX(e.getsWave());
-			g.setColor(Color.red);
-			g.setStroke(new BasicStroke(2f));
-			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
 		}
 
 		if(GlobalQuake.instance != null) {

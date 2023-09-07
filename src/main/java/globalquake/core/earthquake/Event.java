@@ -26,25 +26,26 @@ public class Event implements Serializable {
 	private long lastLogTime;// last log time (increasing until 90 seconds after event end)
 	private long lastAnalysisTime;
 
-	public transient int nextPWaveCalc;
-
 	private List<Log> logs;
-	public final transient Object logsLock;
+	private final transient Object logsLock;
 
 	public double maxRatio;
 
-	private boolean broken;
+	private boolean valid;
 
 	public Cluster assignedCluster;
 	private int updatesCount;
-	private final transient Analysis analysis;
 	public StationReport report;
+
+	private transient int nextPWaveCalc;
+	private final transient Analysis analysis;
 
 	public Event(Analysis analysis, long start, List<Log> logs) {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
 		this.firstLogTime = logs.get(logs.size() - 1).getTime();
+		this.valid = true;
 	}
 
 	// used in emulator
@@ -52,7 +53,7 @@ public class Event implements Serializable {
 		this.logsLock = new Object();
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
-		this.broken = false;
+		this.valid = true;
 		this.analysis = analysis;
 		this.assignedCluster = null;
 		this.updatesCount = 1;
@@ -62,9 +63,9 @@ public class Event implements Serializable {
 		this.end = end;
 	}
 
-	public void endBadly(int i) {
-		this.broken = true;
-		this.end = i;
+	public void endBadly(long time) {
+		this.valid = false;
+		end(time);
 	}
 
 	public void setpWave(long pWave) {
@@ -78,14 +79,6 @@ public class Event implements Serializable {
 		return pWave;
 	}
 
-	public void setsWave(long sWave) {
-		this.sWave = sWave;
-		// this.updatesCount++; S WAVES HAVE NO EFFECT IN THE CURRENT VERSION
-	}
-
-	public long getsWave() {
-		return sWave;
-	}
 
 	/**
 	 * 
@@ -127,9 +120,8 @@ public class Event implements Serializable {
 		return analysis;
 	}
 
-	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	public boolean isBroken() {
-		return broken;
+	public boolean isValid() {
+		return valid;
 	}
 
 	public double getLatFromStation() {

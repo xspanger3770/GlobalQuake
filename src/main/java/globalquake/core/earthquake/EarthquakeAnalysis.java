@@ -136,7 +136,9 @@ public class EarthquakeAnalysis {
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
         List<PickedEvent> result = new ArrayList<>();
         for (Event event : cluster.getAssignedEvents().values()) {
-            result.add(new PickedEvent(event.getpWave(), event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.maxRatio));
+            if(event.isValid()){
+                result.add(new PickedEvent(event.getpWave(), event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.maxRatio));
+            }
         }
 
         return result;
@@ -255,7 +257,7 @@ public class EarthquakeAnalysis {
             Logger.debug(result);
         }
 
-        Logger.info("Hypocenter finding finished in: %d ms%n".formatted( System.currentTimeMillis() - startTime));
+        Logger.info("Hypocenter finding finished in: %d ms".formatted( System.currentTimeMillis() - startTime));
     }
 
     private PreliminaryHypocenter scanArea(List<PickedEvent> events, double distanceResolution, double maxDist,
@@ -555,6 +557,9 @@ public class EarthquakeAnalysis {
         }
         ArrayList<Double> mags = new ArrayList<>();
         for (Event event : goodEvents) {
+            if(!event.isValid()){
+                continue;
+            }
             double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
                     event.getLatFromStation(), event.getLonFromStation());
             double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
