@@ -21,13 +21,11 @@ public class Event implements Serializable {
 	private long start;// time when first detected
 	private long end;// time when end threshold reached
 	private long pWave;
-	private long sWave;
 	private long firstLogTime;// first log time (now 90 seconds before event start)
 	private long lastLogTime;// last log time (increasing until 90 seconds after event end)
 	private long lastAnalysisTime;
 
 	private List<Log> logs;
-	private final transient Object logsLock;
 
 	public double maxRatio;
 
@@ -50,7 +48,6 @@ public class Event implements Serializable {
 
 	// used in emulator
 	public Event(Analysis analysis) {
-		this.logsLock = new Object();
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
 		this.valid = true;
@@ -63,9 +60,8 @@ public class Event implements Serializable {
 		this.end = end;
 	}
 
-	public void endBadly(long time) {
+	public void endBadly() {
 		this.valid = false;
-		end(time);
 	}
 
 	public void setpWave(long pWave) {
@@ -100,16 +96,8 @@ public class Event implements Serializable {
 		return firstLogTime;
 	}
 
-	public long getLastAnalysisTime() {
-		return lastAnalysisTime;
-	}
-
 	public boolean hasEnded() {
 		return getEnd() != 0;
-	}
-
-	public long getLastLogTime() {
-		return lastLogTime;
 	}
 
 	public double getMaxRatio() {
@@ -137,9 +125,7 @@ public class Event implements Serializable {
 	}
 
 	public void log(Log currentLog) {
-		synchronized (logsLock) {
-			logs.add(0, currentLog);
-		}
+		logs.add(0, currentLog);
 		this.lastLogTime = currentLog.getTime();
 		if (currentLog.getRatio() > this.maxRatio) {
 			this.maxRatio = currentLog.getRatio();
@@ -262,4 +248,7 @@ public class Event implements Serializable {
 		return updatesCount;
 	}
 
+	public List<Log> getLogs() {
+		return logs;
+	}
 }

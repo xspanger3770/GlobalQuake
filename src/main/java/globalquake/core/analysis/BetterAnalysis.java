@@ -141,7 +141,7 @@ public class BetterAnalysis extends Analysis {
 
                 if(timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2){
                     setStatus(AnalysisStatus.IDLE);
-                    latestEvent.endBadly(time);
+                    latestEvent.endBadly();
                 }
             }
 
@@ -209,7 +209,7 @@ public class BetterAnalysis extends Analysis {
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {
             if (!e.hasEnded()) {
-                e.endBadly(-1);
+                e.endBadly();
             }
         }
 
@@ -223,13 +223,13 @@ public class BetterAnalysis extends Analysis {
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded()) {
+                if(!event.getLogs().isEmpty()){
+                    event.getLogs().clear();
+                }
                 long age = time - event.getEnd();
-                if (age >= EVENT_STORE_TIME * 1000) {
+                if (!event.isValid() || age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
                 }
-            }
-            if(!event.isValid()){
-                toBeRemoved.add(event);
             }
         }
         getDetectedEvents().removeAll(toBeRemoved);
