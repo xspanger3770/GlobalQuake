@@ -3,6 +3,7 @@ package globalquake.core.analysis;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
+import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 import uk.me.berndporr.iirj.Butterworth;
 
@@ -39,7 +40,6 @@ public class BetterAnalysis extends Analysis {
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
     public static final double EVENT_TOO_LONG_DURATION = 5 * 60.0;
     public static final double EVENT_STORE_TIME = 20 * 60.0;
-    public static final double LOGS_STORE_TIME = 5 * 60;
 
     private Butterworth filter;
     private double initialOffset;
@@ -51,7 +51,7 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void nextSample(int v, long time) {
+    public void nextSample(int v, long time, long currentTime) {
         if (filter == null) {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
@@ -109,9 +109,9 @@ public class BetterAnalysis extends Analysis {
             }
             double ratio = shortAverage / longAverage;
             if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
-                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.5 && time - eventTimer > 200;
-                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.25 && time - eventTimer > 100;
-                boolean condMain = shortAverage / thirdAverage > 2;
+                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
+                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
+                boolean condMain = shortAverage / thirdAverage > 3.0;
                 if (condMain && (cond1 || cond2)) {
                     ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                     if (!_logs.isEmpty()) {
@@ -131,13 +131,17 @@ public class BetterAnalysis extends Analysis {
                 if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
                     setStatus(AnalysisStatus.IDLE);
                     latestEvent.end(time);
-
                 }
                 if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
                     Logger.warn("Station " + getStation().getStationCode()
                             + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
                     reset();
                     return;
+                }
+
+                if(timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2)){
+                    setStatus(AnalysisStatus.IDLE);
+                    latestEvent.endBadly();
                 }
             }
 
@@ -146,8 +150,8 @@ public class BetterAnalysis extends Analysis {
                 _maxRatioReset = false;
             }
 
-            if (time - System.currentTimeMillis() < 1000 * 10
-                    && System.currentTimeMillis() - time < 1000 * LOGS_STORE_TIME) {
+            if (time - currentTime < 1000 * 10
+                    && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
                 Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
                         (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
                 synchronized (previousLogsLock) {
@@ -155,10 +159,8 @@ public class BetterAnalysis extends Analysis {
                 }
                 // from latest event to the oldest event
                 for (Event e : getDetectedEvents()) {
-                    if (!e.isBroken()) {
-                        if (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000) {
-                            e.log(currentLog);
-                        }
+                    if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
+                        e.log(currentLog);
                     }
                 }
             }
@@ -170,7 +172,7 @@ public class BetterAnalysis extends Analysis {
         ArrayList<Log> logs = new ArrayList<>();
         synchronized (previousLogsLock) {
             for (Log l : getPreviousLogs()) {
-                long time = l.getTime();
+                long time = l.time();
                 if (time >= oldestLog && time <= newestLog) {
                     logs.add(l);
                 }
@@ -207,7 +209,7 @@ public class BetterAnalysis extends Analysis {
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {
             if (!e.hasEnded()) {
-                e.endBadly(-1);
+                e.endBadly();
             }
         }
 
@@ -215,23 +217,26 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void second() {
+    public void second(long time) {
         Iterator<Event> it = getDetectedEvents().iterator();
         List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Event event = it.next();
-            if (event.hasEnded()) {
-                long age = System.currentTimeMillis() - event.getEnd();
-                if (age >= EVENT_STORE_TIME * 1000) {
+            if (event.hasEnded() || !event.isValid()) {
+                if(!event.getLogs().isEmpty()){
+                    event.getLogs().clear();
+                }
+                long age = time - event.getEnd();
+                if (!event.isValid() || age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
                 }
             }
         }
         getDetectedEvents().removeAll(toBeRemoved);
 
-        long oldestTime = (System.currentTimeMillis() - (long) (LOGS_STORE_TIME * 1000));
+        long oldestTime = (time - (Settings.logsStoreTimeMinutes * 60 * 1000));
         synchronized (previousLogsLock) {
-            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).getTime() < oldestTime) {
+            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).time() < oldestTime) {
                 getPreviousLogs().remove(getPreviousLogs().size() - 1);
             }
         }

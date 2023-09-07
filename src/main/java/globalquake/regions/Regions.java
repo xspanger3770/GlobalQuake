@@ -131,11 +131,7 @@ public class Regions {
             return localName;
         }
 
-        if(globalName != null){
-            return globalName;
-        }
-
-        return null;
+        return globalName;
     }
 
     public static String getRegion(double lat, double lon) {

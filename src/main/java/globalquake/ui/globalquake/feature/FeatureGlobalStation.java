@@ -117,7 +117,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
                 if(event2.assignedCluster != null){
-                    Color c = event2.assignedCluster.color;
+                    Color c = !event2.isValid() ? Color.gray : event2.assignedCluster.color;
 
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
@@ -127,7 +127,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                     _y += 16;
                 }
             }
-        } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+        } else if (event != null && event.isValid() && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
             if (event.getMaxRatio() >= RATIO_YELLOW) {

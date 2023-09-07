@@ -69,7 +69,7 @@ public abstract class Analysis {
 				return;
 			}
 			for (int v : data) {
-				nextSample(v, time);
+				nextSample(v, time, System.currentTimeMillis());
 				time += (long) (1000 / getSampleRate());
 			}
 		} catch (Exception e) {
@@ -78,7 +78,7 @@ public abstract class Analysis {
         }
 	}
 
-	public abstract void nextSample(int v, long time);
+	public abstract void nextSample(int v, long time, long currentTime);
 
 	@SuppressWarnings("SameReturnValue")
 	public abstract long getGapThreshold();
@@ -91,7 +91,11 @@ public abstract class Analysis {
 		return sampleRate;
 	}
 
-	public abstract void second();
+	public void setSampleRate(double sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public abstract void second(long time);
 
 	public List<Event> getDetectedEvents() {
 		return detectedEvents;

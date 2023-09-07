@@ -46,6 +46,8 @@ hs_err_pid*
 idea.png
 GlobalQuake/
 old/
+out/
+training_datasets/
 science/
 .idea/
 /src/main/resources/META-INF/MANIFEST.MF
