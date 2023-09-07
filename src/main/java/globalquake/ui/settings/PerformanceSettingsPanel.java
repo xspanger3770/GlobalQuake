@@ -9,16 +9,38 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     private static final double RESOLUTION_MAX = 100.0;
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
+    private JSlider sliderStoreTime;
 
     public PerformanceSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(createSettingAccuracy());
+        add(createSettingStoreTime());
         add(createSettingParalell());
 
-        for(int i = 0; i < 16; i++){
+        for(int i = 0; i < 3; i++){
             add(new JPanel()); // fillers
         }
+    }
+
+    private Component createSettingStoreTime() {
+        sliderStoreTime = HypocenterAnalysisSettingsPanel.createSettingsSlider(2, 20, 2, 1);
+
+        JLabel label = new JLabel();
+        ChangeListener changeListener = changeEvent -> label.setText("Waveform data storage time (minutes): %d".formatted(
+                sliderStoreTime.getValue()));
+
+        sliderStoreTime.addChangeListener(changeListener);
+
+        sliderStoreTime.setValue(Settings.logsStoreTimeMinutes);
+        changeListener.stateChanged(null);
+
+        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderStoreTime, label, "5",
+                """
+                        In GlobalQuake, waveform data poses the highest demand on your system's RAM.
+                        If you're encountering memory constraints, you have two options:
+                        either reduce the number of selected stations or lower this specific value.
+                        """);
     }
 
     @SuppressWarnings("ExtractMethodRecommender")
@@ -47,11 +69,11 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public void save() {
         Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
         Settings.parallelHypocenterLocations = chkBoxParalell.isSelected();
+        Settings.logsStoreTimeMinutes = sliderStoreTime.getValue();
     }
 
     private Component createSettingAccuracy() {
-        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) RESOLUTION_MAX, 20, 5);
-        sliderResolution.setPaintLabels(false);
+        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) RESOLUTION_MAX, 10, 5);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent -> label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(

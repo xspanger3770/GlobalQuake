@@ -88,7 +88,7 @@ public final class Settings {
 	public static Integer cinemaModeSwitchTime;
 	public static Integer cinemaModeZoomMultiplier;
 
-	public static Long logsStoreTimeMinutes;
+	public static Integer logsStoreTimeMinutes;
 
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
@@ -195,6 +195,8 @@ public final class Settings {
 					val = Integer.parseInt(defaultVal);
 				}
 				setProperty(field, val);
+			} else {
+				Logger.error("Error: unsupported setting type: %s".formatted(field.getType()));
 			}
 		} catch (Exception e) {
 			Logger.error(e);
