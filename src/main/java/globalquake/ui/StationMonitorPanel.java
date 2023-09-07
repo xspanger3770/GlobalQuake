@@ -312,7 +312,7 @@ public class StationMonitorPanel extends JPanel {
 	}
 
 	private double getX(long time) {
-		return getWidth() * (1 - (getTime() - time) / (Settings.logsStoreTimeMinutes * 1000.0));
+		return getWidth() * (1 - (getTime() - time) / (Settings.logsStoreTimeMinutes * 60 * 1000.0));
 	}
 
 	@Override

@@ -139,7 +139,7 @@ public class BetterAnalysis extends Analysis {
                     return;
                 }
 
-                if(timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2){
+                if(timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2)){
                     setStatus(AnalysisStatus.IDLE);
                     latestEvent.endBadly();
                 }
@@ -222,7 +222,7 @@ public class BetterAnalysis extends Analysis {
         List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Event event = it.next();
-            if (event.hasEnded()) {
+            if (event.hasEnded() || !event.isValid()) {
                 if(!event.getLogs().isEmpty()){
                     event.getLogs().clear();
                 }

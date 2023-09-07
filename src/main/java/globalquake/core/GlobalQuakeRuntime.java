@@ -2,6 +2,7 @@ package globalquake.core;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.main.Main;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.NamedThreadFactory;
 import org.tinylog.Logger;
 
@@ -17,6 +18,8 @@ public class GlobalQuakeRuntime {
     private long lastGC;
     private long clusterAnalysisT;
     private long lastQuakesT;
+
+    private int lastSettings = Settings.changes;
 
     public void runThreads() {
         ScheduledExecutorService execAnalysis = Executors
@@ -47,6 +50,12 @@ public class GlobalQuakeRuntime {
                     GlobalQuake.instance.getEarthquakeAnalysis().second();
                 }
                 lastSecond = System.currentTimeMillis() - a;
+
+                if(lastSettings != Settings.changes){
+                    System.gc();
+                }
+
+                lastSettings = Settings.changes;
             } catch (Exception e) {
                 Logger.error("Exception occurred in 1-second loop");
                 Main.getErrorHandler().handleException(e);
