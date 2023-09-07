@@ -23,7 +23,6 @@ public class Log implements Serializable {
 	private final float mediumAverage;
 	private final float longAverage;
 	private final AnalysisStatus status;
-	private byte phase;
 	private final float thirdAverage;
 	private final float specialAverage;
 
@@ -38,7 +37,6 @@ public class Log implements Serializable {
 		this.thirdAverage = thirdAverage;
 		this.specialAverage = specialAverage;
 		this.status = status;
-		this.phase=NOTHING;
 	}
 
 	public long getTime() {
@@ -75,14 +73,6 @@ public class Log implements Serializable {
 
 	public AnalysisStatus getStatus() {
 		return status;
-	}
-
-	public byte getPhase() {
-		return phase;
-	}
-	
-	public void setPhase(byte phase) {
-		this.phase = phase;
 	}
 	
 	public double getRatio() {

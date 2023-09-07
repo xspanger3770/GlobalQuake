@@ -74,14 +74,14 @@ public class ArtificialWaveformGenerator {
             if(time > pArrival) {
                 long diff = time - pArrival;
                 for (int i = 0; i < FREQ_COUNT; i++) {
-                    intensities[i] += NOISE * magRatio * 0.3 * getDecayMul(diff) * getIMul(i);
+                    intensities[i] += NOISE * magRatio * 0.3 * getDecayMul(diff, i) * getIMul(i);
                 }
             }
 
             if(time > sArrival) {
                 long diff = time - sArrival;
                 for (int i = 0; i < FREQ_COUNT; i++) {
-                    intensities[i] += NOISE * magRatio * 0.95 * getDecayMul(diff) * getIMul(i);
+                    intensities[i] += NOISE * magRatio * 0.95 * getDecayMul(diff, i) * getIMul(i);
                 }
             }
 
@@ -94,10 +94,10 @@ public class ArtificialWaveformGenerator {
             return 1.0 / (pct * coeff + 1.0);
         }
 
-        private double getDecayMul(long diff) {
+        private double getDecayMul(long diff, int i) {
             double startMulCoeff = 500 + 30 * Math.pow(mag, 3);
             double startMul = diff >= startMulCoeff ? 1 : diff / startMulCoeff;
-            double coeff = 2000 * Math.pow(mag, 3);
+            double coeff = 2000 * Math.pow(mag, 3) / (0.5 + i / (double)FREQ_COUNT);
             return coeff / (coeff + Math.pow(diff, 1.25)) * startMul;
         }
 
@@ -221,7 +221,7 @@ public class ArtificialWaveformGenerator {
 
         List<ArtificalEarthquake> artificalEarthquakes = new ArrayList<>();
 
-        artificalEarthquakes.add(new ArtificalEarthquake(500,7,simulationTime + 90 * 1000,5.9));
+        //artificalEarthquakes.add(new ArtificalEarthquake(500,7,simulationTime + 90 * 1000,5.9));
 
         Random quakeRandom = new Random(RAND_SEED);
         Timer timer = new Timer();
@@ -240,10 +240,10 @@ public class ArtificialWaveformGenerator {
 
                 synchronized (lock) {
 
-                    if (quakeRandom.nextDouble() < -0.05) {
+                    if (quakeRandom.nextDouble() < 0.03) {
                         double mag = 2.0 + quakeRandom.nextDouble() * 3.0;
                         double depth = Math.pow(quakeRandom.nextDouble(), 4) * 600.0;
-                        double dist = quakeRandom.nextDouble() * 1000.0;
+                        double dist = 100 + quakeRandom.nextDouble() * 300.0;
                         ArtificalEarthquake art = new ArtificalEarthquake(dist, depth, simulationTime, mag);
 
                         System.out.println("added " + art);
@@ -267,7 +267,14 @@ public class ArtificialWaveformGenerator {
 
             simulationTime += (long) (1000 / SAMPLE_RATE);
 
-            Thread.sleep(1);
+            sleepNanos(1000 * 400);
+        }
+    }
+
+    public static void sleepNanos(long nanoseconds) {
+        long startTime = System.nanoTime();
+        long endTime = startTime + nanoseconds;
+        while (endTime >= System.nanoTime()) {
         }
     }
 

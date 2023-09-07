@@ -234,10 +234,6 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13c, x2, y14c));
 
-				g.setColor(getColorPhase(a.getPhase()));
-				g.setStroke(new BasicStroke(1f));
-				g.draw(new Line2D.Double(x1, y11, x2, y12));
-
 				g.setColor(Color.red);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, yA, x2, yA));

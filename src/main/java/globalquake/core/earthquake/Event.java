@@ -162,16 +162,12 @@ public class Event implements Serializable {
 					findPWaveMethod1();
 				}
 			}
-			if (currentLog.getTime() - getLastAnalysisTime() >= 5 * 1000) {
-				analyseEvent();
-			}
 		}
 	}
 
 	// T-30sec
 	// first estimation of p wave
 	private void findPWaveMethod1() {
-
 		// 0 - when first detected
 		// 1 - first upgrade etc...
 		int strenghtLevel = nextPWaveCalc;
@@ -233,73 +229,6 @@ public class Event implements Serializable {
 		}
 
 		setpWave(pWave);
-		analyseEvent();
-	}
-
-	// assign phases
-	// find s wave
-	// warning! very experimental at this point
-	private void analyseEvent() {
-		if (logs.isEmpty()) {
-			return;
-		}
-		long pWave = getpWave();
-		if (logs.get(logs.size() - 1).getTime() > pWave) {
-			return;
-		}
-		if (pWave == 0) {
-			return;
-		}
-		long end = !hasEnded() ? getLastLogTime() : getEnd();
-		// from oldest log to newest logs
-		byte phase = Log.P_WAVES;
-		var log = getClosestLog(pWave, false);
-
-		if(log == null){
-			return;
-		}
-
-		double specialRatioStart = log.getSpecialRatio();
-		double specialRatioW = 0;
-		long specialRatioWT = 0;
-		double specialRatioMax0 = 0;
-		long specialRatioMax0T = 0;
-		double maxDeriv = 0;
-		double der2 = 0;
-		for (int i = logs.size() - 1; i >= 0; i--) {
-			Log l = logs.get(i);
-			long time = l.getTime();
-			if (time >= pWave && time <= end) {
-
-				if (l.getSpecialRatio() > specialRatioMax0) {
-					specialRatioMax0 = l.getSpecialRatio();
-					specialRatioMax0T = l.getTime();
-				}
-
-				if (time - pWave >= 4000) {
-					if (phase == Log.P_WAVES) {
-						double deriv = (l.getSpecialRatio() - specialRatioStart) / (time - pWave);
-						if (deriv > maxDeriv) {
-							maxDeriv = deriv;
-						}
-						double expectedSpecial = specialRatioStart + (time - pWave) * maxDeriv;
-						if (expectedSpecial / l.getSpecialRatio() > 1.2) {
-							phase = Log.WAITING_FOR_S;
-							specialRatioW = l.getSpecialRatio();
-							specialRatioWT = l.getTime();
-							der2 = (specialRatioW - specialRatioMax0) / (time - specialRatioMax0T);
-						}
-					} else if (phase == Log.WAITING_FOR_S) {
-						double expectedSpecial = specialRatioW + (time - specialRatioWT) * der2;
-						if (l.getSpecialRatio() > expectedSpecial * 1.35) {
-							phase = Log.S_WAVES;
-							setsWave(time);
-						}
-					}
-				}
-				l.setPhase(phase);
-			}
-		}
 		lastAnalysisTime = logs.get(0).getTime();
 	}
 

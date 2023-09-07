@@ -109,9 +109,9 @@ public class BetterAnalysis extends Analysis {
             }
             double ratio = shortAverage / longAverage;
             if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
-                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.5 && time - eventTimer > 200;
-                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.25 && time - eventTimer > 100;
-                boolean condMain = shortAverage / thirdAverage > 2;
+                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
+                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
+                boolean condMain = shortAverage / thirdAverage > 3.0;
                 if (condMain && (cond1 || cond2)) {
                     ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                     if (!_logs.isEmpty()) {
@@ -131,7 +131,6 @@ public class BetterAnalysis extends Analysis {
                 if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
                     setStatus(AnalysisStatus.IDLE);
                     latestEvent.end(time);
-
                 }
                 if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
                     Logger.warn("Station " + getStation().getStationCode()
