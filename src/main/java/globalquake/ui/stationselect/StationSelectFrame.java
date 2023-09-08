@@ -20,6 +20,7 @@ public class StationSelectFrame extends JFrame implements ActionListener {
     private final JTextField searchBar;
     private DragMode dragMode = DragMode.NONE;
     private final JCheckBox chkBoxShowUnavailable;
+    private final JLayeredPane layeredPane = new JLayeredPane();
     public static JPanel suggestionPanel = new JPanel();
 
     public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
@@ -35,7 +36,6 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         deselectAll.addActionListener(this);
         suggestionPanel.setVisible(false);
         suggestionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        suggestionPanel.setPreferredSize(new Dimension(375, 50));
 
         togglePanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -75,11 +75,11 @@ public class StationSelectFrame extends JFrame implements ActionListener {
         toggleButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (toolBar.isVisible()) {
-                    toolBar.setVisible(false);
+                if (layeredPane.isVisible()) {
+                    layeredPane.setVisible(false);
                     toggleButton.setText(">");
                 } else {
-                    toolBar.setVisible(true);
+                    layeredPane.setVisible(true);
                     toggleButton.setText("<");
                 }
             }
@@ -103,8 +103,13 @@ public class StationSelectFrame extends JFrame implements ActionListener {
 
         centerPanel.add(stationSelectPanel, gbc);
 
+        layeredPane.setPreferredSize(new Dimension(225, 300));
+        layeredPane.add(toolBar, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(suggestionPanel, JLayeredPane.PALETTE_LAYER);
+        toolBar.setBounds(0, 0, 225, 500);
+        suggestionPanel.setBounds(0, 40, 225, 200);
         add(centerPanel, BorderLayout.CENTER);
-        add(toolBar, BorderLayout.WEST);
+        add(layeredPane, BorderLayout.WEST);
         add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
 
         pack();
@@ -158,7 +163,6 @@ public class StationSelectFrame extends JFrame implements ActionListener {
 
         searchBar.setMaximumSize(new Dimension(375,40));
         toolBar.add(searchBar);
-        toolBar.add(suggestionPanel);
         toolBar.addSeparator();
 
         toolBar.add(selectButton);
