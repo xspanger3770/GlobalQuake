@@ -59,7 +59,11 @@ For MacOS download the "**_x64 DMG Installer_**".
 
 #### Linux
 <a name="JavaInstallLinux"></a>
-Under Construction
+1. Download the appropriate Java package. If you're not sure which one to download refer to [Java Linux Download](#JavaDownloadLinux). <br>![Screenshot from 2023-09-08 16-15-10](https://github.com/CentreMetre/GlobalQuake/assets/61330791/f17d1c85-5b5e-4c54-b3ea-a48ea8cb21c7)
+2. Open the downloaded file with a package manager. You can either set the defualt app for .deb files to a package manager or just open this file with a package manager this time. To open with a package manager this one time right click the downloaded .deb file, click "**_Open With Another Application_**", then click software install and then select. <br> ![Screenshot from 2023-09-08 16-17-09](https://github.com/CentreMetre/GlobalQuake/assets/61330791/af7dfbea-7ee1-4dc1-aaa2-79c008ddafc2)
+3. When your package manager opens click the install button and wait for it to install. <br> ![Screenshot from 2023-09-08 16-18-13](https://github.com/CentreMetre/GlobalQuake/assets/61330791/4b00a5aa-314d-4b09-9619-01691d6c6e52)
+4. Verify it installed succsefully by going into the terminal and entering ```java -version```. If you get something similar to the screenshot it has successfully installed. If you get an error saying ```bash: /usr/bin/java: No such file or directory``` it means it hasnt installed properly. Please try the steps again from step 1. <br> ![Screenshot from 2023-09-08 16-19-02](https://github.com/CentreMetre/GlobalQuake/assets/61330791/36c00f02-2c11-447a-9468-69846f84f1d4)
+
 
 #### MacOS
 <a name="JavaInstallMacOS"></a>
