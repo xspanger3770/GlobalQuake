@@ -21,10 +21,6 @@ public class StationInterval {
         this.end = end;
     }
 
-    public void setStart(long start) {
-        this.start = start;
-    }
-
     public long getStart() {
         return start;
     }

@@ -1,5 +1,7 @@
 package globalquake.core.earthquake;
 
+import java.util.List;
+
 public class Hypocenter {
 	public final double totalErr;
 	public final int correctEvents;
@@ -10,6 +12,10 @@ public class Hypocenter {
 	public final long origin;
 
 	public int selectedEvents;
+
+	public double magnitude;
+	public List<Double> mags;
+	public ObviousArrivalsInfo obviousArrivalsInfo;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents) {
 		this.lat = lat;

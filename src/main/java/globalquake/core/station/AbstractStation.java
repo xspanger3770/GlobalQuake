@@ -2,16 +2,13 @@ package globalquake.core.station;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.core.earthquake.Event;
 import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class AbstractStation {
 
@@ -61,6 +58,23 @@ public abstract class AbstractStation {
 			}
 		}
 		return StationState.UNKNOWN;
+	}
+
+	public Event getEventAt(long time, long tolerance){
+		if(getAnalysis() == null){
+			return null;
+		}
+
+		for(Event event : getAnalysis().getDetectedEvents()){
+			if(!event.isValid()){
+				continue;
+			}
+			if(time >= event.getpWave() - tolerance && time < event.getEnd() - tolerance){
+				return event;
+			}
+		}
+
+		return null;
 	}
 
 	public void reportState(StationState state, long time) {

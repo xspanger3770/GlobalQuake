@@ -172,7 +172,7 @@ public class ClusterAnalysis {
                 angle);
 
 
-        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
+        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
         if (expectedIntensity < 3.0) {
             return false;
         }
@@ -200,7 +200,7 @@ public class ClusterAnalysis {
         double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                 angle);
 
-        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
+        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
         if (expectedIntensity < 3.0) {
             return false;
         }
