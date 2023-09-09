@@ -64,7 +64,11 @@ public class ClusterAnalysis {
     }
 
     private void clearSWaves() {
-        for(Cluster cluster : clusters){
+        for(Cluster cluster : clusters) {
+            if(cluster.getEarthquake() == null){
+                continue;
+            }
+
             for (AbstractStation station : stations) {
                 for (Event event : station.getAnalysis().getDetectedEvents()) {
                     if (event.isValid() && event.isSWave() && !couldBeSArrival(event, cluster.getEarthquake())) {
@@ -185,7 +189,7 @@ public class ClusterAnalysis {
 
     @SuppressWarnings("RedundantIfStatement")
     private boolean couldBeArrival(Event event, Earthquake earthquake) {
-        if (!event.isValid()) {
+        if (!event.isValid() || earthquake == null) {
             return false;
         }
         long actualTravel = event.getpWave() - earthquake.getOrigin();
