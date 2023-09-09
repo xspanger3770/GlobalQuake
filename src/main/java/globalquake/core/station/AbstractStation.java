@@ -69,7 +69,7 @@ public abstract class AbstractStation {
 			if(!event.isValid()){
 				continue;
 			}
-			if(time >= event.getpWave() - tolerance && time < event.getEnd() - tolerance){
+			if(time >= event.getpWave() - tolerance && (!event.hasEnded() || time < event.getEnd() - tolerance)){
 				return event;
 			}
 		}

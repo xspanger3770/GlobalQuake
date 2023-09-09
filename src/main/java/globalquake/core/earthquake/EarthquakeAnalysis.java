@@ -263,7 +263,7 @@ public class EarthquakeAnalysis {
         bestHypocenter.selectedEvents = selectedEvents.size();
         calculateObviousArrivals(bestHypocenter);
 
-        System.err.println("Obvious arrivals = "+bestHypocenter.obviousArrivalsInfo.total()+", wrong = "+bestHypocenter.obviousArrivalsInfo.wrong());
+        System.err.println("#"+cluster.getId()+" Obvious arrivals = "+bestHypocenter.obviousArrivalsInfo.total()+", wrong = "+bestHypocenter.obviousArrivalsInfo.wrong());
 
         double pct = 100 * bestHypocenter.getCorrectness();
 
@@ -315,6 +315,7 @@ public class EarthquakeAnalysis {
 
             total++;
             if(station.getEventAt(expectedPArrival, 10 * 1000) == null){
+                System.err.println("Wrong at "+station.getStationCode());
                 wrong++;
             }
         }
