@@ -50,7 +50,7 @@ public class CinemaHandler {
                         int currentQuakeCount = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().size();
                         int currentClusterCount = GlobalQuake.instance.getClusterAnalysis().getClusters().size();
                         try {
-                            if (currentQuakeCount != quakeCount[0] || (currentQuakeCount == 0 && currentClusterCount != clusterCount[0])) {
+                            if (currentQuakeCount > quakeCount[0] || (currentQuakeCount == 0 && currentClusterCount > clusterCount[0])) {
                                 nextTarget(true);
                             }
                         } finally {
