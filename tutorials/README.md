@@ -59,13 +59,20 @@ For MacOS download the "**_x64 DMG Installer_**".
 
 #### Linux
 <a name="JavaInstallLinux"></a>
+
+**APT (Ubuntu)**
 1. Download the appropriate Java package. If you're not sure which one to download refer to [Java Linux Download](#JavaDownloadLinux). <br>![Screenshot from 2023-09-08 16-15-10](https://github.com/CentreMetre/GlobalQuake/assets/61330791/f17d1c85-5b5e-4c54-b3ea-a48ea8cb21c7)
 2. Open the downloaded file with a package manager. You can either set the defualt app for .deb files to a package manager or just open this file with a package manager this time. To open with a package manager this one time right click the downloaded .deb file, click "**_Open With Another Application_**", then click software install and then select. <br> ![Screenshot from 2023-09-08 16-17-09](https://github.com/CentreMetre/GlobalQuake/assets/61330791/af7dfbea-7ee1-4dc1-aaa2-79c008ddafc2)
-3. When your package manager opens click the install button and wait for it to install. <br> ![Screenshot from 2023-09-08 16-18-13](https://github.com/CentreMetre/GlobalQuake/assets/61330791/4b00a5aa-314d-4b09-9619-01691d6c6e52)
+3. When your package manager opens click the install button and wait for it to install. If it asks for authentication press "**_OK_**" or "**_Authenticate_**", or if it asks for a password input your password and press the confirmation button. <br> ![Screenshot from 2023-09-08 16-18-13](https://github.com/CentreMetre/GlobalQuake/assets/61330791/4b00a5aa-314d-4b09-9619-01691d6c6e52)
 4. Verify it installed succsefully by going into the terminal and entering ```java -version```. If you get something similar to the screenshot it has successfully installed. If you get an error saying ```bash: /usr/bin/java: No such file or directory``` it means it hasnt installed properly. Please try the steps again from step 1. <br> ![Screenshot from 2023-09-08 16-19-02](https://github.com/CentreMetre/GlobalQuake/assets/61330791/36c00f02-2c11-447a-9468-69846f84f1d4)
 
 > [!NOTE] <br>
 > Some buttons may be in different places or the UI may be entirly different depending on what desktop environment your OS is using. This tutorial was done using Ubuntu 22.04 with the GNOME desktop environment. 
+
+**RPM (Fedora)**
+1. Open the terminal.
+2. Enter the command ```sudo rpm -i https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm```. It may ask for a password, if it does enter the password in the terminal. When you're typing it may look like nothing is happening, this is just to prevent other people from seeing your password, anything being typed is still going into the terminal. The terminal may look like it frozen for a while, it's not, it is just installing Java.<br> ![image](https://github.com/CentreMetre/GlobalQuake/assets/61330791/6b9e8b91-ef7f-42ec-aaf6-94ff6841d045)
+3. Enter the command ```java -version``` to verify it has isntalled. If it is similar to the screen shot then it as successfully installed, if you get an error it might mean it hasnt installed properly, try again from step 1. <br> ![image](https://github.com/CentreMetre/GlobalQuake/assets/61330791/afc64581-c146-40b8-800f-c5f8a78f96e9)
 
 #### MacOS
 <a name="JavaInstallMacOS"></a>
