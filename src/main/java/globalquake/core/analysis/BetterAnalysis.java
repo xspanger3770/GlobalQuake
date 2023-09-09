@@ -3,6 +3,7 @@ package globalquake.core.analysis;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.Event;
+import globalquake.core.station.StationState;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 import uk.me.berndporr.iirj.Butterworth;
@@ -56,15 +57,19 @@ public class BetterAnalysis extends Analysis {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
             reset();// initial reset;
+            getStation().reportState(StationState.INACTIVE, currentTime);
             return;
         }
 
         if (time < latestLogTime) {
             //System.err.println("BACKWARDS TIME IN ANALYSIS (" + getStation().getStationCode() + ")");
             reset();
+            getStation().reportState(StationState.INACTIVE, currentTime);
             return;
         }
+
         latestLogTime = time;
+
         if (getStatus() == AnalysisStatus.INIT) {
             if (initProgress <= INIT_OFFSET_CALCULATION * 0.001 * getSampleRate()) {
                 initialOffsetSum += v;
@@ -92,80 +97,82 @@ public class BetterAnalysis extends Analysis {
                 setStatus(AnalysisStatus.IDLE);
             }
             initProgress++;
-        } else {
-            double filteredV = filter.filter(v - initialOffset);
-            shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
-            mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
-            thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
-
-            if (Math.abs(filteredV) > specialAverage) {
-                specialAverage = Math.abs(filteredV);
-            } else {
-                specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 50.0);
-            }
-
-            if (shortAverage / longAverage < 4.0) {
-                longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
-            }
-            double ratio = shortAverage / longAverage;
-            if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
-                boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
-                boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
-                boolean condMain = shortAverage / thirdAverage > 3.0;
-                if (condMain && (cond1 || cond2)) {
-                    ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
-                    if (!_logs.isEmpty()) {
-                        setStatus(AnalysisStatus.EVENT);
-                        Event event = new Event(this, time, _logs);
-                        getDetectedEvents().add(0, event);
-                    }
-                }
-            }
-            if (shortAverage / longAverage < EVENT_THRESHOLD) {
-                eventTimer = time;
-            }
-
-            Event latestEvent = getLatestEvent();
-            if (getStatus() == AnalysisStatus.EVENT && latestEvent != null) {
-                long timeFromStart = time - latestEvent.getStart();
-                if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
-                    setStatus(AnalysisStatus.IDLE);
-                    latestEvent.end(time);
-                }
-                if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
-                    Logger.warn("Station " + getStation().getStationCode()
-                            + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
-                    reset();
-                    return;
-                }
-
-                if(timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2)){
-                    setStatus(AnalysisStatus.IDLE);
-                    latestEvent.endBadly();
-                }
-            }
-
-            if (ratio > _maxRatio || _maxRatioReset) {
-                _maxRatio = ratio * 1.25;
-                _maxRatioReset = false;
-            }
-
-            if (time - currentTime < 1000 * 10
-                    && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
-                Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                        (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
-                synchronized (previousLogsLock) {
-                    getPreviousLogs().add(0, currentLog);
-                }
-                // from latest event to the oldest event
-                for (Event e : getDetectedEvents()) {
-                    if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                        e.log(currentLog);
-                    }
-                }
-            }
-
+            getStation().reportState(StationState.INACTIVE, currentTime);
+            return;
         }
+        double filteredV = filter.filter(v - initialOffset);
+        shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
+        mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
+        thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
+
+        if (Math.abs(filteredV) > specialAverage) {
+            specialAverage = Math.abs(filteredV);
+        } else {
+            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 50.0);
+        }
+
+        if (shortAverage / longAverage < 4.0) {
+            longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
+        }
+        double ratio = shortAverage / longAverage;
+        if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
+            boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
+            boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
+            boolean condMain = shortAverage / thirdAverage > 3.0;
+            if (condMain && (cond1 || cond2)) {
+                ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
+                if (!_logs.isEmpty()) {
+                    setStatus(AnalysisStatus.EVENT);
+                    Event event = new Event(this, time, _logs);
+                    getDetectedEvents().add(0, event);
+                }
+            }
+        }
+        if (shortAverage / longAverage < EVENT_THRESHOLD) {
+            eventTimer = time;
+        }
+
+        Event latestEvent = getLatestEvent();
+        if (getStatus() == AnalysisStatus.EVENT && latestEvent != null) {
+            long timeFromStart = time - latestEvent.getStart();
+            if (timeFromStart >= EVENT_END_DURATION * 1000 && mediumAverage < thirdAverage * 0.95) {
+                setStatus(AnalysisStatus.IDLE);
+                latestEvent.end(time);
+            }
+            if (timeFromStart >= EVENT_TOO_LONG_DURATION * 1000) {
+                Logger.warn("Station " + getStation().getStationCode()
+                        + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
+                reset();
+                getStation().reportState(StationState.INACTIVE, currentTime);
+                return;
+            }
+
+            if (timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2)) {
+                setStatus(AnalysisStatus.IDLE);
+                latestEvent.endBadly();
+            }
+        }
+
+        if (ratio > _maxRatio || _maxRatioReset) {
+            _maxRatio = ratio * 1.25;
+            _maxRatioReset = false;
+        }
+
+        if (time - currentTime < 1000 * 10
+                && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
+            Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
+                    (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
+            synchronized (previousLogsLock) {
+                getPreviousLogs().add(0, currentLog);
+            }
+            // from latest event to the oldest event
+            for (Event e : getDetectedEvents()) {
+                if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
+                    e.log(currentLog);
+                }
+            }
+        }
+        getStation().reportState(StationState.ACTIVE, currentTime);
     }
 
     private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {
@@ -223,7 +230,7 @@ public class BetterAnalysis extends Analysis {
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded() || !event.isValid()) {
-                if(!event.getLogs().isEmpty()){
+                if (!event.getLogs().isEmpty()) {
                     event.getLogs().clear();
                 }
                 long age = time - event.getEnd();
