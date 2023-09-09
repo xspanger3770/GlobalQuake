@@ -178,8 +178,8 @@ public class ClusterAnalysis {
         }
 
         if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
-            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1.5 * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 5000 + expectedTravel * 0.015) {
+            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 1000);
+            if (Math.abs(expectedTravel - actualTravel) < 5000 + expectedTravel * 0.01) {
                 return true;
             }
         }
