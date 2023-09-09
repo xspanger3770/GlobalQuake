@@ -64,6 +64,8 @@ For MacOS download the "**_x64 DMG Installer_**".
 3. When your package manager opens click the install button and wait for it to install. <br> ![Screenshot from 2023-09-08 16-18-13](https://github.com/CentreMetre/GlobalQuake/assets/61330791/4b00a5aa-314d-4b09-9619-01691d6c6e52)
 4. Verify it installed succsefully by going into the terminal and entering ```java -version```. If you get something similar to the screenshot it has successfully installed. If you get an error saying ```bash: /usr/bin/java: No such file or directory``` it means it hasnt installed properly. Please try the steps again from step 1. <br> ![Screenshot from 2023-09-08 16-19-02](https://github.com/CentreMetre/GlobalQuake/assets/61330791/36c00f02-2c11-447a-9468-69846f84f1d4)
 
+> [!NOTE] <br>
+> Some buttons may be in different places or the UI may be entirly different depending on what desktop environment your OS is using. This tutorial was done using Ubuntu 22.04 with the GNOME desktop environment. 
 
 #### MacOS
 <a name="JavaInstallMacOS"></a>
