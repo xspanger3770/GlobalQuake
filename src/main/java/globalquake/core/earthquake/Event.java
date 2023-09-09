@@ -36,6 +36,8 @@ public class Event implements Serializable {
 	private transient int nextPWaveCalc;
 	private final transient Analysis analysis;
 
+	private boolean isSWave;
+
 	public Event(Analysis analysis, long start, List<Log> logs) {
 		this(analysis);
 		this.start = start;
@@ -52,6 +54,7 @@ public class Event implements Serializable {
 		this.analysis = analysis;
 		this.assignedCluster = null;
 		this.updatesCount = 1;
+		this.isSWave = false;
 	}
 
 	public void end(long end) {
@@ -73,6 +76,14 @@ public class Event implements Serializable {
 		return pWave;
 	}
 
+
+	public boolean isSWave() {
+		return isSWave;
+	}
+
+	public void setAsSWave(boolean isSWave){
+		this.isSWave = isSWave;
+	}
 
 	/**
 	 * 

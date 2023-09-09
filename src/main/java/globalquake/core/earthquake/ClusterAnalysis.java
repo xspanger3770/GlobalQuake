@@ -52,6 +52,7 @@ public class ClusterAnalysis {
     public void run() {
         clustersWriteLock.lock();
         try {
+            clearSWaves();
             //assignEventsToExistingEarthquakeClusters(); VERY CONTROVERSIAL
             expandExistingClusters();
             createNewClusters();
@@ -59,6 +60,18 @@ public class ClusterAnalysis {
             updateClusters();
         } finally {
             clustersWriteLock.unlock();
+        }
+    }
+
+    private void clearSWaves() {
+        for(Cluster cluster : clusters){
+            for (AbstractStation station : stations) {
+                for (Event event : station.getAnalysis().getDetectedEvents()) {
+                    if (event.isValid() && event.isSWave() && !couldBeSArrival(event, cluster.getEarthquake())) {
+                        event.setAsSWave(false);
+                    }
+                }
+            }
         }
     }
 
@@ -142,6 +155,33 @@ public class ClusterAnalysis {
 
     }
 
+    private boolean couldBeSArrival(Event event, Earthquake earthquake){
+        if (!event.isValid()) {
+            return false;
+        }
+        long actualTravel = event.getpWave() - earthquake.getOrigin();
+
+        double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
+                event.getLatFromStation(), event.getLonFromStation());
+        double angle = TauPTravelTimeCalculator.toAngle(distGC);
+        double expectedTravelSRaw = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                angle);
+
+        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
+        if (expectedIntensity < 3.0) {
+            return false;
+        }
+
+        if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1.5 * 1000);
+            if (Math.abs(expectedTravel - actualTravel) < 3000 + expectedTravel * 0.003) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @SuppressWarnings("RedundantIfStatement")
     private boolean couldBeArrival(Event event, Earthquake earthquake) {
         if (!event.isValid()) {
@@ -156,7 +196,7 @@ public class ClusterAnalysis {
                 angle);
 
         double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
-        if (expectedIntensity < 1) {
+        if (expectedIntensity < 3.0) {
             return false;
         }
 
@@ -196,30 +236,21 @@ public class ClusterAnalysis {
         }
     }
 
-    private void expandCluster(Cluster c) {
-        if (c.getEarthquake() != null && c.getEarthquake().getCluster() != null && c.getEarthquake().getCluster().getAssignedEvents().size() > 12) {
-            mainLoop:
-            for (AbstractStation station : stations) {
-                for (Event event : station.getAnalysis().getDetectedEvents()) {
-                    if (event.isValid() && !c.containsStation(station) && couldBeArrival(event, c.getEarthquake())) {
-                        if (c.getAssignedEvents().putIfAbsent(station, event) == null) {
-                            event.assignedCluster = c;
-                        }
-                        continue mainLoop;
-                    }
-                }
-            }
+    private void expandCluster(Cluster cluster) {
+        if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null && cluster.getPreviousHypocenter().correctStations > 12) {
+            expandPWaves(cluster);
+            markPossibleSWaves(cluster);
 
             return;
         }
 
-        ArrayList<Event> list = new ArrayList<>(c.getAssignedEvents().values());
+        ArrayList<Event> list = new ArrayList<>(cluster.getAssignedEvents().values());
         while (!list.isEmpty()) {
             ArrayList<Event> newEvents = new ArrayList<>();
             mainLoop:
             for (Event e : list) {
                 for (NearbyStationDistanceInfo info : e.getAnalysis().getStation().getNearbyStations()) {
-                    if (!c.containsStation(info.station()) && !_contains(newEvents, info.station())) {
+                    if (!cluster.containsStation(info.station()) && !_contains(newEvents, info.station())) {
                         double dist = info.dist();
                         for (Event ev : info.station().getAnalysis().getDetectedEvents()) {
                             if (potentialArrival(ev, e, dist)) {
@@ -232,13 +263,37 @@ public class ClusterAnalysis {
             }
 
             for (Event event : newEvents) {
-                if (c.getAssignedEvents().putIfAbsent(event.getAnalysis().getStation(), event) == null) {
-                    event.assignedCluster = c;
+                if (cluster.getAssignedEvents().putIfAbsent(event.getAnalysis().getStation(), event) == null) {
+                    event.assignedCluster = cluster;
                 }
             }
 
             list.clear();
             list.addAll(newEvents);
+        }
+    }
+
+    private void markPossibleSWaves(Cluster cluster) {
+        for (AbstractStation station : stations) {
+            for (Event event : station.getAnalysis().getDetectedEvents()) {
+                if (event.isValid() && couldBeSArrival(event, cluster.getEarthquake())) {
+                    event.setAsSWave(true);
+                }
+            }
+        }
+    }
+
+    private void expandPWaves(Cluster cluster) {
+        mainLoop:
+        for (AbstractStation station : stations) {
+            for (Event event : station.getAnalysis().getDetectedEvents()) {
+                if (event.isValid() && !cluster.containsStation(station) && couldBeArrival(event, cluster.getEarthquake())) {
+                    if (cluster.getAssignedEvents().putIfAbsent(station, event) == null) {
+                        event.assignedCluster = cluster;
+                    }
+                    continue mainLoop;
+                }
+            }
         }
     }
 

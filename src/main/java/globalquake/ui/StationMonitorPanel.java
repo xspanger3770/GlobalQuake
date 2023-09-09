@@ -259,7 +259,7 @@ public class StationMonitorPanel extends JPanel {
 				continue;
 			}
 			double x = getX(e.getpWave());
-			g.setColor(Color.blue);
+			g.setColor(e.isSWave() ? Color.red : Color.blue);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
 		}

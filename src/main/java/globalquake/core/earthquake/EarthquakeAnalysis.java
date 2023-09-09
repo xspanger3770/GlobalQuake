@@ -136,7 +136,7 @@ public class EarthquakeAnalysis {
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
         List<PickedEvent> result = new ArrayList<>();
         for (Event event : cluster.getAssignedEvents().values()) {
-            if(event.isValid()){
+            if(event.isValid() && !event.isSWave()){
                 result.add(new PickedEvent(event.getpWave(), event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.maxRatio));
             }
         }
@@ -260,12 +260,12 @@ public class EarthquakeAnalysis {
         bestHypocenter.setWrongEventsCount(selectedEvents.size() - bestHypocenter.correctStations);
 
         HypocenterCondition result;
-        if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
+        if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
             updateHypocenter(cluster, bestHypocenter);
         } else {
             Logger.debug(result);
 
-            boolean valid = pct > finderSettings.correctnessThreshold();
+            boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctStations > finderSettings.minStations();
             if (!valid && cluster.getEarthquake() != null) {
                 getEarthquakes().remove(cluster.getEarthquake());
                 cluster.setEarthquake(null);
@@ -454,17 +454,17 @@ public class EarthquakeAnalysis {
         return ((x * x + 600) / 2200.0);
     }
 
-    private HypocenterCondition checkConditions(List<PickedEvent> events, Hypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
+    private HypocenterCondition checkConditions(List<PickedEvent> events, Hypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster, HypocenterFinderSettings finderSettings) {
         if (bestHypocenter == null) {
             return HypocenterCondition.NULL;
         }
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
-        if (distFromRoot > 2000 && bestHypocenter.correctStations < 8) {
+        if (distFromRoot > 2000 && bestHypocenter.correctStations < 12) {
             return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
         }
 
-        if (bestHypocenter.correctStations < 4) {
+        if (bestHypocenter.correctStations < finderSettings.minStations()) {
             return HypocenterCondition.NOT_ENOUGH_CORRECT_STATIONS;
         }
         if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
