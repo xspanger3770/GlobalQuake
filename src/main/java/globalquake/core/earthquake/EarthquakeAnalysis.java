@@ -256,10 +256,10 @@ public class EarthquakeAnalysis {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish();
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
-        bestHypocenter.setWrongEventsCount(selectedEvents.size() - bestHypocenter.correctStations);
+        bestHypocenter.selectedEvents = selectedEvents.size();
         double pct = 100 * bestHypocenter.getCorrectness();
 
-        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctStations > finderSettings.minStations();
+        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctEvents > finderSettings.minStations();
         if (!valid) {
             if(cluster.getEarthquake() != null){
                 getEarthquakes().remove(cluster.getEarthquake());
@@ -460,11 +460,11 @@ public class EarthquakeAnalysis {
         }
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
-        if (distFromRoot > 2000 && bestHypocenter.correctStations < 12) {
+        if (distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
             return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
         }
 
-        if (bestHypocenter.correctStations < finderSettings.minStations()) {
+        if (bestHypocenter.correctEvents < finderSettings.minStations()) {
             return HypocenterCondition.NOT_ENOUGH_CORRECT_STATIONS;
         }
         if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
@@ -484,7 +484,7 @@ public class EarthquakeAnalysis {
         if (previousHypocenter == null) {
             return null;
         }
-        return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctStations);
+        return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctEvents);
     }
 
     private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
@@ -547,12 +547,13 @@ public class EarthquakeAnalysis {
                     event.getLatFromStation(), event.getLonFromStation());
             double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
                     -earthquake.getDepth(), event.getLatFromStation(), event.getLonFromStation(), event.getAnalysis().getStation().getAlt() / 1000.0);
+            double sTravelRaw = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC));
             long expectedSArrival = (long) (earthquake.getOrigin()
-                    + TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(), TauPTravelTimeCalculator.toAngle(distGC))
+                    + sTravelRaw
                     * 1000);
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
-            double mul = lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
+            double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
             mags.add(IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul));
         }
         Collections.sort(mags);

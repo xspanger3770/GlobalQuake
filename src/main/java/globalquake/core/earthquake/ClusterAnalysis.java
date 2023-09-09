@@ -173,13 +173,13 @@ public class ClusterAnalysis {
 
 
         double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
-        if (expectedIntensity < 1.0) {
+        if (expectedIntensity < 3.0) {
             return false;
         }
 
         if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 5000 + expectedTravel * 0.01) {
+            if (Math.abs(expectedTravel - actualTravel) < 5000 + expectedTravel * 0.0075) {
                 return true;
             }
         }
@@ -243,11 +243,11 @@ public class ClusterAnalysis {
 
     private void expandCluster(Cluster cluster) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
-            if(cluster.getPreviousHypocenter().correctStations > 12) {
+            if(cluster.getPreviousHypocenter().correctEvents > 12) {
                 expandPWaves(cluster);
             }
 
-            if(cluster.getPreviousHypocenter().correctStations > 7) {
+            if(cluster.getPreviousHypocenter().correctEvents > 7) {
                 markPossibleSWaves(cluster);
             }
 

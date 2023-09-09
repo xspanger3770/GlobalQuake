@@ -2,35 +2,30 @@ package globalquake.core.earthquake;
 
 public class Hypocenter {
 	public final double totalErr;
-
-	public final int correctStations;
+	public final int correctEvents;
 
 	public final double lat;
 	public final double lon;
 	public final double depth;
 	public final long origin;
 
-	public int wrongEventsCount;
+	public int selectedEvents;
 
-	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctStations) {
+	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.origin = origin;
 		this.totalErr = err;
-		this.correctStations = correctStations;
-	}
-
-	public void setWrongEventsCount(int count) {
-		this.wrongEventsCount = count;
-	}
-
-	public int getWrongEventsCount() {
-		return wrongEventsCount;
+		this.correctEvents = correctEvents;
 	}
 
 	public double getCorrectness(){
-		return (correctStations - wrongEventsCount) / (double)correctStations;
+		return (correctEvents) / (double) selectedEvents;
+	}
+
+	public int getWrongEventCount(){
+		return selectedEvents - correctEvents;
 	}
 
 	@Override
@@ -41,7 +36,7 @@ public class Hypocenter {
 				", lon=" + lon +
 				", depth=" + depth +
 				", origin=" + origin +
-				", correctStations=" + correctStations +
+				", correctStations=" + correctEvents +
 				'}';
 	}
 }

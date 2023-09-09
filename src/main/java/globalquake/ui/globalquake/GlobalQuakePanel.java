@@ -221,7 +221,7 @@ public class GlobalQuakePanel extends GlobePanel {
             if (quake.getCluster() != null) {
                 Hypocenter previousHypocenter = quake.getCluster().getPreviousHypocenter();
                 if (previousHypocenter != null) {
-                    str = "%d / %d / %d".formatted(previousHypocenter.getWrongEventsCount(), quake.getCluster().getSelected().size(), quake.getCluster().getAssignedEvents().size());
+                    str = "%d / %d / %d".formatted(previousHypocenter.getWrongEventCount(), previousHypocenter.selectedEvents, quake.getCluster().getAssignedEvents().size());
                     g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 125);
                 }
             }
