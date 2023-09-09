@@ -29,6 +29,10 @@ public class Hypocenter {
 		return wrongEventsCount;
 	}
 
+	public double getCorrectness(){
+		return (correctStations - wrongEventsCount) / (double)correctStations;
+	}
+
 	@Override
 	public String toString() {
 		return "Hypocenter{" +

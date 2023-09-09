@@ -186,14 +186,12 @@ public class EarthquakeAnalysis {
         return deltaP >= Math.max(2000, finderSettings.pWaveInaccuracyThreshold() * 1.75);
     }
 
-    public void findHypocenter(List<PickedEvent> events, Cluster cluster, HypocenterFinderSettings finderSettings) {
-        if (events.isEmpty()) {
+    public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
+        if (selectedEvents.isEmpty()) {
             return;
         }
 
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
-
-        Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
 
@@ -209,7 +207,7 @@ public class EarthquakeAnalysis {
         // phase 1 search far
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
-        PreliminaryHypocenter bestHypocenter = scanArea(events, 100.0 / universalMultiplier, 10000, _lat, _lon, 5 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
+        PreliminaryHypocenter bestHypocenter = scanArea(selectedEvents, 100.0 / universalMultiplier, 10000, _lat, _lon, 5 + iterationsDifference, maxDepth, 100.0 / universalMultiplier, finderSettings);
         Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
@@ -217,7 +215,7 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        PreliminaryHypocenter hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        PreliminaryHypocenter hyp = scanArea(selectedEvents, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.debug("CLOSE: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
@@ -226,7 +224,7 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = cluster.getRootLat();
         _lon = cluster.getRootLon();
-        hyp = scanArea(events, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
+        hyp = scanArea(selectedEvents, 10.0 / universalMultiplier, 1000, _lat, _lon, 6 + iterationsDifference, maxDepth, 16 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.debug("CLOSE TO ROOT: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
@@ -236,7 +234,7 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        hyp = scanArea(events, 2.0 / universalMultiplier, 100.0, _lat, _lon, 7 + iterationsDifference, maxDepth, 2, finderSettings);
+        hyp = scanArea(selectedEvents, 2.0 / universalMultiplier, 100.0, _lat, _lon, 7 + iterationsDifference, maxDepth, 2, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.debug("EXACT: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
@@ -245,17 +243,36 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        hyp = scanArea(events, 1.0 / universalMultiplier, 10.0, _lat, _lon, 10 + iterationsDifference, maxDepth, 0.4 / universalMultiplier, finderSettings);
+        hyp = scanArea(selectedEvents, 1.0 / universalMultiplier, 10.0, _lat, _lon, 10 + iterationsDifference, maxDepth, 0.4 / universalMultiplier, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
+
+        postProcess(selectedEvents, cluster, bestHypocenter, finderSettings, startTime);
+    }
+
+    private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
+        Hypocenter bestHypocenter = bestHypocenterPrelim.finish();
+        Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
+
+        double pct = 100 * bestHypocenter.getCorrectness();
+        bestHypocenter.setWrongEventsCount(selectedEvents.size() - bestHypocenter.correctStations);
+
         HypocenterCondition result;
-        if ((result = checkConditions(events, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
-            updateHypocenter(events, cluster, bestHypocenter.finish(), previousHypocenter, finderSettings);
+        if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster)) == HypocenterCondition.OK) {
+            updateHypocenter(cluster, bestHypocenter);
         } else {
             Logger.debug(result);
+
+            boolean valid = pct > finderSettings.correctnessThreshold();
+            if (!valid && cluster.getEarthquake() != null) {
+                getEarthquakes().remove(cluster.getEarthquake());
+                cluster.setEarthquake(null);
+            }
         }
+
+        cluster.setPreviousHypocenter(bestHypocenter);
 
         Logger.info("Hypocenter finding finished in: %d ms".formatted( System.currentTimeMillis() - startTime));
     }
@@ -437,7 +454,7 @@ public class EarthquakeAnalysis {
         return ((x * x + 600) / 2200.0);
     }
 
-    private HypocenterCondition checkConditions(List<PickedEvent> events, PreliminaryHypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
+    private HypocenterCondition checkConditions(List<PickedEvent> events, Hypocenter bestHypocenter, Hypocenter previousHypocenter, Cluster cluster) {
         if (bestHypocenter == null) {
             return HypocenterCondition.NULL;
         }
@@ -454,7 +471,9 @@ public class EarthquakeAnalysis {
             return HypocenterCondition.TOO_SHALLOW_ANGLE;
         }
 
-        if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestHypocenter) != bestHypocenter) {
+        PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
+
+        if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }
 
@@ -468,72 +487,35 @@ public class EarthquakeAnalysis {
         return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctStations);
     }
 
-    private void updateHypocenter(List<PickedEvent> events, Cluster cluster, Hypocenter bestHypocenter, Hypocenter previousHypocenter, HypocenterFinderSettings finderSettings) {
-        List<PickedEvent> wrongEvents = getWrongEvents(cluster, bestHypocenter, finderSettings);
-        int wrongAmount = wrongEvents.size();
-
+    private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
         Earthquake earthquake = new Earthquake(cluster, bestHypocenter.lat, bestHypocenter.lon, bestHypocenter.depth,
                 bestHypocenter.origin);
-        double pct = 100 * ((cluster.getSelected().size() - wrongAmount) / (double) cluster.getSelected().size());
-        Logger.debug("PCT = " + (int) (pct) + "%, " + wrongAmount + "/" + cluster.getSelected().size() + " = "
-                + bestHypocenter.correctStations + " w " + events.size() + " err " + bestHypocenter.totalErr);
-        boolean valid = pct > finderSettings.correctnessThreshold();
-        if (!valid && cluster.getEarthquake() != null) {
-            getEarthquakes().remove(cluster.getEarthquake());
-            cluster.setEarthquake(null);
-        }
+        earthquake.setPct(100.0 * bestHypocenter.getCorrectness());
 
-        if (valid) {
-            if (cluster.getEarthquake() == null) {
-                if (!testing) {
-                    Sounds.playSound(Sounds.incoming);
-                    getEarthquakes().add(earthquake);
-                }
-                cluster.setEarthquake(earthquake);
-            } else {
-                cluster.getEarthquake().update(earthquake);
-            }
+        if (cluster.getEarthquake() == null) {
             if (!testing) {
-                earthquake.uppdateRegion();
+                Sounds.playSound(Sounds.incoming);
+                getEarthquakes().add(earthquake);
             }
-
-            double distFromAnchor = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon,
-                    cluster.getAnchorLat(), cluster.getAnchorLon());
-            if (distFromAnchor > 400) {
-                cluster.updateAnchor(bestHypocenter);
-            }
-            cluster.getEarthquake().setPct(pct);
-            cluster.revisionID += 1;
-            cluster.getEarthquake().setRevisionID(cluster.revisionID);
-            bestHypocenter.setWrongEventsCount(wrongEvents.size());
-            if (previousHypocenter != null && previousHypocenter.correctStations < 12
-                    && bestHypocenter.correctStations >= 12) {
-                Logger.debug("FAR DISABLED");
-            }
+            cluster.setEarthquake(earthquake);
         } else {
-            Logger.debug("NOT VALID");
+            cluster.getEarthquake().update(earthquake);
+        }
+        if (!testing) {
+            earthquake.uppdateRegion();
         }
 
-        cluster.setPreviousHypocenter(bestHypocenter);
-    }
-
-    private ArrayList<PickedEvent> getWrongEvents(Cluster c, Hypocenter hyp, HypocenterFinderSettings finderSettings) {
-        ArrayList<PickedEvent> list = new ArrayList<>();
-        for (PickedEvent event : c.getSelected()) {
-            double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), hyp.lat,
-                    hyp.lon);
-            long expectedTravel = (long) ((TauPTravelTimeCalculator.getPWaveTravelTime(hyp.depth, TauPTravelTimeCalculator.toAngle(distGC)) + getElevationCorrection(event.elevation()))
-                    * 1000);
-            long actualTravel = event.pWave() - hyp.origin;
-            boolean wrong = Math.abs(expectedTravel - actualTravel) > finderSettings.pWaveInaccuracyThreshold();
-            if (wrong) {
-                list.add(event);
-            }
+        double distFromAnchor = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon,
+                cluster.getAnchorLat(), cluster.getAnchorLon());
+        if (distFromAnchor > 400) {
+            cluster.updateAnchor(bestHypocenter);
         }
-        return list;
+
+        cluster.revisionID += 1;
+        cluster.getEarthquake().setRevisionID(cluster.revisionID);
     }
 
-    private int checkQuadrants(PreliminaryHypocenter hyp, List<PickedEvent> events) {
+    private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
         int[] qua = new int[QUADRANTS];
         int good = 0;
         for (PickedEvent event : events) {
