@@ -145,7 +145,7 @@ public class EarthquakeAnalysis {
     }
 
     private void findGoodEvents(List<PickedEvent> events, List<PickedEvent> selectedEvents) {
-        while (selectedEvents.size() < TARGET_EVENTS) {
+        while (selectedEvents.size() < 120) {
             double maxDist = 0;
             PickedEvent furthest = null;
             for (PickedEvent event : events) {
@@ -259,20 +259,20 @@ public class EarthquakeAnalysis {
         bestHypocenter.setWrongEventsCount(selectedEvents.size() - bestHypocenter.correctStations);
         double pct = 100 * bestHypocenter.getCorrectness();
 
-        HypocenterCondition result;
-        if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
-            updateHypocenter(cluster, bestHypocenter);
-        } else {
-            Logger.debug(result);
-
-            boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctStations > finderSettings.minStations();
-            if (!valid && cluster.getEarthquake() != null) {
+        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctStations > finderSettings.minStations();
+        if (!valid) {
+            if(cluster.getEarthquake() != null){
                 getEarthquakes().remove(cluster.getEarthquake());
                 cluster.setEarthquake(null);
             }
+        } else {
+            HypocenterCondition result;
+            if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
+                updateHypocenter(cluster, bestHypocenter);
+            } else {
+                Logger.debug(result);
+            }
         }
-
-        cluster.setPreviousHypocenter(bestHypocenter);
 
         Logger.info("Hypocenter finding finished in: %d ms".formatted( System.currentTimeMillis() - startTime));
     }
@@ -513,6 +513,7 @@ public class EarthquakeAnalysis {
 
         cluster.revisionID += 1;
         cluster.getEarthquake().setRevisionID(cluster.revisionID);
+        cluster.setPreviousHypocenter(bestHypocenter);
     }
 
     private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {

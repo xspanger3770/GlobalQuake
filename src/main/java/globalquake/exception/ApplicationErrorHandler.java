@@ -33,6 +33,7 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	public synchronized void handleException(Throwable e) {
+		Logger.error(e);
 		if (!(e instanceof RuntimeApplicationException)) {
 			showDetailedError(e);
 			return;
