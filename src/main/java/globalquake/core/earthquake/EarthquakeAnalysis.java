@@ -256,8 +256,8 @@ public class EarthquakeAnalysis {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish();
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
-        double pct = 100 * bestHypocenter.getCorrectness();
         bestHypocenter.setWrongEventsCount(selectedEvents.size() - bestHypocenter.correctStations);
+        double pct = 100 * bestHypocenter.getCorrectness();
 
         HypocenterCondition result;
         if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {

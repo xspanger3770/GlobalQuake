@@ -156,7 +156,7 @@ public class ClusterAnalysis {
     }
 
     private boolean couldBeSArrival(Event event, Earthquake earthquake){
-        if (!event.isValid()) {
+        if (!event.isValid() || earthquake == null) {
             return false;
         }
         long actualTravel = event.getpWave() - earthquake.getOrigin();
@@ -167,14 +167,15 @@ public class ClusterAnalysis {
         double expectedTravelSRaw = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
                 angle);
 
+
         double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), distGC);
-        if (expectedIntensity < 3.0) {
+        if (expectedIntensity < 1.0) {
             return false;
         }
 
         if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1.5 * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 3000 + expectedTravel * 0.003) {
+            if (Math.abs(expectedTravel - actualTravel) < 3000 + expectedTravel * 0.01) {
                 return true;
             }
         }
