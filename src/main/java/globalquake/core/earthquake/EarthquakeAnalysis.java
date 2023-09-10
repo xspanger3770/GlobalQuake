@@ -19,9 +19,6 @@ public class EarthquakeAnalysis {
 
     public static final double MIN_RATIO = 16.0;
 
-    // TODO DONT FORGEEET
-    public static final int TARGET_EVENTS = 30;
-
     public static final int QUADRANTS = 16;
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
@@ -147,7 +144,7 @@ public class EarthquakeAnalysis {
     }
 
     private void findGoodEvents(List<PickedEvent> events, List<PickedEvent> selectedEvents) {
-        while (selectedEvents.size() < 120) {
+        while (selectedEvents.size() < Settings.maxEvents) {
             double maxDist = 0;
             PickedEvent furthest = null;
             for (PickedEvent event : events) {
@@ -298,7 +295,7 @@ public class EarthquakeAnalysis {
     private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
         int correct = 0;
         for(PickedEvent event : selectedEvents){
-            if(ClusterAnalysis.couldBeArrival(event, bestHypocenter)){
+            if(ClusterAnalysis.couldBeArrival(event, bestHypocenter, false)){
                 correct++;
             }
         }
