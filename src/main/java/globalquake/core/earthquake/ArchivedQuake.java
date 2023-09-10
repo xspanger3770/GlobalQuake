@@ -56,7 +56,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = previousHypocenter.getWrongEventsCount();
+		this.abandonedCount = previousHypocenter.getWrongEventCount();
 		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			if(e.isValid()) {
 				archivedEvents.add(

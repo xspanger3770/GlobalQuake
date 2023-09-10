@@ -15,7 +15,7 @@ public class Earthquake implements Regional {
 	private long lastUpdate;
 	private final Cluster cluster;
 	private double mag;
-	private ArrayList<Double> mags;
+	private List<Double> mags;
 	private double pct;
 	private int revisionID;
 	public final Object magsLock;
@@ -53,7 +53,7 @@ public class Earthquake implements Regional {
 		return mags;
 	}
 
-	public void setMags(ArrayList<Double> mags) {
+	public void setMags(List<Double> mags) {
 		this.mags = mags;
 	}
 
@@ -103,6 +103,12 @@ public class Earthquake implements Regional {
 		if (this.lat != lastLat || this.lon != lastLon) {
 			regionUpdater.updateRegion();
 		}
+
+		synchronized (magsLock){
+			this.mag = newEarthquake.getMag();
+			this.mags = newEarthquake.mags;
+		}
+
 		this.lastUpdate = System.currentTimeMillis();
 	}
 

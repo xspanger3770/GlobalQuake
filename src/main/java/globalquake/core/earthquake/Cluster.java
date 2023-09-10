@@ -5,8 +5,8 @@ import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
 
 import java.awt.*;
-import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Cluster {
@@ -34,7 +34,6 @@ public class Cluster {
 	public int revisionID;
 
 	public static final double NONE = -999;
-	public final Object selectedEventsLock;
 
 	public final Color color = randomColor();
 
@@ -49,13 +48,10 @@ public class Cluster {
 		return new Color(red, 255, blue);
 	}
 
-	// 20 selected
-	private List<PickedEvent> selected = new ArrayList<>();
 
 	public Cluster(int id) {
 		this.id = id;
 		this.assignedEvents = new ConcurrentHashMap<>();
-		this.selectedEventsLock = new Object();
 		this.updateCount = 0;
 		this.earthquake = null;
 		this.bestAngle = -1;
@@ -221,18 +217,6 @@ public class Cluster {
 
 	public double getAnchorLon() {
 		return anchorLon;
-	}
-
-	/**
-	 * 
-	 * @return list of events that were selected for hypocenter search last time
-	 */
-	public List<PickedEvent> getSelected() {
-		return selected;
-	}
-
-	public void setSelected(List<PickedEvent> selected) {
-		this.selected = selected;
 	}
 
 }
