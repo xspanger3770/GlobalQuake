@@ -6,7 +6,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
-    private static final double RESOLUTION_MAX = 100.0;
+    private static final double RESOLUTION_MAX = 160.0;
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
     private JSlider sliderStoreTime;
@@ -95,7 +95,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                         """);
     }
 
-    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Insane"};
+    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
 
     private String getNameForResolution(int value) {
         return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / RESOLUTION_MAX) * (RESOLUTION_NAMES.length))))];
