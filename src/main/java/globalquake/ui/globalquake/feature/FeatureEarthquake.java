@@ -170,7 +170,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         return Scale.interpolateColors(Color.yellow, Color.red, weight);
     }
 
-    private Color getCrossColor(double mag) {
+    public static Color getCrossColor(double mag) {
         if (mag < 3) {
             return Color.lightGray;
         }

@@ -10,6 +10,8 @@ import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.ui.settings.Settings;
 
 import java.awt.*;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -86,6 +88,59 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+
+        if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
+            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+            var centerPonint = renderer.projectPoint(point3D);
+            drawDetails(graphics, centerPonint, entity.getOriginal(), renderer);
+        }
+    }
+
+    private void drawDetails(Graphics2D graphics, Point2D centerPonint, ArchivedQuake quake, GlobeRenderer renderer) {
+        graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
+
+        double size = 3 + Math.pow(quake.getMag(), 2) * 0.6;
+
+        String str = "M%.1f  %.1fkm".formatted(quake.getMag(), quake.getDepth());
+        int y=  (int)centerPonint.y - 24 - (int)size;
+        graphics.setColor(FeatureEarthquake.getCrossColor(quake.getMag()));
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=15;
+
+        graphics.setColor(Color.white);
+        str = "%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())));
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=30 + (int) size * 2;
+
+        str = "%s".formatted(quake.getRegion());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=15;
+        str = "%.4f, %.4f".formatted(quake.getLat(), quake.getLon());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        graphics.setColor(getColorStations(quake.getAssignedStations()));
+        y+=15;
+        str = "%d stations".formatted(quake.getAssignedStations());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+    }
+
+    private Color getColorStations(int assignedStations) {
+        if(assignedStations < 6){
+            return Color.red;
+        } else if(assignedStations < 10){
+            return Color.orange;
+        } else if(assignedStations < 16){
+            return Color.yellow;
+        } else if(assignedStations < 32){
+            return Color.green;
+        }
+        return Color.cyan;
     }
 
     private Color getColor(ArchivedQuake quake) {
