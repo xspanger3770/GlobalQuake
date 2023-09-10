@@ -258,7 +258,7 @@ public class EarthquakeAnalysis {
         calculateActualCorrectEvents(selectedEvents, bestHypocenter);
         calculateObviousArrivals(bestHypocenter);
 
-        System.err.println("#"+cluster.getId()+" Obvious arrivals = "+bestHypocenter.obviousArrivalsInfo.total()+", wrong = "+bestHypocenter.obviousArrivalsInfo.wrong());
+        Logger.debug("#%d Obvious arrivals = %d, wrong = %d".formatted(cluster.getId(), bestHypocenter.obviousArrivalsInfo.total(), bestHypocenter.obviousArrivalsInfo.wrong()));
 
         double obviousCorrectPct = 1.0;
         if(bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
@@ -321,13 +321,13 @@ public class EarthquakeAnalysis {
             long expectedPArrival =  bestHypocenter.origin + (long) ((rawTravelP + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
 
             if(station.getStateAt(expectedPArrival) != StationState.ACTIVE){
-                System.err.println("NOT ACTIVE AT "+station.getStationCode()+" at "+expectedPArrival +" "+station.getStateAt(expectedPArrival));
+                Logger.debug("NOT ACTIVE AT %s at %d %s".formatted(station.getStationCode(), expectedPArrival, station.getStateAt(expectedPArrival)));
                 continue;
             }
 
             total++;
             if(station.getEventAt(expectedPArrival, 10 * 1000) == null){
-                System.err.println("NO EVENT AT "+station.getStationCode());
+                Logger.debug("NO EVENT AT "+station.getStationCode());
                 wrong++;
             }
         }
