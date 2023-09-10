@@ -187,46 +187,60 @@ public class ClusterAnalysis {
         return false;
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    private boolean couldBeArrival(Event event, Earthquake earthquake) {
-        if (!event.isValid() || earthquake == null) {
+    public static boolean couldBeArrival(Event event, Earthquake earthquake) {
+        if (!event.isValid() || event.isSWave() || earthquake == null) {
             return false;
         }
-        long actualTravel = event.getpWave() - earthquake.getOrigin();
 
-        double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(),
-                event.getLatFromStation(), event.getLonFromStation());
+        return couldBeArrival(event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.getpWave(),
+                earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getOrigin(), earthquake.getMag());
+    }
+
+    public static boolean couldBeArrival(PickedEvent event, Hypocenter earthquake) {
+        if (earthquake == null) {
+            return false;
+        }
+
+        return couldBeArrival(event.lat(), event.lon(), event.elevation(), event.pWave(),
+                earthquake.lat, earthquake.lon, earthquake.depth, earthquake.origin, earthquake.magnitude);
+    }
+
+    public static boolean couldBeArrival(double eventLat, double eventLon, double eventAlt, long pWave, double quakeLat, double quakeLon, double quakeDepth, long quakeOrigin, double quakeMag){
+        long actualTravel = pWave - quakeOrigin;
+
+        double distGC = GeoUtils.greatCircleDistance(quakeLat, quakeLon,
+                eventLat, eventLon);
         double angle = TauPTravelTimeCalculator.toAngle(distGC);
-        double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+        double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(quakeDepth,
                 angle);
 
-        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
+        double expectedIntensity = IntensityTable.getMaxIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
         if (expectedIntensity < 3.0) {
             return false;
         }
 
         if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
-            long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
+            long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }
         }
 
-        double expectedTravelPKPRaw = TauPTravelTimeCalculator.getPKPWaveTravelTime(earthquake.getDepth(),
+        double expectedTravelPKPRaw = TauPTravelTimeCalculator.getPKPWaveTravelTime(quakeDepth,
                 angle);
 
         if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
-            long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
+            long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }
         }
 
-        double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(earthquake.getDepth(),
+        double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(quakeDepth,
                 angle);
 
         if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
-            long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation())) * 1000);
+            long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
                 return true;
             }

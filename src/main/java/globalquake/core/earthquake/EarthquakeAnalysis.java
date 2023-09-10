@@ -19,7 +19,7 @@ public class EarthquakeAnalysis {
 
     public static final double MIN_RATIO = 16.0;
 
-    // DONT FORGEEET
+    // TODO DONT FORGEEET
     public static final int TARGET_EVENTS = 30;
 
     public static final int QUADRANTS = 16;
@@ -261,13 +261,23 @@ public class EarthquakeAnalysis {
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
         bestHypocenter.selectedEvents = selectedEvents.size();
+
+        calculateActualCorrectEvents(selectedEvents, bestHypocenter);
         calculateObviousArrivals(bestHypocenter);
 
         System.err.println("#"+cluster.getId()+" Obvious arrivals = "+bestHypocenter.obviousArrivalsInfo.total()+", wrong = "+bestHypocenter.obviousArrivalsInfo.wrong());
 
-        double pct = 100 * bestHypocenter.getCorrectness();
+        boolean obviouslyWrong = false;
+        if(bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
+            double obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
+            if (obviousCorrectPct < 0.275) {
+                System.err.println("TOO MUCH WRONG OBV " + obviousCorrectPct);
+                obviouslyWrong = true;
+            }
+        }
 
-        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctEvents > finderSettings.minStations();
+        double pct = 100 * bestHypocenter.getCorrectness();
+        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctEvents > finderSettings.minStations() && !obviouslyWrong;
         if (!valid) {
             if(cluster.getEarthquake() != null){
                 getEarthquakes().remove(cluster.getEarthquake());
@@ -283,6 +293,17 @@ public class EarthquakeAnalysis {
         }
 
         Logger.info("Hypocenter finding finished in: %d ms".formatted( System.currentTimeMillis() - startTime));
+    }
+
+    private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
+        int correct = 0;
+        for(PickedEvent event : selectedEvents){
+            if(ClusterAnalysis.couldBeArrival(event, bestHypocenter)){
+                correct++;
+            }
+        }
+
+        bestHypocenter.correctEvents = correct;
     }
 
     private void calculateObviousArrivals(Hypocenter bestHypocenter) {
@@ -303,7 +324,7 @@ public class EarthquakeAnalysis {
             }
 
             double expectedIntensity = IntensityTable.getMaxIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
-            if(expectedIntensity < 40){
+            if(expectedIntensity < 16){
                 continue;
             }
 
@@ -315,7 +336,7 @@ public class EarthquakeAnalysis {
 
             total++;
             if(station.getEventAt(expectedPArrival, 10 * 1000) == null){
-                System.err.println("Wrong at "+station.getStationCode());
+                //System.err.println("Wrong at "+station.getStationCode());
                 wrong++;
             }
         }

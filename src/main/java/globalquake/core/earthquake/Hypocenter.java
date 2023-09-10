@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Hypocenter {
 	public final double totalErr;
-	public final int correctEvents;
+	public int correctEvents;
 
 	public final double lat;
 	public final double lon;
