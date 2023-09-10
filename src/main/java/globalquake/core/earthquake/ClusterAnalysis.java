@@ -159,6 +159,7 @@ public class ClusterAnalysis {
 
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     private boolean couldBeSArrival(Event event, Earthquake earthquake){
         if (!event.isValid() || earthquake == null) {
             return false;
@@ -207,6 +208,7 @@ public class ClusterAnalysis {
                 considerIntensity);
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     public static boolean couldBeArrival(double eventLat, double eventLon, double eventAlt, long pWave,
                                          double quakeLat, double quakeLon, double quakeDepth, long quakeOrigin, double quakeMag,
                                          boolean considerIntensity){

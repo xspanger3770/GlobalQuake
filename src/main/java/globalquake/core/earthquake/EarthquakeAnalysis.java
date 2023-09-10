@@ -112,12 +112,6 @@ public class EarthquakeAnalysis {
         // Selects picked events in a way that they are spaced away as much as possible
         findGoodEvents(pickedEvents, selectedEvents);
 
-        synchronized (cluster.selectedEventsLock) {
-            Logger.debug("SELECTED " + selectedEvents.size());
-            cluster.setSelected(selectedEvents);
-        }
-
-
         // There has to be at least some difference in the picked pWave times
         if (!checkDeltaP(selectedEvents, finderSettings)) {
             Logger.debug("Not Enough Delta-P");

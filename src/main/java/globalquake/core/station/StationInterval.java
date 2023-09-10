@@ -4,7 +4,7 @@ public class StationInterval {
 
     private final StationState state;
 
-    private long start;
+    private final long start;
     private long end;
 
     public StationInterval(long start, long end, StationState state){
