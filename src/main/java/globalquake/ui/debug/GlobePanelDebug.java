@@ -91,8 +91,8 @@ public class GlobePanelDebug extends GQFrame {
 		double centerLat = 50;
 		double centerLon = 17;
 
-		double maxDist = 10000;
-		int total = 10000;
+		double maxDist = 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE;
+		int total = 40000;
 
 
 		double phi = 1.61803398875;
