@@ -108,7 +108,7 @@ public class BetterAnalysis extends Analysis {
         if (Math.abs(filteredV) > specialAverage) {
             specialAverage = Math.abs(filteredV);
         } else {
-            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 50.0);
+            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 40.0);
         }
 
         if (shortAverage / longAverage < 4.0) {

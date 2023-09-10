@@ -242,7 +242,7 @@ public class ArtificialWaveformGenerator {
                 synchronized (lock) {
 
                     if (quakeRandom.nextDouble() < 0.03) {
-                        double mag = 2.0 + quakeRandom.nextDouble() * 3.0;
+                        double mag = 3.0 + quakeRandom.nextDouble() * 3.0;
                         double depth = Math.pow(quakeRandom.nextDouble(), 4) * 600.0;
                         double dist = 100 + quakeRandom.nextDouble() * 300.0;
                         ArtificalEarthquake art = new ArtificalEarthquake(dist, depth, simulationTime, mag);
