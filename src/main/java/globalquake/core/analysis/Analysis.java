@@ -70,7 +70,7 @@ public abstract class Analysis {
 				Logger.warn("Decompressed array is null!");
 				return;
 			}
-			System.out.println(getSampleRate());
+
 			for (int v : data) {
 				nextSample(v, time, System.currentTimeMillis());
 				time += (long) (1000 / getSampleRate());
