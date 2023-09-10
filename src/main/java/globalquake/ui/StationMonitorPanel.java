@@ -125,6 +125,9 @@ public class StationMonitorPanel extends JPanel {
 				}
 			}
 
+			maxValue += 10.0;
+			minValue -= 10.0;
+
 			double fix1 = (maxValue - minValue) * 0.25 * 0.5;
 			maxValue += fix1;
 			minValue -= fix1;
@@ -133,13 +136,14 @@ public class StationMonitorPanel extends JPanel {
 			maxFilteredValue += fix2;
 			minFilteredValue -= fix2;
 
+			maxAverage += 10.0;
 			maxAverage *= 1.25;
 
 			for (int i = 0; i < logs.size() - 1; i++) {
 				Log a = logs.get(i);
 				Log b = logs.get(i + 1);
 
-				boolean gap = (a.time() - b.time()) > (1.0 / station.getAnalysis().getSampleRate() + 50);
+				boolean gap = (a.time() - b.time()) > (1000.0 / station.getAnalysis().getSampleRate()) * 2;
 				if (gap) {
 					continue;
 				}

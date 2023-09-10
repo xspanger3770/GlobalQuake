@@ -143,6 +143,7 @@ public class SeedlinkNetworksReader {
 		if (lastData == null || dr.getLastSampleBtime().toInstant().isAfter(lastData)) {
 			lastData = dr.getLastSampleBtime().toInstant();
 		}
+
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
 		var globalStation = stationCache.get("%s %s".formatted(network, station));
