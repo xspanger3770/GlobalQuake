@@ -5,6 +5,7 @@ import globalquake.regions.Regions;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
 import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.settings.Settings;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.tinylog.Logger;
 
@@ -49,7 +50,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         this.cinemaMode = cinemaMode;
     }
 
-    private boolean cinemaMode = false;
+    private boolean cinemaMode = Settings.cinemaModeOnStartup;
     private final Object animationLock = new Object();
     private Animation nextAnimation;
 

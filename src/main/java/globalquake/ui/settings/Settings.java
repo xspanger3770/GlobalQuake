@@ -92,6 +92,7 @@ public final class Settings {
 	public static Integer maxEvents;
 	public static final int maxEventsDefault = 60;
 	public static Boolean displayCoreWaves;
+	public static Boolean cinemaModeOnStartup;
 
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
@@ -119,6 +120,7 @@ public final class Settings {
 
 		loadProperty("logsStoreTimeMinutes", "5");
 
+		loadProperty("cinemaModeOnStartup", "false");
 		loadProperty("cinemaModeSwitchTime", "10");
 		loadProperty("cinemaModeZoomMultiplier", "100");
 
