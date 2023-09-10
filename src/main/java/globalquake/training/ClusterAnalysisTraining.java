@@ -113,8 +113,9 @@ public class ClusterAnalysisTraining {
         System.out.println("Init...");
         TauPTravelTimeCalculator.init();
         Regions.enabled = false;
-        Settings.parallelHypocenterLocations = true;
-        Settings.hypocenterDetectionResolution = 40.0;
+        Settings.parallelHypocenterLocations = false;
+        Settings.hypocenterDetectionResolution = 100.0;
+        Settings.maxEvents = 30;
 
         System.out.println("Running");
         for(int i = 0; i < 1; i++) {

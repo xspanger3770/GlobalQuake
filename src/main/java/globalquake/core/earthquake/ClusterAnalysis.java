@@ -31,8 +31,8 @@ public class ClusterAnalysis {
     private final List<AbstractStation> stations;
     private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
-    private static final double MERGE_THRESHOLD = 0.45;
-    private static final double DISTANCE_INACCURACY_MULTIPLIER = 0.0075;
+    private static final double MERGE_THRESHOLD = 0.30;
+    private static final double DISTANCE_INACCURACY_MULTIPLIER = 0.01;
     private static final long DISTANCE_INACCURACY_BASE = 5000;
 
     public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {

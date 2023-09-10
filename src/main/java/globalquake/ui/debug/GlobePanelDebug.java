@@ -1,6 +1,7 @@
 package globalquake.ui.debug;
 
 import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.geo.GeoUtils;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
@@ -86,10 +87,22 @@ public class GlobePanelDebug extends GQFrame {
 
 		Random r = new Random();
 		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
-		for(int i = 0; i < 50; i++) {
-			double x = 50 + r.nextDouble() * 10 - 5;
-			double y = 17 + r.nextDouble() * 20 - 10;
-			debugStations.add(new DebugStation(new Point2D(x, y)));
+
+		double centerLat = 50;
+		double centerLon = 17;
+
+		double maxDist = 10000;
+		int total = 10000;
+
+
+		double phi = 1.61803398875;
+		double c = maxDist / Math.sqrt(total);
+
+		for(int n = 0; n < total; n++){
+			double ang = 360.0 / (phi * phi) * n;
+			double radius = Math.sqrt(n) * c;
+			double[] latlon = GeoUtils.moveOnGlobe(centerLat, centerLon, radius, ang);
+			debugStations.add(new DebugStation(new Point2D(latlon[0], latlon[1])));
 		}
 
 		System.out.println(debugStations.size());
