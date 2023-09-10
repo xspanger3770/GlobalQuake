@@ -25,6 +25,7 @@ public class EarthquakeAnalysis {
     private static final boolean REMOVE_WEAKEST = false;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 64.0;
+    private static final boolean CHECK_QUADRANTS = false;
 
     private final List<Earthquake> earthquakes;
 
@@ -525,8 +526,11 @@ public class EarthquakeAnalysis {
         if (bestHypocenter.correctEvents < finderSettings.minStations()) {
             return HypocenterCondition.NOT_ENOUGH_CORRECT_STATIONS;
         }
-        if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
-            return HypocenterCondition.TOO_SHALLOW_ANGLE;
+
+        if(CHECK_QUADRANTS) {
+            if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
+                return HypocenterCondition.TOO_SHALLOW_ANGLE;
+            }
         }
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
