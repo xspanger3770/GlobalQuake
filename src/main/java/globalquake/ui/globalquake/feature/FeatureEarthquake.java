@@ -9,6 +9,7 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 
 import java.awt.*;
@@ -21,8 +22,6 @@ import java.util.Locale;
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private final List<Earthquake> earthquakes;
-
-    public static final boolean DRAW_CORE_WAVES = false;
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
@@ -128,7 +127,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             graphics.draw(elementSWave.getShape());
         }
 
-        if(DRAW_CORE_WAVES) {
+        if(Settings.displayCoreWaves) {
             if (elementPKPWave.shouldDraw) {
                 graphics.setColor(Color.MAGENTA);
                 graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));

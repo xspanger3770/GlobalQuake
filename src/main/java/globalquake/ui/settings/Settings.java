@@ -91,6 +91,7 @@ public final class Settings {
 	public static Integer logsStoreTimeMinutes;
 	public static Integer maxEvents;
 	public static final int maxEventsDefault = 60;
+	public static Boolean displayCoreWaves;
 
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
@@ -113,6 +114,7 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("displayCoreWaves", "false");
 		loadProperty("maxEvents", String.valueOf(maxEventsDefault));
 
 		loadProperty("logsStoreTimeMinutes", "5");
