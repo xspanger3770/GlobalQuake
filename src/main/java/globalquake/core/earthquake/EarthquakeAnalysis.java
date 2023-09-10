@@ -24,6 +24,7 @@ public class EarthquakeAnalysis {
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
+    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 64.0;
 
     private final List<Earthquake> earthquakes;
 
@@ -313,7 +314,7 @@ public class EarthquakeAnalysis {
             }
 
             double expectedIntensity = IntensityTable.getMaxIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
-            if(expectedIntensity < 40.0){
+            if(expectedIntensity < OBVIOUS_CORRECT_INTENSITY_THRESHOLD){
                 continue;
             }
 
