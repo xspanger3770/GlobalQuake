@@ -78,7 +78,6 @@ public class GlobalQuakeRuntime {
             try {
                 long a = System.currentTimeMillis();
                 GlobalQuake.instance.getEarthquakeAnalysis().run();
-                GlobalQuake.instance.getArchive().update();
                 lastQuakesT = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 Logger.error("Exception occured in hypocenter location loop");
