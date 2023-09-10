@@ -11,9 +11,9 @@ import java.util.function.Function;
 public class TauPTravelTimeCalculator {
 
     public static final double ANG_RESOLUTION = 0.05;
-    public static final double DEPTH_RESOLUTION = 0.5;
+    public static final double DEPTH_RESOLUTION = 0.75;
 
-    public static final double MAX_DEPTH = 600.0;
+    public static final double MAX_DEPTH = 750.0;
     public static final float NO_ARRIVAL = -999.0f;
     private static TauPTravelTable travelTable;
 
@@ -23,6 +23,10 @@ public class TauPTravelTimeCalculator {
         }catch(Exception e){
             throw new FatalApplicationException(e);
         }
+    }
+
+    public static void main(String[] args) throws Exception{
+        createTravelTable();
     }
 
     @SuppressWarnings("unused")
