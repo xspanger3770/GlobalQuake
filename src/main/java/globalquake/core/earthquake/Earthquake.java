@@ -104,6 +104,8 @@ public class Earthquake implements Regional {
 			regionUpdater.updateRegion();
 		}
 
+		pct = newEarthquake.getPct();
+
 		synchronized (magsLock){
 			this.mag = newEarthquake.getMag();
 			this.mags = newEarthquake.mags;
