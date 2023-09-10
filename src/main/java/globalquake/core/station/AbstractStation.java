@@ -53,7 +53,7 @@ public abstract class AbstractStation {
 			if(time >= interval.getStart() && time < interval.getEnd()){
 				return interval.getState();
 			}
-			if(interval.getEnd() > time){
+			if(interval.getStart() > time){
 				break;
 			}
 		}

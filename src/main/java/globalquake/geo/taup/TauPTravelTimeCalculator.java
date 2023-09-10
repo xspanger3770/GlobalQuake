@@ -103,9 +103,6 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPKPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds > getMaxTime(travelTable.pkp_travel_table)){
-            return  NO_ARRIVAL;
-        }
         return binarySearchTime((angle) -> getPKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE);
     }

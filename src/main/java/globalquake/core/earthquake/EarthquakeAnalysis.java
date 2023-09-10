@@ -315,19 +315,22 @@ public class EarthquakeAnalysis {
             }
 
             double expectedIntensity = IntensityTable.getMaxIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
-            if(expectedIntensity < 16){
+            if(expectedIntensity < 40.0){
                 continue;
             }
 
             long expectedPArrival =  bestHypocenter.origin + (long) ((rawTravelP + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
 
-            if(station.getStateAt(expectedPArrival) != StationState.ACTIVE){
+            long margin = 2000;
+
+            if(station.getStateAt(expectedPArrival - margin) != StationState.ACTIVE){
+                System.err.println("NOT ACTIVE AT "+station.getStationCode());
                 continue;
             }
 
             total++;
             if(station.getEventAt(expectedPArrival, 10 * 1000) == null){
-                //System.err.println("Wrong at "+station.getStationCode());
+                System.err.println("NO EVENT AT "+station.getStationCode());
                 wrong++;
             }
         }
