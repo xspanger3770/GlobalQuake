@@ -324,7 +324,7 @@ public class EarthquakeAnalysis {
             long margin = 2000;
 
             if(station.getStateAt(expectedPArrival - margin) != StationState.ACTIVE){
-                System.err.println("NOT ACTIVE AT "+station.getStationCode());
+                System.err.println("NOT ACTIVE AT "+station.getStationCode()+" at "+expectedPArrival +" "+station.getStateAt(expectedPArrival - margin));
                 continue;
             }
 

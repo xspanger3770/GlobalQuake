@@ -57,14 +57,14 @@ public class BetterAnalysis extends Analysis {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
             reset();// initial reset;
-            getStation().reportState(StationState.INACTIVE, currentTime);
+            getStation().reportState(StationState.INACTIVE, time);
             return;
         }
 
         if (time < latestLogTime) {
             //System.err.println("BACKWARDS TIME IN ANALYSIS (" + getStation().getStationCode() + ")");
             reset();
-            getStation().reportState(StationState.INACTIVE, currentTime);
+            getStation().reportState(StationState.INACTIVE, time);
             return;
         }
 
@@ -97,7 +97,7 @@ public class BetterAnalysis extends Analysis {
                 setStatus(AnalysisStatus.IDLE);
             }
             initProgress++;
-            getStation().reportState(StationState.INACTIVE, currentTime);
+            getStation().reportState(StationState.INACTIVE, time);
             return;
         }
         double filteredV = filter.filter(v - initialOffset);
@@ -143,7 +143,7 @@ public class BetterAnalysis extends Analysis {
                 Logger.warn("Station " + getStation().getStationCode()
                         + " reset for exceeding maximum event duration (" + EVENT_TOO_LONG_DURATION + "s)");
                 reset();
-                getStation().reportState(StationState.INACTIVE, currentTime);
+                getStation().reportState(StationState.INACTIVE, time);
                 return;
             }
 
@@ -172,7 +172,7 @@ public class BetterAnalysis extends Analysis {
                 }
             }
         }
-        getStation().reportState(StationState.ACTIVE, currentTime);
+        getStation().reportState(StationState.ACTIVE, time);
     }
 
     private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {

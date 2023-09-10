@@ -5,6 +5,7 @@ import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Hypocenter;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
+import globalquake.core.station.StationInterval;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
@@ -58,6 +59,15 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
                 if(e.getKeyCode() == KeyEvent.VK_C) {
                     setCinemaMode(!isCinemaMode());
+                }
+                if(e.getKeyCode() == KeyEvent.VK_D){
+                    for(AbstractStation abstractStation : GlobalQuake.instance.getStationManager().getStations()){
+                        if(abstractStation.getStationCode().equals("PB01")){
+                            for(StationInterval interval : abstractStation.getIntervals()){
+                                System.out.println(interval);
+                            }
+                        }
+                    }
                 }
             }
         });

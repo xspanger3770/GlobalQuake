@@ -48,13 +48,10 @@ public abstract class AbstractStation {
 		this.seedlinkNetwork = seedlinkNetwork;
 	}
 
-	public StationState getStateAt(long time){
-		for(StationInterval interval : intervals){
+	public StationState getStateAt(long time) {
+		for(StationInterval interval : intervals) {
 			if(time >= interval.getStart() && time < interval.getEnd()){
 				return interval.getState();
-			}
-			if(interval.getStart() > time){
-				break;
 			}
 		}
 		return StationState.UNKNOWN;
