@@ -41,7 +41,6 @@ public class StationDatabase implements Serializable {
 
     @SuppressWarnings("HttpUrlsUsage")
     public void addDefaults() {
-        // todo some fdsnws servers are also available with https
         stationSources.add(new StationSource("BGR", "https://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
         stationSources.add(new StationSource("KOERI", "http://eida-service.koeri.boun.edu.tr/fdsnws/station/1/"));

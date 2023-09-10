@@ -48,7 +48,7 @@ public abstract class Analysis {
         if (time >= lastRecord && time <= System.currentTimeMillis() + 60 * 1000) {
             decode(dr);
             lastRecord = time;
-        } // TODO ERROR BACKWARDS TIME
+        }
     }
 
 	private void decode(DataRecord dataRecord) {
