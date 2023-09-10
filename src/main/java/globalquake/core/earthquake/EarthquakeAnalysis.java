@@ -23,6 +23,7 @@ public class EarthquakeAnalysis {
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
+    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
 
     private final List<Earthquake> earthquakes;
 
@@ -258,19 +259,16 @@ public class EarthquakeAnalysis {
 
         System.err.println("#"+cluster.getId()+" Obvious arrivals = "+bestHypocenter.obviousArrivalsInfo.total()+", wrong = "+bestHypocenter.obviousArrivalsInfo.wrong());
 
-        boolean obviouslyWrong = false;
+        double obviousCorrectPct = 1.0;
         if(bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
-            double obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
-            if (obviousCorrectPct < 0.275) {
-                System.err.println("TOO MUCH WRONG OBV " + obviousCorrectPct);
-                obviouslyWrong = true;
-            }
+            obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
         }
 
         double pct = 100 * bestHypocenter.getCorrectness();
-        boolean valid = pct > finderSettings.correctnessThreshold() && bestHypocenter.correctEvents > finderSettings.minStations() && !obviouslyWrong;
+        boolean valid = pct >= finderSettings.correctnessThreshold() && bestHypocenter.correctEvents >= finderSettings.minStations() && obviousCorrectPct >= OBVIOUS_CORRECT_THRESHOLD;
         if (!valid) {
-            if(cluster.getEarthquake() != null){
+            boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
+            if(remove && cluster.getEarthquake() != null){
                 getEarthquakes().remove(cluster.getEarthquake());
                 cluster.setEarthquake(null);
             }
@@ -321,10 +319,8 @@ public class EarthquakeAnalysis {
 
             long expectedPArrival =  bestHypocenter.origin + (long) ((rawTravelP + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
 
-            long margin = 2000;
-
-            if(station.getStateAt(expectedPArrival - margin) != StationState.ACTIVE){
-                System.err.println("NOT ACTIVE AT "+station.getStationCode()+" at "+expectedPArrival +" "+station.getStateAt(expectedPArrival - margin));
+            if(station.getStateAt(expectedPArrival) != StationState.ACTIVE){
+                System.err.println("NOT ACTIVE AT "+station.getStationCode()+" at "+expectedPArrival +" "+station.getStateAt(expectedPArrival));
                 continue;
             }
 

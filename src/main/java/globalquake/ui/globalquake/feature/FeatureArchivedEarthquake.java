@@ -11,7 +11,6 @@ import globalquake.ui.settings.Settings;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -94,11 +93,11 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
             var centerPonint = renderer.projectPoint(point3D);
-            drawDetails(graphics, centerPonint, entity.getOriginal(), renderer);
+            drawDetails(graphics, centerPonint, entity.getOriginal());
         }
     }
 
-    private void drawDetails(Graphics2D graphics, Point2D centerPonint, ArchivedQuake quake, GlobeRenderer renderer) {
+    private void drawDetails(Graphics2D graphics, Point2D centerPonint, ArchivedQuake quake) {
         graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
         double size = 3 + Math.pow(quake.getMag(), 2) * 0.6;

@@ -265,7 +265,7 @@ public class ClusterAnalysis {
 
     private void expandCluster(Cluster cluster) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
-            if(cluster.getPreviousHypocenter().correctEvents > 12) {
+            if(cluster.getPreviousHypocenter().correctEvents > 8) {
                 expandPWaves(cluster);
             }
 

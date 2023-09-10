@@ -97,22 +97,10 @@ public class EarthquakeArchive {
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
-	}
-
-	public void update() {
-		boolean save = false;
 
 		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
-			save = true;
 			archivedQuakes.remove(archivedQuakes.size() - 1);
 		}
-
-		if (save) {
-			new Thread("Archive Save Thread") {
-				public void run() {
-					saveArchive();
-				}
-			}.start();
-		}
 	}
+
 }

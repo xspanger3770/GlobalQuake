@@ -90,10 +90,6 @@ public class TauPTravelTimeCalculatorTest {
         assertEquals(1201.45, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 154.0), 0.5);
         assertEquals(1203.61, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 155.0), 0.5);
         assertEquals(1222.92, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 156.0), 0.5);
-
-        /*for(long time = 1000; time < 1300; time += 1){
-            System.out.printf("%ds:%.2f%n", time,  TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, time));
-        }*/
     }
 
     @Test
