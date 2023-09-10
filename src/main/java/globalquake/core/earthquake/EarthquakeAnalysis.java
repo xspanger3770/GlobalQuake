@@ -440,22 +440,37 @@ public class EarthquakeAnalysis {
         double lowerBound = depthStart; // 0
         double upperBound = depthEnd; // 600
 
+        double depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
+        double depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
+
+        createHypocenter(threadData.hypocenterA, lat, lon, depthA, pickedEvents, finderSettings, threadData);
+        createHypocenter(threadData.hypocenterB, lat, lon, depthB, pickedEvents, finderSettings, threadData);
+
+        PreliminaryHypocenter upperHypocenter = threadData.hypocenterA;
+        PreliminaryHypocenter lowerHypocenter = threadData.hypocenterB;
+
         for (int iteration = 0; iteration < depthIterations; iteration++) {
-            double depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
-            double depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
+            PreliminaryHypocenter better = selectBetterHypocenter(upperHypocenter, lowerHypocenter);
+            boolean goUp = better == upperHypocenter;
 
-            createHypocenter(threadData.hypocenterA, lat, lon, depthA, pickedEvents, finderSettings, threadData);
-            createHypocenter(threadData.hypocenterB, lat, lon, depthB, pickedEvents, finderSettings, threadData);
+            PreliminaryHypocenter temp = lowerHypocenter;
+            lowerHypocenter = upperHypocenter;
+            upperHypocenter = temp;
 
-            PreliminaryHypocenter better = selectBetterHypocenter(threadData.hypocenterA, threadData.hypocenterB);
-            threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, better));
-
-            boolean goUp = better == threadData.hypocenterA;
             if (goUp) {
                 upperBound = (upperBound + lowerBound) / 2.0;
+                depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
+
+                createHypocenter(upperHypocenter, lat, lon, depthA, pickedEvents, finderSettings, threadData);
+                threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, upperHypocenter));
             } else {
                 lowerBound = (upperBound + lowerBound) / 2.0;
+                depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
+
+                createHypocenter(lowerHypocenter, lat, lon, depthB, pickedEvents, finderSettings, threadData);
+                threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, lowerHypocenter));
             }
+
         }
 
         // additionally check 0km and 10 km
