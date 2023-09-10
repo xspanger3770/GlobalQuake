@@ -36,7 +36,10 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
         zoomPanel.add(sliderZoomMul);
         add(zoomPanel);
 
-        add(chkBoxEnableOnStartup = new JCheckBox("Enable Cinema Mode on startup", Settings.cinemaModeOnStartup));
+        JPanel chkboxPanel = new JPanel();
+
+        chkboxPanel.add(chkBoxEnableOnStartup = new JCheckBox("Enable Cinema Mode on startup", Settings.cinemaModeOnStartup));
+        add(chkboxPanel);
 
         for(int i = 0; i < 42; i++){
             add(new JPanel()); // fillers
