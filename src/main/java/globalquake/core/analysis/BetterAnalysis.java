@@ -147,7 +147,7 @@ public class BetterAnalysis extends Analysis {
                 return;
             }
 
-            if (timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.5 || shortAverage < mediumAverage * 0.2)) {
+            if (timeFromStart >= 1000 && (timeFromStart < 7.5 * 1000 && shortAverage < longAverage * 1.25 || shortAverage < mediumAverage * 0.12)) {
                 setStatus(AnalysisStatus.IDLE);
                 latestEvent.endBadly();
             }
