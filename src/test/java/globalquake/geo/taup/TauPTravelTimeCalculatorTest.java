@@ -90,18 +90,32 @@ public class TauPTravelTimeCalculatorTest {
         assertEquals(1201.45, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 154.0), 0.5);
         assertEquals(1203.61, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 155.0), 0.5);
         assertEquals(1222.92, TauPTravelTimeCalculator.getPKPWaveTravelTime(0, 156.0), 0.5);
+
+        assertEquals(151, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 1194.46), 0.5);
+        assertEquals(152, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 1196.88), 0.5);
+        assertEquals(153, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 1199.21), 0.5);
+        assertEquals(154, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 1201.45), 0.5);
+        assertEquals(155, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0, 1203.61), 0.5);
+        assertEquals(156, TauPTravelTimeCalculator.getPKPWaveTravelAngle(0,  1222.92), 0.5);
     }
 
     @Test
     public void testPKIKP() throws Exception{
         TauPTravelTimeCalculator.init();
 
+        assertEquals(1212.09, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 180.0), 0.5);
         assertEquals(994.57, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 0.0), 0.5);
         assertEquals(999.02, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 20), 0.5);
         assertEquals(1012.15, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 40), 0.5);
         assertEquals(1061.23, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 80), 0.5);
         assertEquals(1186.73, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 150), 0.5);
-        assertEquals(1212.09, TauPTravelTimeCalculator.getPKIKPWaveTravelTime(0, 179.9), 0.5);
+
+        assertEquals(20, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 999.02), 0.5);
+        assertEquals(0, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 994.47), 0.5);
+        assertEquals(40, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 1012.15), 0.5);
+        assertEquals(80, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 1061.23), 0.5);
+        assertEquals(150, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0, 1186.73), 0.5);
+        assertEquals(179.9, TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(0,  1212.09), 0.5);
     }
 
 }

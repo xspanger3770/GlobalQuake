@@ -99,9 +99,6 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPKIKPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds > getMaxTime(travelTable.pkikp_travel_table)){
-            return  NO_ARRIVAL;
-        }
         return binarySearchTime((angle) -> getPKIKPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE);
     }
@@ -115,11 +112,12 @@ public class TauPTravelTimeCalculator {
     public static double binarySearchTime(Function<Double, Double> func, double target, double epsilon, double minAng, double maxAng) {
         double left = minAng;
         double right = maxAng;
+        double midValue = 0;
 
         while (right - left > epsilon) {
             double mid = left + (right - left) / 2.0;
 
-            double midValue = func.apply(mid);
+            midValue = func.apply(mid);
             if(midValue == NO_ARRIVAL){
                 return NO_ARRIVAL;
             }
@@ -131,6 +129,10 @@ public class TauPTravelTimeCalculator {
             }
         }
 
+        if(Math.abs(target - midValue) > 0.5){
+            return NO_ARRIVAL;
+        }
+
         return (left + right) / 2.0;
     }
 
@@ -138,7 +140,7 @@ public class TauPTravelTimeCalculator {
     private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle, boolean fast) {
         double x = (depth / MAX_DEPTH) * (array.length - 1);
         double y = ((angle - minAng) / (maxAng - minAng)) * (array[0].length - 1);
-        if(x < 0 || y < 0 || x >= array.length - 1 || y >= array[0].length - 1){
+        if(x < 0 || y < 0 || x > array.length - 1 || y > array[0].length - 1){
             return NO_ARRIVAL;
         }
         return fast? fastbilinearInterpolation(array, x, y) : bilinearInterpolation(array, x, y);
@@ -167,9 +169,9 @@ public class TauPTravelTimeCalculator {
         }
 
         int x0 = (int) x;
-        int x1 = x0 + 1;
+        int x1 = x0 == array.length - 1 ? x0 : x0 + 1;
         int y0 = (int) y;
-        int y1 = y0 + 1;
+        int y1 = y0 == array[0].length - 1 ? y0 : y0 + 1;
 
         if (x1 >= array.length || y1 >= array[0].length) {
             return NO_ARRIVAL;

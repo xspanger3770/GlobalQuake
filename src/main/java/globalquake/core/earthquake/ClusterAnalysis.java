@@ -179,8 +179,9 @@ public class ClusterAnalysis {
         }
 
         if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
-            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 5000 + expectedTravel * 0.0075) {
+            // 985 because GQ has high tendency to detect S waves earlier
+            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 985);
+            if (Math.abs(expectedTravel - actualTravel) < 1000 + expectedTravel * 0.01) {
                 return true;
             }
         }
@@ -272,8 +273,6 @@ public class ClusterAnalysis {
             if(cluster.getPreviousHypocenter().correctEvents > 7) {
                 markPossibleSWaves(cluster);
             }
-
-            return;
         }
 
         ArrayList<Event> list = new ArrayList<>(cluster.getAssignedEvents().values());
