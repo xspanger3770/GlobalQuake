@@ -60,15 +60,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 if(e.getKeyCode() == KeyEvent.VK_C) {
                     setCinemaMode(!isCinemaMode());
                 }
-                if(e.getKeyCode() == KeyEvent.VK_D){
-                    for(AbstractStation abstractStation : GlobalQuake.instance.getStationManager().getStations()){
-                        if(abstractStation.getStationCode().equals("PB01")){
-                            for(StationInterval interval : abstractStation.getIntervals()){
-                                System.out.println(interval);
-                            }
-                        }
-                    }
-                }
             }
         });
 
