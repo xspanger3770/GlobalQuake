@@ -96,8 +96,8 @@ public class GlobalStationManager {
     }
 
     private GlobalStation createGlobalStation(Station station, Channel ch) {
-        return new GlobalStation(station.getNetwork().getNetworkCode(),
-                station.getStationCode(), ch.getCode(), ch.getLocationCode(),
+        return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
+                station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
                 nextID.getAndIncrement(), ch.selectBestSeedlinkNetwork());
     }
