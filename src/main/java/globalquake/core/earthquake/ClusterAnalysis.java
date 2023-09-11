@@ -31,7 +31,7 @@ public class ClusterAnalysis {
     private final List<AbstractStation> stations;
     private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
-    private static final double MERGE_THRESHOLD = 0.60;
+    private static final double MERGE_THRESHOLD = 0.45;
 
     public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
         this.earthquakes = earthquakes;
@@ -117,6 +117,11 @@ public class ClusterAnalysis {
     }
 
     private boolean canMerge(Earthquake earthquake, Cluster cluster) {
+        if(!(cluster.getPreviousHypocenter() == null || cluster.getPreviousHypocenter().correctEvents < 24
+                || (cluster.getPreviousHypocenter().correctEvents >= 24 && cluster.getPreviousHypocenter().getCorrectness() < 0.7))){
+            return false;
+        }
+
         int correct = 0;
         for (Event event : cluster.getAssignedEvents().values()) {
             if (couldBeArrival(event, earthquake, true)) {
@@ -264,11 +269,11 @@ public class ClusterAnalysis {
 
     private void expandCluster(Cluster cluster) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
-            if(cluster.getPreviousHypocenter().correctEvents > 8) {
+            if(cluster.getPreviousHypocenter().correctEvents > 7) {
                 expandPWaves(cluster);
             }
 
-            if(cluster.getPreviousHypocenter().correctEvents > 7) {
+            if(cluster.getPreviousHypocenter().correctEvents > 6) {
                 markPossibleSWaves(cluster);
             }
         }
