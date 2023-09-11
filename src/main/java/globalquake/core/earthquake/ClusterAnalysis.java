@@ -31,7 +31,7 @@ public class ClusterAnalysis {
     private final List<AbstractStation> stations;
     private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
-    private static final double MERGE_THRESHOLD = 0.30;
+    private static final double MERGE_THRESHOLD = 0.60;
 
     public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
         this.earthquakes = earthquakes;
