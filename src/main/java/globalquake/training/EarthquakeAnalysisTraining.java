@@ -18,7 +18,7 @@ public class EarthquakeAnalysisTraining {
     public static final int STATIONS = 50;
     public static final double DIST = 300;
 
-    public static final double INACCURACY = 1000;
+    public static final double INACCURACY = 2000;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -62,7 +62,7 @@ public class EarthquakeAnalysisTraining {
 
         List<FakeStation> fakeStations = new ArrayList<>();
 
-        Random r = new Random(453 + (run++));
+        Random r = new Random(1109 + (run++));
 
         for(int i = 0; i < STATIONS; i++){
             double ang = r.nextDouble() * 360.0;
@@ -86,7 +86,7 @@ public class EarthquakeAnalysisTraining {
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);
             if(r.nextDouble() < 0.1){
-                time += (long) (r.nextDouble() * 10 - 5) * 1000;
+                time += (long) ((r.nextDouble() * 10 - 5) * INACCURACY);
             }
             pickedEvents.add(new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100));
         }
