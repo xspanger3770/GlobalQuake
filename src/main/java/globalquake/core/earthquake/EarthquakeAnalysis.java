@@ -71,6 +71,13 @@ public class EarthquakeAnalysis {
 
         // Calculation starts only if number of events increases by some %
         if (cluster.getEarthquake() != null) {
+            if (cluster.getPreviousHypocenter() != null && cluster.lastEpicenterUpdate != cluster.updateCount) {
+                calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+                synchronized (cluster.getEarthquake().magsLock) {
+                    cluster.getEarthquake().setMag(cluster.getPreviousHypocenter().magnitude);
+                    cluster.getEarthquake().setMags(cluster.getPreviousHypocenter().mags);
+                }
+            }
             int count = pickedEvents.size();
             if (count >= 24) {
                 if (count < cluster.getEarthquake().nextReportEventCount) {
@@ -204,31 +211,38 @@ public class EarthquakeAnalysis {
         long timeMillis = System.currentTimeMillis();
         long startTime = timeMillis;
 
-        // phase 1 search far
+        PreliminaryHypocenter bestHypocenter = null;
+        Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
+
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
-        PreliminaryHypocenter bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier),_lat,_lon,6 + iterationsDifference, maxDepth, finderSettings);
-        Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
-        Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
-        // phase 2 search nearby that far
-        timeMillis = System.currentTimeMillis();
-        _lat = bestHypocenter.lat;
-        _lon = bestHypocenter.lon;
-        PreliminaryHypocenter hyp = scanArea(selectedEvents, 2500.0, (int) (20000 * pointMultiplier), _lat, _lon,7 + iterationsDifference, maxDepth, finderSettings);
-        bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        Logger.debug("CLOSE: " + (System.currentTimeMillis() - timeMillis));
-        Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+        if(previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8) {
+            // phase 1 search far
+            bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
+            Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
+            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+            _lat = bestHypocenter.lat;
+            _lon = bestHypocenter.lon;
+        }
+
+        if(previousHypocenter == null || previousHypocenter.correctEvents < 42 || previousHypocenter.getCorrectness() < 0.9) {
+            // phase 2 search nearby that far
+            timeMillis = System.currentTimeMillis();
+            PreliminaryHypocenter hyp = scanArea(selectedEvents, 2500.0, (int) (20000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
+            bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
+            Logger.debug("CLOSE: " + (System.currentTimeMillis() - timeMillis));
+            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+            _lat = cluster.getRootLat();
+            _lon = cluster.getRootLon();
+        }
 
         // phase 3 search nearby of root
         timeMillis = System.currentTimeMillis();
-        _lat = cluster.getRootLat();
-        _lon = cluster.getRootLon();
-        hyp = scanArea(selectedEvents, 500.0, (int) (5000 * pointMultiplier), _lat, _lon,7 + iterationsDifference, maxDepth, finderSettings);
+        PreliminaryHypocenter hyp = scanArea(selectedEvents, 500.0, (int) (5000 * pointMultiplier), _lat, _lon,7 + iterationsDifference, maxDepth, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.debug("CLOSE TO ROOT: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
-
 
         // phase 4 find exact area
         timeMillis = System.currentTimeMillis();
@@ -649,6 +663,9 @@ public class EarthquakeAnalysis {
     }
 
     private void calculateMagnitude(Cluster cluster, Hypocenter hypocenter) {
+        if(cluster == null || hypocenter == null){
+            return;
+        }
         Collection<Event> goodEvents = cluster.getAssignedEvents().values();
         if (goodEvents.isEmpty()) {
             return;
