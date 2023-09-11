@@ -148,7 +148,7 @@ public class StationDatabase implements Serializable {
 
     public static Channel getChannel(Station station, String channelCode, String locationCode){
         for(Channel channel: station.getChannels()){
-            if(channel.getCode().equals(channelCode) && channel.getLocationCode().equals(locationCode)){
+            if(channel.getCode().equalsIgnoreCase(channelCode) && channel.getLocationCode().equalsIgnoreCase(locationCode)){
                 return channel;
             }
         }
@@ -188,7 +188,7 @@ public class StationDatabase implements Serializable {
 
     private static Station findStation(Network network, String stationCode) {
         for(Station station: network.getStations()){
-            if(station.getStationCode().equals(stationCode)){
+            if(station.getStationCode().equalsIgnoreCase(stationCode)){
                 return station;
             }
         }
@@ -222,7 +222,7 @@ public class StationDatabase implements Serializable {
 
     public static Network getNetwork(List<Network> networks, String networkCode) {
         for(Network network: networks){
-            if(network.getNetworkCode().equals(networkCode)){
+            if(network.getNetworkCode().equalsIgnoreCase(networkCode)){
                 return network;
             }
         }
