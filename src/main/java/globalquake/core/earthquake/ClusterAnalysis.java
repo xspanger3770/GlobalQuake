@@ -32,8 +32,6 @@ public class ClusterAnalysis {
     private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
     private static final double MERGE_THRESHOLD = 0.30;
-    private static final double DISTANCE_INACCURACY_MULTIPLIER = 0.01;
-    private static final long DISTANCE_INACCURACY_BASE = 5000;
 
     public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
         this.earthquakes = earthquakes;
@@ -230,7 +228,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
+            if (Math.abs(expectedTravel - actualTravel) < Math.max(5000, 1000 + expectedTravel * 0.01)) {
                 return true;
             }
         }
@@ -238,9 +236,9 @@ public class ClusterAnalysis {
         double expectedTravelPKPRaw = TauPTravelTimeCalculator.getPKPWaveTravelTime(quakeDepth,
                 angle);
 
-        if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
+        if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
+            if (Math.abs(expectedTravel - actualTravel) < Math.max(6000, expectedTravel * 0.005)) {
                 return true;
             }
         }
@@ -248,9 +246,9 @@ public class ClusterAnalysis {
         double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(quakeDepth,
                 angle);
 
-        if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+        if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
             long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < DISTANCE_INACCURACY_BASE + expectedTravel * DISTANCE_INACCURACY_MULTIPLIER) {
+            if (Math.abs(expectedTravel - actualTravel) < Math.max(6000, expectedTravel * 0.005)) {
                 return true;
             }
         }
