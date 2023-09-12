@@ -6,6 +6,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
+import globalquake.database.SeedlinkStatus;
 import org.tinylog.Logger;
 
 import java.time.Instant;
@@ -70,13 +71,14 @@ public class SeedlinkNetworksReader {
 				int reconnectDelay = RECONNECT_DELAY;
 
                 while (true) {
+					seedlinkNetwork.status = SeedlinkStatus.CONNECTING;
+					seedlinkNetwork.connectedStations = 0;
+
 					SeedlinkReader reader = null;
 					try {
 						Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 						reader.sendHello();
-
-						int connected = 0;
 
 						reconnectDelay = RECONNECT_DELAY;
 						boolean first = true;
@@ -91,16 +93,18 @@ public class SeedlinkNetworksReader {
 								}
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
-								connected++;
+								seedlinkNetwork.connectedStations++;
 							}
 						}
 
-						if(connected == 0){
+						if(seedlinkNetwork.connectedStations == 0){
 							Logger.info("No stations connected to "+seedlinkNetwork.getName());
+							seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
 							break;
 						}
 
 						reader.startData();
+						seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
 						while (reader.hasNext()) {
 							SeedlinkPacket slp = reader.readPacket();
@@ -110,6 +114,7 @@ public class SeedlinkNetworksReader {
 								Logger.error(e);
 							}
 						}
+
 						reader.close();
 					} catch (Exception e) {
 						Logger.error(e);
@@ -120,16 +125,18 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
-
-						Logger.warn(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
+					} finally {
+						seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
+						seedlinkNetwork.connectedStations = 0;
+						Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
 								+ " seconds...");
 						try {
 							sleep(reconnectDelay * 1000L);
 							if(reconnectDelay < 60 * 5) {
 								reconnectDelay *= 2;
 							}
-						} catch (InterruptedException e1) {
-							break;
+						} catch (InterruptedException ignored) {
+
 						}
 					}
 				}

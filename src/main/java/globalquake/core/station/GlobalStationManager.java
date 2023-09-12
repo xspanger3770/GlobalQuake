@@ -29,6 +29,7 @@ public class GlobalStationManager {
                     if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
+                    s.getSelectedChannel().selectBestSeedlinkNetwork().selectedStations++;
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
                     stations.add(station);
                 }

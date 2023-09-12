@@ -10,7 +10,7 @@ public class SeedlinkNetworksTableModel extends FilterableTableModel<SeedlinkNet
             Column.readonly("Name", String.class, SeedlinkNetwork::getName, new TableCellRendererAdapter<>()),
             Column.readonly("Host", String.class, SeedlinkNetwork::getHost, new TableCellRendererAdapter<>()),
             Column.readonly("Port", Integer.class, SeedlinkNetwork::getPort, new TableCellRendererAdapter<>()),
-            Column.readonly("Status", JProgressBar.class, SeedlinkNetwork::getStatus, new ProgressBarRenderer<>()));
+            Column.readonly("Status", JProgressBar.class, SeedlinkNetwork::getStatusBar, new ProgressBarRenderer<>()));
 
     public SeedlinkNetworksTableModel(List<SeedlinkNetwork> data) {
         super(data);

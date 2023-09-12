@@ -170,15 +170,15 @@ public class StationDatabaseManager {
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
         toBeUpdated.forEach(seedlinkNetwork -> {
-            seedlinkNetwork.getStatus().setString("Queued...");
-            seedlinkNetwork.getStatus().setValue(0);
+            seedlinkNetwork.getStatusBar().setString("Queued...");
+            seedlinkNetwork.getStatusBar().setValue(0);
         });
         fireStatusChangeEvent();
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
                             try {
-                                seedlinkNetwork.getStatus().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                                seedlinkNetwork.getStatusBar().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
 
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -190,18 +190,18 @@ public class StationDatabaseManager {
                                 Future<Void> future = executor.submit(task);
                                 future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-                                seedlinkNetwork.getStatus().setString("Done");
-                                seedlinkNetwork.getStatus().setValue(100);
+                                seedlinkNetwork.getStatusBar().setString("Done");
+                                seedlinkNetwork.getStatusBar().setValue(100);
 
                                 break;
                             } catch(TimeoutException e){
-                                seedlinkNetwork.getStatus().setString("Timed out!");
-                                seedlinkNetwork.getStatus().setValue(0);
+                                seedlinkNetwork.getStatusBar().setString("Timed out!");
+                                seedlinkNetwork.getStatusBar().setValue(0);
                                 break;
                             } catch (Exception e) {
                                 Logger.error(e);
-                                seedlinkNetwork.getStatus().setString("Error!");
-                                seedlinkNetwork.getStatus().setValue(0);
+                                seedlinkNetwork.getStatusBar().setString("Error!");
+                                seedlinkNetwork.getStatusBar().setValue(0);
                             } finally {
                                 fireUpdateEvent();
                             }

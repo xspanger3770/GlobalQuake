@@ -5,7 +5,8 @@ import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Hypocenter;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
-import globalquake.core.station.StationInterval;
+import globalquake.database.SeedlinkNetwork;
+import globalquake.database.SeedlinkStatus;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
@@ -151,6 +152,24 @@ public class GlobalQuakePanel extends GlobePanel {
 
         settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
+        int totalStations = 0;
+        int connectedStations = 0;
+        int runningSeedlinks = 0;
+        int totalSeedlinks = 0;
+        for(SeedlinkNetwork seedlinkNetwork : GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks()){
+            totalStations += seedlinkNetwork.selectedStations;
+            connectedStations+=seedlinkNetwork.connectedStations;
+            if(seedlinkNetwork.selectedStations > 0){
+                totalSeedlinks++;
+            }
+            if(seedlinkNetwork.status == SeedlinkStatus.RUNNING){
+                runningSeedlinks++;
+            }
+        }
+
+        settingsStrings.add(new SettingInfo("Stations: ", "%d / %d".formatted(connectedStations, totalStations), getColorPCT(1-(double) connectedStations / totalStations)));
+        settingsStrings.add(new SettingInfo("Seedlinks: ", "%d / %d".formatted(runningSeedlinks, totalSeedlinks), getColorPCT(1-(double) runningSeedlinks / totalSeedlinks)));
+
         double GB = 1024 * 1024 * 1024.0;
 
         long maxMem = Runtime.getRuntime().maxMemory();
@@ -158,12 +177,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
         double pctUsed = usedMem / (double)maxMem;
 
-        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorRAM(pctUsed)));
+        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
         settingsStrings.add(new SettingInfo("FPS: ", "%d".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
     }
 
-    private Color getColorRAM(double pct) {
+    private Color getColorPCT(double pct) {
         if(pct <= 0.5){
             return Scale.interpolateColors(Color.green, Color.yellow, pct * 2.0);
         }
@@ -171,7 +190,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private Color getColorFPS(double lastFPS) {
-        return getColorRAM(1 - lastFPS / 60.0);
+        return getColorPCT(1 - lastFPS / 60.0);
     }
 
     record SettingInfo(String name, String value, Color color) {
