@@ -83,7 +83,7 @@ public class EarthquakeListPanel extends JPanel {
 
                 ArchivedQuake quake = filtered.get(i);
 
-                if (quake != null && e.getButton() == MouseEvent.BUTTON3) {
+                if (quake != null && e.getButton() == MouseEvent.BUTTON3 && !isMouseInGoUpRect) {
                     quake.setWrong(!quake.isWrong());
                 }
 
