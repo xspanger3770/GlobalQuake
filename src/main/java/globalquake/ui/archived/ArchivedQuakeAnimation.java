@@ -64,6 +64,9 @@ public class ArchivedQuakeAnimation extends JDialog {
                 if(e.getKeyCode() == KeyEvent.VK_LEFT){
                     animationStart += 5000;
                 }
+                if(e.getKeyCode() == KeyEvent.VK_DOWN){
+                    animationStart = quake.getOrigin() + 5000;
+                }
                 if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
                     dispose();
                 }
