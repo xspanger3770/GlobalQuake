@@ -14,7 +14,6 @@ public class ArchivedQuakeUI extends JDialog {
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
-        setModal(true);
         setLayout(new BorderLayout());
 
         JLabel latLabel = new JLabel("Latitude: %.4f".formatted(quake.getLat()));

@@ -21,9 +21,7 @@ public class ArchivedQuakeAnimation extends JDialog {
 
     public ArchivedQuakeAnimation(Frame parent, ArchivedQuake quake) {
         super(parent);
-        setModal(true);
         this.quake = quake;
-
 
         add(mainPanel = new ArchivedQuakePanel(this, quake));
 
