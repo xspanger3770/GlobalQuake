@@ -99,6 +99,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
             graphics.setColor(Color.yellow);
+            graphics.setStroke(new BasicStroke(2f));
             graphics.draw(elementStationCircle.getShape());
         }
 
@@ -153,7 +154,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             g.setColor(Color.white);
             String str = station.toString();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
-            str = station.getSeedlinkNetwork() == null ? "NONE!" : station.getSeedlinkNetwork().getName();
+            str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
 
             if(station.hasNoDisplayableData()){
@@ -161,7 +162,13 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
             } else {
                 long delay = station.getDelayMS();
-                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
+                if (delay == Long.MIN_VALUE) {
+                    g.setColor(Color.magenta);
+                    str = "Replay";
+                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                } else {
+                    FeatureSelectableStation.drawDelay(g, x, y + 33, delay, "Delay");
+                }
             }
         }
         if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
@@ -191,6 +198,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return new Point2D(((GlobalStation) (entity.getOriginal())).getLatitude(), ((GlobalStation) (entity.getOriginal())).getLongitude());
+        return new Point2D(((AbstractStation) (entity.getOriginal())).getLatitude(), ((AbstractStation) (entity.getOriginal())).getLongitude());
     }
 }

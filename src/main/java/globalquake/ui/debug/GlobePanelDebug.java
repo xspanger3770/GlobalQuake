@@ -2,6 +2,7 @@ package globalquake.ui.debug;
 
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
@@ -188,6 +189,7 @@ public class GlobePanelDebug extends GQFrame {
 
 	public static void main(String[] args) {
 		try {
+			TauPTravelTimeCalculator.init();
 			Regions.init();
 			Scale.load();
 			Sounds.load();
