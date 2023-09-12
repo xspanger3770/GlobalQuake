@@ -4,6 +4,7 @@ import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.ui.settings.Settings;
 
@@ -92,6 +93,10 @@ public class EarthquakeListPanel extends JPanel {
                     }else if (quake != null ) {
                         new ArchivedQuakeUI(parent, quake).setVisible(true);
                     }
+                }
+
+                if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
+                    new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
             }
 
