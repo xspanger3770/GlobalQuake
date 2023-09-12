@@ -15,7 +15,7 @@ public class Earthquake implements Regional {
 	private long lastUpdate;
 	private final Cluster cluster;
 	private double mag;
-	private List<Double> mags;
+	private List<MagnitudeReading> mags;
 	private double pct;
 	private int revisionID;
 	public final Object magsLock;
@@ -49,11 +49,11 @@ public class Earthquake implements Regional {
 		this.mag = mag;
 	}
 
-	public List<Double> getMags() {
+	public List<MagnitudeReading> getMags() {
 		return mags;
 	}
 
-	public void setMags(List<Double> mags) {
+	public void setMags(List<MagnitudeReading> mags) {
 		this.mags = mags;
 	}
 

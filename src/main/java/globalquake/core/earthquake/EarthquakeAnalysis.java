@@ -669,7 +669,7 @@ public class EarthquakeAnalysis {
         if (goodEvents.isEmpty()) {
             return;
         }
-        ArrayList<Double> mags = new ArrayList<>();
+        ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
             if(!event.isValid()){
                 continue;
@@ -685,12 +685,26 @@ public class EarthquakeAnalysis {
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-            mags.add(IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul));
+            mags.add(new MagnitudeReading(IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul), distGC));
         }
-        Collections.sort(mags);
-
         hypocenter.mags = mags;
-        hypocenter.magnitude = mags.get((int) ((mags.size() - 1) * 0.5));
+        hypocenter.magnitude = selectMagnitude(mags);
+    }
+
+    private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
+        mags.sort(Comparator.comparing(MagnitudeReading::distance));
+
+        int targetSize = (int) Math.max(25, mags.size() * 0.25);
+        List<MagnitudeReading> list = new ArrayList<>();
+        for(MagnitudeReading magnitudeReading : mags){
+            if(magnitudeReading.distance() < 1000 || list.size() < targetSize){
+                list.add(magnitudeReading);
+            } else break;
+        }
+
+        list.sort(Comparator.comparing(MagnitudeReading::magnitude));
+
+        return list.get((int) ((list.size() - 1) * 0.5)).magnitude();
     }
 
     public static final int[] STORE_TABLE = {

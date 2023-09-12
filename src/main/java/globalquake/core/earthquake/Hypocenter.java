@@ -14,7 +14,7 @@ public class Hypocenter {
 	public int selectedEvents;
 
 	public double magnitude;
-	public List<Double> mags;
+	public List<MagnitudeReading> mags;
 	public ObviousArrivalsInfo obviousArrivalsInfo;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents) {

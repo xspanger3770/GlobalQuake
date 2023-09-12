@@ -3,6 +3,7 @@ package globalquake.ui.globalquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Hypocenter;
+import globalquake.core.earthquake.MagnitudeReading;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
@@ -331,11 +332,11 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         synchronized (quake.magsLock) {
-            List<Double> mags = quake.getMags();
+            List<MagnitudeReading> mags = quake.getMags();
             int[] groups = new int[100];
 
-            for (Double d : mags) {
-                int group = (int) (d * 10.0);
+            for (MagnitudeReading magnitudeReading : mags) {
+                int group = (int) (magnitudeReading.magnitude() * 10.0);
                 if (group >= 0 && group < 100) {
                     groups[group]++;
                 }
