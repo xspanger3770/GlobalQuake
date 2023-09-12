@@ -86,12 +86,12 @@ public class EarthquakeListPanel extends JPanel {
                     quake.setWrong(!quake.isWrong());
                 }
 
-                if (quake != null && e.getButton() == MouseEvent.BUTTON1) {
-                    new ArchivedQuakeUI(parent, quake).setVisible(true);
-                }
-
-                if(isMouseInGoUpRect && e.getButton() == MouseEvent.BUTTON1){
-                    scroll = 0;
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    if(isMouseInGoUpRect) {
+                        scroll = 0;
+                    }else if (quake != null ) {
+                        new ArchivedQuakeUI(parent, quake).setVisible(true);
+                    }
                 }
             }
 
