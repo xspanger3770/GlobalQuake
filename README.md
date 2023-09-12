@@ -6,7 +6,7 @@
   <img src="" alt="GlobalQuake icon" title="GlobalQuake" />
 </p>-->
 <p align="center">
-  <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <a href="https://discord.gg/9SQHtkKcy"><img src="https://img.shields.io/badge/discord-Join Now-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
+  <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/release/xspanger3770/GlobalQuake.svg?style=for-the-badge&logo=github" alt="Release"></a> <a href="https://github.com/xspanger3770/GlobalQuake/releases"><img src="https://img.shields.io/github/downloads/xspanger3770/GlobalQuake/total?style=for-the-badge&logo=github" alt="Releases"></a> <a href="https://discord.gg/aCyuXfTyma"><img src="https://img.shields.io/badge/discord-Join Now-blue?logo=discord&style=for-the-badge" alt="Discord"></a>
 </p>
 
 ![GlobalQuake_0.9.5](https://github.com/xspanger3770/GlobalQuake/assets/100421968/a2dc2ed7-9c28-47ab-aaa7-f76318d22a1e)
