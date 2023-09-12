@@ -19,8 +19,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
-    private double centerLat = 50;
-    private double centerLon = 17;
+    private double centerLat;
+    private double centerLon;
     private double dragStartLat;
     private double dragStartLon;
     private double scroll = 0.45;
@@ -54,7 +54,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private final Object animationLock = new Object();
     private Animation nextAnimation;
 
-    public GlobePanel() {
+    public GlobePanel(double lat, double lon) {
+        centerLat = lat;
+        centerLon = lon;
         renderer = new GlobeRenderer();
         renderer.updateCamera(createRenderProperties());
         setLayout(null);

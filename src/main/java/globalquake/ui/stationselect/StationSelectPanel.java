@@ -5,6 +5,7 @@ import globalquake.database.Station;
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ public class StationSelectPanel extends GlobePanel {
     }
 
     public StationSelectPanel(StationSelectFrame stationSelectFrame, StationDatabaseManager stationDatabaseManager) {
+        super(Settings.homeLat, Settings.homeLon);
         this.stationDatabaseManager = stationDatabaseManager;
         this.stationSelectFrame = stationSelectFrame;
         updateAllStations();

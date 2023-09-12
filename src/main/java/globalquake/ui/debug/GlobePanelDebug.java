@@ -2,6 +2,7 @@ package globalquake.ui.debug;
 
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
@@ -39,7 +40,7 @@ public class GlobePanelDebug extends GQFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
-		panel = new GlobePanel() {
+		panel = new GlobePanel(50,17) {
 
 			@Override
 			public void paint(Graphics gr) {
@@ -91,8 +92,8 @@ public class GlobePanelDebug extends GQFrame {
 		double centerLat = 50;
 		double centerLon = 17;
 
-		double maxDist = 10;
-		int total = 4000;
+		double maxDist = 10000;
+		int total = 400;
 
 
 		double phi = 1.61803398875;
@@ -136,7 +137,7 @@ public class GlobePanelDebug extends GQFrame {
 			
 		});
 
-		list = new EarthquakeListPanel(archivedQuakes);
+		list = new EarthquakeListPanel(this, archivedQuakes);
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -188,6 +189,7 @@ public class GlobePanelDebug extends GQFrame {
 
 	public static void main(String[] args) {
 		try {
+			TauPTravelTimeCalculator.init();
 			Regions.init();
 			Scale.load();
 			Sounds.load();

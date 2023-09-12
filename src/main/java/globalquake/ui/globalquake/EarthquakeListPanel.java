@@ -4,6 +4,7 @@ import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.ui.settings.Settings;
 
 import javax.swing.*;
@@ -44,7 +45,7 @@ public class EarthquakeListPanel extends JPanel {
         }).collect(Collectors.toList());
     }
 
-    public EarthquakeListPanel(List<ArchivedQuake> archivedQuakes) {
+    public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {
         this.archivedQuakes = archivedQuakes;
         setBackground(Color.gray);
         setForeground(Color.gray);
@@ -83,6 +84,10 @@ public class EarthquakeListPanel extends JPanel {
 
                 if (quake != null && e.getButton() == MouseEvent.BUTTON3) {
                     quake.setWrong(!quake.isWrong());
+                }
+
+                if (quake != null && e.getButton() == MouseEvent.BUTTON1) {
+                    new ArchivedQuakeUI(parent, quake).setVisible(true);
                 }
 
                 if(isMouseInGoUpRect && e.getButton() == MouseEvent.BUTTON1){
