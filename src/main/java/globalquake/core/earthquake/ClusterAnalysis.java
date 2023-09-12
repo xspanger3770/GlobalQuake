@@ -7,6 +7,7 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
 import globalquake.sounds.Sounds;
+import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
@@ -124,7 +125,7 @@ public class ClusterAnalysis {
 
         int correct = 0;
         for (Event event : cluster.getAssignedEvents().values()) {
-            if (couldBeArrival(event, earthquake, true)) {
+            if (couldBeArrival(event, earthquake, true, true)) {
                 correct++;
             }
         }
@@ -142,7 +143,7 @@ public class ClusterAnalysis {
                     HashMap<Earthquake, Event> map = new HashMap<>();
 
                     for (Earthquake earthquake : earthquakes) {
-                        if (couldBeArrival(event, earthquake, true)) {
+                        if (couldBeArrival(event, earthquake, true, true)) {
                             map.putIfAbsent(earthquake, event);
                         }
                     }
@@ -192,30 +193,30 @@ public class ClusterAnalysis {
         return false;
     }
 
-    public static boolean couldBeArrival(Event event, Earthquake earthquake, boolean considerIntensity) {
+    public static boolean couldBeArrival(Event event, Earthquake earthquake, boolean considerIntensity, boolean increasingPWindow) {
         if (!event.isValid() || event.isSWave() || earthquake == null) {
             return false;
         }
 
         return couldBeArrival(event.getLatFromStation(), event.getLonFromStation(), event.getElevationFromStation(), event.getpWave(),
                 earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getOrigin(), earthquake.getMag(),
-                considerIntensity);
+                considerIntensity, increasingPWindow);
     }
 
-    public static boolean couldBeArrival(PickedEvent event, Hypocenter earthquake, boolean considerIntensity) {
+    public static boolean couldBeArrival(PickedEvent event, Hypocenter earthquake, boolean considerIntensity, boolean increasingPWindow) {
         if (earthquake == null) {
             return false;
         }
 
         return couldBeArrival(event.lat(), event.lon(), event.elevation(), event.pWave(),
                 earthquake.lat, earthquake.lon, earthquake.depth, earthquake.origin, earthquake.magnitude,
-                considerIntensity);
+                considerIntensity, increasingPWindow);
     }
 
     @SuppressWarnings("RedundantIfStatement")
     public static boolean couldBeArrival(double eventLat, double eventLon, double eventAlt, long pWave,
                                          double quakeLat, double quakeLon, double quakeDepth, long quakeOrigin, double quakeMag,
-                                         boolean considerIntensity){
+                                         boolean considerIntensity, boolean increasingPWindow){
         long actualTravel = pWave - quakeOrigin;
 
         double distGC = GeoUtils.greatCircleDistance(quakeLat, quakeLon,
@@ -243,7 +244,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < Math.max(6000, expectedTravel * 0.005)) {
+            if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(6000, expectedTravel * 0.005) : Settings.pWaveInaccuracyThreshold)) {
                 return true;
             }
         }
@@ -321,7 +322,7 @@ public class ClusterAnalysis {
         mainLoop:
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
-                if (event.isValid() && !cluster.containsStation(station) && couldBeArrival(event, cluster.getEarthquake(), true)) {
+                if (event.isValid() && !cluster.containsStation(station) && couldBeArrival(event, cluster.getEarthquake(), true, true)) {
                     if (cluster.getAssignedEvents().putIfAbsent(station, event) == null) {
                         event.assignedCluster = cluster;
                     }
