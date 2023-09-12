@@ -42,6 +42,7 @@ public class GlobalQuakePanel extends GlobePanel {
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public GlobalQuakePanel(JFrame frame) {
+        super(Settings.homeLat, Settings.homeLon);
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));

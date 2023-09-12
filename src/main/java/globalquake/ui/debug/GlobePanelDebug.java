@@ -39,7 +39,7 @@ public class GlobePanelDebug extends GQFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
-		panel = new GlobePanel() {
+		panel = new GlobePanel(50,17) {
 
 			@Override
 			public void paint(Graphics gr) {
@@ -91,8 +91,8 @@ public class GlobePanelDebug extends GQFrame {
 		double centerLat = 50;
 		double centerLon = 17;
 
-		double maxDist = 10;
-		int total = 4000;
+		double maxDist = 10000;
+		int total = 400;
 
 
 		double phi = 1.61803398875;
@@ -136,7 +136,7 @@ public class GlobePanelDebug extends GQFrame {
 			
 		});
 
-		list = new EarthquakeListPanel(archivedQuakes);
+		list = new EarthquakeListPanel(this, archivedQuakes);
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 

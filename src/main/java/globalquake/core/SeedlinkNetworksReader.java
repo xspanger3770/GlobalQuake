@@ -125,19 +125,19 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
-					} finally {
-						seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
-						seedlinkNetwork.connectedStations = 0;
-						Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
-								+ " seconds...");
-						try {
-							sleep(reconnectDelay * 1000L);
-							if(reconnectDelay < 60 * 5) {
-								reconnectDelay *= 2;
-							}
-						} catch (InterruptedException ignored) {
+					}
 
+					seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
+					seedlinkNetwork.connectedStations = 0;
+					Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
+							+ " seconds...");
+					try {
+						sleep(reconnectDelay * 1000L);
+						if(reconnectDelay < 60 * 5) {
+							reconnectDelay *= 2;
 						}
+					} catch (InterruptedException ignored) {
+
 					}
 				}
 			}
