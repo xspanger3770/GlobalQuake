@@ -11,7 +11,6 @@ import globalquake.sounds.Sounds;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
-import org.apache.commons.math3.analysis.function.Rint;
 import org.tinylog.Logger;
 
 import java.util.*;

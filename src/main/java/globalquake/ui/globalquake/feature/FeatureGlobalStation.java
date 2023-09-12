@@ -3,7 +3,6 @@ package globalquake.ui.globalquake.feature;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.earthquake.Event;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;

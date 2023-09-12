@@ -96,6 +96,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         return List.of(fake);
     }
 
+    @SuppressWarnings("UnusedAssignment")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);

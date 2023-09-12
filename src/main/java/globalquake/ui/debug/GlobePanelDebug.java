@@ -86,7 +86,6 @@ public class GlobePanelDebug extends GQFrame {
 			}
 		});
 
-		Random r = new Random();
 		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
 
 		double centerLat = 50;
