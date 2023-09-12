@@ -102,6 +102,8 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             graphics.draw(elementStationCircle.getShape());
         }
 
+        graphics.setStroke(new BasicStroke(1f));
+
         if(entity.getOriginal().disabled){
             return;
         }
