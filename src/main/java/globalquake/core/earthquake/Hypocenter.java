@@ -38,11 +38,14 @@ public class Hypocenter {
 	public String toString() {
 		return "Hypocenter{" +
 				"totalErr=" + totalErr +
+				", correctEvents=" + correctEvents +
 				", lat=" + lat +
 				", lon=" + lon +
 				", depth=" + depth +
 				", origin=" + origin +
-				", correctStations=" + correctEvents +
+				", selectedEvents=" + selectedEvents +
+				", magnitude=" + magnitude +
+				", obviousArrivalsInfo=" + obviousArrivalsInfo +
 				'}';
 	}
 }

@@ -187,6 +187,8 @@ public class EarthquakeAnalysis {
         long deltaP = events.get((int) ((events.size() - 1) * 0.75)).pWave()
                 - events.get((int) ((events.size() - 1) * 0.25)).pWave();
 
+        Logger.debug("deltaP: %d ms".formatted(deltaP));
+
         return deltaP >= Math.max(2600, finderSettings.pWaveInaccuracyThreshold() * 2.1);
     }
 
@@ -261,7 +263,6 @@ public class EarthquakeAnalysis {
         Logger.debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
-
         postProcess(selectedEvents, cluster, bestHypocenter, finderSettings, startTime);
     }
 
@@ -276,7 +277,7 @@ public class EarthquakeAnalysis {
         calculateActualCorrectEvents(selectedEvents, bestHypocenter);
         calculateObviousArrivals(bestHypocenter);
 
-        Logger.debug("#%d Obvious arrivals = %d, wrong = %d".formatted(cluster.getId(), bestHypocenter.obviousArrivalsInfo.total(), bestHypocenter.obviousArrivalsInfo.wrong()));
+        Logger.debug(bestHypocenter);
 
         double obviousCorrectPct = 1.0;
         if(bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
