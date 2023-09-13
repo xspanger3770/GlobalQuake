@@ -80,7 +80,7 @@ public class EarthquakeAnalysisTraining {
         }
     }
 
-    private static long measureTest(long seed, int stations){
+    public static long measureTest(long seed, int stations){
         long a = System.currentTimeMillis();
         runTest(seed, stations);
         return System.currentTimeMillis()-a;

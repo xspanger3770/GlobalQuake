@@ -7,11 +7,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Set;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
     private JSlider sliderStoreTime;
+    private JCheckBox chkBoxRecalibrateOnLauch;
 
     public PerformanceSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -70,16 +72,20 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
         Settings.parallelHypocenterLocations = chkBoxParalell.isSelected();
         Settings.logsStoreTimeMinutes = sliderStoreTime.getValue();
+        Settings.recalibrateOnLaunch = chkBoxRecalibrateOnLauch.isSelected();
     }
 
     private Component createSettingAccuracy() {
         sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) Settings.hypocenterDetectionResolutionMax, 10, 5);
 
         JLabel label = new JLabel();
-        ChangeListener changeListener = changeEvent -> label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
-                sliderResolution.getValue() / 100.0,
-                getNameForResolution(sliderResolution.getValue())));
-
+        ChangeListener changeListener = changeEvent ->
+        {
+            label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
+                    sliderResolution.getValue() / 100.0,
+                    getNameForResolution(sliderResolution.getValue())));
+            Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
+        };
         sliderResolution.addChangeListener(changeListener);
 
         sliderResolution.setValue(Settings.hypocenterDetectionResolution.intValue());
@@ -111,6 +117,24 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         });
 
         panel2.add(btnRecalibrate);
+
+        JButton testSpeed = new JButton("Test Hypocenter Search");
+        testSpeed.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                testSpeed.setEnabled(false);
+                new Thread(() -> {
+                    testSpeed.setText("Test took %d ms".formatted(EarthquakeAnalysisTraining.measureTest(System.currentTimeMillis(), 60)));
+                    testSpeed.setEnabled(true);
+                }).start();
+            }
+        });
+        panel2.add(testSpeed);
+
+        chkBoxRecalibrateOnLauch = new JCheckBox("Recalibrate on startup", Settings.recalibrateOnLaunch);
+        panel2.add(chkBoxRecalibrateOnLauch);
+
+
         panel.add(panel2, BorderLayout.SOUTH);
 
         return panel;

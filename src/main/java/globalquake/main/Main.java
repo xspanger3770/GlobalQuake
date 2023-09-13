@@ -12,6 +12,7 @@ import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.training.EarthquakeAnalysisTraining;
 import globalquake.ui.database.DatabaseMonitorFrame;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 
 import javax.swing.*;
@@ -24,7 +25,7 @@ public class Main {
 
     private static ApplicationErrorHandler errorHandler;
 
-    public static final String version = "0.9.7_rc1";
+    public static final String version = "0.9.7";
     public static final String fullName = "GlobalQuake " + version;
 
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
@@ -94,7 +95,9 @@ public class Main {
         TauPTravelTimeCalculator.init();
         databaseMonitorFrame.getMainProgressBar().setString("Calibrating...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        EarthquakeAnalysisTraining.calibrateResolution(databaseMonitorFrame.getMainProgressBar(), null);
+        if(Settings.recalibrateOnLaunch) {
+            EarthquakeAnalysisTraining.calibrateResolution(databaseMonitorFrame.getMainProgressBar(), null);
+        }
         databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
