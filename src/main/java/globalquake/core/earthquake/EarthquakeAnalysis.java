@@ -219,19 +219,8 @@ public class EarthquakeAnalysis {
         double _lon = cluster.getAnchorLon();
 
         if(previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8) {
-            // phase 1A search nearby of root
-            _lat = cluster.getRootLat();
-            _lon = cluster.getRootLon();
-            timeMillis = System.currentTimeMillis();
-            bestHypocenter = scanArea(selectedEvents, 500.0, (int) (5000 * pointMultiplier), _lat, _lon,7 + iterationsDifference, maxDepth, finderSettings);
-            Logger.debug("CLOSE TO ROOT: " + (System.currentTimeMillis() - timeMillis));
-            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
-
-            _lat = cluster.getAnchorLat();
-            _lon = cluster.getAnchorLon();
-            // phase 1B search far from ANCHOR
-            PreliminaryHypocenter hyp = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
-            bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
+            // phase 1 search far from ANCHOR (it's not very certain)
+            bestHypocenter= scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
             Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
             Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
             _lat = bestHypocenter.lat;
@@ -239,14 +228,14 @@ public class EarthquakeAnalysis {
         }
 
         if(previousHypocenter == null || previousHypocenter.correctEvents < 42 || previousHypocenter.getCorrectness() < 0.9) {
-            // phase 2A search region near BEST or ANCHOR
+            // phase 2A search region near BEST or ANCHOR (it's quite certain)
             timeMillis = System.currentTimeMillis();
             PreliminaryHypocenter hyp = scanArea(selectedEvents, 2500.0, (int) (20000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
             Logger.debug("REGIONAL: " + (System.currentTimeMillis() - timeMillis));
             Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
         } else {
-            // phase 2B search region closer BEST or ANCHOR
+            // phase 2B search region closer BEST or ANCHOR (it assumes its almost right)
             timeMillis = System.currentTimeMillis();
             PreliminaryHypocenter hyp = scanArea(selectedEvents, 1000.0, (int) (10000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
@@ -254,7 +243,7 @@ public class EarthquakeAnalysis {
             Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
         }
 
-        // phase 4 find exact area
+        // phase 3 find exact area
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
@@ -263,7 +252,7 @@ public class EarthquakeAnalysis {
         Logger.debug("EXACT: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
-        // phase 5 find exact depth
+        // phase 4 find exact depth
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
