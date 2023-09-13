@@ -7,7 +7,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Set;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
     private JSlider sliderResolution;
