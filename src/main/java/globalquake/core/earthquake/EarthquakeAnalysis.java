@@ -184,10 +184,10 @@ public class EarthquakeAnalysis {
     private boolean checkDeltaP(ArrayList<PickedEvent> events, HypocenterFinderSettings finderSettings) {
         events.sort(Comparator.comparing(PickedEvent::pWave));
 
-        long deltaP = events.get((int) ((events.size() - 1) * 0.9)).pWave()
-                - events.get((int) ((events.size() - 1) * 0.1)).pWave();
+        long deltaP = events.get((int) ((events.size() - 1) * 0.75)).pWave()
+                - events.get((int) ((events.size() - 1) * 0.25)).pWave();
 
-        return deltaP >= Math.max(2000, finderSettings.pWaveInaccuracyThreshold() * 1.75);
+        return deltaP >= Math.max(2600, finderSettings.pWaveInaccuracyThreshold() * 2.1);
     }
 
     public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
