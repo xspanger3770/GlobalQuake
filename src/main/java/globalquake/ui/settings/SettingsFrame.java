@@ -70,9 +70,8 @@ public class SettingsFrame extends GQFrame {
 		addPanels();
 
 		pack();
+		setResizable(false);
 		setLocationRelativeTo(parent);
-
-		SwingUtilities.invokeLater(() -> setResizable(false));
 	}
 
 	protected void error(Exception e) {
@@ -91,6 +90,7 @@ public class SettingsFrame extends GQFrame {
 		for (SettingsPanel panel : panels) {
 			JScrollPane scrollPane = new JScrollPane(panel);
 			scrollPane.setPreferredSize(new Dimension(700, 500));
+			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			tabbedPane.addTab(panel.getTitle(), scrollPane);
 
 			javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));

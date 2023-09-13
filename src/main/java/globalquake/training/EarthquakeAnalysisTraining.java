@@ -23,6 +23,7 @@ public class EarthquakeAnalysisTraining {
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+        measureTest(10,10);
 
         Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 2000.0;

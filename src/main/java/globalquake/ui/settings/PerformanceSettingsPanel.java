@@ -19,10 +19,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         add(createSettingAccuracy());
         add(createSettingStoreTime());
         add(createSettingParalell());
-
-        for(int i = 0; i < 3; i++){
-            add(new JPanel()); // fillers
-        }
     }
 
     private Component createSettingStoreTime() {
@@ -120,7 +116,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         return panel;
     }
 
-    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
+    public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
 
     private String getNameForResolution(int value) {
         return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / Settings.hypocenterDetectionResolutionMax) * (RESOLUTION_NAMES.length))))];
