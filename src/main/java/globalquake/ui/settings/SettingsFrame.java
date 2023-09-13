@@ -1,5 +1,6 @@
 package globalquake.ui.settings;
 
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
@@ -15,7 +16,8 @@ public class SettingsFrame extends GQFrame {
 	private final List<SettingsPanel> panels = new LinkedList<>();
 	private JTabbedPane tabbedPane;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
+		TauPTravelTimeCalculator.init();
 		EventQueue.invokeLater(() -> {
             try {
                 new SettingsFrame(null).setVisible(true);

@@ -64,7 +64,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
                         """);
     }
 
-    public static Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
+    public static JPanel createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createRaisedBevelBorder());
 

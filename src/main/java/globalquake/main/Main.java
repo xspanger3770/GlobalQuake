@@ -7,8 +7,10 @@ import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.RuntimeApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
+import globalquake.training.EarthquakeAnalysisTraining;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.utils.Scale;
 
@@ -65,15 +67,18 @@ public class Main {
         }
     }
 
+    private static final double PHASES = 8.0;
+    private static int phase = 0;
+
     private static void initAll() throws Exception {
         databaseMonitorFrame.getMainProgressBar().setString("Loading regions...");
-        databaseMonitorFrame.getMainProgressBar().setValue(0);
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         Regions.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (1 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         Scale.load();
         databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (2 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         try{
             //Sound may fail to load for a variety of reasons. If it does, this method disables sound.
             Sounds.load();
@@ -81,19 +86,25 @@ public class Main {
             RuntimeApplicationException error = new RuntimeApplicationException("Failed to load sounds. Sound will be disabled", e);
             getErrorHandler().handleWarning(error);
         }
+        databaseMonitorFrame.getMainProgressBar().setString("Filling up intensity table...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        IntensityTable.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading travel table...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (3 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();
+        databaseMonitorFrame.getMainProgressBar().setString("Calibrating...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        EarthquakeAnalysisTraining.calibrateResolution(databaseMonitorFrame.getMainProgressBar(), null);
         databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (4 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
                     databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
-                    databaseMonitorFrame.getMainProgressBar().setValue((int) (5 / 7.0 * 100.0));
+                    databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
                         databaseMonitorFrame.getMainProgressBar().setString("Saving...");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) (6 / 7.0 * 100.0));
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
 
                         try {
                             databaseManager.save();
@@ -103,7 +114,7 @@ public class Main {
                         databaseMonitorFrame.initDone();
 
                         databaseMonitorFrame.getMainProgressBar().setString("Done");
-                        databaseMonitorFrame.getMainProgressBar().setValue(100);
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
                     });
                 });
     }

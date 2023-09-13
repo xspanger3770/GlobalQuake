@@ -108,4 +108,8 @@ public class IntensityTable {
         return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1 * Math.pow(5, mag));
 
     }
+
+    public static void init() {
+        getMaxIntensity(0,0);
+    }
 }

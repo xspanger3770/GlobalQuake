@@ -1,12 +1,16 @@
 package globalquake.ui.settings;
 
+import globalquake.training.EarthquakeAnalysisTraining;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.Set;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
-    private static final double RESOLUTION_MAX = 160.0;
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
     private JSlider sliderStoreTime;
@@ -60,6 +64,8 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         textAreaExplanation.setEditable(false);
         textAreaExplanation.setBackground(panel.getBackground());
 
+        chkBoxParalell.addChangeListener(changeEvent -> Settings.parallelHypocenterLocations = chkBoxParalell.isSelected());
+
         panel.add(chkBoxParalell, BorderLayout.CENTER);
         panel.add(textAreaExplanation, BorderLayout.SOUTH);
         return panel;
@@ -73,7 +79,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingAccuracy() {
-        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) RESOLUTION_MAX, 10, 5);
+        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) Settings.hypocenterDetectionResolutionMax, 10, 5);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent -> label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
@@ -85,7 +91,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         sliderResolution.setValue(Settings.hypocenterDetectionResolution.intValue());
         changeListener.stateChanged(null);
 
-        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, "%.2f".formatted(Settings.hypocenterDetectionResolutionDefault / 100.0),
+        JPanel panel = HypocenterAnalysisSettingsPanel.createCoolLayout(sliderResolution, label, "%.2f".formatted(Settings.hypocenterDetectionResolutionDefault / 100.0),
                 """
                         By increasing the Hypocenter Finding Resolution, you can\s
                         enhance the accuracy at which GlobalQuake locates hypocenters
@@ -93,12 +99,33 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                         significant lags while there is an earthquake happening on the map,
                         you should decrease this value.
                         """);
+
+        JPanel panel2 = new JPanel();
+
+        JButton btnRecalibrate = new JButton("Recalibrate");
+        btnRecalibrate.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                btnRecalibrate.setEnabled(false);
+                sliderResolution.setEnabled(false);
+                new Thread(() -> {
+                    EarthquakeAnalysisTraining.calibrateResolution(null, sliderResolution);
+                    btnRecalibrate.setEnabled(true);
+                    sliderResolution.setEnabled(true);
+                }).start();
+             }
+        });
+
+        panel2.add(btnRecalibrate);
+        panel.add(panel2, BorderLayout.SOUTH);
+
+        return panel;
     }
 
     public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Decreased", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
 
     private String getNameForResolution(int value) {
-        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / RESOLUTION_MAX) * (RESOLUTION_NAMES.length))))];
+        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / Settings.hypocenterDetectionResolutionMax) * (RESOLUTION_NAMES.length))))];
     }
 
     @Override

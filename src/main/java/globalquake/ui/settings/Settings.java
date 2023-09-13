@@ -29,6 +29,7 @@ public final class Settings {
 	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
+	public static final double hypocenterDetectionResolutionMax = 160.0;
 	public static Double hypocenterDetectionResolution;
 
 	public static Boolean parallelHypocenterLocations;
