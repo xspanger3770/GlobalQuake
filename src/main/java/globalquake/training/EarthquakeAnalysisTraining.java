@@ -24,12 +24,6 @@ public class EarthquakeAnalysisTraining {
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
 
-        calibrateResolution(null, null);
-
-        if(true){
-            return;
-        }
-
         Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 2000.0;
         Settings.parallelHypocenterLocations = true;
@@ -64,7 +58,7 @@ public class EarthquakeAnalysisTraining {
 
     public static void calibrateResolution(JProgressBar progressBar, JSlider slider){
         Settings.hypocenterDetectionResolution = 0.0;
-        long lastTime = 0;
+        long lastTime;
         int seed = 6543;
         int failed = 0;
         while(failed < 5 && Settings.hypocenterDetectionResolution <= Settings.hypocenterDetectionResolutionMax){
