@@ -1,6 +1,8 @@
 package globalquake.ui.debug;
 
 import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.geo.GeoUtils;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
@@ -17,6 +19,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -37,7 +40,7 @@ public class GlobePanelDebug extends GQFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
 
-		panel = new GlobePanel() {
+		panel = new GlobePanel(50,17) {
 
 			@Override
 			public void paint(Graphics gr) {
@@ -59,6 +62,15 @@ public class GlobePanelDebug extends GQFrame {
 				g.setFont(new Font("Calibri", Font.BOLD, 16));
 				g.setColor(Color.black);
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
+
+				String region = Regions.getRegion(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon);
+				g.setColor(Color.white);
+				g.drawString(region, getWidth() / 2 - g.getFontMetrics().stringWidth(region), getHeight() - 16);
+
+				double x = getWidth() / 2.0;
+				double y = getHeight() / 2.0;
+				double r = 10.0;
+				g.draw(new Ellipse2D.Double(x - r/2, y - r/2, r, r));
 			}
 		};
 
@@ -74,12 +86,23 @@ public class GlobePanelDebug extends GQFrame {
 			}
 		});
 
-		Random r = new Random();
 		MonitorableCopyOnWriteArrayList<DebugStation> debugStations = new MonitorableCopyOnWriteArrayList<>();
-		for(int i = 0; i < 50; i++) {
-			double x = 50 + r.nextDouble() * 10 - 5;
-			double y = 17 + r.nextDouble() * 20 - 10;
-			debugStations.add(new DebugStation(new Point2D(x, y)));
+
+		double centerLat = 50;
+		double centerLon = 17;
+
+		double maxDist = 10000;
+		int total = 400;
+
+
+		double phi = 1.61803398875;
+		double c = maxDist / Math.sqrt(total);
+
+		for(int n = 0; n < total; n++){
+			double ang = 360.0 / (phi * phi) * n;
+			double radius = Math.sqrt(n) * c;
+			double[] latlon = GeoUtils.moveOnGlobe(centerLat, centerLon, radius, ang);
+			debugStations.add(new DebugStation(new Point2D(latlon[0], latlon[1])));
 		}
 
 		System.out.println(debugStations.size());
@@ -113,7 +136,7 @@ public class GlobePanelDebug extends GQFrame {
 			
 		});
 
-		list = new EarthquakeListPanel(archivedQuakes);
+		list = new EarthquakeListPanel(this, archivedQuakes);
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -165,6 +188,7 @@ public class GlobePanelDebug extends GQFrame {
 
 	public static void main(String[] args) {
 		try {
+			TauPTravelTimeCalculator.init();
 			Regions.init();
 			Scale.load();
 			Sounds.load();

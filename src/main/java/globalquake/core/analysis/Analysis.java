@@ -44,11 +44,13 @@ public abstract class Analysis {
 			sampleRate = dr.getSampleRate();
 			reset();
 		}
+
+
 		long time = dr.getLastSampleBtime().toInstant().toEpochMilli();
         if (time >= lastRecord && time <= System.currentTimeMillis() + 60 * 1000) {
             decode(dr);
             lastRecord = time;
-        } // TODO ERROR BACKWARDS TIME
+        }
     }
 
 	private void decode(DataRecord dataRecord) {
@@ -68,17 +70,18 @@ public abstract class Analysis {
 				Logger.warn("Decompressed array is null!");
 				return;
 			}
+
 			for (int v : data) {
-				nextSample(v, time);
+				nextSample(v, time, System.currentTimeMillis());
 				time += (long) (1000 / getSampleRate());
 			}
 		} catch (Exception e) {
-			System.err.println("Crash occurred at station " + getStation().getStationCode() + ", thread continues.");
-			Logger.error(e);
+			Logger.warn("Crash occurred at station " + getStation().getStationCode() + ", thread continues.");
+			Logger.warn(e);
         }
 	}
 
-	public abstract void nextSample(int v, long time);
+	public abstract void nextSample(int v, long time, long currentTime);
 
 	@SuppressWarnings("SameReturnValue")
 	public abstract long getGapThreshold();
@@ -91,7 +94,11 @@ public abstract class Analysis {
 		return sampleRate;
 	}
 
-	public abstract void second();
+	public void setSampleRate(double sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public abstract void second(long time);
 
 	public List<Event> getDetectedEvents() {
 		return detectedEvents;

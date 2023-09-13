@@ -14,6 +14,7 @@ import globalquake.ui.settings.Settings;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("unused")
 public class ClusterAnalysisTraining {
@@ -25,7 +26,7 @@ public class ClusterAnalysisTraining {
 
     static class SimulatedStation extends AbstractStation {
 
-        public static int nextId = 0;
+        public static final AtomicInteger nextId = new AtomicInteger();
 
         public double sensitivityMultiplier = 1;
 
@@ -33,7 +34,7 @@ public class ClusterAnalysisTraining {
         public final List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
 
         public SimulatedStation(double lat, double lon, double alt) {
-            super("", "", "", "", lat, lon, alt, nextId++, null);
+            super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null);
         }
 
     }
@@ -114,10 +115,11 @@ public class ClusterAnalysisTraining {
         Regions.enabled = false;
         Settings.parallelHypocenterLocations = true;
         Settings.hypocenterDetectionResolution = 40.0;
+        Settings.maxEvents = 30;
 
         System.out.println("Running");
         for(int i = 0; i < 1; i++) {
-            SimulatedStation.nextId = 0;
+            SimulatedStation.nextId.set(0);
             long a = System.currentTimeMillis();
             runTest(1000);
             System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis() - a) / 1000.0);

@@ -8,6 +8,8 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
     private final JTextField textFieldTime;
     private final JSlider sliderZoomMul;
 
+    private final JCheckBox chkBoxEnableOnStartup;
+
     public CinemaModeSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(5,5,5,5));
@@ -34,7 +36,12 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
         zoomPanel.add(sliderZoomMul);
         add(zoomPanel);
 
-        for(int i = 0; i < 42; i++){
+        JPanel chkboxPanel = new JPanel();
+
+        chkboxPanel.add(chkBoxEnableOnStartup = new JCheckBox("Enable Cinema Mode on startup", Settings.cinemaModeOnStartup));
+        add(chkboxPanel);
+
+        for(int i = 0; i < 39; i++){
             add(new JPanel()); // fillers
         }
     }
@@ -43,6 +50,7 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
     public void save() {
         Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
         Settings.cinemaModeSwitchTime = Integer.parseInt(textFieldTime.getText());
+        Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
     }
 
     @Override

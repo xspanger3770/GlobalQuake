@@ -1,43 +1,51 @@
 package globalquake.core.earthquake;
 
+import java.util.List;
+
 public class Hypocenter {
 	public final double totalErr;
-
-	public final int correctStations;
+	public int correctEvents;
 
 	public final double lat;
 	public final double lon;
 	public final double depth;
 	public final long origin;
 
-	public int wrongEventsCount;
+	public int selectedEvents;
 
-	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctStations) {
+	public double magnitude;
+	public List<MagnitudeReading> mags;
+	public ObviousArrivalsInfo obviousArrivalsInfo;
+
+	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.origin = origin;
 		this.totalErr = err;
-		this.correctStations = correctStations;
+		this.correctEvents = correctEvents;
 	}
 
-	public void setWrongEventsCount(int count) {
-		this.wrongEventsCount = count;
+	public double getCorrectness(){
+		return (correctEvents) / (double) selectedEvents;
 	}
 
-	public int getWrongEventsCount() {
-		return wrongEventsCount;
+	public int getWrongEventCount(){
+		return selectedEvents - correctEvents;
 	}
 
 	@Override
 	public String toString() {
 		return "Hypocenter{" +
 				"totalErr=" + totalErr +
+				", correctEvents=" + correctEvents +
 				", lat=" + lat +
 				", lon=" + lon +
 				", depth=" + depth +
 				", origin=" + origin +
-				", correctStations=" + correctStations +
+				", selectedEvents=" + selectedEvents +
+				", magnitude=" + magnitude +
+				", obviousArrivalsInfo=" + obviousArrivalsInfo +
 				'}';
 	}
 }

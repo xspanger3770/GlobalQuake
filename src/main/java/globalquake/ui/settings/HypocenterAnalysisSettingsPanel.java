@@ -10,13 +10,37 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
     private JSlider sliderPWaveInaccuracy;
     private JSlider sliderCorrectness;
     private JSlider sliderMinStations;
+    private JSlider sliderMaxStations;
 
     public HypocenterAnalysisSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(createMinStationsSetting());
+        add(createMaxStationsSetting());
         add(createSettingPWave());
         add(createSettingCorrectness());
+    }
+
+    private Component createMaxStationsSetting() {
+        sliderMaxStations = createSettingsSlider(20, 300, 20, 5);
+
+        JLabel label = new JLabel();
+
+        ChangeListener upd = changeEvent -> label.setText("Maximum number of associated stations: %d".formatted(sliderMaxStations.getValue()));
+
+        sliderMaxStations.addChangeListener(upd);
+        sliderMaxStations.setValue(Settings.maxEvents);
+
+        upd.stateChanged(null);
+
+        return createCoolLayout(sliderMaxStations, label, "%s".formatted(Settings.maxEventsDefault),
+                """
+                        Here you can set the maximum number of stations that will\s
+                        be used for the hypocenter finding algorithm.\s
+                        Increasing this value can enhance the accuracy of earthquake detection,\s
+                        however, it's important to note that doing so will also significantly\s
+                        escalate the computational demands, potentially leading to longer processing times.
+                        """);
     }
 
     private Component createMinStationsSetting() {
@@ -40,7 +64,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
                         """);
     }
 
-    public static Component createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
+    public static JPanel createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createRaisedBevelBorder());
 
@@ -131,6 +155,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         Settings.pWaveInaccuracyThreshold = (double) sliderPWaveInaccuracy.getValue();
         Settings.hypocenterCorrectThreshold = (double) sliderCorrectness.getValue();
         Settings.minimumStationsForEEW = sliderMinStations.getValue();
+        Settings.maxEvents = sliderMaxStations.getValue();
     }
 
     @Override

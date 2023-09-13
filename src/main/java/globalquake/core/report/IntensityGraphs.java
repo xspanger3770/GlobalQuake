@@ -39,9 +39,15 @@ public class IntensityGraphs {
 		
 		recs.add(new DistanceIntensityRecord(5.5,7000,5));
 		recs.add(new DistanceIntensityRecord(6.5,7000,50));
-		
+
+		recs.add(new DistanceIntensityRecord(6.9,800,1000));
+		recs.add(new DistanceIntensityRecord(6.9,1100,300));
+		recs.add(new DistanceIntensityRecord(5.5,3000,40));
+		recs.add(new DistanceIntensityRecord(5.0,3000,40));
+		recs.add(new DistanceIntensityRecord(5.0,9000,30));
+
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa8.png"));
+		ImageIO.write(img, "PNG", new File("aaa9.png"));
 
 		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getMaxIntensity(5.7, 800));
 		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getMaxIntensity(5.7, 300));
@@ -108,7 +114,7 @@ public class IntensityGraphs {
 			}
 		}
 
-		for (int mag = -10; mag <= 90; mag += 1) {
+		for (int mag = -10; mag <= 100; mag += 1) {
 			for (double dist1 = 1; dist1 <= 100000; dist1 *= 2) {
 				double dist2 = dist1 * 2;
 				double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);

@@ -3,8 +3,11 @@ package globalquake.ui.globalquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Hypocenter;
+import globalquake.core.earthquake.MagnitudeReading;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
+import globalquake.database.SeedlinkNetwork;
+import globalquake.database.SeedlinkStatus;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
@@ -40,6 +43,7 @@ public class GlobalQuakePanel extends GlobePanel {
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public GlobalQuakePanel(JFrame frame) {
+        super(Settings.homeLat, Settings.homeLon);
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
@@ -89,7 +93,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if(selectedStation != null)
-            new StationMonitor(this, selectedStation);
+            new StationMonitor(this, selectedStation, 500);
     }
 
     @Override
@@ -150,6 +154,24 @@ public class GlobalQuakePanel extends GlobePanel {
 
         settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
+        int totalStations = 0;
+        int connectedStations = 0;
+        int runningSeedlinks = 0;
+        int totalSeedlinks = 0;
+        for(SeedlinkNetwork seedlinkNetwork : GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks()){
+            totalStations += seedlinkNetwork.selectedStations;
+            connectedStations+=seedlinkNetwork.connectedStations;
+            if(seedlinkNetwork.selectedStations > 0){
+                totalSeedlinks++;
+            }
+            if(seedlinkNetwork.status == SeedlinkStatus.RUNNING){
+                runningSeedlinks++;
+            }
+        }
+
+        settingsStrings.add(new SettingInfo("Stations: ", "%d / %d".formatted(connectedStations, totalStations), getColorPCT(1-(double) connectedStations / totalStations)));
+        settingsStrings.add(new SettingInfo("Seedlinks: ", "%d / %d".formatted(runningSeedlinks, totalSeedlinks), getColorPCT(1-(double) runningSeedlinks / totalSeedlinks)));
+
         double GB = 1024 * 1024 * 1024.0;
 
         long maxMem = Runtime.getRuntime().maxMemory();
@@ -157,12 +179,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
         double pctUsed = usedMem / (double)maxMem;
 
-        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorRAM(pctUsed)));
+        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
         settingsStrings.add(new SettingInfo("FPS: ", "%d".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
     }
 
-    private Color getColorRAM(double pct) {
+    private Color getColorPCT(double pct) {
         if(pct <= 0.5){
             return Scale.interpolateColors(Color.green, Color.yellow, pct * 2.0);
         }
@@ -170,7 +192,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private Color getColorFPS(double lastFPS) {
-        return getColorRAM(1 - lastFPS / 60.0);
+        return getColorPCT(1 - lastFPS / 60.0);
     }
 
     record SettingInfo(String name, String value, Color color) {
@@ -221,9 +243,7 @@ public class GlobalQuakePanel extends GlobePanel {
             if (quake.getCluster() != null) {
                 Hypocenter previousHypocenter = quake.getCluster().getPreviousHypocenter();
                 if (previousHypocenter != null) {
-                    str = previousHypocenter.getWrongEventsCount() + " / "
-                            + quake.getCluster().getSelected().size() + " / "
-                            + quake.getCluster().getAssignedEvents().size();
+                    str = "%d / %d / %d".formatted(previousHypocenter.getWrongEventCount(), previousHypocenter.selectedEvents, quake.getCluster().getAssignedEvents().size());
                     g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 125);
                 }
             }
@@ -312,11 +332,11 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         synchronized (quake.magsLock) {
-            List<Double> mags = quake.getMags();
+            List<MagnitudeReading> mags = quake.getMags();
             int[] groups = new int[100];
 
-            for (Double d : mags) {
-                int group = (int) (d * 10.0);
+            for (MagnitudeReading magnitudeReading : mags) {
+                int group = (int) (magnitudeReading.magnitude() * 10.0);
                 if (group >= 0 && group < 100) {
                     groups[group]++;
                 }

@@ -5,6 +5,7 @@ import globalquake.regions.Regions;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
 import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.settings.Settings;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.tinylog.Logger;
 
@@ -18,8 +19,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
-    private double centerLat = 50;
-    private double centerLon = 17;
+    private double centerLat;
+    private double centerLon;
     private double dragStartLat;
     private double dragStartLon;
     private double scroll = 0.45;
@@ -49,11 +50,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
         this.cinemaMode = cinemaMode;
     }
 
-    private boolean cinemaMode = false;
+    private boolean cinemaMode = Settings.cinemaModeOnStartup;
     private final Object animationLock = new Object();
     private Animation nextAnimation;
 
-    public GlobePanel() {
+    public GlobePanel(double lat, double lon) {
+        centerLat = lat;
+        centerLon = lon;
         renderer = new GlobeRenderer();
         renderer.updateCamera(createRenderProperties());
         setLayout(null);
@@ -75,7 +78,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 lastMouse = e.getPoint();
                 renderer.mouseMoved(e);
                 if(cinemaMode){
-                    System.err.println("Cinema mode disabled by dragging");
+                    Logger.info("Cinema mode disabled by dragging");
                     cinemaMode = false;
                 }
                 if (!_interactionAllowed()) {
@@ -143,7 +146,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         addMouseWheelListener(e -> {
             if(cinemaMode){
-                System.err.println("Cinema mode disabled by scrolling");
+                Logger.info("Cinema mode disabled by scrolling");
                 cinemaMode = false;
             }
 
@@ -180,8 +183,14 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureHorizon(new Point2D(centerLat, centerLon), 1));
 
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsMD, 0.5, Double.MAX_VALUE));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHD, 0.12, 0.5));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHD, 0, 0.12));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHDFiltered, 0.25, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUHDFiltered, 0, 0.25));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsUS, 0, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsAK, 0, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsJP, 0, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsNZ, 0, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHW, 0, 0.5));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsIT, 0, 0.25));
     }
 
     private void animationThread() {
@@ -214,7 +223,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             @Override
             public void run() {
                 if(!cinemaMode){
-                    System.err.println("Animation aborted!");
+                    Logger.info("Animation aborted!");
                     this.cancel();
                     latch.countDown();
                     return;
@@ -255,7 +264,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         targetScroll = Math.max(0.05, targetScroll);
 
-        nextAnimation = new Animation(centerLat, centerLon, scroll, targetLat, targetLon, targetScroll);
+        nextAnimation = new Animation(centerLat % 360, centerLon % 360, scroll, targetLat % 360, targetLon % 360, targetScroll);
         synchronized (animationLock) {
             animationLock.notify();
         }

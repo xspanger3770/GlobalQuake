@@ -887,7 +887,6 @@ public class TravelTimeTableOld {
 
 		double min = getSWaveTravelTime(depth, 0) - getPWaveTravelTime(depth, 0);
 		if (deltaT < min) {
-			System.out.println("min is "+min+", DT = "+deltaT);
 			return -1;
 		}
 

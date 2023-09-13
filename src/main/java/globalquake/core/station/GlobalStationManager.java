@@ -2,10 +2,12 @@ package globalquake.core.station;
 
 import globalquake.database.*;
 import globalquake.geo.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalStationManager {
 
@@ -13,7 +15,7 @@ public class GlobalStationManager {
 
     private static final int RAYS = 9;
 
-    private int nextID = 0;
+    private final AtomicInteger nextID = new AtomicInteger(0);
 
     public void initStations(StationDatabaseManager databaseManager) {
         if(databaseManager == null){
@@ -27,6 +29,7 @@ public class GlobalStationManager {
                     if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
+                    s.getSelectedChannel().selectBestSeedlinkNetwork().selectedStations++;
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
                     stations.add(station);
                 }
@@ -36,7 +39,7 @@ public class GlobalStationManager {
         }
 
         createListOfClosestStations(stations);
-        System.out.println("Initialized " + stations.size() + " Stations.");
+        Logger.info("Initialized " + stations.size() + " Stations.");
     }
 
     public static void createListOfClosestStations(List<AbstractStation> stations) {
@@ -94,10 +97,10 @@ public class GlobalStationManager {
     }
 
     private GlobalStation createGlobalStation(Station station, Channel ch) {
-        return new GlobalStation(station.getNetwork().getNetworkCode(),
-                station.getStationCode(), ch.getCode(), ch.getLocationCode(),
+        return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
+                station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID++, ch.selectBestSeedlinkNetwork());
+                nextID.getAndIncrement(), ch.selectBestSeedlinkNetwork());
     }
 
     public List<AbstractStation> getStations() {

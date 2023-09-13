@@ -101,11 +101,15 @@ public class IntensityTable {
     }
 
     private static double maxIntensity(double mag, double dist) {
-        mag = 1.2 * mag - 0.015 * mag * mag - 1;
-        if (dist > 600) {
-            dist = 600 + Math.sqrt(dist - 600) * 10.0;
+        mag = 1.2 * mag - 0.022 * mag * mag - 1;
+        if (dist > 1200) {
+            dist = 1200 + Math.pow(dist - 1200, 0.4) * 22.0;
         }
-        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.15 + 0.07 * mag) + 8 * Math.pow(5, mag));
+        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1 * Math.pow(5, mag));
 
+    }
+
+    public static void init() {
+        getMaxIntensity(0,0);
     }
 }

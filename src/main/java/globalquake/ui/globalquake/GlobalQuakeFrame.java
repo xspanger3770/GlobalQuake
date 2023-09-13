@@ -65,7 +65,7 @@ public class GlobalQuakeFrame extends GQFrame {
 			}
 		});
 
-		list = new EarthquakeListPanel(GlobalQuake.instance.getArchive().getArchivedQuakes());
+		list = new EarthquakeListPanel(this, GlobalQuake.instance.getArchive().getArchivedQuakes());
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 

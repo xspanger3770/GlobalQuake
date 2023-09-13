@@ -4,6 +4,8 @@ import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.ui.archived.ArchivedQuakeAnimation;
+import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.ui.settings.Settings;
 
 import javax.swing.*;
@@ -44,7 +46,7 @@ public class EarthquakeListPanel extends JPanel {
         }).collect(Collectors.toList());
     }
 
-    public EarthquakeListPanel(List<ArchivedQuake> archivedQuakes) {
+    public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {
         this.archivedQuakes = archivedQuakes;
         setBackground(Color.gray);
         setForeground(Color.gray);
@@ -81,12 +83,20 @@ public class EarthquakeListPanel extends JPanel {
 
                 ArchivedQuake quake = filtered.get(i);
 
-                if (quake != null && e.getButton() == MouseEvent.BUTTON3) {
+                if (quake != null && e.getButton() == MouseEvent.BUTTON3 && !isMouseInGoUpRect) {
                     quake.setWrong(!quake.isWrong());
                 }
 
-                if(isMouseInGoUpRect && e.getButton() == MouseEvent.BUTTON1){
-                    scroll = 0;
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    if(isMouseInGoUpRect) {
+                        scroll = 0;
+                    }else if (quake != null ) {
+                        new ArchivedQuakeUI(parent, quake).setVisible(true);
+                    }
+                }
+
+                if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
+                    new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
             }
 

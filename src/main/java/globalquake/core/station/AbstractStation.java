@@ -2,13 +2,18 @@ package globalquake.core.station;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.core.earthquake.Event;
 import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public abstract class AbstractStation {
+
+	public static final long INTERVAL_STORAGE_TIME = 30 * 60 * 1000;
+	public static final long INTERVAL_MAX_GAP = 5 * 1000;
 
 	private static final int RATIO_HISTORY_SECONDS = 60;
 	private final String networkCode;
@@ -22,9 +27,11 @@ public abstract class AbstractStation {
 	private final int id;
 	private final SeedlinkNetwork seedlinkNetwork;
 
-	private final Queue<Double> ratioHistory = new ConcurrentLinkedQueue<>();
+	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
 	public boolean disabled = false;
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
+
+	private final Deque<StationInterval> intervals = new ConcurrentLinkedDeque<>();
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, double lat, double lon, double alt,
@@ -39,6 +46,58 @@ public abstract class AbstractStation {
 		this.analysis = new BetterAnalysis(this);
 		this.id = id;
 		this.seedlinkNetwork = seedlinkNetwork;
+	}
+
+	public StationState getStateAt(long time) {
+		for(StationInterval interval : intervals) {
+			if(time >= interval.getStart() && time < interval.getEnd()){
+				return interval.getState();
+			}
+		}
+		return StationState.UNKNOWN;
+	}
+
+	public Event getEventAt(long time, long tolerance){
+		if(getAnalysis() == null){
+			return null;
+		}
+
+		for(Event event : getAnalysis().getDetectedEvents()){
+			if(!event.isValid()){
+				continue;
+			}
+			if(time >= event.getpWave() - tolerance && (!event.hasEnded() || time < event.getEnd() - tolerance)){
+				return event;
+			}
+		}
+
+		return null;
+	}
+
+	public void reportState(StationState state, long time) {
+		while(intervals.peekFirst() != null && time - intervals.peekFirst().getEnd() > INTERVAL_STORAGE_TIME){
+			intervals.removeFirst();
+		}
+		StationInterval lastInterval = getIntervals().peekLast();
+		if(lastInterval == null){
+			getIntervals().add(new StationInterval(time, time, state));
+			return;
+		}
+
+		if(time - lastInterval.getEnd() > INTERVAL_MAX_GAP){
+			getIntervals().add(new StationInterval(time, time, state));
+			return;
+		}
+
+		lastInterval.setEnd(time);
+
+		if(lastInterval.getState() != state){
+			getIntervals().add(new StationInterval(time, time, state));
+		}
+	}
+
+	public Deque<StationInterval> getIntervals() {
+		return intervals;
 	}
 
 	public double getAlt() {
@@ -82,7 +141,7 @@ public abstract class AbstractStation {
 
     public  long getDelayMS() { return 0;}
 
-    public void second() {
+    public void second(long time) {
 		if (getAnalysis()._maxRatio > 0) {
 			ratioHistory.add(getAnalysis()._maxRatio);
 			getAnalysis()._maxRatioReset = true;
@@ -92,7 +151,7 @@ public abstract class AbstractStation {
 			}
 		}
 
-		getAnalysis().second();
+		getAnalysis().second(time);
 	}
 
 	public double getMaxRatio60S() {

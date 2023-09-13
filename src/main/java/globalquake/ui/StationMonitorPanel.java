@@ -18,6 +18,7 @@ import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.training.ArtificialWaveformGenerator;
 import globalquake.ui.settings.Settings;
 
 public class StationMonitorPanel extends JPanel {
@@ -51,8 +52,8 @@ public class StationMonitorPanel extends JPanel {
 		g.drawString("Running Averages", 4, (int) (h * 0.4 + 14));
 		g.drawString("Averages Ratio", 4, (int) (h * 0.7 + 14));
 
-		long upperMinute = (long) (Math.ceil(System.currentTimeMillis() / (1000 * 60.0) + 1) * (1000L * 60L));
-		for (int deltaSec = 0; deltaSec <= BetterAnalysis.LOGS_STORE_TIME + 80; deltaSec += 10) {
+		long upperMinute = (long) (Math.ceil(getTime()/ (1000 * 60.0) + 1) * (1000L * 60L));
+		for (int deltaSec = 0; deltaSec <= 60 * Settings.logsStoreTimeMinutes + 80; deltaSec += 10) {
 			long time = upperMinute - deltaSec * 1000L;
 			boolean fullMinute = time % 60000 == 0;
 			double x = getX(time);
@@ -74,7 +75,7 @@ public class StationMonitorPanel extends JPanel {
 			double maxAverage = 0;
 			double maxRatio = 0;
 			for (Log l : logs) {
-				int v = l.getRawValue();
+				int v = l.rawValue();
 				if (v > maxValue) {
 					maxValue = v;
 				}
@@ -82,17 +83,17 @@ public class StationMonitorPanel extends JPanel {
 					minValue = v;
 				}
 
-				double fv = l.getFilteredV();
+				double fv = l.filteredV();
 				if (fv > maxFilteredValue) {
 					maxFilteredValue = fv;
 				}
 				if (fv < minFilteredValue) {
 					minFilteredValue = fv;
 				}
-				double shortAvg = l.getShortAverage();
-				double longAvg = l.getLongAverage();
-				double medAvg = l.getMediumAverage();
-				double specAvg = l.getSpecialAverage();
+				double shortAvg = l.shortAverage();
+				double longAvg = l.longAverage();
+				double medAvg = l.mediumAverage();
+				double specAvg = l.specialAverage();
 				if (shortAvg > maxAverage) {
 					maxAverage = shortAvg;
 				}
@@ -124,6 +125,9 @@ public class StationMonitorPanel extends JPanel {
 				}
 			}
 
+			maxValue += 10.0;
+			minValue -= 10.0;
+
 			double fix1 = (maxValue - minValue) * 0.25 * 0.5;
 			maxValue += fix1;
 			minValue -= fix1;
@@ -132,52 +136,53 @@ public class StationMonitorPanel extends JPanel {
 			maxFilteredValue += fix2;
 			minFilteredValue -= fix2;
 
+			maxAverage += 10.0;
 			maxAverage *= 1.25;
 
 			for (int i = 0; i < logs.size() - 1; i++) {
 				Log a = logs.get(i);
 				Log b = logs.get(i + 1);
 
-				boolean gap = (a.getTime() - b.getTime()) > (1.0 / station.getAnalysis().getSampleRate() + 50);
+				boolean gap = (a.time() - b.time()) > (1000.0 / station.getAnalysis().getSampleRate()) * 2;
 				if (gap) {
 					continue;
 				}
 
-				double x1 = getX(a.getTime());
-				double x2 = getX(b.getTime());
+				double x1 = getX(a.time());
+				double x2 = getX(b.time());
 
-				double y1 = 0 + (getHeight() * 0.20) * (maxValue - a.getRawValue()) / (maxValue - minValue);
-				double y2 = 0 + (getHeight() * 0.20) * (maxValue - b.getRawValue()) / (maxValue - minValue);
+				double y1 = 0 + (getHeight() * 0.20) * (maxValue - a.rawValue()) / (maxValue - minValue);
+				double y2 = 0 + (getHeight() * 0.20) * (maxValue - b.rawValue()) / (maxValue - minValue);
 
-				double y3 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - a.getFilteredV())
+				double y3 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - a.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
-				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.getFilteredV())
+				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
 
 				double y5 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getShortAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.shortAverage()) / (maxAverage);
 				double y6 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getShortAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.shortAverage()) / (maxAverage);
 
 				double y7 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getLongAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.longAverage()) / (maxAverage);
 				double y8 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getLongAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.longAverage()) / (maxAverage);
 
 				double y9 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getMediumAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.mediumAverage()) / (maxAverage);
 				double y10 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getMediumAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.mediumAverage()) / (maxAverage);
 
 				double y9b = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getThirdAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.thirdAverage()) / (maxAverage);
 				double y10b = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getThirdAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.thirdAverage()) / (maxAverage);
 
 				double y9c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.getSpecialAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - a.specialAverage()) / (maxAverage);
 				double y10c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.getSpecialAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.specialAverage()) / (maxAverage);
 
 				double y11 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getRatio()) / (maxRatio);
 				double y12 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getRatio()) / (maxRatio);
@@ -217,7 +222,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y9c, x2, y10c));
 
-				g.setColor(a.getStatus() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y5, x2, y6));
 
@@ -233,7 +238,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13c, x2, y14c));
 
-				g.setColor(getColorPhase(a.getPhase()));
+				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y11, x2, y12));
 
@@ -254,43 +259,43 @@ public class StationMonitorPanel extends JPanel {
 		}
 
 		for (Event e : station.getAnalysis().getDetectedEvents()) {
+			if(!e.isValid()){
+				continue;
+			}
 			double x = getX(e.getpWave());
-			g.setColor(Color.blue);
+			g.setColor(e.isSWave() ? Color.red : Color.blue);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
-
-			double x2 = getX(e.getsWave());
-			g.setColor(Color.red);
-			g.setStroke(new BasicStroke(2f));
-			g.draw(new Line2D.Double(x2, 0, x2, getHeight()));
 		}
 
-		for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-			double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
-			long arrivalP = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
+		if(GlobalQuake.instance != null) {
+			for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
+				double distGC = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), earthquake.getLat(), earthquake.getLon());
+				long arrivalP = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+						TauPTravelTimeCalculator.toAngle(distGC)) + EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
 
-			long arrivalS = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
-					TauPTravelTimeCalculator.toAngle(distGC))+ EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
+				long arrivalS = (long) (earthquake.getOrigin() + 1000 * (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+						TauPTravelTimeCalculator.toAngle(distGC)) + EarthquakeAnalysis.getElevationCorrection(station.getAlt())));
 
-			double xP = getX(arrivalP);
-			double xS = getX(arrivalS);
+				double xP = getX(arrivalP);
+				double xS = getX(arrivalS);
 
-			g.setColor(Color.magenta);
-			g.setStroke(dashed);
-			g.draw(new Line2D.Double(xP, 0, xP, getHeight()));
-			g.draw(new Line2D.Double(xS, 0, xS, getHeight()));
+				g.setColor(Color.magenta);
+				g.setStroke(dashed);
+				g.draw(new Line2D.Double(xP, 0, xP, getHeight()));
+				g.draw(new Line2D.Double(xS, 0, xS, getHeight()));
 
-			double x1 = getX((long) (arrivalP - Settings.pWaveInaccuracyThreshold));
-			double x2 = getX((long) (arrivalP + Settings.pWaveInaccuracyThreshold));
-			double x3 = getX((long) (arrivalS - Settings.pWaveInaccuracyThreshold));
-			double x4 = getX((long) (arrivalS + Settings.pWaveInaccuracyThreshold));
+				double x1 = getX((long) (arrivalP - Settings.pWaveInaccuracyThreshold));
+				double x2 = getX((long) (arrivalP + Settings.pWaveInaccuracyThreshold));
+				double x3 = getX((long) (arrivalS - Settings.pWaveInaccuracyThreshold));
+				double x4 = getX((long) (arrivalS + Settings.pWaveInaccuracyThreshold));
 
-			g.setColor(new Color(0, 0, 255, 80));
-			g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
+				g.setColor(new Color(0, 0, 255, 80));
+				g.fill(new Rectangle2D.Double(x1, 0, x2 - x1, h));
 
-			g.setColor(new Color(255, 0, 0, 80));
-			g.fill(new Rectangle2D.Double(x3, 0, x4 - x3, h));
+				g.setColor(new Color(255, 0, 0, 80));
+				g.fill(new Rectangle2D.Double(x3, 0, x4 - x3, h));
+			}
 		}
 
 		g.setColor(Color.black);
@@ -306,21 +311,12 @@ public class StationMonitorPanel extends JPanel {
 		this.image = img;
 	}
 
-	private Color getColorPhase(byte phase) {
-		if (phase == Log.P_WAVES) {
-			return new Color(0, 148, 255);
-		} else if (phase == Log.WAITING_FOR_S) {
-			return new Color(0, 200, 0);
-		} else if (phase == Log.S_WAVES) {
-			return Color.red;
-		} else if (phase == Log.DECAY) {
-			return Color.orange;
-		}
-		return Color.black;
+	private long getTime() {
+		return ArtificialWaveformGenerator.instance != null ? ArtificialWaveformGenerator.instance.simulationTime : System.currentTimeMillis();
 	}
 
 	private double getX(long time) {
-		return getWidth() * (1 - (System.currentTimeMillis() - time) / (BetterAnalysis.LOGS_STORE_TIME * 1000.0));
+		return getWidth() * (1 - (getTime() - time) / (Settings.logsStoreTimeMinutes * 60 * 1000.0));
 	}
 
 	@Override

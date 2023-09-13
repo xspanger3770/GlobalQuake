@@ -161,7 +161,9 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
         toolBar.addSeparator();
 
-        toolBar.add(new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this)));
+        JButton buttonFilter = new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this));
+        buttonFilter.addActionListener(this);
+        toolBar.add(buttonFilter);
         
         toolBar.addSeparator();
 
@@ -182,18 +184,19 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if(e.getSource() == deselectAll){
             selectAll.setEnabled(true);
             selectButton.setEnabled(true);
             deselectAll.setEnabled(false);
             deselectButton.setEnabled(false);
+            setDragMode(DragMode.NONE);
         }
         else if(e.getSource() == selectAll){
             selectAll.setEnabled(false);
             selectButton.setEnabled(false);
             deselectAll.setEnabled(true);
             deselectButton.setEnabled(true);
+            setDragMode(DragMode.NONE);
         }
         else{
             selectAll.setEnabled(true);

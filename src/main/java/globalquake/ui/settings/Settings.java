@@ -29,6 +29,7 @@ public final class Settings {
 	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
+	public static final double hypocenterDetectionResolutionMax = 160.0;
 	public static Double hypocenterDetectionResolution;
 
 	public static Boolean parallelHypocenterLocations;
@@ -88,6 +89,13 @@ public final class Settings {
 	public static Integer cinemaModeSwitchTime;
 	public static Integer cinemaModeZoomMultiplier;
 
+	public static Integer logsStoreTimeMinutes;
+	public static Integer maxEvents;
+	public static final int maxEventsDefault = 60;
+	public static Boolean displayCoreWaves;
+	public static Boolean cinemaModeOnStartup;
+	public static Boolean recalibrateOnLaunch;
+
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
@@ -107,9 +115,16 @@ public final class Settings {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
-			System.out.println("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
+			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("recalibrateOnLaunch", "true");
 
+		loadProperty("displayCoreWaves", "false");
+		loadProperty("maxEvents", String.valueOf(maxEventsDefault));
+
+		loadProperty("logsStoreTimeMinutes", "5");
+
+		loadProperty("cinemaModeOnStartup", "false");
 		loadProperty("cinemaModeSwitchTime", "10");
 		loadProperty("cinemaModeZoomMultiplier", "100");
 
@@ -192,6 +207,8 @@ public final class Settings {
 					val = Integer.parseInt(defaultVal);
 				}
 				setProperty(field, val);
+			} else {
+				Logger.error("Error: unsupported setting type: %s".formatted(field.getType()));
 			}
 		} catch (Exception e) {
 			Logger.error(e);

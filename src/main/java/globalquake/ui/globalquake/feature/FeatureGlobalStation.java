@@ -3,7 +3,6 @@ package globalquake.ui.globalquake.feature;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.earthquake.Event;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -99,8 +98,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
             graphics.setColor(Color.yellow);
+            graphics.setStroke(new BasicStroke(2f));
             graphics.draw(elementStationCircle.getShape());
         }
+
+        graphics.setStroke(new BasicStroke(1f));
 
         if(entity.getOriginal().disabled){
             return;
@@ -117,7 +119,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
                 if(event2.assignedCluster != null){
-                    Color c = event2.assignedCluster.color;
+                    Color c = !event2.isValid() ? Color.gray : event2.assignedCluster.color;
 
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
@@ -127,7 +129,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                     _y += 16;
                 }
             }
-        } else if (event != null && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+        } else if (event != null && event.isValid() && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
             if (event.getMaxRatio() >= RATIO_YELLOW) {
@@ -153,7 +155,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             g.setColor(Color.white);
             String str = station.toString();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
-            str = station.getSeedlinkNetwork() == null ? "NONE!" : station.getSeedlinkNetwork().getName();
+            str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
 
             if(station.hasNoDisplayableData()){
@@ -161,7 +163,13 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
             } else {
                 long delay = station.getDelayMS();
-                FeatureSelectableStation.drawDelay(g, x, y + 33, delay,"Delay");
+                if (delay == Long.MIN_VALUE) {
+                    g.setColor(Color.magenta);
+                    str = "Replay";
+                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                } else {
+                    FeatureSelectableStation.drawDelay(g, x, y + 33, delay, "Delay");
+                }
             }
         }
         if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
@@ -191,6 +199,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return new Point2D(((GlobalStation) (entity.getOriginal())).getLatitude(), ((GlobalStation) (entity.getOriginal())).getLongitude());
+        return new Point2D(((AbstractStation) (entity.getOriginal())).getLatitude(), ((AbstractStation) (entity.getOriginal())).getLongitude());
     }
 }

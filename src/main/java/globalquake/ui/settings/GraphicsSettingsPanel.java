@@ -170,7 +170,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         fpsPanel.setBorder(BorderFactory.createTitledBorder("Performance"));
         fpsPanel.setLayout(new BoxLayout(fpsPanel, BoxLayout.Y_AXIS));
 
-        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 90, Settings.fpsIdle);
+        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
         sliderFpsIdle.setPaintLabels(true);
         sliderFpsIdle.setPaintTicks(true);
         sliderFpsIdle.setMajorTickSpacing(10);

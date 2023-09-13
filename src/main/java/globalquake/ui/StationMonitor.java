@@ -12,7 +12,7 @@ public class StationMonitor extends GQFrame {
 
 	private final AbstractStation station;
 
-	public StationMonitor(Component parent, AbstractStation station) {
+	public StationMonitor(Component parent, AbstractStation station, int refreshTime) {
 		this.station = station;
 		setLayout(new BorderLayout());
 
@@ -34,7 +34,7 @@ public class StationMonitor extends GQFrame {
 				panel.updateImage();
 				panel.repaint();
 			}
-		}, 0, 1000);
+		}, 0, refreshTime);
 
 		addWindowListener(new WindowAdapter() {
 

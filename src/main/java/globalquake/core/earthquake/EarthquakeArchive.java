@@ -24,13 +24,13 @@ public class EarthquakeArchive {
 	private void loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
 			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
-			System.out.println("Created new archive");
+			Logger.info("Created new archive");
 		} else {
 			try {
 				ObjectInputStream oin = new ObjectInputStream(new FileInputStream(ARCHIVE_FILE));
 				archivedQuakes = (MonitorableCopyOnWriteArrayList<ArchivedQuake>) oin.readObject();
 				oin.close();
-				System.out.println("Loaded " + archivedQuakes.size() + " quakes from archive.");
+				Logger.info("Loaded " + archivedQuakes.size() + " quakes from archive.");
 			} catch (Exception e) {
 				Logger.error(e);
 				archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
@@ -46,12 +46,14 @@ public class EarthquakeArchive {
 		if (archivedQuakes != null) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(TEMP_ARCHIVE_FILE));
-				System.out.println("Saving " + archivedQuakes.size() + " quakes to " + ARCHIVE_FILE.getName());
+				Logger.info("Saving " + archivedQuakes.size() + " quakes to " + ARCHIVE_FILE.getName());
 				out.writeObject(archivedQuakes);
 				out.close();
 				boolean res = (!ARCHIVE_FILE.exists() || ARCHIVE_FILE.delete()) && TEMP_ARCHIVE_FILE.renameTo(ARCHIVE_FILE);
 				if(!res){
 					Logger.error("Unable to save archive!");
+				} else {
+					Logger.info("Archive saved");
 				}
 			} catch (Exception e) {
 				Logger.error(e);
@@ -95,22 +97,10 @@ public class EarthquakeArchive {
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
-	}
-
-	public void update() {
-		boolean save = false;
 
 		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
-			save = true;
 			archivedQuakes.remove(archivedQuakes.size() - 1);
 		}
-
-		if (save) {
-			new Thread("Archive Save Thread") {
-				public void run() {
-					saveArchive();
-				}
-			}.start();
-		}
 	}
+
 }

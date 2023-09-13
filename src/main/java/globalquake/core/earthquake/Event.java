@@ -21,50 +21,48 @@ public class Event implements Serializable {
 	private long start;// time when first detected
 	private long end;// time when end threshold reached
 	private long pWave;
-	private long sWave;
 	private long firstLogTime;// first log time (now 90 seconds before event start)
-	private long lastLogTime;// last log time (increasing until 90 seconds after event end)
-	private long lastAnalysisTime;
-
-	public transient int nextPWaveCalc;
 
 	private List<Log> logs;
-	public final transient Object logsLock;
 
 	public double maxRatio;
 
-	private boolean broken;
+	private boolean valid;
 
 	public Cluster assignedCluster;
 	private int updatesCount;
-	private final transient Analysis analysis;
 	public StationReport report;
+
+	private transient int nextPWaveCalc;
+	private final transient Analysis analysis;
+
+	private boolean isSWave;
 
 	public Event(Analysis analysis, long start, List<Log> logs) {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
-		this.firstLogTime = logs.get(logs.size() - 1).getTime();
+		this.firstLogTime = logs.get(logs.size() - 1).time();
+		this.valid = true;
 	}
 
 	// used in emulator
 	public Event(Analysis analysis) {
-		this.logsLock = new Object();
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
-		this.broken = false;
+		this.valid = true;
 		this.analysis = analysis;
 		this.assignedCluster = null;
 		this.updatesCount = 1;
+		this.isSWave = false;
 	}
 
 	public void end(long end) {
 		this.end = end;
 	}
 
-	public void endBadly(int i) {
-		this.broken = true;
-		this.end = i;
+	public void endBadly() {
+		this.valid = false;
 	}
 
 	public void setpWave(long pWave) {
@@ -78,13 +76,13 @@ public class Event implements Serializable {
 		return pWave;
 	}
 
-	public void setsWave(long sWave) {
-		this.sWave = sWave;
-		// this.updatesCount++; S WAVES HAVE NO EFFECT IN THE CURRENT VERSION
+
+	public boolean isSWave() {
+		return isSWave;
 	}
 
-	public long getsWave() {
-		return sWave;
+	public void setAsSWave(boolean isSWave){
+		this.isSWave = isSWave;
 	}
 
 	/**
@@ -107,16 +105,8 @@ public class Event implements Serializable {
 		return firstLogTime;
 	}
 
-	public long getLastAnalysisTime() {
-		return lastAnalysisTime;
-	}
-
 	public boolean hasEnded() {
 		return getEnd() != 0;
-	}
-
-	public long getLastLogTime() {
-		return lastLogTime;
 	}
 
 	public double getMaxRatio() {
@@ -127,9 +117,8 @@ public class Event implements Serializable {
 		return analysis;
 	}
 
-	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	public boolean isBroken() {
-		return broken;
+	public boolean isValid() {
+		return valid;
 	}
 
 	public double getLatFromStation() {
@@ -145,10 +134,7 @@ public class Event implements Serializable {
 	}
 
 	public void log(Log currentLog) {
-		synchronized (logsLock) {
-			logs.add(0, currentLog);
-		}
-		this.lastLogTime = currentLog.getTime();
+		logs.add(0, currentLog);
 		if (currentLog.getRatio() > this.maxRatio) {
 			this.maxRatio = currentLog.getRatio();
 		}
@@ -162,20 +148,16 @@ public class Event implements Serializable {
 					findPWaveMethod1();
 				}
 			}
-			if (currentLog.getTime() - getLastAnalysisTime() >= 5 * 1000) {
-				analyseEvent();
-			}
 		}
 	}
 
 	// T-30sec
 	// first estimation of p wave
 	private void findPWaveMethod1() {
-
 		// 0 - when first detected
 		// 1 - first upgrade etc...
 		int strenghtLevel = nextPWaveCalc;
-		Log logAtStart = getClosestLog(getStart() - 1, true);
+		Log logAtStart = getClosestLog(getStart() - 1);
 		if (logAtStart == null) {
 			return;
 		}
@@ -187,7 +169,7 @@ public class Event implements Serializable {
 		double minSpecial = Double.MAX_VALUE;
 
 		for (Log l : logs) {
-			long time = l.getTime();
+			long time = l.time();
 			if (time >= lookBack && time <= getStart()) {
 				slows.add(l.getMediumRatio());
 				double spec = l.getSpecialRatio();
@@ -220,7 +202,7 @@ public class Event implements Serializable {
 		// DEPRECATED, again
 		long pWave = -1;
 		for (Log l : logs) {
-			long time = l.getTime();
+			long time = l.time();
 			// l.getMediumRatio() <= slowThreshold;
 			boolean ratioOK = l.getRatio() <= slow15Pct * (slowThresholdMultiplier * 1.25);
 			boolean specialOK = l.getSpecialRatio() <= specialThreshold;
@@ -233,94 +215,26 @@ public class Event implements Serializable {
 		}
 
 		setpWave(pWave);
-		analyseEvent();
-	}
-
-	// assign phases
-	// find s wave
-	// warning! very experimental at this point
-	private void analyseEvent() {
-		if (logs.isEmpty()) {
-			return;
-		}
-		long pWave = getpWave();
-		if (logs.get(logs.size() - 1).getTime() > pWave) {
-			return;
-		}
-		if (pWave == 0) {
-			return;
-		}
-		long end = !hasEnded() ? getLastLogTime() : getEnd();
-		// from oldest log to newest logs
-		byte phase = Log.P_WAVES;
-		var log = getClosestLog(pWave, false);
-
-		if(log == null){
-			return;
-		}
-
-		double specialRatioStart = log.getSpecialRatio();
-		double specialRatioW = 0;
-		long specialRatioWT = 0;
-		double specialRatioMax0 = 0;
-		long specialRatioMax0T = 0;
-		double maxDeriv = 0;
-		double der2 = 0;
-		for (int i = logs.size() - 1; i >= 0; i--) {
-			Log l = logs.get(i);
-			long time = l.getTime();
-			if (time >= pWave && time <= end) {
-
-				if (l.getSpecialRatio() > specialRatioMax0) {
-					specialRatioMax0 = l.getSpecialRatio();
-					specialRatioMax0T = l.getTime();
-				}
-
-				if (time - pWave >= 4000) {
-					if (phase == Log.P_WAVES) {
-						double deriv = (l.getSpecialRatio() - specialRatioStart) / (time - pWave);
-						if (deriv > maxDeriv) {
-							maxDeriv = deriv;
-						}
-						double expectedSpecial = specialRatioStart + (time - pWave) * maxDeriv;
-						if (expectedSpecial / l.getSpecialRatio() > 1.2) {
-							phase = Log.WAITING_FOR_S;
-							specialRatioW = l.getSpecialRatio();
-							specialRatioWT = l.getTime();
-							der2 = (specialRatioW - specialRatioMax0) / (time - specialRatioMax0T);
-						}
-					} else if (phase == Log.WAITING_FOR_S) {
-						double expectedSpecial = specialRatioW + (time - specialRatioWT) * der2;
-						if (l.getSpecialRatio() > expectedSpecial * 1.35) {
-							phase = Log.S_WAVES;
-							setsWave(time);
-						}
-					}
-				}
-				l.setPhase(phase);
-			}
-		}
-		lastAnalysisTime = logs.get(0).getTime();
 	}
 
 	// halving method
 	// this was supposed to be binary search probably
-	private Log getClosestLog(long time, boolean returnNull) {
+	private Log getClosestLog(long time) {
 		if (logs.isEmpty()) {
 			return null;
 		}
-		if (time > logs.get(0).getTime()) {
-			return returnNull ? null : logs.get(0);
+		if (time > logs.get(0).time()) {
+			return null;
 		}
-		if (time < logs.get(logs.size() - 1).getTime()) {
-			return returnNull ? null : logs.get(logs.size() - 1);
+		if (time < logs.get(logs.size() - 1).time()) {
+			return null;
 		}
 
 		int lowerBound = 0;
 		int upperBound = logs.size() - 1;
 		while (upperBound - lowerBound > 1) {
 			int mid = (upperBound + lowerBound) / 2;
-			if (logs.get(mid).getTime() > time) {
+			if (logs.get(mid).time() > time) {
 				upperBound = mid;
 			} else {
 				lowerBound = mid;
@@ -328,8 +242,8 @@ public class Event implements Serializable {
 		}
 		Log up = logs.get(upperBound);
 		Log down = logs.get(lowerBound);
-		int diff1 = (int) Math.abs(up.getTime() - time);
-		int diff2 = (int) Math.abs(down.getTime() - time);
+		int diff1 = (int) Math.abs(up.time() - time);
+		int diff2 = (int) Math.abs(down.time() - time);
 		if (diff1 < diff2) {
 			return up;
 		} else {
@@ -341,4 +255,7 @@ public class Event implements Serializable {
 		return updatesCount;
 	}
 
+	public List<Log> getLogs() {
+		return logs;
+	}
 }

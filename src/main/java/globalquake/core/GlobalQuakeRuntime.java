@@ -2,7 +2,9 @@ package globalquake.core;
 
 import globalquake.core.station.AbstractStation;
 import globalquake.main.Main;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.NamedThreadFactory;
+import org.tinylog.Logger;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +18,8 @@ public class GlobalQuakeRuntime {
     private long lastGC;
     private long clusterAnalysisT;
     private long lastQuakesT;
+
+    private int lastSettings = Settings.changes;
 
     public void runThreads() {
         ScheduledExecutorService execAnalysis = Executors
@@ -33,7 +37,7 @@ public class GlobalQuakeRuntime {
                 GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(AbstractStation::analyse);
                 lastAnalysis = System.currentTimeMillis() - a;
             } catch (Exception e) {
-                System.err.println("Exception occurred in station analysis");
+                Logger.error("Exception occurred in station analysis");
                 Main.getErrorHandler().handleException(e);
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
@@ -41,13 +45,19 @@ public class GlobalQuakeRuntime {
         exec1Sec.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(AbstractStation::second);
+                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(station -> station.second(a));
                 if (GlobalQuake.instance.getEarthquakeAnalysis() != null) {
                     GlobalQuake.instance.getEarthquakeAnalysis().second();
                 }
                 lastSecond = System.currentTimeMillis() - a;
+
+                if(lastSettings != Settings.changes){
+                    System.gc();
+                }
+
+                lastSettings = Settings.changes;
             } catch (Exception e) {
-                System.err.println("Exception occurred in 1-second loop");
+                Logger.error("Exception occurred in 1-second loop");
                 Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);
@@ -59,7 +69,7 @@ public class GlobalQuakeRuntime {
                 GlobalQuake.instance.getAlertManager().tick();
                 clusterAnalysisT = System.currentTimeMillis() - a;
             } catch (Exception e) {
-                System.err.println("Exception occured in cluster analysis loop");
+                Logger.error("Exception occured in cluster analysis loop");
                 Main.getErrorHandler().handleException(e);
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
@@ -68,10 +78,9 @@ public class GlobalQuakeRuntime {
             try {
                 long a = System.currentTimeMillis();
                 GlobalQuake.instance.getEarthquakeAnalysis().run();
-                GlobalQuake.instance.getArchive().update();
                 lastQuakesT = System.currentTimeMillis() - a;
             } catch (Exception e) {
-                System.err.println("Exception occured in hypocenter location loop");
+                Logger.error("Exception occured in hypocenter location loop");
                 Main.getErrorHandler().handleException(e);
             }
         }, 0, 1, TimeUnit.SECONDS);

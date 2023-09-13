@@ -79,7 +79,6 @@ public class DatabaseMonitorFrame extends GQFrame {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                System.out.println("SAVEE");
                 try {
                     manager.save();
                 } catch (FatalIOException ex) {
