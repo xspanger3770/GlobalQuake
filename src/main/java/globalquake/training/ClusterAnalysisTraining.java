@@ -21,7 +21,7 @@ public class ClusterAnalysisTraining {
 
     private static final int MINUTE = 1000 * 60;
 
-    private static final boolean PKIKP = true;
+    private static final boolean PKIKP = false;
     private static final boolean P =  true;
 
     static class SimulatedStation extends AbstractStation {
@@ -121,7 +121,7 @@ public class ClusterAnalysisTraining {
         for(int i = 0; i < 1; i++) {
             SimulatedStation.nextId.set(0);
             long a = System.currentTimeMillis();
-            runTest(1000);
+            runTest(5000);
             System.err.printf("\nTest itself took %.1f seconds%n", (System.currentTimeMillis() - a) / 1000.0);
             Thread.sleep(2000);
         }

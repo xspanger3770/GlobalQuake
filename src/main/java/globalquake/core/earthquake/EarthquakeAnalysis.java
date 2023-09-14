@@ -290,12 +290,13 @@ public class EarthquakeAnalysis {
                 getEarthquakes().remove(cluster.getEarthquake());
                 cluster.setEarthquake(null);
             }
+            Logger.debug("Hypocenter not valid, remove = %s".formatted(remove));
         } else {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
-                Logger.debug(result);
+                Logger.debug("Not updating because: %s".formatted(result));
             }
         }
 

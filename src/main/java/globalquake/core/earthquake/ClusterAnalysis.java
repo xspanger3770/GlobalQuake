@@ -22,6 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
 
+    private static final int MIN_CLUSTER_SIZE = 4;
     private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
 
     private final Lock clustersReadLock = clustersLock.readLock();
@@ -55,10 +56,52 @@ public class ClusterAnalysis {
             //assignEventsToExistingEarthquakeClusters(); VERY CONTROVERSIAL
             expandExistingClusters();
             createNewClusters();
+            stealEvents();
             mergeClusters();
             updateClusters();
         } finally {
             clustersWriteLock.unlock();
+        }
+    }
+
+    record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){};
+
+    private void stealEvents() {
+        java.util.Map<Event, EventIntensityInfo> map = new HashMap<>();
+        for(Cluster cluster : clusters) {
+            if (cluster.getEarthquake() == null) {
+                continue;
+            }
+
+            for (AbstractStation station : stations) {
+                for (Event event : station.getAnalysis().getDetectedEvents()) {
+                    if (event.isValid() && event.isSWave() && !couldBeArrival(event, cluster.getEarthquake(), true, false)) {
+                        double distGC = GeoUtils.greatCircleDistance(event.getLatFromStation(), event.getLonFromStation(), cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon());
+                        double expectedIntensity = IntensityTable.getMaxIntensity(cluster.getEarthquake().getMag(), GeoUtils.gcdToGeo(distGC));
+                        EventIntensityInfo eventIntensityInfo = new EventIntensityInfo(cluster, station, expectedIntensity);
+                        EventIntensityInfo old = map.putIfAbsent(event, eventIntensityInfo);
+                        if(old != null && eventIntensityInfo.expectedIntensity > old.expectedIntensity){
+                            map.put(event, eventIntensityInfo);
+                        }
+                    }
+                }
+            }
+        }
+
+        // reassign
+        for(var entry : map.entrySet()){
+            Event event = entry.getKey();
+            AbstractStation station = entry.getValue().station();
+            Cluster cluster = entry.getValue().cluster();
+
+            if(!cluster.getAssignedEvents().containsKey(station)){
+                if(event.assignedCluster != null){
+                    event.assignedCluster.getAssignedEvents().remove(station);
+                }
+
+                event.assignedCluster = cluster;
+                cluster.getAssignedEvents().put(station, event);
+            }
         }
     }
 
@@ -118,11 +161,14 @@ public class ClusterAnalysis {
     }
 
     private boolean canMerge(Earthquake earthquake, Cluster cluster) {
-        if(!(cluster.getPreviousHypocenter() == null || cluster.getPreviousHypocenter().correctEvents < 24
-                || (cluster.getPreviousHypocenter().correctEvents >= 24 && cluster.getPreviousHypocenter().getCorrectness() < 0.7))){
-            return false;
+        if(cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null){
+            int thatCorrect = cluster.getPreviousHypocenter().correctEvents;
+            double dist = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon());
+            double maxDist = 6000 / (1 + thatCorrect * 0.2);
+            if(dist > maxDist){
+                return false;
+            }
         }
-
         int correct = 0;
         for (Event event : cluster.getAssignedEvents().values()) {
             if (couldBeArrival(event, earthquake, true, true)) {
@@ -382,7 +428,7 @@ public class ClusterAnalysis {
                         }
                     }
                     // so no we have a list of all nearby events that could be earthquake
-                    if (validEvents.size() >= 3) {
+                    if (validEvents.size() >= MIN_CLUSTER_SIZE) {
                         validEvents.add(event);
                         expandCluster(createCluster(validEvents));
                     }
@@ -402,12 +448,13 @@ public class ClusterAnalysis {
             for (Iterator<Event> iterator = cluster.getAssignedEvents().values().iterator(); iterator.hasNext(); ) {
                 Event event = iterator.next();
                 if (!event.isValid()) {
+                    event.assignedCluster = null;
                     iterator.remove();
-                } else if (!event.hasEnded() && event.isValid()) {
+                } else if (!event.hasEnded()) {
                     numberOfActiveEvents++;
                 }
             }
-            if (numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000) {
+            if (cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE || (numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000)) {
                 Logger.debug("Cluster #" + cluster.getId() + " died");
                 toBeRemoved.add(cluster);
             } else {
