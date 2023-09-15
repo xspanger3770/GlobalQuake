@@ -92,7 +92,7 @@ public class EarthquakeArchive {
 		}.start();
 	}
 
-	public void archiveQuake(Earthquake earthquake) {
+	public synchronized void archiveQuake(Earthquake earthquake) {
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
