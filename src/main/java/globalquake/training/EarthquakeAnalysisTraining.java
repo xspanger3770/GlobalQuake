@@ -17,7 +17,7 @@ import java.util.Random;
 public class EarthquakeAnalysisTraining {
 
     public static final int STATIONS = 50;
-    public static final double DIST = 300;
+    public static final double DIST = 500;
 
     public static final double INACCURACY = 2000;
 
@@ -30,7 +30,7 @@ public class EarthquakeAnalysisTraining {
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
         long n = 0;
-        long a  =System.currentTimeMillis();
+        long a  = System.currentTimeMillis();
         int fails = 0;
         for(int i = 0; i < 50; i++) {
             long err = runTest(6546+i, STATIONS);
@@ -39,8 +39,8 @@ public class EarthquakeAnalysisTraining {
                 sum += err;
                 n++;
             } else{
-                // fails++;
-                throw new IllegalStateException();
+                 fails++;
+                //throw new IllegalStateException();
             }
         }
 
@@ -96,7 +96,7 @@ public class EarthquakeAnalysisTraining {
 
         for(int i = 0; i < stations; i++){
             double ang = r.nextDouble() * 360.0;
-            double dist = r.nextDouble() * DIST * (GeoUtils.EARTH_CIRCUMFERENCE / 360.0);
+            double dist = r.nextDouble() * DIST;
             double[] latLon = GeoUtils.moveOnGlobe(0, 0, ang, dist);
             fakeStations.add(new FakeStation(latLon[0], latLon[1]));
         }
@@ -105,9 +105,9 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(0, 10 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0);
+        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0);
 
-        for(FakeStation fakeStation:fakeStations){
+        for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
                     absolutetyCorrect.lon, fakeStation.lat, fakeStation.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
@@ -117,8 +117,12 @@ public class EarthquakeAnalysisTraining {
             if(r.nextDouble() < 0.1){
                 time += (long) ((r.nextDouble() * 10 - 5) * INACCURACY);
             }
-            pickedEvents.add(new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100));
+
+            var event = new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100);
+            pickedEvents.add(event);
         }
+
+        cluster.calculateRoot(fakeStations);
 
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
@@ -130,7 +134,7 @@ public class EarthquakeAnalysisTraining {
         }
     }
 
-    record FakeStation(double lat, double lon){
+    public record FakeStation(double lat, double lon){
 
     }
 

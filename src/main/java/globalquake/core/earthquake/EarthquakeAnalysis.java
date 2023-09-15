@@ -123,12 +123,6 @@ public class EarthquakeAnalysis {
         // Selects picked events in a way that they are spaced away as much as possible
         findGoodEvents(pickedEvents, selectedEvents);
 
-        // There has to be at least some difference in the picked pWave times
-        if (!checkDeltaP(selectedEvents, finderSettings)) {
-            Logger.debug("Not Enough Delta-P");
-            return;
-        }
-
         findHypocenter(selectedEvents, cluster, finderSettings);
     }
 
@@ -181,15 +175,24 @@ public class EarthquakeAnalysis {
         }
     }
 
-    private boolean checkDeltaP(ArrayList<PickedEvent> events, HypocenterFinderSettings finderSettings) {
+    private boolean checkDeltaP(Cluster cluster, Hypocenter bestHypocenter, List<PickedEvent> events) {
         events.sort(Comparator.comparing(PickedEvent::pWave));
+
+        if(cluster.getRootLat() == Cluster.NONE){
+               cluster.calculateRoot();
+        }
+
+        double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
+                cluster.getRootLon());
 
         long deltaP = events.get((int) ((events.size() - 1) * 0.75)).pWave()
                 - events.get((int) ((events.size() - 1) * 0.25)).pWave();
 
-        Logger.debug("deltaP: %d ms".formatted(deltaP));
+        long limit = 1600 + (long)Math.sqrt(distFromRoot) * 200;
 
-        return deltaP >= Math.max(2600, finderSettings.pWaveInaccuracyThreshold() * 2.1);
+        Logger.debug("deltaP: %d ms, limit for %.1f km is %d ms".formatted(deltaP, distFromRoot, limit));
+
+        return deltaP >= limit;
     }
 
     public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
@@ -267,6 +270,12 @@ public class EarthquakeAnalysis {
     private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish();
         calculateMagnitude(cluster, bestHypocenter);
+
+        // There has to be at least some difference in the picked pWave times
+        if (!checkDeltaP(cluster, bestHypocenter, selectedEvents)) {
+            Logger.debug("Not Enough Delta-P");
+            return;
+        }
 
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 

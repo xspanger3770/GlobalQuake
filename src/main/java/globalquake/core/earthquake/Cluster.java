@@ -3,8 +3,10 @@ package globalquake.core.earthquake;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
+import globalquake.training.EarthquakeAnalysisTraining;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,7 +154,7 @@ public class Cluster {
 		this.size = _size;
 	}
 
-	private void calculateRoot() {
+	public void calculateRoot() {
 		int n = 0;
 		double sumLat = 0;
 		double sumLon = 0;
@@ -160,8 +162,8 @@ public class Cluster {
 			if(!e.isValid()){
 				continue;
 			}
-			sumLat += e.getAnalysis().getStation().getLatitude();
-			sumLon += e.getAnalysis().getStation().getLongitude();
+			sumLat += e.getLatFromStation();
+			sumLon += e.getLonFromStation();
 			n++;
 		}
 		if (n > 0) {
@@ -169,6 +171,22 @@ public class Cluster {
 			rootLon = sumLon / n;
 			anchorLat = rootLat;
 			anchorLon = rootLon;
+		}
+	}
+
+	// For testing only
+	public void calculateRoot(List<EarthquakeAnalysisTraining.FakeStation> fakeStations) {
+		int n = 0;
+		double sumLat = 0;
+		double sumLon = 0;
+		for (EarthquakeAnalysisTraining.FakeStation fakeStation : fakeStations) {
+			sumLat += fakeStation.lat();
+			sumLon += fakeStation.lon();
+			n++;
+		}
+		if (n > 0) {
+			rootLat = sumLat / n;
+			rootLon = sumLon / n;
 		}
 	}
 
@@ -217,6 +235,21 @@ public class Cluster {
 
 	public double getAnchorLon() {
 		return anchorLon;
+	}
+
+	@Override
+	public String toString() {
+		return "Cluster{" +
+				"id=" + id +
+				", rootLat=" + rootLat +
+				", rootLon=" + rootLon +
+				", size=" + size +
+				", updateCount=" + updateCount +
+				", lastUpdate=" + lastUpdate +
+				", earthquake=" + earthquake +
+				", anchorLon=" + anchorLon +
+				", anchorLat=" + anchorLat +
+				'}';
 	}
 
 }
