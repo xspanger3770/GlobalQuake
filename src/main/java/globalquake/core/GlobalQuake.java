@@ -38,7 +38,7 @@ public class GlobalQuake {
 		clusterAnalysis = new ClusterAnalysis();
 
 		alertManager = new AlertManager();
-		archive = new EarthquakeArchive();
+		archive = new EarthquakeArchive().loadArchive();
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();

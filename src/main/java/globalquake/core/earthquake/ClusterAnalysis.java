@@ -64,7 +64,7 @@ public class ClusterAnalysis {
         }
     }
 
-    record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){};
+    record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){}
 
     private void stealEvents() {
         java.util.Map<Event, EventIntensityInfo> map = new HashMap<>();
