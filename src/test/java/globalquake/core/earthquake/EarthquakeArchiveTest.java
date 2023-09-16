@@ -22,6 +22,11 @@ public class EarthquakeArchiveTest {
                 earthquakeArchive.archiveQuake(earthquake);
                 n.incrementAndGet();
             });
+            list.parallelStream().forEach(integer -> {
+                for(ArchivedQuake archivedQuake : earthquakeArchive.getArchivedQuakes()){
+                    archivedQuake.setWrong(!archivedQuake.isWrong());
+                }
+            });
         }
 
         assertEquals(50000, n.get());
