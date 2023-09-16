@@ -46,7 +46,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             elementStationSquare.setPolygon(new Polygon3D());
         }
 
-        double size = Math.min(36, renderer.pxToDeg(7.0));
+        double size = Math.min(36, renderer.pxToDeg(7.0)) * Settings.stationsSizeMul;
 
         if(!Settings.stationsTriangles) {
             renderer.createCircle(elementStationCircle.getPolygon(),
@@ -57,7 +57,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             renderer.createTriangle(elementStationCircle.getPolygon(),
                     entity.getOriginal().getLatitude(),
                     entity.getOriginal().getLongitude(),
-                    size, 0);
+                    size * 1.41, 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
@@ -158,22 +158,23 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     private void drawDetails(boolean mouseNearby, double scroll, int x, int y, Graphics2D g, AbstractStation station) {
+        int _y = (int) (7 + 6 * Settings.stationsSizeMul);
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);
             String str = station.toString();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y);
             str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y - 15);
 
             if(station.hasNoDisplayableData()){
                 str = "No data";
-                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 22);
             } else {
                 long delay = station.getDelayMS();
                 if (delay == Long.MIN_VALUE) {
                     g.setColor(Color.magenta);
                     str = "Replay";
-                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 22);
                 } else {
                     FeatureSelectableStation.drawDelay(g, x, y + 33, delay, "Delay");
                 }
@@ -184,7 +185,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));
             g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 9);
         }
     }
 

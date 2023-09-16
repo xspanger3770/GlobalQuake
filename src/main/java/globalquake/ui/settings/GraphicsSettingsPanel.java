@@ -23,6 +23,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
     private JCheckBox chkBoxTriangles;
+    private JSlider sliderStationsSize;
 
 
     public GraphicsSettingsPanel() {
@@ -58,7 +59,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         otherSettingsPanel.setLayout(new BoxLayout(otherSettingsPanel, BoxLayout.Y_AXIS));
         otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Appearance"));
 
-        JPanel checkBoxes = new JPanel(new GridLayout(3,1));
+        JPanel checkBoxes = new JPanel(new GridLayout(2,2));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
@@ -74,12 +75,13 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         otherSettingsPanel.add(checkBoxes);
 
         JPanel intensityPanel = new JPanel(new GridLayout(2,1));
-        intensityPanel.add(new JLabel("Display station's intensity at zoom level:"));
+        intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
 
         sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
-        sliderIntensityZoom.setMajorTickSpacing(20);
+        sliderIntensityZoom.setMajorTickSpacing(10);
         sliderIntensityZoom.setMinorTickSpacing(5);
         sliderIntensityZoom.setPaintTicks(true);
+        sliderIntensityZoom.setPaintLabels(true);
 
         sliderIntensityZoom.addChangeListener(changeEvent -> {
             Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
@@ -88,6 +90,23 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         intensityPanel.add(sliderIntensityZoom);
         otherSettingsPanel.add(intensityPanel);
+
+        JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
+        stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
+
+        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 10, 300, (int) (Settings.stationsSizeMul * 100));
+        sliderStationsSize.setMajorTickSpacing(10);
+        sliderStationsSize.setMinorTickSpacing(5);
+        sliderStationsSize.setPaintTicks(true);
+        sliderStationsSize.setPaintLabels(true);
+
+        sliderStationsSize.addChangeListener(changeEvent -> {
+            Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
+            Settings.changes++;
+        });
+
+        stationSizePanel.add(sliderStationsSize);
+        otherSettingsPanel.add(stationSizePanel);
 
         add(otherSettingsPanel);
     }
@@ -208,6 +227,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
         Settings.stationsTriangles = chkBoxTriangles.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+        Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
         Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
     }
