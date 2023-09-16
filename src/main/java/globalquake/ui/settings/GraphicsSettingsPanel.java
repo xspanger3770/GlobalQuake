@@ -22,6 +22,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
+    private JCheckBox chkBoxTriangles;
 
 
     public GraphicsSettingsPanel() {
@@ -68,6 +69,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         checkBoxes.add(chkBoxAntialiasing);
 
         checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
+        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
 
         otherSettingsPanel.add(checkBoxes);
 
@@ -204,6 +206,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.use24HFormat = chkBox24H.isSelected();
 
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
+        Settings.stationsTriangles = chkBoxTriangles.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
 
         Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());

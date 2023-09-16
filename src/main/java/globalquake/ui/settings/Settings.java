@@ -95,8 +95,9 @@ public final class Settings {
 	public static Boolean displayCoreWaves;
 	public static Boolean cinemaModeOnStartup;
 	public static Boolean recalibrateOnLaunch;
+	public static Boolean stationsTriangles;
 
-	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+    public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
 				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
@@ -142,6 +143,7 @@ public final class Settings {
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
+		loadProperty("stationsTriangles", "false");
 		loadProperty("maxArchivedQuakes", "100");
 
 		loadProperty("enableAlarmDialogs", "false");

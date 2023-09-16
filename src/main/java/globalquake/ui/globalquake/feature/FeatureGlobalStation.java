@@ -48,10 +48,17 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         double size = Math.min(36, renderer.pxToDeg(7.0));
 
-        renderer.createCircle(elementStationCircle.getPolygon(),
-                entity.getOriginal().getLatitude(),
-                entity.getOriginal().getLongitude(),
-                size, 0, 30);
+        if(!Settings.stationsTriangles) {
+            renderer.createCircle(elementStationCircle.getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size, 0, 30);
+        }else{
+            renderer.createTriangle(elementStationCircle.getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size, 0);
+        }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
