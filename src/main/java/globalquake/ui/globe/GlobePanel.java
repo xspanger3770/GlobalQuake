@@ -264,7 +264,20 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
         targetScroll = Math.max(0.05, targetScroll);
 
-        nextAnimation = new Animation(centerLat % 360, centerLon % 360, scroll, targetLat % 360, targetLon % 360, targetScroll);
+        double startLat = centerLat % 360;
+        double startLon = centerLon % 360;
+        targetLat %= 360;
+        targetLon %= 360;
+
+        if(Math.abs((startLon + 360) - targetLon) < Math.abs(startLon - targetLon)){
+            startLon += 360;
+        }
+
+        if(Math.abs(startLon - (targetLon + 360)) < Math.abs(startLon - targetLon)){
+            targetLon += 360;
+        }
+
+        nextAnimation = new Animation(startLat, startLon, scroll, targetLat, targetLon, targetScroll);
         synchronized (animationLock) {
             animationLock.notify();
         }
