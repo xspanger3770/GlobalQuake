@@ -25,7 +25,7 @@ public class ArchivedQuakeAnimation extends JDialog {
 
         add(mainPanel = new ArchivedQuakePanel(this, quake));
 
-        setTitle("Replay of M%.1f %s".formatted(quake.getMag(), quake.getRegion()));
+        setTitle("Event Replay");
         pack();
         setLocationRelativeTo(parent);
 
