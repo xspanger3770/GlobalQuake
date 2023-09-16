@@ -32,7 +32,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         createFpsSlider();
         createEventsSettings();
         createDateSettings();
-        createOtherSettings();
+        createStationsSettings();
     }
 
     private void createDateSettings() {
@@ -54,10 +54,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         add(dateFormatPanel);
     }
 
-    private void createOtherSettings() {
+    private void createStationsSettings() {
         JPanel otherSettingsPanel = new JPanel();
         otherSettingsPanel.setLayout(new BoxLayout(otherSettingsPanel, BoxLayout.Y_AXIS));
-        otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Appearance"));
+        otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
         JPanel checkBoxes = new JPanel(new GridLayout(2,2));
 
@@ -94,9 +94,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
         stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
 
-        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 10, 300, (int) (Settings.stationsSizeMul * 100));
-        sliderStationsSize.setMajorTickSpacing(10);
-        sliderStationsSize.setMinorTickSpacing(5);
+        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 20, 300, (int) (Settings.stationsSizeMul * 100));
+        sliderStationsSize.setMajorTickSpacing(20);
+        sliderStationsSize.setMinorTickSpacing(10);
         sliderStationsSize.setPaintTicks(true);
         sliderStationsSize.setPaintLabels(true);
 

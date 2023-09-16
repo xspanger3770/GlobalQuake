@@ -91,6 +91,7 @@ public class SettingsFrame extends GQFrame {
 			JScrollPane scrollPane = new JScrollPane(panel);
 			scrollPane.setPreferredSize(new Dimension(700, 500));
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			scrollPane.getVerticalScrollBar().setUnitIncrement(10);
 			tabbedPane.addTab(panel.getTitle(), scrollPane);
 
 			javax.swing.SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
