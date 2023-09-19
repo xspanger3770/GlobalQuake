@@ -1,0 +1,234 @@
+Afghanistan
+Aland
+Albania
+Algeria
+American Samoa
+Andorra
+Angola
+Anguilla
+Antarctica
+Antigua and Barb.
+Argentina
+Armenia
+Aruba
+Ashmore and Cartier Is.
+Australia
+Austria
+Azerbaijan
+Bahamas
+Bahrain
+Bangladesh
+Barbados
+Belarus
+Belgium
+Belize
+Benin
+Bermuda
+Bhutan
+Bolivia
+Bosnia and Herz.
+Botswana
+Brazil
+British Virgin Is.
+Brunei
+Bulgaria
+Burkina Faso
+Burundi
+Cote d'Ivoire
+Cambodia
+Cameroon
+Canada
+Cape Verde
+Cayman Is.
+Central African Rep.
+Chad
+Chile
+China
+Colombia
+Comoros
+Congo
+Cook Is.
+Costa Rica
+Croatia
+Cuba
+Curacao
+Cyprus
+Czech Rep.
+Dem. Rep. Congo
+Dem. Rep. Korea
+Denmark
+Djibouti
+Dominica
+Dominican Rep.
+Ecuador
+Egypt
+El Salvador
+Eq. Guinea
+Eritrea
+Estonia
+Ethiopia
+Faeroe Is.
+Falkland Is.
+Fiji
+Finland
+Fr. Polynesia
+Fr. S. Antarctic Lands
+France
+Gabon
+Gambia
+Georgia
+Germany
+Ghana
+Greece
+Greenland
+Grenada
+Guam
+Guatemala
+Guernsey
+Guinea
+Guinea-Bissau
+Guyana
+Haiti
+Honduras
+Hong Kong
+Hungary
+Iceland
+India
+Indian Ocean Ter.
+Indonesia
+Iran
+Iraq
+Ireland
+Isle of Man
+Israel
+Italy
+Jamaica
+Japan
+Jersey
+Jordan
+Kazakhstan
+Kenya
+Kiribati
+Korea
+Kosovo
+Kuwait
+Kyrgyzstan
+Lao PDR
+Latvia
+Lebanon
+Lesotho
+Liberia
+Libya
+Liechtenstein
+Lithuania
+Luxembourg
+Macao
+Macedonia
+Madagascar
+Malawi
+Malaysia
+Mali
+Malta
+Marshall Is.
+Mauritania
+Mexico
+Micronesia
+Moldova
+Monaco
+Mongolia
+Montenegro
+Montserrat
+Morocco
+Mozambique
+Myanmar
+N. Cyprus
+N. Mariana Is.
+Namibia
+Nauru
+Nepal
+Netherlands
+New Caledonia
+New Zealand
+Nicaragua
+Niger
+Nigeria
+Niue
+Norfolk Island
+Norway
+Oman
+Pakistan
+Palau
+Palestine
+Panama
+Papua New Guinea
+Paraguay
+Peru
+Philippines
+Pitcairn Is.
+Poland
+Portugal
+Puerto Rico
+Qatar
+Romania
+Russia
+Rwanda
+S. Sudan
+Sao Tome and Principe
+Saint Lucia
+Samoa
+San Marino
+Saudi Arabia
+Senegal
+Serbia
+Siachen Glacier
+Sierra Leone
+Singapore
+Sint Maarten
+Slovakia
+Slovenia
+Solomon Is.
+Somalia
+Somaliland
+South Africa
+Spain
+Sri Lanka
+St-Barthélemy
+St-Martin
+St. Kitts and Nevis
+St. Pierre and Miquelon
+St. Vin. and Gren.
+Sudan
+Suriname
+Swaziland
+Sweden
+Switzerland
+Syria
+Taiwan
+Tajikistan
+Tanzania
+Thailand
+Timor-Leste
+Togo
+Tonga
+Trinidad and Tobago
+Tunisia
+Turkey
+Turkmenistan
+Turks and Caicos Is.
+U.S. Virgin Is.
+Uganda
+Ukraine
+United Arab Emirates
+United Kingdom
+United States
+Uruguay
+Uzbekistan
+Vanuatu
+Vatican
+Venezuela
+Vietnam
+W. Sahara
+Wallis and Futuna Is.
+Yemen
+Zambia
+Zimbabwe
