@@ -63,7 +63,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size * 1.75, 0);
+                size * (Settings.stationsTriangles ? 2.0 : 1.75), 0);
     }
 
     @Override
