@@ -8,6 +8,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.ui.settings.Settings;
+import globalquake.utils.Scale;
 
 import java.awt.*;
 import java.time.Instant;
@@ -143,10 +144,20 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     private Color getColor(ArchivedQuake quake) {
-        double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+        Color col;
+
+        if(Settings.selectedEventColorIndex == 0){
+            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
+                    : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
+        } else if(Settings.selectedEventColorIndex == 1){
+            col = Scale.getColorEasily(Math.max(0.06, 0.9 - quake.getDepth() / 400.0));
+        } else{
+            col = Scale.getColorEasily(quake.getMag() / 8.0);
+        }
+
         int alpha = (int) Math.max(0, Math.min(255, Settings.oldEventsOpacity / 100.0 * 255.0));
-        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0, alpha) : new Color(255, 0, 0, alpha))
-                : ageInHRS < 24 ? new Color(255, 140, 0, alpha) : new Color(255,255,0, alpha);
+        return new Color(col.getRed(), col.getGreen(), col.getBlue(), alpha);
     }
 
 

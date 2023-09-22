@@ -3,6 +3,7 @@ package globalquake.ui.settings;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
@@ -24,6 +25,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JTextField textFieldMaxArchived;
     private JCheckBox chkBoxTriangles;
     private JSlider sliderStationsSize;
+    private JRadioButton[] colorButtons;
 
 
     public GraphicsSettingsPanel() {
@@ -182,6 +184,39 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         opacityPanel.add(sliderOpacity);
 
         eventsPanel.add(opacityPanel);
+
+        JPanel colorsPanel = new JPanel();
+        colorsPanel.setBorder(BorderFactory.createTitledBorder("Old events color"));
+
+        JRadioButton buttonColorByAge = new JRadioButton("Color by age");
+        JRadioButton buttonColorByDepth = new JRadioButton("Color by depth");
+        JRadioButton buttonColorByMagnitude = new JRadioButton("Color by magnitude");
+
+        colorButtons = new JRadioButton[]{buttonColorByAge, buttonColorByDepth, buttonColorByMagnitude};
+        ButtonGroup bg = new ButtonGroup();
+
+        colorButtons[Math.max(0, Math.min(colorButtons.length - 1, Settings.selectedEventColorIndex))].setSelected(true);
+
+        var colorButtonActionListener = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                for (int i = 0; i < colorButtons.length; i++) {
+                    JRadioButton button = colorButtons[i];
+                    if(button.isSelected()){
+                        Settings.selectedEventColorIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
+        for(JRadioButton button : colorButtons) {
+            bg.add(button);
+            button.addActionListener(colorButtonActionListener);
+            colorsPanel.add(button);
+        }
+
+        eventsPanel.add(colorsPanel);
 
         add(eventsPanel);
     }

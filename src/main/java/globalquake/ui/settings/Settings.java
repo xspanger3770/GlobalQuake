@@ -97,8 +97,9 @@ public final class Settings {
 	public static Boolean recalibrateOnLaunch;
 	public static Boolean stationsTriangles;
 	public static Double stationsSizeMul;
+    public static Integer selectedEventColorIndex;
 
-	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+    public static String formatDateTime(TemporalAccessor temporalAccessor) {
         return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
 				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
@@ -119,6 +120,7 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("selectedEventColorIndex", "0");
 		loadProperty("stationsSizeMul", "1.0");
 		loadProperty("recalibrateOnLaunch", "true");
 
