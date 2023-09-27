@@ -17,20 +17,20 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	private JTextField textFieldLon;
 	private JComboBox<DistanceUnit> distanceUnitJComboBox;
 
-	public GeneralSettingsPanel() {
+	public GeneralSettingsPanel(SettingsFrame settingsFrame) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		createHomeLocationSettings();
 		createAlertsDialogSettings();
 		add(createIntensitySettingsPanel());
-		createOtherSettings();
+		createOtherSettings(settingsFrame);
 
 		for(int i = 0; i < 4; i++){
 			add(new JPanel()); // fillers
 		}
 	}
 
-	private void createOtherSettings() {
+	private void createOtherSettings(SettingsFrame settingsFrame) {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder("Other"));
 
@@ -38,6 +38,12 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 		distanceUnitJComboBox = new JComboBox<>(DistanceUnit.values());
 		distanceUnitJComboBox.setSelectedIndex(Math.max(0, Math.min(distanceUnitJComboBox.getItemCount() - 1, Settings.distanceUnitsIndex)));
+
+		distanceUnitJComboBox.addItemListener(itemEvent -> {
+			Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
+			settingsFrame.refreshUI();
+        });
+
 		panel.add(distanceUnitJComboBox);
 
 		add(panel);

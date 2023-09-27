@@ -8,4 +8,6 @@ public abstract class SettingsPanel extends JPanel{
 	
 	public abstract String getTitle();
 
+	public void refreshUI() {}
+
 }

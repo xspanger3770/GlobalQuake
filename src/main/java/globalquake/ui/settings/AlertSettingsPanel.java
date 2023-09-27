@@ -12,6 +12,7 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JTextField textFieldRegionDist;
     private JCheckBox checkBoxGlobal;
     private JTextField textFieldGlobalMag;
+    private JLabel label1;
 
     public AlertSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -20,6 +21,8 @@ public class AlertSettingsPanel extends SettingsPanel {
         for(int i = 0; i < 10; i++){
             add(new JPanel()); // fillers
         }
+
+        refreshUI();
     }
 
     private void createAlertDialogSettings() {
@@ -27,8 +30,8 @@ public class AlertSettingsPanel extends SettingsPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createTitledBorder("Alert dialogs settings"));
 
-        chkBoxLocal = new JCheckBox("Show when any earthquake occurs closer than (km): ", Settings.alertLocal);
-        textFieldLocalDist = new JTextField(String.valueOf(Settings.alertLocalDist), 12);
+        chkBoxLocal = new JCheckBox("", Settings.alertLocal);
+        textFieldLocalDist = new JTextField("1", 12);
         textFieldLocalDist.setEnabled(chkBoxLocal.isSelected());
         chkBoxLocal.addChangeListener(changeEvent -> textFieldLocalDist.setEnabled(chkBoxLocal.isSelected()));
 
@@ -46,7 +49,7 @@ public class AlertSettingsPanel extends SettingsPanel {
         chkBoxRegion = new JCheckBox("Show for earthquakes larger than (magnitude): ", Settings.alertRegion);
         textFieldRegionMag = new JTextField(String.valueOf(Settings.alertRegionMag) ,12);
         textFieldRegionMag.setEnabled(chkBoxRegion.isSelected());
-        textFieldRegionDist =  new JTextField(String.valueOf(Settings.alertRegionDist),12);
+        textFieldRegionDist =  new JTextField("1",12);
         textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
 
         chkBoxRegion.addChangeListener(changeEvent -> {
@@ -67,7 +70,7 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         JPanel regionDistPanel = new JPanel();
         regionDistPanel.setLayout(new BoxLayout(regionDistPanel, BoxLayout.X_AXIS));
-        regionDistPanel.add(new JLabel("... that are closer from home location than (km): "));
+        regionDistPanel.add(label1 = new JLabel(""));
         regionDistPanel.add(textFieldRegionDist);
 
         regionPanel.add(regionDistPanel);
@@ -95,12 +98,24 @@ public class AlertSettingsPanel extends SettingsPanel {
     }
 
     @Override
+    public void refreshUI() {
+        chkBoxLocal.setText("Show when any earthquake occurs closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        label1.setText("... that are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+
+        textFieldLocalDist.setText("%.2f".formatted(Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldRegionDist.setText("%.2f".formatted(Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+
+        revalidate();
+        repaint();
+    }
+
+    @Override
     public void save() {
         Settings.alertLocal = chkBoxLocal.isSelected();
-        Settings.alertLocalDist = Double.parseDouble(textFieldLocalDist.getText());
+        Settings.alertLocalDist = Double.parseDouble(textFieldLocalDist.getText()) / Settings.getSelectedDistanceUnit().getKmRatio();
         Settings.alertRegion = chkBoxRegion.isSelected();
         Settings.alertRegionMag = Double.parseDouble(textFieldRegionMag.getText());
-        Settings.alertRegionDist = Double.parseDouble(textFieldRegionDist.getText());
+        Settings.alertRegionDist = Double.parseDouble(textFieldRegionDist.getText()) / Settings.getSelectedDistanceUnit().getKmRatio();
 
         Settings.alertGlobal = checkBoxGlobal.isSelected();
         Settings.alertGlobalMag = Double.parseDouble(textFieldGlobalMag.getText());
