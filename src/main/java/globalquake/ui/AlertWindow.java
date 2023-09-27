@@ -61,7 +61,7 @@ public class AlertWindow extends GQFrame {
 		double distGEO = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(),
 				Settings.homeLat, Settings.homeLon, 0.0);
 
-		lblDist.setText(f1d.format(distGC) + "km from home location");
+		lblDist.setText("%s from home location".formatted(Settings.getSelectedDistanceUnit().format(distGC, 0)));
 
 		double age = (System.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
