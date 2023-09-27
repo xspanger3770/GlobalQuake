@@ -15,7 +15,6 @@ public class SettingsFrame extends GQFrame {
 
 	private final List<SettingsPanel> panels = new LinkedList<>();
 	private JTabbedPane tabbedPane;
-	private JPanel contentPanel;
 
 	public static void main(String[] args) throws Exception{
 		TauPTravelTimeCalculator.init();
@@ -38,7 +37,7 @@ public class SettingsFrame extends GQFrame {
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		contentPanel = new JPanel(new BorderLayout());
+		JPanel contentPanel = new JPanel(new BorderLayout());
 		setContentPane(contentPanel);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
