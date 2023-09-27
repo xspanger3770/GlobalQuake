@@ -13,9 +13,11 @@ public class EditSeedlinkNetworkDialog extends JDialog {
     private final JTextField portField;
     private final JTextField nameField;
     private final JTextField hostField;
+    private final SeedlinkNetwork seedlinkNetwork;
 
     public EditSeedlinkNetworkDialog(Window parent, StationDatabaseManager databaseManager, SeedlinkNetwork seedlinkNetwork) {
         super(parent);
+        this.seedlinkNetwork = seedlinkNetwork;
         setModal(true);
 
         this.databaseManager = databaseManager;
@@ -69,7 +71,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         SeedlinkNetwork newSeedlinkNetwork = new SeedlinkNetwork(nameField.getText(), hostField.getText(), port);
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
-            databaseManager.getStationDatabase().getSeedlinkNetworks().remove(newSeedlinkNetwork);
+            databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);
             databaseManager.getStationDatabase().getSeedlinkNetworks().add(newSeedlinkNetwork);
         }finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
