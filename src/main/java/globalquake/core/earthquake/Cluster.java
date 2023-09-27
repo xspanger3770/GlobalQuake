@@ -1,5 +1,6 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.Warnable;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Cluster {
+public class Cluster implements Warnable {
 
 	private final int id;
 	private final Map<AbstractStation, Event> assignedEvents;

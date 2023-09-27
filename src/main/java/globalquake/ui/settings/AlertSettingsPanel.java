@@ -13,6 +13,7 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JCheckBox checkBoxGlobal;
     private JTextField textFieldGlobalMag;
     private JLabel label1;
+    private JCheckBox chkBoxFocus;
 
     public AlertSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -94,16 +95,25 @@ public class AlertSettingsPanel extends SettingsPanel {
         globalPanel.add(globalMagPanel);
 
         panel.add(globalPanel);
+
+        JPanel panel2 = new JPanel(new GridLayout(1,2));
+
+        chkBoxFocus = new JCheckBox("Focus main window if the conditions above are met", Settings.focusOnEvent);
+
+        panel2.add(chkBoxFocus);
+
+        panel.add(panel2);
+
         add(panel);
     }
 
     @Override
     public void refreshUI() {
         chkBoxLocal.setText("Show when any earthquake occurs closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
-        label1.setText("... that are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        label1.setText("and are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
 
-        textFieldLocalDist.setText("%.2f".formatted(Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
-        textFieldRegionDist.setText("%.2f".formatted(Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldLocalDist.setText("%.1f".formatted(Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldRegionDist.setText("%.1f".formatted(Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
 
         revalidate();
         repaint();
@@ -119,6 +129,7 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         Settings.alertGlobal = checkBoxGlobal.isSelected();
         Settings.alertGlobalMag = Double.parseDouble(textFieldGlobalMag.getText());
+        Settings.focusOnEvent = chkBoxFocus.isSelected();
     }
 
     @Override

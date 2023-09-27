@@ -1,7 +1,7 @@
 package globalquake.core;
 
 import java.awt.EventQueue;
-import java.util.HashMap;
+import java.util.*;
 
 import globalquake.core.earthquake.Earthquake;
 import globalquake.ui.settings.Settings;
@@ -9,30 +9,66 @@ import globalquake.ui.AlertWindow;
 import globalquake.geo.GeoUtils;
 import org.tinylog.Logger;
 
-public class AlertManager {
-    private final HashMap<Earthquake, Warning> warnedQuakes;
+import javax.swing.*;
 
-    public AlertManager() {
-        this.warnedQuakes = new HashMap<>();
+public class AlertManager {
+    private static final int STORE_TIME_MINUTES = 2 * 60;
+    private final Map<Warnable, Warning> warnings;
+    private final JFrame mainFrame;
+
+    public AlertManager(JFrame mainFrame) {
+        this.mainFrame = mainFrame;
+        this.warnings = new HashMap<>();
     }
 
     public void tick() {
-        if (!Settings.enableAlarmDialogs) {
-            return;
-        }
-        for (Earthquake quake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
-            if (meetsConditions(quake) && !warnedQuakes.containsKey(quake)) {
-                warnedQuakes.put(quake, new Warning());
-                EventQueue.invokeLater(() -> {
-                    try {
-                        AlertWindow frame = new AlertWindow(quake);
-                        frame.setVisible(true);
-                    } catch (Exception e) {
-                        Logger.error(e);
-                    }
-                });
+        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning()));
+
+        for (Iterator<Map.Entry<Warnable, Warning>> iterator = warnings.entrySet().iterator(); iterator.hasNext(); ) {
+            var kv = iterator.next();
+            Warnable warnable = kv.getKey();
+            Warning warning = kv.getValue();
+
+            long age = System.currentTimeMillis() - warning.createdAt;
+            if(age > 1000 * 60 * STORE_TIME_MINUTES){
+                iterator.remove();
+                continue;
+            }
+
+            if (meetsConditions(warnable) && !warning.metConditions) {
+                warning.metConditions = true;
+                conditionsSatisfied(warnable);
             }
         }
+    }
+
+    private void conditionsSatisfied(Warnable warnable) {
+        if(warnable instanceof Earthquake quake) {
+            EventQueue.invokeLater(() -> {
+                try {
+                    if(mainFrame != null && Settings.focusOnEvent) {
+                        mainFrame.toFront();
+                    }
+
+                    if(Settings.enableAlarmDialogs) {
+                        AlertWindow frame = new AlertWindow(quake);
+                        frame.setVisible(true);
+                    }
+                } catch (Exception e) {
+                    Logger.error(e);
+                }
+            });
+        }
+    }
+
+    private boolean meetsConditions(Warnable warnable) {
+        if(warnable instanceof Earthquake){
+            return meetsConditions((Earthquake) warnable);
+        }
+
+        // TODO cluster warnings
+
+        return false;
     }
 
     public static boolean meetsConditions(Earthquake quake) {
@@ -53,5 +89,13 @@ public class AlertManager {
 }
 
 class Warning {
+
+    public Warning(){
+        createdAt = System.currentTimeMillis();
+        metConditions = false;
+    }
+
+    public final long createdAt;
+    public boolean metConditions;
 
 }

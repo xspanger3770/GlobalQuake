@@ -101,8 +101,9 @@ public final class Settings {
     public static Integer selectedEventColorIndex;
 
 	public static Integer distanceUnitsIndex;
+	public static Boolean focusOnEvent;
 
-	static {
+    static {
 		load();
 	}
 
@@ -127,6 +128,9 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("focusOnEvent", "true");
+
 		loadProperty("distanceUnitsIndex", "0");
 
 		loadProperty("selectedEventColorIndex", "0");

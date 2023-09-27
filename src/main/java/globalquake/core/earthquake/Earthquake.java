@@ -1,12 +1,13 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.Warnable;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Earthquake implements Regional {
+public class Earthquake implements Regional, Warnable {
 
 	private double lat;
 	private double lon;

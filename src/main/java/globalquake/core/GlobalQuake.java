@@ -37,7 +37,7 @@ public class GlobalQuake {
 		earthquakeAnalysis = new EarthquakeAnalysis();
 		clusterAnalysis = new ClusterAnalysis();
 
-		alertManager = new AlertManager();
+		alertManager = new AlertManager(globalQuakeFrame);
 		archive = new EarthquakeArchive().loadArchive();
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
