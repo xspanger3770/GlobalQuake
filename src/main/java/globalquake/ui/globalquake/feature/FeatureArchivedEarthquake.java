@@ -103,7 +103,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
         double size = 3 + Math.pow(quake.getMag(), 2) * 0.6;
 
-        String str = "M%.1f  %.1fkm".formatted(quake.getMag(), quake.getDepth());
+        String str = "M%.1f  %s".formatted(quake.getMag(), Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1));
         int y=  (int)centerPonint.y - 24 - (int)size;
         graphics.setColor(FeatureEarthquake.getCrossColor(quake.getMag()));
         graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);

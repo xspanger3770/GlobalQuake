@@ -1,5 +1,6 @@
 package globalquake.ui.settings;
 
+import globalquake.geo.DistanceUnit;
 import globalquake.main.Main;
 import org.tinylog.Logger;
 
@@ -99,8 +100,14 @@ public final class Settings {
 	public static Double stationsSizeMul;
     public static Integer selectedEventColorIndex;
 
-    public static String formatDateTime(TemporalAccessor temporalAccessor) {
-        return selectedDateTimeFormat().format(temporalAccessor) +
+	public static Integer distanceUnitsIndex;
+
+	static {
+		load();
+	}
+
+	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+		return selectedDateTimeFormat().format(temporalAccessor) +
 				" " +
 				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
 	}
@@ -110,8 +117,8 @@ public final class Settings {
 		return DATE_FORMATS[i];
 	}
 
-	static {
-		load();
+	public static DistanceUnit getSelectedDistanceUnit(){
+		return DistanceUnit.values()[Math.max(0, Math.min(DistanceUnit.values().length - 1, distanceUnitsIndex))];
 	}
 
 	private static void load() {
@@ -120,6 +127,8 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("distanceUnitsIndex", "0");
+
 		loadProperty("selectedEventColorIndex", "0");
 		loadProperty("stationsSizeMul", "1.0");
 		loadProperty("recalibrateOnLaunch", "true");

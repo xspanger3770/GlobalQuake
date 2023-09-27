@@ -156,7 +156,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
 
-            str = "%skm".formatted(f1d.format(entity.getOriginal().getDepth()));
+            str = Settings.getSelectedDistanceUnit().format(entity.getOriginal().getDepth(), 1);
 
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
         }

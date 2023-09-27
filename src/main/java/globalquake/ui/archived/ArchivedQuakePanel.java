@@ -109,7 +109,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         g.drawString("M%.1f %s".formatted(quake.getMag(), quake.getRegion()), 5, y+=15);
         g.drawString("%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()))), 5, y+=15);
         g.drawString("%.4f %.4f".formatted(quake.getLat(), quake.getLon()), 5, y+=15);
-        g.drawString("Depth: %.1fkm".formatted(quake.getDepth()), 5, y+=15);
+        g.drawString("Depth: %s".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), 5, y+=15);
         g.drawString("%d Stations".formatted(quake.getAssignedStations()), 5, y+=15);
 
         g.setFont(new Font("Calibri", Font.BOLD, 18));
