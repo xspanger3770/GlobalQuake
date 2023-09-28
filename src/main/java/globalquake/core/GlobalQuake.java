@@ -37,7 +37,7 @@ public class GlobalQuake {
 		earthquakeAnalysis = new EarthquakeAnalysis();
 		clusterAnalysis = new ClusterAnalysis();
 
-		alertManager = new AlertManager(globalQuakeFrame);
+		alertManager = new AlertManager();
 		archive = new EarthquakeArchive().loadArchive();
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
@@ -66,6 +66,8 @@ public class GlobalQuake {
                     getArchive().saveArchive();
                 }
             });
+
+			alertManager.setMainFrame(globalQuakeFrame);
         });
 		return this;
 	}

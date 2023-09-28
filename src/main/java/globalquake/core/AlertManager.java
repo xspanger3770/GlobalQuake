@@ -14,11 +14,14 @@ import javax.swing.*;
 public class AlertManager {
     private static final int STORE_TIME_MINUTES = 2 * 60;
     private final Map<Warnable, Warning> warnings;
-    private final JFrame mainFrame;
+    private JFrame mainFrame;
 
-    public AlertManager(JFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    public AlertManager() {
         this.warnings = new HashMap<>();
+    }
+
+    public void setMainFrame(JFrame mainFrame) {
+        this.mainFrame = mainFrame;
     }
 
     public void tick() {
