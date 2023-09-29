@@ -153,6 +153,12 @@ public class StationSelectPanel extends GlobePanel {
             return;
         }
 
+        g.setColor(Color.orange);
+        g.setFont(new Font("Calibri", Font.BOLD, 18));
+        String str = stationSelectFrame.getDragMode() == DragMode.SELECT ? "Drag to select region"
+                : "Drag to deselect region";
+        g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, getHeight() - 8);
+
         if(dragRectangle != null){
             g.setColor(stationSelectFrame.getDragMode() == DragMode.SELECT ? Color.green:Color.red);
             g.setStroke(new BasicStroke(2f));
