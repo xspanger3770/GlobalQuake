@@ -1,6 +1,7 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
 import globalquake.core.earthquake.Hypocenter;
 import globalquake.core.earthquake.MagnitudeReading;
@@ -218,38 +219,44 @@ public class GlobalQuakePanel extends GlobePanel {
             g.drawString(string, x + 3, y + 18);
         } else {
             Earthquake quake = quakes.get(displayedQuake);
-            g.setFont(new Font("Calibri", Font.BOLD, 18));
-            baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
-            g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
-            g.fillRect(x, y, baseWidth, baseHeight);
-            g.setColor(Color.white);
-            String str = (displayedQuake + 1) + "/" + quakes.size();
-            g.drawString(str, x + baseWidth - 3 - g.getFontMetrics().stringWidth(str), y + 18);
-            g.setFont(new Font("Calibri", Font.BOLD, 22));
-            g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", x + 3, y + 23);
-            g.setFont(new Font("Calibri", Font.BOLD, 18));
-            g.drawString(quake.getRegion(), y + 3, x + 44);
-            g.setFont(new Font("Calibri", Font.BOLD, 18));
+            Cluster cluster = quake.getCluster();
+            if(cluster != null) {
+                Hypocenter hypocenter = cluster.getPreviousHypocenter();
+                if (hypocenter != null) {
+                    g.setFont(new Font("Calibri", Font.BOLD, 18));
+                    baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quake.getRegion()) + 10);
+                    g.setColor(quake.getMag() < 6 ? new Color(255, 150, 0) : Color.red);
+                    g.fillRect(x, y, baseWidth, baseHeight);
+                    g.setColor(Color.white);
+                    String str = (displayedQuake + 1) + "/" + quakes.size();
+                    g.drawString(str, x + baseWidth - 3 - g.getFontMetrics().stringWidth(str), y + 18);
+                    g.setFont(new Font("Calibri", Font.BOLD, 22));
+                    g.drawString("M" + f1d.format(quake.getMag()) + " Earthquake", x + 3, y + 23);
+                    g.setFont(new Font("Calibri", Font.BOLD, 18));
+                    g.drawString(quake.getRegion(), y + 3, x + 44);
+                    g.setFont(new Font("Calibri", Font.BOLD, 18));
 
-            g.drawString(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
+                    g.drawString(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), x + 3, y + 66);
 
-            g.setFont(new Font("Calibri", Font.BOLD, 16));
-            g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
-            g.drawString("%s Deep".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), x + 3, y + 104);
-            str = "Revision no. " + quake.getRevisionID();
-            g.drawString(str, x + 3, y + 125);
-            str = (int) quake.getPct() + "%";
-            g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
-            if (quake.getCluster() != null) {
-                Hypocenter previousHypocenter = quake.getCluster().getPreviousHypocenter();
-                if (previousHypocenter != null) {
-                    str = "%d / %d / %d".formatted(previousHypocenter.getWrongEventCount(), previousHypocenter.selectedEvents, quake.getCluster().getAssignedEvents().size());
+                    g.setFont(new Font("Calibri", Font.BOLD, 16));
+                    g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
+                    //g.drawString("%s Deep".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), x + 3, y + 104);
+                    g.drawString("Depth: %s (%s to %s)".formatted(
+                            Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1),
+                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.minDepth(), 1),
+                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.maxDepth(), 1)),
+                            x + 3, y + 104);
+                    str = "Revision no. " + quake.getRevisionID();
+                    g.drawString(str, x + 3, y + 125);
+                    str = (int) quake.getPct() + "%";
+                    g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
+                    str = "%d / %d / %d".formatted(hypocenter.getWrongEventCount(), hypocenter.selectedEvents, quake.getCluster().getAssignedEvents().size());
                     g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 125);
+
+
+                    drawIntensityBox(g, quake, baseHeight);
                 }
             }
-
-
-            drawIntensityBox(g, quake, baseHeight);
         }
     }
 

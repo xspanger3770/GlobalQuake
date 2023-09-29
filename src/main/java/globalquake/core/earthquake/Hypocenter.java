@@ -17,13 +17,16 @@ public class Hypocenter {
 	public List<MagnitudeReading> mags;
 	public ObviousArrivalsInfo obviousArrivalsInfo;
 
-	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents) {
+	public HypocenterConfidenceInterval confidenceInterval;
+
+	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents, HypocenterConfidenceInterval confidenceInterval) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.origin = origin;
 		this.totalErr = err;
 		this.correctEvents = correctEvents;
+		this.confidenceInterval = confidenceInterval;
 	}
 
 	public double getCorrectness(){
@@ -45,7 +48,9 @@ public class Hypocenter {
 				", origin=" + origin +
 				", selectedEvents=" + selectedEvents +
 				", magnitude=" + magnitude +
+				", mags=" + mags +
 				", obviousArrivalsInfo=" + obviousArrivalsInfo +
+				", confidenceInterval=" + confidenceInterval +
 				'}';
 	}
 }

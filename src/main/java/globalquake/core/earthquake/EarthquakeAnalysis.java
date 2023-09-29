@@ -267,8 +267,32 @@ public class EarthquakeAnalysis {
         postProcess(selectedEvents, cluster, bestHypocenter, finderSettings, startTime);
     }
 
+    private HypocenterConfidenceInterval confidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings) {
+        double upperBound = bestHypocenter.depth;
+        double lowerBound = bestHypocenter.depth;
+
+        PreliminaryHypocenter hypocenterA = new PreliminaryHypocenter();
+        HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(selectedEvents.size());
+        List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
+        calculateDistances(pickedEvents, bestHypocenter.lat, bestHypocenter.lon);
+
+        for(double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 10.0 / getUniversalResolutionMultiplier(finderSettings)){
+            analyseHypocenter(hypocenterA, bestHypocenter.lat, bestHypocenter.lon, depth, pickedEvents, finderSettings, threadData);
+            System.err.println(depth+": "+hypocenterA+", "+bestHypocenter);
+            if(hypocenterA.err < bestHypocenter.err * 1.2 && depth < bestHypocenter.depth){
+                upperBound = depth;
+            }
+
+            if(hypocenterA.err < bestHypocenter.err * 1.2 && depth > bestHypocenter.depth){
+                lowerBound = depth;
+            }
+        }
+
+        return new HypocenterConfidenceInterval(upperBound, lowerBound);
+    }
+
     private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
-        Hypocenter bestHypocenter = bestHypocenterPrelim.finish();
+        Hypocenter bestHypocenter = bestHypocenterPrelim.finish(confidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings));
         calculateMagnitude(cluster, bestHypocenter);
 
         // There has to be at least some difference in the picked pWave times
@@ -453,7 +477,6 @@ public class EarthquakeAnalysis {
         Point2D point2D = new Point2D();
         GeoUtils.precomputeMoveOnGlobe(precomputed, _lat, _lon, distFromAnchor);
 
-
         for (double ang = 0; ang < 360; ang += angularResolution) {
             GeoUtils.moveOnGlobe(precomputed, point2D, ang);
             double lat = point2D.x;
@@ -473,8 +496,8 @@ public class EarthquakeAnalysis {
         double depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
         double depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
 
-        createHypocenter(threadData.hypocenterA, lat, lon, depthA, pickedEvents, finderSettings, threadData);
-        createHypocenter(threadData.hypocenterB, lat, lon, depthB, pickedEvents, finderSettings, threadData);
+        analyseHypocenter(threadData.hypocenterA, lat, lon, depthA, pickedEvents, finderSettings, threadData);
+        analyseHypocenter(threadData.hypocenterB, lat, lon, depthB, pickedEvents, finderSettings, threadData);
 
         PreliminaryHypocenter upperHypocenter = threadData.hypocenterA;
         PreliminaryHypocenter lowerHypocenter = threadData.hypocenterB;
@@ -491,28 +514,23 @@ public class EarthquakeAnalysis {
                 upperBound = (upperBound + lowerBound) / 2.0;
                 depthA = lowerBound + (upperBound - lowerBound) * (1 / 3.0);
 
-                createHypocenter(upperHypocenter, lat, lon, depthA, pickedEvents, finderSettings, threadData);
+                analyseHypocenter(upperHypocenter, lat, lon, depthA, pickedEvents, finderSettings, threadData);
                 threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, upperHypocenter));
             } else {
                 lowerBound = (upperBound + lowerBound) / 2.0;
                 depthB = lowerBound + (upperBound - lowerBound) * (2 / 3.0);
 
-                createHypocenter(lowerHypocenter, lat, lon, depthB, pickedEvents, finderSettings, threadData);
+                analyseHypocenter(lowerHypocenter, lat, lon, depthB, pickedEvents, finderSettings, threadData);
                 threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, lowerHypocenter));
             }
 
         }
 
         // additionally check 0km and 10 km
-        createHypocenter(threadData.hypocenterA, lat, lon, 0, pickedEvents, finderSettings, threadData);
+        analyseHypocenter(threadData.hypocenterA, lat, lon, 0, pickedEvents, finderSettings, threadData);
         threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
-        createHypocenter(threadData.hypocenterA, lat, lon, 10, pickedEvents, finderSettings, threadData);
+        analyseHypocenter(threadData.hypocenterA, lat, lon, 10, pickedEvents, finderSettings, threadData);
         threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
-    }
-
-    private void createHypocenter(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> pickedEvents,
-                                  HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
-        analyseHypocenter(hypocenter, lat, lon, depth, pickedEvents, finderSettings, threadData);
     }
 
     public static void analyseHypocenter(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> events, HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
@@ -521,6 +539,8 @@ public class EarthquakeAnalysis {
         for (ExactPickedEvent event : events) {
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, event.angle);
             if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
+                hypocenter.correctStations = 0;
+                hypocenter.err = Double.MAX_VALUE;
                 return;
             }
 
@@ -549,6 +569,8 @@ public class EarthquakeAnalysis {
             } else {
                 _err = finderSettings.pWaveInaccuracyThreshold();
             }
+
+            _err /= 1024;
 
             err += _err * _err;
         }

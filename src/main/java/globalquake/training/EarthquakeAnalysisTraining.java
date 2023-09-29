@@ -105,7 +105,7 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0);
+        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0, null);
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,

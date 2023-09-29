@@ -22,7 +22,19 @@ public class PreliminaryHypocenter {
 
     }
 
-    public Hypocenter finish() {
-        return new Hypocenter(lat, lon, depth, origin, err, correctStations);
+    public Hypocenter finish(HypocenterConfidenceInterval hypocenterConfidenceInterval) {
+        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval);
+    }
+
+    @Override
+    public String toString() {
+        return "PreliminaryHypocenter{" +
+                "lat=" + lat +
+                ", lon=" + lon +
+                ", depth=" + depth +
+                ", origin=" + origin +
+                ", err=" + err +
+                ", correctStations=" + correctStations +
+                '}';
     }
 }
