@@ -19,6 +19,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
+    private static final long CINEMA_MODE_CHECK_INTERVAL = 1000 * 60;
     private double centerLat;
     private double centerLon;
     private double dragStartLat;
@@ -46,13 +47,16 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     private int lastFPS;
 
-    public void setCinemaMode(boolean cinemaMode) {
-        this.cinemaMode = cinemaMode;
-    }
-
     private boolean cinemaMode = Settings.cinemaModeOnStartup;
     private final Object animationLock = new Object();
     private Animation nextAnimation;
+
+    private long lastCinemaModeCheck = 0;
+
+    public void setCinemaMode(boolean cinemaMode) {
+        lastCinemaModeCheck = System.currentTimeMillis();
+        this.cinemaMode = cinemaMode;
+    }
 
     public GlobePanel(double lat, double lon) {
         centerLat = lat;
@@ -79,7 +83,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 renderer.mouseMoved(e);
                 if(cinemaMode){
                     Logger.info("Cinema mode disabled by dragging");
-                    cinemaMode = false;
+                    setCinemaMode(false);
                 }
                 if (!_interactionAllowed()) {
                     return;
@@ -147,7 +151,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         addMouseWheelListener(e -> {
             if(cinemaMode){
                 Logger.info("Cinema mode disabled by scrolling");
-                cinemaMode = false;
+                setCinemaMode(false);
             }
 
             double rotation = e.getPreciseWheelRotation();
@@ -434,12 +438,20 @@ public class GlobePanel extends JPanel implements GeoUtils {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
+        checkCinemaMode();
+
         g.setColor(Color.black);
         g.fillRect(0, 0, getWidth(), getHeight());
 
         renderer.render(g, renderer.getRenderProperties());
 
         frameCount.incrementAndGet();
+    }
+
+    private void checkCinemaMode() {
+        if(!cinemaMode && Settings.cinemaModeReenable && System.currentTimeMillis() - lastCinemaModeCheck > CINEMA_MODE_CHECK_INTERVAL){
+            setCinemaMode(true);
+        }
     }
 
     @SuppressWarnings("unused")

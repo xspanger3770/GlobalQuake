@@ -90,11 +90,13 @@ public final class Settings {
 	public static Integer cinemaModeSwitchTime;
 	public static Integer cinemaModeZoomMultiplier;
 
+	public static Boolean cinemaModeOnStartup;
+	public static Boolean cinemaModeReenable;
+
 	public static Integer logsStoreTimeMinutes;
 	public static Integer maxEvents;
 	public static final int maxEventsDefault = 60;
 	public static Boolean displayCoreWaves;
-	public static Boolean cinemaModeOnStartup;
 	public static Boolean recalibrateOnLaunch;
 	public static Boolean stationsTriangles;
 	public static Double stationsSizeMul;
@@ -142,7 +144,8 @@ public final class Settings {
 
 		loadProperty("logsStoreTimeMinutes", "5");
 
-		loadProperty("cinemaModeOnStartup", "false");
+		loadProperty("cinemaModeOnStartup", "true");
+		loadProperty("cinemaModeReenable", "true");
 		loadProperty("cinemaModeSwitchTime", "10");
 		loadProperty("cinemaModeZoomMultiplier", "100");
 
