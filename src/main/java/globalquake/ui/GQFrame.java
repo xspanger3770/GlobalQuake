@@ -13,10 +13,11 @@ public class GQFrame extends JFrame {
     }
 
     public @Override void toFront() {
-        super.setExtendedState(0);
         super.setAlwaysOnTop(true);
         super.toFront();
         super.requestFocus();
         super.setAlwaysOnTop(false);
+        super.setState(Frame.NORMAL);
+        super.repaint();
     }
 }
