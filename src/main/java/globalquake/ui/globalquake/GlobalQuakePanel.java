@@ -241,10 +241,9 @@ public class GlobalQuakePanel extends GlobePanel {
                     g.setFont(new Font("Calibri", Font.BOLD, 16));
                     g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
                     //g.drawString("%s Deep".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), x + 3, y + 104);
-                    g.drawString("Depth: %s (%s to %s)".formatted(
+                    g.drawString("Depth: %s ±%d".formatted(
                             Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1),
-                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.minDepth(), 1),
-                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.maxDepth(), 1)),
+                            (int)((hypocenter.confidenceInterval.maxDepth() - hypocenter.confidenceInterval.minDepth()) / 2.0)),
                             x + 3, y + 104);
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + 3, y + 125);

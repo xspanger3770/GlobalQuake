@@ -1,6 +1,8 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.earthquake.Cluster;
 import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.Hypocenter;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
@@ -117,7 +119,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         if (elementPWave.shouldDraw) {
             graphics.setColor(Color.BLUE);
-            graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
             graphics.draw(elementPWave.getShape());
         }
 
@@ -127,7 +129,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             graphics.draw(elementSWave.getShape());
         }
 
-        if(Settings.displayCoreWaves) {
+        if (Settings.displayCoreWaves) {
             if (elementPKPWave.shouldDraw) {
                 graphics.setColor(Color.MAGENTA);
                 graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
@@ -156,9 +158,19 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
 
-            str = Settings.getSelectedDistanceUnit().format(entity.getOriginal().getDepth(), 1);
+            Cluster cluster = entity.getOriginal().getCluster();
+            if (cluster != null) {
+                Hypocenter hypocenter = cluster.getPreviousHypocenter();
 
-            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+                if (hypocenter != null) {
+                    str = "%s - %s".formatted(
+                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.minDepth(), 1),
+                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.maxDepth(), 1)
+                    );
+
+                    graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+                }
+            }
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -182,7 +194,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         if (mag < 6) {
             return Color.orange;
         }
-        if(mag < 7){
+        if (mag < 7) {
             return Color.red;
         }
         return Color.magenta;

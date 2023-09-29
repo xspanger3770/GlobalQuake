@@ -276,7 +276,7 @@ public class EarthquakeAnalysis {
         List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
         calculateDistances(pickedEvents, bestHypocenter.lat, bestHypocenter.lon);
 
-        for(double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 10.0 / getUniversalResolutionMultiplier(finderSettings)){
+        for(double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 1.0 / getUniversalResolutionMultiplier(finderSettings)){
             analyseHypocenter(hypocenterA, bestHypocenter.lat, bestHypocenter.lon, depth, pickedEvents, finderSettings, threadData);
             System.err.println(depth+": "+hypocenterA+", "+bestHypocenter);
             if(hypocenterA.err < bestHypocenter.err * 1.2 && depth < bestHypocenter.depth){
