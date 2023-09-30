@@ -1,6 +1,8 @@
 package globalquake.ui.settings;
 
+import globalquake.exception.RuntimeApplicationException;
 import globalquake.geo.DistanceUnit;
+import globalquake.intensity.IntensityScales;
 import globalquake.main.Main;
 import org.tinylog.Logger;
 
@@ -14,6 +16,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
+import java.util.function.Function;
 
 public final class Settings {
 
@@ -137,42 +140,42 @@ public final class Settings {
 
 		loadProperty("focusOnEvent", "true");
 
-		loadProperty("distanceUnitsIndex", "0");
+		loadProperty("distanceUnitsIndex", "0", o -> validateInt(0, DistanceUnit.values().length - 1, (Integer) o));
 
-		loadProperty("selectedEventColorIndex", "0");
-		loadProperty("stationsSizeMul", "1.0");
+		loadProperty("selectedEventColorIndex", "0", o -> validateInt(0, 2, (Integer) o));
+		loadProperty("stationsSizeMul", "1.0",  o -> validateDouble(0, 10, (Double) o));
 		loadProperty("recalibrateOnLaunch", "true");
 
 		loadProperty("displayCoreWaves", "false");
 		loadProperty("maxEvents", String.valueOf(maxEventsDefault));
 
-		loadProperty("logsStoreTimeMinutes", "5");
+		loadProperty("logsStoreTimeMinutes", "5", o -> validateInt(1, 60, (Integer) o));
 
 		loadProperty("cinemaModeOnStartup", "true");
 		loadProperty("cinemaModeReenable", "true");
-		loadProperty("cinemaModeSwitchTime", "10");
-		loadProperty("cinemaModeZoomMultiplier", "100");
+		loadProperty("cinemaModeSwitchTime", "10", o -> validateInt(1, 60 * 60, (Integer) o));
+		loadProperty("cinemaModeZoomMultiplier", "100",  o -> validateInt(1, 1000, (Integer) o));
 
 		loadProperty("alertLocal", "true");
-		loadProperty("alertLocalDist", "200");
+		loadProperty("alertLocalDist", "200",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertRegion", "true");
-		loadProperty("alertRegionMag", "3.5");
-		loadProperty("alertRegionDist", "1000");
+		loadProperty("alertRegionMag", "3.5",  o -> validateDouble(0, 10, (Double) o));
+		loadProperty("alertRegionDist", "1000",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertGlobal", "true");
-		loadProperty("alertGlobalMag", "6.0");
+		loadProperty("alertGlobalMag", "6.0",  o -> validateDouble(0, 10, (Double) o));
 
 		loadProperty("reportsEnabled", "false");
 		loadProperty("displayClusters", "false");
-		loadProperty("selectedDateFormatIndex", "0");
-		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
+		loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
+		loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
 		loadProperty("stationsTriangles", "false");
-		loadProperty("maxArchivedQuakes", "100");
+		loadProperty("maxArchivedQuakes", "100", o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
 
 		loadProperty("enableAlarmDialogs", "false");
-		loadProperty("homeLat", "0.0");
-		loadProperty("homeLon", "0.0");
+		loadProperty("homeLat", "0.0", o -> validateDouble(-90, 90, (Double) o));
+		loadProperty("homeLon", "0.0", o -> validateDouble(-180, 180, (Double) o));
 		loadProperty("displayArchivedQuakes", "true");
 		loadProperty("enableSound", "true");
 		loadProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault));
@@ -183,15 +186,23 @@ public final class Settings {
 		loadProperty("parallelHypocenterLocations", "false");
 		loadProperty("displayHomeLocation", "true");
 		loadProperty("antialiasing", "false");
-		loadProperty("fpsIdle", "30");
-		loadProperty("intensityScaleIndex", "0");
+		loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
+		loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.size() - 1, (Integer) o));
 		loadProperty("oldEventsTimeFilterEnabled", "false");
-		loadProperty("oldEventsTimeFilter", "24.0");
+		loadProperty("oldEventsTimeFilter", "24.0", o -> validateDouble(0, 24 * 365, (Double) o));
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
-		loadProperty("oldEventsMagnitudeFilter", "4.0");
-		loadProperty("oldEventsOpacity", "100.0");
+		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
+		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
 
 		save();
+	}
+
+	public static boolean validateDouble(double min, double max, double v){
+        return !Double.isInfinite(v) && !Double.isNaN(v) && !(v < min) && !(v > max);
+    }
+
+	public static boolean validateInt(int min, int max, int v){
+		return !(v < min) && !(v > max);
 	}
 
 	private static void setProperty(Field field, Object value) {
@@ -203,6 +214,10 @@ public final class Settings {
 	}
 
 	private static void loadProperty(String name, String defaultVal){
+		loadProperty(name, defaultVal, null);
+	}
+
+	private static void loadProperty(String name, String defaultVal, Function<Object, Boolean> validator){
 		try {
 			Field field = Settings.class.getDeclaredField(name);
 			field.setAccessible(true);
@@ -210,6 +225,9 @@ public final class Settings {
 				boolean val;
 				try{
 					val = Boolean.parseBoolean((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value! %s".formatted(name, val));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Boolean.parseBoolean(defaultVal);
@@ -219,6 +237,9 @@ public final class Settings {
 				double val;
 				try{
 					val = Double.parseDouble((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value: %s, setting to %s".formatted(name, val, defaultVal));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Double.parseDouble(defaultVal);
@@ -228,6 +249,9 @@ public final class Settings {
 				int val;
 				try{
 					val = Integer.parseInt((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value! %s".formatted(name, val));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Integer.parseInt(defaultVal);
