@@ -251,10 +251,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.fpsIdle = sliderFpsIdle.getValue();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
-        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText());
+        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText().replace(',', '.'));
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
-        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
+        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText().replace(',', '.'));
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
