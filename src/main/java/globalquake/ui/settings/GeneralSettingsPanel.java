@@ -7,9 +7,7 @@ import globalquake.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JCheckBox chkBoxAlertDialogs;

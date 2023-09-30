@@ -4,11 +4,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 public class GraphicsSettingsPanel extends SettingsPanel{
 

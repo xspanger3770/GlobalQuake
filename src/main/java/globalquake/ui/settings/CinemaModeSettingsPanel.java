@@ -2,9 +2,7 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 public class CinemaModeSettingsPanel extends SettingsPanel {
 

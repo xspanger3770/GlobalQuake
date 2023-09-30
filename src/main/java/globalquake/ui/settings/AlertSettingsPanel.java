@@ -1,12 +1,8 @@
 package globalquake.ui.settings;
 
-import globalquake.exception.RuntimeApplicationException;
-
 import javax.swing.*;
 import java.awt.*;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 public class AlertSettingsPanel extends SettingsPanel {
 

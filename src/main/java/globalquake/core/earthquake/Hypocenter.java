@@ -17,7 +17,7 @@ public class Hypocenter {
 	public List<MagnitudeReading> mags;
 	public ObviousArrivalsInfo obviousArrivalsInfo;
 
-	public HypocenterConfidenceInterval confidenceInterval;
+	public final HypocenterConfidenceInterval confidenceInterval;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents, HypocenterConfidenceInterval confidenceInterval) {
 		this.lat = lat;
