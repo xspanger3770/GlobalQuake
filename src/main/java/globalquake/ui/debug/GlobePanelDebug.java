@@ -1,6 +1,6 @@
 package globalquake.ui.debug;
 
-import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.core.archive.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.regions.Regions;

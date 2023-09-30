@@ -2,7 +2,6 @@ package globalquake.core.analysis;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.Event;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;

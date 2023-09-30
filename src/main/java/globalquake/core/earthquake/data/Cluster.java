@@ -1,6 +1,7 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
 import globalquake.core.Warnable;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Cluster implements Warnable {
 
 	private final int id;
-	private final Map<AbstractStation, Event> assignedEvents;
+	private final Map<AbstractStation, globalquake.core.analysis.Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -84,7 +85,7 @@ public class Cluster implements Warnable {
 	 * 
 	 * @return all events that were added to this cluster
 	 */
-	public Map<AbstractStation, Event> getAssignedEvents() {
+	public Map<AbstractStation, globalquake.core.analysis.Event> getAssignedEvents() {
 		return assignedEvents;
 	}
 
@@ -101,7 +102,7 @@ public class Cluster implements Warnable {
 
 	private boolean checkForUpdates() {
 		int upd = 0;
-		for (Event e : getAssignedEvents().values()) {
+		for (globalquake.core.analysis.Event e : getAssignedEvents().values()) {
 			upd += e.getUpdatesCount();
 		}
 		boolean b = (upd != updateCount);
@@ -115,7 +116,7 @@ public class Cluster implements Warnable {
 		int r1024 = 0;
 		int r8192 = 0;
 		int r32K = 0;
-		for (Event e : getAssignedEvents().values()) {
+		for (globalquake.core.analysis.Event e : getAssignedEvents().values()) {
 			if(!e.isValid()){
 				continue;
 			}
@@ -205,7 +206,7 @@ public class Cluster implements Warnable {
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	protected boolean containsStation(AbstractStation station) {
+	public boolean containsStation(AbstractStation station) {
 		return getAssignedEvents().containsKey(station);
 	}
 

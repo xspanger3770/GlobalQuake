@@ -1,9 +1,12 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
+
+import globalquake.core.earthquake.interval.DepthConfidenceInterval;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 
 import java.util.List;
 
 public class Hypocenter {
-	public final double totalErr;
+	public final double totalErr;;
 	public int correctEvents;
 
 	public final double lat;
@@ -17,16 +20,21 @@ public class Hypocenter {
 	public List<MagnitudeReading> mags;
 	public ObviousArrivalsInfo obviousArrivalsInfo;
 
-	public final HypocenterConfidenceInterval confidenceInterval;
+	public final DepthConfidenceInterval depthConfidenceInterval;
 
-	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents, HypocenterConfidenceInterval confidenceInterval) {
+	public final PolygonConfidenceInterval polygonConfidenceInterval;
+
+	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
+					  DepthConfidenceInterval depthConfidenceInterval,
+					  PolygonConfidenceInterval polygonConfidenceInterval) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.origin = origin;
 		this.totalErr = err;
 		this.correctEvents = correctEvents;
-		this.confidenceInterval = confidenceInterval;
+		this.depthConfidenceInterval = depthConfidenceInterval;
+		this.polygonConfidenceInterval = polygonConfidenceInterval;
 	}
 
 	public double getCorrectness(){
@@ -50,7 +58,8 @@ public class Hypocenter {
 				", magnitude=" + magnitude +
 				", mags=" + mags +
 				", obviousArrivalsInfo=" + obviousArrivalsInfo +
-				", confidenceInterval=" + confidenceInterval +
+				", depthConfidenceInterval=" + depthConfidenceInterval +
+				", polygonConfidenceInterval=" + polygonConfidenceInterval +
 				'}';
 	}
 }

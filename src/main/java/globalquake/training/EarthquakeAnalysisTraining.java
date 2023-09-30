@@ -1,9 +1,9 @@
 package globalquake.training;
 
-import globalquake.core.earthquake.Cluster;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.Hypocenter;
-import globalquake.core.earthquake.PickedEvent;
+import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.settings.Settings;
@@ -105,7 +105,7 @@ public class EarthquakeAnalysisTraining {
         Cluster cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0, null, null);
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,

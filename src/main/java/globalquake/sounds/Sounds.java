@@ -1,8 +1,8 @@
 package globalquake.sounds;
 
 import globalquake.core.AlertManager;
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.ShindoIntensityScale;

@@ -1,4 +1,4 @@
-package globalquake.core.earthquake;
+package globalquake.core.archive;
 
 import java.io.Serial;
 import java.io.Serializable;

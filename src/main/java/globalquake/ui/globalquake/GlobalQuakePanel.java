@@ -1,10 +1,10 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Hypocenter;
-import globalquake.core.earthquake.MagnitudeReading;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.data.MagnitudeReading;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
@@ -242,7 +242,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + 3, y + 85);
                     g.drawString("Depth: %s ± %.1f".formatted(
                             Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1),
-                            ((hypocenter.confidenceInterval.maxDepth() - hypocenter.confidenceInterval.minDepth()) / 2.0)),
+                            ((hypocenter.depthConfidenceInterval.maxDepth() - hypocenter.depthConfidenceInterval.minDepth()) / 2.0)),
                             x + 3, y + 104);
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + 3, y + 125);

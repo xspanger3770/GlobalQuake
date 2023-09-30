@@ -1,6 +1,6 @@
 package globalquake.ui;
 
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityScales;

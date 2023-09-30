@@ -1,8 +1,8 @@
 package globalquake.ui.archived;
 
-import globalquake.core.earthquake.ArchivedEvent;
-import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.archive.ArchivedEvent;
+import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
 import globalquake.ui.globalquake.feature.FeatureGlobalStation;

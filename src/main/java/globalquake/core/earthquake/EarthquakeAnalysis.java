@@ -2,6 +2,10 @@ package globalquake.core.earthquake;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.BetterAnalysis;
+import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.*;
+import globalquake.core.earthquake.interval.DepthConfidenceInterval;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import globalquake.geo.GeoUtils;
@@ -267,7 +271,7 @@ public class EarthquakeAnalysis {
         postProcess(selectedEvents, cluster, bestHypocenter, finderSettings, startTime);
     }
 
-    private HypocenterConfidenceInterval confidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings) {
+    private DepthConfidenceInterval calculateDepthConfidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings) {
         double upperBound = bestHypocenter.depth;
         double lowerBound = bestHypocenter.depth;
 
@@ -279,20 +283,61 @@ public class EarthquakeAnalysis {
         for(double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 1.0 / getUniversalResolutionMultiplier(finderSettings)){
             analyseHypocenter(hypocenterA, bestHypocenter.lat, bestHypocenter.lon, depth, pickedEvents, finderSettings, threadData);
             System.err.println(depth+": "+hypocenterA+", "+bestHypocenter);
-            if(hypocenterA.err < bestHypocenter.err * 1.2 && depth < bestHypocenter.depth && depth < upperBound){
+            if(hypocenterA.err < bestHypocenter.err * CONFIDENCE_LEVEL && depth < bestHypocenter.depth && depth < upperBound){
                 upperBound = depth;
             }
 
-            if(hypocenterA.err < bestHypocenter.err * 1.2 && depth > bestHypocenter.depth){
+            if(hypocenterA.err < bestHypocenter.err * CONFIDENCE_LEVEL && depth > bestHypocenter.depth){
                 lowerBound = depth;
             }
         }
 
-        return new HypocenterConfidenceInterval(upperBound, lowerBound);
+        return new DepthConfidenceInterval(upperBound, lowerBound);
+    }
+
+    private static final int CONFIDENCE_POLYGON_EDGES = 16;
+    private static final double CONFIDENCE_POLYGON_OFFSET = 0;
+    private static final double CONFIDENCE_POLYGON_STEP = 10;
+    private static final double CONFIDENCE_POLYGON_MIN_STEP = 0.25;
+    private static final double CONFIDENCE_POLYGON_MAX_DIST = 5000;
+
+    private static final double CONFIDENCE_LEVEL = 1.2;
+
+    private PolygonConfidenceInterval calculatePolygonConfidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings){
+        List<Integer> integerList = IntStream.range(0, CONFIDENCE_POLYGON_EDGES).boxed().toList();
+        List<Double> lengths = (Settings.parallelHypocenterLocations ? integerList.parallelStream() : integerList.stream()).map(ray -> {
+            double ang = CONFIDENCE_POLYGON_OFFSET + (ray / (double)CONFIDENCE_POLYGON_EDGES) * 360.0;
+            double dist = CONFIDENCE_POLYGON_STEP;
+            double step = CONFIDENCE_POLYGON_STEP;
+
+            List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
+            HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
+            while(step > CONFIDENCE_POLYGON_MIN_STEP && dist < CONFIDENCE_POLYGON_MAX_DIST){
+                double[] latLon = GeoUtils.moveOnGlobe(bestHypocenter.lat, bestHypocenter.lon, dist, ang);
+                double lat = latLon[0];
+                double lon = latLon[1];
+
+                calculateDistances(pickedEvents, lat, lon);
+                getBestAtDepth(12, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
+                boolean stillValid = threadData.bestHypocenter.err < bestHypocenter.err * CONFIDENCE_LEVEL;
+                if(stillValid){
+                    dist += step;
+                } else {
+                    step /= 2.0;
+                    dist -= step;
+                }
+            }
+
+            return dist;
+        }).toList();
+
+        return new PolygonConfidenceInterval(CONFIDENCE_POLYGON_EDGES, CONFIDENCE_POLYGON_OFFSET, lengths);
     }
 
     private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
-        Hypocenter bestHypocenter = bestHypocenterPrelim.finish(confidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings));
+        Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
+                calculateDepthConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings),
+                calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings));
         calculateMagnitude(cluster, bestHypocenter);
 
         // There has to be at least some difference in the picked pWave times

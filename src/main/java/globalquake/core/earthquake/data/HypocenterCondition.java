@@ -1,4 +1,4 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
 public enum HypocenterCondition {
 

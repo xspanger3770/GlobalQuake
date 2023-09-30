@@ -1,4 +1,7 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
+
+import globalquake.core.earthquake.interval.DepthConfidenceInterval;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 
 public class PreliminaryHypocenter {
     public double lat;
@@ -22,8 +25,8 @@ public class PreliminaryHypocenter {
 
     }
 
-    public Hypocenter finish(HypocenterConfidenceInterval hypocenterConfidenceInterval) {
-        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval);
+    public Hypocenter finish(DepthConfidenceInterval hypocenterConfidenceInterval, PolygonConfidenceInterval polygonConfidenceInterval) {
+        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval, polygonConfidenceInterval);
     }
 
     @Override

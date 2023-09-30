@@ -340,16 +340,16 @@ public class GlobeRenderer {
         return cameraToPoint <= maxDistance;
     }
 
-    protected static double getX_3D(double lat, double lon, double alt) {
+    public static double getX_3D(double lat, double lon, double alt) {
         return -(GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.sin(FastMath.toRadians(lon)) * FastMath.cos(FastMath.toRadians(lat));
     }
 
     @SuppressWarnings("unused")
-    protected static double getY_3D(double lat, double lon, double alt) {
+    public static double getY_3D(double lat, double lon, double alt) {
         return (GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.sin(FastMath.toRadians(lat));
     }
 
-    protected static double getZ_3D(double lat, double lon, double alt) {
+    public static double getZ_3D(double lat, double lon, double alt) {
         return -(GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.cos(FastMath.toRadians(lon)) * FastMath.cos(FastMath.toRadians(lat));
     }
 

@@ -1,6 +1,8 @@
 package globalquake.core.earthquake;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.*;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.geo.GeoUtils;

@@ -1,5 +1,8 @@
-package globalquake.core.earthquake;
+package globalquake.core.archive;
 
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 

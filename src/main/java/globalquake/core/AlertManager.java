@@ -3,7 +3,7 @@ package globalquake.core;
 import java.awt.EventQueue;
 import java.util.*;
 
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.AlertWindow;
 import globalquake.geo.GeoUtils;

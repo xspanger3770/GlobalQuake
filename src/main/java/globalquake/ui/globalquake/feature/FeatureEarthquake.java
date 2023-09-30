@@ -1,8 +1,9 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Hypocenter;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
@@ -13,6 +14,7 @@ import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -28,7 +30,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
-        super(5);
+        super(6);
         this.earthquakes = earthquakes;
     }
 
@@ -44,6 +46,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         RenderElement elementPKPWave = entity.getRenderElement(2);
         RenderElement elementPKIKPWave = entity.getRenderElement(3);
         RenderElement elementCross = entity.getRenderElement(4);
+        RenderElement elementConfidencePolygon = entity.getRenderElement(5);
 
         Earthquake e = entity.getOriginal();
 
@@ -81,6 +84,30 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
                         .pxToDeg(16), 45.0);
+
+        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceInterval != null) {
+            PolygonConfidenceInterval polygonConfidenceInterval = e.getCluster().getPreviousHypocenter().polygonConfidenceInterval;
+            createConfidencePolygon(elementConfidencePolygon, polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
+        }
+    }
+
+    private void createConfidencePolygon(RenderElement renderElement, PolygonConfidenceInterval polygonConfidenceInterval, double lat, double lon) {
+        renderElement.getPolygon().reset();
+
+        double step = 360.0 / polygonConfidenceInterval.n();
+
+        for (int i = 0; i < polygonConfidenceInterval.n(); i++) {
+            double ang = polygonConfidenceInterval.offset() + step * i;
+            double[] latLon = GeoUtils.moveOnGlobe(lat, lon, polygonConfidenceInterval.lengths().get(i), ang);
+            Vector3D vector3D = new Vector3D(
+                    GlobeRenderer.getX_3D(latLon[0], latLon[1], 0),
+                    GlobeRenderer.getY_3D(latLon[0], latLon[1], 0),
+                    GlobeRenderer.getZ_3D(latLon[0], latLon[1], 0));
+
+            renderElement.getPolygon().addPoint(vector3D);
+        }
+
+        renderElement.getPolygon().finish();
     }
 
     @Override
@@ -114,9 +141,19 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         RenderElement elementSWave = entity.getRenderElement(1);
         RenderElement elementPKPWave = entity.getRenderElement(2);
         RenderElement elementPKIKPWave = entity.getRenderElement(3);
+        RenderElement elementConfidencePolygon = entity.getRenderElement(5);
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+        if(elementConfidencePolygon.shouldDraw){
+            graphics.setStroke(new BasicStroke(3.0f));
+            graphics.setColor(new Color(255,0,255,100));
+            graphics.fill(elementConfidencePolygon.getShape());
+            graphics.setColor(Color.MAGENTA);
+            graphics.draw(elementConfidencePolygon.getShape());
+        }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         if (elementPWave.shouldDraw) {
             graphics.setColor(Color.BLUE);
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
@@ -164,8 +201,8 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
                 if (hypocenter != null) {
                     str = "%s - %s".formatted(
-                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.minDepth(), 1),
-                            Settings.getSelectedDistanceUnit().format(hypocenter.confidenceInterval.maxDepth(), 1)
+                            Settings.getSelectedDistanceUnit().format(hypocenter.depthConfidenceInterval.minDepth(), 1),
+                            Settings.getSelectedDistanceUnit().format(hypocenter.depthConfidenceInterval.maxDepth(), 1)
                     );
 
                     graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));

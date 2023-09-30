@@ -1,9 +1,9 @@
 package globalquake.training;
 
 import globalquake.core.earthquake.ClusterAnalysis;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.Event;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.geo.GeoUtils;

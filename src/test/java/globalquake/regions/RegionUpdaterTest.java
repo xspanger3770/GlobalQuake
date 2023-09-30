@@ -1,7 +1,7 @@
 package globalquake.regions;
 
-import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.data.Earthquake;
 import org.junit.Test;
 
 import java.io.IOException;

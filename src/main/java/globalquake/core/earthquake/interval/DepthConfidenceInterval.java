@@ -1,6 +1,6 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.interval;
 
-public record HypocenterConfidenceInterval(double minDepth, double maxDepth) {
+public record DepthConfidenceInterval(double minDepth, double maxDepth) {
 
     @Override
     public String toString() {

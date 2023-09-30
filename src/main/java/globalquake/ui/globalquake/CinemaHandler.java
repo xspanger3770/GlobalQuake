@@ -1,8 +1,8 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.earthquake.Cluster;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
