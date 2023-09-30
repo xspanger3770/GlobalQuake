@@ -251,10 +251,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.fpsIdle = sliderFpsIdle.getValue();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
-        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText().replace(',', '.'));
+        Settings.oldEventsTimeFilter = parseDouble(textFieldTimeFilter.getText(), "Old events max age", 0, 24 * 365);
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
-        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText().replace(',', '.'));
+        Settings.oldEventsMagnitudeFilter = parseDouble(textFieldMagnitudeFilter.getText(), "Old events min magnitude", 0, 10);
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
@@ -265,7 +265,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
-        Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
+        Settings.maxArchivedQuakes = parseInt(textFieldMaxArchived.getText(), "Max number of archived quakes", 1, Integer.MAX_VALUE);
     }
 
     @Override

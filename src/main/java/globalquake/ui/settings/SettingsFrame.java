@@ -60,7 +60,10 @@ public class SettingsFrame extends GQFrame {
                     panel1.save();
                 }
 				catch(NumberFormatException exx){
-					Main.getErrorHandler().handleException(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
+					Main.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
+					return;
+				} catch(RuntimeApplicationException exxx){
+					Main.getErrorHandler().handleWarning(exxx);
 					return;
 				}
 				catch (Exception ex) {

@@ -123,13 +123,13 @@ public class AlertSettingsPanel extends SettingsPanel {
     @Override
     public void save() throws NumberFormatException, ParseException {
         Settings.alertLocal = chkBoxLocal.isSelected();
-        Settings.alertLocalDist = Double.parseDouble(textFieldLocalDist.getText().replace(',', '.')) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.alertLocalDist = parseDouble(textFieldLocalDist.getText(), "Local alert distance", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
         Settings.alertRegion = chkBoxRegion.isSelected();
-        Settings.alertRegionMag = Double.parseDouble(textFieldRegionMag.getText().replace(',', '.'));
-        Settings.alertRegionDist = Double.parseDouble(textFieldRegionDist.getText().replace(',', '.')) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.alertRegionMag = parseDouble(textFieldRegionMag.getText(), "Regional alert Magnitude", 0, 10);
+        Settings.alertRegionDist = parseDouble(textFieldRegionDist.getText(), "Regional alert distance", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
 
         Settings.alertGlobal = checkBoxGlobal.isSelected();
-        Settings.alertGlobalMag = Double.parseDouble(textFieldGlobalMag.getText().replace(',', '.'));
+        Settings.alertGlobalMag = parseDouble(textFieldGlobalMag.getText(), "Global alert magnitude", 0, 10);
         Settings.focusOnEvent = chkBoxFocus.isSelected();
     }
 
