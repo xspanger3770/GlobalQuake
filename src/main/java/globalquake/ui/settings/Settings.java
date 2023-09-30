@@ -105,6 +105,8 @@ public final class Settings {
 	public static Integer distanceUnitsIndex;
 	public static Boolean focusOnEvent;
 
+	public static Boolean confidencePolygons;
+
     static {
 		load();
 	}
@@ -130,6 +132,8 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("confidencePolygons", "false");
 
 		loadProperty("focusOnEvent", "true");
 

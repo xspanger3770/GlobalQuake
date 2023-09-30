@@ -10,6 +10,7 @@ public class DebugSettingsPanel extends SettingsPanel {
     private final JCheckBox chkBoxClusters;
     private final JCheckBox chkBoxReports;
     private final JCheckBox chkBoxCoreWaves;
+    private final JCheckBox chkBoxConfidencePolygons;
 
     public DebugSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -19,6 +20,7 @@ public class DebugSettingsPanel extends SettingsPanel {
         add(chkBoxReports = new JCheckBox("Enable Earthquake Reports", Settings.reportsEnabled));
         add(new JLabel("     Reports will be stored in %s".formatted(EarthquakeReporter.ANALYSIS_FOLDER.getPath())));
         add(chkBoxCoreWaves = new JCheckBox("Display PKP and PKIKP Waves", Settings.displayCoreWaves));
+        add(chkBoxConfidencePolygons = new JCheckBox("Display epicenter confidence polygons", Settings.confidencePolygons));
     }
 
     @Override
@@ -26,6 +28,7 @@ public class DebugSettingsPanel extends SettingsPanel {
         Settings.displayClusters = chkBoxClusters.isSelected();
         Settings.reportsEnabled = chkBoxReports.isSelected();
         Settings.displayCoreWaves = chkBoxCoreWaves.isSelected();
+        Settings.confidencePolygons = chkBoxConfidencePolygons.isSelected();
     }
 
     @Override

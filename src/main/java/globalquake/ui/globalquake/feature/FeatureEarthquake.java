@@ -148,12 +148,14 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        for(int i = 5; i < 9; i++) {
-            RenderElement elementConfidencePolygon = entity.getRenderElement(i);
-            if (elementConfidencePolygon.shouldDraw) {
-                graphics.setStroke(new BasicStroke(3.0f));
-                graphics.setColor(polygonColor(i - 5));
-                graphics.draw(elementConfidencePolygon.getShape());
+        if(Settings.confidencePolygons) {
+            for (int i = 5; i < 9; i++) {
+                RenderElement elementConfidencePolygon = entity.getRenderElement(i);
+                if (elementConfidencePolygon.shouldDraw) {
+                    graphics.setStroke(new BasicStroke(3.0f));
+                    graphics.setColor(polygonColor(i - 5));
+                    graphics.draw(elementConfidencePolygon.getShape());
+                }
             }
         }
 
