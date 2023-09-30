@@ -1,6 +1,6 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;

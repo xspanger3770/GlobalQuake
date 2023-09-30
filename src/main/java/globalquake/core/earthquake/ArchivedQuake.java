@@ -1,4 +1,4 @@
-package globalquake.core.archive;
+package globalquake.core.earthquake;
 
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.analysis.Event;

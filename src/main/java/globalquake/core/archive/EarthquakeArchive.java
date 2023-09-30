@@ -1,5 +1,6 @@
 package globalquake.core.archive;
 
+import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.main.Main;

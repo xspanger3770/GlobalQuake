@@ -85,6 +85,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 entity.getOriginal().getLon(), renderer
                         .pxToDeg(16), 45.0);
 
+
         if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceInterval != null) {
             PolygonConfidenceInterval polygonConfidenceInterval = e.getCluster().getPreviousHypocenter().polygonConfidenceInterval;
             createConfidencePolygon(elementConfidencePolygon, polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
@@ -96,9 +97,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         double step = 360.0 / polygonConfidenceInterval.n();
 
-        for (int i = 0; i < polygonConfidenceInterval.n(); i++) {
+        for (int i = 0; i < polygonConfidenceInterval.n() + 1; i++) {
             double ang = polygonConfidenceInterval.offset() + step * i;
-            double[] latLon = GeoUtils.moveOnGlobe(lat, lon, polygonConfidenceInterval.lengths().get(i), ang);
+            double[] latLon = GeoUtils.moveOnGlobe(lat, lon, polygonConfidenceInterval.lengths().get(i % polygonConfidenceInterval.n()), ang);
             Vector3D vector3D = new Vector3D(
                     GlobeRenderer.getX_3D(latLon[0], latLon[1], 0),
                     GlobeRenderer.getY_3D(latLon[0], latLon[1], 0),
@@ -127,7 +128,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for (int i = 0; i <= 4; i++) {
+        for (int i = 0; i <= 5; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);

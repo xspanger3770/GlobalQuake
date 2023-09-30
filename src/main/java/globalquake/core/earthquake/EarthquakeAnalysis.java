@@ -282,7 +282,6 @@ public class EarthquakeAnalysis {
 
         for(double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 1.0 / getUniversalResolutionMultiplier(finderSettings)){
             analyseHypocenter(hypocenterA, bestHypocenter.lat, bestHypocenter.lon, depth, pickedEvents, finderSettings, threadData);
-            System.err.println(depth+": "+hypocenterA+", "+bestHypocenter);
             if(hypocenterA.err < bestHypocenter.err * CONFIDENCE_LEVEL && depth < bestHypocenter.depth && depth < upperBound){
                 upperBound = depth;
             }
@@ -316,6 +315,10 @@ public class EarthquakeAnalysis {
                 double[] latLon = GeoUtils.moveOnGlobe(bestHypocenter.lat, bestHypocenter.lon, dist, ang);
                 double lat = latLon[0];
                 double lon = latLon[1];
+
+                // reset
+                threadData.bestHypocenter.err=Double.MAX_VALUE;
+                threadData.bestHypocenter.correctStations = 0;
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(12, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
@@ -568,7 +571,6 @@ public class EarthquakeAnalysis {
                 analyseHypocenter(lowerHypocenter, lat, lon, depthB, pickedEvents, finderSettings, threadData);
                 threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, lowerHypocenter));
             }
-
         }
 
         // additionally check 0km and 10 km

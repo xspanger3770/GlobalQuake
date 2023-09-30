@@ -1,15 +1,13 @@
 package globalquake.core.analysis;
 
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.report.StationReport;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import globalquake.core.analysis.Analysis;
-import globalquake.core.analysis.Log;
-import globalquake.core.earthquake.data.Cluster;
-import globalquake.core.report.StationReport;
 
 public class Event implements Serializable {
 

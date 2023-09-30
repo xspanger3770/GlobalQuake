@@ -1,6 +1,5 @@
 package globalquake.core.earthquake;
 
-import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.earthquake.data.Earthquake;
 import org.junit.Test;

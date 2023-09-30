@@ -1,7 +1,5 @@
 package globalquake.core.earthquake.data;
 
-import globalquake.core.earthquake.data.PreliminaryHypocenter;
-
 public class HypocenterFinderThreadData {
     public final long[] origins;
 
