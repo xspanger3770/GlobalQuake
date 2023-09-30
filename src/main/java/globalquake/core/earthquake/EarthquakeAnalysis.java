@@ -294,7 +294,7 @@ public class EarthquakeAnalysis {
         return new DepthConfidenceInterval(upperBound, lowerBound);
     }
 
-    private static final int CONFIDENCE_POLYGON_EDGES = 16;
+    private static final int CONFIDENCE_POLYGON_EDGES = 64;
     private static final double CONFIDENCE_POLYGON_OFFSET = 0;
     private static final double CONFIDENCE_POLYGON_STEP = 10;
     private static final double CONFIDENCE_POLYGON_MIN_STEP = 0.25;
@@ -302,7 +302,8 @@ public class EarthquakeAnalysis {
 
     private static final double CONFIDENCE_LEVEL = 1.2;
 
-    private PolygonConfidenceInterval calculatePolygonConfidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings){
+    private PolygonConfidenceInterval calculatePolygonConfidenceInterval(List<PickedEvent> selectedEvents,
+                                                                         PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings, double confidenceThreshold){
         List<Integer> integerList = IntStream.range(0, CONFIDENCE_POLYGON_EDGES).boxed().toList();
         List<Double> lengths = (Settings.parallelHypocenterLocations ? integerList.parallelStream() : integerList.stream()).map(ray -> {
             double ang = CONFIDENCE_POLYGON_OFFSET + (ray / (double)CONFIDENCE_POLYGON_EDGES) * 360.0;
@@ -322,7 +323,7 @@ public class EarthquakeAnalysis {
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(12, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
-                boolean stillValid = threadData.bestHypocenter.err < bestHypocenter.err * CONFIDENCE_LEVEL;
+                boolean stillValid = threadData.bestHypocenter.err < bestHypocenter.err * confidenceThreshold;
                 if(stillValid){
                     dist += step;
                 } else {
@@ -340,7 +341,7 @@ public class EarthquakeAnalysis {
     private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings),
-                calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings));
+                calculatePolygonConfidenceIntervals(selectedEvents, bestHypocenterPrelim, finderSettings));
         calculateMagnitude(cluster, bestHypocenter);
 
         // There has to be at least some difference in the picked pWave times
@@ -382,6 +383,17 @@ public class EarthquakeAnalysis {
         }
 
         Logger.info("Hypocenter finding finished in: %d ms".formatted( System.currentTimeMillis() - startTime));
+    }
+
+    private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
+        List<PolygonConfidenceInterval> result = new ArrayList<>();
+
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.2));
+
+        return result;
     }
 
     private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
@@ -614,7 +626,7 @@ public class EarthquakeAnalysis {
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc++;
             } else {
-                _err = finderSettings.pWaveInaccuracyThreshold();
+                _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
             }
 
             _err /= 1024;

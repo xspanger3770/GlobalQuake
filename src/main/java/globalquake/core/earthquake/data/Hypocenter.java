@@ -22,11 +22,11 @@ public class Hypocenter {
 
 	public final DepthConfidenceInterval depthConfidenceInterval;
 
-	public final PolygonConfidenceInterval polygonConfidenceInterval;
+	public final List<PolygonConfidenceInterval> polygonConfidenceIntervals;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,
-					  PolygonConfidenceInterval polygonConfidenceInterval) {
+					  List<PolygonConfidenceInterval> polygonConfidenceIntervals) {
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
@@ -34,7 +34,7 @@ public class Hypocenter {
 		this.totalErr = err;
 		this.correctEvents = correctEvents;
 		this.depthConfidenceInterval = depthConfidenceInterval;
-		this.polygonConfidenceInterval = polygonConfidenceInterval;
+		this.polygonConfidenceIntervals = polygonConfidenceIntervals;
 	}
 
 	public double getCorrectness(){
@@ -59,7 +59,6 @@ public class Hypocenter {
 				", mags=" + mags +
 				", obviousArrivalsInfo=" + obviousArrivalsInfo +
 				", depthConfidenceInterval=" + depthConfidenceInterval +
-				", polygonConfidenceInterval=" + polygonConfidenceInterval +
 				'}';
 	}
 }

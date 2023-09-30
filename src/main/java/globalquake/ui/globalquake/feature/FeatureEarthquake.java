@@ -25,12 +25,13 @@ import java.util.Locale;
 
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
+    private static final int ELEMENT_COUNT = 5 + 4;
     private final List<Earthquake> earthquakes;
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
-        super(6);
+        super(ELEMENT_COUNT);
         this.earthquakes = earthquakes;
     }
 
@@ -46,7 +47,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         RenderElement elementPKPWave = entity.getRenderElement(2);
         RenderElement elementPKIKPWave = entity.getRenderElement(3);
         RenderElement elementCross = entity.getRenderElement(4);
-        RenderElement elementConfidencePolygon = entity.getRenderElement(5);
 
         Earthquake e = entity.getOriginal();
 
@@ -86,9 +86,12 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                         .pxToDeg(16), 45.0);
 
 
-        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceInterval != null) {
-            PolygonConfidenceInterval polygonConfidenceInterval = e.getCluster().getPreviousHypocenter().polygonConfidenceInterval;
-            createConfidencePolygon(elementConfidencePolygon, polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
+        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals != null) {
+            List<PolygonConfidenceInterval> polygonConfidenceIntervals = e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+            for (int i = 0; i < polygonConfidenceIntervals.size(); i++) {
+                PolygonConfidenceInterval polygonConfidenceInterval = polygonConfidenceIntervals.get(i);
+                createConfidencePolygon(entity.getRenderElement(5 + i), polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
+            }
         }
     }
 
@@ -128,7 +131,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for (int i = 0; i <= 5; i++) {
+        for (int i = 0; i < ELEMENT_COUNT; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
@@ -142,16 +145,16 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         RenderElement elementSWave = entity.getRenderElement(1);
         RenderElement elementPKPWave = entity.getRenderElement(2);
         RenderElement elementPKIKPWave = entity.getRenderElement(3);
-        RenderElement elementConfidencePolygon = entity.getRenderElement(5);
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        if(elementConfidencePolygon.shouldDraw){
-            graphics.setStroke(new BasicStroke(3.0f));
-            graphics.setColor(new Color(255,0,255,100));
-            graphics.fill(elementConfidencePolygon.getShape());
-            graphics.setColor(Color.MAGENTA);
-            graphics.draw(elementConfidencePolygon.getShape());
+        for(int i = 5; i < 9; i++) {
+            RenderElement elementConfidencePolygon = entity.getRenderElement(i);
+            if (elementConfidencePolygon.shouldDraw) {
+                graphics.setStroke(new BasicStroke(3.0f));
+                graphics.setColor(polygonColor(i - 5));
+                graphics.draw(elementConfidencePolygon.getShape());
+            }
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -212,6 +215,19 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private Color polygonColor(int i) {
+        if(i == 0){
+            return Color.blue;
+        }
+        if(i == 1){
+            return Color.green;
+        }
+        if(i == 2){
+            return Color.yellow;
+        }
+        return Color.red;
     }
 
     private Color getColorSWave(double mag) {

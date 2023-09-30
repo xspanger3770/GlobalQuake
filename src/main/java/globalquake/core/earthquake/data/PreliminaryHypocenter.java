@@ -3,6 +3,8 @@ package globalquake.core.earthquake.data;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 
+import java.util.List;
+
 public class PreliminaryHypocenter {
     public double lat;
     public double lon;
@@ -25,8 +27,8 @@ public class PreliminaryHypocenter {
 
     }
 
-    public Hypocenter finish(DepthConfidenceInterval hypocenterConfidenceInterval, PolygonConfidenceInterval polygonConfidenceInterval) {
-        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval, polygonConfidenceInterval);
+    public Hypocenter finish(DepthConfidenceInterval hypocenterConfidenceInterval, List<PolygonConfidenceInterval> polygonConfidenceIntervals) {
+        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval, polygonConfidenceIntervals);
     }
 
     @Override
