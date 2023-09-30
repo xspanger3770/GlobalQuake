@@ -2,16 +2,14 @@ package globalquake.ui.settings;
 
 import globalquake.exception.RuntimeApplicationException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.main.Main;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
-
-import globalquake.main.Main;
 
 public class SettingsFrame extends GQFrame {
 
@@ -34,6 +32,7 @@ public class SettingsFrame extends GQFrame {
 	}
 
 	private void initialize(Component parent) {
+		//Main.getErrorHandler().handleException(new NullPointerException());
 		setIconImage(Main.LOGO);
 
 		setTitle("GlobalQuake Settings");
@@ -60,12 +59,13 @@ public class SettingsFrame extends GQFrame {
             for (SettingsPanel panel1 : panels) {
                 try {
                     panel1.save();
-                } catch(NumberFormatException | ParseException ex2){
-					error(new RuntimeApplicationException("Invalid number! %s".formatted(ex2.getMessage())));
+                }
+				catch(NumberFormatException exx){
+					Main.getErrorHandler().handleException(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
 					return;
 				}
 				catch (Exception ex) {
-                    error(ex);
+                    Main.getErrorHandler().handleException(ex);
                     return;
                 }
             }
@@ -78,10 +78,6 @@ public class SettingsFrame extends GQFrame {
 		pack();
 		setResizable(false);
 		setLocationRelativeTo(parent);
-	}
-
-	protected void error(Exception e) {
-		JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	private void addPanels() {

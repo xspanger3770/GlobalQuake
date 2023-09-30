@@ -148,8 +148,8 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 	@Override
 	public void save() throws ParseException {
-		Settings.homeLat = parse(textFieldLat.getText()).doubleValue();
-		Settings.homeLon = parse(textFieldLon.getText()).doubleValue();
+		Settings.homeLat = Double.parseDouble(textFieldLat.getText());
+		Settings.homeLon = Double.parseDouble(textFieldLon.getText());
 		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();

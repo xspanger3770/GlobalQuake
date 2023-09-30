@@ -251,10 +251,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.fpsIdle = sliderFpsIdle.getValue();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
-        Settings.oldEventsTimeFilter = parse(textFieldTimeFilter.getText()).doubleValue();
+        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText());
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
-        Settings.oldEventsMagnitudeFilter = parse(textFieldMagnitudeFilter.getText()).doubleValue();
+        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
@@ -265,7 +265,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
-        Settings.maxArchivedQuakes = parse(textFieldMaxArchived.getText()).intValue();
+        Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
     }
 
     @Override

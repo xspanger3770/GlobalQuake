@@ -52,7 +52,7 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
     @Override
     public void save() throws ParseException {
         Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
-        Settings.cinemaModeSwitchTime = parse(textFieldTime.getText()).intValue();
+        Settings.cinemaModeSwitchTime = Integer.parseInt(textFieldTime.getText());
         Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
         Settings.cinemaModeReenable = chkBoxReenable.isSelected();
     }

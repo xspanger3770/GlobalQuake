@@ -47,7 +47,7 @@ public class Main {
         try {
             if (!MAIN_FOLDER.exists()) {
                 if (!MAIN_FOLDER.mkdirs()) {
-                    errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
+                    getErrorHandler().handleException(new FatalIOException("Unable to create main directory!", null));
                 }
             }
 
@@ -127,10 +127,13 @@ public class Main {
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
+        if(errorHandler == null) {
+            errorHandler = new ApplicationErrorHandler(null);
+        }
         return errorHandler;
     }
 
     public static void initErrorHandler() {
-        Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+        Thread.setDefaultUncaughtExceptionHandler(getErrorHandler());
     }
 }
