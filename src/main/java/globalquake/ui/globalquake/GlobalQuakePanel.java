@@ -213,12 +213,19 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setColor(neutralColor);
 
-        if (displayedQuake == -1) {
+        Earthquake quake;
+        try {
+            // TODO better way?
+            quake = quakes.get(displayedQuake);
+        } catch(Exception e){
+            quake = null;
+        }
+
+        if (quake == null) {
             g.fillRect(x, y, baseWidth, baseHeight);
             g.setColor(Color.white);
             g.drawString(string, x + 3, y + 18);
         } else {
-            Earthquake quake = quakes.get(displayedQuake);
             Cluster cluster = quake.getCluster();
             if(cluster != null) {
                 Hypocenter hypocenter = cluster.getPreviousHypocenter();
