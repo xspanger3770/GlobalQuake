@@ -242,7 +242,7 @@ public class EarthquakeAnalysis {
             Logger.debug("REGIONAL: " + (System.currentTimeMillis() - timeMillis));
             Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
         } else {
-            // phase 2B search region closer BEST or ANCHOR (it assumes its almost right)
+            // phase 2B search region closer BEST or ANCHOR (it assumes it's almost right)
             timeMillis = System.currentTimeMillis();
             PreliminaryHypocenter hyp = scanArea(selectedEvents, 1000.0, (int) (10000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
