@@ -113,8 +113,8 @@ public class AlertSettingsPanel extends SettingsPanel {
         chkBoxLocal.setText("Show when any earthquake occurs closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
         label1.setText("and are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
 
-        textFieldLocalDist.setText("%.1f".formatted(Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
-        textFieldRegionDist.setText("%.1f".formatted(Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldLocalDist.setText(String.format("%.1f", Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldRegionDist.setText(String.format("%.1f", Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
 
         revalidate();
         repaint();

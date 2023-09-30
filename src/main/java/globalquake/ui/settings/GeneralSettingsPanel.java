@@ -86,11 +86,11 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		JLabel lblLon = new JLabel("Home Longitude: ");
 
 		textFieldLat = new JTextField(20);
-		textFieldLat.setText("%s".formatted(Settings.homeLat));
+		textFieldLat.setText(String.format("%s", Settings.homeLat));
 		textFieldLat.setColumns(10);
 
 		textFieldLon = new JTextField(20);
-		textFieldLon.setText("%s".formatted(Settings.homeLon));
+		textFieldLon.setText(String.format("%s", Settings.homeLon));
 		textFieldLon.setColumns(10);
 
 		JPanel latPanel = new JPanel();
