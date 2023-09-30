@@ -3,6 +3,7 @@ package globalquake.ui.globalquake;
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
+import globalquake.ui.action.OpenURLAction;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
@@ -114,6 +115,15 @@ public class GlobalQuakeFrame extends GQFrame {
 		menuOptions.add(settings);
 
 		menuBar.add(menuOptions);
+
+		JMenu aboutMenu = new JMenu("Links");
+
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/", "Open GitHub webpage"));
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/issues/", "Report issue or request new feature"));
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/releases/", "Check for latest version"));
+		aboutMenu.add(new OpenURLAction("https://www.buymeacoffee.com/jakubspangl/", "Donate"));
+
+		menuBar.add(aboutMenu);
 
 		return menuBar;
 	}

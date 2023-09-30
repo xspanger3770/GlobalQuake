@@ -399,7 +399,8 @@ public class EarthquakeAnalysis {
             return false;
         }
 
-        if(bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 && bestHypocenter.depthConfidenceInterval.minDepth() <= 1.0){
+        if(bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
+                (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)){
             Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.locationUncertainty));
             bestHypocenter.depth = 10.0;
             bestHypocenter.depthFixed = true;

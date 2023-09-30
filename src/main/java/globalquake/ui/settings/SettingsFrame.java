@@ -32,7 +32,7 @@ public class SettingsFrame extends GQFrame {
 	}
 
 	private void initialize(Component parent) {
-		//Main.getErrorHandler().handleException(new NullPointerException());
+		Main.getErrorHandler().handleException(new NullPointerException());
 		setIconImage(Main.LOGO);
 
 		setTitle("GlobalQuake Settings");

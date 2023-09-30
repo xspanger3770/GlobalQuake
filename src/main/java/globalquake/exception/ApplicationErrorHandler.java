@@ -2,6 +2,7 @@ package globalquake.exception;
 
 import globalquake.exception.action.IgnoreAction;
 import globalquake.exception.action.TerminateAction;
+import globalquake.ui.action.OpenURLAction;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -98,7 +99,7 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 			return null; // use default
 		}
 
-		return new Component[] { new JButton(new TerminateAction()),
+		return new Component[] { new JButton(new TerminateAction()), new JButton(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/issues", "Open issue on GitHub")),
 				new JButton(new IgnoreAction()) };
 	}
 }
