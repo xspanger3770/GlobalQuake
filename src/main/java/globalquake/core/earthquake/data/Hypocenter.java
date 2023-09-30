@@ -11,7 +11,7 @@ public class Hypocenter {
 
 	public final double lat;
 	public final double lon;
-	public final double depth;
+	public double depth;
 	public final long origin;
 
 	public int selectedEvents;
@@ -23,6 +23,9 @@ public class Hypocenter {
 	public final DepthConfidenceInterval depthConfidenceInterval;
 
 	public final List<PolygonConfidenceInterval> polygonConfidenceIntervals;
+	public double depthUncertainty;
+	public double locationUncertainty;
+	public boolean depthFixed;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,
