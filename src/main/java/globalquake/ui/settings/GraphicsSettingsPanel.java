@@ -4,8 +4,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class GraphicsSettingsPanel extends SettingsPanel{
 
@@ -244,16 +247,16 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     }
 
     @Override
-    public void save() {
+    public void save() throws ParseException {
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
         Settings.antialiasing = chkBoxAntialiasing.isSelected();
         Settings.fpsIdle = sliderFpsIdle.getValue();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
-        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText());
+        Settings.oldEventsTimeFilter = parse(textFieldTimeFilter.getText()).doubleValue();
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
-        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
+        Settings.oldEventsMagnitudeFilter = parse(textFieldMagnitudeFilter.getText()).doubleValue();
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
@@ -264,7 +267,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
-        Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
+        Settings.maxArchivedQuakes = parse(textFieldMaxArchived.getText()).intValue();
     }
 
     @Override

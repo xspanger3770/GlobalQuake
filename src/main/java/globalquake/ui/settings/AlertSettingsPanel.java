@@ -1,7 +1,12 @@
 package globalquake.ui.settings;
 
+import globalquake.exception.RuntimeApplicationException;
+
 import javax.swing.*;
 import java.awt.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 public class AlertSettingsPanel extends SettingsPanel {
 
@@ -120,15 +125,15 @@ public class AlertSettingsPanel extends SettingsPanel {
     }
 
     @Override
-    public void save() {
+    public void save() throws NumberFormatException, ParseException {
         Settings.alertLocal = chkBoxLocal.isSelected();
-        Settings.alertLocalDist = Double.parseDouble(textFieldLocalDist.getText()) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.alertLocalDist = parse(textFieldLocalDist.getText()).doubleValue() / Settings.getSelectedDistanceUnit().getKmRatio();
         Settings.alertRegion = chkBoxRegion.isSelected();
-        Settings.alertRegionMag = Double.parseDouble(textFieldRegionMag.getText());
-        Settings.alertRegionDist = Double.parseDouble(textFieldRegionDist.getText()) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.alertRegionMag = parse(textFieldRegionMag.getText()).doubleValue();
+        Settings.alertRegionDist = parse(textFieldRegionDist.getText()).doubleValue() / Settings.getSelectedDistanceUnit().getKmRatio();
 
         Settings.alertGlobal = checkBoxGlobal.isSelected();
-        Settings.alertGlobalMag = Double.parseDouble(textFieldGlobalMag.getText());
+        Settings.alertGlobalMag = parse(textFieldGlobalMag.getText()).doubleValue();
         Settings.focusOnEvent = chkBoxFocus.isSelected();
     }
 

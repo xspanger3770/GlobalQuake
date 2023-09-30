@@ -2,6 +2,9 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 public class CinemaModeSettingsPanel extends SettingsPanel {
 
@@ -49,9 +52,9 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
     }
 
     @Override
-    public void save() {
+    public void save() throws ParseException {
         Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
-        Settings.cinemaModeSwitchTime = Integer.parseInt(textFieldTime.getText());
+        Settings.cinemaModeSwitchTime = parse(textFieldTime.getText()).intValue();
         Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
         Settings.cinemaModeReenable = chkBoxReenable.isSelected();
     }

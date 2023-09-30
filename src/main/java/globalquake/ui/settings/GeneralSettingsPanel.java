@@ -7,6 +7,9 @@ import globalquake.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JCheckBox chkBoxAlertDialogs;
@@ -146,9 +149,9 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	}
 
 	@Override
-	public void save() {
-		Settings.homeLat = Double.valueOf(textFieldLat.getText());
-		Settings.homeLon = Double.valueOf(textFieldLon.getText());
+	public void save() throws ParseException {
+		Settings.homeLat = parse(textFieldLat.getText()).doubleValue();
+		Settings.homeLon = parse(textFieldLon.getText()).doubleValue();
 		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();

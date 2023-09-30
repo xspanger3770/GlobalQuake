@@ -1,11 +1,13 @@
 package globalquake.ui.settings;
 
+import globalquake.exception.RuntimeApplicationException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,7 +60,11 @@ public class SettingsFrame extends GQFrame {
             for (SettingsPanel panel1 : panels) {
                 try {
                     panel1.save();
-                } catch (Exception ex) {
+                } catch(NumberFormatException | ParseException ex2){
+					error(new RuntimeApplicationException("Invalid number! %s".formatted(ex2.getMessage())));
+					return;
+				}
+				catch (Exception ex) {
                     error(ex);
                     return;
                 }
