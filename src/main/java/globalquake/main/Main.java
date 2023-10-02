@@ -25,7 +25,7 @@ public class Main {
 
     private static ApplicationErrorHandler errorHandler;
 
-    public static final String version = "0.9.8_pre10";
+    public static final String version = "0.9.8_pre11";
     public static final String fullName = "GlobalQuake " + version;
 
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
