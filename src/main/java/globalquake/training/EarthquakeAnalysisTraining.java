@@ -127,7 +127,6 @@ public class EarthquakeAnalysisTraining {
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
         if(cluster.getEarthquake()!=null) {
-            System.err.println(cluster.getPreviousHypocenter());
             double dist = GeoUtils.greatCircleDistance(cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon(), absolutetyCorrect.lat, absolutetyCorrect.lon);
             return Math.abs(cluster.getEarthquake().getOrigin());
         } else{
