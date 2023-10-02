@@ -187,10 +187,12 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         RenderElement elementCross = entity.getRenderElement(4);
-        if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
-            graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
-            graphics.setStroke(new BasicStroke(4f));
-            graphics.draw(elementCross.getShape());
+        if (elementCross.shouldDraw) {
+            if((System.currentTimeMillis() / 500) % 2 == 0) {
+                graphics.setStroke(new BasicStroke(4f));
+                graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
+                graphics.draw(elementCross.getShape());
+            }
 
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
             var centerPonint = renderer.projectPoint(point3D);
@@ -206,9 +208,8 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 Hypocenter hypocenter = cluster.getPreviousHypocenter();
 
                 if (hypocenter != null) {
-                    str = "%s - %s".formatted(
-                            Settings.getSelectedDistanceUnit().format(hypocenter.depthConfidenceInterval.minDepth(), 1),
-                            Settings.getSelectedDistanceUnit().format(hypocenter.depthConfidenceInterval.maxDepth(), 1)
+                    str = "%s".formatted(
+                            Settings.getSelectedDistanceUnit().format(hypocenter.depth, 1)
                     );
 
                     graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
