@@ -183,7 +183,7 @@ public final class Settings {
 		loadProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault));
 		loadProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault));
 		loadProperty("useOldColorScheme", "false");
-		loadProperty("parallelHypocenterLocations", "false");
+		loadProperty("parallelHypocenterLocations", "true");
 		loadProperty("displayHomeLocation", "true");
 		loadProperty("antialiasing", "false");
 		loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
