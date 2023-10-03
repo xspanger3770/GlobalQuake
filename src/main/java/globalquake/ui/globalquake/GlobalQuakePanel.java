@@ -5,6 +5,8 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.MagnitudeReading;
+import globalquake.core.earthquake.interval.DepthConfidenceInterval;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
@@ -22,6 +24,7 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
+import org.tinylog.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -102,7 +105,11 @@ public class GlobalQuakePanel extends GlobePanel {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
-        drawEarthquakesBox(g, 0, 0);
+        try {
+            drawEarthquakesBox(g, 0, 0);
+        }catch(Exception e) {
+            Logger.error(e);
+        }
         drawTexts(g);
     }
 
@@ -218,19 +225,24 @@ public class GlobalQuakePanel extends GlobePanel {
             quake = null;
         }
 
-        /*Cluster clus = new Cluster(0);
-        clus.setPreviousHypocenter(
-                new Hypocenter(0, 0, 0, 0, 0, 0, null, null));
+        {
+            Cluster clus = new Cluster(0);
+            clus.setPreviousHypocenter(
+                    new Hypocenter(0, 0, 0, 0, 0, 0,
+                            new DepthConfidenceInterval(10, 100),
+                            List.of(new PolygonConfidenceInterval(16,0, List.of(
+                                    0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0), 1000, 10000))));
 
-        quake = new Earthquake(clus, 0, 0, 0, 0);
-        quake.setMag((System.currentTimeMillis() % 10000) / 1000.0);
-        List<MagnitudeReading> mags = new ArrayList<>();
-        for(int i = 0; i < 100; i++){
-            double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag,0));
+            quake = new Earthquake(clus, 0, 0, 0, 0);
+            quake.setMag((System.currentTimeMillis() % 10000) / 1000.0);
+            List<MagnitudeReading> mags = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                double mag = 5 + Math.tan(i / 100.0 * 3.14159);
+                mags.add(new MagnitudeReading(mag, 0));
+            }
+            quake.setMags(mags);
+            quake.setRegion("asdasdasd");
         }
-        quake.setMags(mags);
-        quake.setRegion("asdasdasd");*/
 
         int xOffset = 0;
         int baseHeight = quake == null ? 24 : 132;
@@ -250,7 +262,7 @@ public class GlobalQuakePanel extends GlobePanel {
             baseWidth = Math.max(baseWidth + xOffset, g.getFontMetrics().stringWidth(quake.getRegion()) + xOffset + 10);
 
             g.setFont(quakeFont);
-            baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quakeString) + 100);
+            baseWidth = Math.max(baseWidth, g.getFontMetrics().stringWidth(quakeString) + 120);
 
             g.setColor(levelColor);
         } else {
@@ -313,32 +325,154 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + xOffset + 3, y + 123);
 
-                    /*str = (int) quake.getPct() + "%";
-                    g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
-                    str = "%d / %d / %d".formatted(hypocenter.getWrongEventCount(), hypocenter.selectedEvents, quake.getCluster().getAssignedEvents().size());
-                    g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 125);*/
+                    //str = (int) quake.getPct() + "%";
+                    //g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
                 }
             }
 
             int magsWidth = drawMags(g, quake, baseHeight + 20);
-            //drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30);
+            drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30, baseWidth - magsWidth - 30);
         }
     }
 
-    private void drawLocationAcc(Graphics2D g, Earthquake quake, int y, int x) {
-        int width = 240;
-        int height = 80;
+    private void drawLocationAcc(Graphics2D g, Earthquake quake, int y, int x, int width) {
+        if(quake == null || quake.getCluster() == null || quake.getCluster().getPreviousHypocenter() == null
+            || quake.getCluster().getPreviousHypocenter().depthConfidenceInterval == null || quake.getCluster().getPreviousHypocenter().polygonConfidenceIntervals == null){
+            return;
+        }
+
+        int height = 90;
 
         RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x, y, width, height, 10, 10);
         g.setColor(new Color(0, 90, 192));
         g.fill(rect);
         g.setColor(GRAY_COLOR);
-        g.fillRect(x + 2, y + 26, width - 4, height - 28);
+        g.fillRect(x + 2, y + 2, width - 4, height - 4);
 
         g.setColor(Color.white);
-        g.setFont(new Font("Calibri", Font.BOLD, 16));
-        g.drawString("Location Accuracy", x + 4, y + 19);
+        g.setFont(new Font("Calibri", Font.BOLD, 15));
+
+        String str = "Stations: total: %d, used: %d, wrong: %d".formatted(quake.getCluster().getAssignedEvents().size(),
+                quake.getCluster().getPreviousHypocenter().selectedEvents,
+                quake.getCluster().getPreviousHypocenter().getWrongEventCount());
+
+        g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 18);
+
+        var units = Settings.getSelectedDistanceUnit();
+
+        double minDepth = quake.getCluster().getPreviousHypocenter().depthConfidenceInterval.minDepth();
+        double maxDepth = quake.getCluster().getPreviousHypocenter().depthConfidenceInterval.maxDepth();
+
+        str = "Depth: %s (%s - %s)".formatted(units.format(quake.getDepth(), 1),
+                units.format(maxDepth, 1),
+                units.format(minDepth, 1));
+
+        g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 36);
+
+        double errNS = 0;
+        double errEW = 0;
+
+        var polygons = quake.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+        var pols = polygons.get(polygons.size() - 1);
+
+        for(int i = 0; i < pols.n(); i++){
+            double ang = pols.offset() + (i / (double)pols.n()) * 360.0;
+            double length = pols.lengths().get(i);
+
+            if((ang + 360.0 - 45.0) / 4 % 2 == 0){
+                if(length > errNS){
+                    errNS = length;
+                }
+            } else {
+                if(length > errEW){
+                    errEW = length;
+                }
+            }
+        }
+
+        double errOrigin = (pols.maxOrigin() - pols.minOrigin()) / 1000.0;
+
+        drawAccuracyBox(g,"Err Depth: ", x + width / 2, y + 56, units.format(maxDepth - minDepth, 1), getColorDepthInterval(maxDepth - minDepth));
+        drawAccuracyBox(g,"Err Origin: ", x + width / 2, y + 80, "%.1fs".formatted(errOrigin), getColorOriginInterval(errOrigin));
+        drawAccuracyBox(g,"Err N-S: ", x + width, y + 56, units.format(errNS, 1), getColorDistInterval(errNS));
+        drawAccuracyBox(g,"Err E-W: ", x + width, y + 80, units.format(errEW, 1), getColorDistInterval(errEW));
     }
+
+    private Color getColorOriginInterval(double errOrigin) {
+        if(errOrigin < 1.0){
+            return new Color(0, 90, 192);
+        }
+        if(errOrigin < 5.0){
+            return Color.green;
+        }
+
+        if(errOrigin < 20.0){
+            return Color.yellow;
+        }
+
+        if(errOrigin < 50.0){
+            return Color.orange;
+        }
+
+        return Color.red;
+    }
+
+    private Color getColorDistInterval(double distInterval) {
+        if(distInterval < 5.0){
+            return new Color(0, 90, 192);
+        }
+        if(distInterval < 20.0){
+            return Color.green;
+        }
+
+        if(distInterval < 50.0){
+            return Color.yellow;
+        }
+
+        if(distInterval < 200.0){
+            return Color.orange;
+        }
+
+        return Color.red;
+    }
+
+    private void drawAccuracyBox(Graphics2D g, String str, int x, int y, String v, Color color) {
+        g.setColor(Color.white);
+        g.setFont(new Font("Calibri", Font.BOLD, 15));
+
+        int size = g.getFontMetrics().stringWidth("%s  %s".formatted(str, v));
+        int size1 = g.getFontMetrics().stringWidth(str);
+        int size2 = g.getFontMetrics().stringWidth(v);
+
+        g.drawString(str, x - size - 6, y);
+
+        RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x - size + size1 - 3, y - 15, size2 + 6, 20, 10, 10);
+        g.setColor(color);
+        g.fill(rect);
+
+        g.setColor(isDark(color) ? Color.white : Color.black);
+        g.drawString(v, x - size + size1, y);
+    }
+
+    private Color getColorDepthInterval(double depthInterval) {
+        if(depthInterval < 2.0){
+            return new Color(0, 90, 192);
+        }
+        if(depthInterval < 10.0){
+            return Color.green;
+        }
+
+        if(depthInterval < 50.0){
+            return Color.yellow;
+        }
+
+        if(depthInterval < 200.0){
+            return Color.orange;
+        }
+
+        return Color.red;
+    }
+
 
     private boolean isDark(Color color) {
         double darkness = 1 - (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
@@ -429,24 +563,32 @@ public class GlobalQuakePanel extends GlobePanel {
 
         synchronized (quake.magsLock) {
             List<MagnitudeReading> mags = quake.getMags();
-            int[] groups = new int[100];
+            int[] bins = new int[100];
 
             for (MagnitudeReading magnitudeReading : mags) {
-                int group = (int) (magnitudeReading.magnitude() * 10.0);
-                if (group >= 0 && group < 100) {
-                    groups[group]++;
+                int bin = (int) (magnitudeReading.magnitude() * 10.0);
+                if (bin >= 0 && bin < 100) {
+                    bins[bin]++;
                 }
             }
 
-            for (int i = 0; i < groups.length; i++) {
-                int n = groups[i];
+            int max = 1;
+
+            for(int count : bins){
+                if(count > max){
+                    max = count;
+                }
+            }
+
+            for (int i = 0; i < bins.length; i++) {
+                int n = bins[i];
                 if (n == 0) {
                     continue;
                 }
                 double mag = i / 10.0;
                 double y0 = y + hh * (10 - mag) / 10;
                 double y1 = y + hh * (10 - (mag + 0.1)) / 10;
-                double w = Math.min(ww, (n / 10.0) * ww);
+                double w = Math.min(ww, (n / (double) max) * ww);
                 g.setColor(Scale.getColorEasily(mag / 8.0));
                 g.fill(new Rectangle2D.Double(startX + 1, y1, w, y0 - y1));
             }
