@@ -45,6 +45,7 @@ public class GlobalQuakePanel extends GlobePanel {
     private static final Color BLUE_COLOR = new Color(20, 20, 160);
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
+    private static final boolean DEBUG = false;
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
@@ -215,17 +216,16 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setStroke(new BasicStroke(1f));
         String string = "No Earthquakes Detected";
 
-        int baseWidth = (int) (g.getFontMetrics().stringWidth(string) + 12);
+        int baseWidth = g.getFontMetrics().stringWidth(string) + 12;
 
         Earthquake quake;
         try {
-            // TODO better way?
             quake = quakes.get(displayedQuake);
         } catch (Exception e) {
             quake = null;
         }
 
-        if(false){
+        if(DEBUG){
             Cluster clus = new Cluster(0);
             clus.setPreviousHypocenter(
                     new Hypocenter(0, 0, 0, 0, 0, 0,
@@ -325,14 +325,37 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + xOffset + 3, y + 123);
 
-                    //str = (int) quake.getPct() + "%";
-                    //g.drawString(str, x + baseWidth - 5 - g.getFontMetrics().stringWidth(str), y + 104);
+
+                    var polygons = quake.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+                    var pols = polygons.get(polygons.size() - 1);
+                    double errOrigin = (pols.maxOrigin() - pols.minOrigin()) / 1000.0;
+
+                    drawAccuracyBox(g, "Quality: ",x + baseWidth + 2,y + 122, getQualityCode(errOrigin),getColorOriginInterval(errOrigin));
                 }
             }
 
             int magsWidth = drawMags(g, quake, baseHeight + 20);
             drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30, baseWidth - magsWidth - 30);
         }
+    }
+
+    private String getQualityCode(double errOrigin) {
+        if(errOrigin < 1.0){
+            return "S";
+        }
+        if(errOrigin < 5.0){
+            return "A";
+        }
+
+        if(errOrigin < 20.0){
+            return "B";
+        }
+
+        if(errOrigin < 50.0){
+            return "C";
+        }
+
+        return "D";
     }
 
     private void drawLocationAcc(Graphics2D g, Earthquake quake, int y, int x, int width) {
@@ -352,7 +375,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setColor(Color.white);
         g.setFont(new Font("Calibri", Font.BOLD, 15));
 
-        String str = "Stations: total: %d, used: %d, wrong: %d".formatted(quake.getCluster().getAssignedEvents().size(),
+        String str = "Stations: Total: %d Used: %d Wrong: %d".formatted(quake.getCluster().getAssignedEvents().size(),
                 quake.getCluster().getPreviousHypocenter().selectedEvents,
                 quake.getCluster().getPreviousHypocenter().getWrongEventCount());
 
@@ -364,8 +387,8 @@ public class GlobalQuakePanel extends GlobePanel {
         double maxDepth = quake.getCluster().getPreviousHypocenter().depthConfidenceInterval.maxDepth();
 
         str = "Depth: %s (%s - %s)".formatted(units.format(quake.getDepth(), 1),
-                units.format(maxDepth, 1),
-                units.format(minDepth, 1));
+                units.format(minDepth, 1),
+                units.format(maxDepth, 1));
 
         g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 36);
 
@@ -379,7 +402,7 @@ public class GlobalQuakePanel extends GlobePanel {
             double ang = pols.offset() + (i / (double)pols.n()) * 360.0;
             double length = pols.lengths().get(i);
 
-            if((ang + 360.0 - 45.0) / 4 % 2 == 0){
+            if(((int) ((ang + 360.0 - 45.0) / 90)) % 2 == 1){
                 if(length > errNS){
                     errNS = length;
                 }
@@ -392,10 +415,10 @@ public class GlobalQuakePanel extends GlobePanel {
 
         double errOrigin = (pols.maxOrigin() - pols.minOrigin()) / 1000.0;
 
-        drawAccuracyBox(g,"Err Depth: ", x + width / 2, y + 56, units.format(maxDepth - minDepth, 1), getColorDepthInterval(maxDepth - minDepth));
-        drawAccuracyBox(g,"Err Origin: ", x + width / 2, y + 80, "%.1fs".formatted(errOrigin), getColorOriginInterval(errOrigin));
-        drawAccuracyBox(g,"Err N-S: ", x + width, y + 56, units.format(errNS, 1), getColorDistInterval(errNS));
-        drawAccuracyBox(g,"Err E-W: ", x + width, y + 80, units.format(errEW, 1), getColorDistInterval(errEW));
+        drawAccuracyBox(g,"Err. Depth ", x + width / 2, y + 56, units.format(maxDepth - minDepth, 1), getColorDepthInterval(maxDepth - minDepth));
+        drawAccuracyBox(g,"Err. Origin ", x + width / 2, y + 80, "%.1fs".formatted(errOrigin), getColorOriginInterval(errOrigin));
+        drawAccuracyBox(g,"Err. N-S ", x + width, y + 56, units.format(errNS, 1), getColorDistInterval(errNS));
+        drawAccuracyBox(g,"Err. E-W ", x + width, y + 80, units.format(errEW, 1), getColorDistInterval(errEW));
     }
 
     private Color getColorOriginInterval(double errOrigin) {
@@ -486,6 +509,7 @@ public class GlobalQuakePanel extends GlobePanel {
         return g.getFontMetrics().stringWidth(maxIntStr) + 6;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static void drawIntensityBox(Graphics2D g, Earthquake quake, int x, int y, int height) {
         Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
 

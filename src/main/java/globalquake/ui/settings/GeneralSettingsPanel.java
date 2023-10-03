@@ -7,7 +7,6 @@ import globalquake.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.text.ParseException;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JCheckBox chkBoxAlertDialogs;
@@ -147,7 +146,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	}
 
 	@Override
-	public void save() throws ParseException {
+	public void save() {
 		Settings.homeLat = parseDouble(textFieldLat.getText(), "Home latitude", -90, 90);
 		Settings.homeLon = parseDouble(textFieldLon.getText(), "Home longitude", -180, 180);
 		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();

@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
@@ -245,7 +244,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     }
 
     @Override
-    public void save() throws ParseException {
+    public void save() {
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
         Settings.antialiasing = chkBoxAntialiasing.isSelected();
         Settings.fpsIdle = sliderFpsIdle.getValue();

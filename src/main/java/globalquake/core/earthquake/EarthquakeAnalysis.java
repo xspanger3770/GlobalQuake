@@ -302,7 +302,7 @@ public class EarthquakeAnalysis {
 
     private static final double CONFIDENCE_LEVEL = 1.2;
 
-    static record PolygonConfidenceResult(double dist, long minOrigin, long maxOrigin){
+    record PolygonConfidenceResult(double dist, long minOrigin, long maxOrigin){
     }
 
     private PolygonConfidenceInterval calculatePolygonConfidenceInterval(List<PickedEvent> selectedEvents,

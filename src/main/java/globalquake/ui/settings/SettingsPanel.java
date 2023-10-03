@@ -3,11 +3,10 @@ package globalquake.ui.settings;
 import globalquake.exception.RuntimeApplicationException;
 
 import javax.swing.*;
-import java.text.ParseException;
 
 public abstract class SettingsPanel extends JPanel{
 
-	public abstract void save() throws NumberFormatException, ParseException;
+	public abstract void save() throws NumberFormatException;
 	
 	public abstract String getTitle();
 

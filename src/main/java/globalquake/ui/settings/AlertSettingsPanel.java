@@ -2,7 +2,6 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.ParseException;
 
 public class AlertSettingsPanel extends SettingsPanel {
 
@@ -121,7 +120,7 @@ public class AlertSettingsPanel extends SettingsPanel {
     }
 
     @Override
-    public void save() throws NumberFormatException, ParseException {
+    public void save() throws NumberFormatException {
         Settings.alertLocal = chkBoxLocal.isSelected();
         Settings.alertLocalDist = parseDouble(textFieldLocalDist.getText(), "Local alert distance", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
         Settings.alertRegion = chkBoxRegion.isSelected();

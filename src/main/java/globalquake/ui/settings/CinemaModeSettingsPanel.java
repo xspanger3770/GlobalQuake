@@ -2,7 +2,6 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.text.ParseException;
 
 public class CinemaModeSettingsPanel extends SettingsPanel {
 
@@ -50,7 +49,7 @@ public class CinemaModeSettingsPanel extends SettingsPanel {
     }
 
     @Override
-    public void save() throws ParseException {
+    public void save() {
         Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
         Settings.cinemaModeSwitchTime = parseInt(textFieldTime.getText(), "Cinema mode switch time", 1, 3600);
         Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
