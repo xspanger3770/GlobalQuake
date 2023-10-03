@@ -225,7 +225,7 @@ public class GlobalQuakePanel extends GlobePanel {
             quake = null;
         }
 
-        {
+        if(false){
             Cluster clus = new Cluster(0);
             clus.setPreviousHypocenter(
                     new Hypocenter(0, 0, 0, 0, 0, 0,
