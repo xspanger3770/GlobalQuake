@@ -27,7 +27,6 @@ public class Main {
 
     public static final String version = "0.9.8_pre14";
     public static final String fullName = "GlobalQuake " + version;
-
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
