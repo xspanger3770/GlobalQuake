@@ -70,7 +70,7 @@ public class CinemaHandler {
             return;
         }
         long time = System.currentTimeMillis();
-        if(Math.abs(time - lastAnim) < (bypass ? 2000 : 5000)){
+        if(Math.abs(time - lastAnim) < (bypass ? 0 : 5000)){
             return;
         }
         lastAnim = time;

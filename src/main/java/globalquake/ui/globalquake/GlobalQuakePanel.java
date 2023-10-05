@@ -114,9 +114,9 @@ public class GlobalQuakePanel extends GlobePanel {
             Logger.error(e);
         }
 
-        if(Settings.displaySystemInfo) {
-            drawTexts(g);
-        }
+
+        drawTexts(g);
+
     }
 
     private void drawTexts(Graphics2D g) {
@@ -130,6 +130,10 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
         g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
+
+        if(!Settings.displaySystemInfo){
+            return;
+        }
 
         List<SettingInfo> settingsStrings = createSettingInfos();
 
@@ -379,9 +383,9 @@ public class GlobalQuakePanel extends GlobePanel {
 
         Quality quality = quake.getCluster().getPreviousHypocenter().quality;
 
-        drawAccuracyBox(g, "Err. Depth ", x + width / 2, y + 56,
+        drawAccuracyBox(g, "Err. Depth ", (int) (x + width * 0.55), y + 56,
                 units.format(quality.getQualityDepth().getValue(), 1), quality.getQualityDepth().getQualityClass().getColor());
-        drawAccuracyBox(g, "Err. Origin ", x + width / 2, y + 80,
+        drawAccuracyBox(g, "Err. Origin ", (int) (x + width * 0.55), y + 80,
                 "%.1fs".formatted(quality.getQualityOrigin().getValue()), quality.getQualityOrigin().getQualityClass().getColor());
         drawAccuracyBox(g, "Err. N-S ", x + width, y + 56,
                 units.format(quality.getQualityNS().getValue(), 1), quality.getQualityNS().getQualityClass().getColor());

@@ -226,6 +226,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                if(animation != nextAnimation){
+                    Logger.info("Animation aborted!");
+                    this.cancel();
+                    runAnimation(nextAnimation);
+                    latch.countDown();
+                    return;
+                }
                 if(!cinemaMode){
                     Logger.info("Animation aborted!");
                     this.cancel();

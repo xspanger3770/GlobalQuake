@@ -18,6 +18,7 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import org.tinylog.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class EarthquakeAnalysis {
@@ -199,9 +200,9 @@ public class EarthquakeAnalysis {
         return deltaP >= limit;
     }
 
-    public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
+    public PreliminaryHypocenter runHypocenterFinder(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings){
         if (selectedEvents.isEmpty()) {
-            return;
+            return null;
         }
 
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
@@ -217,7 +218,6 @@ public class EarthquakeAnalysis {
         Logger.debug("Iterations difference: " + iterationsDifference);
 
         long timeMillis = System.currentTimeMillis();
-        long startTime = timeMillis;
 
         PreliminaryHypocenter bestHypocenter = null;
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
@@ -268,7 +268,19 @@ public class EarthquakeAnalysis {
         Logger.debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
-        postProcess(selectedEvents, cluster, bestHypocenter, finderSettings, startTime);
+        return bestHypocenter;
+    }
+
+    public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
+        long startTime = System.currentTimeMillis();
+
+        PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings);
+
+        List<PickedEvent> correctSelectedEvents = selectedEvents.stream().filter(pickedEvent -> ClusterAnalysis.couldBeArrival(pickedEvent, bestHypocenter, false, false, true)).collect(Collectors.toList());
+
+        PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings);
+
+        postProcess(selectedEvents, correctSelectedEvents, cluster, bestHypocenter2, finderSettings, startTime);
     }
 
     private DepthConfidenceInterval calculateDepthConfidenceInterval(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenter, HypocenterFinderSettings finderSettings) {
@@ -355,16 +367,16 @@ public class EarthquakeAnalysis {
         return new PolygonConfidenceInterval(CONFIDENCE_POLYGON_EDGES, CONFIDENCE_POLYGON_OFFSET, lengths, minOrigin, maxOrigin);
     }
 
-    private void postProcess(List<PickedEvent> selectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
+    private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
-                calculateDepthConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings),
-                calculatePolygonConfidenceIntervals(selectedEvents, bestHypocenterPrelim, finderSettings));
+                calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
+                calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
         bestHypocenter.calculateQuality();
 
         calculateMagnitude(cluster, bestHypocenter);
 
         // There has to be at least some difference in the picked pWave times
-        if (!checkDeltaP(cluster, bestHypocenter, selectedEvents)) {
+        if (!checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.debug("Not Enough Delta-P");
             return;
         }
@@ -413,7 +425,7 @@ public class EarthquakeAnalysis {
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
-        if (bestHypocenter.locationUncertainty > 500) {
+        if (bestHypocenter.locationUncertainty > 1000) {
             Logger.debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
             return false;
         }
@@ -442,7 +454,7 @@ public class EarthquakeAnalysis {
     private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
         int correct = 0;
         for (PickedEvent event : selectedEvents) {
-            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false)) {
+            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false, true)) {
                 correct++;
             }
         }
