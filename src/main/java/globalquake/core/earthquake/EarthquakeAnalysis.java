@@ -8,6 +8,8 @@ import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
+import globalquake.events.specific.QuakeCreateEvent;
+import globalquake.events.specific.QuakeUpdateEvent;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
@@ -770,11 +772,20 @@ public class EarthquakeAnalysis {
         if (cluster.getEarthquake() == null) {
             if (!testing) {
                 Sounds.playSound(Sounds.incoming);
+
+                if(GlobalQuake.instance != null){
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
+                }
+
                 getEarthquakes().add(earthquake);
             }
             cluster.setEarthquake(earthquake);
         } else {
             cluster.getEarthquake().update(earthquake);
+
+            if(GlobalQuake.instance != null){
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, cluster.getPreviousHypocenter()));
+            }
         }
         if (!testing) {
             earthquake.uppdateRegion();

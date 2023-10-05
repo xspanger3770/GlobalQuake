@@ -16,7 +16,7 @@ public class GlobalQuakeEventHandler {
 
     private boolean running;
 
-    public void runHandler(){
+    public GlobalQuakeEventHandler runHandler() {
         running = true;
         eventListeners = new ConcurrentLinkedQueue<>();
         eventQueue = new ConcurrentLinkedQueue<>();
@@ -40,6 +40,8 @@ public class GlobalQuakeEventHandler {
                 }
             }
         }).start();
+
+        return this;
     }
 
     public void stopHandler(){
@@ -53,6 +55,10 @@ public class GlobalQuakeEventHandler {
 
     public boolean removeEventListener(GlobalQuakeEventListener eventListener){
         return eventListeners.remove(eventListener);
+    }
+
+    public void fireEvent(GlobalQuakeEvent event){
+        eventQueue.add(event);
     }
 
 }

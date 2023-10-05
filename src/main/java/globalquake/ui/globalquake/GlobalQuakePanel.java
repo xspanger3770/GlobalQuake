@@ -236,11 +236,18 @@ public class GlobalQuakePanel extends GlobePanel {
 
         if (DEBUG) {
             Cluster clus = new Cluster(0);
-            clus.setPreviousHypocenter(
-                    new Hypocenter(0, 0, 0, 0, 0, 0,
-                            new DepthConfidenceInterval(10, 100),
-                            List.of(new PolygonConfidenceInterval(16, 0, List.of(
-                                    0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000))));
+
+            Hypocenter hyp = new Hypocenter(0, 0, 0, 0, 0, 10,
+                    new DepthConfidenceInterval(10, 100),
+                    List.of(new PolygonConfidenceInterval(16, 0, List.of(
+                            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
+
+            hyp.selectedEvents = 20;
+            hyp.correctEvents = 6;
+
+            hyp.calculateQuality();
+
+            clus.setPreviousHypocenter(hyp);
 
             quake = new Earthquake(clus, 0, 0, 0, 0);
             quake.setMag((System.currentTimeMillis() % 10000) / 1000.0);
@@ -334,7 +341,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + xOffset + 3, y + 123);
 
-                    QualityClass summaryQuality= quake.getCluster().getPreviousHypocenter().quality.getSummary();
+                    QualityClass summaryQuality = hypocenter.quality.getSummary();
 
                     drawAccuracyBox(g, "Quality: ", x + baseWidth + 2, y + 122, summaryQuality.toString(), summaryQuality.getColor());
                 }
@@ -353,7 +360,7 @@ public class GlobalQuakePanel extends GlobePanel {
             return;
         }
 
-        int height = 90;
+        int height = 114;
 
         RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x, y, width, height, 10, 10);
         g.setColor(new Color(0, 90, 192));
@@ -387,10 +394,14 @@ public class GlobalQuakePanel extends GlobePanel {
                 units.format(quality.getQualityDepth().getValue(), 1), quality.getQualityDepth().getQualityClass().getColor());
         drawAccuracyBox(g, "Err. Origin ", (int) (x + width * 0.55), y + 80,
                 "%.1fs".formatted(quality.getQualityOrigin().getValue()), quality.getQualityOrigin().getQualityClass().getColor());
+        drawAccuracyBox(g, "No. Stations ", (int) (x + width * 0.55), y + 104,
+                "%d".formatted((int) quality.getQualityStations().getValue()), quality.getQualityStations().getQualityClass().getColor());
         drawAccuracyBox(g, "Err. N-S ", x + width, y + 56,
                 units.format(quality.getQualityNS().getValue(), 1), quality.getQualityNS().getQualityClass().getColor());
         drawAccuracyBox(g, "Err. E-W ", x + width, y + 80,
                 units.format(quality.getQualityEW().getValue(), 1), quality.getQualityEW().getQualityClass().getColor());
+        drawAccuracyBox(g, "Correct % ", x + width, y + 104,
+                "%.1f".formatted(quality.getQualityPercentage().getValue()), quality.getQualityPercentage().getQualityClass().getColor());
     }
 
     private void drawAccuracyBox(Graphics2D g, String str, int x, int y, String v, Color color) {

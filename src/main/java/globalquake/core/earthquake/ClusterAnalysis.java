@@ -5,6 +5,7 @@ import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.data.*;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.NearbyStationDistanceInfo;
+import globalquake.events.specific.ClusterCreateEvent;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
@@ -501,6 +502,11 @@ public class ClusterAnalysis {
         Logger.debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
+
+        if(GlobalQuake.instance != null){
+            GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(cluster));
+        }
+
         return cluster;
     }
 

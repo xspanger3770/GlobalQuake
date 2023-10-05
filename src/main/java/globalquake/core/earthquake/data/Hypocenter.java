@@ -78,7 +78,10 @@ public class Hypocenter {
 		double errNS = result[0];
 		double errEW = result[1];
 
-		this.quality = new Quality(errOrigin, errDepth, errNS, errEW);
+		double pct = getCorrectness() * 100.0;
+		int stations = selectedEvents;
+
+		this.quality = new Quality(errOrigin, errDepth, errNS, errEW, stations, pct);
 	}
 
 	private static double[] calculateLocationQuality(PolygonConfidenceInterval lastInterval) {

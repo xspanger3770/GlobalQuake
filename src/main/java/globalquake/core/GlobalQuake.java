@@ -6,6 +6,7 @@ import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.database.StationDatabaseManager;
+import globalquake.events.GlobalQuakeEventHandler;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
 
@@ -23,6 +24,9 @@ public class GlobalQuake {
 	private final EarthquakeAnalysis earthquakeAnalysis;
 	private final AlertManager alertManager;
 	private final EarthquakeArchive archive;
+
+	private final GlobalQuakeEventHandler eventHandler;
+
 	public static GlobalQuake instance;
 
 	private final GlobalStationManager globalStationManager;
@@ -30,6 +34,8 @@ public class GlobalQuake {
 	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
 		this.stationDatabaseManager = stationDatabaseManager;
+
+		eventHandler = new GlobalQuakeEventHandler().runHandler();
 
 		globalStationManager = new GlobalStationManager();
 		globalStationManager.initStations(stationDatabaseManager);
@@ -106,5 +112,9 @@ public class GlobalQuake {
 
 	public StationDatabaseManager getStationDatabaseManager() {
 		return stationDatabaseManager;
+	}
+
+	public GlobalQuakeEventHandler getEventHandler() {
+		return eventHandler;
 	}
 }
