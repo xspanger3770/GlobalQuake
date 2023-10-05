@@ -113,7 +113,10 @@ public class GlobalQuakePanel extends GlobePanel {
         } catch (Exception e) {
             Logger.error(e);
         }
-        drawTexts(g);
+
+        if(Settings.displaySystemInfo) {
+            drawTexts(g);
+        }
     }
 
     private void drawTexts(Graphics2D g) {
@@ -333,8 +336,10 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
             }
 
-            int magsWidth = drawMags(g, quake, baseHeight + 20);
-            drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30, baseWidth - magsWidth - 30);
+            int magsWidth = Settings.displayMagnitudeHistogram ? drawMags(g, quake, baseHeight + 20) : 0;
+            if(Settings.displayAdditionalQuakeInfo){
+                drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30, baseWidth - magsWidth - 30);
+            }
         }
     }
 

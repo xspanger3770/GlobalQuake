@@ -110,23 +110,14 @@ public final class Settings {
 
 	public static Boolean confidencePolygons;
 
+	public static Boolean displayAdditionalQuakeInfo;
+
+	public static Boolean displayMagnitudeHistogram;
+
+	public static Boolean displaySystemInfo;
+
     static {
 		load();
-	}
-
-	public static String formatDateTime(TemporalAccessor temporalAccessor) {
-		return selectedDateTimeFormat().format(temporalAccessor) +
-				" " +
-				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
-	}
-
-	private static DateTimeFormatter selectedDateTimeFormat(){
-		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
-		return DATE_FORMATS[i];
-	}
-
-	public static DistanceUnit getSelectedDistanceUnit(){
-		return DistanceUnit.values()[Math.max(0, Math.min(DistanceUnit.values().length - 1, distanceUnitsIndex))];
 	}
 
 	private static void load() {
@@ -135,6 +126,10 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("displaySystemInfo", "true");
+		loadProperty("displayMagnitudeHistogram", "true");
+		loadProperty("displayAdditionalQuakeInfo", "false");
 
 		loadProperty("confidencePolygons", "false");
 
@@ -195,6 +190,22 @@ public final class Settings {
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
 
 		save();
+	}
+
+
+	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+		return selectedDateTimeFormat().format(temporalAccessor) +
+				" " +
+				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
+	}
+
+	private static DateTimeFormatter selectedDateTimeFormat(){
+		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
+		return DATE_FORMATS[i];
+	}
+
+	public static DistanceUnit getSelectedDistanceUnit(){
+		return DistanceUnit.values()[Math.max(0, Math.min(DistanceUnit.values().length - 1, distanceUnitsIndex))];
 	}
 
 	public static boolean validateDouble(double min, double max, double v){

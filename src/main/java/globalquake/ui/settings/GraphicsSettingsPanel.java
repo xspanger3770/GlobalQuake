@@ -2,6 +2,7 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.Instant;
@@ -27,6 +28,16 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JSlider sliderStationsSize;
     private JRadioButton[] colorButtons;
 
+    // Cinema mode
+    private JTextField textFieldTime;
+    private JSlider sliderZoomMul;
+
+    private JCheckBox chkBoxEnableOnStartup;
+    private JCheckBox chkBoxReEnable;
+    private JCheckBox chkBoxDisplayMagnitudeHistogram;
+    private JCheckBox chkBoxDisplaySystemInfo;
+    private JCheckBox chkBoxDisplayQuakeAdditionalInfo;
+
 
     public GraphicsSettingsPanel() {
         setLayout(new BorderLayout());
@@ -36,8 +47,49 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         tabbedPane.addTab("General", createGeneralTab());
         tabbedPane.addTab("Old Events", createEventsTab());
         tabbedPane.addTab("Stations", createStationsTab());
+        tabbedPane.addTab("Cinema Mode", createCinemaModeTab());
 
         add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    private Component createCinemaModeTab() {
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(6,6,6,6));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        textFieldTime = new JTextField(String.valueOf(Settings.cinemaModeSwitchTime), 12);
+
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
+        timePanel.add(new JLabel("Switch to another point of interest after (seconds): "));
+        timePanel.add(textFieldTime);
+        panel.add(timePanel);
+
+        JPanel zoomPanel = new JPanel();
+        zoomPanel.setBorder(new EmptyBorder(5,5,5,5));
+
+        zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
+        zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
+
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,180, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul.setMinorTickSpacing(5);
+        sliderZoomMul.setMajorTickSpacing(20);
+        sliderZoomMul.setPaintTicks(true);
+
+        zoomPanel.add(sliderZoomMul);
+        panel.add(zoomPanel);
+
+        JPanel checkboxPanel = new JPanel();
+
+        checkboxPanel.add(chkBoxEnableOnStartup = new JCheckBox("Enable Cinema Mode on startup", Settings.cinemaModeOnStartup));
+        checkboxPanel.add(chkBoxReEnable = new JCheckBox("Re-enable Cinema Mode automatically", Settings.cinemaModeReenable));
+        panel.add(checkboxPanel);
+
+        for(int i = 0; i < 39; i++){
+            panel.add(new JPanel()); // fillers
+        }
+
+        return panel;
     }
 
     private Component createGeneralTab() {
@@ -80,6 +132,15 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         dateFormatPanel.add(chkBox24H = new JCheckBox("Use 24 hours format", Settings.use24HFormat));
 
         panel.add(dateFormatPanel);
+
+        JPanel mainWindowPanel = new JPanel(new GridLayout(3,1));
+        mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
+
+        mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
+        mainWindowPanel.add(chkBoxDisplayMagnitudeHistogram = new JCheckBox("Display magnitude histogram", Settings.displayMagnitudeHistogram));
+        mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical Earthquake data", Settings.displayAdditionalQuakeInfo));
+
+        panel.add(mainWindowPanel);
 
         fill(panel, 16);
 
@@ -277,6 +338,15 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
         Settings.maxArchivedQuakes = parseInt(textFieldMaxArchived.getText(), "Max number of archived quakes", 1, Integer.MAX_VALUE);
+
+        Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
+        Settings.cinemaModeSwitchTime = parseInt(textFieldTime.getText(), "Cinema mode switch time", 1, 3600);
+        Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
+        Settings.cinemaModeReenable = chkBoxReEnable.isSelected();
+
+        Settings.displaySystemInfo = chkBoxDisplaySystemInfo.isSelected();
+        Settings.displayMagnitudeHistogram = chkBoxDisplayMagnitudeHistogram.isSelected();
+        Settings.displayAdditionalQuakeInfo = chkBoxDisplayQuakeAdditionalInfo.isSelected();
     }
 
     @Override
