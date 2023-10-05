@@ -35,5 +35,10 @@ public abstract class SettingsPanel extends JPanel{
 		return n;
 	}
 
+	public void fill(JPanel panel, int n){
+		for(int i = 0; i < n; i++){
+			panel.add(new JPanel());
+		}
+	}
 
 }

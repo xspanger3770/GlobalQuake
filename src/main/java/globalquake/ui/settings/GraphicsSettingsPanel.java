@@ -29,15 +29,41 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
 
     public GraphicsSettingsPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
 
-        createFpsSlider();
-        createEventsSettings();
-        createDateSettings();
-        createStationsSettings();
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        tabbedPane.addTab("General", createGeneralTab());
+        tabbedPane.addTab("Old Events", createEventsTab());
+        tabbedPane.addTab("Stations", createStationsTab());
+
+        add(tabbedPane, BorderLayout.CENTER);
     }
 
-    private void createDateSettings() {
+    private Component createGeneralTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JPanel performancePanel = new JPanel();
+        performancePanel.setLayout(new BoxLayout(performancePanel, BoxLayout.Y_AXIS));
+        performancePanel.setBorder(BorderFactory.createTitledBorder("Performance"));
+
+        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
+        sliderFpsIdle.setPaintLabels(true);
+        sliderFpsIdle.setPaintTicks(true);
+        sliderFpsIdle.setMajorTickSpacing(10);
+        sliderFpsIdle.setMinorTickSpacing(5);
+        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+
+        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+
+        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
+
+        performancePanel.add(label);
+        performancePanel.add(sliderFpsIdle);
+
+        panel.add(performancePanel);
+
         JPanel dateFormatPanel = new JPanel();
         dateFormatPanel.setBorder(BorderFactory.createTitledBorder("Date and Time setting"));
 
@@ -53,67 +79,14 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         dateFormatPanel.add(comboBoxDateFormat);
         dateFormatPanel.add(chkBox24H = new JCheckBox("Use 24 hours format", Settings.use24HFormat));
 
-        add(dateFormatPanel);
+        panel.add(dateFormatPanel);
+
+        fill(panel, 16);
+
+        return panel;
     }
 
-    private void createStationsSettings() {
-        JPanel otherSettingsPanel = new JPanel();
-        otherSettingsPanel.setLayout(new BoxLayout(otherSettingsPanel, BoxLayout.Y_AXIS));
-        otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
-
-        JPanel checkBoxes = new JPanel(new GridLayout(2,2));
-
-        chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
-        chkBoxScheme.setSelected(Settings.useOldColorScheme);
-        checkBoxes.add(chkBoxScheme);
-
-        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
-        chkBoxAntialiasing.setSelected(Settings.antialiasing);
-        checkBoxes.add(chkBoxAntialiasing);
-
-        checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
-        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
-
-        otherSettingsPanel.add(checkBoxes);
-
-        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
-        intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
-
-        sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
-        sliderIntensityZoom.setMajorTickSpacing(10);
-        sliderIntensityZoom.setMinorTickSpacing(5);
-        sliderIntensityZoom.setPaintTicks(true);
-        sliderIntensityZoom.setPaintLabels(true);
-
-        sliderIntensityZoom.addChangeListener(changeEvent -> {
-            Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
-            Settings.changes++;
-        });
-
-        intensityPanel.add(sliderIntensityZoom);
-        otherSettingsPanel.add(intensityPanel);
-
-        JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
-        stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
-
-        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 20, 300, (int) (Settings.stationsSizeMul * 100));
-        sliderStationsSize.setMajorTickSpacing(20);
-        sliderStationsSize.setMinorTickSpacing(10);
-        sliderStationsSize.setPaintTicks(true);
-        sliderStationsSize.setPaintLabels(true);
-
-        sliderStationsSize.addChangeListener(changeEvent -> {
-            Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
-            Settings.changes++;
-        });
-
-        stationSizePanel.add(sliderStationsSize);
-        otherSettingsPanel.add(stationSizePanel);
-
-        add(otherSettingsPanel);
-    }
-
-    private void createEventsSettings() {
+    private Component createEventsTab() {
         JPanel eventsPanel = new JPanel();
         eventsPanel.setBorder(BorderFactory.createTitledBorder("Old events settings"));
         eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
@@ -218,29 +191,68 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         eventsPanel.add(colorsPanel);
 
-        add(eventsPanel);
+        fill(eventsPanel, 20);
+
+        return eventsPanel;
     }
 
-    private void createFpsSlider() {
-        JPanel fpsPanel = new JPanel();
-        fpsPanel.setBorder(BorderFactory.createTitledBorder("Performance"));
-        fpsPanel.setLayout(new BoxLayout(fpsPanel, BoxLayout.Y_AXIS));
+    private Component createStationsTab() {
+        JPanel stationsPanel = new JPanel();
+        stationsPanel.setLayout(new BoxLayout(stationsPanel, BoxLayout.Y_AXIS));
+        stationsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
-        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
-        sliderFpsIdle.setPaintLabels(true);
-        sliderFpsIdle.setPaintTicks(true);
-        sliderFpsIdle.setMajorTickSpacing(10);
-        sliderFpsIdle.setMinorTickSpacing(5);
-        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+        JPanel checkBoxes = new JPanel(new GridLayout(2,2));
 
-        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+        chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
+        chkBoxScheme.setSelected(Settings.useOldColorScheme);
+        checkBoxes.add(chkBoxScheme);
 
-        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
+        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
+        chkBoxAntialiasing.setSelected(Settings.antialiasing);
+        checkBoxes.add(chkBoxAntialiasing);
 
-        fpsPanel.add(label);
-        fpsPanel.add(sliderFpsIdle);
+        checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
+        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
 
-        add(fpsPanel);
+        stationsPanel.add(checkBoxes);
+
+        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
+        intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
+
+        sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
+        sliderIntensityZoom.setMajorTickSpacing(10);
+        sliderIntensityZoom.setMinorTickSpacing(5);
+        sliderIntensityZoom.setPaintTicks(true);
+        sliderIntensityZoom.setPaintLabels(true);
+
+        sliderIntensityZoom.addChangeListener(changeEvent -> {
+            Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+            Settings.changes++;
+        });
+
+        intensityPanel.add(sliderIntensityZoom);
+        stationsPanel.add(intensityPanel);
+
+        JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
+        stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
+
+        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 20, 300, (int) (Settings.stationsSizeMul * 100));
+        sliderStationsSize.setMajorTickSpacing(20);
+        sliderStationsSize.setMinorTickSpacing(10);
+        sliderStationsSize.setPaintTicks(true);
+        sliderStationsSize.setPaintLabels(true);
+
+        sliderStationsSize.addChangeListener(changeEvent -> {
+            Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
+            Settings.changes++;
+        });
+
+        stationSizePanel.add(sliderStationsSize);
+        stationsPanel.add(stationSizePanel);
+
+        fill(stationsPanel, 20);
+
+        return stationsPanel;
     }
 
     @Override

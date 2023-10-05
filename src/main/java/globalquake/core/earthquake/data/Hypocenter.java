@@ -72,7 +72,7 @@ public class Hypocenter {
 		PolygonConfidenceInterval lastInterval = polygonConfidenceIntervals.get(polygonConfidenceIntervals.size() - 1);
 
 		double errOrigin = (lastInterval.maxOrigin() - lastInterval.minOrigin()) / 1000.0;
-		double errDepth = (depthConfidenceInterval.maxDepth() - depthConfidenceInterval.minDepth()) / 1000.0;
+		double errDepth = (depthConfidenceInterval.maxDepth() - depthConfidenceInterval.minDepth());
 
 		double[] result = calculateLocationQuality(lastInterval);
 		double errNS = result[0];
