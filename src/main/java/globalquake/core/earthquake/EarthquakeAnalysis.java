@@ -200,7 +200,8 @@ public class EarthquakeAnalysis {
         return deltaP >= limit;
     }
 
-    public PreliminaryHypocenter runHypocenterFinder(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings){
+    public PreliminaryHypocenter runHypocenterFinder(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings,
+                                                     boolean far){
         if (selectedEvents.isEmpty()) {
             return null;
         }
@@ -225,7 +226,7 @@ public class EarthquakeAnalysis {
         double _lat = cluster.getAnchorLat();
         double _lon = cluster.getAnchorLon();
 
-        if (previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8) {
+        if (far && (previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8)) {
             // phase 1 search far from ANCHOR (it's not very certain)
             bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
             Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
@@ -274,11 +275,11 @@ public class EarthquakeAnalysis {
     public void findHypocenter(List<PickedEvent> selectedEvents, Cluster cluster, HypocenterFinderSettings finderSettings) {
         long startTime = System.currentTimeMillis();
 
-        PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings);
+        PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings, true);
 
         List<PickedEvent> correctSelectedEvents = selectedEvents.stream().filter(pickedEvent -> ClusterAnalysis.couldBeArrival(pickedEvent, bestHypocenter, false, false, true)).collect(Collectors.toList());
 
-        PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings);
+        PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
 
         postProcess(selectedEvents, correctSelectedEvents, cluster, bestHypocenter2, finderSettings, startTime);
     }
