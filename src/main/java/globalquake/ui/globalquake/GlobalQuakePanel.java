@@ -219,7 +219,7 @@ public class GlobalQuakePanel extends GlobePanel {
     @SuppressWarnings("SameParameterValue")
     private void drawEarthquakesBox(Graphics2D g, int x, int y) {
         List<Earthquake> quakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes();
-        int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 3000) % (quakes.size()));
+        int displayedQuake = quakes.isEmpty() ? -1 : (int) ((System.currentTimeMillis() / 5000) % (quakes.size()));
 
         g.setFont(new Font("Arial", Font.BOLD, 16));
         g.setStroke(new BasicStroke(1f));

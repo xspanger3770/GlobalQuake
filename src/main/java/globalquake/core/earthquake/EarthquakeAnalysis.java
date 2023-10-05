@@ -489,13 +489,11 @@ public class EarthquakeAnalysis {
             long expectedPArrival = bestHypocenter.origin + (long) ((rawTravelP + EarthquakeAnalysis.getElevationCorrection(station.getAlt())) * 1000);
 
             if (station.getStateAt(expectedPArrival) != StationState.ACTIVE) {
-                Logger.debug("NOT ACTIVE AT %s at %d %s".formatted(station.getStationCode(), expectedPArrival, station.getStateAt(expectedPArrival)));
                 continue;
             }
 
             total++;
             if (station.getEventAt(expectedPArrival, 10 * 1000) == null) {
-                Logger.debug("NO EVENT AT " + station.getStationCode());
                 wrong++;
             }
         }
