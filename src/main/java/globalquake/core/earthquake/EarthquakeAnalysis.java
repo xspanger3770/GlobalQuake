@@ -374,7 +374,6 @@ public class EarthquakeAnalysis {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
-        bestHypocenter.calculateQuality();
 
         calculateMagnitude(cluster, bestHypocenter);
 
@@ -394,6 +393,8 @@ public class EarthquakeAnalysis {
 
         calculateActualCorrectEvents(selectedEvents, bestHypocenter);
         calculateObviousArrivals(bestHypocenter);
+
+        bestHypocenter.calculateQuality();
 
         Logger.debug(bestHypocenter);
 
