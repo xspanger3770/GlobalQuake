@@ -359,6 +359,8 @@ public class EarthquakeAnalysis {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(selectedEvents, bestHypocenterPrelim, finderSettings));
+        bestHypocenter.calculateQuality();
+
         calculateMagnitude(cluster, bestHypocenter);
 
         // There has to be at least some difference in the picked pWave times

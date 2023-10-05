@@ -2,6 +2,7 @@ package globalquake.core.earthquake.data;
 
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
+import globalquake.core.earthquake.quality.*;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class Hypocenter {
 	public double depthUncertainty;
 	public double locationUncertainty;
 	public boolean depthFixed;
+
+	public Quality quality;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,
@@ -63,5 +66,40 @@ public class Hypocenter {
 				", obviousArrivalsInfo=" + obviousArrivalsInfo +
 				", depthConfidenceInterval=" + depthConfidenceInterval +
 				'}';
+	}
+
+    public void calculateQuality() {
+		PolygonConfidenceInterval lastInterval = polygonConfidenceIntervals.get(polygonConfidenceIntervals.size() - 1);
+
+		double errOrigin = (lastInterval.maxOrigin() - lastInterval.minOrigin()) / 1000.0;
+		double errDepth = (depthConfidenceInterval.maxDepth() - depthConfidenceInterval.minDepth()) / 1000.0;
+
+		double[] result = calculateLocationQuality(lastInterval);
+		double errNS = result[0];
+		double errEW = result[1];
+
+		this.quality = new Quality(errOrigin, errDepth, errNS, errEW);
+	}
+
+	private static double[] calculateLocationQuality(PolygonConfidenceInterval lastInterval) {
+		double errNS = 0;
+		double errEW = 0;
+
+		for (int i = 0; i < lastInterval.n(); i++) {
+			double ang = lastInterval.offset() + (i / (double) lastInterval.n()) * 360.0;
+			double length = lastInterval.lengths().get(i);
+
+			if (((int) ((ang + 360.0 - 45.0) / 90)) % 2 == 1) {
+				if (length > errNS) {
+					errNS = length;
+				}
+			} else {
+				if (length > errEW) {
+					errEW = length;
+				}
+			}
+		}
+
+		return new double[]{errNS, errEW};
 	}
 }
