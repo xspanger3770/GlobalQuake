@@ -5,7 +5,6 @@ import java.util.*;
 
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.ui.settings.Settings;
-import globalquake.ui.AlertWindow;
 import globalquake.geo.GeoUtils;
 import org.tinylog.Logger;
 
@@ -51,11 +50,6 @@ public class AlertManager {
                 try {
                     if(mainFrame != null && Settings.focusOnEvent) {
                         mainFrame.toFront();
-                    }
-
-                    if(Settings.enableAlarmDialogs) {
-                        AlertWindow frame = new AlertWindow(quake);
-                        frame.setVisible(true);
                     }
                 } catch (Exception e) {
                     Logger.error(e);
