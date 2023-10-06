@@ -101,7 +101,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
 
         if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
             graphics.setColor(Color.yellow);

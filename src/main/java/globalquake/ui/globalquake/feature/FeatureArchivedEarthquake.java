@@ -89,7 +89,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
 
         if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));

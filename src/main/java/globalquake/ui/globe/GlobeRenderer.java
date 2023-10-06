@@ -21,6 +21,8 @@ public class GlobeRenderer {
     private double sinYaw;
     private double sinPitch;
 
+    private long lastMouseMove = 0;
+
     private static final double[][] projectionMatrix = new double[][]{
             {1.0, 0.0, 0.0, 0.0},
             {0.0, 1.0, 0.0, 0.0},
@@ -459,8 +461,11 @@ public class GlobeRenderer {
         return px / oneDegPx;
     }
 
-    public boolean isMouseNearby(Point2D coords, double dist) {
+    public boolean isMouseNearby(Point2D coords, double dist, boolean moved) {
         if(lastMouse == null || coords == null){
+            return false;
+        }
+        if(moved && (System.currentTimeMillis() - lastMouseMove) > 15 * 1000){
             return false;
         }
         Vector3D vect;
@@ -481,6 +486,7 @@ public class GlobeRenderer {
 
     public void mouseMoved(MouseEvent e) {
         lastMouse = e.getPoint();
+        lastMouseMove = System.currentTimeMillis();
     }
 
     public double getAngularDistance(Point2D centerCoords) {
