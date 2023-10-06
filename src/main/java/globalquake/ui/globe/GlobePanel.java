@@ -216,6 +216,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private void runAnimation(Animation animation) {
+        if(animation == null){
+            return;
+        }
         int steps = 250;
         final int[] step = {0};
 
@@ -268,7 +271,15 @@ public class GlobePanel extends JPanel implements GeoUtils {
         }
     }
 
-    public void smoothTransition(double targetLat, double targetLon, double targetScroll){
+    public synchronized void jumpTo(double targetLat, double targetLon, double targetScroll) {
+        nextAnimation = null;
+        centerLat = targetLat;
+        centerLon = targetLon;
+        scroll = targetScroll;
+        renderer.updateCamera(createRenderProperties());
+    }
+
+    public synchronized void smoothTransition(double targetLat, double targetLon, double targetScroll){
         if(!cinemaMode){
             return;
         }

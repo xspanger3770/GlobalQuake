@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.util.*;
 
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.events.specific.AlertIssuedEvent;
 import globalquake.ui.settings.Settings;
 import globalquake.geo.GeoUtils;
 import org.tinylog.Logger;
@@ -45,16 +46,8 @@ public class AlertManager {
     }
 
     private void conditionsSatisfied(Warnable warnable) {
-        if(warnable instanceof Earthquake quake) {
-            EventQueue.invokeLater(() -> {
-                try {
-                    if(mainFrame != null && Settings.focusOnEvent) {
-                        mainFrame.toFront();
-                    }
-                } catch (Exception e) {
-                    Logger.error(e);
-                }
-            });
+        if(GlobalQuake.instance != null){
+            GlobalQuake.instance.getEventHandler().fireEvent(new AlertIssuedEvent(warnable));
         }
     }
 

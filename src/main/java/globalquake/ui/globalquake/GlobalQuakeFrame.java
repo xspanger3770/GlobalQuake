@@ -141,4 +141,7 @@ public class GlobalQuakeFrame extends GQFrame {
 		revalidate();
 	}
 
+	public GlobalQuakePanel getGQPanel() {
+		return panel;
+	}
 }

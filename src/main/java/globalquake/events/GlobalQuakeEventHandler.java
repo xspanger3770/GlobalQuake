@@ -1,6 +1,7 @@
 package globalquake.events;
 
 import globalquake.events.specific.GlobalQuakeEvent;
+import org.tinylog.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,7 +37,11 @@ public class GlobalQuakeEventHandler {
                 }
 
                 for(GlobalQuakeEventListener eventListener : eventListeners) {
-                    event.run(eventListener);
+                    try {
+                        event.run(eventListener);
+                    }catch(Exception e){
+                        Logger.error(e);
+                    }
                 }
             }
         }).start();

@@ -141,4 +141,14 @@ public class Earthquake implements Regional, Warnable {
 				", revisionID=" + revisionID +
 				'}';
 	}
+
+	@Override
+	public double getWarningLat() {
+		return getLat();
+	}
+
+	@Override
+	public double getWarningLon() {
+		return getLon();
+	}
 }

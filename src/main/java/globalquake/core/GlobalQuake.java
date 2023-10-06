@@ -117,4 +117,8 @@ public class GlobalQuake {
 	public GlobalQuakeEventHandler getEventHandler() {
 		return eventHandler;
 	}
+
+	public GlobalQuakeFrame getGlobalQuakeFrame() {
+		return globalQuakeFrame;
+	}
 }
