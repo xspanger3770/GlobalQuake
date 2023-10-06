@@ -219,6 +219,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
         if(animation == null){
             return;
         }
+
+        Logger.info("Anim! "+animation.initialLat()+", "+animation.initialLon()+" -> "+animation.targetLat()+", "+animation.targetLon());
+
         int steps = 250;
         final int[] step = {0};
 
@@ -229,10 +232,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(animation != nextAnimation){
-                    Logger.info("Animation aborted!");
+                Animation next = nextAnimation;
+                if(animation != next){
+                    Logger.info("Animation BOMBED with "+next.initialLat()+", "+next.initialLon());
                     this.cancel();
-                    runAnimation(nextAnimation);
+                    runAnimation(next);
                     latch.countDown();
                     return;
                 }
@@ -273,6 +277,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     public synchronized void jumpTo(double targetLat, double targetLon, double targetScroll) {
         // a dirty trick, but it works
+        System.err.println("DIRT");
         nextAnimation = new Animation(targetLat, targetLon, targetScroll, targetLat, targetLon, targetScroll);
         centerLat = targetLat;
         centerLon = targetLon;

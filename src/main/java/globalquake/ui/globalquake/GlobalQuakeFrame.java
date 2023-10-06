@@ -82,7 +82,7 @@ public class GlobalQuakeFrame extends GQFrame {
 
 		pack();
 		setLocationRelativeTo(null);
-		setMinimumSize(new Dimension(610, 500));
+		setMinimumSize(new Dimension(1100, 700));
 		setResizable(true);
 		setTitle(Main.fullName);
 

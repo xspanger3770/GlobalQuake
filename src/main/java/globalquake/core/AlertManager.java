@@ -47,6 +47,7 @@ public class AlertManager {
 
     private void conditionsSatisfied(Warnable warnable) {
         if(GlobalQuake.instance != null){
+            Logger.error("Alert at "+warnable.getWarningLat()+", "+warnable.getWarningLon());
             GlobalQuake.instance.getEventHandler().fireEvent(new AlertIssuedEvent(warnable));
         }
     }
