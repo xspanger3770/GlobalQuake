@@ -272,7 +272,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     public synchronized void jumpTo(double targetLat, double targetLon, double targetScroll) {
-        nextAnimation = null;
+        // a dirty trick, but it works
+        nextAnimation = new Animation(targetLat, targetLon, targetScroll, targetLat, targetLon, targetScroll);
         centerLat = targetLat;
         centerLon = targetLon;
         scroll = targetScroll;

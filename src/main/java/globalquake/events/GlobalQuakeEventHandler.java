@@ -30,17 +30,19 @@ public class GlobalQuakeEventHandler {
                     break;
                 }
 
-                GlobalQuakeEvent event = eventQueue.remove();
+                while(!eventQueue.isEmpty()) {
+                    GlobalQuakeEvent event = eventQueue.remove();
 
-                if(event == null){
-                    continue;
-                }
+                    if (event == null) {
+                        continue;
+                    }
 
-                for(GlobalQuakeEventListener eventListener : eventListeners) {
-                    try {
-                        event.run(eventListener);
-                    }catch(Exception e){
-                        Logger.error(e);
+                    for (GlobalQuakeEventListener eventListener : eventListeners) {
+                        try {
+                            event.run(eventListener);
+                        } catch (Exception e) {
+                            Logger.error(e);
+                        }
                     }
                 }
             }
@@ -64,6 +66,7 @@ public class GlobalQuakeEventHandler {
 
     public void fireEvent(GlobalQuakeEvent event){
         eventQueue.add(event);
+        semaphore.release();
     }
 
 }

@@ -66,15 +66,23 @@ public class CinemaHandler {
 
             @Override
             public void onWarningIssued(AlertIssuedEvent event) {
+                System.err.println("B");
                 if(GlobalQuake.instance != null) {
+                    System.err.println(Settings.jumpToAlert);
+                    System.err.println(event.getWarnable() instanceof Earthquake);
                     if(Settings.jumpToAlert && event.getWarnable() instanceof Earthquake) {
                         CinemaTarget tgt = createTarget((Earthquake) event.getWarnable());
-                        if(lastTarget == null || tgt.priority() > lastTarget.priority()){
+                        System.err.println("G");
+                        System.err.println(tgt.priority());
+                        System.err.println(lastTarget.priority());
+                        if(lastTarget == null || tgt.priority() >= lastTarget.priority()){
+                            System.err.println("JUMP");
                             GlobalQuake.instance.getGlobalQuakeFrame().getGQPanel().jumpTo(tgt.lat(), tgt.lon(), tgt.zoom());
                             lastTarget = tgt;
                         }
                     }
                     if (Settings.focusOnEvent) {
+                        System.err.println("FOCUS");
                         GlobalQuake.instance.getGlobalQuakeFrame().toFront();
                     }
                 }
