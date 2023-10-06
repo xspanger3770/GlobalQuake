@@ -9,7 +9,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class GeneralSettingsPanel extends SettingsPanel {
-	private JCheckBox chkBoxAlertDialogs;
 	private JComboBox<IntensityScale> comboBoxScale;
 	private JCheckBox chkBoxHomeLoc;
 
@@ -47,31 +46,6 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		panel.add(distanceUnitJComboBox);
 
 		add(panel);
-	}
-
-	private void createAlertsDialogSettings() {
-		JPanel alertsDialogPanel = new JPanel(new GridLayout(2, 1));
-		alertsDialogPanel.setBorder(BorderFactory.createTitledBorder("Alert dialogs settings"));
-
-		chkBoxAlertDialogs = new JCheckBox("Enable alert dialogs");
-		chkBoxAlertDialogs.setBounds(8, 8, 250, 23);
-		chkBoxAlertDialogs.setSelected(Settings.enableAlarmDialogs);
-
-		JTextArea textAreaDialogs = new JTextArea(
-                """
-                        Alert dialog will show if an earthquake occurs\s
-                         nearby your home location and will display P and S wave\s
-                         arrival time and estimated intensity""");
-
-		textAreaDialogs.setBorder(new EmptyBorder(0,5,5,5));
-		textAreaDialogs.setLineWrap(true);
-		textAreaDialogs.setEditable(false);
-		textAreaDialogs.setBackground(getBackground());
-
-		alertsDialogPanel.add(chkBoxAlertDialogs);
-		alertsDialogPanel.add(textAreaDialogs);
-
-		add(alertsDialogPanel);
 	}
 
 	private void createHomeLocationSettings() {
@@ -149,7 +123,6 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	public void save() {
 		Settings.homeLat = parseDouble(textFieldLat.getText(), "Home latitude", -90, 90);
 		Settings.homeLon = parseDouble(textFieldLon.getText(), "Home longitude", -180, 180);
-		Settings.enableAlarmDialogs = chkBoxAlertDialogs.isSelected();
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 		Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
