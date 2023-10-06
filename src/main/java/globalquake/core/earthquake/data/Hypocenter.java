@@ -29,6 +29,7 @@ public class Hypocenter {
 	public boolean depthFixed;
 
 	public Quality quality;
+	public int bestCount;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,

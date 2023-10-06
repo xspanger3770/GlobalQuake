@@ -371,8 +371,8 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setColor(Color.white);
         g.setFont(new Font("Calibri", Font.BOLD, 15));
 
-        String str = "Stations: Total: %d Used: %d Wrong: %d".formatted(quake.getCluster().getAssignedEvents().size(),
-                quake.getCluster().getPreviousHypocenter().selectedEvents,
+        String str = "Stations: Total: %d Used: %d/%d Wrong: %d".formatted(quake.getCluster().getAssignedEvents().size(),
+                quake.getCluster().getPreviousHypocenter().bestCount, quake.getCluster().getPreviousHypocenter().selectedEvents,
                 quake.getCluster().getPreviousHypocenter().getWrongEventCount());
 
         g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 18);
