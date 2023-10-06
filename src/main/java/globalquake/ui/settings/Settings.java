@@ -115,6 +115,7 @@ public final class Settings {
 	public static Boolean displayMagnitudeHistogram;
 
 	public static Boolean displaySystemInfo;
+	public static Boolean reduceRevisions;
 
     static {
 		load();
@@ -126,6 +127,7 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("reduceRevisions", "true");
 
 		loadProperty("displaySystemInfo", "true");
 		loadProperty("displayMagnitudeHistogram", "true");

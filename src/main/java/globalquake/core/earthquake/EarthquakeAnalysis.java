@@ -85,7 +85,7 @@ public class EarthquakeAnalysis {
                 }
             }
             int count = pickedEvents.size();
-            if (count >= 24) {
+            if (count >= 24 && Settings.reduceRevisions) {
                 if (count < cluster.getEarthquake().nextReportEventCount) {
                     return;
                 }
