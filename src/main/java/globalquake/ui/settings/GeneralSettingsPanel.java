@@ -21,11 +21,11 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		createHomeLocationSettings();
-		createAlertsDialogSettings();
+		//createAlertsDialogSettings();
 		add(createIntensitySettingsPanel());
 		createOtherSettings(settingsFrame);
 
-		for(int i = 0; i < 4; i++){
+		for(int i = 0; i < 20; i++){
 			add(new JPanel()); // fillers
 		}
 	}
