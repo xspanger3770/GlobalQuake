@@ -17,6 +17,7 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.intensity.MMIIntensityScale;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
@@ -141,38 +142,19 @@ public class GlobalQuakePanel extends GlobePanel {
                         TauPTravelTimeCalculator.toAngle(distGC)));
                 int secondsS = (int) Math.ceil(sTravel - age);
 
-                // TODO settings for threshold
-                if(secondsS >= -120 && pga > 0.5) {
+                if(secondsS >= -120 && (pga > IntensityScales.getIntensityScale().firstLevel().getPga() || distGC <= Settings.alertLocalDist)) {
                     quake = earthquake;
                 }
             }
         }
 
         if (DEBUG) {
-            Cluster clus = new Cluster(0);
+            quake = createDebugQuake();
 
-            Hypocenter hyp = new Hypocenter(0, 0, 0, System.currentTimeMillis(), 0, 10,
-                    new DepthConfidenceInterval(10, 100),
-                    List.of(new PolygonConfidenceInterval(16, 0, List.of(
-                            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
-
-            hyp.selectedEvents = 20;
-            hyp.correctEvents = 6;
-
-            hyp.calculateQuality();
-
-            clus.setPreviousHypocenter(hyp);
-
-            quake = new Earthquake(clus, Settings.homeLat + (System.currentTimeMillis() % 10000) / 1000.0, Settings.homeLon, 0, System.currentTimeMillis() - 50 * 1000);
-            quake.setMag(10.0-(System.currentTimeMillis() % 10000) / 1000.0);
-            List<MagnitudeReading> mags = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-                mags.add(new MagnitudeReading(mag, 0));
-            }
-            quake.setMags(mags);
-            quake.setRegion("asdasdasd");
+            double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
+            maxPGA = GeoUtils.pgaFunctionGen1(quake.getMag(), dist);
         }
+
 
         int width = 320;
         int x = getWidth() / 2 - width / 2;
@@ -184,8 +166,18 @@ public class GlobalQuakePanel extends GlobePanel {
 
         if(quake != null) {
             height = 116;
-            color = Color.orange;
-            str = "Shaking is expected at your area!";
+            color = new Color(0, 90, 192);
+            str = "Earthquake detected nearby!";
+        }
+
+        if(maxPGA >= IntensityScales.getIntensityScale().firstLevel().getPga()){
+            color = new Color(255,200,0);
+            str = "Shaking is expected!";
+        }
+
+        if(maxPGA >= IntensityScales.getIntensityScale().strongLevel().getPga()){
+            color = new Color(200,50,0);
+            str = "Strong shaking is expected!";
         }
 
         int y = getHeight() - height;
@@ -236,6 +228,34 @@ public class GlobalQuakePanel extends GlobePanel {
         drawAccuracyBox(g, false, "P Wave arrival: ",x + intW + 14,y + 84, "%ds".formatted(secondsP), secondsP == 0 ? Color.gray : new Color(0,100,220));
         drawAccuracyBox(g, false, "S Wave arrival: ",x + intW + 14,y + 106, "%ds".formatted(secondsS), secondsS == 0 ? Color.gray : new Color(255,50,0));
 
+    }
+
+    private static Earthquake createDebugQuake() {
+        Earthquake quake;
+        Cluster clus = new Cluster(0);
+
+        Hypocenter hyp = new Hypocenter(0, 0, 0, System.currentTimeMillis(), 0, 10,
+                new DepthConfidenceInterval(10, 100),
+                List.of(new PolygonConfidenceInterval(16, 0, List.of(
+                        0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
+
+        hyp.selectedEvents = 20;
+        hyp.correctEvents = 6;
+
+        hyp.calculateQuality();
+
+        clus.setPreviousHypocenter(hyp);
+
+        quake = new Earthquake(clus, Settings.homeLat + 1, Settings.homeLon, 0, System.currentTimeMillis() - 50 * 1000);
+        quake.setMag(10.0-(System.currentTimeMillis() % 10000) / 1000.0);
+        List<MagnitudeReading> mags = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            double mag = 5 + Math.tan(i / 100.0 * 3.14159);
+            mags.add(new MagnitudeReading(mag, 0));
+        }
+        quake.setMags(mags);
+        quake.setRegion("asdasdasd");
+        return quake;
     }
 
     private void drawTexts(Graphics2D g) {
@@ -354,29 +374,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if (DEBUG) {
-            Cluster clus = new Cluster(0);
-
-            Hypocenter hyp = new Hypocenter(0, 0, 0, 0, 0, 10,
-                    new DepthConfidenceInterval(10, 100),
-                    List.of(new PolygonConfidenceInterval(16, 0, List.of(
-                            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
-
-            hyp.selectedEvents = 20;
-            hyp.correctEvents = 6;
-
-            hyp.calculateQuality();
-
-            clus.setPreviousHypocenter(hyp);
-
-            quake = new Earthquake(clus, 0, 0, 0, 0);
-            quake.setMag((System.currentTimeMillis() % 10000) / 1000.0);
-            List<MagnitudeReading> mags = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-                mags.add(new MagnitudeReading(mag, 0));
-            }
-            quake.setMags(mags);
-            quake.setRegion("asdasdasd");
+            quake = createDebugQuake();
         }
 
         int xOffset = 0;
@@ -547,7 +545,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private boolean isDark(Color color) {
-        double darkness = 1 - (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+        double darkness = 1 - (0.4 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
         return !(darkness < 0.5);
     }
 

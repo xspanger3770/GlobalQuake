@@ -69,6 +69,11 @@ public class MMIIntensityScale implements IntensityScale{
 	}
 
 	@Override
+	public Level strongLevel() {
+		return VI;
+	}
+
+	@Override
 	public String toString() {
 		return getNameLong();
 	}

@@ -54,6 +54,11 @@ public class ShindoIntensityScale implements IntensityScale{
 	}
 
 	@Override
+	public Level strongLevel() {
+		return GO_JAKU;
+	}
+
+	@Override
 	public String toString() {
 		return getNameLong();
 	}

@@ -127,6 +127,7 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
 		loadProperty("reduceRevisions", "true");
 
 		loadProperty("displaySystemInfo", "true");

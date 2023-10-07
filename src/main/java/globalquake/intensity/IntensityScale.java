@@ -25,4 +25,9 @@ public interface IntensityScale {
         return null;
     }
 
+    default Level firstLevel() {
+        return getLevels().get(getLevels().size() - 1);
+    }
+
+    Level strongLevel();
 }
