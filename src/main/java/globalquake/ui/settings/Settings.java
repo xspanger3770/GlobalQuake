@@ -22,8 +22,7 @@ public final class Settings {
 
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
 	private static final Properties properties = new Properties();
-	public static Boolean enableAlarmDialogs;
-	
+
 	public static Double homeLat;
 	public static Double homeLon;
 
@@ -107,6 +106,7 @@ public final class Settings {
 
 	public static Integer distanceUnitsIndex;
 	public static Boolean focusOnEvent;
+	public static Boolean jumpToAlert;
 
 	public static Boolean confidencePolygons;
 
@@ -117,7 +117,7 @@ public final class Settings {
 	public static Boolean displaySystemInfo;
 	public static Boolean reduceRevisions;
 
-    static {
+	static {
 		load();
 	}
 
@@ -136,6 +136,7 @@ public final class Settings {
 		loadProperty("confidencePolygons", "false");
 
 		loadProperty("focusOnEvent", "true");
+		loadProperty("jumpToAlert", "true");
 
 		loadProperty("distanceUnitsIndex", "0", o -> validateInt(0, DistanceUnit.values().length - 1, (Integer) o));
 

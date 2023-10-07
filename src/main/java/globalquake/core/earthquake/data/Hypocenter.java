@@ -13,7 +13,7 @@ public class Hypocenter {
 	public final double lat;
 	public final double lon;
 	public double depth;
-	public final long origin;
+	public long origin;
 
 	public int selectedEvents;
 

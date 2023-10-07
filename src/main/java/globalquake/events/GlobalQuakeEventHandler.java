@@ -1,6 +1,7 @@
 package globalquake.events;
 
 import globalquake.events.specific.GlobalQuakeEvent;
+import org.tinylog.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,14 +30,20 @@ public class GlobalQuakeEventHandler {
                     break;
                 }
 
-                GlobalQuakeEvent event = eventQueue.remove();
+                while(!eventQueue.isEmpty()) {
+                    GlobalQuakeEvent event = eventQueue.remove();
 
-                if(event == null){
-                    continue;
-                }
+                    if (event == null) {
+                        continue;
+                    }
 
-                for(GlobalQuakeEventListener eventListener : eventListeners) {
-                    event.run(eventListener);
+                    for (GlobalQuakeEventListener eventListener : eventListeners) {
+                        try {
+                            event.run(eventListener);
+                        } catch (Exception e) {
+                            Logger.error(e);
+                        }
+                    }
                 }
             }
         }).start();
@@ -44,6 +51,7 @@ public class GlobalQuakeEventHandler {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public void stopHandler(){
         running = false;
         semaphore.release();
@@ -53,12 +61,14 @@ public class GlobalQuakeEventHandler {
         eventListeners.add(eventListener);
     }
 
+    @SuppressWarnings("unused")
     public boolean removeEventListener(GlobalQuakeEventListener eventListener){
         return eventListeners.remove(eventListener);
     }
 
     public void fireEvent(GlobalQuakeEvent event){
         eventQueue.add(event);
+        semaphore.release();
     }
 
 }

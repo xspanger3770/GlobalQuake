@@ -1,30 +1,43 @@
 package globalquake.core;
 
-import java.awt.EventQueue;
 import java.util.*;
 
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.events.GlobalQuakeEventAdapter;
+import globalquake.events.specific.AlertIssuedEvent;
+import globalquake.events.specific.ClusterCreateEvent;
+import globalquake.events.specific.QuakeCreateEvent;
+import globalquake.events.specific.QuakeUpdateEvent;
 import globalquake.ui.settings.Settings;
-import globalquake.ui.AlertWindow;
 import globalquake.geo.GeoUtils;
-import org.tinylog.Logger;
-
-import javax.swing.*;
 
 public class AlertManager {
     private static final int STORE_TIME_MINUTES = 2 * 60;
     private final Map<Warnable, Warning> warnings;
-    private JFrame mainFrame;
 
     public AlertManager() {
         this.warnings = new HashMap<>();
+
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+            @Override
+            public void onQuakeCreate(QuakeCreateEvent event) {
+                tick();
+            }
+
+            @Override
+            public void onClusterCreate(ClusterCreateEvent event) {
+                tick();
+            }
+
+            @SuppressWarnings("unused")
+            @Override
+            public void onQuakeUpdate(QuakeUpdateEvent event) {
+                tick();
+            }
+        });
     }
 
-    public void setMainFrame(JFrame mainFrame) {
-        this.mainFrame = mainFrame;
-    }
-
-    public void tick() {
+    public synchronized void tick() {
         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning()));
 
         for (Iterator<Map.Entry<Warnable, Warning>> iterator = warnings.entrySet().iterator(); iterator.hasNext(); ) {
@@ -46,21 +59,8 @@ public class AlertManager {
     }
 
     private void conditionsSatisfied(Warnable warnable) {
-        if(warnable instanceof Earthquake quake) {
-            EventQueue.invokeLater(() -> {
-                try {
-                    if(mainFrame != null && Settings.focusOnEvent) {
-                        mainFrame.toFront();
-                    }
-
-                    if(Settings.enableAlarmDialogs) {
-                        AlertWindow frame = new AlertWindow(quake);
-                        frame.setVisible(true);
-                    }
-                } catch (Exception e) {
-                    Logger.error(e);
-                }
-            });
+        if(GlobalQuake.instance != null){
+            GlobalQuake.instance.getEventHandler().fireEvent(new AlertIssuedEvent(warnable));
         }
     }
 

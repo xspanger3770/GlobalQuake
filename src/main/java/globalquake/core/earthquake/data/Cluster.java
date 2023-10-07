@@ -254,4 +254,15 @@ public class Cluster implements Warnable {
 				'}';
 	}
 
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLat() {
+		return getAnchorLat();
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLon() {
+		return getAnchorLon();
+	}
 }

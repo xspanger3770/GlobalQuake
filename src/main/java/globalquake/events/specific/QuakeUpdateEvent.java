@@ -4,20 +4,17 @@ import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.events.GlobalQuakeEventListener;
 
-public class QuakeUpdateEvent implements GlobalQuakeEvent {
-    private final Earthquake earthquake;
-    private final Hypocenter previousHypocenter;
+public record QuakeUpdateEvent(Earthquake earthquake, Hypocenter previousHypocenter) implements GlobalQuakeEvent {
 
-    public QuakeUpdateEvent(Earthquake earthquake, Hypocenter previousHypocenter) {
-        this.earthquake = earthquake;
-        this.previousHypocenter = previousHypocenter;
-    }
-
-    public Earthquake getEarthquake() {
+    @Override
+    @SuppressWarnings("unused")
+    public Earthquake earthquake() {
         return earthquake;
     }
 
-    public Hypocenter getPreviousHypocenter() {
+    @Override
+    @SuppressWarnings("unused")
+    public Hypocenter previousHypocenter() {
         return previousHypocenter;
     }
 

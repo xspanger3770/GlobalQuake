@@ -72,9 +72,7 @@ public class GlobalQuake {
                     getArchive().saveArchive();
                 }
             });
-
-			alertManager.setMainFrame(globalQuakeFrame);
-        });
+		});
 		return this;
 	}
 
@@ -116,5 +114,9 @@ public class GlobalQuake {
 
 	public GlobalQuakeEventHandler getEventHandler() {
 		return eventHandler;
+	}
+
+	public GlobalQuakeFrame getGlobalQuakeFrame() {
+		return globalQuakeFrame;
 	}
 }

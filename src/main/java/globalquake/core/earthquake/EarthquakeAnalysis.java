@@ -285,11 +285,11 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
 
-        int reduceLimit = 24;
+        int reduceLimit = 16;
 
         if (correctSelectedEvents.size() > reduceLimit) {
             Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter2, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.5);
+            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.75);
 
             List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
             list.sort(Map.Entry.comparingByValue());
@@ -425,7 +425,7 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        if (!checkUncertainty(bestHypocenter)) {
+        if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
             return;
         }
 
@@ -467,7 +467,7 @@ public class EarthquakeAnalysis {
         Logger.info("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
     }
 
-    private boolean checkUncertainty(Hypocenter bestHypocenter) {
+    private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
         bestHypocenter.depthUncertainty = bestHypocenter.depthConfidenceInterval.maxDepth() - bestHypocenter.depthConfidenceInterval.minDepth();
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
@@ -479,12 +479,41 @@ public class EarthquakeAnalysis {
 
         if (bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
                 (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)) {
-            Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.locationUncertainty));
-            bestHypocenter.depth = 10.0;
-            bestHypocenter.depthFixed = true;
+            Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
+            fixDepth(bestHypocenter, 10, events);
         }
 
         return true;
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void fixDepth(Hypocenter bestHypocenter, double depth, List<PickedEvent> events) {
+        bestHypocenter.depth = depth;
+        bestHypocenter.depthFixed = true;
+
+        List<Long> origins = new ArrayList<>();
+
+        for (PickedEvent event : events) {
+            double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), bestHypocenter.lat, bestHypocenter.lon);
+            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(distGC));
+            if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
+                continue;
+            }
+
+            travelTime += getElevationCorrection(event.elevation());
+
+            long origin = event.pWave() - ((long) (travelTime * 1000));
+            origins.add(origin);
+        }
+
+        if(origins.isEmpty()){
+            return;
+        }
+
+        origins.sort(Long::compareTo);
+        bestHypocenter.origin = origins.get((origins.size() - 1) / 2);
+
+        Logger.debug("Origin time recalculated");
     }
 
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
