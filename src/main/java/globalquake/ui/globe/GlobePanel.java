@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class GlobePanel extends JPanel implements GeoUtils {
 
-    private static final long CINEMA_MODE_CHECK_INTERVAL = 1000 * 60;
+    private static final long CINEMA_MODE_CHECK_INTERVAL = 1000 * 60 * 2;
     private double centerLat;
     private double centerLon;
     private double dragStartLat;
@@ -220,8 +220,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
             return;
         }
 
-        Logger.info("Anim! "+animation.initialLat()+", "+animation.initialLon()+" -> "+animation.targetLat()+", "+animation.targetLon());
-
         int steps = 250;
         final int[] step = {0};
 
@@ -234,7 +232,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
             public void run() {
                 Animation next = nextAnimation;
                 if(animation != next){
-                    Logger.info("Animation BOMBED with "+next.initialLat()+", "+next.initialLon());
                     this.cancel();
                     runAnimation(next);
                     latch.countDown();
@@ -277,7 +274,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     public synchronized void jumpTo(double targetLat, double targetLon, double targetScroll) {
         // a dirty trick, but it works
-        System.err.println("DIRT");
         nextAnimation = new Animation(targetLat, targetLon, targetScroll, targetLat, targetLon, targetScroll);
         centerLat = targetLat;
         centerLon = targetLon;

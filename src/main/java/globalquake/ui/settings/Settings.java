@@ -22,8 +22,7 @@ public final class Settings {
 
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
 	private static final Properties properties = new Properties();
-	public static Boolean enableAlarmDialogs;
-	
+
 	public static Double homeLat;
 	public static Double homeLon;
 

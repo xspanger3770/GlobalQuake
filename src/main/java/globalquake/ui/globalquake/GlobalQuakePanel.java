@@ -142,7 +142,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 int secondsS = (int) Math.ceil(sTravel - age);
 
                 // TODO settings for threshold
-                if(secondsS >= -60 && pga > 1.0) {
+                if(secondsS >= -120 && pga > 1.0) {
                     quake = earthquake;
                 }
             }

@@ -11,6 +11,7 @@ public interface GlobalQuakeEventListener {
 
     void onQuakeCreate(QuakeCreateEvent event);
 
+    @SuppressWarnings("unused")
     void onQuakeUpdate(QuakeUpdateEvent event);
 
     void onWarningIssued(AlertIssuedEvent event);

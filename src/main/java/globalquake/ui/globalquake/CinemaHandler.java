@@ -50,7 +50,7 @@ public class CinemaHandler {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
-                CinemaTarget target = createTarget(event.getEarthquake());
+                CinemaTarget target = createTarget(event.earthquake());
                 if(lastTarget == null || target.priority() > lastTarget.priority()){
                     selectTarget(target, true);
                 }
@@ -58,7 +58,7 @@ public class CinemaHandler {
 
             @Override
             public void onClusterCreate(ClusterCreateEvent event) {
-                CinemaTarget target = createTarget(event.getCluster());
+                CinemaTarget target = createTarget(event.cluster());
                 if(lastTarget == null || target.priority() > lastTarget.priority()){
                     selectTarget(target, true);
                 }
@@ -66,23 +66,15 @@ public class CinemaHandler {
 
             @Override
             public void onWarningIssued(AlertIssuedEvent event) {
-                System.err.println("B");
                 if(GlobalQuake.instance != null) {
-                    System.err.println(Settings.jumpToAlert);
-                    System.err.println(event.getWarnable() instanceof Earthquake);
-                    if(Settings.jumpToAlert && event.getWarnable() instanceof Earthquake) {
-                        CinemaTarget tgt = createTarget((Earthquake) event.getWarnable());
-                        System.err.println("G");
-                        System.err.println(tgt.priority());
-                        System.err.println(lastTarget.priority());
+                    if(Settings.jumpToAlert && event.warnable() instanceof Earthquake) {
+                        CinemaTarget tgt = createTarget((Earthquake) event.warnable());
                         if(lastTarget == null || tgt.priority() >= lastTarget.priority()){
-                            System.err.println("JUMP");
                             GlobalQuake.instance.getGlobalQuakeFrame().getGQPanel().jumpTo(tgt.lat(), tgt.lon(), tgt.zoom());
                             lastTarget = tgt;
                         }
                     }
                     if (Settings.focusOnEvent) {
-                        System.err.println("FOCUS");
                         GlobalQuake.instance.getGlobalQuakeFrame().toFront();
                     }
                 }

@@ -51,6 +51,7 @@ public class GlobalQuakeEventHandler {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public void stopHandler(){
         running = false;
         semaphore.release();
@@ -60,6 +61,7 @@ public class GlobalQuakeEventHandler {
         eventListeners.add(eventListener);
     }
 
+    @SuppressWarnings("unused")
     public boolean removeEventListener(GlobalQuakeEventListener eventListener){
         return eventListeners.remove(eventListener);
     }

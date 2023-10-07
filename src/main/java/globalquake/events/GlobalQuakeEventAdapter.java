@@ -17,6 +17,7 @@ public class GlobalQuakeEventAdapter implements GlobalQuakeEventListener{
 
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void onQuakeUpdate(QuakeUpdateEvent event) {
 
