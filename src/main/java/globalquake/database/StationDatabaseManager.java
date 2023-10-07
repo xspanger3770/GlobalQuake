@@ -186,9 +186,7 @@ public class StationDatabaseManager {
 
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
-        toBeUpdated.forEach(seedlinkNetwork -> {
-            seedlinkNetwork.setStatus(0, "Queued...");
-        });
+        toBeUpdated.forEach(seedlinkNetwork -> seedlinkNetwork.setStatus(0, "Queued..."));
         fireStatusChangeEvent();
 
         final Object statusSync = new Object();

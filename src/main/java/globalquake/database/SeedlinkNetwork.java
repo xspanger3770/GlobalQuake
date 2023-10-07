@@ -64,12 +64,9 @@ public final class SeedlinkNetwork implements Serializable {
     }
 
     public void setStatus(int value, String str){
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                getStatusBar().setString(str);
-                getStatusBar().setValue(value);
-            }
+        SwingUtilities.invokeLater(() -> {
+            getStatusBar().setString(str);
+            getStatusBar().setValue(value);
         });
     }
 
