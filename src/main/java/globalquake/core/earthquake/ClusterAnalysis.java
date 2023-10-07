@@ -499,6 +499,9 @@ public class ClusterAnalysis {
                 cluster.addEvent();
             }
         }
+
+        cluster.calculateRoot();
+
         Logger.debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
