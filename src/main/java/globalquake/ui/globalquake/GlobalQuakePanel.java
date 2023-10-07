@@ -141,7 +141,7 @@ public class GlobalQuakePanel extends GlobePanel {
                         TauPTravelTimeCalculator.toAngle(distGC)));
                 int secondsS = (int) Math.ceil(sTravel - age);
 
-                if(secondsS >= -120 && (pga > IntensityScales.getIntensityScale().firstLevel().getPga() || distGC <= Settings.alertLocalDist)) {
+                if(pga > IntensityScales.getIntensityScale().firstLevel().getPga() || distGC <= Settings.alertLocalDist) {
                     quake = earthquake;
                 }
             }
