@@ -1,11 +1,11 @@
 package globalquake.core.earthquake.quality;
 
 public class Quality {
-    private static final double[] THRESHOLDS_ORIGIN = {1.0, 5.0, 10.0, 50.0};
-    private static final double[] THRESHOLDS_DEPTH = {10.0, 50.0, 100.0, 200.0};
+    private static final double[] THRESHOLDS_ORIGIN = {1.0, 2.5, 10.0, 30.0};
+    private static final double[] THRESHOLDS_DEPTH = {5.0, 20.0, 50.0, 200.0};
     private static final double[] THRESHOLDS_LOCATION = {5.0, 20.0, 50.0, 200.0};
     private static final double[] THRESHOLDS_STATIONS = {24.0, 16.0, 10.0, 6.0};
-    private static final double[] THRESHOLDS_PERCENTAGE = {95.0, 80.0, 60.0, 40.0};
+    private static final double[] THRESHOLDS_PERCENTAGE = {90.0, 80.0, 65.0, 50.0};
 
     private final QualityCriteria qualityOrigin;
     private final QualityCriteria qualityDepth;
