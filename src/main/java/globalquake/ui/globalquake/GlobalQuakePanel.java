@@ -142,7 +142,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 int secondsS = (int) Math.ceil(sTravel - age);
 
                 // TODO settings for threshold
-                if(secondsS >= -120 && pga > 1.0) {
+                if(secondsS >= -120 && pga > 0.5) {
                     quake = earthquake;
                 }
             }
@@ -201,8 +201,6 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setColor(isDark(color) ? Color.white : Color.black);
         g.setFont(new Font("Calibri", Font.BOLD, 16));
         g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 18);
-
-        // TODO
 
         if(quake == null){
             return;
