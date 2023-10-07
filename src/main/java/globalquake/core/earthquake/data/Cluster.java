@@ -1,6 +1,6 @@
 package globalquake.core.earthquake.data;
 
-import globalquake.core.Warnable;
+import globalquake.core.alert.Warnable;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;

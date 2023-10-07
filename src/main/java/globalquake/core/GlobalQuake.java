@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import globalquake.core.alert.AlertManager;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;

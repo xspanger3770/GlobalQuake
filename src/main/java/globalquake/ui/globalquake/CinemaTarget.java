@@ -1,4 +1,6 @@
 package globalquake.ui.globalquake;
 
-public record CinemaTarget(double lat, double lon, double zoom, double priority) {
+import globalquake.core.alert.Warnable;
+
+public record CinemaTarget(double lat, double lon, double zoom, double priority, Warnable original) {
 }

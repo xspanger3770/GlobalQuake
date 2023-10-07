@@ -1,7 +1,9 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.AlertManager;
+import globalquake.core.alert.AlertManager;
 import globalquake.core.GlobalQuake;
+import globalquake.core.alert.Warnable;
+import globalquake.core.alert.Warning;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.events.GlobalQuakeEventAdapter;
@@ -12,15 +14,23 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class CinemaHandler {
+
+    private static final long WARNING_TIMEOUT = 1000 * 60 * 30;
+    private static final long WARNING_VALID = 1000 * 60 * 5;
     private final GlobePanel globePanel;
     private CinemaTarget lastTarget;
 
     private long lastAnim = 0;
+
+    private final Map<Warnable, Warning> warnings = new HashMap<>();
 
     public CinemaHandler(GlobePanel globePanel) {
         this.globePanel = globePanel;
@@ -66,6 +76,17 @@ public class CinemaHandler {
 
             @Override
             public void onWarningIssued(AlertIssuedEvent event) {
+                warnings.putIfAbsent(event.warnable(), event.warning());
+
+                for (Iterator<Map.Entry<Warnable, Warning>> iterator = warnings.entrySet().iterator(); iterator.hasNext(); ) {
+                    var kv = iterator.next();
+                    Warning warning = kv.getValue();
+
+                    if(System.currentTimeMillis() - warning.createdAt > WARNING_TIMEOUT){
+                        iterator.remove();
+                    }
+                }
+
                 if(GlobalQuake.instance != null) {
                     if(Settings.jumpToAlert && event.warnable() instanceof Earthquake) {
                         CinemaTarget tgt = createTarget((Earthquake) event.warnable());
@@ -96,16 +117,35 @@ public class CinemaHandler {
         if (Math.abs(time - lastAnim) < (bypass ? 0 : 5000)) {
             return;
         }
+
+        if(isWarningInProgress() && !isWarned(target.original())){
+            return;
+        }
+
         lastAnim = time;
         lastTarget = target;
         globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
+    }
+
+    private boolean isWarned(Warnable original) {
+        return original != null && warnings.containsKey(original);
+    }
+
+    private boolean isWarningInProgress() {
+        for(Warning warning : warnings.values()){
+            if(System.currentTimeMillis() - warning.createdAt < WARNING_VALID){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Earthquake lastEarthquake = null;
     private Cluster lastCluster = null;
 
     private CinemaTarget selectNextTarget() {
-        CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5, 0);
+        CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5, 0, null);
         if (GlobalQuake.instance == null) {
             return result;
         }
@@ -149,7 +189,8 @@ public class CinemaHandler {
     }
 
     private CinemaTarget createTarget(Cluster cluster) {
-        return new CinemaTarget(cluster.getAnchorLat(), cluster.getAnchorLon(), 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0), 1 + cluster.getActualLevel());
+        return new CinemaTarget(cluster.getAnchorLat(), cluster.getAnchorLon(), 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0),
+                1 + cluster.getActualLevel(), cluster);
     }
 
     private CinemaTarget createTarget(Earthquake earthquake) {
@@ -161,6 +202,6 @@ public class CinemaHandler {
             priority += 10000.0;
         }
 
-        return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom, priority);
+        return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom, priority, earthquake);
     }
 }

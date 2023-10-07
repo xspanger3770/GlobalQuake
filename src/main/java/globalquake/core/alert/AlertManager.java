@@ -1,7 +1,8 @@
-package globalquake.core;
+package globalquake.core.alert;
 
 import java.util.*;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.events.GlobalQuakeEventAdapter;
 import globalquake.events.specific.AlertIssuedEvent;
@@ -12,7 +13,7 @@ import globalquake.ui.settings.Settings;
 import globalquake.geo.GeoUtils;
 
 public class AlertManager {
-    private static final int STORE_TIME_MINUTES = 2 * 60;
+    public static final int STORE_TIME_MINUTES = 2 * 60;
     private final Map<Warnable, Warning> warnings;
 
     public AlertManager() {
@@ -53,14 +54,14 @@ public class AlertManager {
 
             if (meetsConditions(warnable) && !warning.metConditions) {
                 warning.metConditions = true;
-                conditionsSatisfied(warnable);
+                conditionsSatisfied(warnable, warning);
             }
         }
     }
 
-    private void conditionsSatisfied(Warnable warnable) {
+    private void conditionsSatisfied(Warnable warnable, Warning warning) {
         if(GlobalQuake.instance != null){
-            GlobalQuake.instance.getEventHandler().fireEvent(new AlertIssuedEvent(warnable));
+            GlobalQuake.instance.getEventHandler().fireEvent(new AlertIssuedEvent(warnable, warning));
         }
     }
 
@@ -88,17 +89,5 @@ public class AlertManager {
 
         return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
     }
-
 }
 
-class Warning {
-
-    public Warning(){
-        createdAt = System.currentTimeMillis();
-        metConditions = false;
-    }
-
-    public final long createdAt;
-    public boolean metConditions;
-
-}

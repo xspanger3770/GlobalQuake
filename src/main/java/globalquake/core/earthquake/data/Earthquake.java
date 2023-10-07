@@ -1,6 +1,6 @@
 package globalquake.core.earthquake.data;
 
-import globalquake.core.Warnable;
+import globalquake.core.alert.Warnable;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 

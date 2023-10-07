@@ -1,4 +1,4 @@
-package globalquake.core;
+package globalquake.core.alert;
 
 public interface Warnable {
 

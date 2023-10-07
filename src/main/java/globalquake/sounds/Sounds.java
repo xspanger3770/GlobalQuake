@@ -1,6 +1,6 @@
 package globalquake.sounds;
 
-import globalquake.core.AlertManager;
+import globalquake.core.alert.AlertManager;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.exception.FatalIOException;
