@@ -274,6 +274,8 @@ public final class Settings {
 			} else {
 				Logger.error("Error: unsupported setting type: %s".formatted(field.getType()));
 			}
+		} catch(NoSuchFieldException ignored){
+
 		} catch (Exception e) {
 			Logger.error(e);
 		}
