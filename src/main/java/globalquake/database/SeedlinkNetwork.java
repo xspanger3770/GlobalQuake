@@ -63,6 +63,16 @@ public final class SeedlinkNetwork implements Serializable {
                 "port=" + port + ']';
     }
 
+    public void setStatus(int value, String str){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                getStatusBar().setString(str);
+                getStatusBar().setValue(value);
+            }
+        });
+    }
+
     public JProgressBar getStatusBar() {
         if(statusBar == null){
             statusBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);

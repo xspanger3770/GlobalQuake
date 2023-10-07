@@ -23,24 +23,19 @@ public class SeedlinkCommunicator {
     public static final int SEEDLINK_TIMEOUT_SECONDS = 60;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
-        seedlinkNetwork.getStatusBar().setString("Connecting...");
-        seedlinkNetwork.getStatusBar().setValue(0);
+        seedlinkNetwork.setStatus(0, "Connecting...");
         SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT_SECONDS, false);
 
-        seedlinkNetwork.getStatusBar().setString("Downloading...");
-        seedlinkNetwork.getStatusBar().setValue(33);
+        seedlinkNetwork.setStatus(33, "Downloading...");
         String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS).trim().replaceAll("[^\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]", " ");
 
-        seedlinkNetwork.getStatusBar().setString("Parsing...");
-        seedlinkNetwork.getStatusBar().setValue(66);
+        seedlinkNetwork.setStatus(66, "Parsing...");
         parseAvailability(infoString, stationDatabase, seedlinkNetwork);
 
-        seedlinkNetwork.getStatusBar().setString("Finishing...");
-        seedlinkNetwork.getStatusBar().setValue(80);
+        seedlinkNetwork.setStatus(80, "Finishing...");
         reader.close();
 
-        seedlinkNetwork.getStatusBar().setString("Done");
-        seedlinkNetwork.getStatusBar().setValue(99);
+        seedlinkNetwork.setStatus(99, "Done");
     }
 
     private static void parseAvailability(String infoString, StationDatabase stationDatabase, SeedlinkNetwork seedlinkNetwork) throws Exception {
