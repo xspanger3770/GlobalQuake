@@ -17,7 +17,6 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
-import globalquake.intensity.MMIIntensityScale;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
