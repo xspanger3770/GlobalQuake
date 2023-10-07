@@ -151,7 +151,7 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
 
-        int width = 400;
+        int width = 240;
         int x = getWidth() / 2 - width / 2;
         int height = 22;
 
@@ -159,10 +159,14 @@ public class GlobalQuakePanel extends GlobePanel {
 
         String str = "No warning";
 
+        g.setFont(new Font("Calibri", Font.BOLD, 16));
+
         if(quake != null) {
             height = 136;
             color = new Color(0, 90, 192);
+            g.setFont(new Font("Calibri", Font.BOLD, 22));
             str = "Earthquake detected nearby!";
+            width = 400;
         }
 
         if(maxPGA >= IntensityScales.getIntensityScale().firstLevel().getPga()){
@@ -186,8 +190,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.fill(rect2);
 
         g.setColor(isDark(color) ? Color.white : Color.black);
-        g.setFont(new Font("Calibri", Font.BOLD, 22));
-        g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + 21);
+        g.drawString(str, x + width / 2 - g.getFontMetrics().stringWidth(str) / 2, y + g.getFont().getSize());
 
         if(quake == null){
             return;
@@ -554,7 +557,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
         g.setColor(isDark(color) ? Color.white : Color.black);
-        g.drawString(v, _x + size1, y);
+        g.drawString(v, _x + size1, y + g.getFont().getSize() - 16);
     }
 
     private boolean isDark(Color color) {
