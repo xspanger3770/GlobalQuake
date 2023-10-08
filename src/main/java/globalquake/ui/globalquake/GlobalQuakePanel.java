@@ -264,7 +264,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         clus.setPreviousHypocenter(hyp);
 
-        quake = new Earthquake(clus, Settings.homeLat + 10, Settings.homeLon, 0, System.currentTimeMillis() - 50 * 1000);
+        quake = new Earthquake(clus, Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis() - 50 * 1000);
         quake.setMag(10.0-(System.currentTimeMillis() % 10000) / 1000.0);
         List<MagnitudeReading> mags = new ArrayList<>();
         for (int i = 0; i < 100; i++) {

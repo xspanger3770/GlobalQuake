@@ -2,8 +2,6 @@ package globalquake.intensity;
 
 import globalquake.ui.settings.Settings;
 
-import java.util.List;
-
 public class IntensityScales {
 
     private static final IntensityScale SHINDO = new ShindoIntensityScale();
