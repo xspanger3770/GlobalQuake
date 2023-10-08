@@ -16,18 +16,16 @@ public interface IntensityScale {
     double getDarkeningFactor();
 
     default Level getLevel(double pga){
+        Level result = null;
         for(Level level : getLevels()){
-            if(pga > level.getPga()){
-                return level;
+            if(pga < level.getPga()){
+                return result;
             }
+
+            result = level;
         }
 
-        return null;
+        return result;
     }
 
-    default Level firstLevel() {
-        return getLevels().get(getLevels().size() - 1);
-    }
-
-    Level strongLevel();
 }

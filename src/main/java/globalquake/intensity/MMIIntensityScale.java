@@ -44,8 +44,6 @@ public class MMIIntensityScale implements IntensityScale{
 		levels.add(X = new Level("X", 432.0, new Color(190, 0, 0))); // 1000
 		levels.add(XI = new Level("XI", 923.0, new Color(130, 0, 0))); // 1300
 		levels.add(XII = new Level("XII", 1972.0, new Color(65, 0, 0))); // 2000
-
-		levels.sort(Comparator.comparing(level -> -level.getPga()));
 	}
 
 	@Override
@@ -66,11 +64,6 @@ public class MMIIntensityScale implements IntensityScale{
 	@Override
 	public double getDarkeningFactor() {
 		return 0.62;
-	}
-
-	@Override
-	public Level strongLevel() {
-		return VI;
 	}
 
 	@Override

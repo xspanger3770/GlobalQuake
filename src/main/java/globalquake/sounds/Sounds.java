@@ -5,6 +5,7 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.GeoUtils;
+import globalquake.intensity.IntensityScales;
 import globalquake.intensity.ShindoIntensityScale;
 import globalquake.ui.settings.Settings;
 
@@ -92,7 +93,6 @@ public class Sounds {
 			}
 			double pga = GeoUtils.pgaFunctionGen1(cluster.getEarthquake().getMag(), cluster.getEarthquake().getDepth());
 			if (info.maxPGA < pga) {
-
 				info.maxPGA = pga;
 				if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
 					Sounds.playSound(Sounds.eew_warning);
@@ -104,8 +104,9 @@ public class Sounds {
 					Settings.homeLat, Settings.homeLon, 0.0);
 			double pgaHome = GeoUtils.pgaFunctionGen1(quake.getMag(), distGEO);
 
-			if (info.maxPGAHome < pgaHome) {
-				if (pgaHome >= ShindoIntensityScale.ICHI.getPga() && info.maxPGAHome < ShindoIntensityScale.ICHI.getPga()) {
+			if (pgaHome > info.maxPGAHome) {
+				double threshold = IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
+				if (pgaHome >= threshold && info.maxPGAHome < threshold) {
 					Sounds.playSound(Sounds.felt);
 				}
 				info.maxPGAHome = pgaHome;

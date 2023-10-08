@@ -9,9 +9,9 @@ public class IntensityScales {
     private static final IntensityScale SHINDO = new ShindoIntensityScale();
     private static final IntensityScale MMI = new MMIIntensityScale();
 
-    public static final List<IntensityScale> INTENSITY_SCALES = List.of(MMI, SHINDO);
+    public static final IntensityScale[] INTENSITY_SCALES = {MMI, SHINDO};
     public static IntensityScale getIntensityScale(){
         int index = Settings.intensityScaleIndex;
-        return INTENSITY_SCALES.get(index < 0 || index >= INTENSITY_SCALES.size() ? 0 : index);
+        return INTENSITY_SCALES[(index < 0 || index >= INTENSITY_SCALES.length) ? 0 : index];
     }
 }

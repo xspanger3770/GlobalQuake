@@ -15,16 +15,33 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JLabel label1;
     private JCheckBox chkBoxFocus;
     private JCheckBox chkBoxJumpToAlert;
+    private IntensityScaleSelector shakingThreshold;
+    private IntensityScaleSelector strongShakingThreshold;
 
     public AlertSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         createAlertDialogSettings();
+        createAlertLevels();
 
         for(int i = 0; i < 10; i++){
             add(new JPanel()); // fillers
         }
 
         refreshUI();
+    }
+
+    private void createAlertLevels() {
+        JPanel panel = new JPanel();
+
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createTitledBorder("Alert levels"));
+
+        panel.add(shakingThreshold = new IntensityScaleSelector("Shaking alert threshold: ",
+                Settings.shakingLevelScale, Settings.shakingLevelIndex));
+        panel.add(strongShakingThreshold = new IntensityScaleSelector("Strong shaking alert threshold: ",
+                Settings.strongShakingLevelScale, Settings.strongShakingLevelIndex));
+
+        add(panel);
     }
 
     private void createAlertDialogSettings() {
@@ -131,6 +148,12 @@ public class AlertSettingsPanel extends SettingsPanel {
         Settings.alertGlobalMag = parseDouble(textFieldGlobalMag.getText(), "Global alert magnitude", 0, 10);
         Settings.focusOnEvent = chkBoxFocus.isSelected();
         Settings.jumpToAlert = chkBoxJumpToAlert.isSelected();
+
+        Settings.shakingLevelScale = shakingThreshold.getShakingScaleComboBox().getSelectedIndex();
+        Settings.shakingLevelIndex = shakingThreshold.getLevelComboBox().getSelectedIndex();
+
+        Settings.strongShakingLevelScale = strongShakingThreshold.getShakingScaleComboBox().getSelectedIndex();
+        Settings.strongShakingLevelIndex = strongShakingThreshold.getLevelComboBox().getSelectedIndex();
     }
 
     @Override

@@ -117,6 +117,12 @@ public final class Settings {
 	public static Boolean displaySystemInfo;
 	public static Boolean reduceRevisions;
 
+	public static Integer shakingLevelScale;
+	public static Integer shakingLevelIndex;
+
+	public static Integer strongShakingLevelScale;
+	public static Integer strongShakingLevelIndex;
+
 	static {
 		load();
 	}
@@ -127,6 +133,16 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("shakingLevelScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("shakingLevelIndex", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[shakingLevelScale].getLevels().size() - 1, (Integer) o));
+
+		loadProperty("strongShakingLevelScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("strongShakingLevelIndex", "5",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[strongShakingLevelScale].getLevels().size() - 1, (Integer) o));
 
 		loadProperty("reduceRevisions", "true");
 
@@ -186,7 +202,7 @@ public final class Settings {
 		loadProperty("displayHomeLocation", "true");
 		loadProperty("antialiasing", "false");
 		loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
-		loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.size() - 1, (Integer) o));
+		loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
 		loadProperty("oldEventsTimeFilterEnabled", "false");
 		loadProperty("oldEventsTimeFilter", "24.0", o -> validateDouble(0, 24 * 365, (Double) o));
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");

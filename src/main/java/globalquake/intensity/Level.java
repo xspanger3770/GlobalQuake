@@ -37,4 +37,9 @@ public final class Level {
     public String getSuffix() {
         return suffix;
     }
+
+    @Override
+    public String toString() {
+        return "%s%s".formatted(getName(), getSuffix());
+    }
 }

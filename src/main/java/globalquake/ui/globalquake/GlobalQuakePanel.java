@@ -137,7 +137,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
                 double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
 
-                if(pga > IntensityScales.getIntensityScale().firstLevel().getPga() || distGC <= Settings.alertLocalDist) {
+                if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
+                        || distGC <= Settings.alertLocalDist) {
                     quake = earthquake;
                 }
             }
@@ -169,12 +170,12 @@ public class GlobalQuakePanel extends GlobePanel {
             width = 400;
         }
 
-        if(maxPGA >= IntensityScales.getIntensityScale().firstLevel().getPga()){
+        if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()){
             color = new Color(255,200,0);
             str = "Shaking is expected!";
         }
 
-        if(maxPGA >= IntensityScales.getIntensityScale().strongLevel().getPga()){
+        if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.strongShakingLevelScale].getLevels().get(Settings.strongShakingLevelIndex).getPga()){
             color = new Color(200,50,0);
             str = "Strong shaking is expected!";
         }

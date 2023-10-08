@@ -29,8 +29,6 @@ public class ShindoIntensityScale implements IntensityScale{
 		levels.add(ROKU_JAKU = new Level("6","-", 250, new Color(235, 26, 0)));
 		levels.add(ROKU_KYOU = new Level("6","+", 315, new Color(165, 2, 7)));
 		levels.add(NANA = new Level("7", 400, new Color(150, 0, 150)));
-
-		levels.sort(Comparator.comparing(level -> -level.getPga()));
 	}
 
 	@Override
@@ -53,10 +51,6 @@ public class ShindoIntensityScale implements IntensityScale{
 		return 0.9;
 	}
 
-	@Override
-	public Level strongLevel() {
-		return GO_JAKU;
-	}
 
 	@Override
 	public String toString() {

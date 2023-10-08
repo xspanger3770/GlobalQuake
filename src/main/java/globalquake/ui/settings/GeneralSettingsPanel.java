@@ -102,7 +102,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		JPanel panel = new JPanel(new GridLayout(2,1));
 		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
 
-		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES.toArray(new IntensityScale[0]));
+		comboBoxScale = new JComboBox<>(IntensityScales.INTENSITY_SCALES);
 		comboBoxScale.setSelectedIndex(Settings.intensityScaleIndex);
 
 		JPanel div = new JPanel();
