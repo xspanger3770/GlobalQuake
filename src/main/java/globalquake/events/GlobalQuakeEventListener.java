@@ -1,9 +1,6 @@
 package globalquake.events;
 
-import globalquake.events.specific.AlertIssuedEvent;
-import globalquake.events.specific.ClusterCreateEvent;
-import globalquake.events.specific.QuakeCreateEvent;
-import globalquake.events.specific.QuakeUpdateEvent;
+import globalquake.events.specific.*;
 
 public interface GlobalQuakeEventListener {
 
@@ -15,4 +12,6 @@ public interface GlobalQuakeEventListener {
     void onQuakeUpdate(QuakeUpdateEvent event);
 
     void onWarningIssued(AlertIssuedEvent event);
+
+    void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent);
 }

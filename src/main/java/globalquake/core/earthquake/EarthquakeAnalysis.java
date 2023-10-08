@@ -9,6 +9,7 @@ import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import globalquake.events.specific.QuakeCreateEvent;
+import globalquake.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.QuakeUpdateEvent;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
@@ -452,6 +453,9 @@ public class EarthquakeAnalysis {
             boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
             if (remove && cluster.getEarthquake() != null) {
                 getEarthquakes().remove(cluster.getEarthquake());
+                if(GlobalQuake.instance != null){
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
+                }
                 cluster.setEarthquake(null);
             }
             Logger.debug("Hypocenter not valid, remove = %s".formatted(remove));
@@ -957,7 +961,12 @@ public class EarthquakeAnalysis {
                 toBeRemoved.add(earthquake);
             }
         }
+
         earthquakes.removeAll(toBeRemoved);
+
+        if (GlobalQuake.instance != null) {
+            toBeRemoved.forEach(earthquake -> GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake)));
+        }
     }
 
 }

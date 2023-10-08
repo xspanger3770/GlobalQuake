@@ -1,7 +1,7 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.alert.AlertManager;
 import globalquake.core.GlobalQuake;
+import globalquake.core.alert.AlertManager;
 import globalquake.core.alert.Warnable;
 import globalquake.core.alert.Warning;
 import globalquake.core.earthquake.data.Cluster;
@@ -10,13 +10,14 @@ import globalquake.events.GlobalQuakeEventAdapter;
 import globalquake.events.specific.AlertIssuedEvent;
 import globalquake.events.specific.ClusterCreateEvent;
 import globalquake.events.specific.QuakeCreateEvent;
+import globalquake.events.specific.QuakeRemoveEvent;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ public class CinemaHandler {
 
     private long lastAnim = 0;
 
-    private final Map<Warnable, Warning> warnings = new HashMap<>();
+    private final Map<Warnable, Warning> warnings = new ConcurrentHashMap<>();
 
     public CinemaHandler(GlobePanel globePanel) {
         this.globePanel = globePanel;
@@ -72,6 +73,11 @@ public class CinemaHandler {
                 if(lastTarget == null || target.priority() > lastTarget.priority()){
                     selectTarget(target, true);
                 }
+            }
+
+            @Override
+            public void onQuakeRemove(QuakeRemoveEvent event) {
+                warnings.remove(event.earthquake());
             }
 
             @Override

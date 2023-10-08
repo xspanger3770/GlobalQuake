@@ -1,9 +1,6 @@
 package globalquake.events;
 
-import globalquake.events.specific.AlertIssuedEvent;
-import globalquake.events.specific.ClusterCreateEvent;
-import globalquake.events.specific.QuakeCreateEvent;
-import globalquake.events.specific.QuakeUpdateEvent;
+import globalquake.events.specific.*;
 
 public class GlobalQuakeEventAdapter implements GlobalQuakeEventListener{
 
@@ -25,6 +22,11 @@ public class GlobalQuakeEventAdapter implements GlobalQuakeEventListener{
 
     @Override
     public void onWarningIssued(AlertIssuedEvent event) {
+
+    }
+
+    @Override
+    public void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent) {
 
     }
 }
