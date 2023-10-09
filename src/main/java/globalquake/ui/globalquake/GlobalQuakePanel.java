@@ -245,7 +245,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setColor(isDark(color) ? Color.white : Color.black);
         g.setFont(new Font("Calibri", Font.BOLD, 36));
-        g.drawString("!", x + width - s / 2 - 14, y + height - 16);
+        g.drawString("!", x + width - s / 2 - g.getFontMetrics().stringWidth("!") + 2, y + height - 16);
     }
 
     private static Earthquake createDebugQuake() {
@@ -482,9 +482,9 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
             }
 
-            int magsWidth = Settings.displayMagnitudeHistogram ? drawMags(g, quake, baseHeight + 20) : 0;
+            int magsWidth = Settings.displayMagnitudeHistogram ? drawMags(g, quake, baseHeight + 20) + 30 : 0;
             if(Settings.displayAdditionalQuakeInfo){
-                drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth + 30, baseWidth - magsWidth - 30);
+                drawLocationAcc(g, quake, baseHeight + 6, x + magsWidth, baseWidth - magsWidth);
             }
         }
     }
@@ -624,19 +624,24 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private static int drawMags(Graphics2D g, Earthquake quake, int y) {
-        g.setColor(Color.white);
         g.setStroke(new BasicStroke(1f));
+
+        String str = "Magnitude";
+        g.setFont(new Font("Calibri", Font.BOLD, 12));
 
         int startX = 16;
         int hh = 200;
-
-        g.setFont(new Font("Calibri", Font.BOLD, 12));
-        String str = "Magnitude";
-        g.drawString(str, 10, y - 5);
-
         int ww = g.getFontMetrics().stringWidth(str) - 12;
 
+        g.setColor(Color.black);
+        g.fillRect(startX - 20, y - 20, ww + 20, hh + 20);
+        g.fillRect(startX - 20, y - 20, ww + 32, 24);
+
+        g.setColor(Color.white);
         g.drawRect(startX, y, ww, hh);
+
+        g.drawString(str, 10, y - 5);
+
 
         for (int mag = 1; mag <= 9; mag++) {
             double y0 = y + hh * (10 - mag) / 10.0;
