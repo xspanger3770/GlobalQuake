@@ -272,8 +272,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         }
     }
 
+    private long lastJump = 0;
+
     public synchronized void jumpTo(double targetLat, double targetLon, double targetScroll) {
         // a dirty trick, but it works
+        lastJump = System.currentTimeMillis();
         nextAnimation = new Animation(targetLat, targetLon, targetScroll, targetLat, targetLon, targetScroll);
         centerLat = targetLat;
         centerLon = targetLon;
@@ -282,7 +285,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     public synchronized void smoothTransition(double targetLat, double targetLon, double targetScroll){
-        if(!cinemaMode){
+        if(!cinemaMode || (System.currentTimeMillis() - lastJump < 1000)){
             return;
         }
 
@@ -319,7 +322,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 lastFPS = frameCount.getAndSet(0);
             }
         }, 0, 1000);
-
     }
 
     private double calculateSpin() {
