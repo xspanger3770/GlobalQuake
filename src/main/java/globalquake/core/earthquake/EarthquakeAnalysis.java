@@ -290,7 +290,7 @@ public class EarthquakeAnalysis {
 
         if (correctSelectedEvents.size() > reduceLimit) {
             Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter2, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.75);
+            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.65);
 
             List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
             list.sort(Map.Entry.comparingByValue());
