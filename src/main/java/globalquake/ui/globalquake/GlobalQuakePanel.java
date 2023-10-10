@@ -245,7 +245,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setColor(isDark(color) ? Color.white : Color.black);
         g.setFont(new Font("Calibri", Font.BOLD, 36));
-        g.drawString("!", x + width - s / 2 - g.getFontMetrics().stringWidth("!") + 2, y + height - 16);
+        g.drawString("!", x + width - s / 2 - g.getFontMetrics().stringWidth("!") / 2 - 6, y + height - 16);
     }
 
     private static Earthquake createDebugQuake() {
