@@ -24,10 +24,8 @@ import java.util.stream.Collectors;
 public class Main {
 
     private static ApplicationErrorHandler errorHandler;
-
-    public static final String version = "0.9.7";
+    public static final String version = "0.9.8";
     public static final String fullName = "GlobalQuake " + version;
-
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
@@ -47,7 +45,7 @@ public class Main {
         try {
             if (!MAIN_FOLDER.exists()) {
                 if (!MAIN_FOLDER.mkdirs()) {
-                    errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
+                    getErrorHandler().handleException(new FatalIOException("Unable to create main directory!", null));
                 }
             }
 
@@ -127,10 +125,13 @@ public class Main {
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
+        if(errorHandler == null) {
+            errorHandler = new ApplicationErrorHandler(null);
+        }
         return errorHandler;
     }
 
     public static void initErrorHandler() {
-        Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+        Thread.setDefaultUncaughtExceptionHandler(getErrorHandler());
     }
 }

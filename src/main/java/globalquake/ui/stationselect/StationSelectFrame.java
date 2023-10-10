@@ -3,6 +3,10 @@ package globalquake.ui.stationselect;
 import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.database.StationCountPanel;
+import globalquake.ui.stationselect.action.DeselectAllAction;
+import globalquake.ui.stationselect.action.DeselectUnavailableAction;
+import globalquake.ui.stationselect.action.DistanceFilterAction;
+import globalquake.ui.stationselect.action.SelectAllAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,8 +31,8 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         
         JPanel togglePanel = new JPanel(new GridBagLayout());
         JButton toggleButton = new JButton("<");
-        selectAll = new JButton(new SelectAllAction(databaseMonitorFrame.getManager()));
-        deselectAll = new JButton(new DeselectAllAction(databaseMonitorFrame.getManager()));
+        selectAll = new JButton(new SelectAllAction(databaseMonitorFrame.getManager(), this));
+        deselectAll = new JButton(new DeselectAllAction(databaseMonitorFrame.getManager(), this));
         selectAll.addActionListener(this);
         deselectAll.addActionListener(this);
 
@@ -106,7 +110,6 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         setLocationRelativeTo(databaseMonitorFrame);
         setResizable(true);
         setTitle("Select Stations");
-
     }
 
     private JToolBar createToolbar() {
@@ -150,6 +153,9 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         deselectButton.setIcon(new ImageIcon(image));
 
         toolBar.setFloatable(false);
+
+        toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.Y_AXIS));
+
         toolBar.add(selectButton);
         toolBar.add(selectAll);
 
@@ -164,10 +170,11 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         JButton buttonFilter = new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this));
         buttonFilter.addActionListener(this);
         toolBar.add(buttonFilter);
-        
+
         toolBar.addSeparator();
 
         toolBar.add(chkBoxShowUnavailable);
+
 
         return toolBar;
     }

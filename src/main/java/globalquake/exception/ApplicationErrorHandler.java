@@ -1,8 +1,8 @@
 package globalquake.exception;
 
-import globalquake.exception.action.CloseAction;
 import globalquake.exception.action.IgnoreAction;
 import globalquake.exception.action.TerminateAction;
+import globalquake.ui.action.OpenURLAction;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -67,12 +67,23 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	private Component createDetailedPane(Throwable e) {
+		JPanel panel = new JPanel(new BorderLayout());
+
+		JPanel labelsPanel = new JPanel(new GridLayout(2, 1));
+
+		labelsPanel.add(new JLabel("Oops! Something has gone terribly wrong inside GlobalQuake."));
+		labelsPanel.add(new JLabel("Please send the following text to the developers so that they can fix it ASAP:"));
+
+		panel.add(labelsPanel, BorderLayout.NORTH);
+
 		JTextArea textArea = new JTextArea(16, 60);
 		textArea.setEditable(false);
 		StringWriter stackTraceWriter = new StringWriter();
 		e.printStackTrace(new PrintWriter(stackTraceWriter));
 		textArea.append(stackTraceWriter.toString());
-		return new JScrollPane(textArea);
+
+		panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+		return panel;
 	}
 
 	private void showGeneralError(String message, boolean isFatal) {
@@ -88,7 +99,7 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 			return null; // use default
 		}
 
-		return new Component[] { new JButton(new TerminateAction()), new JButton(new CloseAction(parent)),
+		return new Component[] { new JButton(new TerminateAction()), new JButton(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/issues", "Open issue on GitHub")),
 				new JButton(new IgnoreAction()) };
 	}
 }

@@ -1,6 +1,7 @@
 package globalquake.core.report;
 
 import globalquake.intensity.IntensityTable;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 
 import java.awt.BasicStroke;
@@ -87,7 +88,7 @@ public class IntensityGraphs {
 				if (n == 1) {
 					g.setColor(Color.black);
 					g.setFont(calibri14);
-					String str = dist + " km";
+					String str = Settings.getSelectedDistanceUnit().format(dist, 1);
 					int width = g.getFontMetrics().stringWidth(str);
 					g.drawString(str, (int) (x - width * 0.5), h - wry + 15);
 				}

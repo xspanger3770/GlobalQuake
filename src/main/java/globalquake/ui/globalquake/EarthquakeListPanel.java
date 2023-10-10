@@ -186,7 +186,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 27 - g.getFontMetrics().stringWidth(str) / 2, y + 30);
 
-                str = ((int) quake.getDepth()) + "km";
+                str = Settings.getSelectedDistanceUnit().format(quake.getDepth(), 0);
                 g.setFont(new Font("Calibri", Font.BOLD, 12));
                 g.setColor(Color.white);
                 g.drawString(str, (int) (25 - g.getFontMetrics().stringWidth(str) * 0.5), y + 46);

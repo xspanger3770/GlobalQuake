@@ -8,6 +8,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.ui.settings.Settings;
+import globalquake.utils.Scale;
 
 import java.awt.*;
 import java.time.Instant;
@@ -88,7 +89,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
 
         if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
@@ -102,7 +103,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
         double size = 3 + Math.pow(quake.getMag(), 2) * 0.6;
 
-        String str = "M%.1f  %.1fkm".formatted(quake.getMag(), quake.getDepth());
+        String str = "M%.1f  %s".formatted(quake.getMag(), Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1));
         int y=  (int)centerPonint.y - 24 - (int)size;
         graphics.setColor(FeatureEarthquake.getCrossColor(quake.getMag()));
         graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
@@ -143,10 +144,20 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     private Color getColor(ArchivedQuake quake) {
-        double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+        Color col;
+
+        if(Settings.selectedEventColorIndex == 0){
+            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
+                    : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
+        } else if(Settings.selectedEventColorIndex == 1){
+            col = Scale.getColorEasily(Math.max(0.06, 0.9 - quake.getDepth() / 400.0));
+        } else{
+            col = Scale.getColorEasily(quake.getMag() / 8.0);
+        }
+
         int alpha = (int) Math.max(0, Math.min(255, Settings.oldEventsOpacity / 100.0 * 255.0));
-        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0, alpha) : new Color(255, 0, 0, alpha))
-                : ageInHRS < 24 ? new Color(255, 140, 0, alpha) : new Color(255,255,0, alpha);
+        return new Color(col.getRed(), col.getGreen(), col.getBlue(), alpha);
     }
 
 

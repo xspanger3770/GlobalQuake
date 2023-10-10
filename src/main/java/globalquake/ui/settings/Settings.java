@@ -1,5 +1,8 @@
 package globalquake.ui.settings;
 
+import globalquake.exception.RuntimeApplicationException;
+import globalquake.geo.DistanceUnit;
+import globalquake.intensity.IntensityScales;
 import globalquake.main.Main;
 import org.tinylog.Logger;
 
@@ -13,13 +16,13 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
+import java.util.function.Function;
 
 public final class Settings {
 
 	private static final File optionsFile = new File(Main.MAIN_FOLDER, "globalQuake.properties");
 	private static final Properties properties = new Properties();
-	public static Boolean enableAlarmDialogs;
-	
+
 	public static Double homeLat;
 	public static Double homeLon;
 
@@ -89,23 +92,36 @@ public final class Settings {
 	public static Integer cinemaModeSwitchTime;
 	public static Integer cinemaModeZoomMultiplier;
 
+	public static Boolean cinemaModeOnStartup;
+	public static Boolean cinemaModeReenable;
+
 	public static Integer logsStoreTimeMinutes;
 	public static Integer maxEvents;
 	public static final int maxEventsDefault = 60;
 	public static Boolean displayCoreWaves;
-	public static Boolean cinemaModeOnStartup;
 	public static Boolean recalibrateOnLaunch;
+	public static Boolean stationsTriangles;
+	public static Double stationsSizeMul;
+    public static Integer selectedEventColorIndex;
 
-	public static String formatDateTime(TemporalAccessor temporalAccessor) {
-        return selectedDateTimeFormat().format(temporalAccessor) +
-				" " +
-				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
-	}
+	public static Integer distanceUnitsIndex;
+	public static Boolean focusOnEvent;
+	public static Boolean jumpToAlert;
 
-	private static DateTimeFormatter selectedDateTimeFormat(){
-		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
-		return DATE_FORMATS[i];
-	}
+	public static Boolean confidencePolygons;
+
+	public static Boolean displayAdditionalQuakeInfo;
+
+	public static Boolean displayMagnitudeHistogram;
+
+	public static Boolean displaySystemInfo;
+	public static Boolean reduceRevisions;
+
+	public static Integer shakingLevelScale;
+	public static Integer shakingLevelIndex;
+
+	public static Integer strongShakingLevelScale;
+	public static Integer strongShakingLevelIndex;
 
 	static {
 		load();
@@ -117,36 +133,64 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("shakingLevelScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("shakingLevelIndex", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[shakingLevelScale].getLevels().size() - 1, (Integer) o));
+
+		loadProperty("strongShakingLevelScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("strongShakingLevelIndex", "5",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[strongShakingLevelScale].getLevels().size() - 1, (Integer) o));
+
+		loadProperty("reduceRevisions", "true");
+
+		loadProperty("displaySystemInfo", "true");
+		loadProperty("displayMagnitudeHistogram", "true");
+		loadProperty("displayAdditionalQuakeInfo", "false");
+
+		loadProperty("confidencePolygons", "false");
+
+		loadProperty("focusOnEvent", "true");
+		loadProperty("jumpToAlert", "true");
+
+		loadProperty("distanceUnitsIndex", "0", o -> validateInt(0, DistanceUnit.values().length - 1, (Integer) o));
+
+		loadProperty("selectedEventColorIndex", "0", o -> validateInt(0, 2, (Integer) o));
+		loadProperty("stationsSizeMul", "1.0",  o -> validateDouble(0, 10, (Double) o));
 		loadProperty("recalibrateOnLaunch", "true");
 
 		loadProperty("displayCoreWaves", "false");
 		loadProperty("maxEvents", String.valueOf(maxEventsDefault));
 
-		loadProperty("logsStoreTimeMinutes", "5");
+		loadProperty("logsStoreTimeMinutes", "5", o -> validateInt(1, 60, (Integer) o));
 
-		loadProperty("cinemaModeOnStartup", "false");
-		loadProperty("cinemaModeSwitchTime", "10");
-		loadProperty("cinemaModeZoomMultiplier", "100");
+		loadProperty("cinemaModeOnStartup", "true");
+		loadProperty("cinemaModeReenable", "true");
+		loadProperty("cinemaModeSwitchTime", "10", o -> validateInt(1, 60 * 60, (Integer) o));
+		loadProperty("cinemaModeZoomMultiplier", "100",  o -> validateInt(1, 1000, (Integer) o));
 
 		loadProperty("alertLocal", "true");
-		loadProperty("alertLocalDist", "200");
+		loadProperty("alertLocalDist", "200",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertRegion", "true");
-		loadProperty("alertRegionMag", "3.5");
-		loadProperty("alertRegionDist", "1000");
+		loadProperty("alertRegionMag", "3.5",  o -> validateDouble(0, 10, (Double) o));
+		loadProperty("alertRegionDist", "1000",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertGlobal", "true");
-		loadProperty("alertGlobalMag", "6.0");
+		loadProperty("alertGlobalMag", "6.0",  o -> validateDouble(0, 10, (Double) o));
 
 		loadProperty("reportsEnabled", "false");
 		loadProperty("displayClusters", "false");
-		loadProperty("selectedDateFormatIndex", "0");
-		loadProperty("stationIntensityVisibilityZoomLevel", "0.2");
+		loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
+		loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
-		loadProperty("maxArchivedQuakes", "100");
+		loadProperty("stationsTriangles", "false");
+		loadProperty("maxArchivedQuakes", "100", o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
 
 		loadProperty("enableAlarmDialogs", "false");
-		loadProperty("homeLat", "0.0");
-		loadProperty("homeLon", "0.0");
+		loadProperty("homeLat", "0.0", o -> validateDouble(-90, 90, (Double) o));
+		loadProperty("homeLon", "0.0", o -> validateDouble(-180, 180, (Double) o));
 		loadProperty("displayArchivedQuakes", "true");
 		loadProperty("enableSound", "true");
 		loadProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault));
@@ -154,18 +198,42 @@ public final class Settings {
 		loadProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault));
 		loadProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault));
 		loadProperty("useOldColorScheme", "false");
-		loadProperty("parallelHypocenterLocations", "false");
+		loadProperty("parallelHypocenterLocations", "true");
 		loadProperty("displayHomeLocation", "true");
 		loadProperty("antialiasing", "false");
-		loadProperty("fpsIdle", "30");
-		loadProperty("intensityScaleIndex", "0");
+		loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
+		loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
 		loadProperty("oldEventsTimeFilterEnabled", "false");
-		loadProperty("oldEventsTimeFilter", "24.0");
+		loadProperty("oldEventsTimeFilter", "24.0", o -> validateDouble(0, 24 * 365, (Double) o));
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
-		loadProperty("oldEventsMagnitudeFilter", "4.0");
-		loadProperty("oldEventsOpacity", "100.0");
+		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
+		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
 
 		save();
+	}
+
+
+	public static String formatDateTime(TemporalAccessor temporalAccessor) {
+		return selectedDateTimeFormat().format(temporalAccessor) +
+				" " +
+				(use24HFormat ? formatter24H : formatter12H).format(temporalAccessor);
+	}
+
+	private static DateTimeFormatter selectedDateTimeFormat(){
+		int i = Math.max(0, Math.min(DATE_FORMATS.length - 1, selectedDateFormatIndex));
+		return DATE_FORMATS[i];
+	}
+
+	public static DistanceUnit getSelectedDistanceUnit(){
+		return DistanceUnit.values()[Math.max(0, Math.min(DistanceUnit.values().length - 1, distanceUnitsIndex))];
+	}
+
+	public static boolean validateDouble(double min, double max, double v){
+        return !Double.isInfinite(v) && !Double.isNaN(v) && !(v < min) && !(v > max);
+    }
+
+	public static boolean validateInt(int min, int max, int v){
+		return !(v < min) && !(v > max);
 	}
 
 	private static void setProperty(Field field, Object value) {
@@ -177,6 +245,10 @@ public final class Settings {
 	}
 
 	private static void loadProperty(String name, String defaultVal){
+		loadProperty(name, defaultVal, null);
+	}
+
+	private static void loadProperty(String name, String defaultVal, Function<Object, Boolean> validator){
 		try {
 			Field field = Settings.class.getDeclaredField(name);
 			field.setAccessible(true);
@@ -184,6 +256,9 @@ public final class Settings {
 				boolean val;
 				try{
 					val = Boolean.parseBoolean((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value! %s".formatted(name, val));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Boolean.parseBoolean(defaultVal);
@@ -193,6 +268,9 @@ public final class Settings {
 				double val;
 				try{
 					val = Double.parseDouble((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value: %s, setting to %s".formatted(name, val, defaultVal));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Double.parseDouble(defaultVal);
@@ -202,6 +280,9 @@ public final class Settings {
 				int val;
 				try{
 					val = Integer.parseInt((String) properties.getOrDefault(field.getName(), defaultVal));
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value! %s".formatted(name, val));
+					}
 				}catch(Exception e){
 					Logger.error(e);
 					val = Integer.parseInt(defaultVal);
@@ -210,6 +291,8 @@ public final class Settings {
 			} else {
 				Logger.error("Error: unsupported setting type: %s".formatted(field.getType()));
 			}
+		} catch(NoSuchFieldException ignored){
+
 		} catch (Exception e) {
 			Logger.error(e);
 		}

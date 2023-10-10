@@ -1,7 +1,7 @@
 package globalquake.core.report;
 
-import globalquake.core.earthquake.Earthquake;
-import globalquake.core.earthquake.Event;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.main.Main;

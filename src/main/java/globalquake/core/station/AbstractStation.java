@@ -2,7 +2,7 @@ package globalquake.core.station;
 
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
-import globalquake.core.earthquake.Event;
+import globalquake.core.analysis.Event;
 import globalquake.database.SeedlinkNetwork;
 
 import java.util.ArrayList;

@@ -18,7 +18,7 @@ public class ArchivedQuakeUI extends JDialog {
 
         JLabel latLabel = new JLabel("Latitude: %.4f".formatted(quake.getLat()));
         JLabel lonLabel = new JLabel("Longitude: %.4f".formatted(quake.getLon()));
-        JLabel depthLabel = new JLabel("Depth: %.1fkm".formatted(quake.getDepth()));
+        JLabel depthLabel = new JLabel("Depth: %s".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)));
         JLabel originLabel = new JLabel("Origin Time: %s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()))));
         JLabel magLabel = new JLabel("Magnitude: %.2f".formatted(quake.getMag()));
         JLabel maxRatioLabel = new JLabel("Max Ratio: %.1f".formatted(quake.getMaxRatio()));

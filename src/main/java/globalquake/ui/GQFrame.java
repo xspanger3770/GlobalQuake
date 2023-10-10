@@ -12,9 +12,12 @@ public class GQFrame extends JFrame {
         setIconImage(Main.LOGO);
     }
 
-    @SuppressWarnings("unused")
-    public GQFrame(String title) throws HeadlessException {
-        super(title);
-        setIconImage(Main.LOGO);
+    public @Override void toFront() {
+        super.setAlwaysOnTop(true);
+        super.toFront();
+        super.requestFocus();
+        super.setAlwaysOnTop(false);
+        super.setState(Frame.NORMAL);
+        super.repaint();
     }
 }

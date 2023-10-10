@@ -1,4 +1,4 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
 import java.util.Objects;
 

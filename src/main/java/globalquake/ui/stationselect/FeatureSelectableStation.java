@@ -71,7 +71,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         graphics.setColor(Color.BLACK);
         graphics.draw(element.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1;
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true) && renderer.getRenderProperties().scroll < 1;
 
         if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())) {
             graphics.setColor(Color.yellow);

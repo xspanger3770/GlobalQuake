@@ -1,12 +1,13 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
+import globalquake.core.alert.Warnable;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Earthquake implements Regional {
+public class Earthquake implements Regional, Warnable {
 
 	private double lat;
 	private double lon;
@@ -139,5 +140,17 @@ public class Earthquake implements Regional {
 				", pct=" + pct +
 				", revisionID=" + revisionID +
 				'}';
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLat() {
+		return getLat();
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLon() {
+		return getLon();
 	}
 }

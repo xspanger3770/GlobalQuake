@@ -1,5 +1,7 @@
-package globalquake.core.earthquake;
+package globalquake.core.archive;
 
+import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.main.Main;
 import globalquake.ui.settings.Settings;
@@ -17,11 +19,11 @@ public class EarthquakeArchive {
 	private List<ArchivedQuake> archivedQuakes;
 
 	public EarthquakeArchive() {
-		loadArchive();
+
 	}
 
 	@SuppressWarnings("unchecked")
-	private void loadArchive() {
+	public EarthquakeArchive loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
 			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			Logger.info("Created new archive");
@@ -39,7 +41,7 @@ public class EarthquakeArchive {
 
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
 
-		saveArchive();
+		return this;
 	}
 
 	public void saveArchive() {
@@ -92,7 +94,11 @@ public class EarthquakeArchive {
 		}.start();
 	}
 
-	public void archiveQuake(Earthquake earthquake) {
+	public synchronized void archiveQuake(Earthquake earthquake) {
+		if(archivedQuakes == null){
+			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
+		}
+
 		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);

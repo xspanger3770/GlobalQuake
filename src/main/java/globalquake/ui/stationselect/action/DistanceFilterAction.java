@@ -1,4 +1,4 @@
-package globalquake.ui.stationselect;
+package globalquake.ui.stationselect.action;
 
 import globalquake.database.Network;
 import globalquake.database.Station;

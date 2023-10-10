@@ -1,20 +1,22 @@
-package globalquake.ui.stationselect;
+package globalquake.ui.stationselect.action;
 
 import globalquake.database.Network;
 import globalquake.database.StationDatabaseManager;
 
 import javax.swing.*;
 
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Objects;
 
 public class DeselectAllAction extends AbstractAction {
 
     private final StationDatabaseManager stationDatabaseManager;
+    private final Window parent;
 
-    public DeselectAllAction(StationDatabaseManager stationDatabaseManager) {
+    public DeselectAllAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Deselect All");
+        this.parent = parent;
         this.stationDatabaseManager=stationDatabaseManager;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
@@ -27,6 +29,15 @@ public class DeselectAllAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        int option = JOptionPane.showConfirmDialog(parent,
+                "Are you sure you want to deselect all stations?",
+                "Confirmation",
+                JOptionPane.YES_NO_OPTION);
+
+        if (option != JOptionPane.YES_OPTION) {
+            return;
+        }
+
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){

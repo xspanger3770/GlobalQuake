@@ -1,7 +1,7 @@
 package globalquake.ui.globalquake.feature;
 
 import globalquake.core.analysis.AnalysisStatus;
-import globalquake.core.earthquake.Event;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -46,17 +46,24 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             elementStationSquare.setPolygon(new Polygon3D());
         }
 
-        double size = Math.min(36, renderer.pxToDeg(7.0));
+        double size = Math.min(36, renderer.pxToDeg(7.0)) * Settings.stationsSizeMul;
 
-        renderer.createCircle(elementStationCircle.getPolygon(),
-                entity.getOriginal().getLatitude(),
-                entity.getOriginal().getLongitude(),
-                size, 0, 30);
+        if(!Settings.stationsTriangles) {
+            renderer.createCircle(elementStationCircle.getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size, 0, 30);
+        }else{
+            renderer.createTriangle(elementStationCircle.getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size * 1.41, 0);
+        }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size * 1.75, 0);
+                size * (Settings.stationsTriangles ? 2.0 : 1.75), 0);
     }
 
     @Override
@@ -94,7 +101,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
 
         if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
             graphics.setColor(Color.yellow);
@@ -151,22 +158,23 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     private void drawDetails(boolean mouseNearby, double scroll, int x, int y, Graphics2D g, AbstractStation station) {
+        int _y = (int) (7 + 6 * Settings.stationsSizeMul);
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);
             String str = station.toString();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y);
             str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 26);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y - 15);
 
             if(station.hasNoDisplayableData()){
                 str = "No data";
-                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 22);
             } else {
                 long delay = station.getDelayMS();
                 if (delay == Long.MIN_VALUE) {
                     g.setColor(Color.magenta);
                     str = "Replay";
-                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+                    g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 22);
                 } else {
                     FeatureSelectableStation.drawDelay(g, x, y + 33, delay, "Delay");
                 }
@@ -177,7 +185,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));
             g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
-            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 9);
         }
     }
 

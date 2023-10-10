@@ -2,7 +2,6 @@ package globalquake.core.analysis;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.earthquake.Event;
 import globalquake.core.station.StationState;
 import globalquake.ui.settings.Settings;
 import org.tinylog.Logger;

@@ -2,7 +2,9 @@ package globalquake.ui.settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
@@ -22,18 +24,98 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
+    private JCheckBox chkBoxTriangles;
+    private JSlider sliderStationsSize;
+    private JRadioButton[] colorButtons;
+
+    // Cinema mode
+    private JTextField textFieldTime;
+    private JSlider sliderZoomMul;
+
+    private JCheckBox chkBoxEnableOnStartup;
+    private JCheckBox chkBoxReEnable;
+    private JCheckBox chkBoxDisplayMagnitudeHistogram;
+    private JCheckBox chkBoxDisplaySystemInfo;
+    private JCheckBox chkBoxDisplayQuakeAdditionalInfo;
 
 
     public GraphicsSettingsPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
 
-        createFpsSlider();
-        createEventsSettings();
-        createDateSettings();
-        createOtherSettings();
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        tabbedPane.addTab("General", createGeneralTab());
+        tabbedPane.addTab("Old Events", createEventsTab());
+        tabbedPane.addTab("Stations", createStationsTab());
+        tabbedPane.addTab("Cinema Mode", createCinemaModeTab());
+
+        add(tabbedPane, BorderLayout.CENTER);
     }
 
-    private void createDateSettings() {
+    private Component createCinemaModeTab() {
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(6,6,6,6));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        textFieldTime = new JTextField(String.valueOf(Settings.cinemaModeSwitchTime), 12);
+
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
+        timePanel.add(new JLabel("Switch to another point of interest after (seconds): "));
+        timePanel.add(textFieldTime);
+        panel.add(timePanel);
+
+        JPanel zoomPanel = new JPanel();
+        zoomPanel.setBorder(new EmptyBorder(5,5,5,5));
+
+        zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
+        zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
+
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,180, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul.setMinorTickSpacing(5);
+        sliderZoomMul.setMajorTickSpacing(20);
+        sliderZoomMul.setPaintTicks(true);
+
+        zoomPanel.add(sliderZoomMul);
+        panel.add(zoomPanel);
+
+        JPanel checkboxPanel = new JPanel();
+
+        checkboxPanel.add(chkBoxEnableOnStartup = new JCheckBox("Enable Cinema Mode on startup", Settings.cinemaModeOnStartup));
+        checkboxPanel.add(chkBoxReEnable = new JCheckBox("Re-enable Cinema Mode automatically", Settings.cinemaModeReenable));
+        panel.add(checkboxPanel);
+
+        for(int i = 0; i < 39; i++){
+            panel.add(new JPanel()); // fillers
+        }
+
+        return panel;
+    }
+
+    private Component createGeneralTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JPanel performancePanel = new JPanel();
+        performancePanel.setLayout(new BoxLayout(performancePanel, BoxLayout.Y_AXIS));
+        performancePanel.setBorder(BorderFactory.createTitledBorder("Performance"));
+
+        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
+        sliderFpsIdle.setPaintLabels(true);
+        sliderFpsIdle.setPaintTicks(true);
+        sliderFpsIdle.setMajorTickSpacing(10);
+        sliderFpsIdle.setMinorTickSpacing(5);
+        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+
+        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+
+        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
+
+        performancePanel.add(label);
+        performancePanel.add(sliderFpsIdle);
+
+        panel.add(performancePanel);
+
         JPanel dateFormatPanel = new JPanel();
         dateFormatPanel.setBorder(BorderFactory.createTitledBorder("Date and Time setting"));
 
@@ -49,48 +131,23 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         dateFormatPanel.add(comboBoxDateFormat);
         dateFormatPanel.add(chkBox24H = new JCheckBox("Use 24 hours format", Settings.use24HFormat));
 
-        add(dateFormatPanel);
+        panel.add(dateFormatPanel);
+
+        JPanel mainWindowPanel = new JPanel(new GridLayout(3,1));
+        mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
+
+        mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
+        mainWindowPanel.add(chkBoxDisplayMagnitudeHistogram = new JCheckBox("Display magnitude histogram", Settings.displayMagnitudeHistogram));
+        mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical Earthquake data", Settings.displayAdditionalQuakeInfo));
+
+        panel.add(mainWindowPanel);
+
+        fill(panel, 16);
+
+        return panel;
     }
 
-    private void createOtherSettings() {
-        JPanel otherSettingsPanel = new JPanel();
-        otherSettingsPanel.setLayout(new BoxLayout(otherSettingsPanel, BoxLayout.Y_AXIS));
-        otherSettingsPanel.setBorder(BorderFactory.createTitledBorder("Appearance"));
-
-        JPanel checkBoxes = new JPanel(new GridLayout(3,1));
-
-        chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
-        chkBoxScheme.setSelected(Settings.useOldColorScheme);
-        checkBoxes.add(chkBoxScheme);
-
-        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
-        chkBoxAntialiasing.setSelected(Settings.antialiasing);
-        checkBoxes.add(chkBoxAntialiasing);
-
-        checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
-
-        otherSettingsPanel.add(checkBoxes);
-
-        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
-        intensityPanel.add(new JLabel("Display station's intensity at zoom level:"));
-
-        sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
-        sliderIntensityZoom.setMajorTickSpacing(20);
-        sliderIntensityZoom.setMinorTickSpacing(5);
-        sliderIntensityZoom.setPaintTicks(true);
-
-        sliderIntensityZoom.addChangeListener(changeEvent -> {
-            Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
-            Settings.changes++;
-        });
-
-        intensityPanel.add(sliderIntensityZoom);
-        otherSettingsPanel.add(intensityPanel);
-
-        add(otherSettingsPanel);
-    }
-
-    private void createEventsSettings() {
+    private Component createEventsTab() {
         JPanel eventsPanel = new JPanel();
         eventsPanel.setBorder(BorderFactory.createTitledBorder("Old events settings"));
         eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
@@ -162,29 +219,101 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         eventsPanel.add(opacityPanel);
 
-        add(eventsPanel);
+        JPanel colorsPanel = new JPanel();
+        colorsPanel.setBorder(BorderFactory.createTitledBorder("Old events color"));
+
+        JRadioButton buttonColorByAge = new JRadioButton("Color by age");
+        JRadioButton buttonColorByDepth = new JRadioButton("Color by depth");
+        JRadioButton buttonColorByMagnitude = new JRadioButton("Color by magnitude");
+
+        colorButtons = new JRadioButton[]{buttonColorByAge, buttonColorByDepth, buttonColorByMagnitude};
+        ButtonGroup bg = new ButtonGroup();
+
+        colorButtons[Math.max(0, Math.min(colorButtons.length - 1, Settings.selectedEventColorIndex))].setSelected(true);
+
+        var colorButtonActionListener = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                for (int i = 0; i < colorButtons.length; i++) {
+                    JRadioButton button = colorButtons[i];
+                    if(button.isSelected()){
+                        Settings.selectedEventColorIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
+        for(JRadioButton button : colorButtons) {
+            bg.add(button);
+            button.addActionListener(colorButtonActionListener);
+            colorsPanel.add(button);
+        }
+
+        eventsPanel.add(colorsPanel);
+
+        fill(eventsPanel, 20);
+
+        return eventsPanel;
     }
 
-    private void createFpsSlider() {
-        JPanel fpsPanel = new JPanel();
-        fpsPanel.setBorder(BorderFactory.createTitledBorder("Performance"));
-        fpsPanel.setLayout(new BoxLayout(fpsPanel, BoxLayout.Y_AXIS));
+    private Component createStationsTab() {
+        JPanel stationsPanel = new JPanel();
+        stationsPanel.setLayout(new BoxLayout(stationsPanel, BoxLayout.Y_AXIS));
+        stationsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
-        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
-        sliderFpsIdle.setPaintLabels(true);
-        sliderFpsIdle.setPaintTicks(true);
-        sliderFpsIdle.setMajorTickSpacing(10);
-        sliderFpsIdle.setMinorTickSpacing(5);
-        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+        JPanel checkBoxes = new JPanel(new GridLayout(2,2));
 
-        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+        chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
+        chkBoxScheme.setSelected(Settings.useOldColorScheme);
+        checkBoxes.add(chkBoxScheme);
 
-        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
+        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
+        chkBoxAntialiasing.setSelected(Settings.antialiasing);
+        checkBoxes.add(chkBoxAntialiasing);
 
-        fpsPanel.add(label);
-        fpsPanel.add(sliderFpsIdle);
+        checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
+        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
 
-        add(fpsPanel);
+        stationsPanel.add(checkBoxes);
+
+        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
+        intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
+
+        sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
+        sliderIntensityZoom.setMajorTickSpacing(10);
+        sliderIntensityZoom.setMinorTickSpacing(5);
+        sliderIntensityZoom.setPaintTicks(true);
+        sliderIntensityZoom.setPaintLabels(true);
+
+        sliderIntensityZoom.addChangeListener(changeEvent -> {
+            Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+            Settings.changes++;
+        });
+
+        intensityPanel.add(sliderIntensityZoom);
+        stationsPanel.add(intensityPanel);
+
+        JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
+        stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
+
+        sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 20, 300, (int) (Settings.stationsSizeMul * 100));
+        sliderStationsSize.setMajorTickSpacing(20);
+        sliderStationsSize.setMinorTickSpacing(10);
+        sliderStationsSize.setPaintTicks(true);
+        sliderStationsSize.setPaintLabels(true);
+
+        sliderStationsSize.addChangeListener(changeEvent -> {
+            Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
+            Settings.changes++;
+        });
+
+        stationSizePanel.add(sliderStationsSize);
+        stationsPanel.add(stationSizePanel);
+
+        fill(stationsPanel, 20);
+
+        return stationsPanel;
     }
 
     @Override
@@ -194,19 +323,30 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.fpsIdle = sliderFpsIdle.getValue();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
-        Settings.oldEventsTimeFilter = Double.parseDouble(textFieldTimeFilter.getText());
+        Settings.oldEventsTimeFilter = parseDouble(textFieldTimeFilter.getText(), "Old events max age", 0, 24 * 365);
 
         Settings.oldEventsMagnitudeFilterEnabled = chkBoxEnableMagnitudeFilter.isSelected();
-        Settings.oldEventsMagnitudeFilter = Double.parseDouble(textFieldMagnitudeFilter.getText());
+        Settings.oldEventsMagnitudeFilter = parseDouble(textFieldMagnitudeFilter.getText(), "Old events min magnitude", 0, 10);
 
         Settings.oldEventsOpacity = (double) sliderOpacity.getValue();
         Settings.selectedDateFormatIndex = comboBoxDateFormat.getSelectedIndex();
         Settings.use24HFormat = chkBox24H.isSelected();
 
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
+        Settings.stationsTriangles = chkBoxTriangles.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
+        Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
-        Settings.maxArchivedQuakes = Integer.parseInt(textFieldMaxArchived.getText());
+        Settings.maxArchivedQuakes = parseInt(textFieldMaxArchived.getText(), "Max number of archived quakes", 1, Integer.MAX_VALUE);
+
+        Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
+        Settings.cinemaModeSwitchTime = parseInt(textFieldTime.getText(), "Cinema mode switch time", 1, 3600);
+        Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
+        Settings.cinemaModeReenable = chkBoxReEnable.isSelected();
+
+        Settings.displaySystemInfo = chkBoxDisplaySystemInfo.isSelected();
+        Settings.displayMagnitudeHistogram = chkBoxDisplayMagnitudeHistogram.isSelected();
+        Settings.displayAdditionalQuakeInfo = chkBoxDisplayQuakeAdditionalInfo.isSelected();
     }
 
     @Override

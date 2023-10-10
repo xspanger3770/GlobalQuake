@@ -1,4 +1,4 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
 public class HypocenterFinderThreadData {
     public final long[] origins;

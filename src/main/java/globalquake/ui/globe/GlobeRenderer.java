@@ -21,6 +21,8 @@ public class GlobeRenderer {
     private double sinYaw;
     private double sinPitch;
 
+    private long lastMouseMove = 0;
+
     private static final double[][] projectionMatrix = new double[][]{
             {1.0, 0.0, 0.0, 0.0},
             {0.0, 1.0, 0.0, 0.0},
@@ -340,16 +342,16 @@ public class GlobeRenderer {
         return cameraToPoint <= maxDistance;
     }
 
-    protected static double getX_3D(double lat, double lon, double alt) {
+    public static double getX_3D(double lat, double lon, double alt) {
         return -(GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.sin(FastMath.toRadians(lon)) * FastMath.cos(FastMath.toRadians(lat));
     }
 
     @SuppressWarnings("unused")
-    protected static double getY_3D(double lat, double lon, double alt) {
+    public static double getY_3D(double lat, double lon, double alt) {
         return (GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.sin(FastMath.toRadians(lat));
     }
 
-    protected static double getZ_3D(double lat, double lon, double alt) {
+    public static double getZ_3D(double lat, double lon, double alt) {
         return -(GeoUtils.EARTH_RADIUS + alt / 1000.0) * FastMath.cos(FastMath.toRadians(lon)) * FastMath.cos(FastMath.toRadians(lat));
     }
 
@@ -459,8 +461,11 @@ public class GlobeRenderer {
         return px / oneDegPx;
     }
 
-    public boolean isMouseNearby(Point2D coords, double dist) {
+    public boolean isMouseNearby(Point2D coords, double dist, boolean moved) {
         if(lastMouse == null || coords == null){
+            return false;
+        }
+        if(moved && (System.currentTimeMillis() - lastMouseMove) > 15 * 1000){
             return false;
         }
         Vector3D vect;
@@ -481,6 +486,7 @@ public class GlobeRenderer {
 
     public void mouseMoved(MouseEvent e) {
         lastMouse = e.getPoint();
+        lastMouseMove = System.currentTimeMillis();
     }
 
     public double getAngularDistance(Point2D centerCoords) {

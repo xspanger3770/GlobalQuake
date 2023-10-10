@@ -1,18 +1,22 @@
-package globalquake.core.earthquake;
+package globalquake.core.earthquake.data;
 
+import globalquake.core.alert.Warnable;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
 import globalquake.geo.GeoUtils;
 import globalquake.sounds.SoundsInfo;
+import globalquake.training.EarthquakeAnalysisTraining;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Cluster {
+public class Cluster implements Warnable {
 
 	private final int id;
-	private final Map<AbstractStation, Event> assignedEvents;
+	private final Map<AbstractStation, globalquake.core.analysis.Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
 	private double size;
@@ -81,7 +85,7 @@ public class Cluster {
 	 * 
 	 * @return all events that were added to this cluster
 	 */
-	public Map<AbstractStation, Event> getAssignedEvents() {
+	public Map<AbstractStation, globalquake.core.analysis.Event> getAssignedEvents() {
 		return assignedEvents;
 	}
 
@@ -98,7 +102,7 @@ public class Cluster {
 
 	private boolean checkForUpdates() {
 		int upd = 0;
-		for (Event e : getAssignedEvents().values()) {
+		for (globalquake.core.analysis.Event e : getAssignedEvents().values()) {
 			upd += e.getUpdatesCount();
 		}
 		boolean b = (upd != updateCount);
@@ -112,7 +116,7 @@ public class Cluster {
 		int r1024 = 0;
 		int r8192 = 0;
 		int r32K = 0;
-		for (Event e : getAssignedEvents().values()) {
+		for (globalquake.core.analysis.Event e : getAssignedEvents().values()) {
 			if(!e.isValid()){
 				continue;
 			}
@@ -152,7 +156,7 @@ public class Cluster {
 		this.size = _size;
 	}
 
-	private void calculateRoot() {
+	public void calculateRoot() {
 		int n = 0;
 		double sumLat = 0;
 		double sumLon = 0;
@@ -160,8 +164,8 @@ public class Cluster {
 			if(!e.isValid()){
 				continue;
 			}
-			sumLat += e.getAnalysis().getStation().getLatitude();
-			sumLon += e.getAnalysis().getStation().getLongitude();
+			sumLat += e.getLatFromStation();
+			sumLon += e.getLonFromStation();
 			n++;
 		}
 		if (n > 0) {
@@ -169,6 +173,22 @@ public class Cluster {
 			rootLon = sumLon / n;
 			anchorLat = rootLat;
 			anchorLon = rootLon;
+		}
+	}
+
+	// For testing only
+	public void calculateRoot(List<EarthquakeAnalysisTraining.FakeStation> fakeStations) {
+		int n = 0;
+		double sumLat = 0;
+		double sumLon = 0;
+		for (EarthquakeAnalysisTraining.FakeStation fakeStation : fakeStations) {
+			sumLat += fakeStation.lat();
+			sumLon += fakeStation.lon();
+			n++;
+		}
+		if (n > 0) {
+			rootLat = sumLat / n;
+			rootLon = sumLon / n;
 		}
 	}
 
@@ -186,7 +206,7 @@ public class Cluster {
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	protected boolean containsStation(AbstractStation station) {
+	public boolean containsStation(AbstractStation station) {
 		return getAssignedEvents().containsKey(station);
 	}
 
@@ -219,4 +239,30 @@ public class Cluster {
 		return anchorLon;
 	}
 
+	@Override
+	public String toString() {
+		return "Cluster{" +
+				"id=" + id +
+				", rootLat=" + rootLat +
+				", rootLon=" + rootLon +
+				", size=" + size +
+				", updateCount=" + updateCount +
+				", lastUpdate=" + lastUpdate +
+				", earthquake=" + earthquake +
+				", anchorLon=" + anchorLon +
+				", anchorLat=" + anchorLat +
+				'}';
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLat() {
+		return getAnchorLat();
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public double getWarningLon() {
+		return getAnchorLon();
+	}
 }

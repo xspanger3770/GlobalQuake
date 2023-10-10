@@ -59,7 +59,7 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
         }
         graphics.setColor(Color.BLUE);
         graphics.fill(element.getShape());
-        if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0) && renderer.getRenderProperties().scroll < 1){
+        if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0, true) && renderer.getRenderProperties().scroll < 1){
             graphics.setColor(Color.yellow);
             graphics.draw(element.getShape());
         }
