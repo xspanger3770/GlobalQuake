@@ -279,16 +279,19 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private void drawTexts(Graphics2D g) {
-        String str = "----/--/-- --:--:--";
         g.setFont(new Font("Calibri", Font.BOLD, 24));
         g.setColor(Color.gray);
-        if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
-            str = Settings.formatDateTime(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
-            if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
-                g.setColor(Color.white);
+
+        if(Settings.displayTime) {
+            String str = "----/--/-- --:--:--";
+            if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
+                str = Settings.formatDateTime(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
+                if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
+                    g.setColor(Color.white);
+                }
             }
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
         }
-        g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
 
         if(!Settings.displaySystemInfo){
             return;
@@ -360,6 +363,9 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private Color getColorPCT(double pct) {
+        if(Double.isInfinite(pct) || Double.isNaN(pct)){
+            pct = 0;
+        }
         if (pct <= 0.5) {
             return Scale.interpolateColors(Color.green, Color.yellow, pct * 2.0);
         }

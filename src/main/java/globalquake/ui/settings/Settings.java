@@ -124,6 +124,7 @@ public final class Settings {
 	public static Integer strongShakingLevelIndex;
 
 	public static Boolean displayAlertBox;
+	public static Boolean displayTime;
 
 	static {
 		load();
@@ -148,6 +149,7 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayTime", "true");
 		loadProperty("displayAlertBox", "true");
 		loadProperty("displaySystemInfo", "true");
 		loadProperty("displayMagnitudeHistogram", "true");
