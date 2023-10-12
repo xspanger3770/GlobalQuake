@@ -123,6 +123,8 @@ public final class Settings {
 	public static Integer strongShakingLevelScale;
 	public static Integer strongShakingLevelIndex;
 
+	public static Boolean displayAlertBox;
+
 	static {
 		load();
 	}
@@ -146,6 +148,7 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayAlertBox", "true");
 		loadProperty("displaySystemInfo", "true");
 		loadProperty("displayMagnitudeHistogram", "true");
 		loadProperty("displayAdditionalQuakeInfo", "false");

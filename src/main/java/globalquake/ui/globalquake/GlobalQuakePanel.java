@@ -118,10 +118,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
         drawTexts(g);
 
-        try {
-            drawAlertsBox(g);
-        } catch (Exception e) {
-            Logger.error(e);
+        if(Settings.displayAlertBox) {
+            try {
+                drawAlertsBox(g);
+            } catch (Exception e) {
+                Logger.error(e);
+            }
         }
     }
 

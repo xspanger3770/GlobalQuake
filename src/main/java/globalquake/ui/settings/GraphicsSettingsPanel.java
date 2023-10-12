@@ -37,6 +37,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDisplayMagnitudeHistogram;
     private JCheckBox chkBoxDisplaySystemInfo;
     private JCheckBox chkBoxDisplayQuakeAdditionalInfo;
+    private JCheckBox chkBoxAlertBox;
 
 
     public GraphicsSettingsPanel() {
@@ -133,12 +134,13 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(dateFormatPanel);
 
-        JPanel mainWindowPanel = new JPanel(new GridLayout(3,1));
+        JPanel mainWindowPanel = new JPanel(new GridLayout(4,1));
         mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
 
         mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
         mainWindowPanel.add(chkBoxDisplayMagnitudeHistogram = new JCheckBox("Display magnitude histogram", Settings.displayMagnitudeHistogram));
-        mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical Earthquake data", Settings.displayAdditionalQuakeInfo));
+        mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical earthquake data", Settings.displayAdditionalQuakeInfo));
+        mainWindowPanel.add(chkBoxAlertBox = new JCheckBox("Display alert box for nearby earthquakes", Settings.displayAlertBox));
 
         panel.add(mainWindowPanel);
 
@@ -347,6 +349,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displaySystemInfo = chkBoxDisplaySystemInfo.isSelected();
         Settings.displayMagnitudeHistogram = chkBoxDisplayMagnitudeHistogram.isSelected();
         Settings.displayAdditionalQuakeInfo = chkBoxDisplayQuakeAdditionalInfo.isSelected();
+        Settings.displayAlertBox = chkBoxAlertBox.isSelected();
     }
 
     @Override
