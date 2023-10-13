@@ -420,6 +420,11 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
+        if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
+            Logger.debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
+            return;
+        }
+
         // There has to be at least some difference in the picked pWave times
         if (!checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.debug("Not Enough Delta-P");
