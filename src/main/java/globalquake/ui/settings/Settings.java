@@ -330,4 +330,5 @@ public final class Settings {
 		}
 
 	}
+
 }

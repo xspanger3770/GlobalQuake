@@ -1,4 +1,4 @@
-package globalquake.geo.taup;
+package globalquake.intensity;
 
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
