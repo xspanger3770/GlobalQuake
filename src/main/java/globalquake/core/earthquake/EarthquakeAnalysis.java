@@ -845,32 +845,29 @@ public class EarthquakeAnalysis {
     }
 
     private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
-        Earthquake earthquake = new Earthquake(cluster, bestHypocenter.lat, bestHypocenter.lon, bestHypocenter.depth,
+        Earthquake newEarthquake = new Earthquake(cluster, bestHypocenter.lat, bestHypocenter.lon, bestHypocenter.depth,
                 bestHypocenter.origin);
-        earthquake.setPct(100.0 * bestHypocenter.getCorrectness());
-        earthquake.setMag(bestHypocenter.magnitude);
-        earthquake.setMags(bestHypocenter.mags);
+        newEarthquake.setPct(100.0 * bestHypocenter.getCorrectness());
+        newEarthquake.setMag(bestHypocenter.magnitude);
+        newEarthquake.setMags(bestHypocenter.mags);
 
         if (cluster.getEarthquake() == null) {
             if (!testing) {
                 Sounds.playSound(Sounds.incoming);
 
                 if (GlobalQuake.instance != null) {
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
                 }
 
-                getEarthquakes().add(earthquake);
+                getEarthquakes().add(newEarthquake);
             }
-            cluster.setEarthquake(earthquake);
+            cluster.setEarthquake(newEarthquake);
         } else {
-            cluster.getEarthquake().update(earthquake);
+            cluster.getEarthquake().update(newEarthquake);
 
             if (GlobalQuake.instance != null) {
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, cluster.getPreviousHypocenter()));
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
             }
-        }
-        if (!testing) {
-            earthquake.uppdateRegion();
         }
 
         cluster.updateAnchor(bestHypocenter);
@@ -879,7 +876,10 @@ public class EarthquakeAnalysis {
         cluster.getEarthquake().setRevisionID(cluster.revisionID);
         cluster.setPreviousHypocenter(bestHypocenter);
 
-        if(!testing){
+        Earthquake earthquake = cluster.getEarthquake();
+
+        if(!testing && earthquake != null){
+            earthquake.uppdateRegion();
             earthquake.updateShakemap(bestHypocenter);
         }
     }
