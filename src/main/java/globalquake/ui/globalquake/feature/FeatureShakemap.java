@@ -72,7 +72,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         return true;
     }
 
-    private void updateHexes() {
+    private synchronized void updateHexes() {
         HashSet<IntensityHex> hashSet = new HashSet<>();
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
             ShakeMap shakeMap = earthquake.getShakemap();

@@ -871,7 +871,6 @@ public class EarthquakeAnalysis {
         }
         if (!testing) {
             earthquake.uppdateRegion();
-            earthquake.updateShakemap(bestHypocenter);
         }
 
         cluster.updateAnchor(bestHypocenter);
@@ -879,6 +878,10 @@ public class EarthquakeAnalysis {
         cluster.revisionID += 1;
         cluster.getEarthquake().setRevisionID(cluster.revisionID);
         cluster.setPreviousHypocenter(bestHypocenter);
+
+        if(!testing){
+            earthquake.updateShakemap(bestHypocenter);
+        }
     }
 
     private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {

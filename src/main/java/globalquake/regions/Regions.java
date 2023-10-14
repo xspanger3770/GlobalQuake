@@ -102,8 +102,8 @@ public class Regions {
         }
     }
 
-    public static boolean isOcean(double lat, double lng) {
-        return isOcean(lat, lng, regionsHD);
+    public static boolean isOcean(double lat, double lng, boolean uhd) {
+        return isOcean(lat, lng, uhd ? regionsUHD : regionsHD);
     }
 
     @SuppressWarnings("SameParameterValue")

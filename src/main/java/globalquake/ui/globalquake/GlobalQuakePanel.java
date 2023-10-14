@@ -19,6 +19,7 @@ import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.intensity.ShakeMap;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.*;
@@ -426,7 +427,9 @@ public class GlobalQuakePanel extends GlobePanel {
         int xOffset = 0;
         int baseHeight = quake == null ? 24 : 132;
 
-        Level level = quake == null ? null : IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+        ShakeMap shakeMap = quake == null ? null : quake.getShakemap();
+
+        Level level = shakeMap == null ? null : IntensityScales.getIntensityScale().getLevel(shakeMap.getMaxPGA());
         Color levelColor = level == null ? Color.gray : level.getColor();
 
         Font regionFont = new Font("Calibri", Font.BOLD, 18);

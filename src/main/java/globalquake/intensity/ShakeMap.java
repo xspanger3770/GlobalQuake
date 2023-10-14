@@ -11,6 +11,7 @@ import java.util.*;
 public class ShakeMap {
 
     private static H3Core h3;
+    private double maxPGA;
 
     public static void init() throws IOException{
         h3 = H3Core.newInstance();
@@ -32,14 +33,20 @@ public class ShakeMap {
 
         IntensityHex intensityHex = new IntensityHex(h3.latLngToCell(hypocenter.lat, hypocenter.lon, res), pga);
         hexList = new ArrayList<>(bfs(intensityHex, hypocenter, intensityScale, res));
+        maxPGA = hexList.stream().map(intensityHex1 -> intensityHex1.pga()).max(Double::compareTo).orElse(0.0);
     }
 
     private HashSet<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
+        boolean uhd = res >= 6;
         HashSet<IntensityHex> visited = new HashSet<>();
         HashSet<IntensityHex> result = new HashSet<>();
 
         visited.add(intensityHex);
-        result.add(intensityHex);
+
+        if(!globalquake.regions.Regions.isOcean(hypocenter.lat, hypocenter.lon, uhd)) {
+            result.add(intensityHex);
+        }
+
         Queue<IntensityHex> pq = new PriorityQueue<>();
         pq.add(intensityHex);
 
@@ -60,7 +67,7 @@ public class ShakeMap {
                 }
 
                 visited.add(neighboxHex);
-                if(!globalquake.regions.Regions.isOcean(latLng.lat, latLng.lng)){
+                if(!globalquake.regions.Regions.isOcean(latLng.lat, latLng.lng, uhd)){
                     result.add(neighboxHex);
                 }
                 pq.add(neighboxHex);
@@ -72,5 +79,9 @@ public class ShakeMap {
 
     public List<IntensityHex> getHexList() {
         return hexList;
+    }
+
+    public double getMaxPGA() {
+        return maxPGA;
     }
 }
