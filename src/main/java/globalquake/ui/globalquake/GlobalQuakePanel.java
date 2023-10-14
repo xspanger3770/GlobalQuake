@@ -13,6 +13,8 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkStatus;
+import globalquake.events.specific.QuakeRemoveEvent;
+import globalquake.events.specific.ShakeMapCreatedEvent;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityScales;
@@ -35,10 +37,12 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
+import java.security.Key;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,11 +55,11 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
+        getRenderer().addFeature(new FeatureShakemap(GlobalQuake.instance.getEarthquakeAnalysis()));
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
         getRenderer().addFeature(new FeatureHomeLoc());
-        getRenderer().addFeature(new FeatureShakemap(GlobalQuake.instance.getEarthquakeAnalysis()));
 
         frame.addKeyListener(new KeyAdapter() {
             @Override
@@ -70,6 +74,24 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_C) {
                     setCinemaMode(!isCinemaMode());
+                }
+
+                if (true) {
+                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                        Earthquake earthquake = createDebugQuake();
+                        earthquake.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
+                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+                        GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
+                    }
+
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        for (Iterator<Earthquake> iterator = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().iterator(); iterator.hasNext(); ) {
+                            Earthquake earthquake = iterator.next();
+                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
+                        }
+
+                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().clear();
+                    }
                 }
             }
         });
@@ -253,7 +275,7 @@ public class GlobalQuakePanel extends GlobePanel {
         Earthquake quake;
         Cluster clus = new Cluster(0);
 
-        Hypocenter hyp = new Hypocenter(0, 0, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 List.of(new PolygonConfidenceInterval(16, 0, List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
@@ -265,8 +287,11 @@ public class GlobalQuakePanel extends GlobePanel {
 
         clus.setPreviousHypocenter(hyp);
 
-        quake = new Earthquake(clus, Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis() - 50 * 1000);
+        quake = new Earthquake(clus, hyp.lat, hyp.lon, 0, System.currentTimeMillis() - 50 * 1000);
         quake.setMag(10.0-(System.currentTimeMillis() % 10000) / 1000.0);
+
+        hyp.magnitude = quake.getMag();
+
         List<MagnitudeReading> mags = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             double mag = 5 + Math.tan(i / 100.0 * 3.14159);

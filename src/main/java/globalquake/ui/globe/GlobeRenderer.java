@@ -385,6 +385,8 @@ public class GlobeRenderer {
     public void createPolygon(Polygon3D polygon3D, List<LatLng> coords) {
         polygon3D.reset();
 
+        coords.add(coords.get(0));
+
         for(LatLng latLng : coords){
             Vector3D vector3D = new Vector3D(
                     getX_3D(latLng.lat, latLng.lng, 0),

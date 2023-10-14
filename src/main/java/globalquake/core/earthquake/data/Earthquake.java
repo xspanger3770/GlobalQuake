@@ -162,7 +162,8 @@ public class Earthquake implements Regional, Warnable {
 		new Thread("Shakemap generator"){
 			@Override
 			public void run() {
-				shakemap = new ShakeMap(hypocenter, 5);
+				double mag = hypocenter.magnitude;
+				shakemap = new ShakeMap(hypocenter, mag < 3 ? 7 : mag < 4 ? 6 : mag < 6 ? 5 : mag < 8 ? 4 : 3);
 				if(GlobalQuake.instance != null) {
 					GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(Earthquake.this));
 				}

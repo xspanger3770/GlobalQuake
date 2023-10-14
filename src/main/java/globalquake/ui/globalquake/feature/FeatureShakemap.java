@@ -57,6 +57,21 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
     }
 
+    @Override
+    public boolean needsCreatePolygon(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
+        return true;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
+        return true;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
     private void updateHexes() {
         HashSet<IntensityHex> hashSet = new HashSet<>();
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
@@ -102,8 +117,14 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             return;
         }
 
-        graphics.setColor(level.getColor());
-        graphics.draw(elementHex.getShape());
+        Color col = level.getColor();
+
+        graphics.setStroke(new BasicStroke(1.0f));
+        graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
+        graphics.fill(elementHex.getShape());
+        graphics.setColor(col);
+        graphics.setStroke(new BasicStroke(0.5f));
+        //graphics.draw(elementHex.getShape());
     }
 
     @Override

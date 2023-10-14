@@ -4,7 +4,6 @@ import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.geo.GeoUtils;
-import globalquake.ui.settings.Settings;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,22 +24,23 @@ public class ShakeMap {
     }
 
     private synchronized void generate(Hypocenter hypocenter, int res) {
-        HashSet<IntensityHex> hexes = new HashSet<>();
-
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
-        double pga = IntensityTable.getMaxIntensity(hypocenter.magnitude, hypocenter.depth);
+        double pga = GeoUtils.pgaFunctionGen1(hypocenter.magnitude, hypocenter.depth);
         Level level = intensityScale.getLevel(pga);
         if(level == null){
             return;
         }
 
         IntensityHex intensityHex = new IntensityHex(h3.latLngToCell(hypocenter.lat, hypocenter.lon, res), pga);
-        hexes.add(intensityHex);
-        bfs(hexes, intensityHex, hypocenter, intensityScale, res);
-        hexList = hexes.stream().collect(Collectors.toList());
+        hexList = bfs(intensityHex, hypocenter, intensityScale, res).stream().collect(Collectors.toList());
     }
 
-    private void bfs(HashSet<IntensityHex> hexes, IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
+    private HashSet<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
+        HashSet<IntensityHex> visited = new HashSet<>();
+        HashSet<IntensityHex> result = new HashSet<>();
+
+        visited.add(intensityHex);
+        result.add(intensityHex);
         Queue<IntensityHex> pq = new PriorityQueue<>();
         pq.add(intensityHex);
 
@@ -56,14 +56,19 @@ public class ShakeMap {
                 }
 
                 IntensityHex neighboxHex = new IntensityHex(neighbor, pga);
-                if (hexes.contains(neighboxHex)) {
+                if (visited.contains(neighboxHex)) {
                     continue;
                 }
 
-                hexes.add(neighboxHex);
+                visited.add(neighboxHex);
+                if(!globalquake.regions.Regions.isOcean(latLng.lat, latLng.lng)){
+                    result.add(neighboxHex);
+                }
                 pq.add(neighboxHex);
             }
         }
+
+        return result;
     }
 
     public List<IntensityHex> getHexList() {

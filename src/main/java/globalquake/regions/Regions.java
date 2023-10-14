@@ -102,6 +102,27 @@ public class Regions {
         }
     }
 
+    public static boolean isOcean(double lat, double lng) {
+        return isOcean(lat, lng, regionsHD);
+    }
+
+    private static boolean isOcean(double lat, double lng, ArrayList<Region> regions) {
+        Point2D.Double point = new Point2D.Double(lng, lat);
+        for (Region reg : regions) {
+            int i = 0;
+            for (Path2D.Double path : reg.paths()) {
+                if (reg.bounds().get(i).contains(point)) {
+                    if(path.contains(point)) {
+                        return false;
+                    }
+                }
+                i++;
+            }
+        }
+
+        return true;
+    }
+
     public static String getName(double lat, double lon, List<Region> regions){
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regions) {

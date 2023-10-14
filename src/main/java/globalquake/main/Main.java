@@ -8,6 +8,7 @@ import globalquake.exception.RuntimeApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
+import globalquake.intensity.ShakeMap;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.training.EarthquakeAnalysisTraining;
@@ -66,7 +67,7 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 8.0;
+    private static final double PHASES = 9.0;
     private static int phase = 0;
 
     private static void initAll() throws Exception {
@@ -76,6 +77,9 @@ public class Main {
         databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         Scale.load();
+        databaseMonitorFrame.getMainProgressBar().setString("Loading shakemap...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        ShakeMap.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
         databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         try{
