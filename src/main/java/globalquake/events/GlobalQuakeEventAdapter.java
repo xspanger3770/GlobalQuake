@@ -30,6 +30,7 @@ public class GlobalQuakeEventAdapter implements GlobalQuakeEventListener{
 
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
 

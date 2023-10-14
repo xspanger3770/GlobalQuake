@@ -14,7 +14,6 @@ import globalquake.ui.globalquake.GlobalQuakeFrame;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
 public class GlobalQuake {
 

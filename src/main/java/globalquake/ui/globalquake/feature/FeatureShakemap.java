@@ -3,10 +3,8 @@ package globalquake.ui.globalquake.feature;
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
 import globalquake.core.GlobalQuake;
-import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.events.GlobalQuakeEventAdapter;
-import globalquake.events.GlobalQuakeEventListener;
 import globalquake.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.ShakeMapCreatedEvent;
 import globalquake.intensity.IntensityHex;
@@ -27,12 +25,13 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private final H3Core h3;
-    private MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList();
-    public FeatureShakemap(EarthquakeAnalysis earthquakeAnalysis) {
+    private final MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList<>();
+    public FeatureShakemap() {
         super(1);
         try {
             h3 = H3Core.newInstance();
@@ -47,6 +46,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
                     updateHexes();
                 }
 
+                @SuppressWarnings("unused")
                 @Override
                 public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
                     updateHexes();
@@ -97,7 +97,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             elementHex.setPolygon(new Polygon3D());
         }
 
-        java.util.List coords = h3.cellToBoundary(entity.getOriginal().id());
+        List<LatLng> coords = h3.cellToBoundary(entity.getOriginal().id());
         renderer.createPolygon(elementHex.getPolygon(), coords);
     }
 

@@ -36,13 +36,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.io.IOException;
-import java.security.Key;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,7 +52,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
-        getRenderer().addFeature(new FeatureShakemap(GlobalQuake.instance.getEarthquakeAnalysis()));
+        getRenderer().addFeature(new FeatureShakemap());
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
@@ -76,7 +73,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     setCinemaMode(!isCinemaMode());
                 }
 
-                if (true) {
+                if (DEBUG) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         earthquake.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
@@ -85,8 +82,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     }
 
                     if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        for (Iterator<Earthquake> iterator = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().iterator(); iterator.hasNext(); ) {
-                            Earthquake earthquake = iterator.next();
+                        for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
                             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                         }
 

@@ -7,7 +7,6 @@ import globalquake.geo.GeoUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ShakeMap {
 
@@ -32,7 +31,7 @@ public class ShakeMap {
         }
 
         IntensityHex intensityHex = new IntensityHex(h3.latLngToCell(hypocenter.lat, hypocenter.lon, res), pga);
-        hexList = bfs(intensityHex, hypocenter, intensityScale, res).stream().collect(Collectors.toList());
+        hexList = new ArrayList<>(bfs(intensityHex, hypocenter, intensityScale, res));
     }
 
     private HashSet<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {

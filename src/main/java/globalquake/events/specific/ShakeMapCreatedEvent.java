@@ -4,6 +4,7 @@ import globalquake.core.earthquake.data.Earthquake;
 import globalquake.events.GlobalQuakeEventListener;
 
 public class ShakeMapCreatedEvent implements GlobalQuakeEvent {
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final Earthquake earthquake;
 
     public ShakeMapCreatedEvent(Earthquake earthquake) {

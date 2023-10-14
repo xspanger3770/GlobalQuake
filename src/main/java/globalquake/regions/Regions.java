@@ -106,6 +106,7 @@ public class Regions {
         return isOcean(lat, lng, regionsHD);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean isOcean(double lat, double lng, ArrayList<Region> regions) {
         Point2D.Double point = new Point2D.Double(lng, lat);
         for (Region reg : regions) {

@@ -15,5 +15,6 @@ public interface GlobalQuakeEventListener {
 
     void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent);
 
+    @SuppressWarnings("unused")
     void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent);
 }

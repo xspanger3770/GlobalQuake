@@ -1,10 +1,8 @@
 package globalquake.intensity;
 
 import com.uber.h3core.H3Core;
-import com.uber.h3core.util.LatLng;
 
 import java.io.IOException;
-import java.util.List;
 
 public class HexTest {
 
