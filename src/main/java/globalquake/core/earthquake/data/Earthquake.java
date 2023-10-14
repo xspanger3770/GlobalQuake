@@ -1,6 +1,9 @@
 package globalquake.core.earthquake.data;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.alert.Warnable;
+import globalquake.events.specific.ShakeMapCreatedEvent;
+import globalquake.intensity.ShakeMap;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 
@@ -24,6 +27,7 @@ public class Earthquake implements Regional, Warnable {
 	private String region;
 
 	private final RegionUpdater regionUpdater;
+	private ShakeMap shakemap;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
 		this.lat = lat;
@@ -152,5 +156,21 @@ public class Earthquake implements Regional, Warnable {
 	@Override
 	public double getWarningLon() {
 		return getLon();
+	}
+
+    public void updateShakemap(Hypocenter hypocenter) {
+		new Thread("Shakemap generator"){
+			@Override
+			public void run() {
+				shakemap = new ShakeMap(hypocenter, 5);
+				if(GlobalQuake.instance != null) {
+					GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(Earthquake.this));
+				}
+			}
+		}.start();
+	}
+
+	public ShakeMap getShakemap() {
+		return shakemap;
 	}
 }

@@ -19,10 +19,7 @@ import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
-import globalquake.ui.globalquake.feature.FeatureArchivedEarthquake;
-import globalquake.ui.globalquake.feature.FeatureEarthquake;
-import globalquake.ui.globalquake.feature.FeatureGlobalStation;
-import globalquake.ui.globalquake.feature.FeatureHomeLoc;
+import globalquake.ui.globalquake.feature.*;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.settings.Settings;
@@ -37,6 +34,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
@@ -57,6 +55,7 @@ public class GlobalQuakePanel extends GlobePanel {
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
         getRenderer().addFeature(new FeatureHomeLoc());
+        getRenderer().addFeature(new FeatureShakemap(GlobalQuake.instance.getEarthquakeAnalysis()));
 
         frame.addKeyListener(new KeyAdapter() {
             @Override

@@ -1,5 +1,6 @@
 package globalquake.ui.globe;
 
+import com.uber.h3core.util.LatLng;
 import globalquake.geo.GeoUtils;
 import globalquake.ui.globe.feature.RenderFeature;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -380,6 +381,22 @@ public class GlobeRenderer {
         return createVec3D(new Vector2D(centerCoords.x, centerCoords.y), 0);
     }
 
+
+    public void createPolygon(Polygon3D polygon3D, List<LatLng> coords) {
+        polygon3D.reset();
+
+        for(LatLng latLng : coords){
+            Vector3D vector3D = new Vector3D(
+                    getX_3D(latLng.lat, latLng.lng, 0),
+                    getY_3D(latLng.lat, latLng.lng, 0),
+                    getZ_3D(latLng.lat, latLng.lng, 0));
+
+            polygon3D.addPoint(vector3D);
+        }
+
+        polygon3D.finish();
+    }
+
     public void createNGon(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double startAngle, double step) {
         polygon3D.reset();
         if(radius < 1e-6){
@@ -495,4 +512,5 @@ public class GlobeRenderer {
         }
         return GeoUtils.greatCircleDistance(centerCoords.x, centerCoords.y, getRenderProperties().centerLat, getRenderProperties().centerLon) / GeoUtils.EARTH_CIRCUMFERENCE * 360.0;
     }
+
 }

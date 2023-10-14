@@ -14,4 +14,6 @@ public interface GlobalQuakeEventListener {
     void onWarningIssued(AlertIssuedEvent event);
 
     void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent);
+
+    void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent);
 }

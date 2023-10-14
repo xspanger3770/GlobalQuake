@@ -871,6 +871,7 @@ public class EarthquakeAnalysis {
         }
         if (!testing) {
             earthquake.uppdateRegion();
+            earthquake.updateShakemap(bestHypocenter);
         }
 
         cluster.updateAnchor(bestHypocenter);

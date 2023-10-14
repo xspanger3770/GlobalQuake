@@ -14,6 +14,7 @@ import globalquake.ui.globalquake.GlobalQuakeFrame;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 public class GlobalQuake {
 
@@ -58,8 +59,8 @@ public class GlobalQuake {
 
 	public GlobalQuake createFrame() {
 		EventQueue.invokeLater(() -> {
-            globalQuakeFrame = new GlobalQuakeFrame();
-            globalQuakeFrame.setVisible(true);
+			globalQuakeFrame = new GlobalQuakeFrame();
+			globalQuakeFrame.setVisible(true);
 
 
 			Main.getErrorHandler().setParent(globalQuakeFrame);

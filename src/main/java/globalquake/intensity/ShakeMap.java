@@ -21,7 +21,10 @@ public class ShakeMap {
     private List<IntensityHex> hexList = new ArrayList<>();
 
     public ShakeMap(Hypocenter hypocenter, int res) {
-        System.err.println("MAX "+h3.getNumCells(res));
+        generate(hypocenter, res);
+    }
+
+    private synchronized void generate(Hypocenter hypocenter, int res) {
         HashSet<IntensityHex> hexes = new HashSet<>();
 
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
