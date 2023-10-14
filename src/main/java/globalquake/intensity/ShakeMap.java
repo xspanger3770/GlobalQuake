@@ -34,17 +34,21 @@ public class ShakeMap {
             return;
         }
 
-        IntensityHex intensityHex = new IntensityHex(h3.latLngToCell(hypocenter.lat, hypocenter.lon, res), pga, new Point2D(hypocenter.lat, hypocenter.lon));
+        long id = h3.latLngToCell(hypocenter.lat, hypocenter.lon, res);
+
+        LatLng latLng = h3.cellToLatLng(id);
+        IntensityHex intensityHex = new IntensityHex(id, pga,
+                new Point2D(latLng.lat, latLng.lng));
         hexList = new ArrayList<>(bfs(intensityHex, hypocenter, intensityScale, res));
         maxPGA = hexList.stream().map(IntensityHex::pga).max(Double::compareTo).orElse(0.0);
     }
 
-    private HashSet<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
+    private Set<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
         boolean uhd = res >= 6;
-        HashSet<IntensityHex> visited = new HashSet<>();
-        HashSet<IntensityHex> result = new HashSet<>();
+        Set<Long> visited = new HashSet<>();
+        Set<IntensityHex> result = new HashSet<>();
 
-        visited.add(intensityHex);
+        visited.add(intensityHex.id());
 
         if(!isOcean(intensityHex.id(), uhd)) {
             result.add(intensityHex);
@@ -65,16 +69,16 @@ public class ShakeMap {
                     continue;
                 }
 
-                IntensityHex neighboxHex = new IntensityHex(neighbor, pga, new Point2D(latLng.lat, latLng.lng));
-                if (visited.contains(neighboxHex)) {
+                IntensityHex neighborHex = new IntensityHex(neighbor, pga, new Point2D(latLng.lat, latLng.lng));
+                if (visited.contains(neighbor)) {
                     continue;
                 }
 
-                visited.add(neighboxHex);
+                visited.add(neighbor);
                 if(!isOcean(neighbor, uhd)){
-                    result.add(neighboxHex);
+                    result.add(neighborHex);
                 }
-                pq.add(neighboxHex);
+                pq.add(neighborHex);
             }
         }
 

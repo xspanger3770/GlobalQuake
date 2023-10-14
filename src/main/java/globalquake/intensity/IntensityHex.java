@@ -10,12 +10,12 @@ public record IntensityHex(long id, double pga, Point2D center) implements Compa
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         IntensityHex that = (IntensityHex) o;
-        return id == that.id;
+        return id == that.id && Double.compare(pga, that.pga) == 0;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, pga);
     }
 
     @Override

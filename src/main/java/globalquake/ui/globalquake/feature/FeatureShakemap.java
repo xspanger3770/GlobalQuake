@@ -24,7 +24,7 @@ import org.tinylog.Logger;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
@@ -73,16 +73,21 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     }
 
     private synchronized void updateHexes() {
-        HashSet<IntensityHex> hashSet = new HashSet<>();
+        java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
             ShakeMap shakeMap = earthquake.getShakemap();
             if(shakeMap != null){
-                hashSet.addAll(shakeMap.getHexList());
+                shakeMap.getHexList().forEach(intensityHex -> {
+                    IntensityHex current = items.putIfAbsent(intensityHex.id(), intensityHex);
+                    if(current != null && intensityHex.pga() > current.pga()){
+                        items.put(intensityHex.id(), intensityHex);
+                    }
+                });
             }
         }
 
         hexes.clear();
-        hexes.addAll(hashSet);
+        hexes.addAll(items.values());
     }
 
     @Override

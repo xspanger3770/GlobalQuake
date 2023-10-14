@@ -27,7 +27,7 @@ public class Earthquake implements Regional, Warnable {
 	private String region;
 
 	private final RegionUpdater regionUpdater;
-	private ShakeMap shakemap;
+	volatile private ShakeMap shakemap;
 
 	public Earthquake(Cluster cluster, double lat, double lon, double depth, long origin) {
 		this.lat = lat;

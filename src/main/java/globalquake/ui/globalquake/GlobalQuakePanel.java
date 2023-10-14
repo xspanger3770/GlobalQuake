@@ -82,6 +82,17 @@ public class GlobalQuakePanel extends GlobePanel {
                         GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
                     }
 
+                    if (e.getKeyCode() == KeyEvent.VK_U) {
+                        Earthquake ex = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findAny().orElse(null);
+
+                        if(ex != null) {
+                            Earthquake earthquake = createDebugQuake();
+                            ex.update(earthquake);
+                            ex.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
+                            GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(ex));
+                        }
+                    }
+
                     if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                         for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
                             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
@@ -272,7 +283,7 @@ public class GlobalQuakePanel extends GlobePanel {
         Earthquake quake;
         Cluster clus = new Cluster(0);
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat + (System.currentTimeMillis() % 10000) / 1000.0, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 List.of(new PolygonConfidenceInterval(16, 0, List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
