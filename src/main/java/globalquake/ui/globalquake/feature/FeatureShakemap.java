@@ -59,12 +59,12 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
-        return true;
+        return propertiesChanged;
     }
 
     @Override
     public boolean needsProject(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
-        return true;
+        return propertiesChanged;
     }
 
     @Override
@@ -122,13 +122,28 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         graphics.setStroke(new BasicStroke(1.0f));
         graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
         graphics.fill(elementHex.getShape());
-        graphics.setColor(col);
-        graphics.setStroke(new BasicStroke(0.5f));
-        //graphics.draw(elementHex.getShape());
+
+        boolean mouseNearby = elementHex.getShape().contains(renderer.getLastMouse());
+
+        if(mouseNearby && renderer.getRenderProperties().scroll < 0.2) {
+            graphics.setColor(col);
+            graphics.setStroke(new BasicStroke(0.5f));
+            graphics.draw(elementHex.getShape());
+
+            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+            var centerPonint = renderer.projectPoint(point3D);
+
+            graphics.setColor(Color.white);
+            graphics.setFont(new Font("Calibri", Font.BOLD, 16));
+            graphics.drawString(level.getName(),
+                    (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
+                    (int)centerPonint.y + graphics.getFont().getSize() / 2);
+        }
     }
 
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return null;
+        IntensityHex hex = (IntensityHex) entity.getOriginal();
+        return hex.center();
     }
 }

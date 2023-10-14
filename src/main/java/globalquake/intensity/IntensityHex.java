@@ -1,8 +1,10 @@
 package globalquake.intensity;
 
+import globalquake.ui.globe.Point2D;
+
 import java.util.Objects;
 
-public record IntensityHex(long id, double pga) implements Comparable<IntensityHex>{
+public record IntensityHex(long id, double pga, Point2D center) implements Comparable<IntensityHex>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -508,6 +508,10 @@ public class GlobeRenderer {
         lastMouseMove = System.currentTimeMillis();
     }
 
+    public Point getLastMouse() {
+        return lastMouse;
+    }
+
     public double getAngularDistance(Point2D centerCoords) {
         if(centerCoords == null){
             return Double.NaN;
