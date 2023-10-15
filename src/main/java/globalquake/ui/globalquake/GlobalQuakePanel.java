@@ -13,6 +13,8 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
 import globalquake.database.SeedlinkStatus;
+import globalquake.events.GlobalQuakeEventAdapter;
+import globalquake.events.specific.CinemaEvent;
 import globalquake.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.ShakeMapCreatedEvent;
 import globalquake.geo.GeoUtils;
@@ -50,6 +52,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final boolean DEBUG = false;
+    private volatile Earthquake lastCinemaModeEarthquake;
+    private volatile long lastCinemaModeEvent;
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
@@ -106,6 +110,17 @@ public class GlobalQuakePanel extends GlobePanel {
 
         CinemaHandler cinemaHandler = new CinemaHandler(this);
         cinemaHandler.run();
+
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+            @Override
+            public void onCinemaModeTargetSwitch(CinemaEvent cinemaEvent) {
+                if(cinemaEvent.getCinemaTarget().original() instanceof Earthquake){
+                    Earthquake earthquake = (Earthquake) cinemaEvent.getCinemaTarget().original();
+                    lastCinemaModeEarthquake = earthquake;
+                    lastCinemaModeEvent = System.currentTimeMillis();
+                }
+            }
+        });
     }
 
     @Override
@@ -426,7 +441,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
         Earthquake quake;
         try {
-            quake = quakes.get(displayedQuake);
+            Earthquake cinemaQuake = lastCinemaModeEarthquake;
+            if(System.currentTimeMillis() - lastCinemaModeEvent < Settings.cinemaModeSwitchTime * 1000 + 1000 && cinemaQuake != null){
+                quake = cinemaQuake;
+            } else {
+                quake = quakes.get(displayedQuake);
+            }
         } catch (Exception e) {
             quake = null;
         }

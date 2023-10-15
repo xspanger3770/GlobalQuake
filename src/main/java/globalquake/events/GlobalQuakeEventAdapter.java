@@ -35,4 +35,9 @@ public class GlobalQuakeEventAdapter implements GlobalQuakeEventListener{
     public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
 
     }
+
+    @Override
+    public void onCinemaModeTargetSwitch(CinemaEvent cinemaEvent) {
+
+    }
 }
