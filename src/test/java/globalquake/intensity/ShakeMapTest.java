@@ -17,7 +17,7 @@ public class ShakeMapTest {
         Regions.init();
 
         Hypocenter hypocenter = new Hypocenter(0,0,0,0,0,0,null,null);
-        hypocenter.magnitude = 4.0;
+        hypocenter.magnitude = 9.0;
 
         long a = System.currentTimeMillis();
         ShakeMap shakeMap = new ShakeMap(hypocenter, 5);
