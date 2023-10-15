@@ -17,10 +17,10 @@ public class ShakeMapTest {
         Regions.init();
 
         Hypocenter hypocenter = new Hypocenter(0,0,0,0,0,0,null,null);
-        hypocenter.magnitude = 9;
+        hypocenter.magnitude = 4.0;
 
         long a = System.currentTimeMillis();
-        ShakeMap shakeMap = new ShakeMap(hypocenter, 6);
+        ShakeMap shakeMap = new ShakeMap(hypocenter, 5);
         System.err.printf("Shake map generated in %d ms%n", (System.currentTimeMillis() - a));
         System.out.println(shakeMap.getHexList().size());
     }
