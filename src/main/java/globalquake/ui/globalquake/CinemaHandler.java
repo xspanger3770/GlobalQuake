@@ -201,7 +201,7 @@ public class CinemaHandler {
     private CinemaTarget createTarget(Earthquake earthquake) {
         double ageMin = (System.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
         double zoom = Math.max(0.1, Math.min(1.6, ageMin / 5.0)) / (Settings.cinemaModeZoomMultiplier / 100.0);
-        if(ageMin >= 3.0 && (System.currentTimeMillis() % 60000 < 2200)){
+        if(ageMin >= 3.0 && (System.currentTimeMillis() % 60000 < 22000)){
             zoom = Math.max(0.02, earthquake.getMag() / 50.0);
         }
 
