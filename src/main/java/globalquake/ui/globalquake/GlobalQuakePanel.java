@@ -444,6 +444,7 @@ public class GlobalQuakePanel extends GlobePanel {
             Earthquake cinemaQuake = lastCinemaModeEarthquake;
             if(System.currentTimeMillis() - lastCinemaModeEvent < Settings.cinemaModeSwitchTime * 1000 + 1000 && cinemaQuake != null){
                 quake = cinemaQuake;
+                displayedQuake = quakes.indexOf(cinemaQuake);
             } else {
                 quake = quakes.get(displayedQuake);
             }
