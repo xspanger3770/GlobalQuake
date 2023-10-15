@@ -10,6 +10,7 @@ import globalquake.ui.globe.Point2D;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ShakeMap {
 
@@ -44,7 +45,6 @@ public class ShakeMap {
     }
 
     private Set<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
-        boolean uhd = res >= 6;
         Set<IntensityHex> result = new HashSet<>();
         Set<Long> visited = new HashSet<>();
 
@@ -64,9 +64,7 @@ public class ShakeMap {
                 continue;
             }
 
-            if(!isOcean(current.id(), uhd)) {
-                result.add(current);
-            }
+            result.add(current);
 
             for (long neighbor : h3.gridDisk(current.id(), res)) {
                 IntensityHex neighborHex = new IntensityHex(neighbor, pga, new Point2D(latLng.lat, latLng.lng));
@@ -80,7 +78,8 @@ public class ShakeMap {
             }
         }
 
-        return result;
+        boolean uhd = res >= 6;
+        return result.parallelStream().filter(intensityHex1 -> !isOcean(intensityHex1.id(), uhd)).collect(Collectors.toSet());
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

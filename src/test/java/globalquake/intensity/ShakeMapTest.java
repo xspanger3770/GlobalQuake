@@ -1,6 +1,7 @@
 package globalquake.intensity;
 
 import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.regions.Regions;
 import globalquake.ui.settings.Settings;
 import org.junit.Test;
 
@@ -13,9 +14,10 @@ public class ShakeMapTest {
         ShakeMap.init();
         Settings.getSelectedDistanceUnit();
         IntensityTable.init();
+        Regions.init();
 
         Hypocenter hypocenter = new Hypocenter(0,0,0,0,0,0,null,null);
-        hypocenter.magnitude = 9.0;
+        hypocenter.magnitude = 9;
 
         long a = System.currentTimeMillis();
         ShakeMap shakeMap = new ShakeMap(hypocenter, 6);
