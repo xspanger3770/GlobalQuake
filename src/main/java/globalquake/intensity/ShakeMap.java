@@ -45,39 +45,37 @@ public class ShakeMap {
 
     private Set<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
         boolean uhd = res >= 6;
-        Set<Long> visited = new HashSet<>();
         Set<IntensityHex> result = new HashSet<>();
-
-        visited.add(intensityHex.id());
-
-        if(!isOcean(intensityHex.id(), uhd)) {
-            result.add(intensityHex);
-        }
+        Set<Long> visited = new HashSet<>();
 
         Queue<IntensityHex> pq = new PriorityQueue<>();
         pq.add(intensityHex);
 
         while(!pq.isEmpty()) {
             IntensityHex current = pq.remove();
-            for (long neighbor : h3.gridDisk(current.id(), res)) {
-                LatLng latLng = h3.cellToLatLng(neighbor);
-                double dist = GeoUtils.geologicalDistance(hypocenter.lat, hypocenter.lon, -hypocenter.depth, latLng.lat, latLng.lng, 0);
-                dist = Math.max(0, dist - h3.getHexagonEdgeLengthAvg(res, LengthUnit.km) * 0.5);
-                double pga = GeoUtils.pgaFunctionGen1(hypocenter.magnitude, dist);
-                Level level = intensityScale.getLevel(pga);
-                if (level == null) {
-                    continue;
-                }
 
+            LatLng latLng = h3.cellToLatLng(current.id());
+            double dist = GeoUtils.geologicalDistance(hypocenter.lat, hypocenter.lon, -hypocenter.depth, latLng.lat, latLng.lng, 0);
+            dist = Math.max(0, dist - h3.getHexagonEdgeLengthAvg(res, LengthUnit.km) * 0.5);
+            double pga = GeoUtils.pgaFunctionGen1(hypocenter.magnitude, dist);
+
+            Level level = intensityScale.getLevel(pga);
+            if (level == null) {
+                continue;
+            }
+
+            if(!isOcean(current.id(), uhd)) {
+                result.add(current);
+            }
+
+            for (long neighbor : h3.gridDisk(current.id(), res)) {
                 IntensityHex neighborHex = new IntensityHex(neighbor, pga, new Point2D(latLng.lat, latLng.lng));
                 if (visited.contains(neighbor)) {
                     continue;
                 }
 
                 visited.add(neighbor);
-                if(!isOcean(neighbor, uhd)){
-                    result.add(neighborHex);
-                }
+
                 pq.add(neighborHex);
             }
         }
