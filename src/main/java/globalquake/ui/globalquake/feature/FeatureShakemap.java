@@ -23,9 +23,9 @@ import org.tinylog.Logger;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
@@ -74,13 +74,19 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private synchronized void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
-        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream()
+                .sorted(Comparator.comparing(earthquake -> -earthquake.getMag())).collect(Collectors.toList())){
             ShakeMap shakeMap = earthquake.getShakemap();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {
-                    IntensityHex current = items.putIfAbsent(intensityHex.id(), intensityHex);
-                    if(current != null && intensityHex.pga() > current.pga()){
+                    IntensityHex current = items.get(intensityHex.id());
+                    if(current == null){
+                        current = findParent(items, intensityHex.id());
+                    }
+                    if(current == null){
                         items.put(intensityHex.id(), intensityHex);
+                    } else if(intensityHex.pga() > current.pga()){
+                        items.put(current.id(), new IntensityHex(current.id(), intensityHex.pga(), current.center()));
                     }
                 });
             }
@@ -88,6 +94,18 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
         hexes.clear();
         hexes.addAll(items.values());
+    }
+
+    private IntensityHex findParent(Map<Long, IntensityHex> items, long id) {
+        int res = h3.getResolution(id);
+        while(res >= 1){
+            res--;
+            id = h3.cellToParent(id, res);
+            if(items.containsKey(id)){
+                return items.get(id);
+            }
+        }
+        return null;
     }
 
     @Override
