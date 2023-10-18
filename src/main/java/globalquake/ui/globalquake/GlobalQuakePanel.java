@@ -439,13 +439,17 @@ public class GlobalQuakePanel extends GlobePanel {
 
         int baseWidth = g.getFontMetrics().stringWidth(string) + 12;
 
-        Earthquake quake;
+        Earthquake quake = null;
         try {
             Earthquake cinemaQuake = lastCinemaModeEarthquake;
-            if(System.currentTimeMillis() - lastCinemaModeEvent < Settings.cinemaModeSwitchTime * 1000 + 1000 && cinemaQuake != null){
-                quake = cinemaQuake;
-                displayedQuake = quakes.indexOf(cinemaQuake);
-            } else {
+            if(cinemaQuake != null && System.currentTimeMillis() - lastCinemaModeEvent < Settings.cinemaModeSwitchTime * 1000 + 1000){
+                int cinemaQuakeIndex = quakes.indexOf(cinemaQuake);
+                if(cinemaQuakeIndex != -1){
+                    quake = cinemaQuake;
+                    displayedQuake = cinemaQuakeIndex + 1;
+                }
+            }
+            if(quake == null) {
                 quake = quakes.get(displayedQuake);
             }
         } catch (Exception e) {
