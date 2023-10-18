@@ -54,7 +54,7 @@ It can also, estimate the earthquake magnitude using some empirical methods, but
 
 ## Installing
 
-A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/tutorials)
+A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/tree/main/tutorials)
 
 ## Contributing
 
