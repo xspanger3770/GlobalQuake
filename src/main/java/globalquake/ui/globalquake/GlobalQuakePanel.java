@@ -78,7 +78,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     setCinemaMode(!isCinemaMode());
                 }
 
-                if (true) {
+                if (DEBUG) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         earthquake.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
@@ -114,9 +114,8 @@ public class GlobalQuakePanel extends GlobePanel {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
             @Override
             public void onCinemaModeTargetSwitch(CinemaEvent cinemaEvent) {
-                if(cinemaEvent.getCinemaTarget().original() instanceof Earthquake){
-                    Earthquake earthquake = (Earthquake) cinemaEvent.getCinemaTarget().original();
-                    lastCinemaModeEarthquake = earthquake;
+                if(cinemaEvent.cinemaTarget().original() instanceof Earthquake){
+                    lastCinemaModeEarthquake = (Earthquake) cinemaEvent.cinemaTarget().original();
                     lastCinemaModeEvent = System.currentTimeMillis();
                 }
             }
@@ -452,8 +451,7 @@ public class GlobalQuakePanel extends GlobePanel {
             if(quake == null) {
                 quake = quakes.get(displayedQuake);
             }
-        } catch (Exception e) {
-            quake = null;
+        } catch (Exception ignored) {
         }
 
         if (DEBUG) {

@@ -25,7 +25,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
@@ -75,7 +74,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     private synchronized void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream()
-                .sorted(Comparator.comparing(earthquake -> -earthquake.getMag())).collect(Collectors.toList())){
+                .sorted(Comparator.comparing(earthquake -> -earthquake.getMag())).toList()){
             ShakeMap shakeMap = earthquake.getShakemap();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {

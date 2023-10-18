@@ -7,28 +7,21 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 
 public class GlobalQuakeEventHandler {
 
     private Queue<GlobalQuakeEventListener> eventListeners;
 
-    private Queue<GlobalQuakeEvent> eventQueue;
-
-    private boolean running;
     private ExecutorService executor;
 
     public GlobalQuakeEventHandler runHandler() {
-        running = true;
         eventListeners = new ConcurrentLinkedQueue<>();
-        eventQueue = new ConcurrentLinkedQueue<>();
         executor = Executors.newSingleThreadExecutor();
         return this;
     }
 
     @SuppressWarnings("unused")
     public void stopHandler(){
-        running = false;
         executor.shutdownNow();
     }
 
@@ -42,16 +35,12 @@ public class GlobalQuakeEventHandler {
     }
 
     public void fireEvent(GlobalQuakeEvent event){
-        eventQueue.add(event);
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                for (GlobalQuakeEventListener eventListener : eventListeners) {
-                    try {
-                        event.run(eventListener);
-                    } catch (Exception e) {
-                        Logger.error(e);
-                    }
+        executor.submit(() -> {
+            for (GlobalQuakeEventListener eventListener : eventListeners) {
+                try {
+                    event.run(eventListener);
+                } catch (Exception e) {
+                    Logger.error(e);
                 }
             }
         });

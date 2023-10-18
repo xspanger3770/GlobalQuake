@@ -71,31 +71,25 @@ public class EarthquakeArchive {
 	}
 
 	public void archiveQuakeAndSave(Earthquake earthquake) {
-		executor.submit(new Runnable() {
+		executor.submit(() -> {
+            archiveQuake(earthquake);
 
-			public void run() {
-				archiveQuake(earthquake);
+            saveArchive();
+            if(Settings.reportsEnabled) {
+                reportQuake(earthquake);
+            }
 
-				saveArchive();
-				if(Settings.reportsEnabled) {
-					reportQuake(earthquake);
-				}
-
-			}
         });
 	}
 
 	private void reportQuake(Earthquake earthquake) {
-		executor.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					EarthquakeReporter.report(earthquake);
-				} catch (Exception e) {
-					Logger.error(e);
-				}
-			}
-		});
+		executor.submit(() -> {
+            try {
+                EarthquakeReporter.report(earthquake);
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        });
 	}
 
 	public synchronized void archiveQuake(Earthquake earthquake) {
