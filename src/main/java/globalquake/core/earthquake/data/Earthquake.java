@@ -9,9 +9,12 @@ import globalquake.regions.Regional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Earthquake implements Regional, Warnable {
 
+	private final ExecutorService shakemapExecutor;
 	private double lat;
 	private double lon;
 	private double depth;
@@ -40,6 +43,7 @@ public class Earthquake implements Regional, Warnable {
 		this.regionUpdater = new RegionUpdater(this);
 
 		this.lastUpdate = System.currentTimeMillis();
+		shakemapExecutor = Executors.newSingleThreadExecutor();
 	}
 
 	public void uppdateRegion(){
@@ -159,16 +163,16 @@ public class Earthquake implements Regional, Warnable {
 	}
 
     public void updateShakemap(Hypocenter hypocenter) {
-		new Thread("Shakemap generator"){
+		shakemapExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
 				double mag = hypocenter.magnitude;
-				shakemap = new ShakeMap(hypocenter, mag < 3 ? 7 : mag < 4.5 ? 6 : mag < 6 ? 5 : mag < 8 ? 4 : 3);
+				shakemap = new ShakeMap(hypocenter, mag < 4.5 ? 6 : mag < 6 ? 5 : mag < 8 ? 4 : 3);
 				if(GlobalQuake.instance != null) {
 					GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(Earthquake.this));
 				}
 			}
-		}.start();
+		});
 	}
 
 	public ShakeMap getShakemap() {

@@ -27,7 +27,7 @@ public class ShakeMap {
         generate(hypocenter, res);
     }
 
-    private synchronized void generate(Hypocenter hypocenter, int res) {
+    private void generate(Hypocenter hypocenter, int res) {
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
         double pga = GeoUtils.pgaFunctionGen1(hypocenter.magnitude, hypocenter.depth);
         Level level = intensityScale.getLevel(pga);

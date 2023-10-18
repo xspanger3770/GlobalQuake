@@ -5,6 +5,8 @@ import org.tinylog.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 public class GlobalQuakeEventHandler {
@@ -13,48 +15,21 @@ public class GlobalQuakeEventHandler {
 
     private Queue<GlobalQuakeEvent> eventQueue;
 
-    private Semaphore semaphore;
-
     private boolean running;
+    private ExecutorService executor;
 
     public GlobalQuakeEventHandler runHandler() {
         running = true;
         eventListeners = new ConcurrentLinkedQueue<>();
         eventQueue = new ConcurrentLinkedQueue<>();
-        semaphore = new Semaphore(0);
-        new Thread(() -> {
-            while(running){
-                try {
-                    semaphore.acquire();
-                } catch (InterruptedException e) {
-                    break;
-                }
-
-                while(!eventQueue.isEmpty()) {
-                    GlobalQuakeEvent event = eventQueue.remove();
-
-                    if (event == null) {
-                        continue;
-                    }
-
-                    for (GlobalQuakeEventListener eventListener : eventListeners) {
-                        try {
-                            event.run(eventListener);
-                        } catch (Exception e) {
-                            Logger.error(e);
-                        }
-                    }
-                }
-            }
-        }).start();
-
+        executor = Executors.newSingleThreadExecutor();
         return this;
     }
 
     @SuppressWarnings("unused")
     public void stopHandler(){
         running = false;
-        semaphore.release();
+        executor.shutdownNow();
     }
 
     public void registerEventListener(GlobalQuakeEventListener eventListener){
@@ -68,7 +43,18 @@ public class GlobalQuakeEventHandler {
 
     public void fireEvent(GlobalQuakeEvent event){
         eventQueue.add(event);
-        semaphore.release();
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                for (GlobalQuakeEventListener eventListener : eventListeners) {
+                    try {
+                        event.run(eventListener);
+                    } catch (Exception e) {
+                        Logger.error(e);
+                    }
+                }
+            }
+        });
     }
 
 }

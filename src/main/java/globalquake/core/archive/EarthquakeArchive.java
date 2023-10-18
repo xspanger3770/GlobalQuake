@@ -10,16 +10,19 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EarthquakeArchive {
 
 	public static final File ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "archive.dat");
 	public static final File TEMP_ARCHIVE_FILE = new File(Main.MAIN_FOLDER, "temp_archive.dat");
+	private final ExecutorService executor;
 
 	private List<ArchivedQuake> archivedQuakes;
 
 	public EarthquakeArchive() {
-
+		executor = Executors.newSingleThreadExecutor();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,7 +71,8 @@ public class EarthquakeArchive {
 	}
 
 	public void archiveQuakeAndSave(Earthquake earthquake) {
-		new Thread("Archive Thread") {
+		executor.submit(new Runnable() {
+
 			public void run() {
 				archiveQuake(earthquake);
 
@@ -78,11 +82,11 @@ public class EarthquakeArchive {
 				}
 
 			}
-        }.start();
+        });
 	}
 
 	private void reportQuake(Earthquake earthquake) {
-		new Thread("Quake Reporter") {
+		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -91,7 +95,7 @@ public class EarthquakeArchive {
 					Logger.error(e);
 				}
 			}
-		}.start();
+		});
 	}
 
 	public synchronized void archiveQuake(Earthquake earthquake) {
