@@ -5,6 +5,7 @@ import globalquake.database.Station;
 import globalquake.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ public class StationSelectPanel extends GlobePanel {
     }
 
     public StationSelectPanel(StationSelectFrame stationSelectFrame, StationDatabaseManager stationDatabaseManager) {
+        super(Settings.homeLat, Settings.homeLon);
         this.stationDatabaseManager = stationDatabaseManager;
         this.stationSelectFrame = stationSelectFrame;
         updateAllStations();
@@ -151,6 +153,12 @@ public class StationSelectPanel extends GlobePanel {
             return;
         }
 
+        g.setColor(Color.orange);
+        g.setFont(new Font("Calibri", Font.BOLD, 18));
+        String str = stationSelectFrame.getDragMode() == DragMode.SELECT ? "Drag to select region"
+                : "Drag to deselect region";
+        g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, getHeight() - 8);
+
         if(dragRectangle != null){
             g.setColor(stationSelectFrame.getDragMode() == DragMode.SELECT ? Color.green:Color.red);
             g.setStroke(new BasicStroke(2f));
@@ -173,7 +181,6 @@ public class StationSelectPanel extends GlobePanel {
 
             allStationsList.clear();
             allStationsList.addAll(stations);
-            System.out.println(allStationsList.size());
         }finally {
             stationDatabaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }

@@ -1,5 +1,8 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.regions.RegionUpdater;
 import globalquake.regions.Regional;
 
@@ -56,12 +59,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = previousHypocenter.getWrongEventsCount();
-		for (Event e : earthquake.getCluster().getAssignedEvents()) {
-			archivedEvents.add(
-					new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), false));
-			if (e.maxRatio > this.maxRatio) {
-				this.maxRatio = e.getMaxRatio();
+		this.abandonedCount = previousHypocenter.getWrongEventCount();
+		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
+			if(e.isValid()) {
+				archivedEvents.add(
+						new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), false));
+				if (e.maxRatio > this.maxRatio) {
+					this.maxRatio = e.getMaxRatio();
+				}
 			}
 		}
 	}

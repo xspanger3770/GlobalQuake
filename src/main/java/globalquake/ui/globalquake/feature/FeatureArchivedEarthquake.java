@@ -8,8 +8,10 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.ui.settings.Settings;
+import globalquake.utils.Scale;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -77,7 +79,8 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
-        if (!entity.getRenderElement(0).shouldDraw) {
+        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        if (!entity.getRenderElement(0).shouldDraw || !displayed) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -85,13 +88,76 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
+
+        if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
+            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+            var centerPonint = renderer.projectPoint(point3D);
+            drawDetails(graphics, centerPonint, entity.getOriginal());
+        }
+    }
+
+    private void drawDetails(Graphics2D graphics, Point2D centerPonint, ArchivedQuake quake) {
+        graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
+
+        double size = 3 + Math.pow(quake.getMag(), 2) * 0.6;
+
+        String str = "M%.1f  %s".formatted(quake.getMag(), Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1));
+        int y=  (int)centerPonint.y - 24 - (int)size;
+        graphics.setColor(FeatureEarthquake.getCrossColor(quake.getMag()));
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=15;
+
+        graphics.setColor(Color.white);
+        str = "%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())));
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=30 + (int) size * 2;
+
+        str = "%s".formatted(quake.getRegion());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        y+=15;
+        str = "%.4f, %.4f".formatted(quake.getLat(), quake.getLon());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+        graphics.setColor(getColorStations(quake.getAssignedStations()));
+        y+=15;
+        str = "%d stations".formatted(quake.getAssignedStations());
+        graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) * 0.5), y);
+
+    }
+
+    private Color getColorStations(int assignedStations) {
+        if(assignedStations < 6){
+            return Color.red;
+        } else if(assignedStations < 10){
+            return Color.orange;
+        } else if(assignedStations < 16){
+            return Color.yellow;
+        } else if(assignedStations < 32){
+            return Color.green;
+        }
+        return Color.cyan;
     }
 
     private Color getColor(ArchivedQuake quake) {
-        double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+        Color col;
+
+        if(Settings.selectedEventColorIndex == 0){
+            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
+                    : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
+        } else if(Settings.selectedEventColorIndex == 1){
+            col = Scale.getColorEasily(Math.max(0.06, 0.9 - quake.getDepth() / 400.0));
+        } else{
+            col = Scale.getColorEasily(quake.getMag() / 8.0);
+        }
+
         int alpha = (int) Math.max(0, Math.min(255, Settings.oldEventsOpacity / 100.0 * 255.0));
-        return ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0, alpha) : new Color(255, 0, 0, alpha))
-                : ageInHRS < 24 ? new Color(255, 140, 0, alpha) : new Color(255,255,0, alpha);
+        return new Color(col.getRed(), col.getGreen(), col.getBlue(), alpha);
     }
 
 

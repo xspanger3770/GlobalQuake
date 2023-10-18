@@ -41,7 +41,6 @@ public class StationDatabase implements Serializable {
 
     @SuppressWarnings("HttpUrlsUsage")
     public void addDefaults() {
-        // todo some fdsnws servers are also available with https
         stationSources.add(new StationSource("BGR", "https://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
         stationSources.add(new StationSource("KOERI", "http://eida-service.koeri.boun.edu.tr/fdsnws/station/1/"));
@@ -149,7 +148,7 @@ public class StationDatabase implements Serializable {
 
     public static Channel getChannel(Station station, String channelCode, String locationCode){
         for(Channel channel: station.getChannels()){
-            if(channel.getCode().equals(channelCode) && channel.getLocationCode().equals(locationCode)){
+            if(channel.getCode().equalsIgnoreCase(channelCode) && channel.getLocationCode().equalsIgnoreCase(locationCode)){
                 return channel;
             }
         }
@@ -169,13 +168,17 @@ public class StationDatabase implements Serializable {
         return channel;
     }
 
-    public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
+    public static Station getStation(List<Network> networks, String networkCode, String stationCode) {
         Network network = getNetwork(networks, networkCode);
         if(network == null){
             return null;
         }
 
-        Station station = findStation(network, stationCode);
+        return findStation(network, stationCode);
+    }
+
+    public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
+        Station station = getStation(networks, networkCode, stationCode);
         if(station == null){
             return null;
         }
@@ -185,7 +188,7 @@ public class StationDatabase implements Serializable {
 
     private static Station findStation(Network network, String stationCode) {
         for(Station station: network.getStations()){
-            if(station.getStationCode().equals(stationCode)){
+            if(station.getStationCode().equalsIgnoreCase(stationCode)){
                 return station;
             }
         }
@@ -219,7 +222,7 @@ public class StationDatabase implements Serializable {
 
     public static Network getNetwork(List<Network> networks, String networkCode) {
         for(Network network: networks){
-            if(network.getNetworkCode().equals(networkCode)){
+            if(network.getNetworkCode().equalsIgnoreCase(networkCode)){
                 return network;
             }
         }

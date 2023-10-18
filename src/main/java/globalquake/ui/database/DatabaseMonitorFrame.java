@@ -3,6 +3,7 @@ package globalquake.ui.database;
 import globalquake.database.StationDatabaseManager;
 import globalquake.exception.FatalIOException;
 import globalquake.main.Main;
+import globalquake.ui.GQFrame;
 import globalquake.ui.database.action.RestoreDatabaseAction;
 import globalquake.ui.stationselect.StationSelectFrame;
 
@@ -12,10 +13,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DatabaseMonitorFrame extends JFrame {
+public class DatabaseMonitorFrame extends GQFrame {
 
     private final StationDatabaseManager manager;
     private final Runnable onLaunch;
@@ -77,7 +79,6 @@ public class DatabaseMonitorFrame extends JFrame {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                System.out.println("SAVEE");
                 try {
                     manager.save();
                 } catch (FatalIOException ex) {
@@ -117,6 +118,10 @@ public class DatabaseMonitorFrame extends JFrame {
         btnSelectStations = new JButton("Select Stations");
         btnSelectStations.setEnabled(false);
 
+        ImageIcon selectStationsIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectStations.png")));
+        Image image = selectStationsIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        btnSelectStations.setIcon(new ImageIcon(image));
+
         btnSelectStations.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -128,6 +133,10 @@ public class DatabaseMonitorFrame extends JFrame {
 
         btnLaunch = new JButton("Launch %s".formatted(Main.fullName));
         btnLaunch.setEnabled(false);
+
+        ImageIcon launchIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/launchGlobalQuake.png")));
+        image = launchIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        btnLaunch.setIcon(new ImageIcon(image));
         btnLaunch.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

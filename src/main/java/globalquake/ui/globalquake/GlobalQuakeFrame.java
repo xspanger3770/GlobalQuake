@@ -2,6 +2,8 @@ package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
+import globalquake.ui.GQFrame;
+import globalquake.ui.action.OpenURLAction;
 import globalquake.ui.settings.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
@@ -14,7 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class GlobalQuakeFrame extends JFrame {
+public class GlobalQuakeFrame extends GQFrame {
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
@@ -64,7 +66,7 @@ public class GlobalQuakeFrame extends JFrame {
 			}
 		});
 
-		list = new EarthquakeListPanel(GlobalQuake.instance.getArchive().getArchivedQuakes());
+		list = new EarthquakeListPanel(this, GlobalQuake.instance.getArchive().getArchivedQuakes());
 		panel.setPreferredSize(new Dimension(600, 600));
 		list.setPreferredSize(new Dimension(300, 600));
 
@@ -80,7 +82,7 @@ public class GlobalQuakeFrame extends JFrame {
 
 		pack();
 		setLocationRelativeTo(null);
-		setMinimumSize(new Dimension(610, 500));
+		setMinimumSize(new Dimension(1100, 700));
 		setResizable(true);
 		setTitle(Main.fullName);
 
@@ -114,6 +116,15 @@ public class GlobalQuakeFrame extends JFrame {
 
 		menuBar.add(menuOptions);
 
+		JMenu aboutMenu = new JMenu("Links");
+
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/", "Open GitHub webpage"));
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/issues/", "Report issue or request new feature"));
+		aboutMenu.add(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/releases/", "Check for latest version"));
+		aboutMenu.add(new OpenURLAction("https://www.buymeacoffee.com/jakubspangl/", "Donate"));
+
+		menuBar.add(aboutMenu);
+
 		return menuBar;
 	}
 
@@ -130,4 +141,7 @@ public class GlobalQuakeFrame extends JFrame {
 		revalidate();
 	}
 
+	public GlobalQuakePanel getGQPanel() {
+		return panel;
+	}
 }

@@ -7,24 +7,30 @@ import globalquake.exception.ApplicationErrorHandler;
 import globalquake.exception.RuntimeApplicationException;
 import globalquake.exception.FatalIOException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
+import globalquake.training.EarthquakeAnalysisTraining;
 import globalquake.ui.database.DatabaseMonitorFrame;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Main {
 
     private static ApplicationErrorHandler errorHandler;
-
-    public static final String version = "0.9.5";
+    public static final String version = "0.9.8";
     public static final String fullName = "GlobalQuake " + version;
-
     public static final File MAIN_FOLDER = new File("./GlobalQuake/");
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
+
+    public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
 
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();
@@ -39,7 +45,7 @@ public class Main {
         try {
             if (!MAIN_FOLDER.exists()) {
                 if (!MAIN_FOLDER.mkdirs()) {
-                    errorHandler.handleException(new FatalIOException("Unable to create main directory!", null));
+                    getErrorHandler().handleException(new FatalIOException("Unable to create main directory!", null));
                 }
             }
 
@@ -60,15 +66,18 @@ public class Main {
         }
     }
 
+    private static final double PHASES = 8.0;
+    private static int phase = 0;
+
     private static void initAll() throws Exception {
         databaseMonitorFrame.getMainProgressBar().setString("Loading regions...");
-        databaseMonitorFrame.getMainProgressBar().setValue(0);
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         Regions.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading scales...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (1 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         Scale.load();
         databaseMonitorFrame.getMainProgressBar().setString("Loading sounds...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (2 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         try{
             //Sound may fail to load for a variety of reasons. If it does, this method disables sound.
             Sounds.load();
@@ -76,19 +85,27 @@ public class Main {
             RuntimeApplicationException error = new RuntimeApplicationException("Failed to load sounds. Sound will be disabled", e);
             getErrorHandler().handleWarning(error);
         }
+        databaseMonitorFrame.getMainProgressBar().setString("Filling up intensity table...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        IntensityTable.init();
         databaseMonitorFrame.getMainProgressBar().setString("Loading travel table...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (3 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();
+        databaseMonitorFrame.getMainProgressBar().setString("Calibrating...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        if(Settings.recalibrateOnLaunch) {
+            EarthquakeAnalysisTraining.calibrateResolution(databaseMonitorFrame.getMainProgressBar(), null);
+        }
         databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) (4 / 7.0 * 100.0));
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
                     databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
-                    databaseMonitorFrame.getMainProgressBar().setValue((int) (5 / 7.0 * 100.0));
+                    databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
                         databaseMonitorFrame.getMainProgressBar().setString("Saving...");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) (6 / 7.0 * 100.0));
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
 
                         try {
                             databaseManager.save();
@@ -98,7 +115,7 @@ public class Main {
                         databaseMonitorFrame.initDone();
 
                         databaseMonitorFrame.getMainProgressBar().setString("Done");
-                        databaseMonitorFrame.getMainProgressBar().setValue(100);
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
                     });
                 });
     }
@@ -108,10 +125,13 @@ public class Main {
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
+        if(errorHandler == null) {
+            errorHandler = new ApplicationErrorHandler(null);
+        }
         return errorHandler;
     }
 
     public static void initErrorHandler() {
-        Thread.setDefaultUncaughtExceptionHandler(errorHandler = new ApplicationErrorHandler(null));
+        Thread.setDefaultUncaughtExceptionHandler(getErrorHandler());
     }
 }

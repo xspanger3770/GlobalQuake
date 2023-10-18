@@ -1,11 +1,13 @@
 package globalquake.core;
 
+import globalquake.core.alert.AlertManager;
 import globalquake.core.earthquake.ClusterAnalysis;
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.EarthquakeArchive;
+import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.database.StationDatabaseManager;
+import globalquake.events.GlobalQuakeEventHandler;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
 
@@ -23,20 +25,28 @@ public class GlobalQuake {
 	private final EarthquakeAnalysis earthquakeAnalysis;
 	private final AlertManager alertManager;
 	private final EarthquakeArchive archive;
+
+	private final GlobalQuakeEventHandler eventHandler;
+
 	public static GlobalQuake instance;
 
 	private final GlobalStationManager globalStationManager;
 
 	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
-		this.stationDatabaseManager =stationDatabaseManager;
+		this.stationDatabaseManager = stationDatabaseManager;
 
-		clusterAnalysis = new ClusterAnalysis();
-		earthquakeAnalysis = new EarthquakeAnalysis();
-		alertManager = new AlertManager();
-		archive = new EarthquakeArchive();
+		eventHandler = new GlobalQuakeEventHandler().runHandler();
+
 		globalStationManager = new GlobalStationManager();
 		globalStationManager.initStations(stationDatabaseManager);
+
+		earthquakeAnalysis = new EarthquakeAnalysis();
+		clusterAnalysis = new ClusterAnalysis();
+
+		alertManager = new AlertManager();
+		archive = new EarthquakeArchive().loadArchive();
+
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
 	}
@@ -63,7 +73,7 @@ public class GlobalQuake {
                     getArchive().saveArchive();
                 }
             });
-        });
+		});
 		return this;
 	}
 
@@ -101,5 +111,13 @@ public class GlobalQuake {
 
 	public StationDatabaseManager getStationDatabaseManager() {
 		return stationDatabaseManager;
+	}
+
+	public GlobalQuakeEventHandler getEventHandler() {
+		return eventHandler;
+	}
+
+	public GlobalQuakeFrame getGlobalQuakeFrame() {
+		return globalQuakeFrame;
 	}
 }

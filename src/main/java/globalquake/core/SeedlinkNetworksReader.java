@@ -6,6 +6,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.database.SeedlinkNetwork;
+import globalquake.database.SeedlinkStatus;
 import org.tinylog.Logger;
 
 import java.time.Instant;
@@ -70,20 +71,21 @@ public class SeedlinkNetworksReader {
 				int reconnectDelay = RECONNECT_DELAY;
 
                 while (true) {
+					seedlinkNetwork.status = SeedlinkStatus.CONNECTING;
+					seedlinkNetwork.connectedStations = 0;
+
 					SeedlinkReader reader = null;
 					try {
-						System.out.println("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
+						Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
 						reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 						reader.sendHello();
-
-						int connected = 0;
 
 						reconnectDelay = RECONNECT_DELAY;
 						boolean first = true;
 
 						for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 							if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-                                System.out.printf("Connecting to %s %s %s %s [%s]\n", s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName());
+                                Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
 								if(!first) {
 									reader.sendCmd("DATA");
 								} else{
@@ -91,16 +93,18 @@ public class SeedlinkNetworksReader {
 								}
 								reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 										s.getChannelName());
-								connected++;
+								seedlinkNetwork.connectedStations++;
 							}
 						}
 
-						if(connected == 0){
-							System.out.println("No stations connected to "+seedlinkNetwork.getName());
+						if(seedlinkNetwork.connectedStations == 0){
+							Logger.info("No stations connected to "+seedlinkNetwork.getName());
+							seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
 							break;
 						}
 
 						reader.startData();
+						seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
 						while (reader.hasNext()) {
 							SeedlinkPacket slp = reader.readPacket();
@@ -110,6 +114,7 @@ public class SeedlinkNetworksReader {
 								Logger.error(e);
 							}
 						}
+
 						reader.close();
 					} catch (Exception e) {
 						Logger.error(e);
@@ -120,17 +125,19 @@ public class SeedlinkNetworksReader {
 								Logger.error(ex);
 							}
 						}
+					}
 
-						System.err.println(seedlinkNetwork.getHost() + " Crashed, Reconnecting after " + reconnectDelay
-								+ " seconds...");
-						try {
-							sleep(reconnectDelay * 1000L);
-							if(reconnectDelay < 60 * 5) {
-								reconnectDelay *= 2;
-							}
-						} catch (InterruptedException e1) {
-							break;
+					seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
+					seedlinkNetwork.connectedStations = 0;
+					Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
+							+ " seconds...");
+					try {
+						sleep(reconnectDelay * 1000L);
+						if(reconnectDelay < 60 * 5) {
+							reconnectDelay *= 2;
 						}
+					} catch (InterruptedException ignored) {
+
 					}
 				}
 			}
@@ -143,11 +150,12 @@ public class SeedlinkNetworksReader {
 		if (lastData == null || dr.getLastSampleBtime().toInstant().isAfter(lastData)) {
 			lastData = dr.getLastSampleBtime().toInstant();
 		}
+
 		String network = dr.getHeader().getNetworkCode().replaceAll(" ", "");
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
 		var globalStation = stationCache.get("%s %s".formatted(network, station));
 		if(globalStation == null){
-			Logger.warn("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
+			Logger.trace("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
 		}else {
 			globalStation.addRecord(dr);
 		}

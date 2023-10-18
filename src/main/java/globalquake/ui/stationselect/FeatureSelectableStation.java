@@ -71,7 +71,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         graphics.setColor(Color.BLACK);
         graphics.draw(element.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0) && renderer.getRenderProperties().scroll < 1;
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true) && renderer.getRenderProperties().scroll < 1;
 
         if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())) {
             graphics.setColor(Color.yellow);
@@ -87,10 +87,20 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
                 && renderer.getAngularDistance(centerCoords) < 25.0 && renderer.getRenderProperties().scroll < 0.75) {
             Optional<Long> minDelay = entity.getOriginal().getSelectedChannel().getSeedlinkNetworks().values().stream().min(Long::compare);
+
+            int x = (int) (centerPonint.x + 10);
+
             if(minDelay.isPresent() && minDelay.get() > 5 * 60 * 1000L) {
                 graphics.setColor(Color.red);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
-                graphics.drawString("!", (int) centerPonint.x + 10, (int) centerPonint.y + 9);
+                graphics.drawString("!", x, (int) centerPonint.y + 9);
+                x+=graphics.getFontMetrics().stringWidth("!");
+            }
+
+            if(entity.getOriginal().locationErrorSuspected()){
+                graphics.setColor(Color.yellow);
+                graphics.setFont(new Font("Calibri", Font.BOLD, 14));
+                graphics.drawString("!", x, (int) centerPonint.y + 9);
             }
         }
     }

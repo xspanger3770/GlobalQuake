@@ -4,6 +4,8 @@ import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.Level;
+import globalquake.ui.archived.ArchivedQuakeAnimation;
+import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.ui.settings.Settings;
 
 import javax.swing.*;
@@ -15,8 +17,6 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 public class EarthquakeListPanel extends JPanel {
     private double scroll = 0;
     protected int mouseY = -999;
-
-    private static final DateTimeFormatter formatNice = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
@@ -48,7 +46,7 @@ public class EarthquakeListPanel extends JPanel {
         }).collect(Collectors.toList());
     }
 
-    public EarthquakeListPanel(List<ArchivedQuake> archivedQuakes) {
+    public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {
         this.archivedQuakes = archivedQuakes;
         setBackground(Color.gray);
         setForeground(Color.gray);
@@ -85,12 +83,20 @@ public class EarthquakeListPanel extends JPanel {
 
                 ArchivedQuake quake = filtered.get(i);
 
-                if (quake != null && e.getButton() == MouseEvent.BUTTON3) {
+                if (quake != null && e.getButton() == MouseEvent.BUTTON3 && !isMouseInGoUpRect) {
                     quake.setWrong(!quake.isWrong());
                 }
 
-                if(isMouseInGoUpRect && e.getButton() == MouseEvent.BUTTON1){
-                    scroll = 0;
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    if(isMouseInGoUpRect) {
+                        scroll = 0;
+                    }else if (quake != null ) {
+                        new ArchivedQuakeUI(parent, quake).setVisible(true);
+                    }
+                }
+
+                if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
+                    new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
             }
 
@@ -180,7 +186,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 27 - g.getFontMetrics().stringWidth(str) / 2, y + 30);
 
-                str = ((int) quake.getDepth()) + "km";
+                str = Settings.getSelectedDistanceUnit().format(quake.getDepth(), 0);
                 g.setFont(new Font("Calibri", Font.BOLD, 12));
                 g.setColor(Color.white);
                 g.drawString(str, (int) (25 - g.getFontMetrics().stringWidth(str) * 0.5), y + 46);
@@ -190,7 +196,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 18);
 
-                str = formatNice.format(Instant.ofEpochMilli(quake.getOrigin()));
+                str = Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()));
                 g.setFont(new Font("Calibri", Font.PLAIN, 16));
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 42);

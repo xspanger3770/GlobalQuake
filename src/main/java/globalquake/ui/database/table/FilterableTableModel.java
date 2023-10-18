@@ -20,11 +20,9 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 		applyFilter();
 	}
 
-	public final void applyFilter() {
-		synchronized (this) {
-			this.filteredData.clear();
-			this.filteredData.addAll(this.data.stream().filter(this::accept).toList());
-		}
+	public synchronized final void applyFilter() {
+		this.filteredData.clear();
+		this.filteredData.addAll(this.data.stream().filter(this::accept).toList());
 		super.fireTableDataChanged();
 	}
 
@@ -43,32 +41,27 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 		return filteredData.size();
 	}
 
-	public void updateRow(E entity) {
+	public synchronized void updateRow(E entity) {
 		int rowIndex;
-		synchronized (this) {
-			rowIndex = filteredData.indexOf(entity);
-		}
+		rowIndex = filteredData.indexOf(entity);
 		fireTableRowsUpdated(rowIndex, rowIndex);
 		dataUpdated();
 	}
 
 	public synchronized void deleteRow(int rowIndex) {
 		E entity;
-		synchronized (this) {
-			entity = filteredData.get(rowIndex);
-			filteredData.remove(entity);
-		}
+		entity = filteredData.get(rowIndex);
+		filteredData.remove(entity);
 		data.remove(entity);
 		fireTableRowsDeleted(rowIndex, rowIndex);
 		dataUpdated();
 	}
 
-	public void addRow(E entity) {
+	public synchronized void addRow(E entity) {
 		int newRowIndex;
-		synchronized (this) {
-			newRowIndex = filteredData.size();
-			filteredData.add(entity);
-		}
+		newRowIndex = filteredData.size();
+		filteredData.add(entity);
+
 		data.add(entity);
 		fireTableRowsInserted(newRowIndex, newRowIndex);
 		dataUpdated();

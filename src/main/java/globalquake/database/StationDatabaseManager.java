@@ -43,14 +43,14 @@ public class StationDatabaseManager {
                 stationDatabase = (StationDatabase) in.readObject();
                 in.close();
 
-                System.out.println("Load successfull");
+                Logger.info("Database load successfull");
             } catch (ClassNotFoundException | IOException e) {
                 Main.getErrorHandler().handleException(new FatalIOException("Unable to read station database!", e));
             }
         }
 
         if (stationDatabase == null) {
-            System.out.println("A new database created");
+            Logger.info("A new database created");
             stationDatabase = new StationDatabase();
         }
 
@@ -73,6 +73,7 @@ public class StationDatabaseManager {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
             out.writeObject(stationDatabase);
             out.close();
+            Logger.info("Station database saved sucessfully");
         } catch (IOException e) {
             throw new FatalIOException("Unable to save station database!", e);
         } finally {
@@ -104,6 +105,8 @@ public class StationDatabaseManager {
         this.updating = true;
         fireStatusChangeEvent();
 
+        final Object statusSync = new Object();
+
         new Thread(() -> {
             toBeUpdated.forEach(stationSource -> {
                 stationSource.getStatus().setString("Queued...");
@@ -111,25 +114,40 @@ public class StationDatabaseManager {
             });
             toBeUpdated.parallelStream().forEach(stationSource -> {
                 try {
-                    stationSource.getStatus().setString("Updating...");
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString("Updating...");
+                    }
                     List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
-                    stationSource.getStatus().setString("Updating database...");
+
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString("Updating database...");
+                    }
+
                     StationDatabaseManager.this.acceptNetworks(networkList);
-                    stationSource.getStatus().setString(networkList.size()+" Networks Downloaded");
-                    stationSource.getStatus().setValue(100);
-                    stationSource.setLastUpdate(LocalDateTime.now());
+
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString(networkList.size() + " Networks Downloaded");
+                        stationSource.getStatus().setValue(100);
+                        stationSource.setLastUpdate(LocalDateTime.now());
+                    }
                 } catch (SocketTimeoutException e) {
                     Logger.error(e);
-                    stationSource.getStatus().setString("Timed out!");
-                    stationSource.getStatus().setValue(0);
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString("Timed out!");
+                        stationSource.getStatus().setValue(0);
+                    }
                 } catch (FdnwsDownloadException e) {
                     Logger.error(e);
-                    stationSource.getStatus().setString(e.getUserMessage());
-                    stationSource.getStatus().setValue(0);
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString(e.getUserMessage());
+                        stationSource.getStatus().setValue(0);
+                    }
                 } catch (Exception e) {
                     Logger.error(e);
-                    stationSource.getStatus().setString("Error!");
-                    stationSource.getStatus().setValue(0);
+                    synchronized (statusSync) {
+                        stationSource.getStatus().setString("Error!");
+                        stationSource.getStatus().setValue(0);
+                    }
                 } finally {
                     fireUpdateEvent();
                 }
@@ -168,16 +186,18 @@ public class StationDatabaseManager {
 
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
-        toBeUpdated.forEach(seedlinkNetwork -> {
-            seedlinkNetwork.getStatus().setString("Queued...");
-            seedlinkNetwork.getStatus().setValue(0);
-        });
+        toBeUpdated.forEach(seedlinkNetwork -> seedlinkNetwork.setStatus(0, "Queued..."));
         fireStatusChangeEvent();
+
+        final Object statusSync = new Object();
+
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
                             try {
-                                seedlinkNetwork.getStatus().setString(attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(0, attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                                }
 
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -189,18 +209,22 @@ public class StationDatabaseManager {
                                 Future<Void> future = executor.submit(task);
                                 future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-                                seedlinkNetwork.getStatus().setString("Done");
-                                seedlinkNetwork.getStatus().setValue(100);
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(100, "Done");
+                                }
 
                                 break;
                             } catch(TimeoutException e){
-                                seedlinkNetwork.getStatus().setString("Timed out!");
-                                seedlinkNetwork.getStatus().setValue(0);
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(0, "Timed out!");
+                                }
                                 break;
                             } catch (Exception e) {
                                 Logger.error(e);
-                                seedlinkNetwork.getStatus().setString("Error!");
-                                seedlinkNetwork.getStatus().setValue(0);
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(0, "Error!");
+                                }
+
                             } finally {
                                 fireUpdateEvent();
                             }

@@ -1,6 +1,8 @@
 package globalquake.database;
 
 
+import globalquake.geo.GeoUtils;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -117,5 +119,14 @@ public class Station implements Serializable {
                 selectedChannel = channel;
             }
         }
+    }
+
+    public boolean locationErrorSuspected() {
+        if(getSelectedChannel() == null){
+            return false;
+        }
+
+        double gcd = GeoUtils.greatCircleDistance(lat, lon, getSelectedChannel().getLatitude(), getSelectedChannel().getLongitude());
+        return gcd > 10.0;
     }
 }

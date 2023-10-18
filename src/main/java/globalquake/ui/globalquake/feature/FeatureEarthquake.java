@@ -1,6 +1,9 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.core.earthquake.Earthquake;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.geo.GeoUtils;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
@@ -9,7 +12,9 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
+import globalquake.ui.settings.Settings;
 import globalquake.utils.Scale;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -20,12 +25,13 @@ import java.util.Locale;
 
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
+    private static final int ELEMENT_COUNT = 5 + 4;
     private final List<Earthquake> earthquakes;
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(List<Earthquake> earthquakes) {
-        super(3);
+        super(ELEMENT_COUNT);
         this.earthquakes = earthquakes;
     }
 
@@ -38,7 +44,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
         RenderElement elementPWave = entity.getRenderElement(0);
         RenderElement elementSWave = entity.getRenderElement(1);
-        RenderElement elementCross = entity.getRenderElement(2);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
+        RenderElement elementCross = entity.getRenderElement(4);
 
         Earthquake e = entity.getOriginal();
 
@@ -47,21 +55,63 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 * GeoUtils.EARTH_CIRCUMFERENCE;
         double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkpDist = TauPTravelTimeCalculator.getPKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
+        double pkikpDist = TauPTravelTimeCalculator.getPKIKPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
+                * GeoUtils.EARTH_CIRCUMFERENCE;
 
         renderer.createCircle(elementPWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                pDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, pDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCircle(elementSWave.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                sDist, 0, GlobeRenderer.QUALITY_HIGH);
+                Math.max(0, sDist), 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                Math.max(0, pkpDist), 0, GlobeRenderer.QUALITY_HIGH);
+
+        renderer.createCircle(elementPKIKPWave.getPolygon(),
+                entity.getOriginal().getLat(),
+                entity.getOriginal().getLon(),
+                Math.max(0, pkikpDist), 0, GlobeRenderer.QUALITY_HIGH);
 
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
                         .pxToDeg(16), 45.0);
+
+
+        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals != null) {
+            List<PolygonConfidenceInterval> polygonConfidenceIntervals = e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+            for (int i = 0; i < polygonConfidenceIntervals.size(); i++) {
+                PolygonConfidenceInterval polygonConfidenceInterval = polygonConfidenceIntervals.get(i);
+                createConfidencePolygon(entity.getRenderElement(5 + i), polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
+            }
+        }
+    }
+
+    private void createConfidencePolygon(RenderElement renderElement, PolygonConfidenceInterval polygonConfidenceInterval, double lat, double lon) {
+        renderElement.getPolygon().reset();
+
+        double step = 360.0 / polygonConfidenceInterval.n();
+
+        for (int i = 0; i < polygonConfidenceInterval.n() + 1; i++) {
+            double ang = polygonConfidenceInterval.offset() + step * i;
+            double[] latLon = GeoUtils.moveOnGlobe(lat, lon, polygonConfidenceInterval.lengths().get(i % polygonConfidenceInterval.n()), ang);
+            Vector3D vector3D = new Vector3D(
+                    GlobeRenderer.getX_3D(latLon[0], latLon[1], 0),
+                    GlobeRenderer.getY_3D(latLon[0], latLon[1], 0),
+                    GlobeRenderer.getZ_3D(latLon[0], latLon[1], 0));
+
+            renderElement.getPolygon().addPoint(vector3D);
+        }
+
+        renderElement.getPolygon().finish();
     }
 
     @Override
@@ -81,7 +131,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
-        for (int i = 0; i <= 2; i++) {
+        for (int i = 0; i < ELEMENT_COUNT; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
             elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
@@ -90,34 +140,59 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity) {
-        long age = System.currentTimeMillis() - entity.getOriginal().getOrigin();
-        double maxDisplayTimeSec = Math.max(3 * 60, Math.pow(((int) (entity.getOriginal().getMag())), 2) * 40);
+        float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
+        RenderElement elementPWave = entity.getRenderElement(0);
+        RenderElement elementSWave = entity.getRenderElement(1);
+        RenderElement elementPKPWave = entity.getRenderElement(2);
+        RenderElement elementPKIKPWave = entity.getRenderElement(3);
 
-        if (age / 1000.0 < maxDisplayTimeSec) {
-            float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
-            RenderElement elementPWave = entity.getRenderElement(0);
-            RenderElement elementSWave = entity.getRenderElement(1);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            if (elementPWave.shouldDraw) {
-                graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(4.0f *thicknessMultiplier));
-                graphics.draw(elementPWave.getShape());
-            }
-
-            if (elementSWave.shouldDraw) {
-                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-                graphics.draw(elementSWave.getShape());
+        if(Settings.confidencePolygons) {
+            for (int i = 5; i < 9; i++) {
+                RenderElement elementConfidencePolygon = entity.getRenderElement(i);
+                if (elementConfidencePolygon.shouldDraw) {
+                    graphics.setStroke(new BasicStroke(3.0f));
+                    graphics.setColor(polygonColor(i - 5));
+                    graphics.draw(elementConfidencePolygon.getShape());
+                }
             }
         }
 
-        RenderElement elementCross = entity.getRenderElement(2);
-        if (elementCross.shouldDraw && (System.currentTimeMillis() / 500) % 2 == 0) {
-            graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
-            graphics.setStroke(new BasicStroke(4f));
-            graphics.draw(elementCross.getShape());
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (elementPWave.shouldDraw) {
+            graphics.setColor(Color.BLUE);
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementPWave.getShape());
+        }
+
+        if (elementSWave.shouldDraw) {
+            graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementSWave.getShape());
+        }
+
+        if (Settings.displayCoreWaves) {
+            if (elementPKPWave.shouldDraw) {
+                graphics.setColor(Color.MAGENTA);
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+                graphics.draw(elementPKPWave.getShape());
+            }
+
+            if (elementPKIKPWave.shouldDraw) {
+                graphics.setColor(Color.GREEN);
+                graphics.setStroke(new BasicStroke(1.0f));
+                graphics.draw(elementPKIKPWave.getShape());
+            }
+        }
+
+        RenderElement elementCross = entity.getRenderElement(4);
+        if (elementCross.shouldDraw) {
+            if((System.currentTimeMillis() / 500) % 2 == 0) {
+                graphics.setStroke(new BasicStroke(4f));
+                graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
+                graphics.draw(elementCross.getShape());
+            }
 
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
             var centerPonint = renderer.projectPoint(point3D);
@@ -128,12 +203,34 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
 
-            str = "%skm".formatted(f1d.format(entity.getOriginal().getDepth()));
+            Cluster cluster = entity.getOriginal().getCluster();
+            if (cluster != null) {
+                Hypocenter hypocenter = cluster.getPreviousHypocenter();
 
-            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+                if (hypocenter != null) {
+                    str = "%s".formatted(
+                            Settings.getSelectedDistanceUnit().format(hypocenter.depth, 1)
+                    );
+
+                    graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+                }
+            }
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private Color polygonColor(int i) {
+        if(i == 0){
+            return Color.blue;
+        }
+        if(i == 1){
+            return Color.green;
+        }
+        if(i == 2){
+            return Color.yellow;
+        }
+        return Color.red;
     }
 
     private Color getColorSWave(double mag) {
@@ -141,7 +238,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         return Scale.interpolateColors(Color.yellow, Color.red, weight);
     }
 
-    private Color getCrossColor(double mag) {
+    public static Color getCrossColor(double mag) {
         if (mag < 3) {
             return Color.lightGray;
         }
@@ -154,7 +251,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         if (mag < 6) {
             return Color.orange;
         }
-        if(mag < 7){
+        if (mag < 7) {
             return Color.red;
         }
         return Color.magenta;

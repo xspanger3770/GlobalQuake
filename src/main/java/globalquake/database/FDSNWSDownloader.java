@@ -1,6 +1,7 @@
 package globalquake.database;
 
 import globalquake.exception.FdnwsDownloadException;
+import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,7 +70,7 @@ public class FDSNWSDownloader {
         }
 
 
-        System.out.println("Connecting to " + url);
+        Logger.info("Connecting to " + url);
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
@@ -78,10 +79,9 @@ public class FDSNWSDownloader {
         int response = con.getResponseCode();
 
         if (response == 413) {
-            System.err.println("413! Splitting...");
+            Logger.debug("413! Splitting...");
             stationSource.getStatus().setString("Splitting...");
             if(maxLon - minLon < 0.1){
-                System.err.println("This can't go forewer");
                 return;
             }
 
@@ -123,7 +123,7 @@ public class FDSNWSDownloader {
         for (int i = 0; i < networks.getLength(); i++) {
             String networkCode = obtainAttribute(networks.item(i), "code", "unknown");
             if (networkCode.equalsIgnoreCase("unknown")) {
-                System.err.println("ERR: no network code wtf.");
+                Logger.debug("ERR: no network code wtf.");
                 continue;
             }
             String networkDescription = obtainElement(networks.item(i), "Description", "");
@@ -137,12 +137,22 @@ public class FDSNWSDownloader {
             Node stationNode = stations.item(j);
             String stationCode = stationNode.getAttributes().getNamedItem("code").getNodeValue();
             String stationSite = ((Element) stationNode).getElementsByTagName("Site").item(0).getTextContent();
-            // todo station-specific lat lon alt
-            parseChannels(result, stationSource, networkCode, networkDescription, (Element) stationNode, stationCode, stationSite);
+
+            double lat = Double.parseDouble(
+                    ((Element) stationNode).getElementsByTagName("Latitude").item(0).getTextContent());
+            double lon = Double.parseDouble(
+                    ((Element) stationNode).getElementsByTagName("Longitude").item(0).getTextContent());
+            double alt = Double.parseDouble(
+                    ((Element) stationNode).getElementsByTagName("Elevation").item(0).getTextContent());
+
+            parseChannels(result, stationSource, networkCode, networkDescription, (Element) stationNode, stationCode, stationSite, lat, lon, alt);
         }
     }
 
-    private static void parseChannels(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, Element stationNode, String stationCode, String stationSite) {
+    private static void parseChannels(
+            List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
+            Element stationNode, String stationCode, String stationSite,
+            double stationLat, double stationLon, double stationAlt) {
         NodeList channels = stationNode.getElementsByTagName("Channel");
         for (int k = 0; k < channels.getLength(); k++) {
                 // Necessary values: lat lon alt sampleRate, Other can fail
@@ -173,7 +183,7 @@ public class FDSNWSDownloader {
             }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
-                    locationCode, lat, lon, alt, sampleRate);
+                    locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt);
         }
     }
 
@@ -189,9 +199,13 @@ public class FDSNWSDownloader {
         return SUPPORTED_INSTRUMENTS.contains(instrument);
     }
 
-    private static void addChannel(List<Network> result, StationSource stationSource, String networkCode, String networkDescription, String stationCode, String stationSite, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate) {
+    private static void addChannel(
+            List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
+            String stationCode, String stationSite, String channelCode, String locationCode,
+            double lat, double lon, double alt, double sampleRate,
+            double stationLat, double stationLon, double stationAlt) {
         Network network = StationDatabase.getOrCreateNetwork(result, networkCode, networkDescription);
-        Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, lat, lon, alt);
+        Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, stationLat, stationLon, stationAlt);
         StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource);
     }
 

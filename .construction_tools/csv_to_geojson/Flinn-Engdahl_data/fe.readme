@@ -1,0 +1,18 @@
+The Flinn-Engdahl (FE) seismic and geographical regionalization scheme was proposed in 1965, defined in 1974 and revised in 1995.
+More information can be found in the following publications:
+Young, J.B., Presgrave, B.W., Aichele, H., Wiens, D.A. and Flinn, E.A., 1996, The Flinn-Engdahl Regionalisation Scheme: the 1995 revision, Physics of the Earth and Planetary Interiors, v. 96, p. 223-297.
+Flinn, E.A., Engdahl, E.R. and Hill, A.R., 1974, Seismic and geographical regionalization, Bulletin of the Seismological Society of America, vol. 64, p. 771-993.
+Flinn, E.A., and Engdahl, E.R., 1965, A proposed basis for geographical and seismic regionalization, Reviews of Geophysics, vol. 3, p. 123-149.
+
+Flinn-Engdahl Regions Schema
+------------------------------------
+Fields
+
+id: (integer) Unique identifier for each region
+
+num: (numeric(38,8)) Original identifier
+
+place: char(100) Flinn-Engdahl region name
+
+shape: (geometry) Coordinates are in GeoJSON format and include both Polygon and MultiPolygon geometries.
+
