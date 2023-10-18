@@ -78,7 +78,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     setCinemaMode(!isCinemaMode());
                 }
 
-                if (DEBUG) {
+                if (true) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         earthquake.updateShakemap(earthquake.getCluster().getPreviousHypocenter());

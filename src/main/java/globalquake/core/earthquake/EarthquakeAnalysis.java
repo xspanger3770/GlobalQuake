@@ -853,7 +853,7 @@ public class EarthquakeAnalysis {
 
         if (cluster.getEarthquake() == null) {
             if (!testing) {
-                Sounds.playSound(Sounds.incoming);
+                Sounds.playSound(Sounds.found);
 
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
@@ -863,6 +863,7 @@ public class EarthquakeAnalysis {
             }
             cluster.setEarthquake(newEarthquake);
         } else {
+            Sounds.playSound(Sounds.update);
             cluster.getEarthquake().update(newEarthquake);
 
             if (GlobalQuake.instance != null) {
