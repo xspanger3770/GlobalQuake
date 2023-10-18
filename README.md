@@ -49,7 +49,7 @@ It can also, estimate the earthquake magnitude using some empirical methods, but
 
 - The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage.
 - You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world.
-- Roughly speaking, 16GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1,000 stations.
+- Roughly speaking, 4GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1000 stations.
 - If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations.
 
 ## Download
