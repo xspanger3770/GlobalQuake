@@ -17,14 +17,15 @@ import java.util.Objects;
 public class Sounds {
 
 	public static Clip weak;
-	public static Clip shindo1;
+	public static Clip moderate;
 	public static Clip shindo5;
 	public static Clip warning;
-	public static Clip incoming;
-	public static Clip eew;
+	public static Clip intensify;
+	public static Clip found;
 	public static Clip eew_warning;
 	public static Clip felt;
 	public static Clip dong;
+	public static Clip update;
 
 	public static boolean soundsAvailable = true;
 
@@ -42,10 +43,11 @@ public class Sounds {
 
 	public static void load() throws Exception {
 		weak = loadSound("sounds/weak.wav");
-		shindo1 = loadSound("sounds/shindo1.wav");
+		moderate = loadSound("sounds/moderate.wav");
 		shindo5 = loadSound("sounds/shindo5.wav");
-		incoming = loadSound("sounds/incoming.wav");
-		eew = loadSound("sounds/eew.wav");
+		intensify = loadSound("sounds/intensify.wav");
+		found = loadSound("sounds/found.wav");
+		update = loadSound("sounds/update.wav");
 		warning = loadSound("sounds/warning.wav");
 		eew_warning = loadSound("sounds/eew_warning.wav");
 		felt = loadSound("sounds/felt.wav");
@@ -73,7 +75,7 @@ public class Sounds {
 		int level = cluster.getActualLevel();
 		if (level > info.maxLevel) {
 			if (level >= 1 && info.maxLevel < 1) {
-				Sounds.playSound(Sounds.shindo1);
+				Sounds.playSound(Sounds.moderate);
 			}
 			if (level >= 2 && info.maxLevel < 2) {
 				Sounds.playSound(Sounds.shindo5);
@@ -88,7 +90,7 @@ public class Sounds {
 		if (quake != null) {
 			boolean meets = AlertManager.meetsConditions(quake);
 			if (meets && !info.meets) {
-				Sounds.playSound(Sounds.eew);
+				Sounds.playSound(Sounds.intensify);
 				info.meets = true;
 			}
 			double pga = GeoUtils.pgaFunctionGen1(cluster.getEarthquake().getMag(), cluster.getEarthquake().getDepth());
