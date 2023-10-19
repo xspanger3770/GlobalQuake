@@ -445,7 +445,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 int cinemaQuakeIndex = quakes.indexOf(cinemaQuake);
                 if(cinemaQuakeIndex != -1){
                     quake = cinemaQuake;
-                    displayedQuake = cinemaQuakeIndex + 1;
+                    displayedQuake = cinemaQuakeIndex;
                 }
             }
             if(quake == null) {
