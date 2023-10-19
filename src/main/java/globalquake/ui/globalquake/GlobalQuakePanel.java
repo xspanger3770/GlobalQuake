@@ -176,7 +176,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
             double dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            double pga = GeoUtils.pgaFunctionGen1(earthquake.getMag(), dist);
+            double pga = GeoUtils.pgaFunction(earthquake.getMag(), dist);
             if(pga > maxPGA){
                 maxPGA = pga;
 
@@ -193,7 +193,7 @@ public class GlobalQuakePanel extends GlobePanel {
             quake = createDebugQuake();
 
             double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            maxPGA = GeoUtils.pgaFunctionGen1(quake.getMag(), dist);
+            maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist);
         }
 
 
@@ -297,7 +297,7 @@ public class GlobalQuakePanel extends GlobePanel {
         Earthquake quake;
         Cluster clus = new Cluster(0);
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat + (System.currentTimeMillis() % 10000) / 1000.0, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 List.of(new PolygonConfidenceInterval(16, 0, List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
@@ -309,8 +309,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
         clus.setPreviousHypocenter(hyp);
 
-        quake = new Earthquake(clus, hyp.lat, hyp.lon, 0, System.currentTimeMillis() - 50 * 1000);
-        quake.setMag(10.0-(System.currentTimeMillis() % 10000) / 1000.0);
+        quake = new Earthquake(clus, hyp.lat, hyp.lon, hyp.depth, System.currentTimeMillis() - 50 * 1000);
+        quake.setMag(System.currentTimeMillis() % 10000.0 / 1000.0);
 
         hyp.magnitude = quake.getMag();
 

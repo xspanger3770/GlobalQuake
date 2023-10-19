@@ -138,7 +138,7 @@ public class EarthquakeListPanel extends JPanel {
                     continue;
                 }
                 Color col;
-                Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunctionGen1(quake.getMag(), quake.getDepth()));
+                Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunction(quake.getMag(), quake.getDepth()));
                 if (level != null) {
                     col = level.getColor();
 

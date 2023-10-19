@@ -3,11 +3,9 @@ package globalquake.geo;
 import globalquake.ui.globe.Point2D;
 import org.apache.commons.math3.util.FastMath;
 
-@SuppressWarnings("unused")
 public interface GeoUtils {
 	double EARTH_CIRCUMFERENCE = 40082;
 	double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
-	double EARTH_RADIUS_2 = Math.pow(EARTH_RADIUS, 2);
 
 	class MoveOnGlobePrecomputed{
 		public double c_theta;
@@ -92,6 +90,7 @@ public interface GeoUtils {
 		return new double[] { FastMath.toDegrees(theta2), FastMath.toDegrees(phi2) };
 	}
 
+	@SuppressWarnings("unused")
 	static double placeOnSurface(double travelledDistance, double alt1, double alt2) {
 		double d = alt1 - alt2;
 		double angDiff = (travelledDistance * 360.0) / EARTH_CIRCUMFERENCE;
@@ -153,13 +152,24 @@ public interface GeoUtils {
 		return FastMath.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	}
 
-	static double pgaFunctionGen1(double mag, double distKm) {
-		distKm = FastMath.abs(distKm);
-		double a = mag + 1.5;
-		return FastMath.pow((a + 0.9) / 5.5, 7.0)
-				/ (0.09 + FastMath.pow((distKm * (14.0 - a * 0.85)) / (FastMath.pow(a, (5.4) / (1 + a * 0.075))), 2.5));
+	static double pgaFunction(double mag, double distKm) {
+		return pgaFunctionGen2(mag, distKm);
 	}
 
+	static double pgaFunctionGen2(double mag, double distKm){
+		return Math.pow(10, mag * 0.575) / (0.36 * Math.pow(distKm, 1.25 + mag / 22.0) + 10);
+	}
+
+	@Deprecated
+	static double pgaFunctionGen1(double mag, double distKm){
+		distKm = FastMath.abs(distKm);
+		double a = mag + 1.5;
+		double b = FastMath.pow((a + 0.9) / 5.5, 7.0);
+		double c = FastMath.pow((distKm * (14.0 - a * 0.85)) / (FastMath.pow(a, (5.4) / (1 + a * 0.075))), 2.5);
+		return b / (0.09 + c);
+	}
+
+	@SuppressWarnings("unused")
 	static double inversePgaFunctionGen1(double mag, double pga) {
 		double a = mag + 1.5;
 		return ((Math.pow((Math.pow((a + 0.9) / 5.5, 7.0)) / pga - 0.09, 1 / 2.5)
