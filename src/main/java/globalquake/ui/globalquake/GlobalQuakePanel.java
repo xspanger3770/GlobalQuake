@@ -382,14 +382,17 @@ public class GlobalQuakePanel extends GlobePanel {
         int connectedStations = 0;
         int runningSeedlinks = 0;
         int totalSeedlinks = 0;
-        for (SeedlinkNetwork seedlinkNetwork : GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks()) {
-            totalStations += seedlinkNetwork.selectedStations;
-            connectedStations += seedlinkNetwork.connectedStations;
-            if (seedlinkNetwork.selectedStations > 0) {
-                totalSeedlinks++;
-            }
-            if (seedlinkNetwork.status == SeedlinkStatus.RUNNING) {
-                runningSeedlinks++;
+
+        if(GlobalQuake.instance.getStationDatabaseManager() != null) {
+            for (SeedlinkNetwork seedlinkNetwork : GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks()) {
+                totalStations += seedlinkNetwork.selectedStations;
+                connectedStations += seedlinkNetwork.connectedStations;
+                if (seedlinkNetwork.selectedStations > 0) {
+                    totalSeedlinks++;
+                }
+                if (seedlinkNetwork.status == SeedlinkStatus.RUNNING) {
+                    runningSeedlinks++;
+                }
             }
         }
 

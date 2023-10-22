@@ -1,17 +1,36 @@
 package globalquake.ui.client;
 
+import globalquake.client.GQClient;
+import globalquake.core.GlobalQuake;
+import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.intensity.IntensityTable;
+import globalquake.intensity.ShakeMap;
 import globalquake.main.Main;
+import globalquake.regions.Regions;
+import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
+import globalquake.ui.globalquake.GlobalQuakeFrame;
+import globalquake.utils.Scale;
+import org.tinylog.Logger;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.time.Year;
+import java.util.concurrent.Executors;
 
 public class ServerSelectionFrame extends GQFrame {
 
     private JTextField addressField;
     private JTextField portField;
 
+    private GQClient client;
+    private JButton connectButton;
+
     public ServerSelectionFrame() {
+        client = new GQClient();
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(600,400));
@@ -25,6 +44,7 @@ public class ServerSelectionFrame extends GQFrame {
 
     private JPanel createServerSelectionPanel() {
         JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         var grid=  new GridLayout(2,1);
         grid.setVgap(5);
@@ -47,11 +67,67 @@ public class ServerSelectionFrame extends GQFrame {
 
         panel.add(addressPanel);
 
+        var gridl2 = new GridLayout(2,1);
+        gridl2.setVgap(5);
+        JPanel buttonsPanel = new JPanel(gridl2);
+        buttonsPanel.setBorder(new EmptyBorder(5,5,5,5));
+
+        connectButton = new JButton("Connect");
+        connectButton.addActionListener(this::connect);
+        JButton localButton = new JButton("Run GlobalQuake Locally");
+        localButton.setEnabled(false);
+
+        buttonsPanel.add(connectButton);
+        buttonsPanel.add(localButton);
+
+        panel.add(buttonsPanel);
+
         return panel;
     }
 
-    public static void main(String[] args) {
+    private void connect(ActionEvent actionEvent) {
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+            @Override
+            public void run() {
+                addressField.setEnabled(false);
+                portField.setEnabled(false);
+                connectButton.setEnabled(false);
+                connectButton.setText("Connecting...");
+                try {
+                    client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
+                    ServerSelectionFrame.this.dispose();
+                    new GlobalQuake(null);
+                    new GlobalQuakeFrame().setVisible(true);
+                } catch (Exception e) {
+                    Logger.error(e);
+                    connectButton.setText("Connection failed! %s".formatted(e.getMessage()));
+                } finally {
+                    addressField.setEnabled(true);
+                    portField.setEnabled(true);
+                    connectButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    private JPanel wrap(JPanel target) {
+        JPanel panel = new JPanel();
+        panel.add(target);
+        return panel;
+    }
+
+    public static void main(String[] args) throws Exception{
+        init();
         new ServerSelectionFrame();
+    }
+
+    private static void init() throws Exception{
+        Regions.init();
+        Scale.load();
+        ShakeMap.init();
+        Sounds.load();
+        IntensityTable.init();
+        TauPTravelTimeCalculator.init();
     }
 
 }

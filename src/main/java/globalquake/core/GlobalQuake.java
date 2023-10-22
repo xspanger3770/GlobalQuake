@@ -39,7 +39,6 @@ public class GlobalQuake {
 		eventHandler = new GlobalQuakeEventHandler().runHandler();
 
 		globalStationManager = new GlobalStationManager();
-		globalStationManager.initStations(stationDatabaseManager);
 
 		earthquakeAnalysis = new EarthquakeAnalysis();
 		clusterAnalysis = new ClusterAnalysis();
@@ -49,6 +48,11 @@ public class GlobalQuake {
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
+	}
+
+	public GlobalQuake initStations(){
+		globalStationManager.initStations(stationDatabaseManager);
+		return this;
 	}
 
 	public GlobalQuake runSeedlinkReader() {

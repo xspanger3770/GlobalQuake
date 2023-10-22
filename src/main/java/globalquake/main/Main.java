@@ -125,7 +125,7 @@ public class Main {
     }
 
     public static void launchGlobalQuake() {
-        new GlobalQuake(databaseManager).createFrame().runSeedlinkReader().startRuntime();
+        new GlobalQuake(databaseManager).initStations().createFrame().runSeedlinkReader().startRuntime();
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
