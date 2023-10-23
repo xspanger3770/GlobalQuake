@@ -10,6 +10,7 @@ import globalquake.database.StationDatabaseManager;
 import globalquake.events.GlobalQuakeEventHandler;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
+import org.tinylog.Logger;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -17,20 +18,22 @@ import java.awt.event.WindowEvent;
 
 public class GlobalQuake {
 
-	private final GlobalQuakeRuntime globalQuakeRuntime;
-	private final SeedlinkNetworksReader seedlinkNetworksReader;
-	private final StationDatabaseManager stationDatabaseManager;
+	private GlobalQuakeRuntime globalQuakeRuntime;
+	private SeedlinkNetworksReader seedlinkNetworksReader;
+	private StationDatabaseManager stationDatabaseManager;
 	private GlobalQuakeFrame globalQuakeFrame;
-	private final ClusterAnalysis clusterAnalysis;
-	private final EarthquakeAnalysis earthquakeAnalysis;
-	private final AlertManager alertManager;
-	private final EarthquakeArchive archive;
+	private ClusterAnalysis clusterAnalysis;
+	private EarthquakeAnalysis earthquakeAnalysis;
+	protected AlertManager alertManager;
+	private EarthquakeArchive archive;
 
-	private final GlobalQuakeEventHandler eventHandler;
+	protected GlobalQuakeEventHandler eventHandler;
 
 	public static GlobalQuake instance;
 
-	private final GlobalStationManager globalStationManager;
+	private GlobalStationManager globalStationManager;
+
+	public GlobalQuake(){};
 
 	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
@@ -62,21 +65,26 @@ public class GlobalQuake {
 
 	public GlobalQuake createFrame() {
 		EventQueue.invokeLater(() -> {
-			globalQuakeFrame = new GlobalQuakeFrame();
-			globalQuakeFrame.setVisible(true);
+			try {
+				globalQuakeFrame = new GlobalQuakeFrame();
+				globalQuakeFrame.setVisible(true);
 
 
-			Main.getErrorHandler().setParent(globalQuakeFrame);
+				Main.getErrorHandler().setParent(globalQuakeFrame);
 
-            globalQuakeFrame.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-					for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
-						getArchive().archiveQuake(quake);
+				globalQuakeFrame.addWindowListener(new WindowAdapter() {
+					@Override
+					public void windowClosing(WindowEvent e) {
+						for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+							getArchive().archiveQuake(quake);
+						}
+						getArchive().saveArchive();
 					}
-                    getArchive().saveArchive();
-                }
-            });
+				});
+			}catch (Exception e){
+				Logger.error(e);
+				System.exit(0);
+			}
 		});
 		return this;
 	}

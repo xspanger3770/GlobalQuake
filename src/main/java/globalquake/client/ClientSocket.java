@@ -1,6 +1,5 @@
 package globalquake.client;
 
-import globalquake.core.analysis.Log;
 import gqserver.api.Packet;
 import gqserver.api.data.ServerClientConfig;
 import gqserver.api.packets.system.HandshakePacket;
@@ -17,7 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class GQClient {
+public class ClientSocket {
 
     private static final int COMPATIBILITY_VERSION = 2;
     private static final int CONNECT_TIMEOUT = 10 * 1000;

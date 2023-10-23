@@ -1,6 +1,7 @@
 package globalquake.ui.client;
 
-import globalquake.client.GQClient;
+import globalquake.client.ClientSocket;
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
@@ -18,8 +19,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.time.Year;
 import java.util.concurrent.Executors;
 
 public class ServerSelectionFrame extends GQFrame {
@@ -27,11 +26,11 @@ public class ServerSelectionFrame extends GQFrame {
     private JTextField addressField;
     private JTextField portField;
 
-    private GQClient client;
+    private ClientSocket client;
     private JButton connectButton;
 
     public ServerSelectionFrame() {
-        client = new GQClient();
+        client = new ClientSocket();
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(600,400));
@@ -104,8 +103,7 @@ public class ServerSelectionFrame extends GQFrame {
                 try {
                     client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
                     ServerSelectionFrame.this.dispose();
-                    new GlobalQuake(null);
-                    new GlobalQuakeFrame().setVisible(true);
+                    launchClientUI();
                 } catch (Exception e) {
                     Logger.error(e);
                     connectButton.setText("Connection failed! %s".formatted(e.getMessage()));
@@ -116,6 +114,10 @@ public class ServerSelectionFrame extends GQFrame {
                 }
             }
         });
+    }
+
+    private void launchClientUI() {
+        new GlobalQuakeClient().createFrame();
     }
 
     private JPanel wrap(JPanel target) {

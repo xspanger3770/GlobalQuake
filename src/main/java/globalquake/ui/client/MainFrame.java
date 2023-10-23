@@ -1,6 +1,8 @@
 package globalquake.ui.client;
 
-import globalquake.client.GQClient;
+import globalquake.core.GlobalQuake;
+import globalquake.database.StationDatabaseManager;
+import globalquake.exception.FatalIOException;
 import globalquake.exception.RuntimeApplicationException;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
@@ -9,8 +11,10 @@ import globalquake.main.Main;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
+import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.settings.SettingsFrame;
 import globalquake.utils.Scale;
+import globalquake.database.StationSource;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,9 +22,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class MainFrame extends GQFrame {
 
+    private static StationDatabaseManager databaseManager;
+    private static DatabaseMonitorFrame databaseMonitorFrame;
     private JProgressBar progressBar;
     private JButton connectButton;
     private JButton hostButton;
@@ -103,6 +110,21 @@ public class MainFrame extends GQFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         panel.add(titleLabel);
 
+        hostButton = new JButton("Run Locally");
+        hostButton.setEnabled(loaded);
+        panel.add(hostButton);
+
+        hostButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    startDatabaseManager();
+                } catch (FatalIOException e) {
+                    Main.getErrorHandler().handleException(e);
+                }
+            }
+        });
+
         connectButton = new JButton("Conect to Server");
         connectButton.setEnabled(loaded);
         panel.add(connectButton);
@@ -114,10 +136,6 @@ public class MainFrame extends GQFrame {
                 new ServerSelectionFrame().setVisible(true);
             }
         });
-
-        hostButton = new JButton("Host Server");
-        hostButton.setEnabled(loaded);
-        panel.add(hostButton);
 
         GridLayout grid2 = new GridLayout(1,2);
         grid2.setHgap(10);
@@ -145,6 +163,44 @@ public class MainFrame extends GQFrame {
         panel.add(buttons2);
 
         return panel;
+    }
+
+    private static void startDatabaseManager() throws FatalIOException {
+        databaseManager = new StationDatabaseManager();
+        databaseManager.load();
+        databaseMonitorFrame = new DatabaseMonitorFrame(databaseManager, MainFrame::launchGlobalQuake);
+        databaseMonitorFrame.setVisible(true);
+
+        finishInit();
+    }
+
+    private static void finishInit() {
+        databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
+        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+        databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
+                        .filter(StationSource::isOutdated).collect(Collectors.toList()),
+                () -> {
+                    databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
+                    databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+                    databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
+                        databaseMonitorFrame.getMainProgressBar().setString("Saving...");
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+
+                        try {
+                            databaseManager.save();
+                        } catch (FatalIOException e) {
+                            Main.getErrorHandler().handleException(new RuntimeException(e));
+                        }
+                        databaseMonitorFrame.initDone();
+
+                        databaseMonitorFrame.getMainProgressBar().setString("Done");
+                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+                    });
+                });
+    }
+
+    public static void launchGlobalQuake() {
+        new GlobalQuake(databaseManager).initStations().createFrame().runSeedlinkReader().startRuntime();
     }
 
     public void onLoad(){
