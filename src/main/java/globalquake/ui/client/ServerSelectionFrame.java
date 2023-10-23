@@ -17,6 +17,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.time.Year;
 import java.util.concurrent.Executors;
@@ -67,18 +68,25 @@ public class ServerSelectionFrame extends GQFrame {
 
         panel.add(addressPanel);
 
-        var gridl2 = new GridLayout(2,1);
+        var gridl2 = new GridLayout(1,2);
         gridl2.setVgap(5);
         JPanel buttonsPanel = new JPanel(gridl2);
         buttonsPanel.setBorder(new EmptyBorder(5,5,5,5));
 
         connectButton = new JButton("Connect");
         connectButton.addActionListener(this::connect);
-        JButton localButton = new JButton("Run GlobalQuake Locally");
-        localButton.setEnabled(false);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ServerSelectionFrame.this.dispose();
+                new MainFrame().setVisible(true);
+            }
+        });
 
         buttonsPanel.add(connectButton);
-        buttonsPanel.add(localButton);
+        buttonsPanel.add(backButton);
 
         panel.add(buttonsPanel);
 

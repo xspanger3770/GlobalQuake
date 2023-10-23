@@ -9,11 +9,14 @@ import globalquake.main.Main;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
+import globalquake.ui.settings.SettingsFrame;
 import globalquake.utils.Scale;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.concurrent.Executors;
 
 public class MainFrame extends GQFrame {
@@ -22,24 +25,39 @@ public class MainFrame extends GQFrame {
     private JButton connectButton;
     private JButton hostButton;
 
+    private static boolean loaded = false;
+
     public MainFrame(){
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(600,400));
 
-        add(createMainPanel());
+        JPanel contentPane = new JPanel();
+        setContentPane(contentPane);
+        contentPane.setBorder(new EmptyBorder(5,5,5,5));
+
+        contentPane.setLayout(new BorderLayout());
+
+        contentPane.add(createMainPanel(), BorderLayout.CENTER);
+
+        contentPane.add(progressBar = new JProgressBar(JProgressBar.HORIZONTAL,0,100), BorderLayout.SOUTH);
+        progressBar.setStringPainted(true);
 
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
 
-        Executors.newSingleThreadExecutor().submit(()->{
-            try {
-                initAll();
-            } catch (Exception e) {
-                Main.getErrorHandler().handleException(e);
-            }
-        });
+        if(!loaded) {
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    initAll();
+                    onLoad();
+                    loaded = true;
+                } catch (Exception e) {
+                    Main.getErrorHandler().handleException(e);
+                }
+            });
+        }
     }
 
     private static final double PHASES = 6.0;
@@ -86,15 +104,45 @@ public class MainFrame extends GQFrame {
         panel.add(titleLabel);
 
         connectButton = new JButton("Conect to Server");
-        connectButton.setEnabled(false);
+        connectButton.setEnabled(loaded);
         panel.add(connectButton);
 
+        connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                MainFrame.this.dispose();
+                new ServerSelectionFrame().setVisible(true);
+            }
+        });
+
         hostButton = new JButton("Host Server");
-        hostButton.setEnabled(false);
+        hostButton.setEnabled(loaded);
         panel.add(hostButton);
 
-        panel.add(progressBar = new JProgressBar(JProgressBar.HORIZONTAL,0,100));
-        progressBar.setStringPainted(true);
+        GridLayout grid2 = new GridLayout(1,2);
+        grid2.setHgap(10);
+        JPanel buttons2 = new JPanel(grid2);
+
+        JButton settingsButton = new JButton("Settings");
+        settingsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new SettingsFrame(MainFrame.this).setVisible(true);
+            }
+        });
+
+        buttons2.add(settingsButton);
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                System.exit(0);
+            }
+        });
+        buttons2.add(exitButton);
+
+        panel.add(buttons2);
 
         return panel;
     }
