@@ -9,6 +9,7 @@ import globalquake.events.specific.AlertIssuedEvent;
 import globalquake.events.specific.ClusterCreateEvent;
 import globalquake.events.specific.QuakeCreateEvent;
 import globalquake.events.specific.QuakeUpdateEvent;
+import globalquake.sounds.Sounds;
 import globalquake.ui.settings.Settings;
 import globalquake.geo.GeoUtils;
 
@@ -23,6 +24,7 @@ public class AlertManager {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 tick();
+                Sounds.playSound(Sounds.found);
             }
 
             @Override
@@ -34,6 +36,7 @@ public class AlertManager {
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
                 tick();
+                Sounds.playSound(Sounds.update);
             }
         });
     }
