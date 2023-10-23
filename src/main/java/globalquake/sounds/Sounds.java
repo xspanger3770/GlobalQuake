@@ -8,11 +8,13 @@ import globalquake.geo.GeoUtils;
 import globalquake.intensity.IntensityScales;
 import globalquake.intensity.ShindoIntensityScale;
 import globalquake.ui.settings.Settings;
+import org.tinylog.Logger;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Sounds {
 
@@ -24,12 +26,13 @@ public class Sounds {
 	public static Clip eew_warning;
 	public static Clip felt;
 	public static Clip dong;
-	@SuppressWarnings("unused")
-	public static Clip update; // TODO ADD
-	@SuppressWarnings("unused")
-	public static Clip found; // TODO ADD
+	public static Clip update;
+
+	public static Clip found;
 
 	public static boolean soundsAvailable = true;
+
+	private static ExecutorService soundService = Executors.newSingleThreadExecutor();
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
@@ -62,8 +65,29 @@ public class Sounds {
 			return;
 		}
 
-		clip.setFramePosition(0);
-		clip.start();
+		soundService.submit(new Runnable() {
+			@Override
+			public void run() {
+
+				var latch = new CountDownLatch(1);
+				clip.addLineListener(new LineListener() {
+					@Override
+					public void update(LineEvent event) {
+						if (event.getType().equals(LineEvent.Type.STOP)) {
+							clip.removeLineListener(this);
+							latch.countDown();
+						}
+					}
+				});
+				clip.setFramePosition(0);
+				clip.start();
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					Logger.error(e);
+				}
+			}
+		});
 	}
 
 	public static void determineSounds(Cluster cluster) {
