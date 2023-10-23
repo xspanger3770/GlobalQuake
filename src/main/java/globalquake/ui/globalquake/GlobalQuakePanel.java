@@ -330,7 +330,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         if(Settings.displayTime) {
             String str = "----/--/-- --:--:--";
-            if (GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
+            if (GlobalQuake.instance.getSeedlinkReader() != null && GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() != 0) {
                 str = Settings.formatDateTime(Instant.ofEpochMilli(GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord()));
                 if (System.currentTimeMillis() - GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecord() < 1000 * 120) {
                     g.setColor(Color.white);

@@ -22,16 +22,16 @@ public class GlobalQuake {
 	private SeedlinkNetworksReader seedlinkNetworksReader;
 	private StationDatabaseManager stationDatabaseManager;
 	private GlobalQuakeFrame globalQuakeFrame;
-	private ClusterAnalysis clusterAnalysis;
-	private EarthquakeAnalysis earthquakeAnalysis;
+	protected ClusterAnalysis clusterAnalysis;
+	protected EarthquakeAnalysis earthquakeAnalysis;
 	protected AlertManager alertManager;
-	private EarthquakeArchive archive;
+	protected EarthquakeArchive archive;
 
 	protected GlobalQuakeEventHandler eventHandler;
 
 	public static GlobalQuake instance;
 
-	private GlobalStationManager globalStationManager;
+	protected GlobalStationManager globalStationManager;
 
 	public GlobalQuake(){};
 

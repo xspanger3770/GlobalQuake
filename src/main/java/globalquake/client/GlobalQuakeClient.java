@@ -17,13 +17,13 @@ public class GlobalQuakeClient extends GlobalQuake {
 
         super.eventHandler = new GlobalQuakeEventHandler().runHandler();
 
-        //TODO globalStationManager = new GlobalStationManager();
+        super.globalStationManager = new GlobalStationManagerClient();
 
-        //TODO earthquakeAnalysis = new EarthquakeAnalysis();
+        super.earthquakeAnalysis = new EarthquakeAnalysisClient();
 
-        //nope? clusterAnalysis = new ClusterAnalysis();
+        super.clusterAnalysis = new ClusterAnalysisClient();
 
         super.alertManager = new AlertManager();
-        // TODO archive = new EarthquakeArchive().loadArchive();
+        super.archive = new EarthquakeArchiveClient();
     }
 }
