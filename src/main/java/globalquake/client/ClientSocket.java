@@ -76,19 +76,17 @@ public class ClientSocket {
                 Logger.error(e);
             }
         }
-        if(heartbeatService != null){
-            heartbeatService.shutdown();
-            try {
-                heartbeatService.awaitTermination(15, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Logger.error(e);
-            }
-        }
+        terminate(heartbeatService);
+        terminate(inputService);
+        terminate(quakeCheckService);
+    }
 
-        if(inputService != null){
-            inputService.shutdown();
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void terminate(ExecutorService service) {
+        if(service != null){
+            service.shutdown();
             try {
-                inputService.awaitTermination(15, TimeUnit.SECONDS);
+                service.awaitTermination(15, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Logger.error(e);
             }

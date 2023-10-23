@@ -317,6 +317,8 @@ public class GlobalQuakePanel extends GlobePanel {
             mags.add(new MagnitudeReading(mag, 0));
         }
 
+        hyp.mags = mags;
+
         quake.setRegion("asdasdasd");
         return quake;
     }

@@ -33,9 +33,9 @@ public class GlobalQuake {
 
 	protected GlobalStationManager globalStationManager;
 
-	public GlobalQuake(){};
+	public GlobalQuake(){}
 
-	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
+    public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
 		instance = this;
 		this.stationDatabaseManager = stationDatabaseManager;
 

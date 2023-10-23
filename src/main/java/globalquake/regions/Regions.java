@@ -71,10 +71,6 @@ public class Regions {
     }
 
 
-    @SuppressWarnings("EmptyMethod")
-    public static synchronized void awaitDownload() {
-    }
-
     @Deprecated
     public static synchronized String downloadRegion(double lat, double lon) {
         if (!enabled) {

@@ -2,7 +2,6 @@ package globalquake.ui.client;
 
 import globalquake.client.ClientSocket;
 import globalquake.client.GlobalQuakeClient;
-import globalquake.core.GlobalQuake;
 import globalquake.geo.taup.TauPTravelTimeCalculator;
 import globalquake.intensity.IntensityTable;
 import globalquake.intensity.ShakeMap;
@@ -10,15 +9,12 @@ import globalquake.main.Main;
 import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
-import globalquake.ui.globalquake.GlobalQuakeFrame;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.concurrent.Executors;
 
 public class ServerSelectionFrame extends GQFrame {
@@ -26,7 +22,7 @@ public class ServerSelectionFrame extends GQFrame {
     private JTextField addressField;
     private JTextField portField;
 
-    private ClientSocket client;
+    private final ClientSocket client;
     private JButton connectButton;
 
     public ServerSelectionFrame() {
@@ -73,15 +69,12 @@ public class ServerSelectionFrame extends GQFrame {
         buttonsPanel.setBorder(new EmptyBorder(5,5,5,5));
 
         connectButton = new JButton("Connect");
-        connectButton.addActionListener(this::connect);
+        connectButton.addActionListener(actionEvent1 -> connect());
 
         JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                ServerSelectionFrame.this.dispose();
-                new MainFrame().setVisible(true);
-            }
+        backButton.addActionListener(actionEvent -> {
+            ServerSelectionFrame.this.dispose();
+            new MainFrame().setVisible(true);
         });
 
         buttonsPanel.add(connectButton);
@@ -92,38 +85,29 @@ public class ServerSelectionFrame extends GQFrame {
         return panel;
     }
 
-    private void connect(ActionEvent actionEvent) {
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                addressField.setEnabled(false);
-                portField.setEnabled(false);
-                connectButton.setEnabled(false);
-                connectButton.setText("Connecting...");
-                try {
-                    client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
-                    ServerSelectionFrame.this.dispose();
-                    launchClientUI();
-                } catch (Exception e) {
-                    Logger.error(e);
-                    connectButton.setText("Connection failed! %s".formatted(e.getMessage()));
-                } finally {
-                    addressField.setEnabled(true);
-                    portField.setEnabled(true);
-                    connectButton.setEnabled(true);
-                }
+    private void connect() {
+        Executors.newSingleThreadExecutor().submit(() -> {
+            addressField.setEnabled(false);
+            portField.setEnabled(false);
+            connectButton.setEnabled(false);
+            connectButton.setText("Connecting...");
+            try {
+                client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
+                ServerSelectionFrame.this.dispose();
+                launchClientUI();
+            } catch (Exception e) {
+                Logger.error(e);
+                connectButton.setText("Connection failed! %s".formatted(e.getMessage()));
+            } finally {
+                addressField.setEnabled(true);
+                portField.setEnabled(true);
+                connectButton.setEnabled(true);
             }
         });
     }
 
     private void launchClientUI() {
         new GlobalQuakeClient().createFrame();
-    }
-
-    private JPanel wrap(JPanel target) {
-        JPanel panel = new JPanel();
-        panel.add(target);
-        return panel;
     }
 
     public static void main(String[] args) throws Exception{

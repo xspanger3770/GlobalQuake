@@ -17,7 +17,6 @@ import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,9 +25,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
-    private List<Earthquake> earthquakes;
+    private final List<Earthquake> earthquakes;
 
-    private Map<UUID, ClientEarthquake> clientEarthquakeMap;
+    private final Map<UUID, ClientEarthquake> clientEarthquakeMap;
 
     public EarthquakeAnalysisClient(){
         earthquakes = new CopyOnWriteArrayList<>();

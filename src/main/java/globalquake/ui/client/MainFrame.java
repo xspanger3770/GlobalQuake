@@ -19,8 +19,6 @@ import globalquake.database.StationSource;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,7 @@ public class MainFrame extends GQFrame {
 
     private static StationDatabaseManager databaseManager;
     private static DatabaseMonitorFrame databaseMonitorFrame;
-    private JProgressBar progressBar;
+    private final JProgressBar progressBar;
     private JButton connectButton;
     private JButton hostButton;
 
@@ -114,14 +112,11 @@ public class MainFrame extends GQFrame {
         hostButton.setEnabled(loaded);
         panel.add(hostButton);
 
-        hostButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    startDatabaseManager();
-                } catch (FatalIOException e) {
-                    Main.getErrorHandler().handleException(e);
-                }
+        hostButton.addActionListener(actionEvent -> {
+            try {
+                startDatabaseManager();
+            } catch (FatalIOException e) {
+                Main.getErrorHandler().handleException(e);
             }
         });
 
@@ -129,12 +124,9 @@ public class MainFrame extends GQFrame {
         connectButton.setEnabled(loaded);
         panel.add(connectButton);
 
-        connectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                MainFrame.this.dispose();
-                new ServerSelectionFrame().setVisible(true);
-            }
+        connectButton.addActionListener(actionEvent -> {
+            MainFrame.this.dispose();
+            new ServerSelectionFrame().setVisible(true);
         });
 
         GridLayout grid2 = new GridLayout(1,2);
@@ -142,22 +134,12 @@ public class MainFrame extends GQFrame {
         JPanel buttons2 = new JPanel(grid2);
 
         JButton settingsButton = new JButton("Settings");
-        settingsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                new SettingsFrame(MainFrame.this).setVisible(true);
-            }
-        });
+        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this).setVisible(true));
 
         buttons2.add(settingsButton);
 
         JButton exitButton = new JButton("Exit");
-        exitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.exit(0);
-            }
-        });
+        exitButton.addActionListener(actionEvent -> System.exit(0));
         buttons2.add(exitButton);
 
         panel.add(buttons2);

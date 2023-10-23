@@ -21,11 +21,13 @@ public class Sounds {
 	public static Clip shindo5;
 	public static Clip warning;
 	public static Clip intensify;
-	public static Clip found;
 	public static Clip eew_warning;
 	public static Clip felt;
 	public static Clip dong;
-	public static Clip update;
+	@SuppressWarnings("unused")
+	public static Clip update; // TODO ADD
+	@SuppressWarnings("unused")
+	public static Clip found; // TODO ADD
 
 	public static boolean soundsAvailable = true;
 

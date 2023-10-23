@@ -9,7 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GlobalStationManagerClient extends GlobalStationManager {
 
-    private List<AbstractStation> stations;
+    private final List<AbstractStation> stations;
 
     public GlobalStationManagerClient(){
         stations = new CopyOnWriteArrayList<>();

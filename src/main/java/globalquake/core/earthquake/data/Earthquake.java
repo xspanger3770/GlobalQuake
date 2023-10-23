@@ -15,7 +15,6 @@ public class Earthquake implements Regional, Warnable {
 	private final ExecutorService shakemapExecutor;
 	private long lastUpdate;
 	protected Cluster cluster;
-	private int revisionID;
 	public int nextReportEventCount;
 	private String region;
 
@@ -50,6 +49,7 @@ public class Earthquake implements Regional, Warnable {
 		return hyp == null ? 0.0 : hyp.magnitude;
 	}
 
+	@SuppressWarnings("unused")
 	public double getPct() {
 		Hypocenter hyp = getHypocenter();
 		return hyp == null ? 0.0 : 100.0 * hyp.getCorrectness();
@@ -90,7 +90,7 @@ public class Earthquake implements Regional, Warnable {
 
 	public void update(Earthquake earthquake) {
 		getCluster().setPreviousHypocenter(earthquake.getHypocenter());
-		getCluster().revisionID = earthquake.revisionID;
+		getCluster().revisionID = earthquake.getRevisionID();
 		update();
 	}
 

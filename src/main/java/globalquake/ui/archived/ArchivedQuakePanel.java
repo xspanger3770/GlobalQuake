@@ -78,7 +78,6 @@ public class ArchivedQuakePanel extends GlobePanel {
             cluster.setPreviousHypocenter(hypocenter);
 
             this.animation = animation;
-            this.cluster = cluster;
         }
 
         @Override
