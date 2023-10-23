@@ -38,6 +38,7 @@ public class Earthquake implements Regional, Warnable {
 
 		shakemapExecutor = Executors.newSingleThreadExecutor();
 		updateShakemap();
+		updateRegion();
 	}
 
 	public void updateRegion(){
@@ -95,7 +96,7 @@ public class Earthquake implements Regional, Warnable {
 
 	public void update(){
 		if (getLat() != lastLat || getLon() != lastLon) {
-			regionUpdater.updateRegion();
+			updateRegion();
 			updateShakemap();
 		}
 

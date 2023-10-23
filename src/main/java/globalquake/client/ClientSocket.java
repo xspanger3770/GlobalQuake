@@ -48,7 +48,7 @@ public class ClientSocket {
         heartbeatService.scheduleAtFixedRate(this::sendHeartbeat,0,10, TimeUnit.SECONDS);
 
         quakeCheckService = Executors.newSingleThreadScheduledExecutor();
-        quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 1, 20, TimeUnit.SECONDS);
+        quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
     }
 
     private void sendQuakeRequest() {
@@ -112,7 +112,7 @@ public class ClientSocket {
         }
     }
 
-    public void sendPacket(Packet packet) throws IOException {
+    public synchronized void sendPacket(Packet packet) throws IOException {
         outputStream.writeObject(packet);
     }
 
