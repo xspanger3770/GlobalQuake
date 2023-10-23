@@ -1,7 +1,9 @@
 package globalquake.client;
 
+import globalquake.core.GlobalQuake;
 import gqserver.api.Packet;
 import gqserver.api.data.ServerClientConfig;
+import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HeartbeatPacket;
 import org.tinylog.Logger;
@@ -28,6 +30,7 @@ public class ClientSocket {
     private ObjectInputStream inputStream;
 
     private ObjectOutputStream outputStream;
+    private ScheduledExecutorService quakeCheckService;
 
     public void connect(String ip, int port) throws IOException {
         socket = new Socket();
@@ -43,6 +46,17 @@ public class ClientSocket {
         inputService.submit(this::runReader);
         heartbeatService = Executors.newSingleThreadScheduledExecutor();
         heartbeatService.scheduleAtFixedRate(this::sendHeartbeat,0,10, TimeUnit.SECONDS);
+
+        quakeCheckService = Executors.newSingleThreadScheduledExecutor();
+        quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 1, 20, TimeUnit.SECONDS);
+    }
+
+    private void sendQuakeRequest() {
+        try {
+            sendPacket(new EarthquakesRequestPacket());
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 
     private void sendHeartbeat() {
@@ -90,6 +104,7 @@ public class ClientSocket {
             while (isConnected()) {
                 Packet packet = (Packet) inputStream.readObject();
                 packet.onClientReceive();
+                ((GlobalQuakeClient) GlobalQuake.instance).processPacket(this, packet);
             }
         } catch (Exception e){
             Logger.error(e);

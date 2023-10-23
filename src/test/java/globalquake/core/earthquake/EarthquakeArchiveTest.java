@@ -20,7 +20,7 @@ public class EarthquakeArchiveTest {
         for (int i = 0; i < 10000; i++) {
             List<Integer> list = List.of(0, 1, 2, 3, 4);
             list.parallelStream().forEach(integer -> {
-                Earthquake earthquake = new Earthquake(null, 0, 0, 0, r.nextLong());
+                Earthquake earthquake = new Earthquake(null);
                 earthquakeArchive.archiveQuake(earthquake);
                 n.incrementAndGet();
             });

@@ -309,8 +309,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         clus.setPreviousHypocenter(hyp);
 
-        quake = new Earthquake(clus, hyp.lat, hyp.lon, hyp.depth, System.currentTimeMillis() - 50 * 1000);
-        quake.setMag(System.currentTimeMillis() % 10000.0 / 1000.0);
+        quake = new Earthquake(clus);
 
         hyp.magnitude = quake.getMag();
 
@@ -319,7 +318,7 @@ public class GlobalQuakePanel extends GlobePanel {
             double mag = 5 + Math.tan(i / 100.0 * 3.14159);
             mags.add(new MagnitudeReading(mag, 0));
         }
-        quake.setMags(mags);
+
         quake.setRegion("asdasdasd");
         return quake;
     }
@@ -720,8 +719,10 @@ public class GlobalQuakePanel extends GlobePanel {
             g.draw(new Line2D.Double(startX + ww - 4, y0, startX + ww, y0));
         }
 
-        synchronized (quake.magsLock) {
-            List<MagnitudeReading> mags = quake.getMags();
+        Hypocenter hypocenter = quake.getHypocenter();
+        List<MagnitudeReading> mags = hypocenter.mags;
+
+        if(mags != null) {
             int[] bins = new int[100];
 
             for (MagnitudeReading magnitudeReading : mags) {

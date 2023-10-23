@@ -2,7 +2,9 @@ package globalquake.ui.archived;
 
 import globalquake.core.earthquake.ArchivedEvent;
 import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
 import globalquake.ui.globalquake.feature.FeatureGlobalStation;
@@ -70,8 +72,13 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
 
         public AnimatedEarthquake(ArchivedQuakeAnimation animation, double lat, double lon, double depth) {
-            super(null, lat, lon, depth, 0);
+            Cluster cluster = new Cluster(0);
+
+            Hypocenter hypocenter = new Hypocenter(lat, lon, depth, 0, 0, 0, null, null);
+            cluster.setPreviousHypocenter(hypocenter);
+
             this.animation = animation;
+            this.cluster = cluster;
         }
 
         @Override
@@ -92,7 +99,7 @@ public class ArchivedQuakePanel extends GlobePanel {
 
     private List<Earthquake> createFakeQuake(ArchivedQuake quake) {
         Earthquake fake = new AnimatedEarthquake(animation,quake.getLat(),quake.getLon(),quake.getDepth());
-        fake.setMag(quake.getMag());
+        fake.getHypocenter().magnitude = quake.getMag();
         return List.of(fake);
     }
 
