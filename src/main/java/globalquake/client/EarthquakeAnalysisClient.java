@@ -74,9 +74,10 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     }
 
     private ClientEarthquake createEarthquake(HypocenterData hypocenterData) {
-
         Hypocenter hypocenter = new Hypocenter(hypocenterData.lat(), hypocenterData.lon(), hypocenterData.depth(), hypocenterData.origin(),
             0,0,null,null);
+
+        hypocenter.magnitude = hypocenterData.magnitude();
 
         Cluster cluster = new Cluster(0);
         cluster.revisionID = hypocenterData.revisionID();

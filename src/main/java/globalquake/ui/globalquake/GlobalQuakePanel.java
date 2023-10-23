@@ -81,7 +81,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 if (DEBUG) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
-                        earthquake.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
                         GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
                     }
@@ -92,7 +91,6 @@ public class GlobalQuakePanel extends GlobePanel {
                         if(ex != null) {
                             Earthquake earthquake = createDebugQuake();
                             ex.update(earthquake);
-                            ex.updateShakemap(earthquake.getCluster().getPreviousHypocenter());
                             GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(ex));
                         }
                     }
@@ -377,12 +375,12 @@ public class GlobalQuakePanel extends GlobePanel {
 
         settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
-        int totalStations = 0;
-        int connectedStations = 0;
-        int runningSeedlinks = 0;
-        int totalSeedlinks = 0;
-
         if(GlobalQuake.instance.getStationDatabaseManager() != null) {
+            int totalStations = 0;
+            int connectedStations = 0;
+            int runningSeedlinks = 0;
+            int totalSeedlinks = 0;
+
             for (SeedlinkNetwork seedlinkNetwork : GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks()) {
                 totalStations += seedlinkNetwork.selectedStations;
                 connectedStations += seedlinkNetwork.connectedStations;
@@ -393,10 +391,11 @@ public class GlobalQuakePanel extends GlobePanel {
                     runningSeedlinks++;
                 }
             }
+
+            settingsStrings.add(new SettingInfo("Stations: ", "%d / %d".formatted(connectedStations, totalStations), getColorPCT(1 - (double) connectedStations / totalStations)));
+            settingsStrings.add(new SettingInfo("Seedlinks: ", "%d / %d".formatted(runningSeedlinks, totalSeedlinks), getColorPCT(1 - (double) runningSeedlinks / totalSeedlinks)));
         }
 
-        settingsStrings.add(new SettingInfo("Stations: ", "%d / %d".formatted(connectedStations, totalStations), getColorPCT(1 - (double) connectedStations / totalStations)));
-        settingsStrings.add(new SettingInfo("Seedlinks: ", "%d / %d".formatted(runningSeedlinks, totalSeedlinks), getColorPCT(1 - (double) runningSeedlinks / totalSeedlinks)));
 
         double GB = 1024 * 1024 * 1024.0;
 
@@ -543,9 +542,11 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + xOffset + 3, y + 123);
 
-                    QualityClass summaryQuality = hypocenter.quality.getSummary();
+                    if(hypocenter.quality != null) {
+                        QualityClass summaryQuality = hypocenter.quality.getSummary();
 
-                    drawAccuracyBox(g, true, "Quality: ", x + baseWidth + 2, y + 122, summaryQuality.toString(), summaryQuality.getColor());
+                        drawAccuracyBox(g, true, "Quality: ", x + baseWidth + 2, y + 122, summaryQuality.toString(), summaryQuality.getColor());
+                    }
                 }
             }
 

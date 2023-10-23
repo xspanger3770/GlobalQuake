@@ -27,15 +27,17 @@ public class Earthquake implements Regional, Warnable {
 
 
 	public Earthquake(Cluster cluster) {
-		this();
-		this.cluster = cluster;
-	}
+		if(cluster == null){
+			throw new IllegalArgumentException("Cluster cannot be null!");
+		}
 
-	public Earthquake() {
 		this.regionUpdater = new RegionUpdater(this);
 
 		this.lastUpdate = System.currentTimeMillis();
+		this.cluster = cluster;
+
 		shakemapExecutor = Executors.newSingleThreadExecutor();
+		updateShakemap();
 	}
 
 	public void updateRegion(){
@@ -94,6 +96,7 @@ public class Earthquake implements Regional, Warnable {
 	public void update(){
 		if (getLat() != lastLat || getLon() != lastLon) {
 			regionUpdater.updateRegion();
+			updateShakemap();
 		}
 
 		lastLat = getLat();
@@ -138,10 +141,11 @@ public class Earthquake implements Regional, Warnable {
 		return getLon();
 	}
 
-    public void updateShakemap(Hypocenter hypocenter) {
+    private void updateShakemap() {
 		shakemapExecutor.submit(() -> {
-            double mag = hypocenter.magnitude;
-            shakemap = new ShakeMap(hypocenter, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
+			Hypocenter hyp = getHypocenter();
+            double mag = hyp.magnitude;
+            shakemap = new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
             if(GlobalQuake.instance != null) {
                 GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(Earthquake.this));
             }

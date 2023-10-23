@@ -1,6 +1,7 @@
 package globalquake.core.earthquake;
 
 import globalquake.core.archive.EarthquakeArchive;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class EarthquakeArchiveTest {
         for (int i = 0; i < 10000; i++) {
             List<Integer> list = List.of(0, 1, 2, 3, 4);
             list.parallelStream().forEach(integer -> {
-                Earthquake earthquake = new Earthquake(null);
+                Earthquake earthquake = new Earthquake(new Cluster(0));
                 earthquakeArchive.archiveQuake(earthquake);
                 n.incrementAndGet();
             });

@@ -72,7 +72,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
 
         public AnimatedEarthquake(ArchivedQuakeAnimation animation, double lat, double lon, double depth) {
-            Cluster cluster = new Cluster(0);
+            super(new Cluster(0));
 
             Hypocenter hypocenter = new Hypocenter(lat, lon, depth, 0, 0, 0, null, null);
             cluster.setPreviousHypocenter(hypocenter);
