@@ -44,15 +44,19 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         if(packet instanceof HypocenterDataPacket hypocenterData) {
             processQuakeDataPacket(hypocenterData);
         } else if(packet instanceof EarthquakeCheckPacket checkPacket) {
-            UUID uuid = checkPacket.getInfo().uuid();
-            ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
-            if(checkPacket.getInfo().revisionID() == EarthquakeInfo.REMOVED){
-                clientEarthquakeMap.remove(uuid);
-                earthquakes.remove(existingQuake);
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
-            }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.getInfo().revisionID()){
-                socket.sendPacket(new EarthquakeRequestPacket(uuid));
-            }
+            processQuakeCheckPacket(socket, checkPacket);
+        }
+    }
+
+    private void processQuakeCheckPacket(ClientSocket socket, EarthquakeCheckPacket checkPacket) throws IOException {
+        UUID uuid = checkPacket.getInfo().uuid();
+        ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
+        if(checkPacket.getInfo().revisionID() == EarthquakeInfo.REMOVED){
+            clientEarthquakeMap.remove(uuid);
+            earthquakes.remove(existingQuake);
+            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
+        }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.getInfo().revisionID()){
+            socket.sendPacket(new EarthquakeRequestPacket(uuid));
         }
     }
 
