@@ -6,10 +6,12 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
+        <version>0.10.0_pre1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>GlobalQuakeServer</artifactId>
+    <version>0.1.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -75,11 +77,13 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeAPI</artifactId>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
+            <version>0.10.0_pre1</version>
             <scope>compile</scope>
         </dependency>
 
