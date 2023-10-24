@@ -6,6 +6,7 @@ import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.events.GlobalQuakeLocalEventHandler;
+import globalquake.intensity.ShakemapService;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
 import org.tinylog.Logger;
@@ -21,6 +22,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
     private final GlobalQuakeLocalEventHandler localEventHandler;
 
     public static GlobalQuakeLocal instance;
+    private final ShakemapService shakemapService;
 
     private GlobalQuakeFrame globalQuakeFrame;
 
@@ -29,6 +31,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
         instance = this;
         this.alertManager = new AlertManager();
         this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
+        this.shakemapService = new ShakemapService();
     }
 
     public GlobalQuakeLocal initStations(){
@@ -72,5 +75,9 @@ public class GlobalQuakeLocal extends GlobalQuake {
 
     public GlobalQuakeFrame getGlobalQuakeFrame() {
         return globalQuakeFrame;
+    }
+
+    public ShakemapService getShakemapService() {
+        return shakemapService;
     }
 }

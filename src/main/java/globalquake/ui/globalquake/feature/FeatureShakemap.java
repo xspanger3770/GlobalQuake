@@ -10,10 +10,13 @@ import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.events.GlobalQuakeLocalEventListener;
+import globalquake.events.specific.ShakeMapCreatedEvent;
 import globalquake.intensity.IntensityHex;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.intensity.ShakeMap;
+import globalquake.local.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -36,10 +39,6 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     private final H3Core h3;
     private final MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList<>();
 
-    private final Map<Earthquake, ShakeMap> shakeMaps = new HashMap<>();
-
-    private final ExecutorService shakemapService = Executors.newSingleThreadExecutor();
-
     public FeatureShakemap() {
         super(1);
         try {
@@ -48,57 +47,12 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             throw new RuntimeException(e);
         }
 
-        if(GlobalQuake.instance != null){
-            GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
-                @Override
-                public void onQuakeCreate(QuakeCreateEvent event) {
-                    updateShakemap(event.earthquake());
-                }
-
-                @Override
-                public void onQuakeArchive(QuakeArchiveEvent event) {
-                    removeShakemap(event.earthquake());
-                }
-
-                @Override
-                public void onQuakeUpdate(QuakeUpdateEvent event) {
-                    updateShakemap(event.earthquake());
-                }
-
-                @Override
-                public void onQuakeRemove(QuakeRemoveEvent event) {
-                    removeShakemap(event.earthquake());
-                }
-            });
-        } else{
-            Logger.error("GQ instance is null!!");
-        }
-    }
-
-    private void removeShakemap(Earthquake earthquake) {
-        shakemapService.submit(new Runnable() {
+        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
             @Override
-            public void run() {
-                shakeMaps.remove(earthquake);
+            public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
                 updateHexes();
             }
         });
-    }
-
-    private void updateShakemap(Earthquake earthquake) {
-        shakemapService.submit(new Runnable() {
-            @Override
-            public void run() {
-                shakeMaps.put(earthquake, createShakemap(earthquake));
-                updateHexes();
-            }
-        });
-    }
-
-    private ShakeMap createShakemap(Earthquake earthquake) {
-        Hypocenter hyp = earthquake.getCluster().getPreviousHypocenter();
-        double mag = hyp.magnitude;
-        return new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
     }
 
     @Override
@@ -118,7 +72,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private synchronized void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
-        for(var pair : shakeMaps.entrySet().stream()
+        for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
                 .sorted(Comparator.comparing(kv -> -kv.getKey().getMag())).toList()){
             ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
