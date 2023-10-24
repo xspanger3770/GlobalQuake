@@ -1,9 +1,14 @@
 package globalquake.local;
 
 import globalquake.alert.AlertManager;
+import globalquake.client.ClusterAnalysisClient;
+import globalquake.client.EarthquakeAnalysisClient;
+import globalquake.client.EarthquakeArchiveClient;
+import globalquake.client.GlobalStationManagerClient;
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.events.GlobalQuakeLocalEventHandler;
 import globalquake.intensity.ShakemapService;
@@ -24,7 +29,21 @@ public class GlobalQuakeLocal extends GlobalQuake {
     public static GlobalQuakeLocal instance;
     private final ShakemapService shakemapService;
 
-    private GlobalQuakeFrame globalQuakeFrame;
+    protected GlobalQuakeFrame globalQuakeFrame;
+
+    public GlobalQuakeLocal() {
+        instance = this;
+
+        super.eventHandler = new GlobalQuakeEventHandler().runHandler();
+        super.globalStationManager = new GlobalStationManagerClient();
+        super.earthquakeAnalysis = new EarthquakeAnalysisClient();
+        super.clusterAnalysis = new ClusterAnalysisClient();
+        super.archive = new EarthquakeArchiveClient();
+
+        this.alertManager = new AlertManager();
+        this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
+        this.shakemapService = new ShakemapService();
+    }
 
     public GlobalQuakeLocal(StationDatabaseManager stationDatabaseManager) {
         super(stationDatabaseManager);
@@ -45,7 +64,6 @@ public class GlobalQuakeLocal extends GlobalQuake {
                 globalQuakeFrame = new GlobalQuakeFrame();
                 globalQuakeFrame.setVisible(true);
 
-
                 Main.getErrorHandler().setParent(globalQuakeFrame);
 
                 globalQuakeFrame.addWindowListener(new WindowAdapter() {
@@ -54,6 +72,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
                         for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
                             getArchive().archiveQuake(quake);
                         }
+
                         getArchive().saveArchive();
                     }
                 });

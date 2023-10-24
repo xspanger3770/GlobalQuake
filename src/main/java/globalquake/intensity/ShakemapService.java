@@ -24,8 +24,8 @@ public class ShakemapService {
     private final ExecutorService shakemapService = Executors.newSingleThreadExecutor();
 
     public ShakemapService(){
-        if(GlobalQuakeLocal.instance != null){
-            GlobalQuakeLocal.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        if(GlobalQuake.instance != null){
+            GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
                 @Override
                 public void onQuakeCreate(QuakeCreateEvent event) {
                     updateShakemap(event.earthquake());

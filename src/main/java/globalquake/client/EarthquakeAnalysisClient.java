@@ -79,7 +79,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         if(existingQuake == null) {
             clientEarthquakeMap.put(uuid, newQuake);
             earthquakes.add(newQuake);
-            GlobalQuakeLocal.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newQuake));
+            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newQuake));
         } else if(existingQuake.getRevisionID() < data.revisionID()) {
             existingQuake.update(newQuake);
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(existingQuake, null));
