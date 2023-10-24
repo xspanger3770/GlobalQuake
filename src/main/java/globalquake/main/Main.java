@@ -1,7 +1,7 @@
 package globalquake.main;
 
-import globalquake.exception.ApplicationErrorHandler;
-import globalquake.exception.FatalIOException;
+import globalquake.core.exception.ApplicationErrorHandler;
+import globalquake.core.exception.FatalIOException;
 import globalquake.ui.client.MainFrame;
 
 import javax.swing.*;

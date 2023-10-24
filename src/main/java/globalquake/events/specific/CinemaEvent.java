@@ -1,12 +1,13 @@
 package globalquake.events.specific;
 
 import globalquake.events.GlobalQuakeEventListener;
+import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.ui.globalquake.CinemaTarget;
 
-public record CinemaEvent(CinemaTarget cinemaTarget) implements GlobalQuakeEvent {
+public record CinemaEvent(CinemaTarget cinemaTarget) implements GlobalQuakeLocalEvent {
 
     @Override
-    public void run(GlobalQuakeEventListener eventListener) {
+    public void run(GlobalQuakeLocalEventListener eventListener) {
         eventListener.onCinemaModeTargetSwitch(this);
     }
 

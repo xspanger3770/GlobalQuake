@@ -1,14 +1,15 @@
 package globalquake.client;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.alert.AlertManager;
-import globalquake.events.GlobalQuakeEventHandler;
+import globalquake.core.events.GlobalQuakeEventHandler;
+import globalquake.local.GlobalQuakeLocal;
 import gqserver.api.Packet;
 
 import java.io.IOException;
 
-public class GlobalQuakeClient extends GlobalQuake {
+public class GlobalQuakeClient extends GlobalQuakeLocal {
     public GlobalQuakeClient() {
+        super(null);
         instance = this;
 
         super.eventHandler = new GlobalQuakeEventHandler().runHandler();
@@ -19,7 +20,6 @@ public class GlobalQuakeClient extends GlobalQuake {
 
         super.clusterAnalysis = new ClusterAnalysisClient();
 
-        super.alertManager = new AlertManager();
         super.archive = new EarthquakeArchiveClient();
     }
 
