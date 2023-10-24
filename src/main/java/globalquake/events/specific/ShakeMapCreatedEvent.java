@@ -1,9 +1,9 @@
 package globalquake.events.specific;
 
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.events.GlobalQuakeEventListener;
+import globalquake.events.GlobalQuakeLocalEventListener;
 
-public class ShakeMapCreatedEvent implements GlobalQuakeEvent {
+public class ShakeMapCreatedEvent implements GlobalQuakeLocalEvent {
     @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final Earthquake earthquake;
 
@@ -12,7 +12,7 @@ public class ShakeMapCreatedEvent implements GlobalQuakeEvent {
     }
 
     @Override
-    public void run(GlobalQuakeEventListener eventListener) {
+    public void run(GlobalQuakeLocalEventListener eventListener) {
         eventListener.onShakemapCreated(this);
     }
 }

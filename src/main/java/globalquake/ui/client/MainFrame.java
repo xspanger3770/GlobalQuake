@@ -1,20 +1,14 @@
 package globalquake.ui.client;
 
 import globalquake.core.GlobalQuake;
-import globalquake.database.StationDatabaseManager;
-import globalquake.exception.FatalIOException;
-import globalquake.exception.RuntimeApplicationException;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.intensity.IntensityTable;
-import globalquake.intensity.ShakeMap;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.regions.Regions;
 import globalquake.main.Main;
-import globalquake.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.settings.SettingsFrame;
 import globalquake.utils.Scale;
-import globalquake.database.StationSource;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

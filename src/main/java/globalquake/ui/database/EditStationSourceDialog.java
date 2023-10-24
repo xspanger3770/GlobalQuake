@@ -1,8 +1,5 @@
 package globalquake.ui.database;
 
-import globalquake.database.StationDatabaseManager;
-import globalquake.database.StationSource;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

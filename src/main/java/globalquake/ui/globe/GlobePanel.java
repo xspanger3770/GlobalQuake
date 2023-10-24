@@ -1,11 +1,11 @@
 package globalquake.ui.globe;
 
-import globalquake.geo.GeoUtils;
-import globalquake.regions.Regions;
+import globalquake.core.Settings;
+import globalquake.core.regions.Regions;
 import globalquake.ui.globe.feature.FeatureGeoPolygons;
 import globalquake.ui.globe.feature.FeatureHorizon;
 import globalquake.ui.globe.feature.RenderEntity;
-import globalquake.ui.settings.Settings;
+import globalquake.utils.GeoUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.tinylog.Logger;
 

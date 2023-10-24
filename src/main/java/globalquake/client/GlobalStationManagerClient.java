@@ -1,8 +1,8 @@
 package globalquake.client;
 
+import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
-import globalquake.database.StationDatabaseManager;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

@@ -1,5 +1,6 @@
 package globalquake.ui.archived;
 
+import globalquake.core.Settings;
 import globalquake.core.earthquake.ArchivedEvent;
 import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.core.earthquake.data.Cluster;
@@ -9,7 +10,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
 import globalquake.ui.globalquake.feature.FeatureGlobalStation;
 import globalquake.ui.globe.GlobePanel;
-import globalquake.ui.settings.Settings;
 
 import java.awt.*;
 import java.time.Instant;
@@ -67,7 +67,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         }
     }
 
-    static class AnimatedEarthquake extends Earthquake{
+    static class AnimatedEarthquake extends Earthquake {
 
         private final ArchivedQuakeAnimation animation;
 
@@ -75,7 +75,7 @@ public class ArchivedQuakePanel extends GlobePanel {
             super(new Cluster(0));
 
             Hypocenter hypocenter = new Hypocenter(lat, lon, depth, 0, 0, 0, null, null);
-            cluster.setPreviousHypocenter(hypocenter);
+            getCluster().setPreviousHypocenter(hypocenter);
 
             this.animation = animation;
         }

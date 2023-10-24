@@ -1,9 +1,9 @@
 package globalquake.ui.globe.feature;
 
+import globalquake.core.Settings;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
-import globalquake.ui.settings.Settings;
 import globalquake.utils.monitorable.Monitorable;
 
 import java.awt.*;

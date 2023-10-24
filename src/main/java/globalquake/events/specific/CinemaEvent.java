@@ -1,6 +1,5 @@
 package globalquake.events.specific;
 
-import globalquake.events.GlobalQuakeEventListener;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.ui.globalquake.CinemaTarget;
 

@@ -1,12 +1,12 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.geo.GeoUtils;
-import globalquake.intensity.IntensityScales;
-import globalquake.intensity.Level;
+import globalquake.core.intensity.IntensityScales;
+import globalquake.core.intensity.Level;
 import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.ui.settings.Settings;
+import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;
