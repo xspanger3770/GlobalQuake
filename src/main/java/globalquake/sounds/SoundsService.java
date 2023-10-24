@@ -1,0 +1,108 @@
+package globalquake.sounds;
+
+import globalquake.alert.AlertManager;
+import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.intensity.IntensityScales;
+import globalquake.core.intensity.ShindoIntensityScale;
+import globalquake.utils.GeoUtils;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class SoundsService {
+
+    private Map<Cluster, SoundsInfo> clusterSoundsInfo = new HashMap<>();
+
+    public SoundsService(){
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void checkSounds() {
+        for(Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()){
+            determineSounds(cluster);
+        }
+
+        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+            determineSounds(earthquake.getCluster());
+        }
+
+        for (Iterator<Map.Entry<Cluster, SoundsInfo>> iterator = clusterSoundsInfo.entrySet().iterator(); iterator.hasNext(); ) {
+            var kv = iterator.next();
+            if(System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100){
+                iterator.remove();
+            }
+        }
+    }
+
+    public void determineSounds(Cluster cluster) {
+        SoundsInfo info = clusterSoundsInfo.get(cluster);
+
+        if(info == null){
+            clusterSoundsInfo.put(cluster, new SoundsInfo());
+            return;
+        }
+
+        if (!info.firstSound) {
+            Sounds.playSound(Sounds.weak);
+            info.firstSound = true;
+        }
+
+        int level = cluster.getActualLevel();
+        if (level > info.maxLevel) {
+            if (level >= 1 && info.maxLevel < 1) {
+                Sounds.playSound(Sounds.moderate);
+            }
+            if (level >= 2 && info.maxLevel < 2) {
+                Sounds.playSound(Sounds.shindo5);
+            }
+            if (level >= 3 && info.maxLevel < 3) {
+                Sounds.playSound(Sounds.warning);
+            }
+            info.maxLevel = level;
+        }
+
+        Earthquake quake = cluster.getEarthquake();
+
+        if (quake != null) {
+            boolean meets = AlertManager.meetsConditions(quake);
+            if (meets && !info.meets) {
+                Sounds.playSound(Sounds.intensify);
+                info.meets = true;
+            }
+            double pga = GeoUtils.pgaFunction(cluster.getEarthquake().getMag(), cluster.getEarthquake().getDepth());
+            if (info.maxPGA < pga) {
+                info.maxPGA = pga;
+                if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
+                    Sounds.playSound(Sounds.eew_warning);
+                    info.warningPlayed = true;
+                }
+            }
+
+            double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
+                    Settings.homeLat, Settings.homeLon, 0.0);
+            double pgaHome = GeoUtils.pgaFunction(quake.getMag(), distGEO);
+
+            if (pgaHome > info.maxPGAHome) {
+                double threshold = IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
+                if (pgaHome >= threshold && info.maxPGAHome < threshold) {
+                    Sounds.playSound(Sounds.felt);
+                }
+                info.maxPGAHome = pgaHome;
+            }
+
+            if (info.maxPGAHome >= ShindoIntensityScale.ICHI.getPga()) {
+                if (info.lastCountdown == 0) {
+                    info.lastCountdown = -999;
+                    Sounds.playSound(Sounds.dong);
+                }
+            }
+        }
+    }
+
+}

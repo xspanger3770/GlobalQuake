@@ -7,11 +7,9 @@ public class SoundsInfo {
 	public double maxPGA;
 	public double maxPGAHome;
 	public boolean warningPlayed;
-	public int lastCountdown;
+	public int lastCountdown = -1;
 	public boolean meets;
 
-	public SoundsInfo() {
-		this.lastCountdown = -1;
-	}
+	public long createdAt = System.currentTimeMillis();
 
 }
