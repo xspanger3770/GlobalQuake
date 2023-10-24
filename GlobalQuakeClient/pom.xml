@@ -6,10 +6,8 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.0</version>
     </parent>
 
-    <groupId>xspanger.GlobalQuake</groupId>
     <artifactId>GlobalQuakeClient</artifactId>
 
     <properties>
@@ -27,13 +25,11 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
-            <version>0.10.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeAPI</artifactId>
-            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
