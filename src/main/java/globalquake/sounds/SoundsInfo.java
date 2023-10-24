@@ -10,6 +10,6 @@ public class SoundsInfo {
 	public int lastCountdown = -1;
 	public boolean meets;
 
-	public long createdAt = System.currentTimeMillis();
+	public final long createdAt = System.currentTimeMillis();
 
 }

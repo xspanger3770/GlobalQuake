@@ -12,7 +12,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.*;
-import globalquake.local.GlobalQuakeLocal;
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.core.Settings;
 import org.tinylog.Logger;

@@ -4,10 +4,10 @@ import globalquake.events.specific.*;
 
 public class GlobalQuakeLocalEventListener {
 
-    public void onWarningIssued(AlertIssuedEvent event) {};
+    public void onWarningIssued(AlertIssuedEvent event) {}
 
     @SuppressWarnings("unused")
-    public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {};
+    public void onShakemapCreated(ShakeMapCreatedEvent event) {}
 
-    public void onCinemaModeTargetSwitch(CinemaEvent cinemaEvent) {};
+    public void onCinemaModeTargetSwitch(CinemaEvent event) {}
 }

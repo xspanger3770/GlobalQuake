@@ -9,7 +9,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.events.specific.ShakeMapCreatedEvent;
-import globalquake.local.GlobalQuakeLocal;
+import globalquake.client.GlobalQuakeLocal;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
@@ -52,22 +52,16 @@ public class ShakemapService {
     }
 
     private void removeShakemap(Earthquake earthquake) {
-        shakemapService.submit(new Runnable() {
-            @Override
-            public void run() {
-                shakeMaps.remove(earthquake);
-                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
-            }
+        shakemapService.submit(() -> {
+            shakeMaps.remove(earthquake);
+            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
         });
     }
 
     private void updateShakemap(Earthquake earthquake) {
-        shakemapService.submit(new Runnable() {
-            @Override
-            public void run() {
-                shakeMaps.put(earthquake, createShakemap(earthquake));
-                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
-            }
+        shakemapService.submit(() -> {
+            shakeMaps.put(earthquake, createShakemap(earthquake));
+            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
         });
     }
 

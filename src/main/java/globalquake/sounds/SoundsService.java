@@ -13,14 +13,13 @@ import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SoundsService {
 
-    private Map<Cluster, SoundsInfo> clusterSoundsInfo = new HashMap<>();
+    private final Map<Cluster, SoundsInfo> clusterSoundsInfo = new HashMap<>();
 
     public SoundsService(){
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
@@ -47,12 +46,7 @@ public class SoundsService {
             determineSounds(earthquake.getCluster());
         }
 
-        for (Iterator<Map.Entry<Cluster, SoundsInfo>> iterator = clusterSoundsInfo.entrySet().iterator(); iterator.hasNext(); ) {
-            var kv = iterator.next();
-            if(System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100){
-                iterator.remove();
-            }
-        }
+        clusterSoundsInfo.entrySet().removeIf(kv -> System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100);
     }
 
     public void determineSounds(Cluster cluster) {

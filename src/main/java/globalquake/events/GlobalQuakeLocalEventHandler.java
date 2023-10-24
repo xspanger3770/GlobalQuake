@@ -1,6 +1,5 @@
 package globalquake.events;
 
-import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.events.specific.GlobalQuakeLocalEvent;
 import org.tinylog.Logger;
 

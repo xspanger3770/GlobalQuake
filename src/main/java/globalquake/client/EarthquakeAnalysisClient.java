@@ -12,7 +12,6 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
-import globalquake.local.GlobalQuakeLocal;
 import gqserver.api.Packet;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
@@ -87,9 +86,12 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     }
 
     private ClientEarthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData) {
+        DepthConfidenceInterval depthConfidenceInterval = advancedHypocenterData == null ? null : createDepthConfidenceInterval(advancedHypocenterData.depthIntervalData());
+        var polygonConfidenceIntervals =advancedHypocenterData == null ? null : createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData());
+
         Hypocenter hypocenter = new Hypocenter(hypocenterData.lat(), hypocenterData.lon(), hypocenterData.depth(), hypocenterData.origin(),
-            0,0,createDepthConfidenceInterval(advancedHypocenterData.depthIntervalData()),
-                createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData()));
+            0,0, depthConfidenceInterval,
+                polygonConfidenceIntervals);
 
         hypocenter.magnitude = hypocenterData.magnitude();
 

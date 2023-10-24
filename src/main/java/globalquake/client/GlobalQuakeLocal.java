@@ -1,15 +1,10 @@
-package globalquake.local;
+package globalquake.client;
 
 import globalquake.alert.AlertManager;
-import globalquake.client.ClusterAnalysisClient;
-import globalquake.client.EarthquakeAnalysisClient;
-import globalquake.client.EarthquakeArchiveClient;
-import globalquake.client.GlobalStationManagerClient;
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventHandler;
-import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.events.GlobalQuakeLocalEventHandler;
 import globalquake.intensity.ShakemapService;
 import globalquake.main.Main;
@@ -20,15 +15,16 @@ import org.tinylog.Logger;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 
 public class GlobalQuakeLocal extends GlobalQuake {
 
+    @SuppressWarnings("unused")
     private final AlertManager alertManager;
     private final GlobalQuakeLocalEventHandler localEventHandler;
 
     public static GlobalQuakeLocal instance;
     private final ShakemapService shakemapService;
+    @SuppressWarnings("unused")
     private final SoundsService soundsService;
 
     protected GlobalQuakeFrame globalQuakeFrame;
@@ -57,11 +53,6 @@ public class GlobalQuakeLocal extends GlobalQuake {
         this.soundsService = new SoundsService();
     }
 
-    public GlobalQuakeLocal initStations(){
-        globalStationManager.initStations(stationDatabaseManager);
-        return this;
-    }
-
     public GlobalQuakeLocal createFrame() {
         EventQueue.invokeLater(() -> {
             try {
@@ -86,10 +77,6 @@ public class GlobalQuakeLocal extends GlobalQuake {
             }
         });
         return this;
-    }
-
-    public AlertManager getAlertManager() {
-        return alertManager;
     }
 
     public GlobalQuakeLocalEventHandler getLocalEventHandler() {

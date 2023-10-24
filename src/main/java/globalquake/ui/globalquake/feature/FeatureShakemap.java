@@ -2,21 +2,13 @@ package globalquake.ui.globalquake.feature;
 
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
-import globalquake.core.GlobalQuake;
-import globalquake.core.earthquake.data.Earthquake;
-import globalquake.core.earthquake.data.Hypocenter;
-import globalquake.core.events.GlobalQuakeEventAdapter;
-import globalquake.core.events.specific.QuakeArchiveEvent;
-import globalquake.core.events.specific.QuakeCreateEvent;
-import globalquake.core.events.specific.QuakeRemoveEvent;
-import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.ShakeMapCreatedEvent;
 import globalquake.intensity.IntensityHex;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.intensity.ShakeMap;
-import globalquake.local.GlobalQuakeLocal;
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -25,14 +17,11 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
-import org.tinylog.Logger;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
@@ -48,8 +37,9 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
 
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
+            @SuppressWarnings("unused")
             @Override
-            public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
+            public void onShakemapCreated(ShakeMapCreatedEvent event) {
                 updateHexes();
             }
         });

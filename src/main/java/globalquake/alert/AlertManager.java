@@ -11,7 +11,7 @@ import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.events.specific.AlertIssuedEvent;
-import globalquake.local.GlobalQuakeLocal;
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.utils.GeoUtils;
 
 public class AlertManager {

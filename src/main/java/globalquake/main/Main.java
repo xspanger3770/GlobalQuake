@@ -7,7 +7,6 @@ import globalquake.ui.client.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.GlyphJustificationInfo;
 import java.io.File;
 import java.util.Objects;
 

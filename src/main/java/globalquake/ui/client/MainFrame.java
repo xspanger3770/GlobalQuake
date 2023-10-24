@@ -1,6 +1,5 @@
 package globalquake.ui.client;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
 import globalquake.core.exception.FatalIOException;
@@ -9,7 +8,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.regions.Regions;
 import globalquake.intensity.ShakeMap;
-import globalquake.local.GlobalQuakeLocal;
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.main.Main;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;

@@ -1,18 +1,10 @@
 package globalquake.sounds;
 
-import globalquake.alert.AlertManager;
-import globalquake.core.earthquake.data.Cluster;
-import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.FatalIOException;
-import globalquake.utils.GeoUtils;
-import globalquake.core.intensity.IntensityScales;
-import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +26,7 @@ public class Sounds {
 
 	public static boolean soundsAvailable = true;
 
-	private static ExecutorService soundService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService soundService = Executors.newSingleThreadExecutor();
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
