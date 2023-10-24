@@ -1,15 +1,15 @@
 package globalquake.ui.debug;
 
 import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.regions.Regions;
+import globalquake.utils.GeoUtils;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.Point2D;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.utils.Scale;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 

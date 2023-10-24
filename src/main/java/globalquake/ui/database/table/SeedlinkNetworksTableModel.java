@@ -1,6 +1,6 @@
 package globalquake.ui.database.table;
 
-import globalquake.database.SeedlinkNetwork;
+import globalquake.core.database.SeedlinkNetwork;
 
 import javax.swing.*;
 import java.util.List;

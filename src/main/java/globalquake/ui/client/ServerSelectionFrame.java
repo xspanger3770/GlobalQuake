@@ -2,11 +2,11 @@ package globalquake.ui.client;
 
 import globalquake.client.ClientSocket;
 import globalquake.client.GlobalQuakeClient;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.intensity.IntensityTable;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.intensity.IntensityTable;
 import globalquake.intensity.ShakeMap;
 import globalquake.main.Main;
-import globalquake.regions.Regions;
+import globalquake.core.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import globalquake.utils.Scale;

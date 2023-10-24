@@ -30,4 +30,8 @@ public class GlobalQuakeLocal extends GlobalQuake {
     public GlobalQuakeLocalEventHandler getLocalEventHandler() {
         return localEventHandler;
     }
+
+    public void createFrame() {
+        
+    }
 }

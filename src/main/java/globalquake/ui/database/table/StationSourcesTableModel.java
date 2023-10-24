@@ -1,6 +1,6 @@
 package globalquake.ui.database.table;
 
-import globalquake.database.StationSource;
+import globalquake.core.database.StationSource;
 
 import javax.swing.*;
 import java.time.LocalDateTime;

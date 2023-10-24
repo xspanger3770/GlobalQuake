@@ -1,8 +1,8 @@
 package globalquake.ui.database;
 
-import globalquake.database.Channel;
-import globalquake.database.Network;
-import globalquake.database.Station;
+import globalquake.core.database.Channel;
+import globalquake.core.database.Network;
+import globalquake.core.database.Station;
 import globalquake.ui.stationselect.StationColor;
 
 import javax.swing.*;

@@ -1,7 +1,7 @@
 package globalquake.ui.archived;
 
+import globalquake.core.Settings;
 import globalquake.core.earthquake.ArchivedQuake;
-import globalquake.ui.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;

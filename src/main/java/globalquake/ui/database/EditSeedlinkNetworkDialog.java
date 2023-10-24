@@ -1,8 +1,8 @@
 package globalquake.ui.database;
 
-import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationDatabaseManager;
-import globalquake.exception.RuntimeApplicationException;
+import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.exception.RuntimeApplicationException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

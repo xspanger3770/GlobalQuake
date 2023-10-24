@@ -1,7 +1,7 @@
 package globalquake.ui.database;
 
-import globalquake.database.StationDatabaseManager;
-import globalquake.exception.FatalIOException;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.exception.FatalIOException;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
 import globalquake.ui.database.action.RestoreDatabaseAction;

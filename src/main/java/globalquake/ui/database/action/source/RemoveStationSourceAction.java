@@ -1,7 +1,7 @@
 package globalquake.ui.database.action.source;
 
-import globalquake.database.StationDatabaseManager;
-import globalquake.database.StationSource;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.database.StationSource;
 import globalquake.ui.database.table.FilterableTableModel;
 
 import javax.swing.*;

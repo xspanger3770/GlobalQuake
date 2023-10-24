@@ -1,7 +1,7 @@
 package globalquake.ui.database.action.seedlink;
 
-import globalquake.database.SeedlinkNetwork;
-import globalquake.database.StationDatabaseManager;
+import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.database.StationDatabaseManager;
 import globalquake.ui.database.EditSeedlinkNetworkDialog;
 import globalquake.ui.database.table.FilterableTableModel;
 
