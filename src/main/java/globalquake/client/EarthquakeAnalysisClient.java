@@ -10,8 +10,8 @@ import globalquake.events.specific.QuakeCreateEvent;
 import globalquake.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.QuakeUpdateEvent;
 import gqserver.api.Packet;
-import gqserver.api.data.EarthquakeInfo;
-import gqserver.api.data.HypocenterData;
+import gqserver.api.data.earthquake.EarthquakeInfo;
+import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
@@ -48,21 +48,21 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     }
 
     private void processQuakeCheckPacket(ClientSocket socket, EarthquakeCheckPacket checkPacket) throws IOException {
-        UUID uuid = checkPacket.getInfo().uuid();
+        UUID uuid = checkPacket.info().uuid();
         ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
-        if(checkPacket.getInfo().revisionID() == EarthquakeInfo.REMOVED){
+        if(checkPacket.info().revisionID() == EarthquakeInfo.REMOVED){
             clientEarthquakeMap.remove(uuid);
             earthquakes.remove(existingQuake);
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
-        }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.getInfo().revisionID()){
+        }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.info().revisionID()){
             socket.sendPacket(new EarthquakeRequestPacket(uuid));
         }
     }
 
     private void processQuakeDataPacket(HypocenterDataPacket hypocenterData) {
-        UUID uuid = hypocenterData.getData().uuid();
+        UUID uuid = hypocenterData.data().uuid();
         ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
-        HypocenterData data = hypocenterData.getData();
+        HypocenterData data = hypocenterData.data();
 
         ClientEarthquake newQuake = createEarthquake(data);
 

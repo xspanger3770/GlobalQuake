@@ -2,7 +2,7 @@ package globalquake.client;
 
 import globalquake.core.GlobalQuake;
 import gqserver.api.Packet;
-import gqserver.api.data.ServerClientConfig;
+import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HeartbeatPacket;
@@ -101,7 +101,6 @@ public class ClientSocket {
         try {
             while (isConnected()) {
                 Packet packet = (Packet) inputStream.readObject();
-                packet.onClientReceive();
                 ((GlobalQuakeClient) GlobalQuake.instance).processPacket(this, packet);
             }
         } catch (Exception e){
