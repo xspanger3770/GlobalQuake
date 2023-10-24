@@ -10,6 +10,7 @@ import globalquake.core.events.GlobalQuakeEventAdapter;
 import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
+import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.*;
 import globalquake.local.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobePanel;
@@ -80,7 +81,9 @@ public class CinemaHandler {
             public void onQuakeRemove(QuakeRemoveEvent event) {
                 warnings.remove(event.earthquake());
             }
+        });
 
+        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
             @Override
             public void onWarningIssued(AlertIssuedEvent event) {
                 warnings.putIfAbsent(event.warnable(), event.warning());
@@ -89,15 +92,15 @@ public class CinemaHandler {
                     var kv = iterator.next();
                     Warning warning = kv.getValue();
 
-                    if(System.currentTimeMillis() - warning.createdAt > WARNING_TIMEOUT){
+                    if (System.currentTimeMillis() - warning.createdAt > WARNING_TIMEOUT) {
                         iterator.remove();
                     }
                 }
 
-                if(GlobalQuake.instance != null) {
-                    if(Settings.jumpToAlert && event.warnable() instanceof Earthquake) {
+                if (GlobalQuake.instance != null) {
+                    if (Settings.jumpToAlert && event.warnable() instanceof Earthquake) {
                         CinemaTarget tgt = createTarget((Earthquake) event.warnable());
-                        if(lastTarget == null || tgt.priority() >= lastTarget.priority()){
+                        if (lastTarget == null || tgt.priority() >= lastTarget.priority()) {
                             GlobalQuakeLocal.instance.getGlobalQuakeFrame().getGQPanel().jumpTo(tgt.lat(), tgt.lon(), tgt.zoom());
                             GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new CinemaEvent(tgt));
                             lastTarget = tgt;

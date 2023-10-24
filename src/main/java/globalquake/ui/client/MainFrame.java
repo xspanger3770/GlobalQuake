@@ -2,12 +2,14 @@ package globalquake.ui.client;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.database.StationSource;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.regions.Regions;
 import globalquake.intensity.ShakeMap;
+import globalquake.local.GlobalQuakeLocal;
 import globalquake.main.Main;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
@@ -181,7 +183,7 @@ public class MainFrame extends GQFrame {
     }
 
     public static void launchGlobalQuake() {
-        new GlobalQuake(databaseManager).initStations().createFrame().runSeedlinkReader().startRuntime();
+        new GlobalQuakeLocal(databaseManager).createFrame().startRuntime();
     }
 
     public void onLoad(){

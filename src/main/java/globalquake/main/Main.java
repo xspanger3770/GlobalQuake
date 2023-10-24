@@ -1,11 +1,13 @@
 package globalquake.main;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalIOException;
 import globalquake.ui.client.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.GlyphJustificationInfo;
 import java.io.File;
 import java.util.Objects;
 
@@ -20,8 +22,9 @@ public class Main {
 
     public static void main(String[] args) {
         initErrorHandler();
-
         initMainDirectory();
+
+        GlobalQuake.prepare(MAIN_FOLDER, getErrorHandler());
 
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);

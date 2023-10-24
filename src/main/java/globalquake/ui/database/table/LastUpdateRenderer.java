@@ -1,5 +1,7 @@
 package globalquake.ui.database.table;
 
+import globalquake.core.Settings;
+
 import java.time.LocalDateTime;
 
 public class LastUpdateRenderer<E> extends TableCellRendererAdapter<E, LocalDateTime> {

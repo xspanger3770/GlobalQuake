@@ -3,6 +3,7 @@ package globalquake.ui.globe;
 import com.uber.h3core.util.LatLng;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.GeoUtils;
+import globalquake.utils.Point2DGQ;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
@@ -404,7 +405,7 @@ public class GlobeRenderer {
         if(radius < 1e-6){
             return;
         }
-        Point2D point = new Point2D();
+        Point2DGQ point = new Point2DGQ();
         GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
         GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
 
@@ -422,7 +423,7 @@ public class GlobeRenderer {
 
     public void createCross(Polygon3D polygon3D, double lat, double lon, double radius, double offset) {
         polygon3D.reset();
-        Point2D point = new Point2D();
+        Point2DGQ point = new Point2DGQ();
 
         GeoUtils.MoveOnGlobePrecomputed precomputed = new GeoUtils.MoveOnGlobePrecomputed();
         GeoUtils.precomputeMoveOnGlobe(precomputed, lat, lon, radius);
@@ -436,11 +437,11 @@ public class GlobeRenderer {
             polygon3D.addPoint(new Vector3D(centerPoint.getX(), centerPoint.getY(), centerPoint.getZ()));
 
             GeoUtils.moveOnGlobe(precomputed, point, ang);
-            Vector3D vector3D = createVec3D(point);
+            Vector3D vector3D = createVec3D(new Point2D(point.x, point.y));
             polygon3D.addPoint(vector3D);
 
             GeoUtils.moveOnGlobe(precomputed, point, ang + 180);
-            vector3D = createVec3D(point);
+            vector3D = createVec3D(new Point2D(point.x, point.y));
             polygon3D.addPoint(vector3D);
 
             ang += 90;

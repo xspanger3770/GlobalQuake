@@ -3,10 +3,16 @@ package globalquake.local;
 import globalquake.alert.AlertManager;
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.events.GlobalQuakeLocalEventHandler;
 import globalquake.main.Main;
+import globalquake.ui.globalquake.GlobalQuakeFrame;
+import org.tinylog.Logger;
 
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 public class GlobalQuakeLocal extends GlobalQuake {
@@ -16,11 +22,44 @@ public class GlobalQuakeLocal extends GlobalQuake {
 
     public static GlobalQuakeLocal instance;
 
+    private GlobalQuakeFrame globalQuakeFrame;
+
     public GlobalQuakeLocal(StationDatabaseManager stationDatabaseManager) {
-        super(stationDatabaseManager, Main.getErrorHandler(), Main.MAIN_FOLDER);
+        super(stationDatabaseManager);
         instance = this;
         this.alertManager = new AlertManager();
         this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
+    }
+
+    public GlobalQuakeLocal initStations(){
+        globalStationManager.initStations(stationDatabaseManager);
+        return this;
+    }
+
+    public GlobalQuakeLocal createFrame() {
+        EventQueue.invokeLater(() -> {
+            try {
+                globalQuakeFrame = new GlobalQuakeFrame();
+                globalQuakeFrame.setVisible(true);
+
+
+                Main.getErrorHandler().setParent(globalQuakeFrame);
+
+                globalQuakeFrame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        for (Earthquake quake : getEarthquakeAnalysis().getEarthquakes()) {
+                            getArchive().archiveQuake(quake);
+                        }
+                        getArchive().saveArchive();
+                    }
+                });
+            }catch (Exception e){
+                Logger.error(e);
+                System.exit(0);
+            }
+        });
+        return this;
     }
 
     public AlertManager getAlertManager() {
@@ -31,7 +70,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
         return localEventHandler;
     }
 
-    public void createFrame() {
-        
+    public GlobalQuakeFrame getGlobalQuakeFrame() {
+        return globalQuakeFrame;
     }
 }

@@ -14,6 +14,7 @@ import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.ShakeMapCreatedEvent;
@@ -110,7 +111,7 @@ public class GlobalQuakePanel extends GlobePanel {
         CinemaHandler cinemaHandler = new CinemaHandler(this);
         cinemaHandler.run();
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
             @Override
             public void onCinemaModeTargetSwitch(CinemaEvent cinemaEvent) {
                 if(cinemaEvent.cinemaTarget().original() instanceof Earthquake){
@@ -465,7 +466,9 @@ public class GlobalQuakePanel extends GlobePanel {
         int xOffset = 0;
         int baseHeight = quake == null ? 24 : 132;
 
-        ShakeMap shakeMap = quake == null ? null : quake.getShakemap();
+        //ShakeMap shakeMap = quake == null ? null : quake.getShakemap();
+
+        ShakeMap shakeMap = null; // TODO
 
         Level level = shakeMap == null ? null : IntensityScales.getIntensityScale().getLevel(shakeMap.getMaxPGA());
         Color levelColor = level == null ? Color.gray : level.getColor();

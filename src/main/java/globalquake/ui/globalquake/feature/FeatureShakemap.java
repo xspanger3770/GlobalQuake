@@ -4,9 +4,12 @@ import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.specific.QuakeArchiveEvent;
+import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
-import globalquake.events.specific.ShakeMapCreatedEvent;
+import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.intensity.IntensityHex;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
@@ -25,11 +28,18 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private final H3Core h3;
     private final MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList<>();
+
+    private final Map<Earthquake, ShakeMap> shakeMaps = new HashMap<>();
+
+    private final ExecutorService shakemapService = Executors.newSingleThreadExecutor();
+
     public FeatureShakemap() {
         super(1);
         try {
@@ -41,19 +51,54 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         if(GlobalQuake.instance != null){
             GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
                 @Override
-                public void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent) {
-                    updateHexes();
+                public void onQuakeCreate(QuakeCreateEvent event) {
+                    updateShakemap(event.earthquake());
                 }
 
-                @SuppressWarnings("unused")
                 @Override
-                public void onShakemapCreated(ShakeMapCreatedEvent shakeMapCreatedEvent) {
-                    updateHexes();
+                public void onQuakeArchive(QuakeArchiveEvent event) {
+                    removeShakemap(event.earthquake());
+                }
+
+                @Override
+                public void onQuakeUpdate(QuakeUpdateEvent event) {
+                    updateShakemap(event.earthquake());
+                }
+
+                @Override
+                public void onQuakeRemove(QuakeRemoveEvent event) {
+                    removeShakemap(event.earthquake());
                 }
             });
         } else{
             Logger.error("GQ instance is null!!");
         }
+    }
+
+    private void removeShakemap(Earthquake earthquake) {
+        shakemapService.submit(new Runnable() {
+            @Override
+            public void run() {
+                shakeMaps.remove(earthquake);
+                updateHexes();
+            }
+        });
+    }
+
+    private void updateShakemap(Earthquake earthquake) {
+        shakemapService.submit(new Runnable() {
+            @Override
+            public void run() {
+                shakeMaps.put(earthquake, createShakemap(earthquake));
+                updateHexes();
+            }
+        });
+    }
+
+    private ShakeMap createShakemap(Earthquake earthquake) {
+        Hypocenter hyp = earthquake.getCluster().getPreviousHypocenter();
+        double mag = hyp.magnitude;
+        return new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
     }
 
     @Override
@@ -73,9 +118,9 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private synchronized void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
-        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream()
-                .sorted(Comparator.comparing(earthquake -> -earthquake.getMag())).toList()){
-            ShakeMap shakeMap = earthquake.getShakemap();
+        for(var pair : shakeMaps.entrySet().stream()
+                .sorted(Comparator.comparing(kv -> -kv.getKey().getMag())).toList()){
+            ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {
                     IntensityHex current = items.get(intensityHex.id());
