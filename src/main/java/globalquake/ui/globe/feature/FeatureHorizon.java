@@ -1,6 +1,6 @@
 package globalquake.ui.globe.feature;
 
-import globalquake.geo.GeoUtils;
+import globalquake.utils.GeoUtils;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;

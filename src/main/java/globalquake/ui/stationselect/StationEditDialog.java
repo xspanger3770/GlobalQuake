@@ -1,7 +1,7 @@
 package globalquake.ui.stationselect;
 
-import globalquake.database.Channel;
-import globalquake.database.Station;
+import globalquake.core.database.Channel;
+import globalquake.core.database.Station;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

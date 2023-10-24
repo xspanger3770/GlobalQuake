@@ -4,15 +4,15 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
-import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.utils.GeoUtils;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.utils.Scale;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 

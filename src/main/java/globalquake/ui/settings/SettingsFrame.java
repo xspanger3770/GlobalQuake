@@ -1,7 +1,8 @@
 package globalquake.ui.settings;
 
-import globalquake.exception.RuntimeApplicationException;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.Settings;
+import globalquake.core.exception.RuntimeApplicationException;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;

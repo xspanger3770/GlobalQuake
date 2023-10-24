@@ -1,6 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 
 class HomeLocationPlaceholder implements LocationPlaceholder {
     public double getLat() {

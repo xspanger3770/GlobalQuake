@@ -11,23 +11,24 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
-import globalquake.database.SeedlinkNetwork;
-import globalquake.database.SeedlinkStatus;
-import globalquake.events.GlobalQuakeEventAdapter;
+import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.database.SeedlinkStatus;
+import globalquake.core.events.GlobalQuakeEventAdapter;
 import globalquake.events.specific.CinemaEvent;
-import globalquake.events.specific.QuakeRemoveEvent;
+import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.ShakeMapCreatedEvent;
-import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.intensity.IntensityScales;
-import globalquake.intensity.Level;
+import globalquake.local.GlobalQuakeLocal;
+import globalquake.utils.GeoUtils;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.intensity.IntensityScales;
+import globalquake.core.intensity.Level;
 import globalquake.intensity.ShakeMap;
 import globalquake.sounds.Sounds;
 import globalquake.ui.StationMonitor;
 import globalquake.ui.globalquake.feature.*;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
@@ -82,7 +83,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
+                        GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
                     }
 
                     if (e.getKeyCode() == KeyEvent.VK_U) {
@@ -91,7 +92,7 @@ public class GlobalQuakePanel extends GlobePanel {
                         if(ex != null) {
                             Earthquake earthquake = createDebugQuake();
                             ex.update(earthquake);
-                            GlobalQuake.instance.getEventHandler().fireEvent(new ShakeMapCreatedEvent(ex));
+                            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(ex));
                         }
                     }
 

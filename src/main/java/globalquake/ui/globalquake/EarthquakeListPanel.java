@@ -5,7 +5,7 @@ import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.utils.GeoUtils;
 
 import javax.swing.*;

@@ -1,8 +1,9 @@
 package globalquake.ui.settings;
 
-import globalquake.geo.DistanceUnit;
-import globalquake.intensity.IntensityScale;
-import globalquake.intensity.IntensityScales;
+import globalquake.core.Settings;
+import globalquake.core.geo.DistanceUnit;
+import globalquake.core.intensity.IntensityScale;
+import globalquake.core.intensity.IntensityScales;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

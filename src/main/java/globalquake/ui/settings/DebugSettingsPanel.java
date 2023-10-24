@@ -1,5 +1,6 @@
 package globalquake.ui.settings;
 
+import globalquake.core.Settings;
 import globalquake.core.report.EarthquakeReporter;
 
 import javax.swing.*;

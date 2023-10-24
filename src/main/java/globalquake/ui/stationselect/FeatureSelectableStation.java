@@ -1,8 +1,8 @@
 package globalquake.ui.stationselect;
 
-import globalquake.database.Channel;
-import globalquake.database.SeedlinkCommunicator;
-import globalquake.database.Station;
+import globalquake.core.database.Channel;
+import globalquake.core.database.SeedlinkCommunicator;
+import globalquake.core.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;

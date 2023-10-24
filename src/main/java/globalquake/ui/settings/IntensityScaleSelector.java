@@ -1,8 +1,8 @@
 package globalquake.ui.settings;
 
-import globalquake.intensity.IntensityScale;
-import globalquake.intensity.IntensityScales;
-import globalquake.intensity.Level;
+import globalquake.core.intensity.IntensityScale;
+import globalquake.core.intensity.IntensityScales;
+import globalquake.core.intensity.Level;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

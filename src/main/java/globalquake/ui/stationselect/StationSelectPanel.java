@@ -1,11 +1,11 @@
 package globalquake.ui.stationselect;
 
-import globalquake.database.Network;
-import globalquake.database.Station;
-import globalquake.database.StationDatabaseManager;
+import globalquake.core.database.Network;
+import globalquake.core.database.Station;
+import globalquake.core.database.StationDatabaseManager;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 
 import javax.swing.*;

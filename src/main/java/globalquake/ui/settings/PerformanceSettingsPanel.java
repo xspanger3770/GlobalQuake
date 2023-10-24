@@ -1,6 +1,7 @@
 package globalquake.ui.settings;
 
-import globalquake.training.EarthquakeAnalysisTraining;
+import globalquake.core.Settings;
+import globalquake.core.training.EarthquakeAnalysisTraining;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

@@ -1,6 +1,6 @@
 package globalquake.ui.settings;
 
-import globalquake.exception.RuntimeApplicationException;
+import globalquake.core.exception.RuntimeApplicationException;
 
 import javax.swing.*;
 

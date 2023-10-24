@@ -1,9 +1,9 @@
 package globalquake.ui.stationselect.action;
 
-import globalquake.database.Network;
-import globalquake.database.Station;
-import globalquake.database.StationDatabaseManager;
-import globalquake.geo.GeoUtils;
+import globalquake.core.database.Network;
+import globalquake.core.database.Station;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;

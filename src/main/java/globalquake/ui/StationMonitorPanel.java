@@ -16,10 +16,9 @@ import globalquake.core.analysis.Event;
 import globalquake.core.analysis.Log;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.BetterAnalysis;
-import globalquake.geo.GeoUtils;
-import globalquake.geo.taup.TauPTravelTimeCalculator;
-import globalquake.training.ArtificialWaveformGenerator;
-import globalquake.ui.settings.Settings;
+import globalquake.utils.GeoUtils;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.Settings;
 
 public class StationMonitorPanel extends JPanel {
 
@@ -312,7 +311,7 @@ public class StationMonitorPanel extends JPanel {
 	}
 
 	private long getTime() {
-		return ArtificialWaveformGenerator.instance != null ? ArtificialWaveformGenerator.instance.simulationTime : System.currentTimeMillis();
+		return System.currentTimeMillis();
 	}
 
 	private double getX(long time) {

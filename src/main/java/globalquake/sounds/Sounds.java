@@ -1,13 +1,13 @@
 package globalquake.sounds;
 
-import globalquake.core.alert.AlertManager;
+import globalquake.alert.AlertManager;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.exception.FatalIOException;
-import globalquake.geo.GeoUtils;
-import globalquake.intensity.IntensityScales;
-import globalquake.intensity.ShindoIntensityScale;
-import globalquake.ui.settings.Settings;
+import globalquake.core.exception.FatalIOException;
+import globalquake.utils.GeoUtils;
+import globalquake.core.intensity.IntensityScales;
+import globalquake.core.intensity.ShindoIntensityScale;
+import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;

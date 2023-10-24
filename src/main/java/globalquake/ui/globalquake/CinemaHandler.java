@@ -1,15 +1,19 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.alert.AlertManager;
+import globalquake.alert.AlertManager;
 import globalquake.core.alert.Warnable;
-import globalquake.core.alert.Warning;
+import globalquake.alert.Warning;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.QuakeCreateEvent;
+import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.events.specific.*;
+import globalquake.local.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobePanel;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import java.util.Iterator;
@@ -94,13 +98,13 @@ public class CinemaHandler {
                     if(Settings.jumpToAlert && event.warnable() instanceof Earthquake) {
                         CinemaTarget tgt = createTarget((Earthquake) event.warnable());
                         if(lastTarget == null || tgt.priority() >= lastTarget.priority()){
-                            GlobalQuake.instance.getGlobalQuakeFrame().getGQPanel().jumpTo(tgt.lat(), tgt.lon(), tgt.zoom());
-                            GlobalQuake.instance.getEventHandler().fireEvent(new CinemaEvent(tgt));
+                            GlobalQuakeLocal.instance.getGlobalQuakeFrame().getGQPanel().jumpTo(tgt.lat(), tgt.lon(), tgt.zoom());
+                            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new CinemaEvent(tgt));
                             lastTarget = tgt;
                         }
                     }
                     if (Settings.focusOnEvent) {
-                        GlobalQuake.instance.getGlobalQuakeFrame().toFront();
+                        GlobalQuakeLocal.instance.getGlobalQuakeFrame().toFront();
                     }
                 }
             }
@@ -129,7 +133,7 @@ public class CinemaHandler {
         lastAnim = time;
         lastTarget = target;
         globePanel.smoothTransition(target.lat(), target.lon(), target.zoom());
-        GlobalQuake.instance.getEventHandler().fireEvent(new CinemaEvent(target));
+        GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new CinemaEvent(target));
     }
 
     private boolean isWarned(Warnable original) {

@@ -1,7 +1,8 @@
 package globalquake.ui.stationselect.action;
 
-import globalquake.database.Network;
-import globalquake.database.StationDatabaseManager;
+import globalquake.core.database.Network;
+import globalquake.core.database.Station;
+import globalquake.core.database.StationDatabaseManager;
 
 import javax.swing.*;
 
@@ -34,7 +35,7 @@ public class DeselectUnavailableAction extends AbstractAction {
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
-                for(globalquake.database.Station station : network.getStations()){
+                for(Station station : network.getStations()){
                     if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
                         alreadyDeselected = false;
                         break;

@@ -4,7 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
 import globalquake.ui.action.OpenURLAction;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;

@@ -6,7 +6,7 @@ import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
-import globalquake.ui.settings.Settings;
+import globalquake.core.Settings;
 
 import java.awt.*;
 import java.util.Collection;
