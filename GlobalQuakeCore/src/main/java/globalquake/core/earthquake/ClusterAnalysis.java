@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.station.AbstractStation;
@@ -156,6 +157,7 @@ public class ClusterAnalysis {
 
             if (cluster.getEarthquake() != null) {
                 earthquakes.remove(cluster.getEarthquake());
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
             }
         }
 
