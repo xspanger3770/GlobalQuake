@@ -63,6 +63,8 @@ public class GlobalQuake {
 	public void stopRuntime(){
 		getGlobalQuakeRuntime().stop();
 		getSeedlinkReader().stop();
+		getArchive().destroy();
+		getEventHandler().stopHandler();
 
 		getEarthquakeAnalysis().getEarthquakes().clear();
 		getClusterAnalysis().getClusters().clear();

@@ -19,6 +19,12 @@ public class GlobalQuakeServer extends GlobalQuake {
         this.serverEventHandler = new GlobalQuakeServerEventHandler().runHandler();
     }
 
+    @Override
+    public void stopRuntime() {
+        super.stopRuntime();
+        getServerEventHandler().stopHandler();
+    }
+
     public GQServerSocket getServerSocket() {
         return serverSocket;
     }

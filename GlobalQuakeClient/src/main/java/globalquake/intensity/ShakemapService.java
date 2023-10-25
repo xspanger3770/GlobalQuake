@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ShakemapService {
 
@@ -69,6 +70,15 @@ public class ShakemapService {
         Hypocenter hyp = earthquake.getCluster().getPreviousHypocenter();
         double mag = hyp.magnitude;
         return new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
+    }
+
+    public void stop(){
+        shakemapService.shutdownNow();
+        try {
+            shakemapService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 
     public Map<Earthquake, ShakeMap> getShakeMaps() {

@@ -79,6 +79,14 @@ public class GlobalQuakeLocal extends GlobalQuake {
         return this;
     }
 
+    @Override
+    public void stopRuntime() {
+        super.stopRuntime();
+        getLocalEventHandler().stopHandler();
+        getShakemapService().stop();
+        soundsService.destroy();
+    }
+
     public GlobalQuakeLocalEventHandler getLocalEventHandler() {
         return localEventHandler;
     }

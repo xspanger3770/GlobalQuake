@@ -11,18 +11,22 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class SoundsService {
 
     private final Map<Cluster, SoundsInfo> clusterSoundsInfo = new HashMap<>();
+    private final ScheduledExecutorService soundCheckService;
 
     public SoundsService(){
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
+        soundCheckService = Executors.newSingleThreadScheduledExecutor();
+        soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
 
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
             @Override
@@ -111,6 +115,15 @@ public class SoundsService {
                     Sounds.playSound(Sounds.dong);
                 }
             }
+        }
+    }
+
+    public void destroy(){
+        soundCheckService.shutdownNow();
+        try {
+            soundCheckService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
         }
     }
 

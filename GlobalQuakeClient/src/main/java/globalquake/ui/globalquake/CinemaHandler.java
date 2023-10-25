@@ -34,15 +34,13 @@ public class CinemaHandler {
     private long lastAnim = 0;
 
     private final Map<Warnable, Warning> warnings = new ConcurrentHashMap<>();
+    private ScheduledExecutorService cinemaTargetService = Executors.newSingleThreadScheduledExecutor();
 
     public CinemaHandler(GlobePanel globePanel) {
         this.globePanel = globePanel;
     }
 
     public void run() {
-
-        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
         Runnable task = new Runnable() {
             @Override
             public void run() {
@@ -53,12 +51,12 @@ public class CinemaHandler {
                         Logger.error(e);
                     }
                 } finally {
-                    scheduler.schedule(this, Settings.cinemaModeSwitchTime, TimeUnit.SECONDS);
+                    cinemaTargetService.schedule(this, Settings.cinemaModeSwitchTime, TimeUnit.SECONDS);
                 }
             }
         };
 
-        scheduler.schedule(task, 0, TimeUnit.SECONDS);
+        cinemaTargetService.schedule(task, 0, TimeUnit.SECONDS);
 
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
             @Override
@@ -112,6 +110,15 @@ public class CinemaHandler {
                 }
             }
         });
+    }
+
+    public void stop(){
+        cinemaTargetService.shutdownNow();
+        try {
+            cinemaTargetService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 
     private synchronized void nextTarget() {

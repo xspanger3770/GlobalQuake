@@ -42,6 +42,7 @@ public class GQServerSocket {
 
     private volatile ServerSocket lastSocket;
     private final Object joinMutex = new Object();
+    private ExecutorService acceptService;
 
     public GQServerSocket() {
         status = SocketStatus.IDLE;
@@ -50,17 +51,17 @@ public class GQServerSocket {
     }
 
     public void run(String ip, int port) {
-        ExecutorService serverExec = Executors.newSingleThreadExecutor();
+        acceptService = Executors.newSingleThreadExecutor();
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
         clientsWatchdog = Executors.newSingleThreadScheduledExecutor();
-        clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
 
         setStatus(SocketStatus.OPENING);
         try {
             lastSocket = new ServerSocket();
             lastSocket.bind(new InetSocketAddress(ip, port));
-            serverExec.submit(this::runAccept);
+            clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
+            acceptService.submit(this::runAccept);
             setStatus(SocketStatus.RUNNING);
         } catch (IOException e) {
             setStatus(SocketStatus.IDLE);
@@ -119,10 +120,20 @@ public class GQServerSocket {
 
     private void onClose() {
         clients.clear();
-        if (!clientsWatchdog.isShutdown()) {
-            clientsWatchdog.shutdown();
-        }
+        terminate(clientsWatchdog);
+        terminate(readerService);
+        terminate(handshakeService);
+        // we are the acceptservice
         setStatus(SocketStatus.IDLE);
+    }
+
+    private void terminate(ExecutorService service) {
+        service.shutdownNow();
+        try {
+            service.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 
     public void setStatus(SocketStatus status) {

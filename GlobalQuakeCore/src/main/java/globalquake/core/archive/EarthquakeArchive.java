@@ -12,6 +12,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class EarthquakeArchive {
 
@@ -104,6 +105,15 @@ public class EarthquakeArchive {
 
 		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
 			archivedQuakes.remove(archivedQuakes.size() - 1);
+		}
+	}
+
+	public void destroy(){
+		executor.shutdown();
+		try {
+			executor.awaitTermination(10, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			Logger.error(e);
 		}
 	}
 

@@ -9,9 +9,7 @@ import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -96,6 +94,18 @@ public class GlobalQuakeFrame extends GQFrame {
 				scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.MILLISECONDS);
 			}
 		}, 1, TimeUnit.SECONDS);
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				scheduler.shutdown();
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				scheduler.shutdown();
+			}
+		});
 	}
 
 	private JMenuBar createJMenuBar() {

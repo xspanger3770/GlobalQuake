@@ -36,6 +36,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -53,6 +55,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final boolean DEBUG = false;
+
+    private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;
     private volatile long lastCinemaModeEvent;
 
@@ -107,7 +111,7 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         });
 
-        CinemaHandler cinemaHandler = new CinemaHandler(this);
+        cinemaHandler = new CinemaHandler(this);
         cinemaHandler.run();
 
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
@@ -117,6 +121,18 @@ public class GlobalQuakePanel extends GlobePanel {
                     lastCinemaModeEarthquake = (Earthquake) cinemaEvent.cinemaTarget().original();
                     lastCinemaModeEvent = System.currentTimeMillis();
                 }
+            }
+        });
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                cinemaHandler.stop();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                cinemaHandler.stop();
             }
         });
     }

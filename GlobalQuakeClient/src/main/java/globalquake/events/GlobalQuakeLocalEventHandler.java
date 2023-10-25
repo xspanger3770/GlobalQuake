@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GlobalQuakeLocalEventHandler {
 
@@ -20,9 +21,13 @@ public class GlobalQuakeLocalEventHandler {
         return this;
     }
 
-    @SuppressWarnings("unused")
     public void stopHandler(){
         executor.shutdownNow();
+        try {
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 
     public void registerEventListener(GlobalQuakeLocalEventListener eventListener){
