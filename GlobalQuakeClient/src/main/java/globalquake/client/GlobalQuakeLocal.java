@@ -81,7 +81,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
 
     @Override
     public void destroy() {
-        destroy();
+        super.destroy();
         getLocalEventHandler().stopHandler();
         getShakemapService().stop();
         soundsService.destroy();

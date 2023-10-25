@@ -31,7 +31,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 
-	private int abandonedCount;
 	private boolean wrong;
 
 	private transient RegionUpdater regionUpdater;
@@ -65,7 +64,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 
 		this.maxRatio = 1;
-		this.abandonedCount = previousHypocenter.getWrongEventCount();
+		int abandonedCount = previousHypocenter.getWrongEventCount();
 		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			if(e.isValid()) {
 				archivedEvents.add(

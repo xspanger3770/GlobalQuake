@@ -42,7 +42,6 @@ public class GQServerSocket {
 
     private volatile ServerSocket lastSocket;
     private final Object joinMutex = new Object();
-    private ExecutorService acceptService;
 
     public GQServerSocket() {
         status = SocketStatus.IDLE;
@@ -51,7 +50,7 @@ public class GQServerSocket {
     }
 
     public void run(String ip, int port) {
-        acceptService = Executors.newSingleThreadExecutor();
+        ExecutorService acceptService = Executors.newSingleThreadExecutor();
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
         clientsWatchdog = Executors.newSingleThreadScheduledExecutor();

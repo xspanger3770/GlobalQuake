@@ -34,7 +34,7 @@ public class CinemaHandler {
     private long lastAnim = 0;
 
     private final Map<Warnable, Warning> warnings = new ConcurrentHashMap<>();
-    private ScheduledExecutorService cinemaTargetService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService cinemaTargetService = Executors.newSingleThreadScheduledExecutor();
 
     public CinemaHandler(GlobePanel globePanel) {
         this.globePanel = globePanel;

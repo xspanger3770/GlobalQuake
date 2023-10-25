@@ -4,7 +4,6 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
-import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;

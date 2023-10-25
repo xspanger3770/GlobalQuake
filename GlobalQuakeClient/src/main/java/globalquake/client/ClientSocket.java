@@ -61,6 +61,19 @@ public class ClientSocket {
         reconnectService.scheduleAtFixedRate(this::checkReconnect, 0, 1, TimeUnit.SECONDS);
     }
 
+    public void destroy(){
+        if(reconnectService == null){
+            return;
+        }
+
+        reconnectService.shutdown();
+        try {
+            reconnectService.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
+    }
+
     private void checkReconnect() {
         if(!socket.isConnected() || socket.isClosed()){
             try {
