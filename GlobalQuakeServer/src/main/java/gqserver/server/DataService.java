@@ -1,5 +1,6 @@
 package gqserver.server;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 public class DataService implements GlobalQuakeEventListener {
 
+    private static final int MAX_ARCHIVED_QUAKES = 100;
     private final ReadWriteLock quakesRWLock = new ReentrantReadWriteLock();
 
     private final Lock quakesReadLock = quakesRWLock.readLock();
@@ -199,9 +201,22 @@ public class DataService implements GlobalQuakeEventListener {
                 processEarthquakesRequest(client);
             } else if (packet instanceof EarthquakeRequestPacket earthquakeRequestPacket) {
                 processEarthquakeRequest(client, earthquakeRequestPacket);
+            } else if (packet instanceof ArchivedQuakesRequestPacket) {
+                processArchivedQuakesRequest(client);
             }
         }catch(IOException e){
             Logger.error(e);
+        }
+    }
+
+    private void processArchivedQuakesRequest(ServerClient client) throws IOException {
+        int count = 0;
+        for(ArchivedQuake archivedQuake : GlobalQuake.instance.getArchive().getArchivedQuakes()){
+            client.sendPacket(createArchivedPacket(archivedQuake));
+            count++;
+            if(count > MAX_ARCHIVED_QUAKES){
+                break;
+            }
         }
     }
 

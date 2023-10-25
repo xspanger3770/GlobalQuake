@@ -3,7 +3,7 @@ package globalquake.ui.globalquake.feature;
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
 import globalquake.events.GlobalQuakeLocalEventListener;
-import globalquake.events.specific.ShakeMapCreatedEvent;
+import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.intensity.IntensityHex;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
@@ -39,7 +39,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
             @SuppressWarnings("unused")
             @Override
-            public void onShakemapCreated(ShakeMapCreatedEvent event) {
+            public void onShakemapCreated(ShakeMapsUpdatedEvent event) {
                 updateHexes();
             }
         });
@@ -63,7 +63,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     private synchronized void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
-                .sorted(Comparator.comparing(kv -> -kv.getKey().getMag())).toList()){
+                .sorted(Comparator.comparing(kv -> -kv.getValue().getMag())).toList()){
             ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {

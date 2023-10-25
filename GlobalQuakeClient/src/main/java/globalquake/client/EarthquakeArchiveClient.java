@@ -13,16 +13,11 @@ import java.util.List;
 
 public class EarthquakeArchiveClient extends EarthquakeArchive {
 
-    private final List<ArchivedQuake> archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
-
-    @Override
-    public List<ArchivedQuake> getArchivedQuakes() {
-        return archivedQuakes;
-    }
-
     public void processPacket(ClientSocket socket, Packet packet) {
-        if(packet instanceof ArchivedQuakePacket quakePacket){
-            archiveQuake(createArchivedQuake(quakePacket), null);
+        if(packet instanceof ArchivedQuakePacket quakePacket) {
+            if(getArchivedQuakeByUUID(((ArchivedQuakePacket) packet).archivedQuakeData().uuid()) == null) {
+                archiveQuake(createArchivedQuake(quakePacket), null);
+            }
         }
     }
 

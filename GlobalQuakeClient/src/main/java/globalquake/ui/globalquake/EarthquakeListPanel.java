@@ -1,6 +1,7 @@
 package globalquake.ui.globalquake;
 
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.ui.archived.ArchivedQuakeAnimation;
@@ -201,6 +202,11 @@ public class EarthquakeListPanel extends JPanel {
                 g.setColor(Color.white);
                 g.drawString(str, 52, y + 42);
 
+                QualityClass quality = quake.getQualityClass();
+                g.setFont(new Font("Calibri", Font.BOLD, 14));
+                GlobalQuakePanel.drawAccuracyBox(g, true, "", getWidth() + 4, y + 20, quality.toString(), quality.getColor());
+
+                g.setFont(new Font("Calibri", Font.PLAIN, 16));
                 if (quake.isWrong()) {
                     g.setColor(new Color(200, 0, 0));
                     g.setStroke(new BasicStroke(2f));

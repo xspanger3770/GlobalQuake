@@ -16,7 +16,7 @@ import globalquake.core.database.SeedlinkStatus;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
-import globalquake.events.specific.ShakeMapCreatedEvent;
+import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
@@ -87,7 +87,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
+                        GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
                     }
 
                     if (e.getKeyCode() == KeyEvent.VK_U) {
@@ -96,7 +96,7 @@ public class GlobalQuakePanel extends GlobePanel {
                         if(ex != null) {
                             Earthquake earthquake = createDebugQuake();
                             ex.update(earthquake);
-                            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(ex));
+                            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
                         }
                     }
 
@@ -626,7 +626,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 "%.1f".formatted(quality.getQualityPercentage().getValue()), quality.getQualityPercentage().getQualityClass().getColor());
     }
 
-    private void drawAccuracyBox(Graphics2D g, boolean alignRight, String str, int x, int y, String v, Color color) {
+    public static void drawAccuracyBox(Graphics2D g, boolean alignRight, String str, int x, int y, String v, Color color) {
         g.setColor(Color.white);
 
         int size = g.getFontMetrics().stringWidth("%s  %s".formatted(str, v));
@@ -637,7 +637,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.drawString(str, _x - 6, y);
 
-        RoundRectangle2D.Double rect = new RoundRectangle2D.Double( _x+size1- 3, y - 15, size2 + 6, 20, 10, 10);
+        RoundRectangle2D.Double rect = new RoundRectangle2D.Double( _x+size1- 3, y - g.getFont().getSize() - 2, size2 + 6, g.getFont().getSize() + 4, 10, 10);
         g.setColor(color);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -645,10 +645,10 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
         g.setColor(isDark(color) ? Color.white : Color.black);
-        g.drawString(v, _x + size1, y + g.getFont().getSize() - 16);
+        g.drawString(v, _x + size1, y + g.getFont().getSize() / 2 - 10);
     }
 
-    private boolean isDark(Color color) {
+    public static boolean isDark(Color color) {
         double darkness = 1 - (0.6 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
         return !(darkness < 0.5);
     }

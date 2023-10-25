@@ -19,6 +19,7 @@ import gqserver.api.data.earthquake.advanced.AdvancedHypocenterData;
 import gqserver.api.data.earthquake.advanced.DepthConfidenceIntervalData;
 import gqserver.api.data.earthquake.advanced.HypocenterQualityData;
 import gqserver.api.data.earthquake.advanced.LocationConfidenceIntervalData;
+import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
@@ -53,6 +54,17 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             processQuakeDataPacket(hypocenterData);
         } else if(packet instanceof EarthquakeCheckPacket checkPacket) {
             processQuakeCheckPacket(socket, checkPacket);
+        } else if(packet instanceof ArchivedQuakePacket archivedQuakePacket) {
+            processQuakeArchivePacket(archivedQuakePacket);
+        }
+    }
+
+    private void processQuakeArchivePacket(ArchivedQuakePacket archivedQuakePacket) {
+        UUID uuid = archivedQuakePacket.archivedQuakeData().uuid();
+        ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
+        if (existingQuake != null) {
+            clientEarthquakeMap.remove(uuid);
+            earthquakes.remove(existingQuake);
         }
     }
 

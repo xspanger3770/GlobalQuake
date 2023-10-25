@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class ShakeMap {
 
     private static H3Core h3;
+    private final double mag;
     private double maxPGA;
 
     public static void init() throws IOException{
@@ -27,6 +28,7 @@ public class ShakeMap {
     private List<IntensityHex> hexList = new ArrayList<>();
 
     public ShakeMap(Hypocenter hypocenter, int res) {
+        this.mag = hypocenter.magnitude;
         generate(hypocenter, res);
     }
 
@@ -98,5 +100,9 @@ public class ShakeMap {
 
     public double getMaxPGA() {
         return maxPGA;
+    }
+
+    public double getMag() {
+        return mag;
     }
 }

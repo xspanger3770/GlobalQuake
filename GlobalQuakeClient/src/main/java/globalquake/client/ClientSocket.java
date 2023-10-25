@@ -3,6 +3,7 @@ package globalquake.client;
 import globalquake.core.GlobalQuake;
 import gqserver.api.Packet;
 import gqserver.api.data.system.ServerClientConfig;
+import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
 import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HeartbeatPacket;
@@ -54,6 +55,8 @@ public class ClientSocket {
 
         quakeCheckService = Executors.newSingleThreadScheduledExecutor();
         quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
+
+        sendPacket(new ArchivedQuakesRequestPacket());
     }
 
     public void runReconnectService(){

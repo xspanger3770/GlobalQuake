@@ -10,6 +10,7 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +21,9 @@ public class EarthquakeArchive {
 	public static final File TEMP_ARCHIVE_FILE = new File(GlobalQuake.mainFolder, "temp_archive.dat");
 	private final ExecutorService executor;
 
-	private List<ArchivedQuake> archivedQuakes;
+	private List<ArchivedQuake> archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
+
+	private Map<UUID, ArchivedQuake> uuidArchivedQuakeMap = new ConcurrentHashMap<>();
 
 	public EarthquakeArchive() {
 		executor = Executors.newSingleThreadExecutor();
@@ -29,7 +32,6 @@ public class EarthquakeArchive {
 	@SuppressWarnings("unchecked")
 	public EarthquakeArchive loadArchive() {
 		if (!ARCHIVE_FILE.exists()) {
-			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			Logger.info("Created new archive");
 		} else {
 			try {
@@ -39,13 +41,19 @@ public class EarthquakeArchive {
 				Logger.info("Loaded " + archivedQuakes.size() + " quakes from archive.");
 			} catch (Exception e) {
 				Logger.error(e);
-				archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 			}
 		}
 
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
+		buildUUIDMap();
 
 		return this;
+	}
+
+	private void buildUUIDMap() {
+		for(ArchivedQuake archivedQuake : archivedQuakes){
+			uuidArchivedQuakeMap.put(archivedQuake.getUuid(), archivedQuake);
+		}
 	}
 
 	public void saveArchive() {
@@ -105,6 +113,7 @@ public class EarthquakeArchive {
 
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
+		uuidArchivedQuakeMap.put(archivedQuake.getUuid(), archivedQuake);
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
 
 		if(GlobalQuake.instance != null) {
@@ -112,8 +121,14 @@ public class EarthquakeArchive {
 		}
 
 		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
-			archivedQuakes.remove(archivedQuakes.size() - 1);
+			ArchivedQuake toRemove = archivedQuakes.get(archivedQuakes.size() - 1);
+			archivedQuakes.remove(toRemove);
+			uuidArchivedQuakeMap.remove(toRemove.getUuid());
 		}
+	}
+
+	public ArchivedQuake getArchivedQuakeByUUID(UUID uuid){
+		return uuidArchivedQuakeMap.get(uuid);
 	}
 
 	public void destroy(){

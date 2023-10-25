@@ -8,19 +8,20 @@ import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
-import globalquake.events.specific.ShakeMapCreatedEvent;
+import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ShakemapService {
 
-    private final Map<Earthquake, ShakeMap> shakeMaps = new HashMap<>();
+    private final Map<UUID, ShakeMap> shakeMaps = new HashMap<>();
 
     private final ExecutorService shakemapService = Executors.newSingleThreadExecutor();
 
@@ -34,7 +35,7 @@ public class ShakemapService {
 
                 @Override
                 public void onQuakeArchive(QuakeArchiveEvent event) {
-                    removeShakemap(event.earthquake());
+                    removeShakemap(event.archivedQuake().getUuid());
                 }
 
                 @Override
@@ -44,7 +45,7 @@ public class ShakemapService {
 
                 @Override
                 public void onQuakeRemove(QuakeRemoveEvent event) {
-                    removeShakemap(event.earthquake());
+                    removeShakemap(event.earthquake().getUuid());
                 }
             });
         } else{
@@ -52,17 +53,17 @@ public class ShakemapService {
         }
     }
 
-    private void removeShakemap(Earthquake earthquake) {
+    private void removeShakemap(UUID uuid) {
         shakemapService.submit(() -> {
-            shakeMaps.remove(earthquake);
-            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
+            shakeMaps.remove(uuid);
+            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
         });
     }
 
     private void updateShakemap(Earthquake earthquake) {
         shakemapService.submit(() -> {
-            shakeMaps.put(earthquake, createShakemap(earthquake));
-            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapCreatedEvent(earthquake));
+            shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
+            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
         });
     }
 
@@ -81,7 +82,7 @@ public class ShakemapService {
         }
     }
 
-    public Map<Earthquake, ShakeMap> getShakeMaps() {
+    public Map<UUID, ShakeMap> getShakeMaps() {
         return shakeMaps;
     }
 }
