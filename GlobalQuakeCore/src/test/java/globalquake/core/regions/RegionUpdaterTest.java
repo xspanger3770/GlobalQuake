@@ -1,10 +1,9 @@
 package globalquake.core.regions;
 
-import globalquake.core.earthquake.ArchivedQuake;
+import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.core.regions.RegionUpdater;
-import globalquake.core.regions.Regional;
+import globalquake.core.earthquake.quality.QualityClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -35,7 +34,7 @@ public class RegionUpdaterTest {
 
     @Test
     public void testArchivedEarthquakeRegion(){
-        ArchivedQuake archivedQuake = new ArchivedQuake(50,17,0,0,0);
+        ArchivedQuake archivedQuake = new ArchivedQuake(null, 50,17,0,0,0, QualityClass.S);
         assertNotNull(archivedQuake.getRegion());
     }
 

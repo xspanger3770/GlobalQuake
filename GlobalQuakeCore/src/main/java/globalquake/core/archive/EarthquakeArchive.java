@@ -2,8 +2,8 @@ package globalquake.core.archive;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
-import globalquake.core.earthquake.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.report.EarthquakeReporter;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import org.tinylog.Logger;
@@ -93,15 +93,23 @@ public class EarthquakeArchive {
         });
 	}
 
-	public synchronized void archiveQuake(Earthquake earthquake) {
+	public void archiveQuake(Earthquake earthquake) {
+		archiveQuake(new ArchivedQuake(earthquake), earthquake);
+
+	}
+
+	protected synchronized void archiveQuake(ArchivedQuake archivedQuake, Earthquake earthquake) {
 		if(archivedQuakes == null){
 			archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 		}
 
-		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
 		archivedQuake.updateRegion();
 		archivedQuakes.add(0, archivedQuake);
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
+
+		if(GlobalQuake.instance != null) {
+			GlobalQuake.instance.getEventHandler().fireEvent(new QuakeArchiveEvent(earthquake, archivedQuake));
+		}
 
 		while(archivedQuakes.size() > Settings.maxArchivedQuakes){
 			archivedQuakes.remove(archivedQuakes.size() - 1);

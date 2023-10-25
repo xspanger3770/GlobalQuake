@@ -1,8 +1,9 @@
-package globalquake.core.earthquake;
+package globalquake.core.archive;
 
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
 
@@ -11,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
@@ -22,6 +24,8 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final double depth;
 	private final long origin;
 	private final double mag;
+	private final UUID uuid;
+	private final QualityClass qualityClass;
 	private double maxRatio;
 	private String region;
 
@@ -40,8 +44,10 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	}
 
 	public ArchivedQuake(Earthquake earthquake) {
-		this(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
-				earthquake.getOrigin());
+		this(earthquake.getUuid(), earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
+				earthquake.getOrigin(),
+				earthquake.getHypocenter() == null || earthquake.getHypocenter().quality == null ? null :
+						earthquake.getHypocenter().quality.getSummary());
 		copyEvents(earthquake);
 	}
 
@@ -63,7 +69,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			if(e.isValid()) {
 				archivedEvents.add(
-						new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave(), false));
+						new ArchivedEvent(e.getLatFromStation(), e.getLonFromStation(), e.maxRatio, e.getpWave()));
 				if (e.maxRatio > this.maxRatio) {
 					this.maxRatio = e.getMaxRatio();
 				}
@@ -71,13 +77,15 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 	}
 
-	public ArchivedQuake(double lat, double lon, double depth, double mag, long origin) {
+	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass) {
+		this.uuid = uuid;
 		this.lat = lat;
 		this.lon = lon;
 		this.depth = depth;
 		this.mag = mag;
 		this.origin = origin;
 		this.archivedEvents = new ArrayList<>();
+		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
 	}
 
@@ -121,6 +129,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return region;
 	}
 
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public QualityClass getQualityClass() {
+		return qualityClass;
+	}
+
 	@Override
 	public void setRegion(String newRegion) {
 		this.region = newRegion;
@@ -132,11 +148,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 
 	public void setWrong(boolean wrong) {
 		this.wrong = wrong;
-	}
-
-	@SuppressWarnings("unused")
-	public int getAbandonedCount() {
-		return abandonedCount;
 	}
 
 	@Override

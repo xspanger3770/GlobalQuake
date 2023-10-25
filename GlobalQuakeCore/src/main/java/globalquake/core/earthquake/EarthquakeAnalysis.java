@@ -946,17 +946,12 @@ public class EarthquakeAnalysis {
                     && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeArchiveEvent(earthquake));
                 }
                 toBeRemoved.add(earthquake);
             }
         }
 
         earthquakes.removeAll(toBeRemoved);
-
-        if (GlobalQuake.instance != null) {
-            toBeRemoved.forEach(earthquake -> GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake)));
-        }
     }
 
 }

@@ -15,6 +15,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
         ((EarthquakeAnalysisClient)getEarthquakeAnalysis()).processPacket(socket, packet);
+        ((EarthquakeArchiveClient)getArchive()).processPacket(socket, packet);
     }
 
     @Override

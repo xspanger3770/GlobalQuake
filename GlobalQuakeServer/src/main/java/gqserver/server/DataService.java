@@ -1,5 +1,7 @@
 package gqserver.server;
 
+import globalquake.core.archive.ArchivedEvent;
+import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
@@ -9,18 +11,16 @@ import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.*;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
+import gqserver.api.data.earthquake.ArchivedEventData;
+import gqserver.api.data.earthquake.ArchivedQuakeData;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
-import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
-import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
-import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
-import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import gqserver.api.packets.earthquake.*;
 import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -66,14 +66,7 @@ public class DataService implements GlobalQuakeEventListener {
     public void onQuakeRemove(QuakeRemoveEvent event) {
         quakesWriteLock.lock();
         try{
-            Earthquake earthquake = event.earthquake();
-            for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
-                EarthquakeInfo info = iterator.next();
-                if (info.uuid().equals(earthquake.getUuid())) {
-                    iterator.remove();
-                    break;
-                }
-            }
+            currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
         } finally {
             quakesWriteLock.unlock();
         }
@@ -87,14 +80,7 @@ public class DataService implements GlobalQuakeEventListener {
         Earthquake earthquake = event.earthquake();
 
         try{
-            for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
-                EarthquakeInfo info = iterator.next();
-                if (info.uuid().equals(earthquake.getUuid())) {
-                    iterator.remove();
-                    break;
-                }
-            }
-
+            currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
             currentEarthquakes.add(new EarthquakeInfo(earthquake.getUuid(), earthquake.getRevisionID()));
         } finally {
             quakesWriteLock.unlock();
@@ -111,6 +97,31 @@ public class DataService implements GlobalQuakeEventListener {
         } finally {
             quakesWriteLock.unlock();
         }
+
+        broadcast(getEarthquakeReceivingClients(), createArchivedPacket(event.archivedQuake()));
+    }
+
+    private Packet createArchivedPacket(ArchivedQuake archivedQuake) {
+        return new ArchivedQuakePacket(new ArchivedQuakeData(
+                archivedQuake.getUuid(),
+                (float) archivedQuake.getLat(),
+                (float) archivedQuake.getLon(),
+                (float) archivedQuake.getDepth(),
+                (float) archivedQuake.getMag(),
+                archivedQuake.getOrigin(),
+                (byte) archivedQuake.getQualityClass().ordinal()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
+    }
+
+    private List<ArchivedEventData> createArchivedEventsData(ArrayList<ArchivedEvent> archivedEvents) {
+        List<ArchivedEventData> result = new ArrayList<>();
+        for(ArchivedEvent archivedEvent : archivedEvents){
+            result.add(new ArchivedEventData(
+                    (float) archivedEvent.lat(),
+                    (float) archivedEvent.lon(),
+                    (float) archivedEvent.maxRatio(),
+                    archivedEvent.pWave()));
+        }
+        return result;
     }
 
     private Packet createQuakePacket(Earthquake earthquake) {

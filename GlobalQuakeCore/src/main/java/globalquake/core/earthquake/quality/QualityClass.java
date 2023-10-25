@@ -1,8 +1,9 @@
 package globalquake.core.earthquake.quality;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public enum QualityClass {
+public enum QualityClass implements Serializable {
 
     S(new Color(0, 90, 192)),
     A(new Color(0,255, 0)),

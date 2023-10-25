@@ -1,6 +1,7 @@
 package gqserver.ui.server.tabs;
 
 import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
@@ -28,6 +29,11 @@ public class EarthquakesTab extends JPanel {
 
             @Override
             public void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent) {
+                model.applyFilter();
+            }
+
+            @Override
+            public void onQuakeArchive(QuakeArchiveEvent quakeArchiveEvent) {
                 model.applyFilter();
             }
 
