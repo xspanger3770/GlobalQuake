@@ -31,8 +31,13 @@ public class ClientSocket {
 
     private ObjectOutputStream outputStream;
     private ScheduledExecutorService quakeCheckService;
+    private ScheduledExecutorService reconnectService;
+    private String ip;
+    private int port;
 
     public void connect(String ip, int port) throws IOException {
+        this.ip = ip;
+        this.port = port;
         socket = new Socket();
         socket.setSoTimeout(SO_TIMEOUT);
         socket.connect(new InetSocketAddress(ip, port), CONNECT_TIMEOUT);
@@ -51,11 +56,27 @@ public class ClientSocket {
         quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
     }
 
+    public void runReconnectService(){
+        reconnectService = Executors.newSingleThreadScheduledExecutor();
+        reconnectService.scheduleAtFixedRate(this::checkReconnect, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void checkReconnect() {
+        if(!socket.isConnected() || socket.isClosed()){
+            try {
+                connect(ip, port);
+            } catch (IOException e) {
+                Logger.error("Unable to reconnect: %s".formatted(e.getMessage()));
+            }
+        }
+    }
+
     private void sendQuakeRequest() {
         try {
             sendPacket(new EarthquakesRequestPacket());
         } catch (IOException e) {
             Logger.error(e);
+            onClose();
         }
     }
 
@@ -64,11 +85,11 @@ public class ClientSocket {
             sendPacket(new HeartbeatPacket());
         } catch (IOException e) {
             Logger.error(e);
-            destroy();
+            onClose();
         }
     }
 
-    private void destroy() {
+    private void onClose() {
         if(socket != null){
             try {
                 socket.close();
@@ -105,7 +126,7 @@ public class ClientSocket {
             }
         } catch (Exception e){
             Logger.error(e);
-            destroy();
+            onClose();
         }
     }
 

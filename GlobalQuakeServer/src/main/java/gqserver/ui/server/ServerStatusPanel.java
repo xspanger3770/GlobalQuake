@@ -107,6 +107,7 @@ public class ServerStatusPanel extends JPanel {
                     try {
                         GlobalQuakeServer.instance.getServerSocket().stop();
                         GlobalQuakeServer.instance.stopRuntime();
+                        GlobalQuakeServer.instance.reset();
                     } catch (IOException e) {
                         Main.getErrorHandler().handleException(new RuntimeApplicationException("Failed to stop server", e));
                     }

@@ -114,6 +114,7 @@ public class MainFrame extends GQFrame {
 
         hostButton.addActionListener(actionEvent -> {
             try {
+                this.dispose();
                 startDatabaseManager();
             } catch (FatalIOException e) {
                 Main.getErrorHandler().handleException(e);
@@ -125,7 +126,7 @@ public class MainFrame extends GQFrame {
         panel.add(connectButton);
 
         connectButton.addActionListener(actionEvent -> {
-            MainFrame.this.dispose();
+            this.dispose();
             new ServerSelectionFrame().setVisible(true);
         });
 

@@ -20,8 +20,8 @@ public class GlobalQuakeServer extends GlobalQuake {
     }
 
     @Override
-    public void stopRuntime() {
-        super.stopRuntime();
+    public void destroy() {
+        super.destroy();
         getServerEventHandler().stopHandler();
     }
 

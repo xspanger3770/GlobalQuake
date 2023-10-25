@@ -93,6 +93,7 @@ public class ServerSelectionFrame extends GQFrame {
             connectButton.setText("Connecting...");
             try {
                 client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
+                client.runReconnectService();
                 ServerSelectionFrame.this.dispose();
                 launchClientUI();
             } catch (Exception e) {
