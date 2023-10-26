@@ -12,7 +12,6 @@
 		<module>GlobalQuakeCore</module>
 		<module>GlobalQuakeAPI</module>
 		<module>GlobalQuakeServer</module>
-        <module>GQCudaTest</module>
     </modules>
 
 	<properties>

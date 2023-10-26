@@ -17,6 +17,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
 import java.io.IOException;
@@ -109,7 +110,24 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
 
         List<LatLng> coords = h3.cellToBoundary(entity.getOriginal().id());
-        renderer.createPolygon(elementHex.getPolygon(), coords);
+        createPolygon(renderer, elementHex.getPolygon(), coords);
+    }
+
+    public void createPolygon(GlobeRenderer renderer, Polygon3D polygon3D, List<LatLng> coords) {
+        polygon3D.reset();
+
+        coords.add(coords.get(0));
+
+        for(LatLng latLng : coords){
+            Vector3D vector3D = new Vector3D(
+                    renderer.getX_3D(latLng.lat, latLng.lng, 0),
+                    renderer.getY_3D(latLng.lat, latLng.lng, 0),
+                    renderer.getZ_3D(latLng.lat, latLng.lng, 0));
+
+            polygon3D.addPoint(vector3D);
+        }
+
+        polygon3D.finish();
     }
 
     @Override
