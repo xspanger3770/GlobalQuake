@@ -8,6 +8,7 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventAdapter;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.events.GlobalQuakeLocalEventListener;
@@ -79,6 +80,7 @@ public class CinemaHandler {
             public void onQuakeRemove(QuakeRemoveEvent event) {
                 warnings.remove(event.earthquake());
             }
+
         });
 
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){

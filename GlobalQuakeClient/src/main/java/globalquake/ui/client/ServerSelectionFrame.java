@@ -2,6 +2,8 @@ package globalquake.ui.client;
 
 import globalquake.client.ClientSocket;
 import globalquake.client.GlobalQuakeClient;
+import globalquake.core.GlobalQuake;
+import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.intensity.ShakeMap;
@@ -29,7 +31,7 @@ public class ServerSelectionFrame extends GQFrame {
         client = new ClientSocket();
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(600,400));
+        setPreferredSize(new Dimension(400,200));
 
         add(createServerSelectionPanel());
 
@@ -97,8 +99,8 @@ public class ServerSelectionFrame extends GQFrame {
                 ServerSelectionFrame.this.dispose();
                 launchClientUI();
             } catch (Exception e) {
-                Logger.error(e);
-                connectButton.setText("Connection failed! %s".formatted(e.getMessage()));
+                GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to connect to the server: %s".formatted(e.getMessage())));
+                connectButton.setText("Connect");
             } finally {
                 addressField.setEnabled(true);
                 portField.setEnabled(true);
