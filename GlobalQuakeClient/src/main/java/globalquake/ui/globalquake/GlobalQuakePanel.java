@@ -481,7 +481,7 @@ public class GlobalQuakePanel extends GlobePanel {
         int xOffset = 0;
         int baseHeight = quake == null ? 24 : 132;
 
-        ShakeMap shakeMap = quake == null ? null : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().get(quake);
+        ShakeMap shakeMap = quake == null ? null : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().get(quake.getUuid());
 
         Level level = shakeMap == null ? null : IntensityScales.getIntensityScale().getLevel(shakeMap.getMaxPGA());
         Color levelColor = level == null ? Color.gray : level.getColor();
