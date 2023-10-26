@@ -122,6 +122,7 @@ public class GQServerSocket {
         terminate(clientsWatchdog);
         terminate(readerService);
         terminate(handshakeService);
+        dataService.stop();
         // we are the acceptservice
         setStatus(SocketStatus.IDLE);
     }

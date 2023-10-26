@@ -139,6 +139,8 @@ public abstract class AbstractStation {
 
 	public boolean hasNoDisplayableData() { return true; }
 
+	public boolean isInEventMode() {return false;};
+
     public  long getDelayMS() { return 0;}
 
     public void second(long time) {

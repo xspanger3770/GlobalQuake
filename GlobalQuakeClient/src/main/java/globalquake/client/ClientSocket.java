@@ -5,6 +5,7 @@ import gqserver.api.Packet;
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
 import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
+import gqserver.api.packets.station.StationsRequestPacket;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HeartbeatPacket;
 import org.tinylog.Logger;
@@ -57,6 +58,7 @@ public class ClientSocket {
         quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
 
         sendPacket(new ArchivedQuakesRequestPacket());
+        sendPacket(new StationsRequestPacket());
     }
 
     public void runReconnectService(){

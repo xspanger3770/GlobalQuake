@@ -33,13 +33,10 @@ import java.util.stream.Collectors;
 
 public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
-    private final List<Earthquake> earthquakes;
-
     private final Map<UUID, Earthquake> clientEarthquakeMap;
     private final ScheduledExecutorService checkService;
 
     public EarthquakeAnalysisClient(){
-        earthquakes = new CopyOnWriteArrayList<>();
         clientEarthquakeMap = new ConcurrentHashMap<>();
 
         checkService = Executors.newSingleThreadScheduledExecutor();
@@ -48,19 +45,15 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private void removeOld() {
         List<Earthquake> toRemove = new ArrayList<>();
-        for(Earthquake earthquake:earthquakes){
+        for(Earthquake earthquake:getEarthquakes()){
             if(shouldRemove(earthquake)){
                 toRemove.add(earthquake);
                 clientEarthquakeMap.remove(earthquake.getUuid());
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
             }
         }
 
-        earthquakes.removeAll(toRemove);
-    }
-
-    @Override
-    public List<Earthquake> getEarthquakes() {
-        return earthquakes;
+        getEarthquakes().removeAll(toRemove);
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
@@ -78,7 +71,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         if (existingQuake != null) {
             clientEarthquakeMap.remove(uuid);
-            earthquakes.remove(existingQuake);
+            getEarthquakes().remove(existingQuake);
         }
     }
 
@@ -87,7 +80,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         if(checkPacket.info().revisionID() == EarthquakeInfo.REMOVED){
             clientEarthquakeMap.remove(uuid);
-            earthquakes.remove(existingQuake);
+            getEarthquakes().remove(existingQuake);
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
         }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.info().revisionID()){
             socket.sendPacket(new EarthquakeRequestPacket(uuid));
@@ -103,7 +96,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
         if(existingQuake == null) {
             clientEarthquakeMap.put(uuid, newQuake);
-            earthquakes.add(newQuake);
+            getEarthquakes().add(newQuake);
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newQuake));
         } else if(existingQuake.getRevisionID() < data.revisionID()) {
             existingQuake.update(newQuake);

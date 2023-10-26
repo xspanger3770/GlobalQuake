@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
 
 import java.time.Instant;
@@ -82,5 +83,9 @@ public class GlobalStation extends AbstractStation {
 		return getAnalysis().getLastRecord() == 0 ? -1 : System.currentTimeMillis() - getAnalysis().getLastRecord();
 	}
 
-
+	@Override
+	public boolean isInEventMode() {
+		Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
+		return event != null && event.isValid() && !event.hasEnded();
+	}
 }

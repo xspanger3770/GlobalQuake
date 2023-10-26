@@ -204,7 +204,7 @@ public class EarthquakeListPanel extends JPanel {
 
                 QualityClass quality = quake.getQualityClass();
                 g.setFont(new Font("Calibri", Font.BOLD, 14));
-                GlobalQuakePanel.drawAccuracyBox(g, true, "", getWidth() + 4, y + 20, quality.toString(), quality.getColor());
+                GlobalQuakePanel.drawAccuracyBox(g, true, "", getWidth() + 4, y + 17, quality.toString(), quality.getColor());
 
                 g.setFont(new Font("Calibri", Font.PLAIN, 16));
                 if (quake.isWrong()) {

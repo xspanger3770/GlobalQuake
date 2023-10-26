@@ -10,6 +10,8 @@ import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.*;
+import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
 import gqserver.api.data.earthquake.ArchivedEventData;
@@ -17,12 +19,24 @@ import gqserver.api.data.earthquake.ArchivedQuakeData;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
+import gqserver.api.data.station.StationInfoData;
+import gqserver.api.data.station.StationIntensityData;
 import gqserver.api.packets.earthquake.*;
+import gqserver.api.packets.station.StationsInfoPacket;
+import gqserver.api.packets.station.StationsIntensityPacket;
+import gqserver.api.packets.station.StationsRequestPacket;
+import org.apache.commons.math3.analysis.function.Abs;
 import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -31,6 +45,7 @@ import java.util.stream.Collectors;
 public class DataService implements GlobalQuakeEventListener {
 
     private static final int MAX_ARCHIVED_QUAKES = 100;
+    private static final int STATIONS_INFO_PACKET_MAX_SIZE = 64;
     private final ReadWriteLock quakesRWLock = new ReentrantReadWriteLock();
 
     private final Lock quakesReadLock = quakesRWLock.readLock();
@@ -38,11 +53,39 @@ public class DataService implements GlobalQuakeEventListener {
 
     private final List<EarthquakeInfo> currentEarthquakes;
 
+    private final Map<AbstractStation, StationStatus> stationIntensities = new HashMap<>();
+    private final ScheduledExecutorService stationIntensityService;
+
     public DataService() {
         currentEarthquakes = new ArrayList<>();
 
         GlobalQuakeServer.instance.getEventHandler().registerEventListener(this);
 
+        stationIntensityService = Executors.newSingleThreadScheduledExecutor();
+        stationIntensityService.scheduleAtFixedRate(this::sendIntensityData, 0, 1, TimeUnit.SECONDS);
+    }
+
+    public StationStatus createStatus(AbstractStation station){
+        return new StationStatus(station.isInEventMode(), !station.hasNoDisplayableData(), station.getMaxRatio60S());
+    }
+
+    private void sendIntensityData() {
+        List<StationIntensityData> data = new ArrayList<>();
+        for(AbstractStation abstractStation: GlobalQuake.instance.getStationManager().getStations()){
+            StationStatus status = createStatus(abstractStation);
+            StationStatus previous = stationIntensities.put(abstractStation, status);
+            if(previous == null || !previous.equals(status)){
+                data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
+                if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
+                    broadcast(getStationReceivingClients(), new StationsIntensityPacket(System.currentTimeMillis(), data));
+                    data = new ArrayList<>();
+                }
+            }
+        }
+
+        if(!data.isEmpty()){
+            broadcast(getStationReceivingClients(), new StationsIntensityPacket(System.currentTimeMillis(), data));
+        }
     }
 
     @Override
@@ -191,6 +234,10 @@ public class DataService implements GlobalQuakeEventListener {
         return getClients().stream().filter(serverClient -> serverClient.getClientConfig().earthquakeData()).toList();
     }
 
+    private List<ServerClient> getStationReceivingClients(){
+        return getClients().stream().filter(serverClient -> serverClient.getClientConfig().stationData()).toList();
+    }
+
     private List<ServerClient> getClients() {
         return GlobalQuakeServer.instance.getServerSocket().getClients();
     }
@@ -203,9 +250,35 @@ public class DataService implements GlobalQuakeEventListener {
                 processEarthquakeRequest(client, earthquakeRequestPacket);
             } else if (packet instanceof ArchivedQuakesRequestPacket) {
                 processArchivedQuakesRequest(client);
+            } else if(packet instanceof StationsRequestPacket){
+                processStationsRequestPacket(client);
             }
         }catch(IOException e){
             Logger.error(e);
+        }
+    }
+
+    private void processStationsRequestPacket(ServerClient client) throws IOException {
+        List<StationInfoData> data = new ArrayList<>();
+        for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()){
+            StationInfoData info;
+            data.add(info = new StationInfoData(
+                    station.getId(),
+                    (float) station.getLatitude(),
+                    (float) station.getLongitude(),
+                    station.getNetworkCode(),
+                    station.getStationCode(),
+                    station.getChannelName(),
+                    station.getLocationCode()
+                    ));
+            if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
+                client.sendPacket(new StationsInfoPacket(data));
+                data = new ArrayList<>();
+            }
+        }
+
+        if(data.size() != 0){
+            client.sendPacket(new StationsInfoPacket(data));
         }
     }
 
@@ -238,5 +311,15 @@ public class DataService implements GlobalQuakeEventListener {
         } finally {
             quakesReadLock.unlock();
         }
+    }
+
+    public void stop() {
+        stationIntensityService.shutdown();
+        try {
+            stationIntensityService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
+        stationIntensities.clear();
     }
 }

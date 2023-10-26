@@ -34,6 +34,9 @@ public class Earthquake implements Regional, Warnable {
 		this.regionUpdater = new RegionUpdater(this);
 		this.updateRegion();
 
+		this.lastLat = getLat();
+		this.lastLon = getLon();
+
 		this.lastUpdate = System.currentTimeMillis();
 	}
 

@@ -67,6 +67,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
@@ -115,7 +120,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             return;
         }
 
-        Event event = entity.getOriginal().getAnalysis().getLatestEvent();
 
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
         var centerPonint = renderer.projectPoint(point3D);
@@ -136,14 +140,16 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                     _y += 16;
                 }
             }
-        } else if (event != null && event.isValid() && !event.hasEnded() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
+        } else if (entity.getOriginal().isInEventMode() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
             Color c = Color.green;
 
-            if (event.getMaxRatio() >= RATIO_YELLOW) {
+            double maxRatio = entity.getOriginal().getMaxRatio60S();
+
+            if (maxRatio >= RATIO_YELLOW) {
                 c = Color.yellow;
             }
 
-            if (event.getMaxRatio() >= RATIO_RED) {
+            if (maxRatio >= RATIO_RED) {
                 c = Color.red;
             }
 

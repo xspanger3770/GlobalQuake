@@ -637,7 +637,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.drawString(str, _x - 6, y);
 
-        RoundRectangle2D.Double rect = new RoundRectangle2D.Double( _x+size1- 3, y - g.getFont().getSize() - 2, size2 + 6, g.getFont().getSize() + 4, 10, 10);
+        RoundRectangle2D.Double rect = new RoundRectangle2D.Double( _x+size1- 3, y - g.getFont().getSize() + 1, size2 + 6, g.getFont().getSize() + 4, 10, 10);
         g.setColor(color);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -645,7 +645,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
         g.setColor(isDark(color) ? Color.white : Color.black);
-        g.drawString(v, _x + size1, y + g.getFont().getSize() / 2 - 10);
+        g.drawString(v, _x + size1, y + g.getFont().getSize() / 2 - 7);
     }
 
     public static boolean isDark(Color color) {
