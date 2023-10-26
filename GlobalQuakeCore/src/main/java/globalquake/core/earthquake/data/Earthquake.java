@@ -21,12 +21,16 @@ public class Earthquake implements Regional, Warnable {
 	private double lastLat;
 	private double lastLon;
 
-	public Earthquake(Cluster cluster) {
+	public Earthquake(Cluster cluster){
+		this(cluster, UUID.randomUUID());
+	}
+
+	public Earthquake(Cluster cluster, UUID uuid) {
 		if(cluster == null){
 			throw new IllegalArgumentException("Cluster cannot be null!");
 		}
 		this.cluster = cluster;
-		this.uuid = UUID.randomUUID();
+		this.uuid = uuid;
 		this.regionUpdater = new RegionUpdater(this);
 		this.updateRegion();
 

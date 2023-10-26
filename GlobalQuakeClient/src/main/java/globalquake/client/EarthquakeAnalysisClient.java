@@ -1,6 +1,5 @@
 package globalquake.client;
 
-import globalquake.client.data.ClientEarthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
@@ -29,19 +28,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private final List<Earthquake> earthquakes;
 
-    private final Map<UUID, ClientEarthquake> clientEarthquakeMap;
+    private final Map<UUID, Earthquake> clientEarthquakeMap;
+    private final ScheduledExecutorService checkService;
 
     public EarthquakeAnalysisClient(){
         earthquakes = new CopyOnWriteArrayList<>();
         clientEarthquakeMap = new ConcurrentHashMap<>();
+
+        checkService = Executors.newSingleThreadScheduledExecutor();
+        checkService.scheduleAtFixedRate(this::removeOld, 0, 30, TimeUnit.SECONDS);
+    }
+
+    private void removeOld() {
+        List<Earthquake> toRemove = new ArrayList<>();
+        for(Earthquake earthquake:earthquakes){
+            if(shouldRemove(earthquake)){
+                toRemove.add(earthquake);
+                clientEarthquakeMap.remove(earthquake.getUuid());
+            }
+        }
+
+        earthquakes.removeAll(toRemove);
     }
 
     @Override
@@ -61,7 +75,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private void processQuakeArchivePacket(ArchivedQuakePacket archivedQuakePacket) {
         UUID uuid = archivedQuakePacket.archivedQuakeData().uuid();
-        ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
+        Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         if (existingQuake != null) {
             clientEarthquakeMap.remove(uuid);
             earthquakes.remove(existingQuake);
@@ -70,7 +84,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private void processQuakeCheckPacket(ClientSocket socket, EarthquakeCheckPacket checkPacket) throws IOException {
         UUID uuid = checkPacket.info().uuid();
-        ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
+        Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         if(checkPacket.info().revisionID() == EarthquakeInfo.REMOVED){
             clientEarthquakeMap.remove(uuid);
             earthquakes.remove(existingQuake);
@@ -82,10 +96,10 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private void processQuakeDataPacket(HypocenterDataPacket hypocenterData) {
         UUID uuid = hypocenterData.data().uuid();
-        ClientEarthquake existingQuake = clientEarthquakeMap.get(uuid);
+        Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         HypocenterData data = hypocenterData.data();
 
-        ClientEarthquake newQuake = createEarthquake(data, hypocenterData.advancedHypocenterData());
+        Earthquake newQuake = createEarthquake(data, hypocenterData.advancedHypocenterData());
 
         if(existingQuake == null) {
             clientEarthquakeMap.put(uuid, newQuake);
@@ -97,7 +111,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         }
     }
 
-    private ClientEarthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData) {
+    private Earthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData) {
         DepthConfidenceInterval depthConfidenceInterval = advancedHypocenterData == null ? null : createDepthConfidenceInterval(advancedHypocenterData.depthIntervalData());
         var polygonConfidenceIntervals =advancedHypocenterData == null ? null : createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData());
 
@@ -115,7 +129,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         }
 
         cluster.setPreviousHypocenter(hypocenter);
-        return new ClientEarthquake(cluster, hypocenterData.uuid());
+        return new Earthquake(cluster, hypocenterData.uuid());
     }
 
     private List<PolygonConfidenceInterval> createPolygonConfidenceIntervals(LocationConfidenceIntervalData locationConfidenceIntervalData) {

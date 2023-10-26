@@ -930,19 +930,27 @@ public class EarthquakeAnalysis {
             5, 6, // M3
             8, 16, // M4
             30, 30, // M5
-            30, 30, // M6
+            30, 45, // M6
             60, 60, // M7+
     };
+
+    public static boolean shouldRemove(Earthquake earthquake){
+        int store_minutes = STORE_TABLE[Math.max(0,
+                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
+        if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
+                && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
+            return true;
+        }
+
+        return false;
+    }
 
     public void second() {
         Iterator<Earthquake> it = earthquakes.iterator();
         List<Earthquake> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Earthquake earthquake = it.next();
-            int store_minutes = STORE_TABLE[Math.max(0,
-                    Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
-            if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
-                    && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
+            if(shouldRemove(earthquake)){
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
                 }
