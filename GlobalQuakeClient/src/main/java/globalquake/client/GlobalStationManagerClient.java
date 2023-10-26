@@ -67,6 +67,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
                         infoData.lat(),
                         infoData.lon(),
                         infoData.index()));
+                station.setIntensity(infoData.maxIntensity(), infoData.time(), infoData.eventMode());
                 stationsIdMap.put(infoData.index(), station);
             }
         }

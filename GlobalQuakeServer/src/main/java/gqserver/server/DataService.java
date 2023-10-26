@@ -263,14 +263,17 @@ public class DataService implements GlobalQuakeEventListener {
         for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()){
             StationInfoData info;
             data.add(info = new StationInfoData(
-                    station.getId(),
-                    (float) station.getLatitude(),
-                    (float) station.getLongitude(),
-                    station.getNetworkCode(),
-                    station.getStationCode(),
-                    station.getChannelName(),
-                    station.getLocationCode()
-                    ));
+                                station.getId(),
+                                (float) station.getLatitude(),
+                                (float) station.getLongitude(),
+                                station.getNetworkCode(),
+                                station.getStationCode(),
+                                station.getChannelName(),
+                                station.getLocationCode(),
+                                System.currentTimeMillis(),
+                                (float) station.getMaxRatio60S(),
+                                station.isInEventMode()
+                                ));
             if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
                 client.sendPacket(new StationsInfoPacket(data));
                 data = new ArrayList<>();
