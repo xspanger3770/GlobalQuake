@@ -12,7 +12,8 @@
 		<module>GlobalQuakeCore</module>
 		<module>GlobalQuakeAPI</module>
 		<module>GlobalQuakeServer</module>
-	</modules>
+        <module>GQCudaTest</module>
+    </modules>
 
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
