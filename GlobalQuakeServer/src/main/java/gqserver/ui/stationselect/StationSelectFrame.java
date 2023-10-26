@@ -1,6 +1,6 @@
 package gqserver.ui.stationselect;
 
-import gqserver.ui.GQFrame;
+import globalquake.ui.GQFrame;
 import gqserver.ui.server.DatabaseMonitorFrame;
 import gqserver.ui.server.StationCountPanel;
 import gqserver.ui.stationselect.action.DeselectAllAction;

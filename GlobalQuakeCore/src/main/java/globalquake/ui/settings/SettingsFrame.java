@@ -1,10 +1,10 @@
-package gqserver.ui.settings;
+package globalquake.ui.settings;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import gqserver.main.Main;
-import gqserver.ui.GQFrame;
+import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -33,8 +33,6 @@ public class SettingsFrame extends GQFrame {
 	}
 
 	private void initialize(Component parent) {
-		setIconImage(Main.LOGO);
-
 		setTitle("GlobalQuake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -61,14 +59,14 @@ public class SettingsFrame extends GQFrame {
                     panel1.save();
                 }
 				catch(NumberFormatException exx){
-					Main.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
+					GlobalQuake.instance.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
 					return;
 				} catch(RuntimeApplicationException exxx){
-					Main.getErrorHandler().handleWarning(exxx);
+					GlobalQuake.instance.getErrorHandler().handleWarning(exxx);
 					return;
 				}
 				catch (Exception ex) {
-                    Main.getErrorHandler().handleException(ex);
+					GlobalQuake.instance.getErrorHandler().handleException(ex);
                     return;
                 }
             }

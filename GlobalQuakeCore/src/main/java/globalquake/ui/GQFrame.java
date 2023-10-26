@@ -1,15 +1,16 @@
-package gqserver.ui;
+package globalquake.ui;
 
 import javax.swing.*;
 import java.awt.*;
-
-import gqserver.main.Main;
+import java.util.Objects;
 
 public class GQFrame extends JFrame {
 
+    public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
+
     public GQFrame() throws HeadlessException {
         super();
-        setIconImage(Main.LOGO);
+        setIconImage(LOGO);
     }
 
     public @Override void toFront() {

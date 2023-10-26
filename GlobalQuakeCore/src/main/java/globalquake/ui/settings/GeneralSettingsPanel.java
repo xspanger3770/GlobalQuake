@@ -1,4 +1,4 @@
-package gqserver.ui.settings;
+package globalquake.ui.settings;
 
 
 import globalquake.core.Settings;

@@ -3,14 +3,16 @@ package gqserver.ui.server;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.FatalIOException;
 import gqserver.main.Main;
-import gqserver.ui.GQFrame;
+import globalquake.ui.GQFrame;
 import gqserver.ui.server.action.RestoreDatabaseAction;
+import globalquake.ui.settings.SettingsFrame;
 import gqserver.ui.stationselect.StationSelectFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Objects;
@@ -112,6 +114,15 @@ public class DatabaseMonitorFrame extends GQFrame {
         GridLayout gridLayout = new GridLayout(1, 2);
         gridLayout.setHgap(5);
         buttonsPanel.setLayout(gridLayout);
+
+        JButton btnSettings = new JButton("Settings");
+        buttonsPanel.add(btnSettings);
+        btnSettings.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new SettingsFrame(DatabaseMonitorFrame.this).setVisible(true);
+            }
+        });
 
         btnSelectStations = new JButton("Select Stations");
         btnSelectStations.setEnabled(false);

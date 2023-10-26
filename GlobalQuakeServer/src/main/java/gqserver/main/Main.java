@@ -31,8 +31,6 @@ public class Main {
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
 
-    public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
-
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();
         databaseManager.load();
