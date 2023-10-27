@@ -1,0 +1,1 @@
+nvcc --compiler-options '-fPIC -I /usr/lib/jvm/java-17-openjdk-amd64/include/ -I /usr/lib/jvm/java-17-openjdk-amd64/include/linux/' gq_brainstorm.cu travel_table.c -shared -o libgq.so

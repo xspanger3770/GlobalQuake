@@ -9,11 +9,11 @@ extern "C" {
 #endif
 /*
  * Class:     globalquake_jni_GQNativeFunctions
- * Method:    getTheUltimateAnswer
- * Signature: (I)I
+ * Method:    initPTravelTable
+ * Signature: ([[FIIF)V
  */
-JNIEXPORT jint JNICALL Java_globalquake_jni_GQNativeFunctions_getTheUltimateAnswer
-  (JNIEnv *, jclass, jint);
+JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable
+  (JNIEnv *, jclass, jobjectArray, jint, jint, jfloat);
 
 #ifdef __cplusplus
 }

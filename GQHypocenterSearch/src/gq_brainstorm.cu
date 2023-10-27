@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <cuda_profiler_api.h>
 
-#include "travel_table.h"
+#include "travel_table.hpp"
+#include "globalquake.hpp"
 
 #define BLOCK 128
 
@@ -60,7 +61,6 @@ __global__ void evaluateHypocenter(size_t points, float maxDist, float fromLat, 
 
 void hypocenter_search(size_t points, float maxDist, float fromLat, float fromLon)
 {
-
     dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)ceil(MAX_DEPTH / DEPTH_RESOLUTION), 1};
     dim3 threads = {BLOCK, 1, 1};
     printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
@@ -76,13 +76,4 @@ void hypocenter_search(size_t points, float maxDist, float fromLat, float fromLo
     }
 
     cudaProfilerStop();
-}
-
-int main()
-{
-    hypocenter_search(100000000, 10000.0, 0, 0);
-
-    cudaDeviceReset();
-
-    return 0;
 }
