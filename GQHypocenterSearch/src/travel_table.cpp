@@ -25,16 +25,45 @@ static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {
     }
 }
 
-JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jint w, jint h, jfloat d) {
-    table_width = w;
-    table_height = h;
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    isInitialized
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isInitialized
+  (JNIEnv *, jclass){
+    return is_initialised();
+  }
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    querryTable
+ * Signature: (DD)F
+ */
+JNIEXPORT jfloat JNICALL Java_globalquake_jni_GQNativeFunctions_querryTable
+  (JNIEnv *env, jclass, jdouble ang, jdouble depth){
+    int i = depth / max_depth * (table_height - 1);
+    int j = ang / MAX_ANG * (table_width - 1);
+    float val = p_wave_table[i * table_width + j];
+    return val;
+  }
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    initPTravelTable
+ * Signature: ([[FF)V
+ */
+JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jfloat d) {
     max_depth = d;
 
     int len1 = env->GetArrayLength(table);
     jfloatArray dim =  (jfloatArray)env->GetObjectArrayElement(table, 0);
     int len2 = env->GetArrayLength(dim);
     
-    if(travel_time_initialised){
+    table_height = len1;
+    table_width = len2;
+    
+    if(is_initialised()){
         free(p_wave_table);
     }
     
@@ -54,4 +83,6 @@ JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(J
     }
 
     releaseMatrixArray(env, table);
+
+    travel_time_initialised = true;
 }

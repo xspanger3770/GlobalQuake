@@ -17,6 +17,10 @@ public class TauPTravelTimeCalculator {
     public static final float NO_ARRIVAL = -999.0f;
     private static TauPTravelTable travelTable;
 
+    public static TauPTravelTable getTravelTable() {
+        return travelTable;
+    }
+
     public static void init() throws FatalApplicationException {
         try {
             travelTable = loadTravelTable("travel_table/travel_table.dat");

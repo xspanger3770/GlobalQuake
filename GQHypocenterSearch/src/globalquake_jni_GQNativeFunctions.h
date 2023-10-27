@@ -10,10 +10,26 @@ extern "C" {
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    initPTravelTable
- * Signature: ([[FIIF)V
+ * Signature: ([[FF)V
  */
 JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable
-  (JNIEnv *, jclass, jobjectArray, jint, jint, jfloat);
+  (JNIEnv *, jclass, jobjectArray, jfloat);
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    isInitialized
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isInitialized
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    querryTable
+ * Signature: (DD)F
+ */
+JNIEXPORT jfloat JNICALL Java_globalquake_jni_GQNativeFunctions_querryTable
+  (JNIEnv *, jclass, jdouble, jdouble);
 
 #ifdef __cplusplus
 }
