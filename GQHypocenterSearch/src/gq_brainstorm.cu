@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <cuda_profiler_api.h>
 
-#include "travel_table.hpp"
+#include "travel_table.h"
 
 #define BLOCK 128
 
@@ -80,11 +80,6 @@ void hypocenter_search(size_t points, float maxDist, float fromLat, float fromLo
 
 int main()
 {
-    /*if(createTravelTable(750.0, 10.0, 10.0) != 0){
-        std::cerr << "Failed to create travel time table!" << std::endl;
-        return;
-    }*/
-
     hypocenter_search(100000000, 10000.0, 0, 0);
 
     cudaDeviceReset();
