@@ -29,6 +29,10 @@ cuda_add_library(my_cuda_lib SHARED ${SRC_FILES})
 
 # Add an executable that links to the shared library
 add_executable(my_cuda_app src/main.cpp)
+
+include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/)
+include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/linux)
+
 target_link_libraries(my_cuda_app my_cuda_lib)
 
 # Link any additional libraries if needed
