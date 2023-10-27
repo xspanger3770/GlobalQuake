@@ -9,27 +9,35 @@ extern "C" {
 #endif
 /*
  * Class:     globalquake_jni_GQNativeFunctions
- * Method:    initPTravelTable
- * Signature: ([[FF)V
+ * Method:    copyPTravelTable
+ * Signature: ([[FF)Z
  */
-JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable
   (JNIEnv *, jclass, jobjectArray, jfloat);
 
 /*
  * Class:     globalquake_jni_GQNativeFunctions
- * Method:    isInitialized
+ * Method:    isTravelTableReady
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isInitialized
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableReady
   (JNIEnv *, jclass);
 
 /*
  * Class:     globalquake_jni_GQNativeFunctions
- * Method:    querryTable
- * Signature: (DD)F
+ * Method:    initCUDA
+ * Signature: ()Z
  */
-JNIEXPORT jfloat JNICALL Java_globalquake_jni_GQNativeFunctions_querryTable
-  (JNIEnv *, jclass, jdouble, jdouble);
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    findHypocenter
+ * Signature: ([[FFFJF)[F
+ */
+JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
+  (JNIEnv *, jclass, jobjectArray, jfloat, jfloat, jlong, jfloat);
 
 #ifdef __cplusplus
 }

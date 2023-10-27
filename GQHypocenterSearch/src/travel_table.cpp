@@ -5,13 +5,13 @@
 #include "globalquake_jni_GQNativeFunctions.h"
 
 float* p_wave_table;
-int32_t table_width;
-int32_t table_height;
+int32_t table_rows;
+int32_t table_columns;
 float max_depth;
-bool travel_time_initialised = false;
+bool travel_table_initialised = false;
 
 bool is_initialised(void){
-    return travel_time_initialised;
+    return travel_table_initialised;
 }
 
 static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {
@@ -30,22 +30,9 @@ static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {
  * Method:    isInitialized
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isInitialized
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableReady
   (JNIEnv *, jclass){
     return is_initialised();
-  }
-
-/*
- * Class:     globalquake_jni_GQNativeFunctions
- * Method:    querryTable
- * Signature: (DD)F
- */
-JNIEXPORT jfloat JNICALL Java_globalquake_jni_GQNativeFunctions_querryTable
-  (JNIEnv *env, jclass, jdouble ang, jdouble depth){
-    int i = depth / max_depth * (table_height - 1);
-    int j = ang / MAX_ANG * (table_width - 1);
-    float val = p_wave_table[i * table_width + j];
-    return val;
   }
 
 /*
@@ -53,15 +40,15 @@ JNIEXPORT jfloat JNICALL Java_globalquake_jni_GQNativeFunctions_querryTable
  * Method:    initPTravelTable
  * Signature: ([[FF)V
  */
-JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jfloat d) {
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jfloat d) {
     max_depth = d;
 
     int len1 = env->GetArrayLength(table);
     jfloatArray dim =  (jfloatArray)env->GetObjectArrayElement(table, 0);
     int len2 = env->GetArrayLength(dim);
     
-    table_height = len1;
-    table_width = len2;
+    table_rows = len1;
+    table_columns = len2;
     
     if(is_initialised()){
         free(p_wave_table);
@@ -70,7 +57,7 @@ JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(J
     p_wave_table = static_cast<float*>(malloc(sizeof(float) * len1 * len2));
     if(p_wave_table == nullptr){
         perror("malloc");
-        return;
+        return false;
     }
 
     for(int i=0; i<len1; ++i){
@@ -78,11 +65,12 @@ JNIEXPORT void JNICALL Java_globalquake_jni_GQNativeFunctions_initPTravelTable(J
         jfloat *element = env->GetFloatArrayElements(oneDim, 0);
 
         for(int j=0; j<len2; ++j) {
-            p_wave_table[i * len1 + j]= element[j];
+            p_wave_table[i * len1 + j] = element[j];
         }
     }
 
     releaseMatrixArray(env, table);
 
-    travel_time_initialised = true;
+    travel_table_initialised = true;
+    return true;
 }

@@ -24,19 +24,16 @@ foreach(arch ${CUDA_ARCH_LIST})
     set(CUDA_NVCC_FLAGS_${arch} "-gencode arch=compute_${arch},code=sm_${arch}")
 endforeach()
 
+include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/)
+include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/linux)
+
 # Compile CUDA sources into a shared library
 cuda_add_library(gq_hypocs SHARED ${SRC_FILES})
 
 # Add an executable that links to the shared library
 add_executable(gq_test src/main.cpp)
 
-include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/)
-include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/linux)
-
 target_link_libraries(gq_test gq_hypocs)
-
-# Link any additional libraries if needed
-# target_link_libraries(my_cuda_app PRIVATE library_name)
 
 # Set C++11 standard
 set_property(TARGET gq_test PROPERTY CXX_STANDARD 11)
