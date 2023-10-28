@@ -29,7 +29,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableR
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jlong, jfloat);
 
 /*
  * Class:     globalquake_jni_GQNativeFunctions

@@ -10,11 +10,20 @@
 
 #define BLOCK 128
 #define PHI 1.61803398875
-#define DEPTH_RESOLUTION 1.0
 
 #define STATION_FILEDS 4
 
+struct preliminary_hypocenter_t {
+    float origin;
+    int index;
+    float totalErr;
+    int correct;
+};
+
+bool cuda_initialised = false;
+float depth_resolution;
 float* travel_table_device;
+preliminary_hypocenter_t* results_device;
 
 __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float distance, float* lat, float* lon)
 {
@@ -50,30 +59,33 @@ __device__ void calculateParams(int points, int index, float maxDist, float from
     moveOnGlobe(fromLat, fromLon, ang, *dist, lat, lon);
 }
 
-__global__ void evaluateHypocenter(size_t points, float maxDist, float fromLat, float fromLon, float max_depth)
+__global__ void evaluateHypocenter(preliminary_hypocenter_t* results, float* stations, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon, float max_depth)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     float depth = max_depth * (blockIdx.y / (float)blockDim.y); 
     float lat, lon, dist;
     calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+    
 }
 
-bool run_hypocenter_search(float* stations, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon)
+bool run_hypocenter_search(float* stations, size_t station_count, size_t points, float depth_resolution, float maxDist, float fromLat, float fromLon)
 {
-    bool success = true;
-    size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     float* d_stations;
+    bool success = true;
+    
+    size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
+    
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
 
-    dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)ceil(max_depth / DEPTH_RESOLUTION), 1};
+    dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution), 1};
     dim3 threads = {BLOCK, 1, 1};
-    
+
     printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
     printf("%d %d %d\n", threads.x, threads.y, threads.z);
     printf("total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
-    if(success) evaluateHypocenter<<<blocks, threads>>>(points, maxDist, fromLat, fromLon, max_depth);
+    if(success) evaluateHypocenter<<<blocks, threads>>>(results_device, d_stations, station_count, points, maxDist, fromLat, fromLon, max_depth);
     success &= cudaDeviceSynchronize();
     cudaError_t err = cudaGetLastError();
 
@@ -101,7 +113,7 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
         }
     }
 
-    run_hypocenter_search(stationsArray, station_count, points, maxDist, fromLat, fromLon);
+    run_hypocenter_search(stationsArray, station_count, points, depth_resolution, maxDist, fromLat, fromLon);
 
     if(stationsArray) free(stationsArray);
 
@@ -124,10 +136,25 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-      (JNIEnv *, jclass){
-    size_t table_size = sizeof(float) * table_columns * table_rows;
+      (JNIEnv *, jclass, jlong max_points, jfloat _depth_resolution){
     bool success = true;
+    depth_resolution = _depth_resolution;
+    
+    size_t table_size = sizeof(float) * table_columns * table_rows;
+    
+    dim3 blocks = {(unsigned int)ceil(max_points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution), 1};
+    
+    size_t results_size = sizeof(preliminary_hypocenter_t) * (blocks.x * blocks.y * blocks.z);
+
+    printf("Results array has size %.2fGB\n", (results_size / (1024.0*1024.0*1024.0)));
+    
     success &= cudaMalloc(&travel_table_device, table_size) == cudaSuccess;
     success &= cudaMemcpy(travel_table_device, p_wave_table, table_size, cudaMemcpyHostToDevice) == cudaSuccess;
+
+    success &= cudaMalloc(&results_device, results_size) == cudaSuccess;
+    success &= cudaMemset(results_device, 0, results_size) == cudaSuccess;
+
+    cuda_initialised = success;
+    
     return success;
 }

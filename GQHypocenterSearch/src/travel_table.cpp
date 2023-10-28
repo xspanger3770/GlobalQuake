@@ -40,8 +40,9 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableR
  * Method:    initPTravelTable
  * Signature: ([[FF)V
  */
-JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jfloat d) {
-    max_depth = d;
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable(
+        JNIEnv *env, jclass cls, jobjectArray table, jfloat _max_depth) {
+    max_depth = _max_depth;
 
     int len1 = env->GetArrayLength(table);
     jfloatArray dim =  (jfloatArray)env->GetObjectArrayElement(table, 0);
