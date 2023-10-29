@@ -71,12 +71,12 @@ __device__ float haversine (float lat1, float lon1,
 {
     float dlat, dlon, c1, c2, d1, d2, a, t;
 
-    c1 = cospif (lat1 / 180.0);
-    c2 = cospif (lat2 / 180.0);
+    c1 = cospif (lat1 / 180.0f);
+    c2 = cospif (lat2 / 180.0f);
     dlat = lat2 - lat1;
     dlon = lon2 - lon1;
-    d1 = sinpif (dlat / 360.0);
-    d2 = sinpif (dlon / 360.0);
+    d1 = sinpif (dlat / 360.0f);
+    d2 = sinpif (dlon / 360.0f);
     t = d2 * d2 * c1 * c2;
     a = d1 * d1 + t;
     return 114.46338116f * asinf (fminf (1.0f, sqrtf (a)));
@@ -91,8 +91,9 @@ __device__ void calculateParams(int points, int index, float maxDist, float from
 __device__ float table_interpolate(float* s_travel_table, float ang) {
     float index = (ang / MAX_ANG) * (SHARED_TRAVEL_TABLE_SIZE - 1.0);
 
-    int index1 = fminf(0, floorf(index));
+    int index1 = fminf(0, floor(index));
     int index2 = fmaxf(index1 + 1, SHARED_TRAVEL_TABLE_SIZE - 1.0);
+
     float t = index - index1;
     return (1 - t) * s_travel_table[index1] + t * s_travel_table[index2];
 }
@@ -123,7 +124,7 @@ __device__ void reduce(float *a, float *b){
 }
 
 __global__ void evaluateHypocenter(float* results, float* travel_table, float* stations, 
-    float* station_distances, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon, float max_depth)
+    float* station_distances, int station_count, int points, float maxDist, float fromLat, float fromLon, float max_depth)
 {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
@@ -151,9 +152,10 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 
     float origin = 0;
 
-    for(int station = 0; station < station_count; station++) {
-        float s_pwave = s_stations[station * STATION_FILEDS + 3];
-        float ang_dist = station_distances[index + station * points];
+    for(int station = threadIdx.x; station < station_count; station++) {
+        int station_index = station % station_count;
+        float s_pwave = s_stations[station_index + 3 * station_count];
+        float ang_dist = station_distances[station_index + index * station_count];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         origin += s_pwave - expected_travel_time;
     }
@@ -164,12 +166,13 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
     float correct = 0;
 
     for(int station = 0; station < station_count; station++) {
-        float s_pwave = s_stations[station * STATION_FILEDS + 3];
-        float ang_dist = station_distances[index + station * points];
+        int station_index = station % station_count;
+        float s_pwave = s_stations[station_index + 3 * station_count];
+        float ang_dist = station_distances[station_index + index * station_count];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float expected_origin = s_pwave - expected_travel_time;
         float _err = (expected_origin - origin);
-        _err *= 2;
+        _err *= 2.0f;
 
         err += _err;
         if(_err < 2.0){
@@ -178,10 +181,10 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
     }
 
     //!!!
-    s_results[threadIdx.x * HYPOCENTER_FILEDS + 0] = correct;
-    s_results[threadIdx.x * HYPOCENTER_FILEDS + 1] = err;
-    s_results[threadIdx.x * HYPOCENTER_FILEDS + 2] = index;
-    s_results[threadIdx.x * HYPOCENTER_FILEDS + 3] = origin;
+    s_results[threadIdx.x + blockDim.x * 0] = correct;
+    s_results[threadIdx.x + blockDim.x * 1] = err;
+    s_results[threadIdx.x + blockDim.x * 2] = index;
+    s_results[threadIdx.x + blockDim.x * 3] = origin;
     
     // implementation 3 from slides
     for ( unsigned int s = blockDim . x / 2 ; s > 0 ; s >>= 1 ) {
@@ -191,13 +194,15 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         }
     }
 
-    results[index * HYPOCENTER_FILEDS + 0] = s_results[0];
-    results[index * HYPOCENTER_FILEDS + 1] = s_results[1];
-    results[index * HYPOCENTER_FILEDS + 2] = s_results[2];
-    results[index * HYPOCENTER_FILEDS + 3] = s_results[3];
+    if(threadIdx.x == 0){
+        results[index + 0 * points] = s_results[0];
+        results[index + 1 * points] = s_results[1];
+        results[index + 2 * points] = s_results[2];
+        results[index + 3 * points] = s_results[3];
+    }
 }
 
-__global__ void calculate_station_distances(float* result, float* point_locations, float* stations, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon){
+__global__ void calculate_station_distances(float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     float lat, lon, dist;
     
@@ -206,11 +211,12 @@ __global__ void calculate_station_distances(float* result, float* point_location
     point_locations[index] = lat;
     point_locations[index + points] = lon;
 
-    for(int station = 0; station < station_count; station++){
-        float s_lat = stations[station * STATION_FILEDS + 0];
-        float s_lon = stations[station * STATION_FILEDS + 1];
+    for(int i = 0; i < station_count; i++){
+        int station_index = (i + threadIdx.x) % station_count;
+        float s_lat = stations[station_index + 0 * station_count];
+        float s_lon = stations[station_index + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon);
-        result[index + station * points] = ang_dist;
+        station_distances[index + i * station_count] = ang_dist;
     }
 }
 
@@ -250,7 +256,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     success &= cudaDeviceSynchronize() == cudaSuccess;
 
     if(!success){
-        printf("ERR!!\n");
+        printf("ERR!! %d\n", cudaGetLastError());
     }
     
     if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * STATION_FILEDS * station_count>>>

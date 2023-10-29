@@ -13,7 +13,7 @@ int main()
     int len1 = max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 100 * 1000;
+    int points = 100*1000;
     
     table_rows = len1;
     table_columns = len2;
@@ -24,6 +24,15 @@ int main()
 
     int st_c = 64;
     float stations[st_c * 4];
+
+    float a = 999.0;
+
+    for(int station = 0; station < st_c; station++){
+        stations[station * 4 + 0] = (float)rand()/(float)(RAND_MAX/a);
+        stations[station * 4 + 1] = (float)rand()/(float)(RAND_MAX/a);
+        stations[station * 4 + 2] = (float)rand()/(float)(RAND_MAX/a);
+        stations[station * 4 + 3] = (float)rand()/(float)(RAND_MAX/a);
+    }
 
     run_hypocenter_search(stations, st_c, points, 5.0, 10000.0, 0, 0);
 
