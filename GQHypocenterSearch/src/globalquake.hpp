@@ -3,6 +3,6 @@
 
 #include "cstddef"
 
-void hypocenter_search(size_t points, float maxDist, float fromLat, float fromLon);
+bool run_hypocenter_search(float* stations, size_t station_count, size_t points, float depth_resolution, float maxDist, float fromLat, float fromLon);
 
 #endif

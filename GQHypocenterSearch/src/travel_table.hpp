@@ -12,4 +12,6 @@ extern float max_depth;
 
 extern bool is_initialised(void);
 
+extern float p_interpolate(float ang, float depth);
+
 #endif

@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "travel_table.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
@@ -12,6 +13,35 @@ bool travel_table_initialised = false;
 
 bool is_initialised(void){
     return travel_table_initialised;
+}
+
+float p_interpolate(float ang, float depth) {
+    float row = (depth / max_depth) * (table_rows - 1.0);
+    float column = (ang / MAX_ANG) * (table_columns - 1.0);
+
+    int row_floor = floor(row);
+    int col_floor = floor(column);
+    int row_ceil = fmin(table_rows - 1, row_floor + 1);
+    int col_ceil = fmin(table_columns - 1, col_floor + 1);
+
+    if(row_floor < 0 || col_floor < 0 || row_ceil >= table_rows || col_ceil >= table_columns){
+        printf("%d %d %d %d [%d %d]\n", row_floor, col_floor, row_ceil, col_ceil, table_rows, table_columns);
+        exit(1);
+    }
+
+    
+    float row_frac = row - row_floor;
+    float col_frac = column - col_floor;
+
+    float q11 = p_wave_table[row_floor * table_columns + col_floor];
+    float q12 = p_wave_table[row_floor * table_columns + col_ceil];
+    float q21 = p_wave_table[row_ceil * table_columns + col_floor];
+    float q22 = p_wave_table[row_ceil * table_columns + col_ceil];
+
+    float interpolated_value = (1 - row_frac) * ((1 - col_frac) * q11 + col_frac * q12) +
+                              row_frac * ((1 - col_frac) * q21 + col_frac * q22);
+
+    return interpolated_value;
 }
 
 static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {

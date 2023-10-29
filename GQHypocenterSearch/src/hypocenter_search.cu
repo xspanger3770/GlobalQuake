@@ -8,27 +8,38 @@
 #include "geo_utils.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
 
-#define BLOCK 128
-#define PHI 1.61803398875
+/**
+ * STATION:
+ * lat | lon | alt | pwave
+ * 
+ * HYPOCENTER:
+ * correct | err | index | origin
+*/
 
 #define STATION_FILEDS 4
+#define HYPOCENTER_FILEDS 4
+#define BLOCK 128
+#define SHARED_TRAVEL_TABLE_SIZE 1024
 
-struct preliminary_hypocenter_t {
+#define PHI 1.61803398875
+
+/*struct preliminary_hypocenter_t {
     float origin;
     int index;
     float totalErr;
     int correct;
-};
+};*/
 
 bool cuda_initialised = false;
 float depth_resolution;
+
 float* travel_table_device;
-preliminary_hypocenter_t* results_device;
+float* f_results_device;
 
 __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float distance, float* lat, float* lon)
 {
     // calculate angles
-    float delta = distance / EARTH_RADIUS;
+    float delta = distance / EARTH_CIRCUMFERENCE;
     float theta = fromLat;
     float phi = fromLon;
     float gamma = angle;
@@ -53,43 +64,203 @@ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float dis
     *lon = atan2f(y, x);
 }
 
+// lat and lon are in range -1-1
+// source: https://developer.nvidia.com/blog/fast-great-circle-distance-calculation-cuda-c/
+__device__ float haversine (float lat1, float lon1, 
+                            float lat2, float lon2)
+{
+    float dlat, dlon, c1, c2, d1, d2, a, t;
+
+    c1 = cospif (lat1 / 180.0);
+    c2 = cospif (lat2 / 180.0);
+    dlat = lat2 - lat1;
+    dlon = lon2 - lon1;
+    d1 = sinpif (dlat / 360.0);
+    d2 = sinpif (dlon / 360.0);
+    t = d2 * d2 * c1 * c2;
+    a = d1 * d1 + t;
+    return 114.46338116f * asinf (fminf (1.0f, sqrtf (a)));
+}
+
 __device__ void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
     float ang = 2 * M_PI / (PHI * PHI) * index;
     *dist = sqrtf(index) * (maxDist / sqrtf(points));
     moveOnGlobe(fromLat, fromLon, ang, *dist, lat, lon);
 }
 
-__global__ void evaluateHypocenter(preliminary_hypocenter_t* results, float* stations, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon, float max_depth)
+__device__ float table_interpolate(float* s_travel_table, float ang) {
+    float index = (ang / MAX_ANG) * (SHARED_TRAVEL_TABLE_SIZE - 1.0);
+
+    int index1 = fminf(0, floorf(index));
+    int index2 = fmaxf(index1 + 1, SHARED_TRAVEL_TABLE_SIZE - 1.0);
+    float t = index - index1;
+    return (1 - t) * s_travel_table[index1] + t * s_travel_table[index2];
+}
+
+__device__ inline float* h_correct(float* hypoc){
+    return &hypoc[0];
+}
+
+__device__ inline float* h_err(float* hypoc){
+    return &hypoc[1];
+}
+
+__device__ inline float* h_index(float* hypoc){
+    return &hypoc[2];
+}
+
+__device__ inline float* h_origin(float* hypoc){
+    return &hypoc[3];
+}
+
+__device__ void reduce(float *a, float *b){
+    if(*h_correct(b) > *h_correct(a) || (*h_correct(b) == *h_correct(a) && *h_err(b) < *h_err(a))){
+        *h_correct(a) = *h_correct(b);
+        *h_err(a) = *h_err(b);
+        *h_origin(a) = *h_origin(b);
+        *h_index(a) = *h_index(b);
+    }
+}
+
+__global__ void evaluateHypocenter(float* results, float* travel_table, float* stations, 
+    float* station_distances, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon, float max_depth)
 {
+    extern __shared__ float s_stations[];
+    __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
+    __shared__ float s_results[BLOCK * HYPOCENTER_FILEDS];
+
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     float depth = max_depth * (blockIdx.y / (float)blockDim.y); 
-    float lat, lon, dist;
-    calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+        
+    for(int tt_iteration = 0; tt_iteration < ceilf(SHARED_TRAVEL_TABLE_SIZE / blockDim.x); tt_iteration++) {
+        int s_index = tt_iteration * blockDim.x + threadIdx.x;
+        if(s_index < SHARED_TRAVEL_TABLE_SIZE){
+            s_travel_table[s_index] = travel_table[blockIdx.y * SHARED_TRAVEL_TABLE_SIZE + s_index];
+        }
+    }
     
+    for(int station_iteration = 0; station_iteration < ceilf((station_count * STATION_FILEDS) / blockDim.x); station_iteration++){
+        int index = station_iteration * blockDim.x * STATION_FILEDS + threadIdx.x;
+
+        if(index < station_count * STATION_FILEDS) {
+            s_stations[index] = stations[index];
+        }
+    }
+
+    __syncthreads();
+
+    float origin = 0;
+
+    for(int station = 0; station < station_count; station++) {
+        float s_pwave = s_stations[station * STATION_FILEDS + 3];
+        float ang_dist = station_distances[index + station * points];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        origin += s_pwave - expected_travel_time;
+    }
+
+    origin /= station_count;
+
+    float err = 0.0;
+    float correct = 0;
+
+    for(int station = 0; station < station_count; station++) {
+        float s_pwave = s_stations[station * STATION_FILEDS + 3];
+        float ang_dist = station_distances[index + station * points];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float expected_origin = s_pwave - expected_travel_time;
+        float _err = (expected_origin - origin);
+        _err *= 2;
+
+        err += _err;
+        if(_err < 2.0){
+            correct++;
+        } 
+    }
+
+    //!!!
+    s_results[threadIdx.x * HYPOCENTER_FILEDS + 0] = correct;
+    s_results[threadIdx.x * HYPOCENTER_FILEDS + 1] = err;
+    s_results[threadIdx.x * HYPOCENTER_FILEDS + 2] = index;
+    s_results[threadIdx.x * HYPOCENTER_FILEDS + 3] = origin;
+    
+    // implementation 3 from slides
+    for ( unsigned int s = blockDim . x / 2 ; s > 0 ; s >>= 1 ) {
+        if (threadIdx.x < s) {
+            reduce(&s_results[threadIdx.x], &s_results[threadIdx.x + s]);
+            __syncthreads();
+        }
+    }
+
+    results[index * HYPOCENTER_FILEDS + 0] = s_results[0];
+    results[index * HYPOCENTER_FILEDS + 1] = s_results[1];
+    results[index * HYPOCENTER_FILEDS + 2] = s_results[2];
+    results[index * HYPOCENTER_FILEDS + 3] = s_results[3];
+}
+
+__global__ void calculate_station_distances(float* result, float* point_locations, float* stations, size_t station_count, size_t points, float maxDist, float fromLat, float fromLon){
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    float lat, lon, dist;
+    
+    calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+
+    point_locations[index] = lat;
+    point_locations[index + points] = lon;
+
+    for(int station = 0; station < station_count; station++){
+        float s_lat = stations[station * STATION_FILEDS + 0];
+        float s_lon = stations[station * STATION_FILEDS + 1];
+        float ang_dist = haversine(lat, lon, s_lat, s_lon);
+        result[index + station * points] = ang_dist;
+    }
 }
 
 bool run_hypocenter_search(float* stations, size_t station_count, size_t points, float depth_resolution, float maxDist, float fromLat, float fromLon)
 {
     float* d_stations;
+    float* d_stations_distances;
+    float* d_point_locations;
     bool success = true;
     
+    dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)table_rows, 1};
+    dim3 threads = {BLOCK, 1, 1};
+    
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
+    size_t station_distances_array_size = sizeof(float) * station_count * points;
+    size_t point_locations_array_size = sizeof(float) * 2 * points;
+
+    printf("station array size %.2fkB\n", station_array_size / (1024.0));
+    printf("station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
+    printf("point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
-
-    dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution), 1};
-    dim3 threads = {BLOCK, 1, 1};
+    success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
+    success &= cudaMalloc(&d_point_locations, station_distances_array_size) == cudaSuccess;
 
     printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
     printf("%d %d %d\n", threads.x, threads.y, threads.z);
     printf("total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
-    if(success) evaluateHypocenter<<<blocks, threads>>>(results_device, d_stations, station_count, points, maxDist, fromLat, fromLon, max_depth);
-    success &= cudaDeviceSynchronize();
-    cudaError_t err = cudaGetLastError();
+    const int block2 = 256;
+    const int block_count2 = ceil(points / block2);
 
+    if(success) calculate_station_distances<<<block_count2, block2>>>
+        (d_stations_distances, d_point_locations, d_stations, station_count, points, maxDist, fromLat, fromLon);
+    
+    success &= cudaDeviceSynchronize() == cudaSuccess;
+
+    if(!success){
+        printf("ERR!!\n");
+    }
+    
+    if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * STATION_FILEDS * station_count>>>
+        (f_results_device, travel_table_device, d_stations, d_stations_distances, station_count, points, maxDist, fromLat, fromLon, max_depth);
+    
+    success &= cudaDeviceSynchronize() == cudaSuccess;
+    
     if(d_stations) cudaFree(d_stations);
+    if(d_stations_distances) cudaFree(d_stations_distances);
+    if(d_point_locations) cudaFree(d_point_locations);
 
     return success;
 }
@@ -113,6 +284,8 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
         }
     }
 
+    printf("run\n");
+
     run_hypocenter_search(stationsArray, station_count, points, depth_resolution, maxDist, fromLat, fromLon);
 
     if(stationsArray) free(stationsArray);
@@ -130,6 +303,18 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
     return nullptr;
 }
 
+void prepare_travel_table(float* fitted_travel_table) {
+    for(int row = 0; row < table_rows; row++){
+        for(int column = 0; column < SHARED_TRAVEL_TABLE_SIZE; column++){
+            fitted_travel_table[row * SHARED_TRAVEL_TABLE_SIZE + column] = 
+                p_interpolate(
+                    column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG, 
+                    (row / (table_rows-1.0)) * max_depth
+                );
+        }
+    }
+}
+
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    initCUDA
@@ -140,21 +325,33 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
     bool success = true;
     depth_resolution = _depth_resolution;
     
-    size_t table_size = sizeof(float) * table_columns * table_rows;
+    size_t table_size = sizeof(float) * table_rows * SHARED_TRAVEL_TABLE_SIZE;
     
-    dim3 blocks = {(unsigned int)ceil(max_points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution), 1};
+    dim3 blocks = {(unsigned int)ceil(max_points / BLOCK), (unsigned int)table_rows, 1};
     
-    size_t results_size = sizeof(preliminary_hypocenter_t) * (blocks.x * blocks.y * blocks.z);
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);
 
     printf("Results array has size %.2fGB\n", (results_size / (1024.0*1024.0*1024.0)));
     
     success &= cudaMalloc(&travel_table_device, table_size) == cudaSuccess;
     success &= cudaMemcpy(travel_table_device, p_wave_table, table_size, cudaMemcpyHostToDevice) == cudaSuccess;
 
-    success &= cudaMalloc(&results_device, results_size) == cudaSuccess;
-    success &= cudaMemset(results_device, 0, results_size) == cudaSuccess;
+    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
+    float* fitted_travel_table = static_cast<float*>(malloc(table_size));
+
+    if(fitted_travel_table == nullptr){
+        success = false;
+        perror("malloc");
+    }else {
+        prepare_travel_table(fitted_travel_table);
+        success &= cudaMemcpy(travel_table_device, fitted_travel_table, table_size, cudaMemcpyHostToDevice) == cudaSuccess;
+        if(!success){
+            printf("memcpy f\n");
+        }
+    }
+
+    free(fitted_travel_table);
 
     cuda_initialised = success;
-    
     return success;
 }
