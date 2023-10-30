@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#define MAX_ANG 150.0
+#define MAX_ANG 150.0f
 
 extern float* p_wave_table;
 extern int32_t table_columns;

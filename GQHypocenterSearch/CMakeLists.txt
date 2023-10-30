@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(GQHypocenterSearch)
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} $ENV{CUDA_NVCC_FLAGS} -lineinfo -g")
 
 # Find CUDA package
 find_package(CUDA REQUIRED)
