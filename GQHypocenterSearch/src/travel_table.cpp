@@ -24,10 +24,10 @@ float p_interpolate(float ang, float depth) {
     int row_ceil = fmin(table_rows - 1, row_floor + 1);
     int col_ceil = fmin(table_columns - 1, col_floor + 1);
 
-    if(row_floor < 0 || col_floor < 0 || row_ceil >= table_rows || col_ceil >= table_columns){
-        printf("%d %d %d %d [%d %d]\n", row_floor, col_floor, row_ceil, col_ceil, table_rows, table_columns);
-        exit(1);
-    }
+    //if(row_floor < 0 || col_floor < 0 || row_ceil >= table_rows || col_ceil >= table_columns){
+        //printf("%d %d %d %d [%d %d]\n", row_floor, col_floor, row_ceil, col_ceil, table_rows, table_columns);
+        //exit(1);
+    //}
 
     
     float row_frac = row - row_floor;
@@ -96,7 +96,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTab
         jfloat *element = env->GetFloatArrayElements(oneDim, 0);
 
         for(int j=0; j<len2; ++j) {
-            p_wave_table[i * len1 + j] = element[j];
+            p_wave_table[i * len2 + j] = element[j];
         }
     }
 

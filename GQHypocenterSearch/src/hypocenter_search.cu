@@ -16,10 +16,14 @@
  * correct | err | index | origin
 */
 
+
+#define BLOCK_HYPOCS 16
+#define BLOCK_REDUCE 256
+#define BLOCK_DISTANCES 64
+
 #define STATION_FILEDS 4
 #define HYPOCENTER_FILEDS 4
-#define BLOCK 240
-#define SHARED_TRAVEL_TABLE_SIZE 1024
+#define SHARED_TRAVEL_TABLE_SIZE 32
 
 #define PHI 1.61803398875f
 
@@ -36,10 +40,10 @@ float depth_resolution;
 float* travel_table_device;
 float* f_results_device;
 
-__device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float distance, float* lat, float* lon)
+__device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
 {
     // calculate angles
-    float delta = distance / EARTH_CIRCUMFERENCE;
+    float delta = angular_distance;
     float theta = fromLat;
     float phi = fromLon;
     float gamma = angle;
@@ -82,18 +86,7 @@ __device__ __host__ float haversine (float lat1, float lon1,
     return asinf (fminf (1.0f, sqrtf (a)));
 }
 
-void sanity(){
-    float RADIANS = M_PIf / 360.0;
-
-    float lat1 = 0;
-    float lon1 = 0;
-
-    float lat2 = 10 * RADIANS;
-    float lon2 = 10 * RADIANS;
-
-    printf("ang dist = %f\n", haversine(lat1, lon1, lat2, lon2));
-}
-
+// everything in radians
 __device__ void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
     float ang = 2.0f * M_PIf / (PHI * PHI) * index;
     *dist = sqrtf(index) * (maxDist / sqrtf(points));
@@ -142,7 +135,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
-    __shared__ float s_results[BLOCK * HYPOCENTER_FILEDS];
+    __shared__ float s_results[BLOCK_HYPOCS * HYPOCENTER_FILEDS];
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -155,7 +148,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         }
     }
     
-    for(int station_iteration = 0; station_iteration < ceilf((station_count * STATION_FILEDS) / blockDim.x); station_iteration++){
+    for(int station_iteration = 0; station_iteration < ceilf(static_cast<float>(station_count * STATION_FILEDS) / blockDim.x); station_iteration++){
         int index = station_iteration * blockDim.x * STATION_FILEDS + threadIdx.x;
 
         if(index < station_count * STATION_FILEDS) {
@@ -196,14 +189,17 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float s_pwave = s_stations[station_index + 3 * station_count];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float expected_origin = s_pwave - expected_travel_time;
-        float _err = (expected_origin - origin);
-        _err *= 2.0f;
+        float _err = fabsf(expected_origin - origin);
 
-        err += _err;
+        printf("%f %f %f %f %f [%f]\n", ang_dist, s_pwave, expected_travel_time, expected_origin, origin, _err);
+
+        err += _err * _err;
         if(_err < 2.0){
             correct++;
         } 
     }
+
+    printf("result of %d is err %f\n", index, err);
 
     s_results[threadIdx.x + blockDim.x * 0] = correct;
     s_results[threadIdx.x + blockDim.x * 1] = err;
@@ -212,7 +208,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
     
     // implementation 3 from slides
     for (unsigned int s = blockDim.x / 2 ; s > 0 ;s >>= 1) {
-        if (threadIdx.x < s) {
+        if (threadIdx.x < s && blockDim.x * blockIdx.x + threadIdx.x + s < points) {
             reduce(&s_results[threadIdx.x], &s_results[threadIdx.x + s], blockDim.x);
             __syncthreads();
         }
@@ -224,10 +220,9 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         results[idx + 1 * (gridDim.x * gridDim.y)] = s_results[1 * blockDim.x];
         results[idx + 2 * (gridDim.x * gridDim.y)] = s_results[2 * blockDim.x];
         results[idx + 3 * (gridDim.x * gridDim.y)] = s_results[3 * blockDim.x];
+        printf("result of the whole threadblock is err %f\n", s_results[1 * blockDim.x]);
     }
 }
-
-#define BLOCK_REDUCE 256
 
 __global__ void results_reduce(float* out, float* in, int total_size){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -244,7 +239,7 @@ __global__ void results_reduce(float* out, float* in, int total_size){
 
     // implementation 3 from slides
     for (unsigned int s = blockDim.x / 2 ; s > 0 ;s >>= 1) {
-        if (threadIdx.x < s) {
+        if (threadIdx.x < s && blockDim.x * blockIdx.x + threadIdx.x + s < total_size) {
             reduce(&s_results[threadIdx.x], &s_results[threadIdx.x + s], blockDim.x);
             __syncthreads();
         }
@@ -261,9 +256,16 @@ __global__ void results_reduce(float* out, float* in, int total_size){
 
 __global__ void calculate_station_distances(float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if(index >= points){
+        return;
+    }
+
     float lat, lon, dist;
     
     calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+
+    printf("!! %f %f %f %f %f\n", lat, lon, maxDist, fromLat, fromLon);
 
     point_locations[index] = lat;
     point_locations[index + points] = lon;
@@ -277,6 +279,7 @@ __global__ void calculate_station_distances(float* station_distances, float* poi
         float s_lon = stations[station_index + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon);
         station_distances[index + i * points] = ang_dist;
+        printf("station distance is %f (%f, %f) (%f, %f)\n", ang_dist, s_lat, s_lon, lat, lon);
     }
 }
 
@@ -286,17 +289,18 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     float* d_stations_distances;
     float* d_point_locations;
     float* d_temp_results;
+
     bool success = true;
     
-    dim3 blocks = {(unsigned int)ceil(points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
-    dim3 threads = {BLOCK, 1, 1};
+    dim3 blocks = {(unsigned int)ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
+    dim3 threads = {BLOCK_HYPOCS, 1, 1};
     
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
     size_t point_locations_array_size = sizeof(float) * 2 * points;
-    size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / BLOCK_REDUCE);
+    size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
 
-    printf("station array size %.2fkB\n", station_array_size / (1024.0));
+    printf("station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
     printf("station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
     printf("point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     printf("temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
@@ -304,24 +308,23 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
-    success &= cudaMalloc(&d_point_locations, station_distances_array_size) == cudaSuccess;
+    success &= cudaMalloc(&d_point_locations, point_locations_array_size) == cudaSuccess;
 
     printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
     printf("%d %d %d\n", threads.x, threads.y, threads.z);
     printf("total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
-    const int block2 = 128;
-    const int block_count2 = ceil(points / block2);
+    const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
-    if(success) calculate_station_distances<<<block_count2, block2>>>
+    if(success) calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>
         (d_stations_distances, d_point_locations, d_stations, station_count, points, maxDist, fromLat, fromLon);
     
     success &= cudaDeviceSynchronize() == cudaSuccess;
     cudaError err;
 
-    success = (err = cudaGetLastError()) == cudaSuccess;
+    success &= (err = cudaGetLastError()) == cudaSuccess;
     if(err != cudaSuccess){
-        printf("ERROR IN HYPOCS!!!! %s\n", cudaGetErrorString(err));
+        printf("ERROR IN STATD!!!! %s\n", cudaGetErrorString(err));
     }
     
     if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * STATION_FILEDS * station_count>>>
@@ -330,7 +333,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
-    success = (err = cudaGetLastError()) == cudaSuccess;
+    success &= (err = cudaGetLastError()) == cudaSuccess;
     if(err != cudaSuccess){
         printf("ERROR IN HYPOCS!!!! %s\n", cudaGetErrorString(err));
     }
@@ -339,14 +342,14 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     while(success && current_result_count > 1){
         dim3 blcks = {(unsigned int)ceil(current_result_count / static_cast<double>(BLOCK_REDUCE)), 1, 1};
 
-        printf("REDUCING... now %ld to %d\n", current_result_count, blcks.x);
+        printf("REDUCING [%d]... now %ld to %d\n",success, current_result_count, blcks.x);
         
         results_reduce<<<blcks, BLOCK_REDUCE>>>(d_temp_results, f_results_device, current_result_count);
-        success &= cudaDeviceSynchronize();
+        success &= cudaDeviceSynchronize() == cudaSuccess;
 
-        success = (err = cudaGetLastError()) == cudaSuccess;
+        success &= (err = cudaGetLastError()) == cudaSuccess;
         if(err != cudaSuccess){
-            printf("ERROR IN HYPOCS!!!! %s\n", cudaGetErrorString(err));
+            printf("ERROR IN REDUCE!!!! %s\n", cudaGetErrorString(err));
         }
 
         current_result_count = blcks.x;
@@ -355,6 +358,11 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
             success &= cudaMemcpy(final_result, d_temp_results, HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToHost) == cudaSuccess;
         } else {
             success &= cudaMemcpy(f_results_device,d_temp_results, current_result_count, cudaMemcpyDeviceToDevice) == cudaSuccess;
+        }
+
+        success &= (err = cudaGetLastError()) == cudaSuccess;
+        if(!success){
+            printf("ERROR IN MEMCPY!!!! %s\n", cudaGetErrorString(err));
         }
     }
 
@@ -370,21 +378,16 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
 
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *env, jclass, jobjectArray stations, jfloat fromLat, jfloat fromLon, jlong points, jfloat maxDist){
-    size_t station_count = env->GetArrayLength(stations);
+  (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, jfloat maxDist) {
+    size_t station_count = env->GetArrayLength(stations) / STATION_FILEDS;
     
     float* stationsArray = static_cast<float*>(malloc(sizeof(float) * station_count * STATION_FILEDS));
     if(!stationsArray){
         goto cleanup;
     }
 
-    for(int i = 0; i < station_count; i++){
-        jfloatArray oneDim = (jfloatArray)env->GetObjectArrayElement(stations, i);
-        jfloat *element = env->GetFloatArrayElements(oneDim, 0);
-        
-        for(int j = 0; j < STATION_FILEDS; j++){
-            stationsArray[i * STATION_FILEDS + j] = element[j];    
-        }
+    for(int i = 0; i < env->GetArrayLength(stations); i++){        
+        stationsArray[i] = env->GetFloatArrayElements(stations, 0)[i];
     }
 
     printf("run\n");
@@ -398,14 +401,8 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
     cleanup:
     if(stationsArray) free(stationsArray);
 
-
-    for (int i = 0; i < station_count; i++) {
-        jfloatArray oneDim = (jfloatArray) env->GetObjectArrayElement(stations, i);
-        jfloat *elements = env->GetFloatArrayElements(oneDim, 0);
-
-        env->ReleaseFloatArrayElements(oneDim, elements, 0);
-        env->DeleteLocalRef(oneDim);
-    }
+    jfloat *elements = env->GetFloatArrayElements(stations, 0);
+    env->ReleaseFloatArrayElements(stations, elements, 0);
 
     return nullptr;
 }
@@ -432,7 +429,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
     bool success = true;
     depth_resolution = _depth_resolution;
     
-    dim3 blocks = {(unsigned int)ceil(max_points / BLOCK), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
+    dim3 blocks = {(unsigned int)ceil(static_cast<float>(max_points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
     
     size_t table_size = sizeof(float) * blocks.y * SHARED_TRAVEL_TABLE_SIZE;
     size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);

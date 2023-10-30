@@ -89,6 +89,10 @@ public interface GeoUtils {
 		return new double[] { FastMath.toDegrees(theta2), FastMath.toDegrees(phi2) };
 	}
 
+	public static void main(String[] args) {
+		System.err.println(moveOnGlobe(0,0,10000, 0)[0]);
+	}
+
 	@SuppressWarnings("unused")
 	static double placeOnSurface(double travelledDistance, double alt1, double alt2) {
 		double d = alt1 - alt2;

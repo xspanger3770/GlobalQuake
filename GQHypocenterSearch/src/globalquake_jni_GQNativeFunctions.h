@@ -26,7 +26,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableR
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    initCUDA
- * Signature: ()Z
+ * Signature: (JF)Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
   (JNIEnv *, jclass, jlong, jfloat);
@@ -34,10 +34,10 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    findHypocenter
- * Signature: ([[FFFJF)[F
+ * Signature: ([FFFJF)[F
  */
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *, jclass, jobjectArray, jfloat, jfloat, jlong, jfloat);
+  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jfloat);
 
 #ifdef __cplusplus
 }
