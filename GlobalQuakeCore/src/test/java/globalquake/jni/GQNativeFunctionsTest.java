@@ -2,6 +2,8 @@ package globalquake.jni;
 
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
+import java.util.Arrays;
+
 public class GQNativeFunctionsTest {
 
     static{
@@ -21,12 +23,12 @@ public class GQNativeFunctionsTest {
 
         boolean init = true;
 
-        int pts = 2;
+        int pts = 20000;
 
         System.err.println(TauPTravelTimeCalculator.getTravelTable().p_travel_table.length+", "+TauPTravelTimeCalculator.getTravelTable().p_travel_table[0].length);
 
         init &= GQNativeFunctions.copyPTravelTable(TauPTravelTimeCalculator.getTravelTable().p_travel_table, (float) TauPTravelTimeCalculator.MAX_DEPTH);
-        init &= GQNativeFunctions.initCUDA(pts, 750.0f);
+        init &= GQNativeFunctions.initCUDA(pts, 10);
 
         // TODO
         if(!init){
@@ -35,7 +37,7 @@ public class GQNativeFunctionsTest {
         }
         float RADIANS = (float) (Math.PI / 360.0);
 
-        int stations = 3;
+        int stations = 30;
         float[] stations_array = new float[stations * 4];
 
         stations_array[0] = 50.262f * RADIANS;
@@ -45,7 +47,7 @@ public class GQNativeFunctionsTest {
 
         long a = System.currentTimeMillis();
         float[] result = GQNativeFunctions.findHypocenter(stations_array, 0f,0f, pts,90.0f*RADIANS);
-        System.err.println(result);
+        System.err.println(Arrays.toString(result));
         System.err.println((System.currentTimeMillis()-a)+"ms");
     }
 
