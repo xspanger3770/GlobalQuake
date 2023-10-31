@@ -28,7 +28,8 @@
 #define HYPOCENTER_FILEDS 5
 #define SHARED_TRAVEL_TABLE_SIZE 1024
 
-#define PHI2 (2.618033989f)
+#define PHI2 2.618033989f
+#define PI 3.14159256f
 
 /*struct preliminary_hypocenter_t {
     float origin;
@@ -87,7 +88,7 @@ __device__ __host__ float haversine (float lat1, float lon1,
 
 // everything in radians
 __device__ __host__ void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
-    float ang = (2.0f * M_PIf * (float)index) / PHI2;
+    float ang = (2.0f * PI * (float)index) / PHI2;
     *dist = sqrtf(index) * (maxDist / sqrtf(points - 1.0f));
     moveOnGlobe(fromLat, fromLon, ang, *dist, lat, lon);
 }
@@ -289,7 +290,7 @@ __global__ void calculate_station_distances(float* station_distances, float* poi
         }
         float s_lat = stations[station_index + 0 * station_count];
         float s_lon = stations[station_index + 1 * station_count];
-        float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / M_PIf; // because travel table is in degrees
+        float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI; // because travel table is in degrees
         station_distances[index + i * points] = ang_dist; // special precomputed value 
     }
 }
