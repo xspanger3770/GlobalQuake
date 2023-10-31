@@ -14,7 +14,7 @@ int main()
     int len1 = max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 100 * 1000;
+    int points = 1000 * 1000;
     
     table_rows = len1;
     table_columns = len2;

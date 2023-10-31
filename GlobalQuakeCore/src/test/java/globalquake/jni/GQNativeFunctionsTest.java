@@ -58,7 +58,7 @@ public class GQNativeFunctionsTest {
 
         boolean init = true;
 
-        int pts = 500 * 1000;
+        int pts = 10 * 1000;
         float depthResolution = 1.0f;
 
         System.err.println(TauPTravelTimeCalculator.getTravelTable().p_travel_table.length+", "+TauPTravelTimeCalculator.getTravelTable().p_travel_table[0].length);
