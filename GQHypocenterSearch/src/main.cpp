@@ -5,6 +5,7 @@
 #include "travel_table.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
 #include "globalquake.hpp"
+#include "geo_utils.hpp"
 
 int main()
 {
@@ -32,7 +33,7 @@ int main()
 
     float a = 999.0;
 
-    static const float RADIANS = M_PIf / 360.0;
+    static const float RADIANS = PI / 180.0;
 
     for(int station = 0; station < st_c; station++){
         stations[station * 4 + 0] = 50.262 * RADIANS;

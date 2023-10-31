@@ -29,7 +29,6 @@
 #define SHARED_TRAVEL_TABLE_SIZE 1024
 
 #define PHI2 2.618033989f
-#define PI 3.14159256f
 
 /*struct preliminary_hypocenter_t {
     float origin;
