@@ -1,10 +1,11 @@
 package globalquake.utils;
 
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import org.apache.commons.math3.util.FastMath;
 
 public interface GeoUtils {
 	double EARTH_CIRCUMFERENCE = 40082;
-	double EARTH_RADIUS = EARTH_CIRCUMFERENCE / (2 * Math.PI);// 6371.0;
+	double EARTH_RADIUS = 6379.0;// 6371.0;
 
 	class MoveOnGlobePrecomputed{
 		public double c_theta;
@@ -90,7 +91,7 @@ public interface GeoUtils {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(moveOnGlobe(0,0,10000, 0)[0]);
+		System.err.println(TauPTravelTimeCalculator.toAngle(greatCircleDistance(0,0,10,10)));
 	}
 
 	@SuppressWarnings("unused")
@@ -121,6 +122,7 @@ public interface GeoUtils {
 
 		return EARTH_RADIUS * c; // Angular distance in radians
 	}
+
 
 	static double calculateAngle(double lat1, double lon1, double lat2, double lon2) {
 		lat1 =Math.toRadians(lat1);

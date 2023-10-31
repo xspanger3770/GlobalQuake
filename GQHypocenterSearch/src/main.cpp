@@ -9,12 +9,12 @@
 int main()
 {
     max_depth = 750.0;
-    float depth_resolution = 750.0;
+    float depth_resolution = 5.0;
 
     int len1 = max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 10;
+    int points = 100 * 1000;
     
     table_rows = len1;
     table_columns = len2;
@@ -27,7 +27,7 @@ int main()
 
     Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, points, depth_resolution);
 
-    int st_c = 1;
+    int st_c = 64;
     float stations[st_c * 4];
 
     float a = 999.0;

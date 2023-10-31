@@ -1,7 +1,4 @@
 #ifndef _GEO_UTILS_H
 #define _GEO_UTILS_H
 
-#define EARTH_CIRCUMFERENCE 40075.0
-#define EARTH_RADIUS 6371.0
-
 #endif

@@ -37,7 +37,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
  * Signature: ([FFFJF)[F
  */
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jfloat);
+  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jfloat, jfloat);
 
 #ifdef __cplusplus
 }
