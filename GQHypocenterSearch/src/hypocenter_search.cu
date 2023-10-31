@@ -172,7 +172,10 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         return;
     }
 
-    float origin = 0;
+    float last_origin = 0.0f;
+    float final_origin = 0.0f;
+    float err = 0.0;
+    float correct = 0;
 
     int station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {
@@ -182,35 +185,27 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float ang_dist = station_distances[index + i * points];
         float s_pwave = s_stations[station_index + 3 * station_count];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-        origin += s_pwave - expected_travel_time;
-    }
+        float predicted_origin = s_pwave - expected_travel_time;
 
-    origin /= station_count;
-
-    float err = 0.0;
-    float correct = 0;
-
-    station_index = threadIdx.x % station_count;
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
+        if(i > 0){
+            float _err = predicted_origin - last_origin;
+            err += _err * _err;
+            if(_err < 5) {
+                correct++;
+            }
         }
-        float ang_dist = station_distances[index + i * points];
-        float s_pwave = s_stations[station_index + 3 * station_count];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-        float expected_origin = s_pwave - expected_travel_time;
-        float _err = fabsf(expected_origin - origin);
 
-        err += _err * _err;
-        if(_err < 2.0f){
-            correct++;
-        } 
+        if(i == station_count / 2){
+            final_origin = predicted_origin;
+        }
+
+        last_origin = predicted_origin;
     }
 
     s_results[threadIdx.x + blockDim.x * 0] = correct;
     s_results[threadIdx.x + blockDim.x * 1] = err;
     s_results[threadIdx.x + blockDim.x * 2] = index;
-    s_results[threadIdx.x + blockDim.x * 3] = origin;
+    s_results[threadIdx.x + blockDim.x * 3] = final_origin;
     s_results[threadIdx.x + blockDim.x * 4] = depth;
 
     __syncthreads();

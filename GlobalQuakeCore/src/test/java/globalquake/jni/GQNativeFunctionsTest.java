@@ -5,10 +5,7 @@ import globalquake.core.earthquake.data.PreliminaryHypocenter;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.utils.GeoUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GQNativeFunctionsTest {
 
@@ -26,7 +23,9 @@ public class GQNativeFunctionsTest {
 
     public static final float RADIANS = (float) (Math.PI / 180.0);
 
-    public static PreliminaryHypocenter cudaRun(List<PickedEvent> pickedEventList, float fromLat, float fromLon, int points){
+    public static PreliminaryHypocenter cudaRun(List<PickedEvent> pickedEventList, float fromLat, float fromLon, int points) {
+        pickedEventList.sort(Comparator.comparing(PickedEvent::pWave));
+
         float[] stations_array = new float[pickedEventList.size() * 4];
 
         long time = pickedEventList.get(0).pWave();
@@ -37,6 +36,7 @@ public class GQNativeFunctionsTest {
             stations_array[i + pickedEventList.size()] = (float) pickedEvent.lon() * RADIANS;
             stations_array[i + 2 * pickedEventList.size()] = (float) pickedEvent.elevation();
             stations_array[i + 3 * pickedEventList.size()] = (float) ((pickedEvent.pWave() - time) / 1000.0);
+            System.err.println("pwave: "+stations_array[i + 3 * pickedEventList.size()]);
         }
 
         System.err.println(Arrays.toString(stations_array));
