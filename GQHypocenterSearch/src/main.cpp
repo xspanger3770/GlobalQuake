@@ -10,12 +10,12 @@
 int main()
 {
     max_depth = 750.0;
-    float depth_resolution = 5.0;
+    float depth_resolution = 10.0;
 
     int len1 = max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 1000 * 1000;
+    int points = 5000 * 1000;
     
     table_rows = len1;
     table_columns = len2;
@@ -26,9 +26,15 @@ int main()
         return 1;
     }
 
-    Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, points, depth_resolution);
+    float resols[] = {10.0};
+    if(!initDepthProfiles(resols, 1)){
+        printf("Failure!\n");
+        return 1;
+    }
 
-    int st_c = 64;
+    Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, points, nullptr);
+    
+    int st_c = 100;
     float stations[st_c * 4];
 
     float a = 999.0;
@@ -44,7 +50,7 @@ int main()
 
     float final_result[4];
 
-    if(run_hypocenter_search(stations, st_c, points, depth_resolution, 90.0 * RADIANS, 0, 0, final_result)){
+    if(run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result)){
         printf("FINAL RESULT %f %f %f %f\n", final_result[0], final_result[1], final_result[2], final_result[3]);
     }
 

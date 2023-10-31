@@ -6,8 +6,8 @@ public class GQNativeFunctions {
 
     public static native boolean isTravelTableReady();
 
-    public static native boolean initCUDA(long max_points, float depth_resolution);
+    public static native boolean initCUDA(long max_points, float[] depth_resolutions);
 
-    public static native float[] findHypocenter(float[] stations, float lat, float lon, long points, float depth_resolution, float maxDist);
+    public static native float[] findHypocenter(float[] stations, float lat, float lon, long points, int depth_resolution_index, float maxDist);
 
 }

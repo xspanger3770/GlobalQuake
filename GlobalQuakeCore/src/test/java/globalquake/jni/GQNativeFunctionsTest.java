@@ -36,21 +36,29 @@ public class GQNativeFunctionsTest {
             stations_array[i + pickedEventList.size()] = (float) pickedEvent.lon() * RADIANS;
             stations_array[i + 2 * pickedEventList.size()] = (float) pickedEvent.elevation();
             stations_array[i + 3 * pickedEventList.size()] = (float) ((pickedEvent.pWave() - time) / 1000.0);
-            System.err.println("pwave: "+stations_array[i + 3 * pickedEventList.size()]);
         }
 
-        System.err.println(Arrays.toString(stations_array));
+        float[] result = {fromLat  * RADIANS, fromLat  * RADIANS};
+        float maxDist = 100.0f;
 
-        float[] result = GQNativeFunctions.findHypocenter(stations_array, fromLat * RADIANS, fromLon * RADIANS, points, 10.0f,90.0f * RADIANS);
+        int i = 0;
 
-        if(result == null){
+        while(maxDist > 0.1) {
+            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, i, maxDist * RADIANS);
+
+            if (result == null) {
+                return null;
+            }
+
+            maxDist /= 10.0f;
+            i++;
+        }
+
+        if (result == null) {
             return null;
         }
 
-        float[] result2 = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, 1.0f,2.0f * RADIANS);
-
-
-        return new PreliminaryHypocenter(result2[0] / RADIANS, result2[1] / RADIANS, result2[2], (long) (result2[3] * 1000.0 + time),0,0);
+        return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time),0,0);
     }
 
     public static void main(String[] args) throws Exception {
@@ -58,13 +66,12 @@ public class GQNativeFunctionsTest {
 
         boolean init = true;
 
-        int pts = 10 * 1000;
-        float depthResolution = 1.0f;
+        int pts = 100 * 1000;
 
         System.err.println(TauPTravelTimeCalculator.getTravelTable().p_travel_table.length+", "+TauPTravelTimeCalculator.getTravelTable().p_travel_table[0].length);
 
         init &= GQNativeFunctions.copyPTravelTable(TauPTravelTimeCalculator.getTravelTable().p_travel_table, (float) TauPTravelTimeCalculator.MAX_DEPTH);
-        init &= GQNativeFunctions.initCUDA(pts, depthResolution);
+        init &= GQNativeFunctions.initCUDA(pts, new float[]{50.0f, 10.0f, 1.0f, 0.5f});
 
         // TODO
         if(!init){
@@ -74,9 +81,9 @@ public class GQNativeFunctionsTest {
 
         int stations = 50;
         double lat = 1;
-        double lon = 10;
-        double depth = 100;
-        long origin = 10000;
+        double lon = 100;
+        double depth = 101;
+        long origin = -500;
 
         Random r = new Random(0);
         double DIST = 5000.0;
