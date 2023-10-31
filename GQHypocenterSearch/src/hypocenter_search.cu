@@ -188,7 +188,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         if(i > 0){
-            float _err = predicted_origin - last_origin;
+            float _err = fabsf(predicted_origin - last_origin);
             err += _err * _err;
             if(_err < 5) {
                 correct++;
