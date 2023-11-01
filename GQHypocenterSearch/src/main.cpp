@@ -10,12 +10,12 @@
 int main()
 {
     max_depth = 750.0;
-    float depth_resolution = 10.0;
+    float depth_resolution = 1.0;
 
     int len1 = max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 50 * 1000;
+    int points = 500 * 1000;
     
     table_rows = len1;
     table_columns = len2;
@@ -26,7 +26,7 @@ int main()
         return 1;
     }
 
-    float resols[] = {10.0};
+    float resols[] = {1.0};
     if(!initDepthProfiles(resols, 1)){
         printf("Failure!\n");
         return 1;

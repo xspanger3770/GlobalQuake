@@ -136,9 +136,9 @@ __device__ void reduce(float *a, float *b, int grid_size){
     float err_a = *h_err(a, grid_size);
     float err_b = *h_err(b, grid_size);
     
-    float correct_a = *h_correct(a);
+/*  float correct_a = *h_correct(a);
     float correct_b = *h_correct(b);
-/*
+
     
     float coeff_a = correct_a / (err_a * err_a + 2.0);
     float coeff_b = correct_b / (err_b * err_b + 2.0);
@@ -194,28 +194,22 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 
 
     float final_origin = 0.0f;
-    
-    // TODO how to calculate this without the loop?
-    int station_index = threadIdx.x % station_count;
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
-        }
+    int mid = ((station_count - 1) / 2);
         
-        if(station_index == (station_count - 1) / 2){
-            float ang_dist = station_distances[point_index + i * points];
-            float s_pwave = s_stations[station_index];
-            float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-            float predicted_origin = s_pwave - expected_travel_time;
+    int station_index = threadIdx.x % station_count;
+    {
+        int j = (mid - station_index + station_count) % station_count;
+        float ang_dist = station_distances[point_index + j * points];
+        float s_pwave = s_stations[mid];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float predicted_origin = s_pwave - expected_travel_time;
 
-            final_origin = predicted_origin;
-        }
+        final_origin = predicted_origin;
     }
 
     float err = 0.0;
     float correct = 0;
 
-    station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
             station_index = 0;
