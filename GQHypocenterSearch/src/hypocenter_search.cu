@@ -354,8 +354,8 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
         goto cleanup;
     }
 
-    printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
-    printf("%d %d %d\n", threads.x, threads.y, threads.z);
+    printf("Grid size: %d %d %d\n", blocks.x, blocks.y, blocks.z);
+    printf("Block size: %d %d %d\n", threads.x, threads.y, threads.z);
     printf("total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
     if(success) calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>
