@@ -44,7 +44,7 @@ public class GQNativeFunctionsTest {
         int i = 0;
 
         while(maxDist > 0.1) {
-            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, i, maxDist * RADIANS);
+            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points / (1 + 2*i), i, maxDist * RADIANS);
 
             if (result == null) {
                 return null;
@@ -66,7 +66,7 @@ public class GQNativeFunctionsTest {
 
         boolean init = true;
 
-        int pts = 100 * 1000;
+        int pts = 500 * 1000;
 
         System.err.println(TauPTravelTimeCalculator.getTravelTable().p_travel_table.length+", "+TauPTravelTimeCalculator.getTravelTable().p_travel_table[0].length);
 
@@ -79,13 +79,13 @@ public class GQNativeFunctionsTest {
             return;
         }
 
-        int stations = 50;
-        double lat = 1;
-        double lon = 100;
-        double depth = 101;
-        long origin = -500;
+        int stations = 30;
+        double lat = 50.262;
+        double lon = 17.262;
+        double depth = 20.69;
+        long origin = 6222;
 
-        Random r = new Random(0);
+        Random r = new Random(2);
         double DIST = 5000.0;
 
         List<PickedEvent> events = new ArrayList<>();

@@ -42,6 +42,10 @@ int depth_profile_count;
 depth_profile_t* depth_profiles;
 float* f_results_device;
 
+void print_err(const char* msg){
+    printf("%s failed: %s (%d)\n", msg, cudaGetErrorString(cudaGetLastError()), cudaGetLastError());
+}
+
 __host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
 {
     // calculate angles
@@ -346,7 +350,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
     
     if(!success){
-        printf("Error during initialization: %s\n", cudaGetErrorString(cudaGetLastError()));
+        print_err("Hypocs initialisation");
         goto cleanup;
     }
 
@@ -359,11 +363,8 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
-    cudaError err;
-    success &= (err = cudaGetLastError()) == cudaSuccess;
-
-    if(err != cudaSuccess){
-        printf("ERROR IN STATD!!!! %s (%d)\n", cudaGetErrorString(err), err);
+    if(!success){
+        print_err("Calculate station distances");
         goto cleanup;
     }
     
@@ -372,9 +373,8 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
-    success &= (err = cudaGetLastError()) == cudaSuccess;
-    if(err != cudaSuccess){
-        printf("ERROR IN HYPOCS!!!! %s\n", cudaGetErrorString(err));
+    if(!success){
+        print_err("Hypocenter search");
         goto cleanup;
     }
 
@@ -385,9 +385,8 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
         results_reduce<<<blcks, BLOCK_REDUCE>>>(d_temp_results, f_results_device, current_result_count);
         success &= cudaDeviceSynchronize() == cudaSuccess;
 
-        success &= (err = cudaGetLastError()) == cudaSuccess;
-        if(err != cudaSuccess){
-            printf("ERROR IN REDUCE!!!! %s\n", cudaGetErrorString(err));
+        if(!success){
+            print_err("Reduce");
             goto cleanup;
         }
 
@@ -409,9 +408,8 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
             success &= cudaMemcpy(f_results_device, d_temp_results, current_result_count * HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToDevice) == cudaSuccess;
         }
 
-        success &= (err = cudaGetLastError()) == cudaSuccess;
         if(!success){
-            printf("ERROR IN MEMCPY!!!! %s\n", cudaGetErrorString(err));
+            print_err("CUDA memcpy");
             goto cleanup;
         }
     }
@@ -491,6 +489,7 @@ bool initDepthProfiles(float* resols, int count){
 
         // todo fitted array
         if(cudaMalloc(&depth_profiles[i].device_travel_table, table_size) != cudaSuccess){
+            print_err("CUDA malloc");
             return false;
         }
 
@@ -502,6 +501,7 @@ bool initDepthProfiles(float* resols, int count){
         } else {
             prepare_travel_table(fitted_travel_table, rows);
             if(cudaMemcpy(depth_profiles[i].device_travel_table, fitted_travel_table, table_size, cudaMemcpyHostToDevice) != cudaSuccess){
+                print_err("CUDA memcpy");
                 free(fitted_travel_table);
                 return false;
             }
@@ -541,6 +541,10 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
     printf("Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
     
     success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
+
+    if(!success){
+        print_err("CUDA malloc");
+    }
 
     cuda_initialised = success;
     return success;
