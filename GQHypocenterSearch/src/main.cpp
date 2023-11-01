@@ -42,10 +42,10 @@ int main()
     static const float RADIANS = PI / 180.0;
 
     for(int station = 0; station < st_c; station++){
-        stations[station * 4 + 0] = 50.262 * RADIANS;
-        stations[station * 4 + 1] = 17.262 * RADIANS;
-        stations[station * 4 + 2] = 420.0;
-        stations[station * 4 + 3] = 10;
+        stations[station + 0 * st_c] = (float)rand()/(float)(RAND_MAX / 360.0) * RADIANS;
+        stations[station + 1 * st_c] = (float)rand()/(float)(RAND_MAX / 180.0) * RADIANS;
+        stations[station + 2 * st_c] = 420.0;
+        stations[station + 3 * st_c] = (float)rand()/(float)(RAND_MAX / 10000.0);
     }
 
     float final_result[4];
