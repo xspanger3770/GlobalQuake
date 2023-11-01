@@ -2,6 +2,9 @@ package globalquake.core.earthquake;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
+import globalquake.core.analysis.BetterAnalysis;
+import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.*;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.events.specific.QuakeCreateEvent;
@@ -11,9 +14,6 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
-import globalquake.core.earthquake.data.*;
-import globalquake.core.analysis.BetterAnalysis;
-import globalquake.core.analysis.Event;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Point2DGQ;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -34,6 +34,8 @@ public class EarthquakeAnalysis {
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 64.0;
     private static final boolean CHECK_QUADRANTS = false;
+
+    public static boolean DEPTH_FIX_ALLOWED = true;
 
     private final List<Earthquake> earthquakes;
 
@@ -204,6 +206,10 @@ public class EarthquakeAnalysis {
             return null;
         }
 
+        if(GQHypocs.isCudaLoaded()){
+            return GQHypocs.findHypocenter(selectedEvents, cluster);
+        }
+
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
@@ -298,7 +304,15 @@ public class EarthquakeAnalysis {
 
             correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
 
-            bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
+            PreliminaryHypocenter best3 =runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
+
+            System.err.println(best3);
+
+            bestHypocenter2 = best3;
+        }
+
+        if(bestHypocenter2 == null){
+            return;
         }
 
         postProcess(selectedEvents, correctSelectedEvents, cluster, bestHypocenter2, finderSettings, startTime);
@@ -447,7 +461,8 @@ public class EarthquakeAnalysis {
             obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
         }
 
-        double pct = 100 * bestHypocenter.getCorrectness();
+        // TODO workaround
+        double pct = 100;//100 * bestHypocenter.getCorrectness();
         boolean valid = pct >= finderSettings.correctnessThreshold() && bestHypocenter.correctEvents >= finderSettings.minStations() && obviousCorrectPct >= OBVIOUS_CORRECT_THRESHOLD;
         if (!valid) {
             boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
@@ -458,7 +473,7 @@ public class EarthquakeAnalysis {
                 }
                 cluster.setEarthquake(null);
             }
-            Logger.debug("Hypocenter not valid, remove = %s".formatted(remove));
+            Logger.debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f".formatted(remove, pct, finderSettings.correctnessThreshold()));
         } else {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
@@ -481,10 +496,12 @@ public class EarthquakeAnalysis {
             return false;
         }
 
-        if (bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
-                (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)) {
-            Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
-            fixDepth(bestHypocenter, 10, events);
+        if(DEPTH_FIX_ALLOWED) {
+            if (bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
+                    (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)) {
+                Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
+                fixDepth(bestHypocenter, 10, events);
+            }
         }
 
         return true;

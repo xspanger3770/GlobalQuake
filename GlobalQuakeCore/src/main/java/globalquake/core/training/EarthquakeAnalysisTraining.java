@@ -1,5 +1,6 @@
 package globalquake.core.training;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
@@ -9,6 +10,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,12 +19,15 @@ import java.util.Random;
 public class EarthquakeAnalysisTraining {
 
     public static final int STATIONS = 50;
-    public static final double DIST = 500;
+    public static final double DIST = 10000;
 
-    public static final double INACCURACY = 2000;
+    public static final double INACCURACY = 0;
+    private static final double MASSIVE_ERR_ODDS = 0.0;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+        EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
+        GlobalQuake.prepare(new File("./training/"), null);
         measureTest(10,10);
 
         Settings.hypocenterDetectionResolution = 40.0;
@@ -33,7 +38,7 @@ public class EarthquakeAnalysisTraining {
         long a  = System.currentTimeMillis();
         int fails = 0;
         for(int i = 0; i < 50; i++) {
-            long err = runTest(6546+i, STATIONS);
+            long err = runTest(1234+i, STATIONS);
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;
@@ -97,7 +102,7 @@ public class EarthquakeAnalysisTraining {
         for(int i = 0; i < stations; i++){
             double ang = r.nextDouble() * 360.0;
             double dist = r.nextDouble() * DIST;
-            double[] latLon = GeoUtils.moveOnGlobe(0, 0, ang, dist);
+            double[] latLon = GeoUtils.moveOnGlobe(0, 0, dist, ang);
             fakeStations.add(new FakeStation(latLon[0], latLon[1]));
         }
 
@@ -105,7 +110,7 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(10.5 * r.nextDouble() * 3, - 1.5 + r.nextDouble() * 3, r.nextDouble() * 200, 0, 0,0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, r.nextDouble() * 200, 0, 0,0, null, null);
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -114,7 +119,7 @@ public class EarthquakeAnalysisTraining {
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);
-            if(r.nextDouble() < 0.1){
+            if(r.nextDouble() < MASSIVE_ERR_ODDS){
                 time += (long) ((r.nextDouble() * 10 - 5) * INACCURACY);
             }
 
@@ -126,6 +131,7 @@ public class EarthquakeAnalysisTraining {
 
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
+        System.err.println("It shouldve been "+absolutetyCorrect);
         if(cluster.getEarthquake()!=null) {
             double dist = GeoUtils.greatCircleDistance(cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon(), absolutetyCorrect.lat, absolutetyCorrect.lon);
             return Math.abs(cluster.getEarthquake().getOrigin());

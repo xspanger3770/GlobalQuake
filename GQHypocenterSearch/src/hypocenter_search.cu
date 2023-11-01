@@ -42,8 +42,9 @@ int depth_profile_count;
 depth_profile_t* depth_profiles;
 float* f_results_device;
 
-void print_err(const char* msg){
-    printf("%s failed: %s (%d)\n", msg, cudaGetErrorString(cudaGetLastError()), cudaGetLastError());
+void print_err(const char* msg) {
+    cudaError err= cudaGetLastError();
+    printf("%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
 }
 
 __host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
@@ -101,7 +102,7 @@ __device__ float table_interpolate(float* s_travel_table, float ang) {
     float index = ang * K;
 
     if(index >= SHARED_TRAVEL_TABLE_SIZE - 1.0f) {
-        return s_travel_table[SHARED_TRAVEL_TABLE_SIZE - 1];
+        return -ang * ang; // some
     }
 
     int index1 = (int) index;
@@ -132,7 +133,25 @@ __device__ inline float* h_depth(float* hypoc, int grid_size){
 }
 
 __device__ void reduce(float *a, float *b, int grid_size){
-    if(*h_correct(b) > *h_correct(a) || (*h_correct(b) == *h_correct(a) && *h_err(b, grid_size) < *h_err(a, grid_size))){
+    float err_a = *h_err(a, grid_size);
+    float err_b = *h_err(b, grid_size);
+    
+    float correct_a = *h_correct(a);
+    float correct_b = *h_correct(b);
+/*
+    
+    float coeff_a = correct_a / (err_a * err_a + 2.0);
+    float coeff_b = correct_b / (err_b * err_b + 2.0);
+
+    // B is better
+    bool swap = correct_b > correct_a * 1.3 && (correct_a < correct_b * 1.3) 
+                || coeff_b > coeff_a;*/
+
+   // bool swap = correct_b > correct_a || (correct_b == correct_a && err_b < err_a);
+
+    bool swap = err_b < err_a;
+
+    if(swap){
         *h_correct(a) = *h_correct(b);
         *h_err(a,grid_size) = *h_err(b, grid_size);
         *h_origin(a, grid_size) = *h_origin(b, grid_size);
@@ -173,12 +192,39 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         return;
     }
 
-    float last_origin = 0.0f;
+
     float final_origin = 0.0f;
+    
+    int station_index = threadIdx.x % station_count;
+    for(int i = 0; i < station_count; i++, station_index++) {
+        if(station_index >= station_count){
+            station_index = 0;
+        }
+        
+        if(station_index == (station_count - 1) / 2){
+            float ang_dist = station_distances[point_index + i * points];
+            float s_pwave = s_stations[station_index];
+            float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+            float predicted_origin = s_pwave - expected_travel_time;
+
+            final_origin = predicted_origin;
+        }
+    }
+    
+    /*{
+        int i = ((station_count - 1) / 2 - point_index);
+        float ang_dist = station_distances[point_index + i * points];
+        float s_pwave = s_stations[(station_count - 1) / 2];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float predicted_origin = s_pwave - expected_travel_time;
+
+        final_origin = predicted_origin;
+    }*/
+
     float err = 0.0;
     float correct = 0;
 
-    int station_index = threadIdx.x % station_count;
+    station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
             station_index = 0;
@@ -188,19 +234,8 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
-        if(i > 0){
-            float _err = fabsf(predicted_origin - last_origin);
-            err += _err * _err;
-            if(_err < 5) {
-                correct++;
-            }
-        }
-
-        if(i == station_count / 2){
-            final_origin = predicted_origin;
-        }
-
-        last_origin = predicted_origin;
+        float _err = fabsf(predicted_origin - final_origin);
+        err += _err * _err;
     }
 
     s_results[threadIdx.x + blockDim.x * 0] = correct;
@@ -283,7 +318,7 @@ __global__ void calculate_station_distances(float* station_distances, float* poi
         float s_lat = stations[station_index + 0 * station_count];
         float s_lon = stations[station_index + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI; // because travel table is in degrees
-        station_distances[index + i * points] = ang_dist; // special precomputed value 
+        station_distances[index + i * points] = ang_dist;
     }
 }
 
