@@ -44,7 +44,7 @@ float* f_results_device;
 
 void print_err(const char* msg) {
     cudaError err= cudaGetLastError();
-    printf("%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
+    TRACE(2, "%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
 }
 
 __host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
@@ -195,6 +195,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 
     float final_origin = 0.0f;
     
+    // TODO how to calculate this without the loop?
     int station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
@@ -210,16 +211,6 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
             final_origin = predicted_origin;
         }
     }
-    
-    /*{
-        int i = ((station_count - 1) / 2 - point_index);
-        float ang_dist = station_distances[point_index + i * points];
-        float s_pwave = s_stations[(station_count - 1) / 2];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-        float predicted_origin = s_pwave - expected_travel_time;
-
-        final_origin = predicted_origin;
-    }*/
 
     float err = 0.0;
     float correct = 0;
@@ -338,7 +329,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     float maxDist, float fromLat, float fromLon, float* final_result)
 {
     if(depth_profile_index < 0 || depth_profile_index >= depth_profile_count){
-        printf("Invalid depth profile: %d!\n", depth_profile_index);
+        TRACE(2, "Error! Invalid depth profile: %d!\n", depth_profile_index);
         return false;
     }
 
@@ -350,7 +341,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     float* d_temp_results;
 
     if(points < 2){
-        printf("ERR!! at least 2 points needed!\n");
+        TRACE(2, "Error! at least 2 points needed!\n");
         return false;
     }
 
@@ -360,7 +351,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     dim3 threads = {BLOCK_HYPOCS, 1, 1};
 
     if(blocks.y < 2){
-        printf("ERR!! at least 2 depth points needed!\n");
+        TRACE(2, "Error! at least 2 depth points needed!\n");
         return false;
     }
     
@@ -373,10 +364,10 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     
     const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
-    printf("station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
-    printf("station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
-    printf("point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
-    printf("temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
+    TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
+    TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
+    TRACE(1, "point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
+    TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
@@ -389,9 +380,9 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
         goto cleanup;
     }
 
-    printf("Grid size: %d %d %d\n", blocks.x, blocks.y, blocks.z);
-    printf("Block size: %d %d %d\n", threads.x, threads.y, threads.z);
-    printf("total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
+    TRACE(1, "Grid size: %d %d %d\n", blocks.x, blocks.y, blocks.z);
+    TRACE(1, "Block size: %d %d %d\n", threads.x, threads.y, threads.z);
+    TRACE(1, "total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
     if(success) calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>
         (d_stations_distances, d_point_locations, d_stations, station_count, points, maxDist, fromLat, fromLon);
@@ -415,7 +406,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     while(success && current_result_count > 1){
         dim3 blcks = {(unsigned int)ceil(current_result_count / static_cast<double>(BLOCK_REDUCE)), 1, 1};
-        printf("Reducing... from %ld to %d\n", current_result_count, blcks.x);
+        TRACE(1, "Reducing... from %ld to %d\n", current_result_count, blcks.x);
         
         results_reduce<<<blcks, BLOCK_REDUCE>>>(d_temp_results, f_results_device, current_result_count);
         success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -520,7 +511,7 @@ bool initDepthProfiles(float* resols, int count){
         int rows = (unsigned int)ceil(max_depth / depthRes) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
 
-        printf("Creating depth profile with resolution %.2fkm (%.2fkB)\n", depthRes, table_size / 1024.0);
+        TRACE(1, "Creating depth profile with resolution %.2fkm (%.2fkB)\n", depthRes, table_size / 1024.0);
 
         // todo fitted array
         if(cudaMalloc(&depth_profiles[i].device_travel_table, table_size) != cudaSuccess){

@@ -15,9 +15,9 @@ public class GQHypocs {
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
 
-    private static final int MAX_POINTS = 100_000;
-    private static final float[] depth_profiles = new float[]{ 100.0f, 50.0f, 10.0f, 1.0f};
-    private static final int[] point_profiles = new int[] {100_000, 30_000, 20_000, 10_000};
+    private static final int MAX_POINTS = 200_000;
+    private static final float[] depth_profiles = new float[]{ 100.0f, 50.0f, 10.0f, 5.0f, 0.5f};
+    private static final int[] point_profiles = new int[] {200_000, 30_000, 5_000, 2_000, 200};
 
     static {
         try {
@@ -67,7 +67,6 @@ public class GQHypocs {
 
         for(int i = 0; i < depth_profiles.length; i++){
             result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], point_profiles[i], i, maxDist * RADIANS);
-            System.err.println(Arrays.toString(result)+", "+pickedEventList.size());
 
             if (result == null) {
                 return null;
