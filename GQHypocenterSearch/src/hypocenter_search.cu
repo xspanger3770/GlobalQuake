@@ -26,9 +26,13 @@
 
 #define STATION_FILEDS 4
 #define HYPOCENTER_FILEDS 5
-#define SHARED_TRAVEL_TABLE_SIZE 1024
+#define SHARED_TRAVEL_TABLE_SIZE 512
 
 #define PHI2 2.618033989f
+
+#define THRESHOLD 3.0f
+#define MUL 1.3f
+#define ADD 3.0f
 
 struct depth_profile_t{
     float depth_resolution;
@@ -141,7 +145,11 @@ __device__ void reduce(float *a, float *b, int grid_size){
     
     //bool swap = err_b < err_a;
 
-    bool swap = correct_b > correct_a || correct_b == correct_a && err_b < err_a;
+    //bool swap = correct_b > correct_a || correct_b == correct_a && err_b < err_a;
+
+    bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
+        (correct_b / (err_b * err_b + ADD) > correct_a / (err_a * err_a + ADD))
+    );
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
@@ -184,7 +192,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         return;
     }
 
-    float final_origin = 0.0f;
+    float prelim_origin = 0.0f;
     int station_index = threadIdx.x % station_count;
    
     /*int mid = ((station_count - 1) / 2);
@@ -208,10 +216,34 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
-        final_origin += predicted_origin;
+        prelim_origin += predicted_origin;
     }
 
-    final_origin /= station_count;
+    prelim_origin /= station_count;
+
+    int k=0;
+    float final_origin = 0;
+    
+    for(int i = 0; i < station_count; i++, station_index++) {
+        if(station_index >= station_count){
+            station_index = 0;
+        }
+        float ang_dist = station_distances[point_index + i * points];
+        float s_pwave = s_stations[station_index];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float predicted_origin = s_pwave - expected_travel_time;
+
+        float _err = fabsf(predicted_origin - prelim_origin);
+
+        if(_err < THRESHOLD) {
+            final_origin += predicted_origin;
+            k++;
+        }
+
+    }
+
+    final_origin /= k;
+
 
     float err = 0.0;
     int correct = 0;
@@ -226,8 +258,8 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        if(_err < 3.0){
-            err += _err * _err;    
+        err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
+        if(_err <= THRESHOLD){
             correct++;
         }
     }
@@ -347,6 +379,11 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     if(points < 2){
         TRACE(2, "Error! at least 2 points needed!\n");
+        return false;
+    }
+
+    if(station_count < 3){
+        TRACE(2, "Error! at least 3 stations needed!\n");
         return false;
     }
 

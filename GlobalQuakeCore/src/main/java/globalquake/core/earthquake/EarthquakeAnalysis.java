@@ -283,11 +283,12 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings, true);
 
+        int reduceLimit = 16;
+
         List<PickedEvent> correctSelectedEvents = selectedEvents.stream().filter(pickedEvent -> ClusterAnalysis.couldBeArrival(pickedEvent, bestHypocenter, false, false, true)).collect(Collectors.toList());
 
         PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
 
-        int reduceLimit = 16;
 
         if (correctSelectedEvents.size() > reduceLimit) {
             Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter2, correctSelectedEvents);
@@ -457,8 +458,7 @@ public class EarthquakeAnalysis {
             obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
         }
 
-        // TODO workaround
-        double pct = 100;//100 * bestHypocenter.getCorrectness();
+        double pct = 100 * bestHypocenter.getCorrectness();
         boolean valid = pct >= finderSettings.correctnessThreshold() && bestHypocenter.correctEvents >= finderSettings.minStations() && obviousCorrectPct >= OBVIOUS_CORRECT_THRESHOLD;
         if (!valid) {
             boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
