@@ -4,8 +4,11 @@ import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
+import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
+import globalquake.core.exception.FatalApplicationException;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.station.GlobalStationManager;
 
 import java.io.File;
@@ -27,6 +30,15 @@ public class GlobalQuake {
 
 	public static ApplicationErrorHandler errorHandler;
 	public static File mainFolder;
+
+	static {
+		try {
+			TauPTravelTimeCalculator.init();
+		} catch (FatalApplicationException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println("Cuda loaded: "+GQHypocs.isCudaLoaded());
+	}
 
 	public static void prepare(File mainFolder, ApplicationErrorHandler errorHandler) {
 		GlobalQuake.mainFolder = mainFolder;

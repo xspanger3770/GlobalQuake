@@ -25,7 +25,7 @@
 #define BLOCK_DISTANCES 64
 
 #define STATION_FILEDS 4
-#define HYPOCENTER_FILEDS 4
+#define HYPOCENTER_FILEDS 5
 #define SHARED_TRAVEL_TABLE_SIZE 1024
 
 #define PHI2 2.618033989f
@@ -116,25 +116,36 @@ __device__ inline float* h_err(float* hypoc, int grid_size){
     return &hypoc[0 * grid_size];
 }
 
-__device__ inline float* h_index(float* hypoc, int grid_size){
-    return &hypoc[1 * grid_size];
+__device__ inline int* h_correct(float* hypoc, int grid_size){
+    return (int*)&hypoc[1 * grid_size];
 }
 
-__device__ inline float* h_origin(float* hypoc, int grid_size){
+__device__ inline float* h_index(float* hypoc, int grid_size){
     return &hypoc[2 * grid_size];
 }
 
-__device__ inline float* h_depth(float* hypoc, int grid_size){
+__device__ inline float* h_origin(float* hypoc, int grid_size){
     return &hypoc[3 * grid_size];
+}
+
+__device__ inline float* h_depth(float* hypoc, int grid_size){
+    return &hypoc[4 * grid_size];
 }
 
 __device__ void reduce(float *a, float *b, int grid_size){
     float err_a = *h_err(a, grid_size);
     float err_b = *h_err(b, grid_size);
-    bool swap = err_b < err_a;
+    
+    int correct_a = *h_correct(a, grid_size);
+    int correct_b = *h_correct(b, grid_size);
+    
+    //bool swap = err_b < err_a;
+
+    bool swap = correct_b > correct_a || correct_b == correct_a && err_b < err_a;
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
+        *h_correct(a,grid_size) = *h_correct(b, grid_size);
         *h_origin(a, grid_size) = *h_origin(b, grid_size);
         *h_index(a, grid_size) = *h_index(b, grid_size);
         *h_depth(a, grid_size) = *h_depth(b, grid_size);
@@ -142,7 +153,7 @@ __device__ void reduce(float *a, float *b, int grid_size){
 }
 
 __global__ void evaluateHypocenter(float* results, float* travel_table, float* stations, 
-    float* station_distances, int station_count, int points, float maxDist, float fromLat, float fromLon, float max_depth)
+    float* station_distances, int station_count, int points, float maxDist, float max_depth)
 {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
@@ -173,11 +184,11 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         return;
     }
 
-
     float final_origin = 0.0f;
-    int mid = ((station_count - 1) / 2);
-        
     int station_index = threadIdx.x % station_count;
+   
+    /*int mid = ((station_count - 1) / 2);
+        
     {
         int j = (mid - station_index + station_count) % station_count;
         float ang_dist = station_distances[point_index + j * points];
@@ -186,9 +197,24 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         final_origin = predicted_origin;
+    }*/
+
+    for(int i = 0; i < station_count; i++, station_index++) {
+        if(station_index >= station_count){
+            station_index = 0;
+        }
+        float ang_dist = station_distances[point_index + i * points];
+        float s_pwave = s_stations[station_index];
+        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float predicted_origin = s_pwave - expected_travel_time;
+
+        final_origin += predicted_origin;
     }
 
+    final_origin /= station_count;
+
     float err = 0.0;
+    int correct = 0;
 
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
@@ -200,13 +226,18 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        err += _err * _err;
+        if(_err < 3.0){
+            err += _err * _err;    
+            correct++;
+        }
     }
 
+
     s_results[threadIdx.x + blockDim.x * 0] = err;
-    s_results[threadIdx.x + blockDim.x * 1] = point_index;
-    s_results[threadIdx.x + blockDim.x * 2] = final_origin;
-    s_results[threadIdx.x + blockDim.x * 3] = depth;
+    *(int*)&s_results[threadIdx.x + blockDim.x * 1] = correct;
+    *(int*)(&s_results[threadIdx.x + blockDim.x * 2]) = point_index;
+    s_results[threadIdx.x + blockDim.x * 3] = final_origin;
+    s_results[threadIdx.x + blockDim.x * 4] = depth;
 
     __syncthreads();
     
@@ -224,6 +255,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         results[idx + 1 * (gridDim.x * gridDim.y)] = s_results[1 * blockDim.x];
         results[idx + 2 * (gridDim.x * gridDim.y)] = s_results[2 * blockDim.x];
         results[idx + 3 * (gridDim.x * gridDim.y)] = s_results[3 * blockDim.x];
+        results[idx + 4 * (gridDim.x * gridDim.y)] = s_results[4 * blockDim.x];
     }
 }
 
@@ -238,6 +270,7 @@ __global__ void results_reduce(float* out, float* in, int total_size){
     s_results[threadIdx.x + BLOCK_REDUCE * 1] = in[index + total_size * 1];
     s_results[threadIdx.x + BLOCK_REDUCE * 2] = in[index + total_size * 2];
     s_results[threadIdx.x + BLOCK_REDUCE * 3] = in[index + total_size * 3];
+    s_results[threadIdx.x + BLOCK_REDUCE * 4] = in[index + total_size * 4];
     __syncthreads();
 
     // implementation 3 from slides
@@ -254,10 +287,12 @@ __global__ void results_reduce(float* out, float* in, int total_size){
         out[idx + 1 * (gridDim.x * gridDim.y)] = s_results[1 * blockDim.x];
         out[idx + 2 * (gridDim.x * gridDim.y)] = s_results[2 * blockDim.x];
         out[idx + 3 * (gridDim.x * gridDim.y)] = s_results[3 * blockDim.x];
+        out[idx + 4 * (gridDim.x * gridDim.y)] = s_results[4 * blockDim.x];
     }
 }
 
-__global__ void calculate_station_distances(float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
+__global__ void calculate_station_distances(
+        float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     if(index >= points){
@@ -365,7 +400,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     }
     
     if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * station_count>>>
-        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, fromLat, fromLon, max_depth);
+        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth);
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
@@ -394,12 +429,12 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
             success &= cudaMemcpy(local_result, d_temp_results, HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToHost) == cudaSuccess;
 
             float lat, lon, u_dist;
-            calculateParams(points, local_result[1], maxDist, fromLat, fromLon, &lat, &lon, &u_dist);
+            calculateParams(points, *(int*)&local_result[2], maxDist, fromLat, fromLon, &lat, &lon, &u_dist);
 
             final_result[0] = lat;
             final_result[1] = lon;
-            final_result[2] = local_result[3];
-            final_result[3] = local_result[2];
+            final_result[2] = local_result[4];
+            final_result[3] = local_result[3];
         } else {
             success &= cudaMemcpy(f_results_device, d_temp_results, current_result_count * HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToDevice) == cudaSuccess;
         }
@@ -440,6 +475,19 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
     float final_result[HYPOCENTER_FILEDS];
 
     success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result);
+
+    /*if(success){
+        for(int i = 0; i < station_count; i++){
+            float lat = stationsArray[i + station_count * 0];
+            float lon = stationsArray[i + station_count * 1];
+            float ang_dist = haversine(lat, lon, final_result[0], final_result[1]);
+            float travel_time = p_interpolate(ang_dist * 180.0 / PI, final_result[2]);
+            float pwave = stationsArray[i + station_count * 3];
+            float predicted_origin = pwave - travel_time;
+
+            printf("Success, station %d predicted origin=%f\n", i, predicted_origin);
+        }
+    }*/
 
     cleanup:
     if(stationsArray) free(stationsArray);

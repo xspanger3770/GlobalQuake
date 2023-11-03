@@ -18,11 +18,11 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 50;
+    public static final int STATIONS = 100;
     public static final double DIST = 10000;
 
-    public static final double INACCURACY = 0;
-    private static final double MASSIVE_ERR_ODDS = 0.0;
+    public static final double INACCURACY = 5000;
+    private static final double MASSIVE_ERR_ODDS = 0.4;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -37,8 +37,8 @@ public class EarthquakeAnalysisTraining {
         long n = 0;
         long a  = System.currentTimeMillis();
         int fails = 0;
-        for(int i = 0; i < 50; i++) {
-            long err = runTest(1234+i, STATIONS);
+        for(int i = 0; i < 100; i++) {
+            long err = runTest(0 + i, STATIONS);
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;
@@ -110,7 +110,9 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster(0);
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, r.nextDouble() * 200, 0, 0,0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, r.nextDouble()*200, 0, 0,0, null, null);
+
+        boolean bb = false;
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -119,8 +121,9 @@ public class EarthquakeAnalysisTraining {
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);
-            if(r.nextDouble() < MASSIVE_ERR_ODDS){
-                time += (long) ((r.nextDouble() * 10 - 5) * INACCURACY);
+            if(r.nextDouble() < MASSIVE_ERR_ODDS && !bb){
+                time += (long) ((r.nextDouble() * 10.0 - 5.0) * INACCURACY);
+                bb=true;
             }
 
             var event = new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100);
@@ -131,7 +134,6 @@ public class EarthquakeAnalysisTraining {
 
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
-        System.err.println("It shouldve been "+absolutetyCorrect);
         if(cluster.getEarthquake()!=null) {
             double dist = GeoUtils.greatCircleDistance(cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon(), absolutetyCorrect.lat, absolutetyCorrect.lon);
             return Math.abs(cluster.getEarthquake().getOrigin());

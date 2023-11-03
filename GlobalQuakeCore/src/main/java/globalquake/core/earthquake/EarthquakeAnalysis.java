@@ -207,7 +207,7 @@ public class EarthquakeAnalysis {
         }
 
         if(GQHypocs.isCudaLoaded()){
-            return GQHypocs.findHypocenter(selectedEvents, cluster);
+            return GQHypocs.findHypocenter(selectedEvents, cluster, 0);
         }
 
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
@@ -304,11 +304,7 @@ public class EarthquakeAnalysis {
 
             correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
 
-            PreliminaryHypocenter best3 =runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
-
-            System.err.println(best3);
-
-            bestHypocenter2 = best3;
+            bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
         }
 
         if(bestHypocenter2 == null){
@@ -479,7 +475,7 @@ public class EarthquakeAnalysis {
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
-                Logger.debug("Not updating because: %s".formatted(result));
+                Logger.warn("Not updating because: %s".formatted(result));
             }
         }
 
@@ -824,11 +820,13 @@ public class EarthquakeAnalysis {
         if (bestHypocenter == null) {
             return HypocenterCondition.NULL;
         }
+
+
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
-        if (distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
+        /*if (distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
             return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
-        }
+        }*/
 
         if (bestHypocenter.correctEvents < finderSettings.minStations()) {
             return HypocenterCondition.NOT_ENOUGH_CORRECT_STATIONS;
