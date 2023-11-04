@@ -131,14 +131,14 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<IntensityHex> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<IntensityHex> entity, RenderProperties renderProperties) {
         RenderElement elementHex = entity.getRenderElement(0);
         elementHex.getShape().reset();
-        elementHex.shouldDraw = renderer.project3D(elementHex.getShape(), elementHex.getPolygon(), true);
+        elementHex.shouldDraw = renderer.project3D(elementHex.getShape(), elementHex.getPolygon(), true, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<IntensityHex> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<IntensityHex> entity, RenderProperties renderProperties) {
         RenderElement elementHex = entity.getRenderElement(0);
 
         Level level = IntensityScales.getIntensityScale().getLevel(entity.getOriginal().pga());
@@ -154,13 +154,13 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
         boolean mouseNearby = renderer.getLastMouse() != null && elementHex.getShape().contains(renderer.getLastMouse());
 
-        if(mouseNearby && renderer.getRenderProperties().scroll < 0.2) {
+        if(mouseNearby && renderProperties.scroll < 0.2) {
             graphics.setColor(col);
             graphics.setStroke(new BasicStroke(0.5f));
             graphics.draw(elementHex.getShape());
 
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D);
+            var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
             graphics.setColor(Color.white);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));

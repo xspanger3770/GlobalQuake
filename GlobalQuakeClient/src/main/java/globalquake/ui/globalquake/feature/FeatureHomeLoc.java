@@ -52,14 +52,14 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<LocationPlaceholder> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<LocationPlaceholder> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
+        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<LocationPlaceholder> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<LocationPlaceholder> entity, RenderProperties renderProperties) {
         RenderElement elementCross = entity.getRenderElement(0);
         if (elementCross.shouldDraw && Settings.displayHomeLocation) {
             graphics.setColor(Color.magenta);

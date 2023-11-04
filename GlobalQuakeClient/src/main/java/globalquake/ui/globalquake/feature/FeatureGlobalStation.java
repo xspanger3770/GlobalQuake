@@ -77,18 +77,18 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<AbstractStation> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
         elementStationCircle.getShape().reset();
-        elementStationCircle.shouldDraw = renderer.project3D(elementStationCircle.getShape(), elementStationCircle.getPolygon(), true);
+        elementStationCircle.shouldDraw = renderer.project3D(elementStationCircle.getShape(), elementStationCircle.getPolygon(), true, renderProperties);
 
         RenderElement elementStationSquare = entity.getRenderElement(1);
         elementStationSquare.getShape().reset();
-        elementStationSquare.shouldDraw = renderer.project3D(elementStationSquare.getShape(), elementStationSquare.getPolygon(), true);
+        elementStationSquare.shouldDraw = renderer.project3D(elementStationSquare.getShape(), elementStationSquare.getPolygon(), true, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         if(Settings.hideDeadStations && entity.getOriginal().hasNoDisplayableData()){
             return;
         }
@@ -106,9 +106,9 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true, renderProperties);
 
-        if (mouseNearby && renderer.getRenderProperties().scroll < 1) {
+        if (mouseNearby && renderProperties.scroll < 1) {
             graphics.setColor(Color.yellow);
             graphics.setStroke(new BasicStroke(2f));
             graphics.draw(elementStationCircle.getShape());
@@ -122,7 +122,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
 
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-        var centerPonint = renderer.projectPoint(point3D);
+        var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
         graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
@@ -160,7 +160,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        drawDetails(mouseNearby, renderer.getRenderProperties().scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());
+        drawDetails(mouseNearby, renderProperties.scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());
     }
 
     private void drawDetails(boolean mouseNearby, double scroll, int x, int y, Graphics2D g, AbstractStation station) {

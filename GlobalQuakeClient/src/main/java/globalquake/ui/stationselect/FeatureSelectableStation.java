@@ -55,13 +55,14 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<Station> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<Station> entity, RenderProperties renderProperties) {
         entity.getRenderElement(0).getShape().reset();
-        entity.getRenderElement(0).shouldDraw = renderer.project3D(entity.getRenderElement(0).getShape(), entity.getRenderElement(0).getPolygon(), true);
+        entity.getRenderElement(0).shouldDraw = renderer.project3D(
+                entity.getRenderElement(0).getShape(), entity.getRenderElement(0).getPolygon(), true, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Station> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Station> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         if (!element.shouldDraw) {
             return;
@@ -71,7 +72,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         graphics.setColor(Color.BLACK);
         graphics.draw(element.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true) && renderer.getRenderProperties().scroll < 1;
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true, renderProperties) && renderProperties.scroll < 1;
 
         if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())) {
             graphics.setColor(Color.yellow);
@@ -80,12 +81,12 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
         var centerCoords = getCenterCoords(entity);
         var point3D = GlobeRenderer.createVec3D(centerCoords);
-        var centerPonint = renderer.projectPoint(point3D);
+        var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
         if(mouseNearby){
             drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
         } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
-                && renderer.getAngularDistance(centerCoords) < 25.0 && renderer.getRenderProperties().scroll < 0.75) {
+                && renderer.getAngularDistance(centerCoords, renderProperties) < 25.0 && renderProperties.scroll < 0.75) {
             Optional<Long> minDelay = entity.getOriginal().getSelectedChannel().getSeedlinkNetworks().values().stream().min(Long::compare);
 
             int x = (int) (centerPonint.x + 10);

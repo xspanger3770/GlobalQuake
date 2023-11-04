@@ -396,7 +396,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                         continue;
                     }
 
-                    Point2D centerProjected = renderer.projectPoint(pos);
+                    Point2D centerProjected = renderer.projectPoint(pos, renderer.getRenderProperties());
                     double distOnScreen = Math.sqrt(Math.pow(centerProjected.x - x, 2) + Math.pow(centerProjected.y - y, 2));
                     if (distOnScreen <= 10) {
                         synchronized (clicked) {

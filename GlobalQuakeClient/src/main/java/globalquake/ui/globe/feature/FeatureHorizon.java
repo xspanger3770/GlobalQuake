@@ -44,14 +44,14 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<Point2D> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), false);
+        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), false, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         if(!element.shouldDraw){
             return;

@@ -1,6 +1,5 @@
 package globalquake.ui.globe;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class RenderProperties{
     public final double centerLat;
     public final double centerLon;

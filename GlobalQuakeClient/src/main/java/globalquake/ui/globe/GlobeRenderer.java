@@ -108,18 +108,18 @@ public class GlobeRenderer {
                 getY_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
                 getZ_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000));
 
-        Vector3D surfacePoint = new Vector3D(getX_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0),
-                getY_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0),
-                getZ_3D(getRenderProperties().centerLat, getRenderProperties().centerLon, 0));
+        Vector3D surfacePoint = new Vector3D(getX_3D(properties.centerLat, properties.centerLon, 0),
+                getY_3D(properties.centerLat, properties.centerLon, 0),
+                getZ_3D(properties.centerLat, properties.centerLon, 0));
 
-        double[] moved = GeoUtils.moveOnGlobe(getRenderProperties().centerLat, getRenderProperties().centerLon, 1, 0);
+        double[] moved = GeoUtils.moveOnGlobe(properties.centerLat, properties.centerLon, 1, 0);
 
         Vector3D surfacePoint1 = new Vector3D(getX_3D(moved[0], moved[1], 0),
                 getY_3D(moved[0], moved[1], 0),
                 getZ_3D(moved[0], moved[1], 0));
 
-        Point2D ptS1 = projectPoint(surfacePoint);
-        Point2D ptS2 = projectPoint(surfacePoint1);
+        Point2D ptS1 = projectPoint(surfacePoint, renderProperties);
+        Point2D ptS2 = projectPoint(surfacePoint1, renderProperties);
         oneDegPx = Math.sqrt(Math.pow(ptS1.x - ptS2.x, 2) + Math.pow(ptS1.y - ptS2.y, 2));
 
         double centerToCamera = center.distance(cameraPoint);
@@ -149,7 +149,7 @@ public class GlobeRenderer {
         horizonDist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
     }
 
-    public Point2D projectPoint(Vector3D pos){
+    public Point2D projectPoint(Vector3D pos, RenderProperties renderProperties){
         Point2D point2D = new Point2D();
         project(point2D, pos.getX(), pos.getY(), pos.getZ(),
                 GeoUtils.EARTH_RADIUS + camera_altitude,
@@ -158,7 +158,7 @@ public class GlobeRenderer {
         return point2D;
     }
 
-    public boolean project3D(Path2D.Float result, Polygon3D polygon3D, boolean canClip) {
+    public boolean project3D(Path2D.Float result, Polygon3D polygon3D, boolean canClip, RenderProperties renderProperties) {
         if(polygon3D == null || polygon3D.getBoundingBoxCorner(0) == null){
             return false;
         }
@@ -176,7 +176,7 @@ public class GlobeRenderer {
                         GeoUtils.EARTH_RADIUS + camera_altitude,
                         renderProperties.width, renderProperties.height);
 
-                int mask = get_mask(point2D.x, point2D.y);
+                int mask = get_mask(point2D.x, point2D.y, renderProperties);
                 totalMask &= mask;
 
                 if (isAboveHorizon(point)) {
@@ -212,7 +212,7 @@ public class GlobeRenderer {
                     firstStart = point;
                 }
                 if (bowEnd != null) {
-                    bowAlgorithm(point2D, result, bowStart, point, true);
+                    bowAlgorithm(point2D, result, bowStart, point, true, renderProperties);
                     bowEnd = null;
                 }
                 bowStart = point;
@@ -228,7 +228,7 @@ public class GlobeRenderer {
                 init = true;
             }
 
-            mask &= get_mask(point2D.x, point2D.y);
+            mask &= get_mask(point2D.x, point2D.y, renderProperties);
             result.lineTo(point2D.x, point2D.y);
 
             if (point == polygon3D.getPoints().get(polygon3D.getPoints().size() - 1)) {
@@ -247,13 +247,13 @@ public class GlobeRenderer {
         }
 
         if (bowEnd != null) {
-            bowAlgorithm(point2D, result, bowStart, firstStart, true);
+            bowAlgorithm(point2D, result, bowStart, firstStart, true, renderProperties);
         }
 
         return true;
     }
 
-    private int get_mask(double x, double y) {
+    private int get_mask(double x, double y, RenderProperties renderProperties) {
         int result = 0;
 
         if (x < 0) {
@@ -276,13 +276,13 @@ public class GlobeRenderer {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void bowAlgorithm(Point2D point2D, Path2D.Float result, Vector3D bowStart, Vector3D bowEnd, boolean bow) {
+    private void bowAlgorithm(Point2D point2D, Path2D.Float result, Vector3D bowStart, Vector3D bowEnd, boolean bow, RenderProperties renderProperties) {
         project(point2D, bowStart.getX(), bowStart.getY(), bowStart.getZ(),
                 GeoUtils.EARTH_RADIUS + camera_altitude,
                 renderProperties.width, renderProperties.height
         );
 
-        ground(point2D);
+        ground(point2D, renderProperties);
 
         double startX = point2D.x;
         double startY = point2D.y;
@@ -293,7 +293,7 @@ public class GlobeRenderer {
         );
 
 
-        ground(point2D);
+        ground(point2D, renderProperties);
 
         if(!bow) {
             result.lineTo(startX, startY);
@@ -312,13 +312,13 @@ public class GlobeRenderer {
         point2D.x=x_mid;
         point2D.y=y_mid;
 
-        ground(point2D);
+        ground(point2D, renderProperties);
 
-        drawBow(point2D, result, startX, startY, point2D.x, point2D.y);
-        drawBow(point2D, result, point2D.x, point2D.y, endX, endY);
+        drawBow(point2D, result, startX, startY, point2D.x, point2D.y, renderProperties);
+        drawBow(point2D, result, point2D.x, point2D.y, endX, endY, renderProperties);
     }
 
-    private void drawBow(Point2D point2D, Path2D.Float result, double startX, double startY, double endX, double endY){
+    private void drawBow(Point2D point2D, Path2D.Float result, double startX, double startY, double endX, double endY, RenderProperties renderProperties){
         double dx = endX - startX;
         double dy = endY - startY;
 
@@ -326,13 +326,13 @@ public class GlobeRenderer {
             point2D.x = startX + dx * t;
             point2D.y = startY + dy * t;
 
-            ground(point2D);
+            ground(point2D, renderProperties);
 
             result.lineTo(point2D.x, point2D.y);
         }
     }
 
-    void ground(Point2D point2D){
+    void ground(Point2D point2D, RenderProperties renderProperties){
         double dist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
 
         point2D.x = renderProperties.width / 2.0 + (point2D.x - renderProperties.width / 2.0) * (horizonDist / dist);
@@ -481,7 +481,7 @@ public class GlobeRenderer {
         return px / oneDegPx;
     }
 
-    public boolean isMouseNearby(Point2D coords, double dist, boolean moved) {
+    public boolean isMouseNearby(Point2D coords, double dist, boolean moved, RenderProperties renderProperties) {
         if(lastMouse == null || coords == null){
             return false;
         }
@@ -490,7 +490,7 @@ public class GlobeRenderer {
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
-                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
+                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
         return isAboveHorizon(vect) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
     }
 
@@ -500,7 +500,7 @@ public class GlobeRenderer {
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
-                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)));
+                getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
         return  isAboveHorizon(vect) && shape.contains(point.toAwt());
     }
 
@@ -513,11 +513,11 @@ public class GlobeRenderer {
         return lastMouse;
     }
 
-    public double getAngularDistance(Point2D centerCoords) {
+    public double getAngularDistance(Point2D centerCoords, RenderProperties renderProperties) {
         if(centerCoords == null){
             return Double.NaN;
         }
-        return GeoUtils.greatCircleDistance(centerCoords.x, centerCoords.y, getRenderProperties().centerLat, getRenderProperties().centerLon) / GeoUtils.EARTH_CIRCUMFERENCE * 360.0;
+        return GeoUtils.greatCircleDistance(centerCoords.x, centerCoords.y, renderProperties.centerLat, renderProperties.centerLon) / GeoUtils.EARTH_CIRCUMFERENCE * 360.0;
     }
 
 }

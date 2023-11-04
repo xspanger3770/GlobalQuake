@@ -53,10 +53,10 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<Polygon> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
+        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         if(!element.shouldDraw){
             return;

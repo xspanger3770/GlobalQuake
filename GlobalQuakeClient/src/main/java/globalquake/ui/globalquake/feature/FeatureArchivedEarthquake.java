@@ -58,7 +58,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
         if(Settings.oldEventsMagnitudeFilterEnabled) {
@@ -71,14 +71,14 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
         if(displayed) {
             element.getShape().reset();
-            element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true);
+            element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
         }else {
             element.shouldDraw = false;
         }
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
         if (!entity.getRenderElement(0).shouldDraw || !displayed) {
             return;
@@ -89,11 +89,11 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true);
+        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true, renderProperties);
 
-        if(mouseNearby && renderer.getRenderProperties().scroll < 1) {
+        if(mouseNearby && renderProperties.scroll < 1) {
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D);
+            var centerPonint = renderer.projectPoint(point3D, renderProperties);
             drawDetails(graphics, centerPonint, entity.getOriginal());
         }
     }

@@ -45,21 +45,21 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<DebugStation> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<DebugStation> entity, RenderProperties renderProperties) {
         RenderElement element=entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), true);
+        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<DebugStation> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<DebugStation> entity, RenderProperties renderProperties) {
         RenderElement element=entity.getRenderElement(0);
         if(!element.shouldDraw){
             return;
         }
         graphics.setColor(Color.BLUE);
         graphics.fill(element.getShape());
-        if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0, true) && renderer.getRenderProperties().scroll < 1){
+        if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0, true, renderProperties) && renderProperties.scroll < 1){
             graphics.setColor(Color.yellow);
             graphics.draw(element.getShape());
         }

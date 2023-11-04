@@ -85,7 +85,7 @@ public abstract class RenderFeature<E> {
             if(finalEntitiesUpdated || settingsChanged || needsCreatePolygon(entity, propertiesChanged))
                 createPolygon(renderer, entity, renderProperties);
             if(finalEntitiesUpdated || settingsChanged || needsProject(entity, propertiesChanged))
-                project(renderer, entity);
+                project(renderer, entity, renderProperties);
         });
     }
 
@@ -95,9 +95,9 @@ public abstract class RenderFeature<E> {
 
     public abstract void createPolygon(GlobeRenderer renderer, RenderEntity<E> entity, RenderProperties renderProperties);
 
-    public abstract void project(GlobeRenderer renderer, RenderEntity<E> entity);
+    public abstract void project(GlobeRenderer renderer, RenderEntity<E> entity, RenderProperties renderProperties);
 
-    public abstract void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<E> entity);
+    public abstract void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<E> entity, RenderProperties renderProperties);
 
     protected boolean isVisible(RenderProperties properties){
         return true;
@@ -105,7 +105,7 @@ public abstract class RenderFeature<E> {
 
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
         if(isVisible(properties)){
-            getEntities().forEach(entity -> render(renderer, graphics, entity));
+            getEntities().forEach(entity -> render(renderer, graphics, entity, properties));
         }
     }
 

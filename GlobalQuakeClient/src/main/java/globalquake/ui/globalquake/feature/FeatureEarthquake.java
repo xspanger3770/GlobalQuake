@@ -130,16 +130,16 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity) {
+    public void project(GlobeRenderer renderer, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
         for (int i = 0; i < ELEMENT_COUNT; i++) {
             RenderElement elementPWave = entity.getRenderElement(i);
             elementPWave.getShape().reset();
-            elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true);
+            elementPWave.shouldDraw = renderer.project3D(elementPWave.getShape(), elementPWave.getPolygon(), true, renderProperties);
         }
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
         float thicknessMultiplier = (float) Math.max(0.3, Math.min(1.6, entity.getOriginal().getMag() / 5.0));
         RenderElement elementPWave = entity.getRenderElement(0);
         RenderElement elementSWave = entity.getRenderElement(1);
@@ -195,7 +195,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             }
 
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D);
+            var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
             String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
 
