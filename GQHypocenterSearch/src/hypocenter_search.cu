@@ -13,7 +13,7 @@
  * lat | lon | alt | pwave
  * 
  * PRELIMINARY_HYPOCENTER:
- * err | index | origin | depth
+ * err | correct (int) | index (int) | origin | depth
  * 
  * RESULT_HYPOCENTER:
  * lat, lon, depth, origin
@@ -142,10 +142,6 @@ __device__ void reduce(float *a, float *b, int grid_size){
     
     int correct_a = *h_correct(a, grid_size);
     int correct_b = *h_correct(b, grid_size);
-    
-    //bool swap = err_b < err_a;
-
-    //bool swap = correct_b > correct_a || correct_b == correct_a && err_b < err_a;
 
     bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
         (correct_b / (err_b * err_b + ADD) > correct_a / (err_a * err_a + ADD))
@@ -192,58 +188,17 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         return;
     }
 
-    float prelim_origin = 0.0f;
     int station_index = threadIdx.x % station_count;
-   
-    /*int mid = ((station_count - 1) / 2);
+    float final_origin = 0.0f;
         
     {
-        int j = (mid - station_index + station_count) % station_count;
-        float ang_dist = station_distances[point_index + j * points];
-        float s_pwave = s_stations[mid];
+        float ang_dist = station_distances[point_index + 0 * points];
+        float s_pwave = s_stations[station_index];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
         final_origin = predicted_origin;
-    }*/
-
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
-        }
-        float ang_dist = station_distances[point_index + i * points];
-        float s_pwave = s_stations[station_index];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-        float predicted_origin = s_pwave - expected_travel_time;
-
-        prelim_origin += predicted_origin;
     }
-
-    prelim_origin /= station_count;
-
-    int k=0;
-    float final_origin = 0;
-    
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
-        }
-        float ang_dist = station_distances[point_index + i * points];
-        float s_pwave = s_stations[station_index];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
-        float predicted_origin = s_pwave - expected_travel_time;
-
-        float _err = fabsf(predicted_origin - prelim_origin);
-
-        if(_err < THRESHOLD) {
-            final_origin += predicted_origin;
-            k++;
-        }
-
-    }
-
-    final_origin /= k;
-
 
     float err = 0.0;
     int correct = 0;
@@ -263,7 +218,6 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
             correct++;
         }
     }
-
 
     s_results[threadIdx.x + blockDim.x * 0] = err;
     *(int*)&s_results[threadIdx.x + blockDim.x * 1] = correct;
@@ -512,19 +466,6 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
     float final_result[HYPOCENTER_FILEDS];
 
     success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result);
-
-    /*if(success){
-        for(int i = 0; i < station_count; i++){
-            float lat = stationsArray[i + station_count * 0];
-            float lon = stationsArray[i + station_count * 1];
-            float ang_dist = haversine(lat, lon, final_result[0], final_result[1]);
-            float travel_time = p_interpolate(ang_dist * 180.0 / PI, final_result[2]);
-            float pwave = stationsArray[i + station_count * 3];
-            float predicted_origin = pwave - travel_time;
-
-            printf("Success, station %d predicted origin=%f\n", i, predicted_origin);
-        }
-    }*/
 
     cleanup:
     if(stationsArray) free(stationsArray);

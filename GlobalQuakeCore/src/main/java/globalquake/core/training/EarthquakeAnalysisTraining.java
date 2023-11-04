@@ -19,7 +19,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 10;
+    public static final int STATIONS = 50;
     public static final double DIST = 10000;
 
     public static final double INACCURACY = 3000;
@@ -39,7 +39,7 @@ public class EarthquakeAnalysisTraining {
         long a  = System.currentTimeMillis();
         int fails = 0;
         for(int i = 0; i < 50; i++) {
-            long err = runTest(0 + i, STATIONS);
+            long err = runTest(i, STATIONS);
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;

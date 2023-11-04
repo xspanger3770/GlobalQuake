@@ -17,8 +17,8 @@ public class GQHypocs {
 
     private static final int MAX_POINTS = 4000_000;
     private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
-    private static final int[] point_profiles = new int[] { 4000_000, 200_000, 100_000, 40_000, 10_000};
-    private static final float[] dist_profiles = new float[]{ 100.0f, 20.0f, 4.0f, 2.0f, 0.4f};
+    private static final int[] point_profiles = new int[] { 4000_000, 400_000, 200_000, 100_000, 40_000};
+    private static final float[] dist_profiles = new float[]{ 100.0f, 20.0f, 4.0f, 0.5f, 0.04f};
 
     static {
         try {
@@ -65,10 +65,6 @@ public class GQHypocs {
             stations_array[i + pickedEventList.size()] = (float) pickedEvent.lon() * RADIANS;
             stations_array[i + 2 * pickedEventList.size()] = (float) pickedEvent.elevation();
             stations_array[i + 3 * pickedEventList.size()] = (float) ((pickedEvent.pWave() - time) / 1000.0);
-            /*if(i == (pickedEventList.size() -1) /2){
-                stations_array[i + 3 * pickedEventList.size()] += 10.0f;
-                System.err.println("Intentional f");
-            }*/
         }
 
         float[] result = {
