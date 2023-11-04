@@ -120,9 +120,9 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
         for(LatLng latLng : coords){
             Vector3D vector3D = new Vector3D(
-                    renderer.getX_3D(latLng.lat, latLng.lng, 0),
-                    renderer.getY_3D(latLng.lat, latLng.lng, 0),
-                    renderer.getZ_3D(latLng.lat, latLng.lng, 0));
+                    GlobeRenderer.getX_3D(latLng.lat, latLng.lng, 0),
+                    GlobeRenderer.getY_3D(latLng.lat, latLng.lng, 0),
+                    GlobeRenderer.getZ_3D(latLng.lat, latLng.lng, 0));
 
             polygon3D.addPoint(vector3D);
         }

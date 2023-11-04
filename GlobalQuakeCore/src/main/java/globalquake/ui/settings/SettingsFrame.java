@@ -59,14 +59,14 @@ public class SettingsFrame extends GQFrame {
                     panel1.save();
                 }
 				catch(NumberFormatException exx){
-					GlobalQuake.instance.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
+					GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to parse a number: %s".formatted(exx.getMessage()), exx));
 					return;
 				} catch(RuntimeApplicationException exxx){
-					GlobalQuake.instance.getErrorHandler().handleWarning(exxx);
+					GlobalQuake.getErrorHandler().handleWarning(exxx);
 					return;
 				}
 				catch (Exception ex) {
-					GlobalQuake.instance.getErrorHandler().handleException(ex);
+					GlobalQuake.getErrorHandler().handleException(ex);
                     return;
                 }
             }

@@ -4,12 +4,9 @@ import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
-import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.Packet;
 import gqserver.api.data.earthquake.ArchivedQuakeData;
 import gqserver.api.packets.earthquake.ArchivedQuakePacket;
-
-import java.util.List;
 
 public class EarthquakeArchiveClient extends EarthquakeArchive {
 

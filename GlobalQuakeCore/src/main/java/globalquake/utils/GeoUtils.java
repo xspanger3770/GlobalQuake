@@ -90,7 +90,7 @@ public interface GeoUtils {
 		return new double[] { FastMath.toDegrees(theta2), FastMath.toDegrees(phi2) };
 	}
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		System.err.println(TauPTravelTimeCalculator.toAngle(greatCircleDistance(0,0,10,10)));
 	}
 

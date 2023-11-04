@@ -14,10 +14,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import gqserver.server.GlobalQuakeServer;
 import gqserver.ui.server.DatabaseMonitorFrame;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 

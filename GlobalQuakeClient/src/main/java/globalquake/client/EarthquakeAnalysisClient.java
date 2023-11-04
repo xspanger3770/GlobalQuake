@@ -22,6 +22,7 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -150,5 +151,15 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
                 hypocenterQualityData.errEW(),
                 hypocenterQualityData.stations(),
                 hypocenterQualityData.pct());
+    }
+
+    @Override
+    public void destroy() {
+        checkService.shutdown();
+        try {
+            checkService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Logger.error(e);
+        }
     }
 }

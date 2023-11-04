@@ -4,7 +4,6 @@ import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
-import globalquake.core.station.StationInterval;
 import gqserver.api.Packet;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;

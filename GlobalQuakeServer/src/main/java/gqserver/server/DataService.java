@@ -11,7 +11,6 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.*;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
 import gqserver.api.data.earthquake.ArchivedEventData;
@@ -25,7 +24,6 @@ import gqserver.api.packets.earthquake.*;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
 import gqserver.api.packets.station.StationsRequestPacket;
-import org.apache.commons.math3.analysis.function.Abs;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -33,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -261,8 +258,7 @@ public class DataService implements GlobalQuakeEventListener {
     private void processStationsRequestPacket(ServerClient client) throws IOException {
         List<StationInfoData> data = new ArrayList<>();
         for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()){
-            StationInfoData info;
-            data.add(info = new StationInfoData(
+            data.add(new StationInfoData(
                                 station.getId(),
                                 (float) station.getLatitude(),
                                 (float) station.getLongitude(),
@@ -280,7 +276,7 @@ public class DataService implements GlobalQuakeEventListener {
             }
         }
 
-        if(data.size() != 0){
+        if(!data.isEmpty()){
             client.sendPacket(new StationsInfoPacket(data));
         }
     }

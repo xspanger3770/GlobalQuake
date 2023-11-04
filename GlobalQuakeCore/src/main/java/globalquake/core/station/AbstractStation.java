@@ -139,7 +139,7 @@ public abstract class AbstractStation {
 
 	public boolean hasNoDisplayableData() { return true; }
 
-	public boolean isInEventMode() {return false;};
+	public boolean isInEventMode() {return false;}
 
     public  long getDelayMS() { return 0;}
 

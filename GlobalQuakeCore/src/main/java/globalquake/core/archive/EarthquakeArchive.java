@@ -23,7 +23,7 @@ public class EarthquakeArchive {
 
 	private List<ArchivedQuake> archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
 
-	private Map<UUID, ArchivedQuake> uuidArchivedQuakeMap = new ConcurrentHashMap<>();
+	private final Map<UUID, ArchivedQuake> uuidArchivedQuakeMap = new ConcurrentHashMap<>();
 
 	public EarthquakeArchive() {
 		executor = Executors.newSingleThreadExecutor();

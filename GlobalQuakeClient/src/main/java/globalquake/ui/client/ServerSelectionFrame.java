@@ -12,7 +12,6 @@ import globalquake.core.regions.Regions;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import globalquake.utils.Scale;
-import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

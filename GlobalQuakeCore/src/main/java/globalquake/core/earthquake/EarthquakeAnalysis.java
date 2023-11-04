@@ -34,6 +34,7 @@ public class EarthquakeAnalysis {
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 64.0;
     private static final boolean CHECK_QUADRANTS = false;
+    private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -824,9 +825,9 @@ public class EarthquakeAnalysis {
 
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
-        /*if (distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
+        if (CHECK_DISTANT_EVENT_STATIONS && distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
             return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
-        }*/
+        }
 
         if (bestHypocenter.correctEvents < finderSettings.minStations()) {
             return HypocenterCondition.NOT_ENOUGH_CORRECT_STATIONS;
@@ -952,12 +953,8 @@ public class EarthquakeAnalysis {
     public static boolean shouldRemove(Earthquake earthquake){
         int store_minutes = STORE_TABLE[Math.max(0,
                 Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
-        if (System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
-                && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000) {
-            return true;
-        }
-
-        return false;
+        return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
+                && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }
 
     public void second() {
@@ -975,5 +972,7 @@ public class EarthquakeAnalysis {
 
         earthquakes.removeAll(toBeRemoved);
     }
+
+    public void destroy(){}
 
 }

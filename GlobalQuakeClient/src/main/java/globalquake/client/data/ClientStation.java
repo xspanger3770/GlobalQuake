@@ -1,8 +1,6 @@
 package globalquake.client.data;
 
-import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.station.AbstractStation;
-import org.apache.commons.math3.analysis.function.Abs;
 
 public class ClientStation extends AbstractStation {
     private double intensity = -1;
