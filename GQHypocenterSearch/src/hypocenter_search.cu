@@ -26,12 +26,12 @@
 
 #define STATION_FILEDS 4
 #define HYPOCENTER_FILEDS 5
-#define SHARED_TRAVEL_TABLE_SIZE 512
+#define SHARED_TRAVEL_TABLE_SIZE 2048
 
 #define PHI2 2.618033989f
 
 #define THRESHOLD 3.0f
-#define MUL 1.3f
+#define MUL 1.12f
 #define ADD 3.0f
 
 struct depth_profile_t{
