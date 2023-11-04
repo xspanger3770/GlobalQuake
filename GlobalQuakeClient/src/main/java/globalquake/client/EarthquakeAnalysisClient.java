@@ -123,7 +123,11 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         }
 
         cluster.setPreviousHypocenter(hypocenter);
-        return new Earthquake(cluster, hypocenterData.uuid());
+        Earthquake earthquake = new Earthquake(cluster, hypocenterData.uuid());
+
+        cluster.setEarthquake(earthquake);
+
+        return earthquake;
     }
 
     private List<PolygonConfidenceInterval> createPolygonConfidenceIntervals(LocationConfidenceIntervalData locationConfidenceIntervalData) {

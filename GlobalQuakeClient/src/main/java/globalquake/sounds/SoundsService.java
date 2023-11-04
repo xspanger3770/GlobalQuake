@@ -57,8 +57,7 @@ public class SoundsService {
         SoundsInfo info = clusterSoundsInfo.get(cluster);
 
         if(info == null){
-            clusterSoundsInfo.put(cluster, new SoundsInfo());
-            return;
+            clusterSoundsInfo.put(cluster, info = new SoundsInfo());
         }
 
         if (!info.firstSound) {
