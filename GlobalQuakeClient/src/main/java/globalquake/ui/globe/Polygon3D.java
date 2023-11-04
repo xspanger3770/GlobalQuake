@@ -34,7 +34,7 @@ public class Polygon3D {
     }
 
     Vector3D ground(Vector3D space) {
-        double dist = space.distance(GlobeRenderer.center);
+        double dist = space.distance(GlobeRenderer.CENTER);
         double mul = GeoUtils.EARTH_RADIUS / dist;
 
         return new Vector3D(space.getX() * mul, space.getY() * mul, space.getZ() * mul);

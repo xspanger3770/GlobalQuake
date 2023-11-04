@@ -8,6 +8,7 @@ public class RenderProperties{
     public final int width;
 
     public final int height;
+    private RenderPrecomputedValues renderPrecomputedValues;
 
     public RenderProperties(int width, int height, double centerLat, double centerLon, double scroll) {
         this.width = width;
@@ -17,4 +18,11 @@ public class RenderProperties{
         this.scroll = scroll;
     }
 
+    public void setPrecomputed(RenderPrecomputedValues renderPrecomputedValues) {
+        this.renderPrecomputedValues = renderPrecomputedValues;
+    }
+
+    public RenderPrecomputedValues getRenderPrecomputedValues() {
+        return renderPrecomputedValues;
+    }
 }

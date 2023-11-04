@@ -392,7 +392,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     Vector3D pos = new Vector3D(GlobeRenderer.getX_3D(centerCoords.x, centerCoords.y, 0),
                             GlobeRenderer.getY_3D(centerCoords.x, centerCoords.y, 0), GlobeRenderer.getZ_3D(centerCoords.x, centerCoords.y, 0));
 
-                    if (!renderer.isAboveHorizon(pos)) {
+                    if (!renderer.isAboveHorizon(pos, getRenderer().getRenderProperties())) {
                         continue;
                     }
 

@@ -83,7 +83,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
-                        .pxToDeg(16), 45.0);
+                        .pxToDeg(16, renderProperties), 45.0);
 
 
         if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals != null) {

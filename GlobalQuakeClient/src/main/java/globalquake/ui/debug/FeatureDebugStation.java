@@ -36,7 +36,7 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
         renderer.createCircle(element.getPolygon(),
                 entity.getOriginal().coords().x,
                 entity.getOriginal().coords().y,
-                Math.min(50, renderer.pxToDeg(8.0)), 0, GlobeRenderer.QUALITY_LOW);
+                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0, GlobeRenderer.QUALITY_LOW);
     }
 
     @Override

@@ -132,7 +132,7 @@ public class StationSelectPanel extends GlobePanel {
     private void fireDragEvent() {
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try {
-            List<Station> selected = getRenderer().getAllInside(featureSelectableStation, dragRectangle);
+            List<Station> selected = getRenderer().getAllInside(featureSelectableStation, dragRectangle, getRenderer().getRenderProperties());
             if (stationSelectFrame.getDragMode().equals(DragMode.SELECT)) {
                 selected.forEach(Station::selectBestChannel);
             } else {

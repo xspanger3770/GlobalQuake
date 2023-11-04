@@ -46,7 +46,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                Math.min(50, renderer.pxToDeg(8.0)), 0);
+                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
         boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true, renderProperties) && renderProperties.scroll < 1;
 
-        if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle())) {
+        if (mouseNearby || renderer.isMouseInside(getCenterCoords(entity), stationSelectPanel.getDragRectangle(), renderProperties)) {
             graphics.setColor(Color.yellow);
             graphics.draw(element.getShape());
         }

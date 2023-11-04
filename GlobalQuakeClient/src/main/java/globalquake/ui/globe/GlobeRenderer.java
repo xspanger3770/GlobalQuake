@@ -18,11 +18,6 @@ public class GlobeRenderer {
 
     private static final double fieldOfView = Math.PI / 3.0; // 60 degrees
 
-    private double cosYaw;
-    private double cosPitch;
-    private double sinYaw;
-    private double sinPitch;
-
     private long lastMouseMove = 0;
 
     private static final double[][] projectionMatrix = new double[][]{
@@ -41,17 +36,10 @@ public class GlobeRenderer {
     public static final double QUALITY_ULTRA = 0.5;
 
     private RenderProperties renderProperties;
-    private double camera_altitude;
-    private Vector3D cameraPoint;
 
-    private double oneDegPx;
 
-    protected static final Vector3D center = new Vector3D(0, 0, 0);
-    private double maxAngle;
+    public static final Vector3D CENTER = new Vector3D(0, 0, 0);
 
-    private double maxDistance;
-
-    private double horizonDist;
 
     private final List<RenderFeature<?>> renderFeatures;
     private Point lastMouse;
@@ -64,20 +52,16 @@ public class GlobeRenderer {
         return renderProperties;
     }
 
-    public double getMaxAngle() {
-        return maxAngle;
-    }
-
-    private void project(Point2D result, double x, double y, double z, double cameraZ, int screenWidth, int screenHeight) {
+    void project(Point2D result, double x, double y, double z, double cameraZ, int screenWidth, int screenHeight, RenderProperties renderProperties) {
         // Translate the point to the camera's position
 
-        double newX = x * cosYaw + z * sinYaw;
+        double newX = x * renderProperties.getRenderPrecomputedValues().cosYaw + z * renderProperties.getRenderPrecomputedValues().sinYaw;
         double newY = y;
-        double newZ = z * cosYaw - x * sinYaw;
+        double newZ = z * renderProperties.getRenderPrecomputedValues().cosYaw - x * renderProperties.getRenderPrecomputedValues().sinYaw;
 
         double tmpX = newX;
-        double tmpY = newY * cosPitch - newZ * sinPitch;
-        double tmpZ = newZ * cosPitch + newY * sinPitch;
+        double tmpY = newY * renderProperties.getRenderPrecomputedValues().cosPitch - newZ * renderProperties.getRenderPrecomputedValues().sinPitch;
+        double tmpZ = newZ * renderProperties.getRenderPrecomputedValues().cosPitch + newY * renderProperties.getRenderPrecomputedValues().sinPitch;
         newX = tmpX;
         newY = tmpY;
         newZ = tmpZ;
@@ -101,59 +85,15 @@ public class GlobeRenderer {
      * Precompute values as part of optimisation
      */
     public void updateCamera(RenderProperties properties) {
+        properties.setPrecomputed(new RenderPrecomputedValues(this, properties));
         renderProperties = properties;
-        camera_altitude = GeoUtils.EARTH_RADIUS * renderProperties.scroll;
-
-        cameraPoint = new Vector3D(getX_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
-                getY_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
-                getZ_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000));
-
-        Vector3D surfacePoint = new Vector3D(getX_3D(properties.centerLat, properties.centerLon, 0),
-                getY_3D(properties.centerLat, properties.centerLon, 0),
-                getZ_3D(properties.centerLat, properties.centerLon, 0));
-
-        double[] moved = GeoUtils.moveOnGlobe(properties.centerLat, properties.centerLon, 1, 0);
-
-        Vector3D surfacePoint1 = new Vector3D(getX_3D(moved[0], moved[1], 0),
-                getY_3D(moved[0], moved[1], 0),
-                getZ_3D(moved[0], moved[1], 0));
-
-        Point2D ptS1 = projectPoint(surfacePoint, renderProperties);
-        Point2D ptS2 = projectPoint(surfacePoint1, renderProperties);
-        oneDegPx = Math.sqrt(Math.pow(ptS1.x - ptS2.x, 2) + Math.pow(ptS1.y - ptS2.y, 2));
-
-        double centerToCamera = center.distance(cameraPoint);
-        maxAngle = FastMath.acos(GeoUtils.EARTH_RADIUS / centerToCamera);
-
-        double[] data1 = GeoUtils.moveOnGlobe(renderProperties.centerLat, renderProperties.centerLon, GeoUtils.EARTH_CIRCUMFERENCE * (maxAngle / (2.0 * Math.PI)), 0);
-        Vector3D horizonPoint = new Vector3D(getX_3D(data1[0], data1[1], 0),
-                getY_3D(data1[0], data1[1], 0), getZ_3D(data1[0], data1[1], 0));
-
-        maxDistance = horizonPoint.distance(cameraPoint);
-
-        double cameraYaw = -FastMath.toRadians(renderProperties.centerLon);
-        double cameraPitch = FastMath.toRadians(180 - renderProperties.centerLat);
-
-        cosYaw = FastMath.cos(cameraYaw);
-        sinYaw = FastMath.sin(cameraYaw);
-        cosPitch = FastMath.cos(cameraPitch);
-        sinPitch = FastMath.sin(cameraPitch);
-
-        Point2D point2D = new Point2D();
-
-        project(point2D, horizonPoint.getX(), horizonPoint.getY(), horizonPoint.getZ(),
-                GeoUtils.EARTH_RADIUS + camera_altitude,
-                renderProperties.width, renderProperties.height
-        );
-
-        horizonDist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
     }
 
     public Point2D projectPoint(Vector3D pos, RenderProperties renderProperties){
         Point2D point2D = new Point2D();
         project(point2D, pos.getX(), pos.getY(), pos.getZ(),
-                GeoUtils.EARTH_RADIUS + camera_altitude,
-                renderProperties.width, renderProperties.height);
+                GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
+                renderProperties.width, renderProperties.height, renderProperties);
 
         return point2D;
     }
@@ -173,13 +113,13 @@ public class GlobeRenderer {
                 Vector3D point = polygon3D.getBoundingBoxCorner(i);
 
                 project(point2D, point.getX(), point.getY(), point.getZ(),
-                        GeoUtils.EARTH_RADIUS + camera_altitude,
-                        renderProperties.width, renderProperties.height);
+                        GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
+                        renderProperties.width, renderProperties.height, renderProperties);
 
                 int mask = get_mask(point2D.x, point2D.y, renderProperties);
                 totalMask &= mask;
 
-                if (isAboveHorizon(point)) {
+                if (isAboveHorizon(point, renderProperties)) {
                     onPlane = true;
                 }
             }
@@ -199,7 +139,7 @@ public class GlobeRenderer {
 
         for (int i = 0; i < polygon3D.getPoints().size(); i++) {
             Vector3D point = polygon3D.getPoints().get(i);
-            if (!isAboveHorizon(point) && canClip) {
+            if (!isAboveHorizon(point, renderProperties) && canClip) {
                 if (bowStart != null) {
                     bowEnd = point;
                 }
@@ -219,8 +159,8 @@ public class GlobeRenderer {
             }
 
             project(point2D, point.getX(), point.getY(), point.getZ(),
-                    GeoUtils.EARTH_RADIUS + camera_altitude,
-                    renderProperties.width, renderProperties.height
+                    GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
+                    renderProperties.width, renderProperties.height, renderProperties
             );
 
             if (!init) {
@@ -278,8 +218,8 @@ public class GlobeRenderer {
     @SuppressWarnings("SameParameterValue")
     private void bowAlgorithm(Point2D point2D, Path2D.Float result, Vector3D bowStart, Vector3D bowEnd, boolean bow, RenderProperties renderProperties) {
         project(point2D, bowStart.getX(), bowStart.getY(), bowStart.getZ(),
-                GeoUtils.EARTH_RADIUS + camera_altitude,
-                renderProperties.width, renderProperties.height
+                GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
+                renderProperties.width, renderProperties.height, renderProperties
         );
 
         ground(point2D, renderProperties);
@@ -288,8 +228,8 @@ public class GlobeRenderer {
         double startY = point2D.y;
 
         project(point2D, bowEnd.getX(), bowEnd.getY(), bowEnd.getZ(),
-                GeoUtils.EARTH_RADIUS + camera_altitude,
-                renderProperties.width, renderProperties.height
+                GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
+                renderProperties.width, renderProperties.height, renderProperties
         );
 
 
@@ -335,13 +275,13 @@ public class GlobeRenderer {
     void ground(Point2D point2D, RenderProperties renderProperties){
         double dist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
 
-        point2D.x = renderProperties.width / 2.0 + (point2D.x - renderProperties.width / 2.0) * (horizonDist / dist);
-        point2D.y = renderProperties.height / 2.0 + (point2D.y - renderProperties.height / 2.0) * (horizonDist / dist);
+        point2D.x = renderProperties.width / 2.0 + (point2D.x - renderProperties.width / 2.0) * (renderProperties.getRenderPrecomputedValues().horizonDist / dist);
+        point2D.y = renderProperties.height / 2.0 + (point2D.y - renderProperties.height / 2.0) * (renderProperties.getRenderPrecomputedValues().horizonDist / dist);
     }
 
-    public boolean isAboveHorizon(Vector3D point) {
-        double cameraToPoint = cameraPoint.distance(point);
-        return cameraToPoint <= maxDistance;
+    public boolean isAboveHorizon(Vector3D point, RenderProperties renderProperties) {
+        double cameraToPoint = renderProperties.getRenderPrecomputedValues().cameraPoint.distance(point);
+        return cameraToPoint <= renderProperties.getRenderPrecomputedValues().maxDistance;
     }
 
     public static double getX_3D(double lat, double lon, double alt) {
@@ -463,10 +403,10 @@ public class GlobeRenderer {
         createNGon(polygon3D, lat, lon, radius, altitude, 45, 90);
     }
 
-    public <E> List<E> getAllInside(RenderFeature<E> renderFeature, Shape shape) {
+    public <E> List<E> getAllInside(RenderFeature<E> renderFeature, Shape shape, RenderProperties renderPropertiesLocal) {
         List<E> result = new ArrayList<>();
         renderFeature.getEntities().forEach(renderEntity -> {
-            if(isMouseInside(renderFeature.getCenterCoords(renderEntity), shape)){
+            if(isMouseInside(renderFeature.getCenterCoords(renderEntity), shape, renderPropertiesLocal)){
                 result.add(renderEntity.getOriginal());
             }
         });
@@ -477,8 +417,8 @@ public class GlobeRenderer {
         return renderFeatures;
     }
 
-    public double pxToDeg(double px) {
-        return px / oneDegPx;
+    public double pxToDeg(double px, RenderProperties renderProperties) {
+        return px / renderProperties.getRenderPrecomputedValues().oneDegPx;
     }
 
     public boolean isMouseNearby(Point2D coords, double dist, boolean moved, RenderProperties renderProperties) {
@@ -491,17 +431,17 @@ public class GlobeRenderer {
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
-        return isAboveHorizon(vect) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
+        return isAboveHorizon(vect,  renderProperties) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
     }
 
-    public boolean isMouseInside(Point2D coords, Shape shape) {
+    public boolean isMouseInside(Point2D coords, Shape shape, RenderProperties renderProperties) {
         if(coords == null || shape == null){
             return false;
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
-        return  isAboveHorizon(vect) && shape.contains(point.toAwt());
+        return  isAboveHorizon(vect, renderProperties) && shape.contains(point.toAwt());
     }
 
     public void mouseMoved(MouseEvent e) {
