@@ -51,11 +51,13 @@ public class DataService implements GlobalQuakeEventListener {
     private final List<EarthquakeInfo> currentEarthquakes;
 
     private final Map<AbstractStation, StationStatus> stationIntensities = new HashMap<>();
-    private final ScheduledExecutorService stationIntensityService;
+    private ScheduledExecutorService stationIntensityService;
 
     public DataService() {
         currentEarthquakes = new ArrayList<>();
+    }
 
+    public void run(){
         GlobalQuakeServer.instance.getEventHandler().registerEventListener(this);
 
         stationIntensityService = Executors.newSingleThreadScheduledExecutor();
@@ -320,5 +322,6 @@ public class DataService implements GlobalQuakeEventListener {
             Logger.error(e);
         }
         stationIntensities.clear();
+        currentEarthquakes.clear();
     }
 }

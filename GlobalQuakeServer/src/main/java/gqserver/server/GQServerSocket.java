@@ -61,6 +61,7 @@ public class GQServerSocket {
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
+            dataService.run();
             setStatus(SocketStatus.RUNNING);
         } catch (IOException e) {
             setStatus(SocketStatus.IDLE);
