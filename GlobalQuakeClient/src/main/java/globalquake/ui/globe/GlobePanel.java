@@ -245,7 +245,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 }
                 double t = (double) step[0] / steps;
                 double t1 = -Math.cos(t * Math.PI) * 0.5 + 0.5;
-                double t2 = Math.sin(t * Math.PI) * (animation.initialScroll() + animation.targetScroll()) * (distGC / 15000.0);
+                double t2 = Math.sin(t * Math.PI) * Math.max(1.6, animation.initialScroll() + animation.targetScroll()) *  (distGC / 14000.0);
                 double currentScroll = t2 + animation.initialScroll() + t * (animation.targetScroll() - animation.initialScroll());
                 double currentLatitude = animation.initialLat() + t1 * (animation.targetLat() - animation.initialLat());
                 double currentLongitude = animation.initialLon() + t1 * (animation.targetLon() - animation.initialLon());
