@@ -86,6 +86,7 @@ public class GlobeRenderer {
      */
     public void updateCamera(RenderProperties properties) {
         properties.setPrecomputed(new RenderPrecomputedValues(this, properties));
+        properties.getRenderPrecomputedValues().part2(this, properties);
         renderProperties = properties;
     }
 
