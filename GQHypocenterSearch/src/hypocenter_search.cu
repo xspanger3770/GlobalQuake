@@ -31,7 +31,7 @@
 #define PHI2 2.618033989f
 
 #define THRESHOLD 3.0f
-#define MUL 1.12f
+#define MUL 1.35f
 #define ADD 3.0f
 
 struct depth_profile_t{

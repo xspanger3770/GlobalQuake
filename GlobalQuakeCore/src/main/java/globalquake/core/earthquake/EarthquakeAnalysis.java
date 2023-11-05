@@ -347,11 +347,11 @@ public class EarthquakeAnalysis {
 
         for (double depth = 0; depth < TauPTravelTimeCalculator.MAX_DEPTH; depth += 1.0 / getUniversalResolutionMultiplier(finderSettings)) {
             analyseHypocenter(hypocenterA, bestHypocenter.lat, bestHypocenter.lon, depth, pickedEvents, finderSettings, threadData);
-            if (hypocenterA.err < bestHypocenter.err * CONFIDENCE_LEVEL && depth < bestHypocenter.depth && depth < upperBound) {
+            if (calculateHeuristic(hypocenterA) < calculateHeuristic(bestHypocenter) * CONFIDENCE_LEVEL && depth < bestHypocenter.depth && depth < upperBound) {
                 upperBound = depth;
             }
 
-            if (hypocenterA.err < bestHypocenter.err * CONFIDENCE_LEVEL && depth > bestHypocenter.depth) {
+            if (calculateHeuristic(hypocenterA) < calculateHeuristic(bestHypocenter) * CONFIDENCE_LEVEL && depth > bestHypocenter.depth) {
                 lowerBound = depth;
             }
         }
@@ -394,7 +394,7 @@ public class EarthquakeAnalysis {
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(12, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
-                boolean stillValid = threadData.bestHypocenter.err < bestHypocenter.err * confidenceThreshold;
+                boolean stillValid = calculateHeuristic(threadData.bestHypocenter) > calculateHeuristic(bestHypocenter) / confidenceThreshold;
                 if (stillValid) {
                     dist += step;
                     if (threadData.bestHypocenter.origin > maxOrigin) {
@@ -420,7 +420,42 @@ public class EarthquakeAnalysis {
         return new PolygonConfidenceInterval(CONFIDENCE_POLYGON_EDGES, CONFIDENCE_POLYGON_OFFSET, lengths, minOrigin, maxOrigin);
     }
 
+
+    // calculate correct stations and err
+    private void postProcess(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
+        int correct = 0;
+        double err = 0;
+
+        for(PickedEvent event : selectedEvents){
+            long actualTravel = event.pWave() - bestHypocenterPrelim.origin;
+
+            double distGC = GeoUtils.greatCircleDistance(bestHypocenterPrelim.lat, bestHypocenterPrelim.lon,
+                    event.lat(), event.lon());
+            double angle = TauPTravelTimeCalculator.toAngle(distGC);
+            double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(bestHypocenterPrelim.depth,
+                    angle);
+
+            if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+                long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.elevation())) * 1000);
+                double _err = Math.abs(expectedTravel - actualTravel);
+                if (_err < finderSettings.pWaveInaccuracyThreshold()) {
+                    correct++;
+                } else {
+                    _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
+                }
+
+                _err /= 1000.0;
+
+                err += _err * _err;
+            }
+        }
+
+        bestHypocenterPrelim.correctStations = correct;
+        bestHypocenterPrelim.err = err;
+    }
+
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
+        postProcess(selectedEvents, bestHypocenterPrelim, finderSettings);
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
@@ -654,6 +689,10 @@ public class EarthquakeAnalysis {
         return result;
     }
 
+    private static double calculateHeuristic(PreliminaryHypocenter hypocenter){
+        return hypocenter.correctStations / (Math.pow(hypocenter.err, 2)) + 2.0;
+    }
+
     private static PreliminaryHypocenter selectBetterHypocenter(PreliminaryHypocenter hypocenter1, PreliminaryHypocenter hypocenter2) {
         if (hypocenter1 == null) {
             return hypocenter2;
@@ -666,9 +705,7 @@ public class EarthquakeAnalysis {
         } else if (hypocenter2.correctStations > (int) (hypocenter1.correctStations * 1.3)) {
             return hypocenter2;
         } else {
-            return (hypocenter1.correctStations / (Math.pow(hypocenter1.err, 2) + 2.0)) >
-                    (hypocenter2.correctStations / (Math.pow(hypocenter2.err, 2) + 2.0))
-                    ? hypocenter1 : hypocenter2;
+            return calculateHeuristic(hypocenter1) > calculateHeuristic(hypocenter2) ? hypocenter1 : hypocenter2;
         }
     }
 
@@ -776,7 +813,7 @@ public class EarthquakeAnalysis {
                 _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
             }
 
-            _err /= 1024;
+            _err /= 1000;
 
             err += _err * _err;
         }

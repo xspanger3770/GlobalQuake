@@ -19,11 +19,11 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 7;
-    public static final double DIST = 10000;
+    public static final int STATIONS = 50;
+    public static final double DIST = 5000;
 
-    public static final double INACCURACY = 3000;
-    private static final double MASSIVE_ERR_ODDS = 0.0;
+    public static final double INACCURACY = 0;
+    private static final double MASSIVE_ERR_ODDS = 0.4;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
