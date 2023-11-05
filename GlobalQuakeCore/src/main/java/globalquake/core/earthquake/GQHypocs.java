@@ -15,8 +15,8 @@ public class GQHypocs {
     private static final float RADIANS = (float) (Math.PI / 180.0);
 
     private static final int MAX_POINTS = 4000_000;
-    private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.2f};
-    private static final int[] point_profiles = new int[] { 4000_000, 400_000, 200_000, 200_000, 40_000};
+    private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
+    private static final int[] point_profiles = new int[] { 4000_000, 400_000, 200_000, 100_000, 40_000};
     private static final float[] dist_profiles = new float[]{ 100.0f, 20.0f, 4.0f, 0.8f, 0.12f};
 
     static {
