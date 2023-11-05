@@ -35,7 +35,7 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
         renderer.createCircle(element.getPolygon(),
                 renderProperties.centerLat,
                 renderProperties.centerLon,
-                renderer.getMaxAngle() / (2*Math.PI) * GeoUtils.EARTH_CIRCUMFERENCE, 0, quality);
+                renderProperties.getRenderPrecomputedValues().maxAngle / (2*Math.PI) * GeoUtils.EARTH_CIRCUMFERENCE, 0, quality);
     }
 
     @Override

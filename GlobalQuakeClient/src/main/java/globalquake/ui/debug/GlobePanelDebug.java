@@ -1,7 +1,9 @@
 package globalquake.ui.debug;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
+import globalquake.main.Main;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.regions.Regions;
@@ -193,6 +195,7 @@ public class GlobePanelDebug extends GQFrame {
 			Regions.init();
 			Scale.load();
 			Sounds.load();
+			GlobalQuake.prepare(Main.MAIN_FOLDER, null);
 		} catch (Exception e) {
 			return;
 		}

@@ -46,7 +46,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             elementStationSquare.setPolygon(new Polygon3D());
         }
 
-        double size = Math.min(36, renderer.pxToDeg(7.0)) * Settings.stationsSizeMul;
+        double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties)) * Settings.stationsSizeMul;
 
         if(!Settings.stationsTriangles) {
             renderer.createCircle(elementStationCircle.getPolygon(),

@@ -39,12 +39,12 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         renderer.createCircle(element.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                getSize(archivedQuake, renderer), 0, 4);
+                getSize(archivedQuake, renderer, renderProperties), 0, 4);
     }
 
-    private double getSize(ArchivedQuake quake, GlobeRenderer renderer) {
+    private double getSize(ArchivedQuake quake, GlobeRenderer renderer, RenderProperties renderProperties) {
         double size = 3 + Math.pow(quake.getMag(), 2) * 0.8;
-        return Math.min(10 * size, renderer.pxToDeg(quake.getMag() < 0 ? 3 : size));
+        return Math.min(10 * size, renderer.pxToDeg(quake.getMag() < 0 ? 3 : size, renderProperties));
     }
 
     @Override

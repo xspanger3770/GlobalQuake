@@ -33,7 +33,7 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
         renderer.createCross(elementCross.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(), renderer
-                        .pxToDeg(8), 0.0);
+                        .pxToDeg(8, renderProperties), 0.0);
     }
 
     @Override
