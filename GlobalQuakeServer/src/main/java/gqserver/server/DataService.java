@@ -205,10 +205,10 @@ public class DataService implements GlobalQuakeEventListener {
         }
 
         return new StationCountData(
-                cluster.getAssignedEvents().size(),
-                previousHypocenter.bestCount,
-                previousHypocenter.selectedEvents,
-                previousHypocenter.getWrongEventCount());
+                previousHypocenter.totalEvents,
+                previousHypocenter.reducedEvents,
+                previousHypocenter.usedEvents,
+                previousHypocenter.correctEvents);
     }
 
     private LocationConfidenceIntervalData createLocationConfidenceData(List<PolygonConfidenceInterval> intervals) {

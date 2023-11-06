@@ -15,7 +15,7 @@ public class Hypocenter {
 	public double depth;
 	public long origin;
 
-	public int selectedEvents;
+	public int usedEvents;
 
 	public double magnitude;
 	public List<MagnitudeReading> mags;
@@ -29,7 +29,8 @@ public class Hypocenter {
 	public boolean depthFixed;
 
 	public Quality quality;
-	public int bestCount;
+	public int reducedEvents;
+	public int totalEvents;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,
@@ -45,11 +46,11 @@ public class Hypocenter {
 	}
 
 	public double getCorrectness(){
-		return (correctEvents) / (double) selectedEvents;
+		return (correctEvents) / (double) usedEvents;
 	}
 
 	public int getWrongEventCount(){
-		return selectedEvents - correctEvents;
+		return usedEvents - correctEvents;
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class Hypocenter {
 				", lon=" + lon +
 				", depth=" + depth +
 				", origin=" + origin +
-				", selectedEvents=" + selectedEvents +
+				", selectedEvents=" + usedEvents +
 				", magnitude=" + magnitude +
 				", mags=" + mags +
 				", obviousArrivalsInfo=" + obviousArrivalsInfo +
@@ -80,7 +81,7 @@ public class Hypocenter {
 		double errEW = result[1];
 
 		double pct = getCorrectness() * 100.0;
-		int stations = selectedEvents;
+		int stations = usedEvents;
 
 		this.quality = new Quality(errOrigin, errDepth, errNS, errEW, stations, pct);
 	}

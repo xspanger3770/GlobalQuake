@@ -5,6 +5,7 @@ import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.data.MagnitudeReading;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
@@ -14,10 +15,7 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import gqserver.api.Packet;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
-import gqserver.api.data.earthquake.advanced.AdvancedHypocenterData;
-import gqserver.api.data.earthquake.advanced.DepthConfidenceIntervalData;
-import gqserver.api.data.earthquake.advanced.HypocenterQualityData;
-import gqserver.api.data.earthquake.advanced.LocationConfidenceIntervalData;
+import gqserver.api.data.earthquake.advanced.*;
 import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
@@ -120,6 +118,20 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
         if(advancedHypocenterData != null){
             hypocenter.quality = createQuality(advancedHypocenterData.qualityData());
+
+            StationCountData stationCountData = advancedHypocenterData.stationCountData();
+            if(stationCountData != null) {
+                hypocenter.totalEvents = stationCountData.total();
+                hypocenter.reducedEvents = stationCountData.reduced();
+                hypocenter.usedEvents = stationCountData.used();
+                hypocenter.correctEvents = stationCountData.correct();
+            }
+
+            hypocenter.mags = new ArrayList<>();
+
+            for(Float mag : advancedHypocenterData.magsData()){
+                hypocenter.mags.add(new MagnitudeReading(mag, 0));
+            }
         }
 
         cluster.setPreviousHypocenter(hypocenter);

@@ -458,6 +458,7 @@ public class EarthquakeAnalysis {
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
 
+
         calculateMagnitude(cluster, bestHypocenter);
 
         if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
@@ -478,8 +479,9 @@ public class EarthquakeAnalysis {
 
         Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
 
-        bestHypocenter.selectedEvents = selectedEvents.size();
-        bestHypocenter.bestCount = correctSelectedEvents.size();
+        bestHypocenter.usedEvents = selectedEvents.size();
+        bestHypocenter.reducedEvents = correctSelectedEvents.size();
+        bestHypocenter.totalEvents = cluster.getAssignedEvents().size();
 
         calculateActualCorrectEvents(selectedEvents, bestHypocenter);
         calculateObviousArrivals(bestHypocenter);
