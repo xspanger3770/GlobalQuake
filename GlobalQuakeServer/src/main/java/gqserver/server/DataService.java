@@ -3,8 +3,10 @@ package gqserver.server;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
+import globalquake.core.earthquake.data.MagnitudeReading;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
@@ -182,7 +184,31 @@ public class DataService implements GlobalQuakeEventListener {
         return new AdvancedHypocenterData(
                 createQualityData(hypocenter.quality),
                 createDepthConfidenceData(hypocenter.depthConfidenceInterval),
-                createLocationConfidenceData(hypocenter.polygonConfidenceIntervals));
+                createLocationConfidenceData(hypocenter.polygonConfidenceIntervals),
+                createStationCountData(earthquake.getCluster()),
+                createMagsData(hypocenter));
+    }
+
+    private List<Float> createMagsData(Hypocenter hypocenter) {
+        List<Float> result = new ArrayList<>();
+        for(MagnitudeReading magnitudeReading : hypocenter.mags){
+            result.add((float) magnitudeReading.magnitude());
+        }
+
+        return result;
+    }
+
+    private StationCountData createStationCountData(Cluster cluster) {
+        Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
+        if(previousHypocenter == null){
+            return null;
+        }
+
+        return new StationCountData(
+                cluster.getAssignedEvents().size(),
+                previousHypocenter.bestCount,
+                previousHypocenter.selectedEvents,
+                previousHypocenter.getWrongEventCount());
     }
 
     private LocationConfidenceIntervalData createLocationConfidenceData(List<PolygonConfidenceInterval> intervals) {
