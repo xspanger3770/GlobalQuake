@@ -862,6 +862,11 @@ public class EarthquakeAnalysis {
 
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
+
+        if (CHECK_DISTANT_EVENT_STATIONS && distFromRoot > 600 && bestHypocenter.correctEvents < 8) {
+            return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
+        }
+
         if (CHECK_DISTANT_EVENT_STATIONS && distFromRoot > 2000 && bestHypocenter.correctEvents < 12) {
             return HypocenterCondition.DISTANT_EVENT_NOT_ENOUGH_STATIONS;
         }
