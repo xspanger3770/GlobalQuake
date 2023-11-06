@@ -30,9 +30,9 @@
 
 #define PHI2 2.618033989f
 
-#define THRESHOLD 3.0f
-#define MUL 1.35f
-#define ADD 3.0f
+#define THRESHOLD 2.2f
+#define MUL 1.30f
+#define ADD 2.0f
 
 struct depth_profile_t{
     float depth_resolution;
@@ -144,7 +144,7 @@ __device__ void reduce(float *a, float *b, int grid_size){
     int correct_b = *h_correct(b, grid_size);
 
     bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
-        (correct_b / (err_b * err_b + ADD) > correct_a / (err_a * err_a + ADD))
+        (correct_b / (err_b + ADD) > correct_a / (err_a + ADD))
     );
 
     if(swap){

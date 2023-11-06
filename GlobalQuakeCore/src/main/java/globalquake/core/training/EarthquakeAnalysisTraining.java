@@ -19,10 +19,10 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 50;
+    public static final int STATIONS = 40;
     public static final double DIST = 5000;
 
-    public static final double INACCURACY = 0;
+    public static final double INACCURACY = 5000;
     private static final double MASSIVE_ERR_ODDS = 0.4;
 
     public static void main(String[] args) throws Exception {
@@ -38,8 +38,8 @@ public class EarthquakeAnalysisTraining {
         long n = 0;
         long a  = System.currentTimeMillis();
         int fails = 0;
-        for(int i = 0; i < 50; i++) {
-            long err = runTest(i, STATIONS);
+        for(int i = 0; i < 100; i++) {
+            long err = runTest(888+i, STATIONS);
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;

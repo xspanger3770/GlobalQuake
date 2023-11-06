@@ -284,38 +284,33 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings, true);
 
-        int reduceLimit = 6;
-        double reduceAmount = 0.75;
-        int reduceIterations = 2;
+        PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
-        List<PickedEvent> correctSelectedEvents = selectedEvents.stream().filter(pickedEvent -> ClusterAnalysis.couldBeArrival(pickedEvent, bestHypocenter, false, false, true)).collect(Collectors.toList());
+        int reduceLimit = 12;
 
-        PreliminaryHypocenter bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
-
-        while (reduceIterations > 0 && correctSelectedEvents.size() > reduceLimit) {
-            Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter2, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
+        if (selectedEvents.size() > reduceLimit) {
+            Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, selectedEvents);
+            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.65);
 
             List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
             list.sort(Map.Entry.comparingByValue());
 
-            while (list.size() > targetSize) {
+            while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * 0.5) {
                 list.remove(list.size() - 1);
             }
 
-            Logger.debug("Reduced the number of events from %d to the best %d for better accuracy".formatted(correctSelectedEvents.size(), list.size()));
+            Logger.debug("Reduced the number of events from %d to the best %d for better accuracy".formatted(selectedEvents.size(), list.size()));
 
-            correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
+            selectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
 
-            bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
-            reduceIterations--;
+            bestHypocenter2 = runHypocenterFinder(selectedEvents, cluster, finderSettings, false);
         }
 
         if(bestHypocenter2 == null){
             return;
         }
 
-        postProcess(selectedEvents, correctSelectedEvents, cluster, bestHypocenter2, finderSettings, startTime);
+        postProcess(selectedEvents, selectedEvents, cluster, bestHypocenter2, finderSettings, startTime);
     }
 
     private Map<PickedEvent, Long> calculateResiduals(PreliminaryHypocenter hypocenter, List<PickedEvent> events) {
@@ -526,7 +521,7 @@ public class EarthquakeAnalysis {
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
-        if (bestHypocenter.locationUncertainty > 1000) {
+        if (bestHypocenter.locationUncertainty > 500) {
             Logger.debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
             return false;
         }
@@ -693,7 +688,7 @@ public class EarthquakeAnalysis {
     }
 
     private static double calculateHeuristic(PreliminaryHypocenter hypocenter){
-        return hypocenter.correctStations / (Math.pow(hypocenter.err, 2) + 2.0);
+        return (hypocenter.correctStations) / (hypocenter.err);
     }
 
     private static PreliminaryHypocenter selectBetterHypocenter(PreliminaryHypocenter hypocenter1, PreliminaryHypocenter hypocenter2) {
