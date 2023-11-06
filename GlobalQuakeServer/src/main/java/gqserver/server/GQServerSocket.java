@@ -3,6 +3,7 @@ package gqserver.server;
 import globalquake.core.exception.InvalidPacketException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
 import gqserver.api.packets.system.HandshakePacket;
@@ -25,8 +26,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GQServerSocket {
-
-    public static final int COMPATIBILITY_VERSION = 2;
 
     private static final int HANDSHAKE_TIMEOUT = 10 * 1000;
     public static final int MAX_CLIENTS = 64;
@@ -90,10 +89,10 @@ public class GQServerSocket {
         try {
             Packet packet = client.readPacket();
             if (packet instanceof HandshakePacket handshakePacket) {
-                if (handshakePacket.compatVersion() != COMPATIBILITY_VERSION) {
+                if (handshakePacket.compatVersion() != GQApi.COMPATIBILITY_VERSION) {
                     client.sendPacket(new TerminationPacket("Your client version is not compatible with the server!"));
                     throw new InvalidPacketException("Client's version is not compatible %d != %d"
-                            .formatted(handshakePacket.compatVersion(), COMPATIBILITY_VERSION));
+                            .formatted(handshakePacket.compatVersion(), GQApi.COMPATIBILITY_VERSION));
                 }
 
                 client.setClientConfig(handshakePacket.clientConfig());

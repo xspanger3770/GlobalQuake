@@ -1,5 +1,6 @@
 package gqserver.server;
 
+import gqserver.api.GQApi;
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HeartbeatPacket;
@@ -32,7 +33,7 @@ public class GQServerSocketTest {
 
 
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        out.writeObject(new HandshakePacket(1, new ServerClientConfig(false, false)));
+        out.writeObject(new HandshakePacket(GQApi.COMPATIBILITY_VERSION, new ServerClientConfig(false, false)));
 
         while(true){
             Thread.sleep(1000);

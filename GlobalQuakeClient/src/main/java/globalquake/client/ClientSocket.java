@@ -1,6 +1,7 @@
 package globalquake.client;
 
 import globalquake.core.GlobalQuake;
+import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
@@ -22,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ClientSocket {
 
-    private static final int COMPATIBILITY_VERSION = 2;
     private static final int CONNECT_TIMEOUT = 10 * 1000;
     private static final int SO_TIMEOUT = 60 * 1000;
     private ExecutorService inputService;
@@ -153,7 +153,7 @@ public class ClientSocket {
     }
 
     private void handshake() throws IOException {
-        sendPacket(new HandshakePacket(COMPATIBILITY_VERSION, new ServerClientConfig(true, true)));
+        sendPacket(new HandshakePacket(GQApi.COMPATIBILITY_VERSION, new ServerClientConfig(true, true)));
     }
 
 }
