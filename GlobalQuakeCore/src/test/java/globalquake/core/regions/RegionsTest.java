@@ -12,7 +12,7 @@ public class RegionsTest {
     public void basicRegionsTest() throws IOException {
         Regions.init();
 
-        assertEquals("Czech Republic", Regions.getRegion(50, 17));
+        assertEquals("Poland-Czech Republic border region", Regions.getRegion(50, 17));
         assertEquals("Poland", Regions.getRegion(51.8, 18.3));
     }
 

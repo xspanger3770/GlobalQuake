@@ -145,6 +145,11 @@ public class Regions {
 
     public static String getExtendedName(double lat, double lon){
         String localName = getName(lat, lon, regionSearchHD);
+
+        if(localName != null){
+            return localName;
+        }
+
         String globalName = getName(lat, lon, regionsUHD);
 
         if(localName != null && globalName != null) {
