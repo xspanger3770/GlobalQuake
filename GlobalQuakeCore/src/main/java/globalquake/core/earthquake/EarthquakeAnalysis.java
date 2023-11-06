@@ -80,9 +80,6 @@ public class EarthquakeAnalysis {
 
         // Calculation starts only if number of events increases by some %
         if (cluster.getEarthquake() != null) {
-            if (cluster.getPreviousHypocenter() != null && cluster.lastEpicenterUpdate != cluster.updateCount) {
-                calculateMagnitude(cluster, cluster.getPreviousHypocenter());
-            }
             int count = pickedEvents.size();
             if (count >= 24 && Settings.reduceRevisions) {
                 if (count < cluster.getEarthquake().nextReportEventCount) {
