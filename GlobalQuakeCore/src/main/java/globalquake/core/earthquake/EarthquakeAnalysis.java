@@ -284,6 +284,10 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter = runHypocenterFinder(selectedEvents, cluster, finderSettings, true);
 
+        if(bestHypocenter == null) {
+            return;
+        }
+
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
         int reduceLimit = 12;
@@ -306,7 +310,7 @@ public class EarthquakeAnalysis {
             bestHypocenter2 = runHypocenterFinder(selectedEvents, cluster, finderSettings, false);
         }
 
-        if(bestHypocenter2 == null){
+        if(bestHypocenter2 == null) {
             return;
         }
 

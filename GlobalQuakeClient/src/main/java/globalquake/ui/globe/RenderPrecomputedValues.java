@@ -14,10 +14,10 @@ public class RenderPrecomputedValues {
     public double oneDegPx;
     public double maxAngle;
     public double maxDistance;
-    public double cosYaw;
-    public double sinYaw;
-    public double cosPitch;
-    public double sinPitch;
+    public final double cosYaw;
+    public final double sinYaw;
+    public final double cosPitch;
+    public final double sinPitch;
     public double horizonDist;
 
     public RenderPrecomputedValues(GlobeRenderer renderer, RenderProperties renderProperties){
