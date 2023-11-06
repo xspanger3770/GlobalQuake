@@ -458,7 +458,6 @@ public class EarthquakeAnalysis {
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
 
-
         calculateMagnitude(cluster, bestHypocenter);
 
         if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
