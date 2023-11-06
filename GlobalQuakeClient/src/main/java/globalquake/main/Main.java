@@ -13,7 +13,7 @@ import java.util.Objects;
 public class Main {
 
     private static ApplicationErrorHandler errorHandler;
-    public static final String version = "0.10.0_pre2";
+    public static final String version = "0.10.0_pre3";
     public static final String fullName = "GlobalQuake " + version;
     public static final File MAIN_FOLDER = new File("./.GlobalQuakeData/");
 
