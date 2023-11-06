@@ -83,7 +83,9 @@ public class CinemaHandler {
 
             @Override
             public void onQuakeArchive(QuakeArchiveEvent event) {
-                warnings.remove(event.earthquake());
+                if(event.earthquake() != null) {
+                    warnings.remove(event.earthquake());
+                }
             }
         });
 
