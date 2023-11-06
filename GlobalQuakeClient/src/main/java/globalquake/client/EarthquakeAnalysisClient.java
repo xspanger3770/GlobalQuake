@@ -93,6 +93,11 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
         Earthquake newQuake = createEarthquake(data, hypocenterData.advancedHypocenterData());
 
+        // ignore quake data that are too old
+        if(shouldRemove(newQuake)){
+            return;
+        }
+
         if(existingQuake == null) {
             clientEarthquakeMap.put(uuid, newQuake);
             getEarthquakes().add(newQuake);
