@@ -23,7 +23,7 @@ public class Main {
     public static final File MAIN_FOLDER = new File("./.GlobalQuakeServerData/");
 
     private static ApplicationErrorHandler errorHandler;
-    public static final String version = "0.1.0";
+    public static final String version = "0.1.1";
     public static final String fullName = "GlobalQuakeServer " + version;
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;

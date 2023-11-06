@@ -35,7 +35,7 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 
 	@SuppressWarnings("EmptyMethod")
 	public void dataUpdated() {
-
+		
 	}
 
 	@Override

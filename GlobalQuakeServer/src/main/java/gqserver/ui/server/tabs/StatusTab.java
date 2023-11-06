@@ -61,7 +61,7 @@ public class StatusTab extends JPanel {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {updateRamProgressBar();updateStations();}, 0, 100, TimeUnit.MILLISECONDS);
     }
 
-    private void updateStations(){
+    private synchronized void updateStations(){
         int totalStations = 0;
         int connectedStations = 0;
         int runningSeedlinks = 0;
@@ -87,7 +87,7 @@ public class StatusTab extends JPanel {
 
     }
 
-    private void updateRamProgressBar() {
+    private synchronized void updateRamProgressBar() {
         long maxMem = Runtime.getRuntime().maxMemory();
         long usedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -97,7 +97,7 @@ public class StatusTab extends JPanel {
         repaint();
     }
 
-    private void updateClientsProgressBar() {
+    private synchronized void updateClientsProgressBar() {
         int clients = GlobalQuakeServer.instance.getServerSocket().getClientCount();
         clientsProgressBar.setString("Clients: %d / %d".formatted(clients, GQServerSocket.MAX_CLIENTS));
         clientsProgressBar.setValue(clients);
