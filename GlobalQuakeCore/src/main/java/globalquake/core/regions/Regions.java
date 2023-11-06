@@ -64,10 +64,12 @@ public class Regions {
         parseGeoJson("polygons_converted/new-zealand-districts.geojson", raw_polygonsNZ, regionsNZ, NONE);
         parseGeoJson("polygons_converted/hawaii-countries.geojson", raw_polygonsHW, regionsHW, NONE);
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
+        parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
+        parseGeoJson("polygons_converted/region_dataset.geojson", null, regionSearchHD, NONE);
 
-        for(ArrayList<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
+        /*for(ArrayList<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
             regionSearchHD.addAll(list);
-        }
+        }*/
     }
 
 
@@ -239,7 +241,9 @@ public class Regions {
                 raws.add(pol);
                 paths.add(toPath(pol));
 
-                raw.add(pol);
+                if(raw != null) {
+                    raw.add(pol);
+                }
                 regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
             } else if (o instanceof MultiPolygon mp) {
                 createRegion(regions, mp, name);
@@ -247,13 +251,15 @@ public class Regions {
                 List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
                 for (List<List<LngLatAlt>> polygon : polygons) {
                     org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
-                    raw.add(pol);
+                    if(raw != null) {
+                        raw.add(pol);
+                    }
                 }
             }
         }
     }
 
-    private static final String[] NAME_NAMES = {"name_long", "name", "NAME_2", "NAME_1", "NAME"};
+    private static final String[] NAME_NAMES = {"name_long", "name", "NAME_2", "NAME_1", "NAME", "name_l"};
 
     private static String fetchName(Feature f) {
         String name;
