@@ -1,6 +1,7 @@
 package globalquake.client;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.exception.RuntimeApplicationException;
 import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.data.system.ServerClientConfig;
@@ -8,7 +9,9 @@ import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
 import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
 import gqserver.api.packets.station.StationsRequestPacket;
 import gqserver.api.packets.system.HandshakePacket;
+import gqserver.api.packets.system.HandshakeSuccessfulPacket;
 import gqserver.api.packets.system.HeartbeatPacket;
+import gqserver.api.packets.system.TerminationPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -37,7 +40,7 @@ public class ClientSocket {
     private String ip;
     private int port;
 
-    public void connect(String ip, int port) throws IOException {
+    public void connect(String ip, int port) throws IOException, ClassNotFoundException {
         this.ip = ip;
         this.port = port;
         socket = new Socket();
@@ -83,7 +86,7 @@ public class ClientSocket {
         if(!socket.isConnected() || socket.isClosed()){
             try {
                 connect(ip, port);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Logger.error("Unable to reconnect: %s".formatted(e.getMessage()));
             }
         }
@@ -152,8 +155,16 @@ public class ClientSocket {
         outputStream.writeObject(packet);
     }
 
-    private void handshake() throws IOException {
+    private void handshake() throws IOException, ClassNotFoundException {
         sendPacket(new HandshakePacket(GQApi.COMPATIBILITY_VERSION, new ServerClientConfig(true, true)));
+        Packet packet = (Packet) inputStream.readObject();
+        if(!(packet instanceof HandshakeSuccessfulPacket)) {
+            if(packet instanceof TerminationPacket terminationPacket){
+                throw new RuntimeApplicationException(terminationPacket.cause());
+            } else {
+                throw new RuntimeApplicationException("Unknown");
+            }
+        }
     }
 
 }

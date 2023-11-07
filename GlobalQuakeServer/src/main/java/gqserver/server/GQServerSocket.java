@@ -7,6 +7,7 @@ import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
 import gqserver.api.packets.system.HandshakePacket;
+import gqserver.api.packets.system.HandshakeSuccessfulPacket;
 import gqserver.api.packets.system.TerminationPacket;
 import gqserver.events.specific.ClientJoinedEvent;
 import gqserver.events.specific.ClientLeftEvent;
@@ -106,6 +107,7 @@ public class GQServerSocket {
                     client.destroy();
                 } else {
                     Logger.info("Client #%d handshake successfull".formatted(client.getID()));
+                    client.sendPacket(new HandshakeSuccessfulPacket());
                     readerService.submit(new ClientReader(client));
                     clients.add(client);
                     GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientJoinedEvent(client));
