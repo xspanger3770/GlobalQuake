@@ -87,7 +87,6 @@ public class EarthquakeArchive {
             if(Settings.reportsEnabled) {
                 reportQuake(earthquake);
             }
-
         });
 	}
 

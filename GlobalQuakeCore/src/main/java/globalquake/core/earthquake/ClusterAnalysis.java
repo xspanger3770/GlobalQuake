@@ -127,6 +127,7 @@ public class ClusterAnalysis {
     private void mergeClusters() {
         for (Earthquake earthquake : earthquakes) {
             List<Cluster> toMerge = null;
+
             for (Cluster cluster : clusters) {
                 if (earthquake.getCluster() == cluster) {
                     continue;
@@ -155,9 +156,11 @@ public class ClusterAnalysis {
                 }
             }
 
-            if (cluster.getEarthquake() != null) {
-                earthquakes.remove(cluster.getEarthquake());
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
+            Earthquake earthquake1 = cluster.getEarthquake();
+
+            if (earthquake1 != null) {
+                earthquakes.remove(earthquake1);
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
             }
         }
 

@@ -12,7 +12,7 @@ public class EarthquakeArchiveClient extends EarthquakeArchive {
 
     public void processPacket(ClientSocket socket, Packet packet) {
         if(packet instanceof ArchivedQuakePacket quakePacket) {
-            if(getArchivedQuakeByUUID(((ArchivedQuakePacket) packet).archivedQuakeData().uuid()) == null) {
+            if(getArchivedQuakeByUUID(quakePacket.archivedQuakeData().uuid()) == null) {
                 archiveQuake(createArchivedQuake(quakePacket), null);
             }
         }
