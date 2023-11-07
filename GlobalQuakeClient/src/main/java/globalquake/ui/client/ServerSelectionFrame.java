@@ -3,6 +3,7 @@ package globalquake.ui.client;
 import globalquake.client.ClientSocket;
 import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
@@ -16,6 +17,7 @@ import globalquake.utils.Scale;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 public class ServerSelectionFrame extends GQFrame {
@@ -51,14 +53,14 @@ public class ServerSelectionFrame extends GQFrame {
         JPanel ipPanel = new JPanel();
         ipPanel.setLayout(new BoxLayout(ipPanel, BoxLayout.X_AXIS));
         ipPanel.add(new JLabel("IP Address: "));
-        ipPanel.add(addressField = new JTextField("0.0.0.0",20));
+        ipPanel.add(addressField = new JTextField(Settings.lastServerIP,20));
 
         addressPanel.add(ipPanel);
 
         JPanel portPanel = new JPanel();
         portPanel.setLayout(new BoxLayout(portPanel, BoxLayout.X_AXIS));
         portPanel.add(new JLabel("Port: "));
-        portPanel.add(portField = new JTextField("12345",20));
+        portPanel.add(portField = new JTextField(String.valueOf(Settings.lastServerPORT),20));
 
         addressPanel.add(portPanel);
 
@@ -93,8 +95,16 @@ public class ServerSelectionFrame extends GQFrame {
             connectButton.setEnabled(false);
             connectButton.setText("Connecting...");
             try {
-                client.connect(addressField.getText(), Integer.parseInt(portField.getText()));
+                String ip = addressField.getText();
+                int port = Integer.parseInt(portField.getText());
+
+                Settings.lastServerIP = ip;
+                Settings.lastServerPORT = port;
+                Settings.save();
+
+                client.connect(ip, port);
                 client.runReconnectService();
+
                 ServerSelectionFrame.this.dispose();
                 launchClientUI();
             } catch (Exception e) {

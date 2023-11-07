@@ -125,6 +125,10 @@ public final class Settings {
 	public static Boolean displayAlertBox;
 	public static Boolean displayTime;
 
+	public static String lastServerIP;
+
+	public static Integer lastServerPORT;
+
 	static {
 		load();
 	}
@@ -135,6 +139,9 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("lastServerIP", "0.0.0.0");
+		loadProperty("lastServerPORT", "12345");
 
 		loadProperty("shakingLevelScale", "0",
 				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
@@ -290,6 +297,18 @@ public final class Settings {
 				}catch(Exception e){
 					Logger.error(e);
 					val = Integer.parseInt(defaultVal);
+				}
+				setProperty(field, val);
+			}else if (field.getType() == String.class) {
+				String val;
+				try{
+					val = properties.getOrDefault(field.getName(), defaultVal).toString();
+					if(validator != null && !validator.apply(val)){
+						throw new RuntimeApplicationException("Field %s has invalid value! %s".formatted(name, val));
+					}
+				}catch(Exception e){
+					Logger.error(e);
+					val = defaultVal.toString();
 				}
 				setProperty(field, val);
 			} else {
