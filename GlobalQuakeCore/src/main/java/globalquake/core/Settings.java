@@ -141,7 +141,7 @@ public final class Settings {
 		}
 
 		loadProperty("lastServerIP", "0.0.0.0");
-		loadProperty("lastServerPORT", "12345");
+		loadProperty("lastServerPORT", "38000");
 
 		loadProperty("shakingLevelScale", "0",
 				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));

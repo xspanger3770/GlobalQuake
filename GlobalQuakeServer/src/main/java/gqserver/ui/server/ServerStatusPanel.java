@@ -1,5 +1,6 @@
 package gqserver.ui.server;
 
+import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import gqserver.events.GlobalQuakeServerEventListener;
 import gqserver.events.specific.ServerStatusChangedEvent;
@@ -47,14 +48,14 @@ public class ServerStatusPanel extends JPanel {
         JPanel ipPanel = new JPanel();
         ipPanel.setLayout(new BoxLayout(ipPanel, BoxLayout.X_AXIS));
         ipPanel.add(new JLabel("IP Address: "));
-        ipPanel.add(addressField = new JTextField("0.0.0.0",20));
+        ipPanel.add(addressField = new JTextField(Settings.lastServerIP,20));
 
         addressPanel.add(ipPanel);
 
         JPanel portPanel = new JPanel();
         portPanel.setLayout(new BoxLayout(portPanel, BoxLayout.X_AXIS));
         portPanel.add(new JLabel("Port: "));
-        portPanel.add(portField = new JTextField("12345",20));
+        portPanel.add(portField = new JTextField(String.valueOf(Settings.lastServerPORT),20));
 
         addressPanel.add(portPanel);
 
@@ -97,7 +98,14 @@ public class ServerStatusPanel extends JPanel {
             SocketStatus status = GlobalQuakeServer.instance.getServerSocket().getStatus();
             if(status == SocketStatus.IDLE){
                 try {
-                    GlobalQuakeServer.instance.getServerSocket().run(addressField.getText(), Integer.parseInt(portField.getText()));
+                    String ip = addressField.getText();
+                    int port = Integer.parseInt(portField.getText());
+
+                    Settings.lastServerIP = ip;
+                    Settings.lastServerPORT = port;
+                    Settings.save();
+
+                    GlobalQuakeServer.instance.getServerSocket().run(ip, port);
                     GlobalQuakeServer.instance.startRuntime();
                 } catch(Exception e){
                     Main.getErrorHandler().handleException(new RuntimeApplicationException("Failed to start server", e));
