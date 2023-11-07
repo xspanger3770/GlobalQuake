@@ -337,7 +337,7 @@ public final class Settings {
 		try {
 			Field[] fields = Settings.class.getDeclaredFields();
 			for (Field field : fields) {
-				if (field.getType() == Boolean.class || field.getType() == Double.class || field.getType() == Integer.class) {
+				if (field.getType() == Boolean.class || field.getType() == Double.class || field.getType() == Integer.class || field.getType() == String.class) {
 					String value = String.valueOf(getPropertyValue(field));
 					properties.setProperty(field.getName(), value);
 				}
