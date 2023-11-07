@@ -169,7 +169,7 @@ public class SeedlinkNetworksReader {
 		}
 	}
 
-    public long getLastReceivedRecord() {
+    public long getLastReceivedRecordTime() {
         return lastReceivedRecord;
     }
 

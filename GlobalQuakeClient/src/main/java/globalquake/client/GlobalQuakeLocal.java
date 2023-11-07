@@ -31,15 +31,10 @@ public class GlobalQuakeLocal extends GlobalQuake {
 
     public GlobalQuakeLocal() {
         instance = this;
-
+        this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
         super.eventHandler = new GlobalQuakeEventHandler().runHandler();
-        super.globalStationManager = new GlobalStationManagerClient();
-        super.earthquakeAnalysis = new EarthquakeAnalysisClient();
-        super.clusterAnalysis = new ClusterAnalysisClient();
-        super.archive = new EarthquakeArchiveClient();
 
         this.alertManager = new AlertManager();
-        this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
         this.shakemapService = new ShakemapService();
         this.soundsService = new SoundsService();
     }
@@ -47,8 +42,10 @@ public class GlobalQuakeLocal extends GlobalQuake {
     public GlobalQuakeLocal(StationDatabaseManager stationDatabaseManager) {
         super(stationDatabaseManager);
         instance = this;
-        this.alertManager = new AlertManager();
+
         this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
+
+        this.alertManager = new AlertManager();
         this.shakemapService = new ShakemapService();
         this.soundsService = new SoundsService();
     }
