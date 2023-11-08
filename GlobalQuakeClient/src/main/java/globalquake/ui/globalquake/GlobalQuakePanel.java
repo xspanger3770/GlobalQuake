@@ -359,6 +359,13 @@ public class GlobalQuakePanel extends GlobePanel {
                 if (System.currentTimeMillis() - time < 1000 * 120) {
                     g.setColor(Color.white);
                 }
+
+                if(GlobalQuake.instance instanceof GlobalQuakeClient client){
+                    if(client.getClientSocket().getStatus() != ClientSocketStatus.CONNECTED){
+                        g.setColor(Color.red);
+                    }
+                }
+
             }
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
         }
