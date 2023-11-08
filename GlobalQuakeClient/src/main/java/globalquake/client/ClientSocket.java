@@ -40,28 +40,37 @@ public class ClientSocket {
     private String ip;
     private int port;
 
+    private ClientSocketStatus status = ClientSocketStatus.DISCONNECTED;
+
     public void connect(String ip, int port) throws IOException, ClassNotFoundException {
         this.ip = ip;
         this.port = port;
-        socket = new Socket();
-        socket.setSoTimeout(SO_TIMEOUT);
-        socket.connect(new InetSocketAddress(ip, port), CONNECT_TIMEOUT);
+        status = ClientSocketStatus.CONNECTING;
+        try {
+            socket = new Socket();
+            socket.setSoTimeout(SO_TIMEOUT);
+            socket.connect(new InetSocketAddress(ip, port), CONNECT_TIMEOUT);
 
-        outputStream = new ObjectOutputStream(socket.getOutputStream());
-        inputStream = new ObjectInputStream(socket.getInputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
 
-        handshake();
+            handshake();
 
-        inputService = Executors.newSingleThreadExecutor();
-        inputService.submit(this::runReader);
-        heartbeatService = Executors.newSingleThreadScheduledExecutor();
-        heartbeatService.scheduleAtFixedRate(this::sendHeartbeat,0,10, TimeUnit.SECONDS);
+            inputService = Executors.newSingleThreadExecutor();
+            inputService.submit(this::runReader);
+            heartbeatService = Executors.newSingleThreadScheduledExecutor();
+            heartbeatService.scheduleAtFixedRate(this::sendHeartbeat, 0, 10, TimeUnit.SECONDS);
 
-        quakeCheckService = Executors.newSingleThreadScheduledExecutor();
-        quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
+            quakeCheckService = Executors.newSingleThreadScheduledExecutor();
+            quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
 
-        sendPacket(new ArchivedQuakesRequestPacket());
-        sendPacket(new StationsRequestPacket());
+            sendPacket(new ArchivedQuakesRequestPacket());
+            sendPacket(new StationsRequestPacket());
+            status = ClientSocketStatus.CONNECTED;
+        }catch(Exception e){
+            status = ClientSocketStatus.DISCONNECTED;
+            throw e;
+        }
     }
 
     public void runReconnectService(){
@@ -111,6 +120,7 @@ public class ClientSocket {
     }
 
     private void onClose() {
+        status = ClientSocketStatus.DISCONNECTED;
         if(socket != null){
             try {
                 socket.close();
@@ -167,4 +177,7 @@ public class ClientSocket {
         }
     }
 
+    public ClientSocketStatus getStatus() {
+        return status;
+    }
 }

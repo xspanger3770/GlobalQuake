@@ -119,7 +119,7 @@ public class ServerSelectionFrame extends GQFrame {
     }
 
     private void launchClientUI() {
-        new GlobalQuakeClient().createFrame();
+        new GlobalQuakeClient(client).createFrame();
     }
 
     public static void main(String[] args) throws Exception{

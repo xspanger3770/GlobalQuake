@@ -1,6 +1,5 @@
 package globalquake.client;
 
-import globalquake.core.SeedlinkNetworksReader;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
 import gqserver.api.Packet;
@@ -10,7 +9,9 @@ import java.awt.*;
 import java.io.IOException;
 
 public class GlobalQuakeClient extends GlobalQuakeLocal {
-    public GlobalQuakeClient() {
+    private final ClientSocket clientSocket;
+
+    public GlobalQuakeClient(ClientSocket clientSocket) {
         instance = this;
 
         super.globalStationManager = new GlobalStationManagerClient();
@@ -18,6 +19,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         super.clusterAnalysis = new ClusterAnalysisClient();
         super.archive = new EarthquakeArchiveClient();
         super.seedlinkNetworksReader = new SeedlinkNetworksReaderClient();
+        this.clientSocket = clientSocket;
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
@@ -41,5 +43,9 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         });
         return this;
 
+    }
+
+    public ClientSocket getClientSocket() {
+        return clientSocket;
     }
 }

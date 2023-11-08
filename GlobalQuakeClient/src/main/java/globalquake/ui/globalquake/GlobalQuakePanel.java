@@ -1,5 +1,8 @@
 package globalquake.ui.globalquake;
 
+import globalquake.client.ClientSocket;
+import globalquake.client.ClientSocketStatus;
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
@@ -420,6 +423,10 @@ public class GlobalQuakePanel extends GlobePanel {
             settingsStrings.add(new SettingInfo("Seedlinks: ", "%d / %d".formatted(runningSeedlinks, totalSeedlinks), getColorPCT(1 - (double) runningSeedlinks / totalSeedlinks)));
         }
 
+        if(GlobalQuake.instance instanceof GlobalQuakeClient clientGQ){
+            ClientSocket socket = clientGQ.getClientSocket();
+            settingsStrings.add(new SettingInfo("Server: ", "%s".formatted(socket.getStatus().getName()), socket.getStatus().getColor()));
+        }
 
         double GB = 1024 * 1024 * 1024.0;
 
