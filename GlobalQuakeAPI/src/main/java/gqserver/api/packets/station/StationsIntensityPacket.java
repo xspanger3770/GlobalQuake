@@ -4,6 +4,7 @@ import gqserver.api.Packet;
 import gqserver.api.data.station.StationIntensityData;
 
 import java.util.List;
+import java.util.UUID;
 
-public record StationsIntensityPacket(long time, List<StationIntensityData> intensities) implements Packet {
+public record StationsIntensityPacket(UUID stationsIndexing, long time, List<StationIntensityData> intensities) implements Packet {
 }

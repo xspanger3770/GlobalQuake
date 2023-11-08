@@ -78,14 +78,14 @@ public class DataService implements GlobalQuakeEventListener {
             if(previous == null || !previous.equals(status)){
                 data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
                 if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
-                    broadcast(getStationReceivingClients(), new StationsIntensityPacket(System.currentTimeMillis(), data));
+                    broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
                     data = new ArrayList<>();
                 }
             }
         }
 
         if(!data.isEmpty()){
-            broadcast(getStationReceivingClients(), new StationsIntensityPacket(System.currentTimeMillis(), data));
+            broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
         }
     }
 
@@ -299,13 +299,13 @@ public class DataService implements GlobalQuakeEventListener {
                                 station.isInEventMode()
                                 ));
             if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
-                client.sendPacket(new StationsInfoPacket(data));
+                client.sendPacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
                 data = new ArrayList<>();
             }
         }
 
         if(!data.isEmpty()){
-            client.sendPacket(new StationsInfoPacket(data));
+            client.sendPacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
         }
     }
 

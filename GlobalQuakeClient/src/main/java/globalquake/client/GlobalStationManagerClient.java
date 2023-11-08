@@ -9,10 +9,12 @@ import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -45,6 +47,9 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void processStationsIntensityPacket(StationsIntensityPacket stationsIntensityPacket) {
+        if(!getIndexing().equals(stationsIntensityPacket.stationsIndexing())){
+            resetIndexing(stationsIntensityPacket.stationsIndexing());
+        }
         for(StationIntensityData stationIntensityData : stationsIntensityPacket.intensities()){
             ClientStation clientStation = stationsIdMap.get(stationIntensityData.index());
             if(clientStation != null){
@@ -54,6 +59,9 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void processStationsInfoPacket(StationsInfoPacket stationsInfoPacket) {
+        if(!getIndexing().equals(stationsInfoPacket.stationsIndexing())){
+            resetIndexing(stationsInfoPacket.stationsIndexing());
+        }
         List<AbstractStation> list = new ArrayList<>();
         for(StationInfoData infoData : stationsInfoPacket.stationInfoDataList()) {
             if(!stationsIdMap.containsKey(infoData.index())) {
@@ -72,5 +80,12 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         }
 
         getStations().addAll(list);
+    }
+
+    private void resetIndexing(UUID uuid) {
+        Logger.info("Station indexing has changed!");
+        super.indexing = uuid;
+        stations.clear();
+        stationsIdMap.clear();
     }
 }
