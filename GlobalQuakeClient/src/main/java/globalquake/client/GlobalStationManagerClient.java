@@ -2,6 +2,7 @@ package globalquake.client;
 
 import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import gqserver.api.Packet;
@@ -9,8 +10,10 @@ import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
+import gqserver.api.packets.station.StationsRequestPacket;
 import org.tinylog.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,5 +90,10 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         super.indexing = uuid;
         stations.clear();
         stationsIdMap.clear();
+        try {
+            ((GlobalQuakeClient)GlobalQuakeClient.instance).getClientSocket().sendPacket(new StationsRequestPacket());
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 }
