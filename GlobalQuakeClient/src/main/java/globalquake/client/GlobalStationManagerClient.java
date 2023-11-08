@@ -47,7 +47,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void processStationsIntensityPacket(StationsIntensityPacket stationsIntensityPacket) {
-        if(!getIndexing().equals(stationsIntensityPacket.stationsIndexing())){
+        if(getIndexing() == null ||!getIndexing().equals(stationsIntensityPacket.stationsIndexing())){
             resetIndexing(stationsIntensityPacket.stationsIndexing());
         }
         for(StationIntensityData stationIntensityData : stationsIntensityPacket.intensities()){
@@ -59,7 +59,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void processStationsInfoPacket(StationsInfoPacket stationsInfoPacket) {
-        if(!getIndexing().equals(stationsInfoPacket.stationsIndexing())){
+        if(getIndexing() == null || !getIndexing().equals(stationsInfoPacket.stationsIndexing())){
             resetIndexing(stationsInfoPacket.stationsIndexing());
         }
         List<AbstractStation> list = new ArrayList<>();
