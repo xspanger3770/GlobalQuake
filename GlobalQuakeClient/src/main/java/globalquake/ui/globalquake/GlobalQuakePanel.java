@@ -67,8 +67,8 @@ public class GlobalQuakePanel extends GlobePanel {
         super(Settings.homeLat, Settings.homeLon);
         getRenderer().addFeature(new FeatureShakemap());
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
-        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureHomeLoc());
 
         frame.addKeyListener(new KeyAdapter() {
