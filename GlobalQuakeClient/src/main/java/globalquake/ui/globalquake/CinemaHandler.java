@@ -79,12 +79,22 @@ public class CinemaHandler {
             @Override
             public void onQuakeRemove(QuakeRemoveEvent event) {
                 warnings.remove(event.earthquake());
+                if(lastTarget.original() instanceof Earthquake earthquake){
+                    if(event.earthquake().getUuid().equals(earthquake.getUuid())){
+                        lastTarget = null;
+                    }
+                }
             }
 
             @Override
             public void onQuakeArchive(QuakeArchiveEvent event) {
                 if(event.earthquake() != null) {
                     warnings.remove(event.earthquake());
+                    if(lastTarget.original() instanceof Earthquake earthquake) {
+                        if (event.earthquake().getUuid().equals(earthquake.getUuid())) {
+                            lastTarget = null;
+                        }
+                    }
                 }
             }
         });

@@ -71,6 +71,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         if (existingQuake != null) {
             clientEarthquakeMap.remove(uuid);
             getEarthquakes().remove(existingQuake);
+            GlobalQuakeClient.instance.getArchive().archiveQuake(existingQuake);
         }
     }
 
