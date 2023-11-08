@@ -115,7 +115,7 @@ public class EarthquakeArchive {
 		uuidArchivedQuakeMap.put(archivedQuake.getUuid(), archivedQuake);
 		archivedQuakes.sort(Comparator.comparing(archivedQuake1 -> -archivedQuake1.getOrigin()));
 
-		if(GlobalQuake.instance != null) {
+		if(GlobalQuake.instance != null && earthquake != null) {
 			GlobalQuake.instance.getEventHandler().fireEvent(new QuakeArchiveEvent(earthquake, archivedQuake));
 		}
 

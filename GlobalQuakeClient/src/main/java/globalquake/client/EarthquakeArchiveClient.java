@@ -11,14 +11,14 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 public class EarthquakeArchiveClient extends EarthquakeArchive {
 
     public void processPacket(ClientSocket socket, Packet packet) {
-        /*if(packet instanceof ArchivedQuakePacket quakePacket) {
+        if(packet instanceof ArchivedQuakePacket quakePacket) {
             if(getArchivedQuakeByUUID(quakePacket.archivedQuakeData().uuid()) == null) {
                 archiveQuake(createArchivedQuake(quakePacket), null);
             }
-        }*/
+        }
     }
 
-    /*private ArchivedQuake createArchivedQuake(ArchivedQuakePacket quakePacket) {
+    private ArchivedQuake createArchivedQuake(ArchivedQuakePacket quakePacket) {
         ArchivedQuakeData data = quakePacket.archivedQuakeData();
         ArchivedQuake archivedQuake = new ArchivedQuake(
                 data.uuid(), data.lat(), data.lon(), data.depth(), data.magnitude(), data.origin(), QualityClass.values()[data.qualityID()]
@@ -29,5 +29,5 @@ public class EarthquakeArchiveClient extends EarthquakeArchive {
         )));
 
         return archivedQuake;
-    }*/
+    }
 }
