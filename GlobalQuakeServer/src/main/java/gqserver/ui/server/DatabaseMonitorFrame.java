@@ -3,6 +3,8 @@ package gqserver.ui.server;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.FatalIOException;
 import globalquake.ui.StationCountPanel;
+import globalquake.ui.database.SeedlinkServersPanel;
+import globalquake.ui.database.StationSourcesPanel;
 import globalquake.ui.stationselect.StationSelectFrame;
 import gqserver.main.Main;
 import globalquake.ui.GQFrame;
@@ -94,8 +96,8 @@ public class DatabaseMonitorFrame extends GQFrame {
 
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this, restoreDatabaseAction));
-        tabbedPane.addTab("FDSNWS", new FDSNWSPanel(this, restoreDatabaseAction));
+        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this, manager, restoreDatabaseAction));
+        tabbedPane.addTab("FDSNWS", new StationSourcesPanel(this, manager, restoreDatabaseAction));
         tabbedPane.addTab("Server Status", new ServerStatusPanel());
         return tabbedPane;
     }
