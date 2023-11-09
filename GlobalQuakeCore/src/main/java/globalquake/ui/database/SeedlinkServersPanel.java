@@ -6,6 +6,7 @@ import globalquake.ui.action.seedlink.EditSeedlinkNetworkAction;
 import globalquake.ui.action.seedlink.RemoveSeedlinkNetworkAction;
 import globalquake.ui.action.seedlink.UpdateSeedlinkNetworkAction;
 import globalquake.ui.table.SeedlinkNetworksTableModel;
+import globalquake.ui.table.StationSourcesTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -22,8 +23,14 @@ public class SeedlinkServersPanel extends JPanel {
     private final RemoveSeedlinkNetworkAction removeSeedlinkNetworkAction;
     private final UpdateSeedlinkNetworkAction updateSeedlinkNetworkAction;
 
-    public SeedlinkServersPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction) {
+    private final JButton selectButton;
+    private final JButton launchButton;
+
+    public SeedlinkServersPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction,
+                               JButton selectButton, JButton launchButton) {
         this.manager = manager;
+        this.selectButton = selectButton;
+        this.launchButton = launchButton;
 
         this.addSeedlinkNetworkAction = new AddSeedlinkNetworkAction(parent, manager);
         this.editSeedlinkNetworkAction = new EditSeedlinkNetworkAction(parent, manager);
@@ -95,7 +102,7 @@ public class SeedlinkServersPanel extends JPanel {
         removeSeedlinkNetworkAction.setEnabled(count >= 1 && !manager.isUpdating());
         updateSeedlinkNetworkAction.setEnabled(count >= 1 && !manager.isUpdating());
         addSeedlinkNetworkAction.setEnabled(!manager.isUpdating());
-        //databaseMonitorFrame.getBtnSelectStations().setEnabled(!manager.isUpdating());
-        //databaseMonitorFrame.getBtnLaunch().setEnabled(!manager.isUpdating());
+        selectButton.setEnabled(!manager.isUpdating());
+        launchButton.setEnabled(!manager.isUpdating());
     }
 }

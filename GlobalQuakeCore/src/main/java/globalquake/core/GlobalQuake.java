@@ -87,7 +87,7 @@ public class GlobalQuake {
 		getStationManager().getStations().clear();
 	}
 
-	public void destroy(){
+	public void destroy() {
 		getArchive().destroy();
 		getEarthquakeAnalysis().destroy();
 		getEventHandler().stopHandler();

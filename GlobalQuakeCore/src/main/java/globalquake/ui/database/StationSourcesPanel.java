@@ -19,9 +19,14 @@ public class StationSourcesPanel extends JPanel {
     private final RemoveStationSourceAction removeStationSourceAction;
     private final UpdateStationSourceAction updateStationSourceAction;
     private final JTable table;
+    private final JButton selectButton;
+    private final JButton launchButton;
     private StationSourcesTableModel tableModel;
 
-    public StationSourcesPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction) {
+    public StationSourcesPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction,
+                               JButton selectButton, JButton launchButton) {
+        this.selectButton = selectButton;
+        this.launchButton = launchButton;
         this.manager = manager;
         this.addStationSourceAction = new AddStationSourceAction(parent, manager);
         this.editStationSourceAction = new EditStationSourceAction(parent, manager);
@@ -93,7 +98,7 @@ public class StationSourcesPanel extends JPanel {
         removeStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
         updateStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
         addStationSourceAction.setEnabled(!manager.isUpdating());
-        //databaseMonitorFrame.getBtnSelectStations().setEnabled(!manager.isUpdating());
-        //databaseMonitorFrame.getBtnLaunch().setEnabled(!manager.isUpdating());
+        selectButton.setEnabled(!manager.isUpdating());
+        launchButton.setEnabled(!manager.isUpdating());
     }
 }

@@ -2,7 +2,6 @@ package globalquake.ui.table;
 
 
 import globalquake.core.GlobalQuake;
-import globalquake.ui.globe.GlobeRenderer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -39,7 +38,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
             }
 
         } catch (ClassCastException e) {
-            GlobalQuake.instance.getErrorHandler().handleException(e);
+            GlobalQuake.getErrorHandler().handleException(e);
         }
 
         return this;

@@ -110,10 +110,10 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
 
         List<LatLng> coords = h3.cellToBoundary(entity.getOriginal().id());
-        createPolygon(renderer, elementHex.getPolygon(), coords);
+        createPolygon(elementHex.getPolygon(), coords);
     }
 
-    public void createPolygon(GlobeRenderer renderer, Polygon3D polygon3D, List<LatLng> coords) {
+    public void createPolygon(Polygon3D polygon3D, List<LatLng> coords) {
         polygon3D.reset();
 
         coords.add(coords.get(0));

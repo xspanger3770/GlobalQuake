@@ -48,8 +48,8 @@ public class DatabaseMonitorFrame extends GQFrame {
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        contentPane.add(createTabbedPane(), BorderLayout.CENTER);
         contentPane.add(createBottomPanel(), BorderLayout.SOUTH);
+        contentPane.add(createTabbedPane(), BorderLayout.CENTER);
 
         pack();
         setTitle(Main.fullName);
@@ -96,8 +96,10 @@ public class DatabaseMonitorFrame extends GQFrame {
 
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this, manager, restoreDatabaseAction));
-        tabbedPane.addTab("FDSNWS", new StationSourcesPanel(this, manager, restoreDatabaseAction));
+        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(
+                this, manager, restoreDatabaseAction, getBtnSelectStations(), new JButton()));
+        tabbedPane.addTab("FDSNWS", new StationSourcesPanel(
+                this, manager, restoreDatabaseAction, getBtnSelectStations(), new JButton()));
         tabbedPane.addTab("Server Status", new ServerStatusPanel());
         return tabbedPane;
     }
