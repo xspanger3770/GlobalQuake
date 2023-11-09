@@ -4,7 +4,7 @@ import globalquake.ui.database.action.seedlink.AddSeedlinkNetworkAction;
 import globalquake.ui.database.action.seedlink.EditSeedlinkNetworkAction;
 import globalquake.ui.database.action.seedlink.RemoveSeedlinkNetworkAction;
 import globalquake.ui.database.action.seedlink.UpdateSeedlinkNetworkAction;
-import globalquake.ui.database.table.SeedlinkNetworksTableModel;
+import globalquake.ui.table.SeedlinkNetworksTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

@@ -1,12 +1,13 @@
 package gqserver.ui.server.table.model;
 
 import globalquake.core.database.SeedlinkNetwork;
-import gqserver.ui.server.table.Column;
-import gqserver.ui.server.table.TableCellRendererAdapter;
+import globalquake.ui.table.Column;
+import globalquake.ui.table.FilterableTableModel;
+import globalquake.ui.table.TableCellRendererAdapter;
 
 import java.util.List;
 
-public class SeedlinkStatusTableModel extends FilterableTableModel<SeedlinkNetwork>{
+public class SeedlinkStatusTableModel extends FilterableTableModel<SeedlinkNetwork> {
     private final List<Column<SeedlinkNetwork, ?>> columns = List.of(
             Column.readonly("Name", String.class, SeedlinkNetwork::getName, new TableCellRendererAdapter<>()),
             Column.readonly("Host", String.class, SeedlinkNetwork::getHost, new TableCellRendererAdapter<>()),
@@ -29,6 +30,7 @@ public class SeedlinkStatusTableModel extends FilterableTableModel<SeedlinkNetwo
         return columns.get(columnIndex).getName();
     }
 
+    @Override
     public TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex) {
         return columns.get(columnIndex).getRenderer();
     }

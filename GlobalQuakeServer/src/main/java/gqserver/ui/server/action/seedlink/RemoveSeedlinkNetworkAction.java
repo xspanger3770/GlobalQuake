@@ -3,7 +3,7 @@ package gqserver.ui.server.action.seedlink;
 
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
-import gqserver.ui.server.table.model.FilterableTableModel;
+import globalquake.ui.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;

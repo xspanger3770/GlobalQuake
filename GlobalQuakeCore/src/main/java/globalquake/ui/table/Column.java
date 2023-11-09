@@ -1,4 +1,4 @@
-package gqserver.ui.server.table;
+package globalquake.ui.table;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;

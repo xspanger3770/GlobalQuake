@@ -4,7 +4,7 @@ import globalquake.ui.database.action.source.AddStationSourceAction;
 import globalquake.ui.database.action.source.EditStationSourceAction;
 import globalquake.ui.database.action.source.RemoveStationSourceAction;
 import globalquake.ui.database.action.source.UpdateStationSourceAction;
-import globalquake.ui.database.table.StationSourcesTableModel;
+import globalquake.ui.table.StationSourcesTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

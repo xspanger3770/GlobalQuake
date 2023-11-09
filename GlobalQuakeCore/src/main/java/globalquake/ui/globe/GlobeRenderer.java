@@ -1,6 +1,5 @@
 package globalquake.ui.globe;
 
-import com.uber.h3core.util.LatLng;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Point2DGQ;
@@ -85,7 +84,7 @@ public class GlobeRenderer {
      * Precompute values as part of optimisation
      */
     public void updateCamera(RenderProperties properties) {
-        properties.setPrecomputed(new RenderPrecomputedValues(this, properties));
+        properties.setPrecomputed(new RenderPrecomputedValues(properties));
         properties.getRenderPrecomputedValues().part2(this, properties);
         renderProperties = properties;
     }
@@ -323,23 +322,6 @@ public class GlobeRenderer {
         return createVec3D(new Vector2D(centerCoords.x, centerCoords.y), 0);
     }
 
-
-    public void createPolygon(Polygon3D polygon3D, List<LatLng> coords) {
-        polygon3D.reset();
-
-        coords.add(coords.get(0));
-
-        for(LatLng latLng : coords){
-            Vector3D vector3D = new Vector3D(
-                    getX_3D(latLng.lat, latLng.lng, 0),
-                    getY_3D(latLng.lat, latLng.lng, 0),
-                    getZ_3D(latLng.lat, latLng.lng, 0));
-
-            polygon3D.addPoint(vector3D);
-        }
-
-        polygon3D.finish();
-    }
 
     public void createNGon(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double startAngle, double step) {
         polygon3D.reset();

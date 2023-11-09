@@ -2,14 +2,15 @@ package gqserver.ui.server.table.model;
 
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.quality.QualityClass;
-import gqserver.ui.server.table.Column;
-import gqserver.ui.server.table.LastUpdateRenderer;
-import gqserver.ui.server.table.TableCellRendererAdapter;
+import globalquake.ui.table.Column;
+import globalquake.ui.table.FilterableTableModel;
+import globalquake.ui.table.LastUpdateRenderer;
+import globalquake.ui.table.TableCellRendererAdapter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class EarthquakeTableModel extends FilterableTableModel<Earthquake>{
+public class EarthquakeTableModel extends FilterableTableModel<Earthquake> {
     private final List<Column<Earthquake, ?>> columns = List.of(
             Column.readonly("Origin", LocalDateTime.class, Earthquake::getOriginDate, new LastUpdateRenderer<>()),
             Column.readonly("Region", String.class, Earthquake::getRegion, new TableCellRendererAdapter<>()),
@@ -35,6 +36,7 @@ public class EarthquakeTableModel extends FilterableTableModel<Earthquake>{
         return columns.get(columnIndex).getName();
     }
 
+    @Override
     public TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex) {
         return columns.get(columnIndex).getRenderer();
     }

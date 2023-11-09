@@ -1,4 +1,4 @@
-package globalquake.ui.database.table;
+package globalquake.ui.table;
 
 import javax.swing.*;
 import java.awt.*;

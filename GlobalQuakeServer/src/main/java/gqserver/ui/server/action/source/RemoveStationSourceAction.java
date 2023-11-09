@@ -3,7 +3,7 @@ package gqserver.ui.server.action.source;
 
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
-import gqserver.ui.server.table.model.FilterableTableModel;
+import globalquake.ui.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;

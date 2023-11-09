@@ -49,11 +49,6 @@ public class Earthquake implements Regional, Warnable {
 		return hyp == null ? 0.0 : hyp.magnitude;
 	}
 
-	public double getPct() {
-		Hypocenter hyp = getHypocenter();
-		return hyp == null ? 0.0 : 100.0 * hyp.getCorrectness();
-	}
-
 	public int getRevisionID() {
 		Hypocenter hyp = getHypocenter();
 		return hyp == null ? 0 : cluster.revisionID;

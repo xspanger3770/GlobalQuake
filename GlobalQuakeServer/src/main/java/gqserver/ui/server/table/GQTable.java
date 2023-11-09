@@ -1,6 +1,7 @@
 package gqserver.ui.server.table;
 
-import gqserver.ui.server.table.model.FilterableTableModel;
+
+import globalquake.ui.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;

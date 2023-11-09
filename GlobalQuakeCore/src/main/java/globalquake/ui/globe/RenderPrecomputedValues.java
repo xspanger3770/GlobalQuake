@@ -20,7 +20,7 @@ public class RenderPrecomputedValues {
     public final double sinPitch;
     public double horizonDist;
 
-    public RenderPrecomputedValues(GlobeRenderer renderer, RenderProperties renderProperties){
+    public RenderPrecomputedValues(RenderProperties renderProperties){
         camera_altitude = GeoUtils.EARTH_RADIUS * renderProperties.scroll;
 
         double cameraYaw = -FastMath.toRadians(renderProperties.centerLon);

@@ -1,4 +1,4 @@
-package globalquake.ui.database.table;
+package globalquake.ui.table;
 
 import java.io.Serial;
 import java.util.ArrayList;
@@ -74,4 +74,6 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 	public List<E> getData() {
 		return data;
 	}
+
+	public abstract TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex);
 }

@@ -246,6 +246,7 @@ public class ClusterAnalysis {
         return false;
     }
 
+    @SuppressWarnings("unused")
     public static boolean couldBeArrival(PickedEvent pickedEvent, PreliminaryHypocenter bestHypocenter,
                                          boolean considerIntensity, boolean increasingPWindow, boolean pWaveOnly) {
         if (pickedEvent == null || bestHypocenter == null) {

@@ -1,12 +1,13 @@
 package gqserver.ui.server.table.model;
 
 import globalquake.core.earthquake.data.Cluster;
-import gqserver.ui.server.table.Column;
-import gqserver.ui.server.table.TableCellRendererAdapter;
+import globalquake.ui.table.Column;
+import globalquake.ui.table.FilterableTableModel;
+import globalquake.ui.table.TableCellRendererAdapter;
 
 import java.util.List;
 
-public class ClusterTableModel extends FilterableTableModel<Cluster>{
+public class ClusterTableModel extends FilterableTableModel<Cluster> {
     private final List<Column<Cluster, ?>> columns = List.of(
             Column.readonly("ID", Integer.class, Cluster::getId, new TableCellRendererAdapter<>()),
             Column.readonly("Assigned Events", Integer.class, cluster -> cluster.getAssignedEvents().size(), new TableCellRendererAdapter<>()),
@@ -29,6 +30,7 @@ public class ClusterTableModel extends FilterableTableModel<Cluster>{
         return columns.get(columnIndex).getName();
     }
 
+    @Override
     public TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex) {
         return columns.get(columnIndex).getRenderer();
     }

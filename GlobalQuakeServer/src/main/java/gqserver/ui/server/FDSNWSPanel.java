@@ -1,10 +1,10 @@
 package gqserver.ui.server;
 
+import globalquake.ui.table.StationSourcesTableModel;
 import gqserver.ui.server.action.source.AddStationSourceAction;
 import gqserver.ui.server.action.source.EditStationSourceAction;
 import gqserver.ui.server.action.source.RemoveStationSourceAction;
 import gqserver.ui.server.action.source.UpdateStationSourceAction;
-import gqserver.ui.server.table.model.StationSourcesTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

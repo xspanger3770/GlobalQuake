@@ -1,7 +1,8 @@
-package gqserver.ui.server.table;
+package globalquake.ui.table;
 
-import gqserver.main.Main;
-import gqserver.ui.server.table.model.FilterableTableModel;
+
+import globalquake.core.GlobalQuake;
+import globalquake.ui.globe.GlobeRenderer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -38,7 +39,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
             }
 
         } catch (ClassCastException e) {
-            Main.getErrorHandler().handleException(e);
+            GlobalQuake.instance.getErrorHandler().handleException(e);
         }
 
         return this;

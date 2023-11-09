@@ -69,10 +69,6 @@ public class Regions {
     }
 
 
-    @SuppressWarnings("EmptyMethod")
-    public static synchronized void awaitDownload() {
-    }
-
     @Deprecated
     public static synchronized String downloadRegion(double lat, double lon) {
         if (!enabled) {
@@ -146,9 +142,7 @@ public class Regions {
             return localName;
         }
 
-        String globalName = getName(lat, lon, regionsUHD);
-
-        return globalName;
+        return getName(lat, lon, regionsUHD);
     }
 
     public static String getRegion(double lat, double lon) {

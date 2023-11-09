@@ -3,7 +3,7 @@ package globalquake.ui.database.action.seedlink;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.RuntimeApplicationException;
-import globalquake.ui.database.table.FilterableTableModel;
+import globalquake.ui.table.FilterableTableModel;
 
 import javax.swing.*;
 

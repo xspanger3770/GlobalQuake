@@ -1,14 +1,15 @@
 package gqserver.ui.server.table.model;
 
+import globalquake.ui.table.Column;
+import globalquake.ui.table.FilterableTableModel;
+import globalquake.ui.table.LastUpdateRenderer;
+import globalquake.ui.table.TableCellRendererAdapter;
 import gqserver.api.ServerClient;
-import gqserver.ui.server.table.Column;
-import gqserver.ui.server.table.LastUpdateRenderer;
-import gqserver.ui.server.table.TableCellRendererAdapter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ClientsTableModel extends FilterableTableModel<ServerClient>{
+public class ClientsTableModel extends FilterableTableModel<ServerClient> {
     private final List<Column<ServerClient, ?>> columns = List.of(
             Column.readonly("ID", Integer.class, ServerClient::getID, new TableCellRendererAdapter<>()),
             Column.readonly("Joined at", LocalDateTime.class, ServerClient::getJoinDate, new LastUpdateRenderer<>()),
