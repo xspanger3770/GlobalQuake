@@ -1,23 +1,24 @@
-package gqserver.ui.server;
+package globalquake.ui;
 
 import globalquake.core.database.Channel;
 import globalquake.core.database.Network;
 import globalquake.core.database.Station;
-import gqserver.ui.stationselect.StationColor;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.ui.stationselect.StationColor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Path2D;
 
 public class StationCountPanel extends JPanel {
-    private final DatabaseMonitorFrame databaseMonitorFrame;
+    private final StationDatabaseManager manager;
     private final CounterPanel total;
     private final CounterPanel available;
     private final CounterPanel selected;
     private final CounterPanel unavailable;
 
-    public StationCountPanel(DatabaseMonitorFrame databaseMonitorFrame, LayoutManager layoutManager) {
-        this.databaseMonitorFrame = databaseMonitorFrame;
+    public StationCountPanel(StationDatabaseManager manager, LayoutManager layoutManager) {
+        this.manager = manager;
         setLayout(layoutManager);
 
         add(total = new CounterPanel("Total Channels", StationColor.ALL));
@@ -25,7 +26,7 @@ public class StationCountPanel extends JPanel {
         add(selected = new CounterPanel("Selected Channels", StationColor.SELECTED));
         add(unavailable = new CounterPanel("Unavailable Channels", StationColor.UNAVAILABLE));
 
-        databaseMonitorFrame.getManager().addUpdateListener(this::recalculate);
+        manager.addUpdateListener(this::recalculate);
 
         recalculate();
     }
@@ -35,9 +36,9 @@ public class StationCountPanel extends JPanel {
         int ava = 0;
         int sel = 0;
         int unb = 0;
-        databaseMonitorFrame.getManager().getStationDatabase().getDatabaseReadLock().lock();
+        manager.getStationDatabase().getDatabaseReadLock().lock();
         try{
-            for(Network network : databaseMonitorFrame.getManager().getStationDatabase().getNetworks()){
+            for(Network network : manager.getStationDatabase().getNetworks()){
                 for(Station station: network.getStations()){
                     for(Channel channel:station.getChannels()){
                         tot++;
@@ -55,7 +56,7 @@ public class StationCountPanel extends JPanel {
                 }
             }
         } finally {
-            databaseMonitorFrame.getManager().getStationDatabase().getDatabaseReadLock().unlock();
+            manager.getStationDatabase().getDatabaseReadLock().unlock();
         }
         total.setCount(tot);
         available.setCount(ava);

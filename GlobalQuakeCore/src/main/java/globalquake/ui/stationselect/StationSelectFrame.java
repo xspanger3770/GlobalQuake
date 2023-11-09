@@ -1,12 +1,14 @@
-package gqserver.ui.stationselect;
+package globalquake.ui.stationselect;
 
+import globalquake.core.database.StationDatabaseManager;
 import globalquake.ui.GQFrame;
-import gqserver.ui.server.DatabaseMonitorFrame;
-import gqserver.ui.server.StationCountPanel;
-import gqserver.ui.stationselect.action.DeselectAllAction;
-import gqserver.ui.stationselect.action.DeselectUnavailableAction;
-import gqserver.ui.stationselect.action.DistanceFilterAction;
-import gqserver.ui.stationselect.action.SelectAllAction;
+import globalquake.ui.StationCountPanel;
+import globalquake.ui.stationselect.DragMode;
+import globalquake.ui.stationselect.StationSelectPanel;
+import globalquake.ui.stationselect.action.DeselectAllAction;
+import globalquake.ui.stationselect.action.DeselectUnavailableAction;
+import globalquake.ui.stationselect.action.DistanceFilterAction;
+import globalquake.ui.stationselect.action.SelectAllAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +19,7 @@ import java.util.Objects;
 public class StationSelectFrame extends GQFrame implements ActionListener {
 
     private final StationSelectPanel stationSelectPanel;
-    private final DatabaseMonitorFrame databaseMonitorFrame;
+    private final StationDatabaseManager manager;
     private JToggleButton selectButton;
     private JToggleButton deselectButton;
     private final JButton selectAll;
@@ -25,14 +27,14 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
     private DragMode dragMode = DragMode.NONE;
     private final JCheckBox chkBoxShowUnavailable;
 
-    public StationSelectFrame(DatabaseMonitorFrame databaseMonitorFrame) {
+    public StationSelectFrame(Window parent, StationDatabaseManager manager) {
         setLayout(new BorderLayout());
-        this.databaseMonitorFrame = databaseMonitorFrame;
+        this.manager = manager;
         
         JPanel togglePanel = new JPanel(new GridBagLayout());
         JButton toggleButton = new JButton("<");
-        selectAll = new JButton(new SelectAllAction(databaseMonitorFrame.getManager(), this));
-        deselectAll = new JButton(new DeselectAllAction(databaseMonitorFrame.getManager(), this));
+        selectAll = new JButton(new SelectAllAction(manager, this));
+        deselectAll = new JButton(new DeselectAllAction(manager, this));
         selectAll.addActionListener(this);
         deselectAll.addActionListener(this);
 
@@ -51,7 +53,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         toggleButton.setBackground(Color.GRAY);
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
-        stationSelectPanel = new StationSelectPanel(this, databaseMonitorFrame.getManager()){
+        stationSelectPanel = new StationSelectPanel(this, manager){
             @Override
             public void paint(Graphics gr) {
                 super.paint(gr);
@@ -104,10 +106,10 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
         add(centerPanel, BorderLayout.CENTER);
         add(toolBar, BorderLayout.WEST);
-        add(new StationCountPanel(databaseMonitorFrame, new GridLayout(1,4)), BorderLayout.SOUTH);
+        add(new StationCountPanel(manager, new GridLayout(1,4)), BorderLayout.SOUTH);
 
         pack();
-        setLocationRelativeTo(databaseMonitorFrame);
+        setLocationRelativeTo(parent);
         setResizable(true);
         setTitle("Select Stations");
     }
@@ -163,11 +165,11 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
         toolBar.add(deselectButton);
         toolBar.add(deselectAll);
-        toolBar.add(new JButton(new DeselectUnavailableAction(databaseMonitorFrame.getManager(), this)));
+        toolBar.add(new JButton(new DeselectUnavailableAction(manager, this)));
 
         toolBar.addSeparator();
 
-        JButton buttonFilter = new JButton(new DistanceFilterAction(databaseMonitorFrame.getManager(), this));
+        JButton buttonFilter = new JButton(new DistanceFilterAction(manager, this));
         buttonFilter.addActionListener(this);
         toolBar.add(buttonFilter);
 

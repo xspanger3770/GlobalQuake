@@ -125,7 +125,7 @@ public class DatabaseMonitorFrame extends GQFrame {
         btnSelectStations.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new StationSelectFrame(DatabaseMonitorFrame.this).setVisible(true);
+                new StationSelectFrame(DatabaseMonitorFrame.this, manager).setVisible(true);
             }
         });
 

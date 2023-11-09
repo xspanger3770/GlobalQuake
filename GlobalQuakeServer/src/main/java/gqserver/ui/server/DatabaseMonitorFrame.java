@@ -2,11 +2,12 @@ package gqserver.ui.server;
 
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.FatalIOException;
+import globalquake.ui.StationCountPanel;
+import globalquake.ui.stationselect.StationSelectFrame;
 import gqserver.main.Main;
 import globalquake.ui.GQFrame;
 import gqserver.ui.server.action.RestoreDatabaseAction;
 import globalquake.ui.settings.SettingsFrame;
-import gqserver.ui.stationselect.StationSelectFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -128,13 +129,13 @@ public class DatabaseMonitorFrame extends GQFrame {
         btnSelectStations.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new StationSelectFrame(DatabaseMonitorFrame.this).setVisible(true);
+                new StationSelectFrame(DatabaseMonitorFrame.this, manager).setVisible(true);
             }
         });
 
         buttonsPanel.add(btnSelectStations);
 
-        bottomPanel.add(new StationCountPanel(this, new GridLayout(2, 2)));
+        bottomPanel.add(new StationCountPanel(manager, new GridLayout(2, 2)));
 
         mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         mainProgressBar.setValue(0);
