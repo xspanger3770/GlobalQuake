@@ -13,8 +13,7 @@ import java.util.Objects;
 public class Main {
 
     private static ApplicationErrorHandler errorHandler;
-    public static final String version = "0.10.0_pre4";
-    public static final String fullName = "GlobalQuake " + version;
+    public static final String fullName = "GlobalQuake " + GlobalQuake.version;
     public static final File MAIN_FOLDER = new File("./.GlobalQuakeData/");
 
     public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
