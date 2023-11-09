@@ -2,7 +2,6 @@ package globalquake.client;
 
 import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
-import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import gqserver.api.Packet;

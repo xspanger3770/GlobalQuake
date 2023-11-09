@@ -1,6 +1,5 @@
 package globalquake.intensity;
 
-import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
@@ -11,7 +10,6 @@ import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
-import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Iterator;

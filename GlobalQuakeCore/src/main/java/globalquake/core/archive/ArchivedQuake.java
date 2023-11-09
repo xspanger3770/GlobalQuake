@@ -1,6 +1,5 @@
 package globalquake.core.archive;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;
@@ -28,7 +27,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final UUID uuid;
 	private final QualityClass qualityClass;
 	private double maxRatio;
-	private double maxPGA;
 	private String region;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
@@ -66,7 +64,6 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 
 		this.maxRatio = 1;
-		int abandonedCount = previousHypocenter.getWrongEventCount();
 		for (Event e : earthquake.getCluster().getAssignedEvents().values()) {
 			if(e.isValid()) {
 				archivedEvents.add(

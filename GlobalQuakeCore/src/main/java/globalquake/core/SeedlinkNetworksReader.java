@@ -188,7 +188,9 @@ public class SeedlinkNetworksReader {
             	iterator.remove();
 			}
 			try {
-				seedlinkReaderService.awaitTermination(10, TimeUnit.SECONDS);
+				if(!seedlinkReaderService.awaitTermination(10, TimeUnit.SECONDS)){
+					Logger.error("Unable to terminate seedlinkReaderService!");
+				}
 			} catch (InterruptedException e) {
 				Logger.error(e);
 			}

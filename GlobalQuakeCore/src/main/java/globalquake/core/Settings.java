@@ -308,7 +308,7 @@ public final class Settings {
 					}
 				}catch(Exception e){
 					Logger.error(e);
-					val = defaultVal.toString();
+					val = defaultVal;
 				}
 				setProperty(field, val);
 			} else {

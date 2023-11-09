@@ -66,10 +66,6 @@ public class Regions {
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/region_dataset.geojson", null, regionSearchHD, NONE);
-
-        /*for(ArrayList<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
-            regionSearchHD.addAll(list);
-        }*/
     }
 
 
@@ -151,14 +147,6 @@ public class Regions {
         }
 
         String globalName = getName(lat, lon, regionsUHD);
-
-        if(localName != null && globalName != null) {
-            return "%s, %s".formatted(localName, globalName);
-        }
-
-        if(localName != null){
-            return localName;
-        }
 
         return globalName;
     }

@@ -2,6 +2,7 @@ package globalquake.ui.client;
 
 import globalquake.client.ClientSocket;
 import globalquake.client.GlobalQuakeClient;
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
@@ -17,7 +18,8 @@ import globalquake.utils.Scale;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.Set;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.Executors;
 
 public class ServerSelectionFrame extends GQFrame {
@@ -119,7 +121,20 @@ public class ServerSelectionFrame extends GQFrame {
     }
 
     private void launchClientUI() {
-        new GlobalQuakeClient(client).createFrame();
+        GlobalQuakeLocal gq = new GlobalQuakeClient(client).createFrame();
+        gq.getGlobalQuakeFrame().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                client.destroy();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                client.destroy();
+            }
+        });
     }
 
     public static void main(String[] args) throws Exception{

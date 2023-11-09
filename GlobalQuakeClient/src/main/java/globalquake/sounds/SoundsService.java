@@ -11,7 +11,6 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
-import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;

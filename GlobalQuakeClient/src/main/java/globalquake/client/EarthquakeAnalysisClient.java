@@ -20,7 +20,6 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
-import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
