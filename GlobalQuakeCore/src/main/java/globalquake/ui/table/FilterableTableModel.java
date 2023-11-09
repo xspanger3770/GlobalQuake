@@ -35,4 +35,9 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 	}
 
 	public abstract TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex);
+
+	@Override
+	public synchronized int getRowCount() {
+		return filteredData.size();
+	}
 }
