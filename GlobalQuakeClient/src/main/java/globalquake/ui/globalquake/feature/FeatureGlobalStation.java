@@ -89,7 +89,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        if(Settings.hideDeadStations && entity.getOriginal().hasNoDisplayableData()){
+        if(Settings.hideDeadStations && !entity.getOriginal().hasDisplayableData()){
             return;
         }
 
@@ -172,7 +172,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y - 15);
 
-            if(station.hasNoDisplayableData()){
+            if(!station.hasDisplayableData()){
                 str = "No data";
                 g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 22);
             } else {
@@ -188,7 +188,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         }
         if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
-            String str = station.hasNoDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
+            String str = !station.hasDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
             g.setFont(new Font("Calibri", Font.PLAIN, 13));
             g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 9);
@@ -203,7 +203,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             return Color.gray;
         }
 
-        if (station.getAnalysis().getStatus() == AnalysisStatus.INIT || station.hasNoDisplayableData()) {
+        if (station.getAnalysis().getStatus() == AnalysisStatus.INIT || !station.hasDisplayableData()) {
             return Color.lightGray;
         } else {
             return Scale.getColorRatio(station.getMaxRatio60S());

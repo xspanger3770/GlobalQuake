@@ -74,8 +74,8 @@ public class GlobalStation extends AbstractStation {
 	}
 
 	@Override
-	public boolean hasNoDisplayableData() {
-		return !hasData() || getAnalysis().getNumRecords() < 3;
+	public boolean hasDisplayableData() {
+		return hasData() && getAnalysis().getNumRecords() >= 3;
 	}
 
 	@Override

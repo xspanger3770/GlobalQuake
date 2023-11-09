@@ -67,7 +67,7 @@ public class DataService implements GlobalQuakeEventListener {
     }
 
     public StationStatus createStatus(AbstractStation station){
-        return new StationStatus(station.isInEventMode(), !station.hasNoDisplayableData(), station.getMaxRatio60S());
+        return new StationStatus(station.isInEventMode(), station.hasDisplayableData(), station.getMaxRatio60S());
     }
 
     private void sendIntensityData() {

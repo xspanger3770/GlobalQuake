@@ -57,8 +57,8 @@ public class ArchivedQuakePanel extends GlobePanel {
         }
 
         @Override
-        public boolean hasNoDisplayableData() {
-            return false;
+        public boolean hasDisplayableData() {
+            return true;
         }
 
         @Override

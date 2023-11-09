@@ -132,12 +132,11 @@ public abstract class AbstractStation {
 		return analysis;
 	}
 
-	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hasData() {
 		return getDelayMS() != -1 && getDelayMS() < 5 * 60 * 1000;
 	}
 
-	public boolean hasNoDisplayableData() { return true; }
+	public boolean hasDisplayableData() { return false; }
 
 	public boolean isInEventMode() {return false;}
 

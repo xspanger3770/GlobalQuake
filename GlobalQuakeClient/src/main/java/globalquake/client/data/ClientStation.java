@@ -35,8 +35,8 @@ public class ClientStation extends AbstractStation {
     }
 
     @Override
-    public boolean hasNoDisplayableData() {
-        return !hasData();
+    public boolean hasDisplayableData() {
+        return hasData() && getDelayMS() < 1000 * 60 * 5;
     }
 
     @Override
