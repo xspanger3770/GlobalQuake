@@ -42,15 +42,15 @@ public class GlobalStationManagerClient extends GlobalStationManager {
 
     public void processPacket(ClientSocket socket, Packet packet) {
         if(packet instanceof StationsInfoPacket stationsInfoPacket){
-            processStationsInfoPacket(stationsInfoPacket);
+            processStationsInfoPacket(socket, stationsInfoPacket);
         } else if (packet instanceof StationsIntensityPacket stationsIntensityPacket) {
-            processStationsIntensityPacket(stationsIntensityPacket);
+            processStationsIntensityPacket(socket, stationsIntensityPacket);
         }
     }
 
-    private void processStationsIntensityPacket(StationsIntensityPacket stationsIntensityPacket) {
+    private void processStationsIntensityPacket(ClientSocket socket, StationsIntensityPacket stationsIntensityPacket) {
         if(getIndexing() == null ||!getIndexing().equals(stationsIntensityPacket.stationsIndexing())){
-            resetIndexing(stationsIntensityPacket.stationsIndexing());
+            resetIndexing(socket, stationsIntensityPacket.stationsIndexing());
         }
         for(StationIntensityData stationIntensityData : stationsIntensityPacket.intensities()){
             ClientStation clientStation = stationsIdMap.get(stationIntensityData.index());
@@ -60,9 +60,9 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         }
     }
 
-    private void processStationsInfoPacket(StationsInfoPacket stationsInfoPacket) {
+    private void processStationsInfoPacket(ClientSocket socket, StationsInfoPacket stationsInfoPacket) {
         if(getIndexing() == null || !getIndexing().equals(stationsInfoPacket.stationsIndexing())){
-            resetIndexing(stationsInfoPacket.stationsIndexing());
+            resetIndexing(socket, stationsInfoPacket.stationsIndexing());
         }
         List<AbstractStation> list = new ArrayList<>();
         for(StationInfoData infoData : stationsInfoPacket.stationInfoDataList()) {
@@ -84,13 +84,13 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         getStations().addAll(list);
     }
 
-    private void resetIndexing(UUID uuid) {
+    private void resetIndexing(ClientSocket socket, UUID uuid) {
         Logger.info("Station indexing has changed!");
         super.indexing = uuid;
         stations.clear();
         stationsIdMap.clear();
         try {
-            ((GlobalQuakeClient)GlobalQuakeClient.instance).getClientSocket().sendPacket(new StationsRequestPacket());
+            socket.sendPacket(new StationsRequestPacket());
         } catch (IOException e) {
             Logger.error(e);
         }

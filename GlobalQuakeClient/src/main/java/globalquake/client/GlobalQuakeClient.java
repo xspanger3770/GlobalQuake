@@ -5,7 +5,6 @@ import globalquake.ui.globalquake.GlobalQuakeFrame;
 import gqserver.api.Packet;
 import org.tinylog.Logger;
 
-import java.awt.*;
 import java.io.IOException;
 
 public class GlobalQuakeClient extends GlobalQuakeLocal {
@@ -30,17 +29,15 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
 
     @Override
     public GlobalQuakeLocal createFrame() {
-        EventQueue.invokeLater(() -> {
-            try {
-                globalQuakeFrame = new GlobalQuakeFrame();
-                globalQuakeFrame.setVisible(true);
+        try {
+            globalQuakeFrame = new GlobalQuakeFrame();
+            globalQuakeFrame.setVisible(true);
 
-                Main.getErrorHandler().setParent(globalQuakeFrame);
-            }catch (Exception e){
-                Logger.error(e);
-                System.exit(0);
-            }
-        });
+            Main.getErrorHandler().setParent(globalQuakeFrame);
+        }catch (Exception e){
+            Logger.error(e);
+            System.exit(0);
+        }
         return this;
 
     }

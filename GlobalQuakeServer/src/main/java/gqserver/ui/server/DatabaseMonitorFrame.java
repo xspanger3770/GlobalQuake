@@ -153,10 +153,6 @@ public class DatabaseMonitorFrame extends GQFrame {
         return bottomPanel;
     }
 
-    public StationDatabaseManager getManager() {
-        return manager;
-    }
-
     public void initDone() {
         buttonsOutsidePanel.remove(mainProgressBar);
         buttonsOutsidePanel.setLayout(new GridLayout(1, 1));

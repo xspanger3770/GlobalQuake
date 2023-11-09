@@ -110,7 +110,7 @@ public class ServerSelectionFrame extends GQFrame {
                 ServerSelectionFrame.this.dispose();
                 launchClientUI();
             } catch (Exception e) {
-                GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to connect to the server: %s".formatted(e.getMessage())));
+                GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to connect to the server: %s".formatted(e.getMessage()), e));
                 connectButton.setText("Connect");
             } finally {
                 addressField.setEnabled(true);

@@ -32,7 +32,6 @@ public class AlertManager {
                 tick();
             }
 
-            @SuppressWarnings("unused")
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
                 tick();

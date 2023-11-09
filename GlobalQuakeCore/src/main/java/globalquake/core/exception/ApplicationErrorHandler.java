@@ -48,6 +48,7 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 	}
 
 	public synchronized void handleWarning(Throwable e) {
+		Logger.warn(e);
 		showWarning(e.getMessage());
 	}
 

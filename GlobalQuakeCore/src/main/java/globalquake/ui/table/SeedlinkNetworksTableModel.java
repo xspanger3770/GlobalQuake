@@ -26,6 +26,7 @@ public class SeedlinkNetworksTableModel extends FilterableTableModel<SeedlinkNet
         return columns.get(columnIndex).getName();
     }
 
+    @Override
     public TableCellRendererAdapter<?, ?> getColumnRenderer(int columnIndex) {
         return columns.get(columnIndex).getRenderer();
     }

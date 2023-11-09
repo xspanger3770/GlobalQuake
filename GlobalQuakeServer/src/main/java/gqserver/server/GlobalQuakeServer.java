@@ -19,6 +19,7 @@ public class GlobalQuakeServer extends GlobalQuake {
         this.serverEventHandler = new GlobalQuakeServerEventHandler().runHandler();
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void destroy() {
         super.destroy();

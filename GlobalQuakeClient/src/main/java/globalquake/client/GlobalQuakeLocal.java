@@ -76,6 +76,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
         return this;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void destroy() {
         super.destroy();
