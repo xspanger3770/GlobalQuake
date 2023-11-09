@@ -18,7 +18,6 @@ public class GlobalQuakeRuntime {
     private long lastQuakesT;
     private ScheduledExecutorService execAnalysis;
     private ScheduledExecutorService exec1Sec;
-    private ScheduledExecutorService execClusters;
     private ScheduledExecutorService execQuake;
 
     public void runThreads() {
@@ -26,8 +25,6 @@ public class GlobalQuakeRuntime {
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("Station Analysis Thread"));
         exec1Sec = Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("1-Second Loop Thread"));
-        execClusters = Executors
-                .newSingleThreadScheduledExecutor(new NamedThreadFactory("Cluster Analysis Thread"));
         execQuake = Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("Hypocenter Location Thread"));
 
@@ -56,40 +53,28 @@ public class GlobalQuakeRuntime {
             }
         }, 0, 1, TimeUnit.SECONDS);
 
-        execClusters.scheduleAtFixedRate(() -> {
-            try {
-                long a = System.currentTimeMillis();
-                GlobalQuake.instance.getClusterAnalysis().run();
-                clusterAnalysisT = System.currentTimeMillis() - a;
-            } catch (Exception e) {
-                Logger.error("Exception occurred in cluster analysis loop");
-                GlobalQuake.getErrorHandler().handleException(e);
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
-
         execQuake.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
+                GlobalQuake.instance.getClusterAnalysis().run();
                 GlobalQuake.instance.getEarthquakeAnalysis().run();
                 lastQuakesT = System.currentTimeMillis() - a;
             } catch (Exception e) {
                 Logger.error("Exception occurred in hypocenter location loop");
                 GlobalQuake.getErrorHandler().handleException(e);
             }
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 300, TimeUnit.MILLISECONDS);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void stop() {
         execAnalysis.shutdownNow();
         execQuake.shutdownNow();
-        execClusters.shutdownNow();
         exec1Sec.shutdownNow();
 
         try {
             execAnalysis.awaitTermination(10, TimeUnit.SECONDS);
             execQuake.awaitTermination(10, TimeUnit.SECONDS);
-            execClusters.awaitTermination(10, TimeUnit.SECONDS);
             exec1Sec.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Logger.error(e);
