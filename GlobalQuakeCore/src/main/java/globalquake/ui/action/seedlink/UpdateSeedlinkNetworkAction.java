@@ -1,4 +1,4 @@
-package gqserver.ui.server.action.seedlink;
+package globalquake.ui.action.seedlink;
 
 
 import globalquake.core.database.SeedlinkNetwork;

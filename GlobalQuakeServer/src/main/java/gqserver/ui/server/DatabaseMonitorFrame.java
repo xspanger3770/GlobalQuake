@@ -6,7 +6,7 @@ import globalquake.ui.StationCountPanel;
 import globalquake.ui.stationselect.StationSelectFrame;
 import gqserver.main.Main;
 import globalquake.ui.GQFrame;
-import gqserver.ui.server.action.RestoreDatabaseAction;
+import globalquake.ui.action.RestoreDatabaseAction;
 import globalquake.ui.settings.SettingsFrame;
 
 import javax.swing.*;

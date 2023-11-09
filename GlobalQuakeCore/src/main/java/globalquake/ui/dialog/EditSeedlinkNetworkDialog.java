@@ -1,4 +1,4 @@
-package globalquake.ui.database;
+package globalquake.ui.dialog;
 
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;

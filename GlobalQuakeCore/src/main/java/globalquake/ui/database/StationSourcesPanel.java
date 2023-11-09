@@ -1,9 +1,10 @@
 package globalquake.ui.database;
 
-import globalquake.ui.database.action.source.AddStationSourceAction;
-import globalquake.ui.database.action.source.EditStationSourceAction;
-import globalquake.ui.database.action.source.RemoveStationSourceAction;
-import globalquake.ui.database.action.source.UpdateStationSourceAction;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.ui.action.source.AddStationSourceAction;
+import globalquake.ui.action.source.EditStationSourceAction;
+import globalquake.ui.action.source.RemoveStationSourceAction;
+import globalquake.ui.action.source.UpdateStationSourceAction;
 import globalquake.ui.table.StationSourcesTableModel;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 
 public class StationSourcesPanel extends JPanel {
-    private final DatabaseMonitorFrame databaseMonitorFrame;
+    private final StationDatabaseManager manager;
 
     private final AddStationSourceAction addStationSourceAction;
     private final EditStationSourceAction editStationSourceAction;
@@ -20,12 +21,12 @@ public class StationSourcesPanel extends JPanel {
     private final JTable table;
     private StationSourcesTableModel tableModel;
 
-    public StationSourcesPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
-        this.databaseMonitorFrame = databaseMonitorFrame;
-        this.addStationSourceAction = new AddStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.editStationSourceAction = new EditStationSourceAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.removeStationSourceAction = new RemoveStationSourceAction(databaseMonitorFrame.getManager(), this);
-        this.updateStationSourceAction = new UpdateStationSourceAction(databaseMonitorFrame.getManager());
+    public StationSourcesPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction) {
+        this.manager = manager;
+        this.addStationSourceAction = new AddStationSourceAction(parent, manager);
+        this.editStationSourceAction = new EditStationSourceAction(parent, manager);
+        this.removeStationSourceAction = new RemoveStationSourceAction(manager, this);
+        this.updateStationSourceAction = new UpdateStationSourceAction(manager);
 
         setLayout(new BorderLayout());
 
@@ -47,8 +48,8 @@ public class StationSourcesPanel extends JPanel {
         this.updateStationSourceAction.setEnabled(false);
         this.addStationSourceAction.setEnabled(false);
 
-        databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
-        databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
+        manager.addStatusListener(() -> rowSelectionChanged(null));
+        manager.addUpdateListener(() -> tableModel.applyFilter());
     }
 
     private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
@@ -69,7 +70,7 @@ public class StationSourcesPanel extends JPanel {
     }
 
     private JTable createTable() {
-        JTable table = new JTable(tableModel = new StationSourcesTableModel(databaseMonitorFrame.getManager().getStationDatabase().getStationSources()));
+        JTable table = new JTable(tableModel = new StationSourcesTableModel(manager.getStationDatabase().getStationSources()));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
         table.setRowHeight(20);
         table.setGridColor(Color.black);
@@ -88,11 +89,11 @@ public class StationSourcesPanel extends JPanel {
 
     private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
         var count = table.getSelectionModel().getSelectedItemsCount();
-        editStationSourceAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
-        removeStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
-        updateStationSourceAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
-        addStationSourceAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        editStationSourceAction.setEnabled(count == 1 && !manager.isUpdating());
+        removeStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
+        updateStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
+        addStationSourceAction.setEnabled(!manager.isUpdating());
+        //databaseMonitorFrame.getBtnSelectStations().setEnabled(!manager.isUpdating());
+        //databaseMonitorFrame.getBtnLaunch().setEnabled(!manager.isUpdating());
     }
 }

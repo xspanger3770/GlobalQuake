@@ -1,6 +1,7 @@
-package globalquake.ui.database.action;
+package globalquake.ui.action;
 
 import globalquake.core.database.StationDatabaseManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;

@@ -4,8 +4,9 @@ import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.FatalIOException;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
-import globalquake.ui.database.action.RestoreDatabaseAction;
+import globalquake.ui.action.RestoreDatabaseAction;
 import globalquake.ui.stationselect.StationSelectFrame;
+import globalquake.ui.StationCountPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -95,8 +96,8 @@ public class DatabaseMonitorFrame extends GQFrame {
 
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this,restoreDatabaseAction));
-        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this,restoreDatabaseAction));
+        tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(this, manager,restoreDatabaseAction));
+        tabbedPane.addTab("Station Sources", new StationSourcesPanel(this, manager, restoreDatabaseAction));
         return tabbedPane;
     }
 
@@ -146,7 +147,7 @@ public class DatabaseMonitorFrame extends GQFrame {
         });
         buttonsPanel.add(btnLaunch);
 
-        bottomPanel.add(new StationCountPanel(this, new GridLayout(2, 2)));
+        bottomPanel.add(new StationCountPanel(manager, new GridLayout(2, 2)));
 
         mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         mainProgressBar.setValue(0);

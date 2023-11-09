@@ -1,7 +1,7 @@
-package globalquake.ui.database.action.seedlink;
+package globalquake.ui.action.seedlink;
 
 import globalquake.core.database.StationDatabaseManager;
-import globalquake.ui.database.EditSeedlinkNetworkDialog;
+import globalquake.ui.dialog.EditSeedlinkNetworkDialog;
 
 import javax.swing.*;
 import java.awt.*;

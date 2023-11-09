@@ -1,4 +1,4 @@
-package gqserver.ui.server.dialog;
+package globalquake.ui.dialog;
 
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;

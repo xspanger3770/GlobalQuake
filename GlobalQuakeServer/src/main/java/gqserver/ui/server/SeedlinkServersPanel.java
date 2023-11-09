@@ -1,10 +1,10 @@
 package gqserver.ui.server;
 
 import globalquake.ui.table.SeedlinkNetworksTableModel;
-import gqserver.ui.server.action.seedlink.AddSeedlinkNetworkAction;
-import gqserver.ui.server.action.seedlink.EditSeedlinkNetworkAction;
-import gqserver.ui.server.action.seedlink.RemoveSeedlinkNetworkAction;
-import gqserver.ui.server.action.seedlink.UpdateSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.AddSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.EditSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.RemoveSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.UpdateSeedlinkNetworkAction;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

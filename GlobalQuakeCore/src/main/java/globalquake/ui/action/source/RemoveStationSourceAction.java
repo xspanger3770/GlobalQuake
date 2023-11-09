@@ -1,30 +1,31 @@
-package gqserver.ui.server.action.seedlink;
+package globalquake.ui.action.source;
 
 
-import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.database.StationSource;
 import globalquake.ui.table.FilterableTableModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class RemoveSeedlinkNetworkAction extends AbstractAction {
+public class RemoveStationSourceAction extends AbstractAction {
 
     private final StationDatabaseManager databaseManager;
     private final Component parent;
-    private FilterableTableModel<SeedlinkNetwork> tableModel;
+    private FilterableTableModel<StationSource> tableModel;
 
     private JTable table;
 
-    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager, Component parent){
+    public RemoveStationSourceAction(StationDatabaseManager databaseManager, Component parent){
         super("Remove");
         this.parent = parent;
         this.databaseManager = databaseManager;
 
-        putValue(SHORT_DESCRIPTION, "Remove Seedlink Network");
+        putValue(SHORT_DESCRIPTION, "Remove Station Sources");
 
         ImageIcon removeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/remove.png")));
         Image image = removeIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
@@ -53,12 +54,12 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
-            java.util.List<SeedlinkNetwork> toBeRemoved = new ArrayList<>();
+            List<StationSource> toBeRemoved = new ArrayList<>();
             for(int i:selectedRows){
-                SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
-                toBeRemoved.add(seedlinkNetwork);
+                StationSource stationSource = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
+                toBeRemoved.add(stationSource);
             }
-            databaseManager.removeAllSeedlinks(toBeRemoved);
+            databaseManager.removeAllStationSources(toBeRemoved);
         }finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
@@ -66,7 +67,7 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
         databaseManager.fireUpdateEvent();
     }
 
-    public void setTableModel(FilterableTableModel<SeedlinkNetwork> tableModel) {
+    public void setTableModel(FilterableTableModel<StationSource> tableModel) {
         this.tableModel = tableModel;
     }
 

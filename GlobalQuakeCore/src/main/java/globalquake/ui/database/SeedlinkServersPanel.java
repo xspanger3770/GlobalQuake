@@ -1,9 +1,10 @@
 package globalquake.ui.database;
 
-import globalquake.ui.database.action.seedlink.AddSeedlinkNetworkAction;
-import globalquake.ui.database.action.seedlink.EditSeedlinkNetworkAction;
-import globalquake.ui.database.action.seedlink.RemoveSeedlinkNetworkAction;
-import globalquake.ui.database.action.seedlink.UpdateSeedlinkNetworkAction;
+import globalquake.core.database.StationDatabaseManager;
+import globalquake.ui.action.seedlink.AddSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.EditSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.RemoveSeedlinkNetworkAction;
+import globalquake.ui.action.seedlink.UpdateSeedlinkNetworkAction;
 import globalquake.ui.table.SeedlinkNetworksTableModel;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 
 public class SeedlinkServersPanel extends JPanel {
-    private final DatabaseMonitorFrame databaseMonitorFrame;
+    private final StationDatabaseManager manager;
     private final JTable table;
 
     private SeedlinkNetworksTableModel tableModel;
@@ -21,13 +22,13 @@ public class SeedlinkServersPanel extends JPanel {
     private final RemoveSeedlinkNetworkAction removeSeedlinkNetworkAction;
     private final UpdateSeedlinkNetworkAction updateSeedlinkNetworkAction;
 
-    public SeedlinkServersPanel(DatabaseMonitorFrame databaseMonitorFrame, AbstractAction restoreDatabaseAction) {
-        this.databaseMonitorFrame = databaseMonitorFrame;
+    public SeedlinkServersPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction) {
+        this.manager = manager;
 
-        this.addSeedlinkNetworkAction = new AddSeedlinkNetworkAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.editSeedlinkNetworkAction = new EditSeedlinkNetworkAction(databaseMonitorFrame, databaseMonitorFrame.getManager());
-        this.removeSeedlinkNetworkAction = new RemoveSeedlinkNetworkAction(databaseMonitorFrame.getManager(), this);
-        this.updateSeedlinkNetworkAction = new UpdateSeedlinkNetworkAction(databaseMonitorFrame.getManager());
+        this.addSeedlinkNetworkAction = new AddSeedlinkNetworkAction(parent, manager);
+        this.editSeedlinkNetworkAction = new EditSeedlinkNetworkAction(parent, manager);
+        this.removeSeedlinkNetworkAction = new RemoveSeedlinkNetworkAction(manager, this);
+        this.updateSeedlinkNetworkAction = new UpdateSeedlinkNetworkAction(manager);
 
         setLayout(new BorderLayout());
 
@@ -49,8 +50,8 @@ public class SeedlinkServersPanel extends JPanel {
         this.updateSeedlinkNetworkAction.setEnabled(false);
         this.addSeedlinkNetworkAction.setEnabled(false);
 
-        databaseMonitorFrame.getManager().addStatusListener(() -> rowSelectionChanged(null));
-        databaseMonitorFrame.getManager().addUpdateListener(() -> tableModel.applyFilter());
+        manager.addStatusListener(() -> rowSelectionChanged(null));
+        manager.addUpdateListener(() -> tableModel.applyFilter());
     }
 
     private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
@@ -71,7 +72,7 @@ public class SeedlinkServersPanel extends JPanel {
     }
 
     private JTable createTable() {
-        JTable table = new JTable(tableModel = new SeedlinkNetworksTableModel(databaseMonitorFrame.getManager().getStationDatabase().getSeedlinkNetworks()));
+        JTable table = new JTable(tableModel = new SeedlinkNetworksTableModel(manager.getStationDatabase().getSeedlinkNetworks()));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
         table.setRowHeight(20);
         table.setGridColor(Color.black);
@@ -90,11 +91,11 @@ public class SeedlinkServersPanel extends JPanel {
 
     private void rowSelectionChanged(ListSelectionEvent ignoredEvent) {
         var count = table.getSelectionModel().getSelectedItemsCount();
-        editSeedlinkNetworkAction.setEnabled(count == 1 && !databaseMonitorFrame.getManager().isUpdating());
-        removeSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
-        updateSeedlinkNetworkAction.setEnabled(count >= 1 && !databaseMonitorFrame.getManager().isUpdating());
-        addSeedlinkNetworkAction.setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        databaseMonitorFrame.getBtnSelectStations().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
-        databaseMonitorFrame.getBtnLaunch().setEnabled(!databaseMonitorFrame.getManager().isUpdating());
+        editSeedlinkNetworkAction.setEnabled(count == 1 && !manager.isUpdating());
+        removeSeedlinkNetworkAction.setEnabled(count >= 1 && !manager.isUpdating());
+        updateSeedlinkNetworkAction.setEnabled(count >= 1 && !manager.isUpdating());
+        addSeedlinkNetworkAction.setEnabled(!manager.isUpdating());
+        //databaseMonitorFrame.getBtnSelectStations().setEnabled(!manager.isUpdating());
+        //databaseMonitorFrame.getBtnLaunch().setEnabled(!manager.isUpdating());
     }
 }

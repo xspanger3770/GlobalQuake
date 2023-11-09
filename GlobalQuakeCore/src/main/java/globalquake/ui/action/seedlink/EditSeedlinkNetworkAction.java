@@ -1,9 +1,9 @@
-package gqserver.ui.server.action.seedlink;
+package globalquake.ui.action.seedlink;
 
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
+import globalquake.ui.dialog.EditSeedlinkNetworkDialog;
 import globalquake.ui.table.FilterableTableModel;
-import gqserver.ui.server.dialog.EditSeedlinkNetworkDialog;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
-package globalquake.ui.database.action.source;
+package globalquake.ui.action.source;
 
 import globalquake.core.database.StationDatabaseManager;
-import globalquake.ui.database.EditStationSourceDialog;
+import globalquake.ui.dialog.EditStationSourceDialog;
 
 import javax.swing.*;
 import java.awt.*;
