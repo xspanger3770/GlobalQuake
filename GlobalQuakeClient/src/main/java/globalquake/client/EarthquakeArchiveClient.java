@@ -3,6 +3,7 @@ package globalquake.client;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.quality.QualityClass;
 import gqserver.api.Packet;
 import gqserver.api.data.earthquake.ArchivedQuakeData;
@@ -13,9 +14,13 @@ public class EarthquakeArchiveClient extends EarthquakeArchive {
     public void processPacket(ClientSocket socket, Packet packet) {
         if(packet instanceof ArchivedQuakePacket quakePacket) {
             if(getArchivedQuakeByUUID(quakePacket.archivedQuakeData().uuid()) == null) {
-                archiveQuake(createArchivedQuake(quakePacket), null);
+                archiveQuake(quakePacket, null);
             }
         }
+    }
+
+    public void archiveQuake(ArchivedQuakePacket quakePacket, Earthquake earthquake){
+        archiveQuake(createArchivedQuake(quakePacket), earthquake);
     }
 
     private ArchivedQuake createArchivedQuake(ArchivedQuakePacket quakePacket) {
