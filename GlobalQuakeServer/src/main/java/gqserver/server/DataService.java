@@ -341,12 +341,8 @@ public class DataService implements GlobalQuakeEventListener {
     }
 
     public void stop() {
-        stationIntensityService.shutdown();
-        try {
-            stationIntensityService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(stationIntensityService);
+
         stationIntensities.clear();
         currentEarthquakes.clear();
     }

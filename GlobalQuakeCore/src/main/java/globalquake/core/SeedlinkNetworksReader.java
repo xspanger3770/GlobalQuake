@@ -181,7 +181,6 @@ public class SeedlinkNetworksReader {
 
 	public void stop() {
 		if(seedlinkReaderService != null) {
-			System.err.println("INT SDL");
 			seedlinkReaderService.shutdownNow();
             for (Iterator<SeedlinkReader> iterator = activeReaders.iterator(); iterator.hasNext(); ) {
                 SeedlinkReader reader = iterator.next();
@@ -193,8 +192,6 @@ public class SeedlinkNetworksReader {
 			} catch (InterruptedException e) {
 				Logger.error(e);
 			}
-
-			System.err.println("INT SDL DONE");
 		}
 		stationCache.clear();
 	}

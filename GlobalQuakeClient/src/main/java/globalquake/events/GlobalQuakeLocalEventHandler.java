@@ -1,5 +1,6 @@
 package globalquake.events;
 
+import globalquake.core.GlobalQuake;
 import globalquake.events.specific.GlobalQuakeLocalEvent;
 import org.tinylog.Logger;
 
@@ -22,12 +23,7 @@ public class GlobalQuakeLocalEventHandler {
     }
 
     public void stopHandler(){
-        executor.shutdownNow();
-        try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(executor);
     }
 
     public void registerEventListener(GlobalQuakeLocalEventListener eventListener){

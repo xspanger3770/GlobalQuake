@@ -1,5 +1,6 @@
 package gqserver.events;
 
+import globalquake.core.GlobalQuake;
 import org.tinylog.Logger;
 
 import java.util.Queue;
@@ -21,12 +22,7 @@ public class GlobalQuakeServerEventHandler {
     }
 
     public void stopHandler(){
-        executor.shutdownNow();
-        try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(executor);
         eventListeners.clear();
     }
 

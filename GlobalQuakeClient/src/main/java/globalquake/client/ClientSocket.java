@@ -83,12 +83,7 @@ public class ClientSocket {
             return;
         }
 
-        reconnectService.shutdown();
-        try {
-            reconnectService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(reconnectService);
     }
 
     private void checkReconnect() {
@@ -128,21 +123,10 @@ public class ClientSocket {
                 Logger.error(e);
             }
         }
-        terminate(heartbeatService);
-        terminate(inputService);
-        terminate(quakeCheckService);
-    }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void terminate(ExecutorService service) {
-        if(service != null){
-            service.shutdown();
-            try {
-                service.awaitTermination(15, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Logger.error(e);
-            }
-        }
+        GlobalQuake.instance.stopService(heartbeatService);
+        GlobalQuake.instance.stopService(inputService);
+        GlobalQuake.instance.stopService(quakeCheckService);
     }
 
     public boolean isConnected(){

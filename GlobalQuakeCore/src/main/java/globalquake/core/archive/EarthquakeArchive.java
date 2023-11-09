@@ -131,12 +131,7 @@ public class EarthquakeArchive {
 	}
 
 	public void destroy(){
-		executor.shutdown();
-		try {
-			executor.awaitTermination(10, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			Logger.error(e);
-		}
+		GlobalQuake.instance.stopService(executor);
 	}
 
 }

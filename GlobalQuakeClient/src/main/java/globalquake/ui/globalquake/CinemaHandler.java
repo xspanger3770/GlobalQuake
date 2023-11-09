@@ -131,12 +131,7 @@ public class CinemaHandler {
     }
 
     public void stop(){
-        cinemaTargetService.shutdownNow();
-        try {
-            cinemaTargetService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(cinemaTargetService);
     }
 
     private synchronized void nextTarget() {

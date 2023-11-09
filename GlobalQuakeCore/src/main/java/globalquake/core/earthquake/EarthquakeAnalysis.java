@@ -365,6 +365,16 @@ public class EarthquakeAnalysis {
 
     private static final double CONFIDENCE_LEVEL = 1.2;
 
+    public Earthquake getEarthquake(UUID uuid) {
+        for(Earthquake earthquake : getEarthquakes()){
+            if(earthquake.getUuid().equals(uuid)){
+                return earthquake;
+            }
+        }
+
+        return null;
+    }
+
     record PolygonConfidenceResult(double dist, long minOrigin, long maxOrigin) {
     }
 

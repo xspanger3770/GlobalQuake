@@ -1,5 +1,6 @@
 package gqserver.server;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.exception.InvalidPacketException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -121,21 +122,14 @@ public class GQServerSocket {
 
     private void onClose() {
         clients.clear();
-        terminate(clientsWatchdog);
-        terminate(readerService);
-        terminate(handshakeService);
+
+        GlobalQuake.instance.stopService(clientsWatchdog);
+        GlobalQuake.instance.stopService(readerService);
+        GlobalQuake.instance.stopService(handshakeService);
+
         dataService.stop();
         // we are the acceptservice
         setStatus(SocketStatus.IDLE);
-    }
-
-    private void terminate(ExecutorService service) {
-        service.shutdownNow();
-        try {
-            service.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
     }
 
     public void setStatus(SocketStatus status) {

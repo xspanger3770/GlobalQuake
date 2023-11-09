@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import globalquake.core.analysis.Log;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
@@ -8,10 +9,14 @@ import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalApplicationException;
+import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.station.GlobalStationManager;
+import org.tinylog.Logger;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
 
@@ -87,6 +92,24 @@ public class GlobalQuake {
 		getArchive().destroy();
 		getEarthquakeAnalysis().destroy();
 		getEventHandler().stopHandler();
+	}
+
+	public void stopService(ExecutorService service) {
+		if(service == null){
+			return;
+		}
+
+		service.shutdown();
+		try {
+			if(!service.awaitTermination(1, TimeUnit.SECONDS)){
+				service.shutdownNow();
+				if(!service.awaitTermination(10, TimeUnit.SECONDS)) {
+					GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to terminate one or more services!"));
+				}
+			}
+		} catch (InterruptedException e) {
+			Logger.error("Thread interrupted while shutting down service!");
+		}
 	}
 
 	public ClusterAnalysis getClusterAnalysis() {

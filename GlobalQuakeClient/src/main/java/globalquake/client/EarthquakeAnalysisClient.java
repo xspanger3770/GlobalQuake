@@ -177,11 +177,6 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     @Override
     public void destroy() {
-        checkService.shutdown();
-        try {
-            checkService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(checkService);
     }
 }

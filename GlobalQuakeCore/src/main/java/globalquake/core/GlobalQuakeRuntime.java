@@ -66,18 +66,9 @@ public class GlobalQuakeRuntime {
         }, 0, 300, TimeUnit.MILLISECONDS);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void stop() {
-        execAnalysis.shutdownNow();
-        execQuake.shutdownNow();
-        exec1Sec.shutdownNow();
-
-        try {
-            execAnalysis.awaitTermination(10, TimeUnit.SECONDS);
-            execQuake.awaitTermination(10, TimeUnit.SECONDS);
-            exec1Sec.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(execQuake);
+        GlobalQuake.instance.stopService(execAnalysis);
+        GlobalQuake.instance.stopService(exec1Sec);
     }
 }

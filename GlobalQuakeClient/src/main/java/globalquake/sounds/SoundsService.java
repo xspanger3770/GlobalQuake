@@ -118,12 +118,7 @@ public class SoundsService {
     }
 
     public void destroy(){
-        soundCheckService.shutdownNow();
-        try {
-            soundCheckService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Logger.error(e);
-        }
+        GlobalQuake.instance.stopService(soundCheckService);
     }
 
 }
