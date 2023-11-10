@@ -70,8 +70,10 @@ public class ClientSocket {
             status = ClientSocketStatus.CONNECTED;
         } catch(ConnectException ce){
             Logger.trace(ce);
-        } finally {
             status = ClientSocketStatus.DISCONNECTED;
+        } catch(Exception e) {
+            status = ClientSocketStatus.DISCONNECTED;
+            Logger.error(e);
         }
     }
 

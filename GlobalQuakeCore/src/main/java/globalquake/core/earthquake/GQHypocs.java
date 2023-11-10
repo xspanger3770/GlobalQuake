@@ -30,12 +30,12 @@ public class GQHypocs {
         }
 
         for(int i = 0; i < depth_profiles.length; i++){
-            Logger.debug("Iteration #%d difficulty: %.2fK%n", i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0);
+            Logger.debug("Iteration #%d difficulty: %.2fK".formatted( i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
         }
 
         for(int i = 0; i < depth_profiles.length; i++) {
             double distKM = dist_profiles[i] / 360.0* GeoUtils.EARTH_CIRCUMFERENCE;
-            Logger.debug("Iteration #%d space H %.2fkm V %fkm%n", i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]);
+            Logger.debug("Iteration #%d space H %.2fkm V %fkm".formatted(i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]));
         }
     }
 
