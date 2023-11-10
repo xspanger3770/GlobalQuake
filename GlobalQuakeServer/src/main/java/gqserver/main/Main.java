@@ -71,7 +71,7 @@ public class Main {
 
     public static void updateProgressBar(String status, int value) {
         if(headless){
-            Logger.info("%.2f%%: %s".formatted(value, status));
+            Logger.info("%d%%: %s".formatted(value, status));
         }else{
             databaseMonitorFrame.getMainProgressBar().setString(status);
             databaseMonitorFrame.getMainProgressBar().setValue(value);
@@ -107,11 +107,23 @@ public class Main {
                         } catch (FatalIOException e) {
                             getErrorHandler().handleException(new RuntimeException(e));
                         }
-                        databaseMonitorFrame.initDone();
+
+                        if(!headless) {
+                            databaseMonitorFrame.initDone();
+                        }
 
                         updateProgressBar("Done", (int) ((phase++ / PHASES) * 100.0));
+
+                        if(headless){
+                            autoStartServer();
+                        }
                     });
                 });
+    }
+
+    private static void autoStartServer() {
+        GlobalQuakeServer.instance.getServerSocket().run(Settings.lastServerIP, Settings.lastServerPORT);
+        GlobalQuakeServer.instance.startRuntime();
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
