@@ -57,7 +57,7 @@ public class ServerClient {
             }
 
             throw new UnknownPacketException("Received obj not instance of Packet!", null);
-        }catch(ClassNotFoundException e){
+        }  catch(ClassNotFoundException e){
             throw new UnknownPacketException(e.getMessage(), e);
         }
     }

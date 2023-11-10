@@ -9,6 +9,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import org.tinylog.Logger;
 
+import java.net.ConnectException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -120,18 +121,18 @@ public class SeedlinkNetworksReader {
 			}
 
 			reader.close();
+		} catch(ConnectException e1){
+			Logger.trace(e1);
 		} catch (Exception e) {
 			Logger.error(e);
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (Exception ex) {
-					Logger.error(ex);
-				}
-			}
 		}finally{
 			if(reader != null){
-				activeReaders.remove(reader);
+                try {
+                    reader.close();
+                } catch (Exception ex) {
+                    Logger.error(ex);
+                }
+                activeReaders.remove(reader);
 			}
 		}
 

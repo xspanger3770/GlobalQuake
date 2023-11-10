@@ -254,7 +254,7 @@ public class DataService implements GlobalQuakeEventListener {
             try {
                 client.sendPacket(packet);
             } catch (IOException e) {
-                Logger.error(e);
+                Logger.trace(e);
             }
         });
     }
