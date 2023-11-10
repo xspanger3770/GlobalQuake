@@ -79,8 +79,10 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
         if(checkPacket.info().revisionID() == EarthquakeInfo.REMOVED){
             clientEarthquakeMap.remove(uuid);
-            getEarthquakes().remove(existingQuake);
-            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
+            if(existingQuake != null) {
+                getEarthquakes().remove(existingQuake);
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
+            }
         }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.info().revisionID()){
             socket.sendPacket(new EarthquakeRequestPacket(uuid));
         }

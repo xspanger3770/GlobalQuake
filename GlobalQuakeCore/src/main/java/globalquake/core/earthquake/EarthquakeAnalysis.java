@@ -508,10 +508,11 @@ public class EarthquakeAnalysis {
         boolean valid = pct >= finderSettings.correctnessThreshold() && bestHypocenter.correctEvents >= finderSettings.minStations() && obviousCorrectPct >= OBVIOUS_CORRECT_THRESHOLD;
         if (!valid) {
             boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
-            if (remove && cluster.getEarthquake() != null) {
-                getEarthquakes().remove(cluster.getEarthquake());
+            Earthquake earthquake1 = cluster.getEarthquake();
+            if (remove && earthquake1 != null) {
+                getEarthquakes().remove(earthquake1);
                 if(GlobalQuake.instance != null){
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
                 }
                 cluster.setEarthquake(null);
             }
