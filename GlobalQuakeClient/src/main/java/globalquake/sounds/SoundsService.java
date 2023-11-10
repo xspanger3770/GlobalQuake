@@ -43,6 +43,10 @@ public class SoundsService {
 
     private void checkSounds() {
         try {
+            if(GlobalQuake.instance.getClusterAnalysis() == null ||GlobalQuake.instance.getEarthquakeAnalysis() == null){
+                return;
+            }
+
             for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
                 determineSounds(cluster);
             }

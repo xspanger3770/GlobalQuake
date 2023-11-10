@@ -6,6 +6,7 @@ import globalquake.core.exception.FdnwsDownloadException;
 import org.tinylog.Logger;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -207,7 +208,9 @@ public class StationDatabaseManager {
                                 Callable<Void> task = () -> {
                                     try {
                                         SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                                    }catch(Exception e){
+                                    } catch(ConnectException ce){
+                                        Logger.trace(ce);
+                                    } catch(Exception e){
                                         Logger.error(e);
                                     }
                                     return null;
