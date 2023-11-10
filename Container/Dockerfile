@@ -13,5 +13,8 @@ WORKDIR /usr/src/app
 # Copy the application JAR file into the container at the working directory
 COPY ../out/artifacts/GlobalQuakeServer/GlobalQuakeServer_v0.10.0_pre5.jar .
 
+COPY globalQuake.properties ./.GlobalQuakeServerData/
+COPY stationDatabase ./.GlobalQuakeServerData/
+
 # Specify the command to run your application
 CMD ["java", "-jar", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
