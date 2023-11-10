@@ -143,9 +143,11 @@ __device__ void reduce(float *a, float *b, int grid_size){
     int correct_a = *h_correct(a, grid_size);
     int correct_b = *h_correct(b, grid_size);
 
-    bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
+    /*bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
         (correct_b / (err_b + ADD) > correct_a / (err_a + ADD))
-    );
+    );*/
+
+    bool swap = (correct_b / (err_b + ADD) > correct_a / (err_a + ADD));
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
@@ -203,7 +205,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 
     int station_index = threadIdx.x % station_count;
     float err = 0.0;
-    int correct = 0;
+    int correct = station_count;
 
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
@@ -215,10 +217,17 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
+        /*err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
         if(_err <= THRESHOLD){
             correct++;
+        }*/
+
+        if (_err > THRESHOLD) {
+            correct--;
+            _err = (_err - THRESHOLD) * 0.05f + THRESHOLD;
         }
+
+        err += _err * _err;
     }
 
     s_results[threadIdx.x + blockDim.x * 0] = err;

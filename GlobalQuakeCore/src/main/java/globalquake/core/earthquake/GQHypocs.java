@@ -14,10 +14,10 @@ public class GQHypocs {
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
 
-    private static final int MAX_POINTS = 6000_000;
+    private static final int MAX_POINTS = 40_000;
     private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
-    private static final int[] point_profiles = new int[] { 6000_000, 300_000, 100_000, 40_000, 10_000};
-    private static final float[] dist_profiles = new float[]{ 100.0f, 20.0f, 4.0f, 0.8f, 0.2f};
+    private static final int[] point_profiles = new int[] { 40_000, 8_000, 4_000, 1600, 400};
+    private static final float[] dist_profiles = new float[]{ 90.0f, 20.0f, 4.0f, 0.8f, 0.2f};
 
     static {
         try {
