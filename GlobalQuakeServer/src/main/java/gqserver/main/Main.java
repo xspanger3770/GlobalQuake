@@ -69,31 +69,38 @@ public class Main {
     private static final double PHASES = 6.0;
     private static int phase = 0;
 
-    private static void initAll() throws Exception {
-        databaseMonitorFrame.getMainProgressBar().setString("Loading regions...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        Regions.init();
-        databaseMonitorFrame.getMainProgressBar().setString("Filling up intensity table...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        IntensityTable.init();
-        databaseMonitorFrame.getMainProgressBar().setString("Loading travel table...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        TauPTravelTimeCalculator.init();
-        databaseMonitorFrame.getMainProgressBar().setString("Calibrating...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        if(Settings.recalibrateOnLaunch) {
-            EarthquakeAnalysisTraining.calibrateResolution(databaseMonitorFrame.getMainProgressBar(), null);
+    public static void updateProgressBar(String status, int value) {
+        if(headless){
+            Logger.info("%.2f%%: %s".formatted(value, status));
+        }else{
+            databaseMonitorFrame.getMainProgressBar().setString(status);
+            databaseMonitorFrame.getMainProgressBar().setValue(value);
         }
-        databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
+    }
+
+    public static void initAll() throws Exception{
+        updateProgressBar("Loading regions...", (int) ((phase++ / PHASES) * 100.0));
+        Regions.init();
+
+        updateProgressBar("Filling up intensity table...", (int) ((phase++ / PHASES) * 100.0));
+        IntensityTable.init();
+
+        updateProgressBar("Loading travel table...", (int) ((phase++ / PHASES) * 100.0));
+        TauPTravelTimeCalculator.init();
+
+        updateProgressBar("Calibrating...", (int) ((phase++ / PHASES) * 100.0));
+        if(Settings.recalibrateOnLaunch) {
+            EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null);
+        }
+
+        updateProgressBar("Updating Station Sources...", (int) ((phase++ / PHASES) * 100.0));
+        databaseManager.runUpdate(
+                databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
-                    databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
-                    databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+                    updateProgressBar("Checking Seedlink Networks...", (int) ((phase++ / PHASES) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
-                        databaseMonitorFrame.getMainProgressBar().setString("Saving...");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+                        updateProgressBar("Saving...", (int) ((phase++ / PHASES) * 100.0));
 
                         try {
                             databaseManager.save();
@@ -102,8 +109,7 @@ public class Main {
                         }
                         databaseMonitorFrame.initDone();
 
-                        databaseMonitorFrame.getMainProgressBar().setString("Done");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+                        updateProgressBar("Done", (int) ((phase++ / PHASES) * 100.0));
                     });
                 });
     }
