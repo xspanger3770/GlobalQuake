@@ -17,6 +17,7 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -67,9 +68,10 @@ public class ClientSocket {
             sendPacket(new ArchivedQuakesRequestPacket());
             sendPacket(new StationsRequestPacket());
             status = ClientSocketStatus.CONNECTED;
-        }catch(Exception e){
+        } catch(ConnectException ce){
+            Logger.trace(ce);
+        } finally {
             status = ClientSocketStatus.DISCONNECTED;
-            throw e;
         }
     }
 
