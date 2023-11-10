@@ -43,8 +43,8 @@ bool cuda_initialised = false;
 float max_depth_resolution;
 
 int depth_profile_count;
-depth_profile_t* depth_profiles;
-float* f_results_device;
+depth_profile_t* depth_profiles = nullptr;
+float* f_results_device = nullptr;
 
 void print_err(const char* msg) {
     cudaError err= cudaGetLastError();
@@ -365,22 +365,25 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
     size_t point_locations_array_size = sizeof(float) * 2 * points;
-    
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
     size_t current_result_count = blocks.x * blocks.y * blocks.z;
-    
+
     const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
     TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
     TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
     TRACE(1, "point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
+    TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_point_locations, point_locations_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
+    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
     
     if(!success){
         print_err("Hypocs initialisation");
@@ -553,10 +556,10 @@ bool initDepthProfiles(float* resols, int count){
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-      (JNIEnv *env, jclass, jlong max_points, jfloatArray depth_profiles_array){
+      (JNIEnv *env, jclass, jfloatArray depth_profiles_array){
     bool success = true;
 
-    if(depth_profiles_array != nullptr) {
+    if(depth_profiles_array != nullptr && depth_profiles == nullptr) {
         int depth_profile_count = env->GetArrayLength(depth_profiles_array);
         float depthResols[depth_profile_count];
         for(int i = 0; i < depth_profile_count; i++){
@@ -566,19 +569,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
         success &= initDepthProfiles(depthResols, depth_profile_count);
         env->ReleaseFloatArrayElements(depth_profiles_array, env->GetFloatArrayElements(depth_profiles_array, 0), 0);
     }
-
-    dim3 blocks = {(unsigned int)ceil(static_cast<float>(max_points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / max_depth_resolution) + 1, 1};
     
-    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
-
-    printf("Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
-    
-    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
-
-    if(!success){
-        print_err("CUDA malloc");
-    }
-
     cuda_initialised = success;
     return success;
 }

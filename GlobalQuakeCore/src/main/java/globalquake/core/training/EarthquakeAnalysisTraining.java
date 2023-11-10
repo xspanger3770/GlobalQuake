@@ -25,6 +25,8 @@ public class EarthquakeAnalysisTraining {
     public static final double INACCURACY = 5000;
     private static final double MASSIVE_ERR_ODDS = 0.4;
 
+    public static double hypocenterDetectionResolutionMax = 160.0;
+
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
@@ -68,7 +70,7 @@ public class EarthquakeAnalysisTraining {
         long lastTime;
         int seed = 6543;
         int failed = 0;
-        while(failed < 5 && Settings.hypocenterDetectionResolution <= Settings.hypocenterDetectionResolutionMax){
+        while(failed < 5 && Settings.hypocenterDetectionResolution <= hypocenterDetectionResolutionMax){
             lastTime = measureTest(seed++, 60);
             if(lastTime > TARGET_TIME){
                 failed++;

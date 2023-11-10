@@ -1,9 +1,11 @@
 package globalquake.core.earthquake;
 
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 
@@ -13,8 +15,6 @@ public class GQHypocs {
 
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
-
-    private static final int MAX_POINTS = 40_000;
     private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
     private static final int[] point_profiles = new int[] { 40_000, 8_000, 4_000, 1600, 400};
     private static final float[] dist_profiles = new float[]{ 90.0f, 20.0f, 4.0f, 0.8f, 0.2f};
@@ -23,6 +23,7 @@ public class GQHypocs {
         try {
             System.loadLibrary("gq_hypocs");
             initCuda();
+            EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
         } catch(UnsatisfiedLinkError e){
             System.err.println("Failed to load CUDA: "+e.getMessage());
         }
@@ -41,7 +42,7 @@ public class GQHypocs {
         boolean init = true;
 
         init &= GQNativeFunctions.copyPTravelTable(TauPTravelTimeCalculator.getTravelTable().p_travel_table, (float) TauPTravelTimeCalculator.MAX_DEPTH);
-        init &= GQNativeFunctions.initCUDA(MAX_POINTS, depth_profiles);
+        init &= GQNativeFunctions.initCUDA(depth_profiles);
 
         if(init) {
             System.err.println("CUDA Loaded successfully");
@@ -69,9 +70,11 @@ public class GQHypocs {
                 (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lon : cluster.getRootLon()) * RADIANS)
         };
 
+        double point_multiplier = Settings.hypocenterDetectionResolution;
+        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
 
         for(int i = from; i < depth_profiles.length; i++){
-            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], point_profiles[i], i, dist_profiles[i] * RADIANS);
+            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * point_multiplier), i, dist_profiles[i] * RADIANS);
 
             if (result == null) {
                 return null;
