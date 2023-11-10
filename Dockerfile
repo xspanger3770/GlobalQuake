@@ -10,7 +10,7 @@ RUN apt-get update && \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install NVIDIA CUDA Toolkit and cuDNN (adjust versions as needed)
+# Install NVIDIA CUDA Toolkit
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install -y \
     nvidia-cuda-toolkit \
@@ -27,9 +27,11 @@ WORKDIR /usr/src/app
 # Copy the application JAR file into the container at the working directory
 COPY out/artifacts/GlobalQuakeServer/GlobalQuakeServer_v0.10.0_pre5.jar .
 
+# Copy station database and configuration files
 COPY Container ./.GlobalQuakeServerData
 
+# Copy CUDA library
 COPY GQHypocenterSearch/build/lib ./lib
 
-# Specify the command to run your application
+# Run GQ Server
 CMD ["java", "-jar", "-Dtinylog.writer.level=debug", "-Djava.library.path=./lib", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
