@@ -13,6 +13,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
 import gqserver.server.GlobalQuakeServer;
 import gqserver.ui.server.DatabaseMonitorFrame;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.util.concurrent.Executors;
@@ -26,6 +27,7 @@ public class Main {
     public static final String fullName = "GlobalQuakeServer " + GlobalQuake.version;
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
+    private static boolean headless;
 
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();
@@ -33,12 +35,19 @@ public class Main {
 
         new GlobalQuakeServer(databaseManager);
 
-        databaseMonitorFrame = new DatabaseMonitorFrame(databaseManager);
-        databaseMonitorFrame.setVisible(true);
+        if (!headless) {
+            databaseMonitorFrame = new DatabaseMonitorFrame(databaseManager);
+            databaseMonitorFrame.setVisible(true);
+        }
     }
 
     public static void main(String[] args) {
         initErrorHandler();
+
+        if(args.length > 0 && (args[0].equals("--headless"))){
+            headless = true;
+            Logger.info("Running as headless");
+        }
 
         GlobalQuake.prepare(Main.MAIN_FOLDER, Main.getErrorHandler());
 
