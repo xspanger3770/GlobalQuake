@@ -11,10 +11,11 @@ RUN apt-get update && \
 WORKDIR /usr/src/app
 
 # Copy the application JAR file into the container at the working directory
-COPY ../out/artifacts/GlobalQuakeServer/GlobalQuakeServer_v0.10.0_pre5.jar .
+COPY out/artifacts/GlobalQuakeServer/GlobalQuakeServer_v0.10.0_pre5.jar .
 
-COPY globalQuake.properties ./.GlobalQuakeServerData/
-COPY stationDatabase ./.GlobalQuakeServerData/
+COPY Container ./.GlobalQuakeServerData
+
+COPY GQHypocenterSearch/build/lib .
 
 # Specify the command to run your application
-CMD ["java", "-jar", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
+CMD ["java", "-jar", "-Dtinylog.writer.level=debug", "-Djava.library.path=./lib", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
