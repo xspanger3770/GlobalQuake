@@ -456,6 +456,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     if(d_stations_distances) cudaFree(d_stations_distances);
     if(d_point_locations) cudaFree(d_point_locations);
     if(d_temp_results) cudaFree(d_temp_results);
+    if(f_results_device) cudaFree(f_results_device);
 
     return success;
 }
