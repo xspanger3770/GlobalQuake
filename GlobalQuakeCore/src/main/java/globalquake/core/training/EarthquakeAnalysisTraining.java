@@ -7,6 +7,7 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.ui.ProgressUpdateFunction;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
@@ -15,6 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
@@ -65,7 +67,7 @@ public class EarthquakeAnalysisTraining {
 
     private static final long TARGET_TIME = 400;
 
-    public static void calibrateResolution(JProgressBar progressBar, JSlider slider){
+    public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider){
         Settings.hypocenterDetectionResolution = 0.0;
         long lastTime;
         int seed = 6543;
@@ -78,8 +80,8 @@ public class EarthquakeAnalysisTraining {
                 failed = 0;
                 Settings.hypocenterDetectionResolution += 2.5;
             }
-            if(progressBar !=null){
-                progressBar.setString("Calibrating: Resolution %.2f took %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime));
+            if(progressUpdateFunction !=null){
+                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime), 0);
             }
             if(slider != null){
                 slider.setValue(Settings.hypocenterDetectionResolution.intValue());
