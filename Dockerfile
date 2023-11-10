@@ -34,4 +34,4 @@ COPY Container ./.GlobalQuakeServerData
 COPY GQHypocenterSearch/build/lib ./lib
 
 # Run GQ Server
-CMD ["java", "-jar", "-Dtinylog.writer.level=debug", "-Djava.library.path=./lib", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
+CMD ["java", "-jar", "-Djava.library.path=./lib", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]

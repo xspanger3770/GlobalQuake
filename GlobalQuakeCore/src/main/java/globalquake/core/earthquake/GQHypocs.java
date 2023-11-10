@@ -8,6 +8,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.List;
 
@@ -25,16 +26,16 @@ public class GQHypocs {
             initCuda();
             EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
         } catch(UnsatisfiedLinkError e){
-            System.err.println("Failed to load CUDA: "+e.getMessage());
+            Logger.warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
         }
 
         for(int i = 0; i < depth_profiles.length; i++){
-            System.err.printf("Iteration #%d difficulty: %.2fK%n", i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0);
+            Logger.debug("Iteration #%d difficulty: %.2fK%n", i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0);
         }
 
         for(int i = 0; i < depth_profiles.length; i++) {
             double distKM = dist_profiles[i] / 360.0* GeoUtils.EARTH_CIRCUMFERENCE;
-            System.err.printf("Iteration #%d space H %.2fkm V %fkm%n", i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]);
+            Logger.debug("Iteration #%d space H %.2fkm V %fkm%n", i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]);
         }
     }
 

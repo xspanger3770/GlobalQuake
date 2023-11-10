@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
@@ -136,8 +135,8 @@ public class EarthquakeAnalysisTraining {
 
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 
-        Logger.warn("Shouldve been " + absolutetyCorrect);
-        Logger.warn("Got           " + cluster.getPreviousHypocenter());
+        Logger.debug("Shouldve been " + absolutetyCorrect);
+        Logger.debug("Got           " + cluster.getPreviousHypocenter());
 
         if(cluster.getEarthquake()!=null) {
             double dist = GeoUtils.greatCircleDistance(cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon(), absolutetyCorrect.lat, absolutetyCorrect.lon);
