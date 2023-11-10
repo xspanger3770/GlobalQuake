@@ -205,7 +205,11 @@ public class StationDatabaseManager {
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
                                 Callable<Void> task = () -> {
-                                    SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                    try {
+                                        SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                    }catch(Exception e){
+                                        Logger.error(e);
+                                    }
                                     return null;
                                 };
 

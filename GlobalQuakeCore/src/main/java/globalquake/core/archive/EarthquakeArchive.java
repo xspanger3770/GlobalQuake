@@ -80,12 +80,16 @@ public class EarthquakeArchive {
 
 	public void archiveQuakeAndSave(Earthquake earthquake) {
 		executor.submit(() -> {
-            archiveQuake(earthquake);
+			try {
+				archiveQuake(earthquake);
 
-            saveArchive();
-            if(Settings.reportsEnabled) {
-                reportQuake(earthquake);
-            }
+				saveArchive();
+				if (Settings.reportsEnabled) {
+					reportQuake(earthquake);
+				}
+			} catch(Exception e){
+				Logger.error(e);
+			}
         });
 	}
 

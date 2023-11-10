@@ -71,20 +71,24 @@ public class GQServerSocket {
     }
 
     private void checkClients() {
-        List<ServerClient> toRemove = new LinkedList<>();
-        for (ServerClient client : clients) {
-            if (!client.isConnected() || System.currentTimeMillis() - client.getLastHeartbeat() > WATCHDOG_TIMEOUT) {
-                try {
-                    client.destroy();
-                    toRemove.add(client);
-                    GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
-                    Logger.info("Client #%d disconnected due to timeout".formatted(client.getID()));
-                } catch (Exception e) {
-                    Logger.error(e);
+        try {
+            List<ServerClient> toRemove = new LinkedList<>();
+            for (ServerClient client : clients) {
+                if (!client.isConnected() || System.currentTimeMillis() - client.getLastHeartbeat() > WATCHDOG_TIMEOUT) {
+                    try {
+                        client.destroy();
+                        toRemove.add(client);
+                        GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
+                        Logger.info("Client #%d disconnected due to timeout".formatted(client.getID()));
+                    } catch (Exception e) {
+                        Logger.error(e);
+                    }
                 }
             }
+            clients.removeAll(toRemove);
+        }catch(Exception e) {
+            Logger.error(e);
         }
-        clients.removeAll(toRemove);
     }
 
     private void handshake(ServerClient client) throws IOException {

@@ -71,21 +71,25 @@ public class DataService implements GlobalQuakeEventListener {
     }
 
     private void sendIntensityData() {
-        List<StationIntensityData> data = new ArrayList<>();
-        for(AbstractStation abstractStation: GlobalQuake.instance.getStationManager().getStations()){
-            StationStatus status = createStatus(abstractStation);
-            StationStatus previous = stationIntensities.put(abstractStation, status);
-            if(previous == null || !previous.equals(status)){
-                data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
-                if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
-                    broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
-                    data = new ArrayList<>();
+        try {
+            List<StationIntensityData> data = new ArrayList<>();
+            for (AbstractStation abstractStation : GlobalQuake.instance.getStationManager().getStations()) {
+                StationStatus status = createStatus(abstractStation);
+                StationStatus previous = stationIntensities.put(abstractStation, status);
+                if (previous == null || !previous.equals(status)) {
+                    data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
+                    if (data.size() >= STATIONS_INFO_PACKET_MAX_SIZE) {
+                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                        data = new ArrayList<>();
+                    }
                 }
             }
-        }
 
-        if(!data.isEmpty()){
-            broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+            if (!data.isEmpty()) {
+                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+            }
+        }catch(Exception e){
+            Logger.error(e);
         }
     }
 

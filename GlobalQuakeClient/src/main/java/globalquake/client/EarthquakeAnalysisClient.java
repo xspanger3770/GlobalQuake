@@ -20,6 +20,7 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,16 +43,20 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     }
 
     private void removeOld() {
-        List<Earthquake> toRemove = new ArrayList<>();
-        for(Earthquake earthquake:getEarthquakes()){
-            if(shouldRemove(earthquake)){
-                toRemove.add(earthquake);
-                clientEarthquakeMap.remove(earthquake.getUuid());
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
+        try {
+            List<Earthquake> toRemove = new ArrayList<>();
+            for (Earthquake earthquake : getEarthquakes()) {
+                if (shouldRemove(earthquake)) {
+                    toRemove.add(earthquake);
+                    clientEarthquakeMap.remove(earthquake.getUuid());
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
+                }
             }
-        }
 
-        getEarthquakes().removeAll(toRemove);
+            getEarthquakes().removeAll(toRemove);
+        } catch(Exception e) {
+            Logger.error(e);
+        }
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
