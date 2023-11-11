@@ -29,6 +29,9 @@ import gqserver.api.packets.station.StationsRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -282,7 +285,9 @@ public class DataService implements GlobalQuakeEventListener {
             } else if(packet instanceof StationsRequestPacket){
                 processStationsRequestPacket(client);
             }
-        }catch(IOException e){
+        } catch(SocketTimeoutException | SocketException e) {
+            Logger.trace(e);
+        } catch(IOException e){
             Logger.error(e);
         }
     }
