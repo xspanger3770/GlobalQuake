@@ -56,7 +56,7 @@ public class IntensityTable {
             }
         }
 
-        Logger.trace("Intensity tables filled in %s ms.\n".formatted(System.currentTimeMillis() - a));
+        Logger.trace("Intensity tables filled in %s ms".formatted(System.currentTimeMillis() - a));
     }
 
     private static double searchMag(int row, double intensity) {
