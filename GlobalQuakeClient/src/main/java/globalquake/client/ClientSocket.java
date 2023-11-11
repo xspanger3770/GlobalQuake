@@ -20,6 +20,7 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,7 +69,7 @@ public class ClientSocket {
             sendPacket(new ArchivedQuakesRequestPacket());
             sendPacket(new StationsRequestPacket());
             status = ClientSocketStatus.CONNECTED;
-        } catch(ConnectException ce){
+        } catch(ConnectException | SocketTimeoutException ce){
             Logger.trace(ce);
             status = ClientSocketStatus.DISCONNECTED;
         } catch(Exception e) {
@@ -143,8 +144,11 @@ public class ClientSocket {
                 Packet packet = (Packet) inputStream.readObject();
                 ((GlobalQuakeClient) GlobalQuake.instance).processPacket(this, packet);
             }
-        } catch (Exception e){
+        } catch(SocketTimeoutException se){
+            Logger.trace(se);
+        }catch (Exception e){
             Logger.error(e);
+        } finally {
             onClose();
         }
     }
