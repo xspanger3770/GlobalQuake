@@ -27,6 +27,7 @@ public class GQHypocs {
             EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
         } catch(UnsatisfiedLinkError e){
             Logger.warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
+            Logger.warn("Earthquake parameters will be calculated on the CPU");
         }
 
         for(int i = 0; i < depth_profiles.length; i++){

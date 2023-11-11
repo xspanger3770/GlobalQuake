@@ -142,7 +142,7 @@ public class ClientSocket {
         try {
             while (isConnected()) {
                 Packet packet = (Packet) inputStream.readObject();
-                ((GlobalQuakeClient) GlobalQuake.instance).processPacket(this, packet);
+                ((GlobalQuakeClient) GlobalQuakeClient.instance).processPacket(this, packet);
             }
         } catch(SocketTimeoutException se){
             Logger.trace(se);
