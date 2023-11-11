@@ -17,10 +17,7 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -104,6 +101,9 @@ public class ClientSocket {
     private void sendQuakeRequest() {
         try {
             sendPacket(new EarthquakesRequestPacket());
+        } catch(SocketTimeoutException | SocketException e){
+            Logger.trace(e);
+            onClose();
         } catch (IOException e) {
             Logger.error(e);
             onClose();
@@ -113,6 +113,9 @@ public class ClientSocket {
     private void sendHeartbeat() {
         try {
             sendPacket(new HeartbeatPacket());
+        } catch(SocketTimeoutException | SocketException e){
+            Logger.trace(e);
+            onClose();
         } catch (IOException e) {
             Logger.error(e);
             onClose();
@@ -124,8 +127,12 @@ public class ClientSocket {
         if(socket != null){
             try {
                 socket.close();
+            } catch(SocketTimeoutException | SocketException e){
+                Logger.trace(e);
+                onClose();
             } catch (IOException e) {
                 Logger.error(e);
+                onClose();
             }
         }
 
@@ -144,7 +151,7 @@ public class ClientSocket {
                 Packet packet = (Packet) inputStream.readObject();
                 ((GlobalQuakeClient) GlobalQuakeClient.instance).processPacket(this, packet);
             }
-        } catch(SocketTimeoutException se){
+        } catch(SocketTimeoutException | SocketException se){
             Logger.trace(se);
         }catch (Exception e){
             Logger.error(e);

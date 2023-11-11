@@ -91,7 +91,7 @@ public class DataService implements GlobalQuakeEventListener {
             if (!data.isEmpty()) {
                 broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
             }
-        }catch(Exception e){
+        } catch(Exception e){
             Logger.error(e);
         }
     }
@@ -256,7 +256,9 @@ public class DataService implements GlobalQuakeEventListener {
         clients.forEach(client -> {
             try {
                 client.sendPacket(packet);
-            } catch (IOException e) {
+            } catch(SocketException | SocketTimeoutException e){
+                Logger.trace(e);
+            }catch (IOException e) {
                 Logger.trace(e);
             }
         });
