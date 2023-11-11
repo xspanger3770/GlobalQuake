@@ -483,8 +483,15 @@ public class ClusterAnalysis {
                     numberOfActiveEvents++;
                 }
             }
-            if (cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE || (numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000)) {
-                Logger.debug("Cluster #" + cluster.getId() + " died");
+
+            Earthquake earthquake = cluster.getEarthquake();
+
+            boolean notEnoughEvents = cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE;
+            boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake);
+            boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
+
+            if ( notEnoughEvents || eqRemoved || tooOld) {
+                Logger.debug("Cluster #" + cluster.getId() + " marked for removal");
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
