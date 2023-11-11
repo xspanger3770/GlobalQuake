@@ -42,7 +42,6 @@ public class GlobalQuake {
 		} catch (FatalApplicationException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println("Cuda loaded: "+GQHypocs.isCudaLoaded());
 	}
 
 	public static void prepare(File mainFolder, ApplicationErrorHandler errorHandler) {

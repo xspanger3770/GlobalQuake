@@ -1,5 +1,7 @@
 package globalquake.core.intensity;
 
+import org.tinylog.Logger;
+
 public class IntensityTable {
 
     private static final int ROWS = 100; // UP TO 100,000km
@@ -53,7 +55,8 @@ public class IntensityTable {
                 TABLE2[row][col] = mag;
             }
         }
-        System.out.printf("Intensity tables filled in %s ms.\n", (System.currentTimeMillis() - a));
+
+        Logger.trace("Intensity tables filled in %s ms.\n".formatted(System.currentTimeMillis() - a));
     }
 
     private static double searchMag(int row, double intensity) {
