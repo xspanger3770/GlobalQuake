@@ -1,6 +1,7 @@
 package gqserver.server;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.exception.InvalidPacketException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -30,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 public class GQServerSocket {
 
     private static final int HANDSHAKE_TIMEOUT = 10 * 1000;
-    public static final int MAX_CLIENTS = 64;
     private static final int WATCHDOG_TIMEOUT = 60 * 1000;
 
     public static final int READ_TIMEOUT = WATCHDOG_TIMEOUT + 10 * 1000;
@@ -110,7 +110,7 @@ public class GQServerSocket {
             }
 
             synchronized (joinMutex) {
-                if (clients.size() >= MAX_CLIENTS) {
+                if (clients.size() >= Settings.maxClients) {
                     client.sendPacket(new TerminationPacket("Server is full!"));
                     client.destroy();
                 } else {

@@ -127,8 +127,9 @@ public final class Settings {
 	public static String lastServerIP;
 
 	public static Integer lastServerPORT;
+	public static Integer maxClients;
 
-	static {
+    static {
 		load();
 	}
 
@@ -138,6 +139,9 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("maxClients", "64",
+				o -> validateInt(2, 10000, (Integer) o));
 
 		loadProperty("lastServerIP", "0.0.0.0");
 		loadProperty("lastServerPORT", "38000");
