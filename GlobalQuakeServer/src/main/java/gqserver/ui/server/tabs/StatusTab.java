@@ -1,5 +1,6 @@
 package gqserver.ui.server.tabs;
 
+import globalquake.core.Settings;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import gqserver.events.GlobalQuakeServerEventListener;
@@ -27,7 +28,7 @@ public class StatusTab extends JPanel {
 
         long maxMem = Runtime.getRuntime().maxMemory();
 
-        clientsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, GQServerSocket.MAX_CLIENTS);
+        clientsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, Settings.maxClients);
         clientsProgressBar.setStringPainted(true);
         add(clientsProgressBar);
 
@@ -99,7 +100,7 @@ public class StatusTab extends JPanel {
 
     private synchronized void updateClientsProgressBar() {
         int clients = GlobalQuakeServer.instance.getServerSocket().getClientCount();
-        clientsProgressBar.setString("Clients: %d / %d".formatted(clients, GQServerSocket.MAX_CLIENTS));
+        clientsProgressBar.setString("Clients: %d / %d".formatted(clients, Settings.maxClients));
         clientsProgressBar.setValue(clients);
         repaint();
     }
