@@ -13,6 +13,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
 import gqserver.server.GlobalQuakeServer;
 import gqserver.ui.server.DatabaseMonitorFrame;
+import org.apache.commons.cli.*;
 import org.tinylog.Logger;
 
 import java.io.File;
@@ -43,13 +44,50 @@ public class Main {
 
     public static void main(String[] args) {
         initErrorHandler();
+        GlobalQuake.prepare(Main.MAIN_FOLDER, Main.getErrorHandler());
 
-        if(args.length > 0 && (args[0].equals("--headless"))){
-            headless = true;
-            Logger.info("Running as headless");
+        Options options = new Options();
+
+        Option headlessOption = new Option("h", "headless", false, "run in headless mode");
+        headlessOption.setRequired(false);
+        options.addOption(headlessOption);
+
+        Option maxClientsOption = new Option("c", "clients", true, "maximum number of clients");
+        maxClientsOption.setRequired(false);
+        options.addOption(maxClientsOption);
+
+        CommandLineParser parser = new org.apache.commons.cli.BasicParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println(e.getMessage());
+            formatter.printHelp("gqserver", options);
+
+            System.exit(1);
         }
 
-        GlobalQuake.prepare(Main.MAIN_FOLDER, Main.getErrorHandler());
+        if(cmd.hasOption(headlessOption.getOpt())){
+            headless = true;
+        }
+
+        if(cmd.hasOption(maxClientsOption.getOpt())) {
+            try {
+                int maxCli =  Integer.parseInt(cmd.getOptionValue(maxClientsOption.getOpt()));
+                if(maxCli < 1){
+                    throw new IllegalArgumentException("Maximum client count must be at least 1!");
+                }
+                Settings.maxClients = maxCli;
+                Logger.info("Maximum client count set to %d".formatted(Settings.maxClients));
+            } catch(IllegalArgumentException e){
+                Logger.error(e);
+                System.exit(1);
+            }
+        }
+
+        Logger.info("Headless = %s".formatted(headless));
 
         try {
             startDatabaseManager();
