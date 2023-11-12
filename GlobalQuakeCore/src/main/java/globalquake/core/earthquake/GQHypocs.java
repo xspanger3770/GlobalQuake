@@ -31,7 +31,7 @@ public class GQHypocs {
             } else {
                 Logger.warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
             }
-        } catch(Exception e){
+        } catch(Exception | UnsatisfiedLinkError e) {
             Logger.warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
         }
 
