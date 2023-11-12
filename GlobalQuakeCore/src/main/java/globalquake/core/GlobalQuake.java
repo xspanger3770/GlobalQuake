@@ -4,7 +4,6 @@ import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalApplicationException;
@@ -18,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
-	public static final String version = "v0.10.0_pre5";
+	public static final String version = "v0.10.0_pre6";
 
 	protected GlobalQuakeRuntime globalQuakeRuntime;
 	protected SeedlinkNetworksReader seedlinkNetworksReader;
