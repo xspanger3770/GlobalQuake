@@ -28,12 +28,13 @@ public class GQHypocs {
                 EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
                 Logger.info("CUDA library loaded successfully!");
                 printResolution();
+            } else {
+                Logger.warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
             }
         } catch(Exception e){
             Logger.warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
         }
 
-        Logger.warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
     }
 
     private static void printResolution() {
