@@ -51,6 +51,7 @@ public class GQServerSocket {
     }
 
     public void run(String ip, int port) {
+        Logger.info("Creating server...");
         ExecutorService acceptService = Executors.newSingleThreadExecutor();
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
@@ -59,11 +60,13 @@ public class GQServerSocket {
         setStatus(SocketStatus.OPENING);
         try {
             lastSocket = new ServerSocket();
+            Logger.info("Binding port %d...".formatted(port));
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
             dataService.run();
             setStatus(SocketStatus.RUNNING);
+            Logger.info("Server launched successfully");
         } catch (IOException e) {
             setStatus(SocketStatus.IDLE);
             throw new RuntimeApplicationException("Unable to open server", e);

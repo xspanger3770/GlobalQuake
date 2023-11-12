@@ -21,15 +21,13 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ENV PATH=/usr/local/cuda/bin:$PATH
 
 RUN addgroup --gid 1000 group && \
-    adduser --gid 1000 --uid 1000 --disable-password --gecos user user
-
-USER 1000
+    adduser --gid 1000 --uid 1000 --disabled-password --gecos user user
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /home/user/
 
 # Copy the application JAR file into the container at the working directory
-COPY out/artifacts/GlobalQuakeServer/GlobalQuakeServer_v0.10.0_pre5.jar .
+COPY out/artifacts/GlobalQuakeServer/GlobalQuakeServer.jar .
 
 # Copy station database and configuration files
 COPY Container ./.GlobalQuakeServerData
@@ -37,5 +35,10 @@ COPY Container ./.GlobalQuakeServerData
 # Copy CUDA library
 COPY GQHypocenterSearch/build/lib ./lib
 
+RUN chown -R user:group ./.GlobalQuakeServerData
+RUN chown -R user:group GlobalQuakeServer.jar
+RUN chown -R user:group ./lib
+USER 1000
+
 # Run GQ Server
-CMD ["java", "-jar", "-Djava.library.path=./lib", "GlobalQuakeServer_v0.10.0_pre5.jar", "--headless"]
+CMD ["java", "-jar", "-Djava.library.path=./lib", "GlobalQuakeServer.jar", "--headless"]
