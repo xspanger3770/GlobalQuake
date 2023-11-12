@@ -66,12 +66,12 @@ public class Main {
         });
     }
 
-    private static final double PHASES = 6.0;
+    private static final double PHASES = 7.0;
     private static int phase = 0;
 
     public static void updateProgressBar(String status, int value) {
         if(headless){
-            Logger.info("%d%%: %s".formatted(value, status));
+            Logger.info("Initialising... %d%%: %s".formatted(value, status));
         }else{
             databaseMonitorFrame.getMainProgressBar().setString(status);
             databaseMonitorFrame.getMainProgressBar().setValue(value);

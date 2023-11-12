@@ -1,15 +1,17 @@
 package globalquake.core;
 
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
+import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
-import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
-import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import org.tinylog.Logger;
 
 import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -121,8 +123,8 @@ public class SeedlinkNetworksReader {
 			}
 
 			reader.close();
-		} catch(ConnectException e1){
-			Logger.trace(e1);
+		} catch(ConnectException | NoRouteToHostException | SocketTimeoutException e1){
+			Logger.warn("Unable to connect to seedlink server `%s`: %s", seedlinkNetwork.getHost(), e1.getMessage());
 		} catch (Exception e) {
 			Logger.error(e);
 		}finally{

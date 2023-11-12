@@ -77,10 +77,10 @@ public class EarthquakeAnalysisTraining {
                 failed++;
             } else {
                 failed = 0;
-                Settings.hypocenterDetectionResolution += 2.5;
+                Settings.hypocenterDetectionResolution += 5.0;
             }
             if(progressUpdateFunction !=null){
-                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime), 0);
+                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime, TARGET_TIME), (int) Math.max(0, Math.min(100, ((double)lastTime / TARGET_TIME) * 100.0)));
             }
             if(slider != null){
                 slider.setValue(Settings.hypocenterDetectionResolution.intValue());

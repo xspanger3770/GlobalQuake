@@ -526,7 +526,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        Logger.info("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
+        Logger.trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
     }
 
     private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {

@@ -7,6 +7,7 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -208,8 +209,8 @@ public class StationDatabaseManager {
                                 Callable<Void> task = () -> {
                                     try {
                                         SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                                    } catch(ConnectException ce){
-                                        Logger.trace(ce);
+                                    } catch(ConnectException | NoRouteToHostException ce){
+                                        Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), ce.getMessage()));
                                     } catch(Exception e){
                                         Logger.error(e);
                                     }
