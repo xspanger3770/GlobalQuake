@@ -173,6 +173,7 @@ public class GQServerSocket {
             try {
                 lastSocket.setSoTimeout(0); // we can wait for clients forever
                 Socket socket = lastSocket.accept();
+
                 Logger.info("A new client is joining...");
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
                 handshakeService.submit(() -> {

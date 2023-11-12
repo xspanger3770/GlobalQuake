@@ -11,6 +11,7 @@ import org.tinylog.Logger;
 
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.*;
@@ -117,17 +118,17 @@ public class SeedlinkNetworksReader {
 				SeedlinkPacket slp = reader.readPacket();
 				try {
 					newPacket(slp.getMiniSeed());
-				} catch (Exception e) {
+				} catch(SocketException se){Logger.trace(se);} catch (Exception e) {
 					Logger.error(e);
 				}
 			}
 
 			reader.close();
-		} catch(ConnectException | NoRouteToHostException | SocketTimeoutException e1){
+		} catch(SocketTimeoutException | SocketException e1){
 			Logger.warn("Unable to connect to seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), e1.getMessage()));
 		} catch (Exception e) {
 			Logger.error(e);
-		}finally{
+		} finally{
 			if(reader != null){
                 try {
                     reader.close();
