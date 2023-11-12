@@ -124,7 +124,7 @@ public class SeedlinkNetworksReader {
 
 			reader.close();
 		} catch(ConnectException | NoRouteToHostException | SocketTimeoutException e1){
-			Logger.warn("Unable to connect to seedlink server `%s`: %s", seedlinkNetwork.getHost(), e1.getMessage());
+			Logger.warn("Unable to connect to seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), e1.getMessage()));
 		} catch (Exception e) {
 			Logger.error(e);
 		}finally{
