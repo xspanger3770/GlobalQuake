@@ -9,8 +9,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import org.tinylog.Logger;
 
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.Instant;

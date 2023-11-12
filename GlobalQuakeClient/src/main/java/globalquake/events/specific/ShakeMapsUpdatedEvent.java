@@ -3,7 +3,7 @@ package globalquake.events.specific;
 import globalquake.events.GlobalQuakeLocalEventListener;
 
 public class ShakeMapsUpdatedEvent implements GlobalQuakeLocalEvent {
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    @SuppressWarnings({"unused"})
 
     public ShakeMapsUpdatedEvent() {
     }
