@@ -41,4 +41,4 @@ RUN chown -R user:group ./lib
 USER 1000
 
 # Run GQ Server
-CMD ["java", "-jar", "-Djava.library.path=./lib", "GlobalQuakeServer.jar", "--headless"]
+ENTRYPOINT ["java", "-jar", "-Djava.library.path=./lib", "GlobalQuakeServer.jar", "--headless"]
