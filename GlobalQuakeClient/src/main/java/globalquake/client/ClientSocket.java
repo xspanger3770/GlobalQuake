@@ -69,9 +69,11 @@ public class ClientSocket {
         } catch(ConnectException | SocketTimeoutException ce){
             Logger.trace(ce);
             status = ClientSocketStatus.DISCONNECTED;
+            throw ce;
         } catch(Exception e) {
             status = ClientSocketStatus.DISCONNECTED;
             Logger.error(e);
+            throw e;
         }
     }
 
