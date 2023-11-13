@@ -8,12 +8,15 @@ RUN apt-get update && \
     maven \
     build-essential \
     curl \
+    btop \
+    htop \
     && rm -rf /var/lib/apt/lists/*
 
 # Install NVIDIA CUDA Toolkit
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install -y --no-install-recommends \
     nvidia-cuda-toolkit \
+    nvtop \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for CUDA
