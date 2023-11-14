@@ -312,4 +312,27 @@ public class StationDatabaseManager {
 
         fireUpdateEvent();
     }
+
+    /**
+     *
+     * @return {totalStations, connectedStations, runningSeedlinks, totalSeedlinks}
+     */
+    public int[] getSummary() {
+        int totalStations = 0;
+        int connectedStations = 0;
+        int runningSeedlinks = 0;
+        int totalSeedlinks = 0;
+        for (SeedlinkNetwork seedlinkNetwork : getStationDatabase().getSeedlinkNetworks()) {
+            totalStations += seedlinkNetwork.selectedStations;
+            connectedStations += seedlinkNetwork.connectedStations;
+            if (seedlinkNetwork.selectedStations > 0) {
+                totalSeedlinks++;
+            }
+            if (seedlinkNetwork.status == SeedlinkStatus.RUNNING) {
+                runningSeedlinks++;
+            }
+        }
+
+        return new int[] {totalStations, connectedStations, runningSeedlinks, totalSeedlinks};
+    }
 }

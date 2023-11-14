@@ -2,6 +2,7 @@ package gqserver.api;
 
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.exception.UnknownPacketException;
+import gqserver.api.packets.system.TerminationPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -79,6 +80,14 @@ public class ServerClient {
         socket.close();
     }
 
+    public void destroy(String reason) throws IOException{
+        try {
+            sendPacket(new TerminationPacket(reason));
+        } finally {
+            destroy();
+        }
+    }
+
     public int getID() {
         return id;
     }
@@ -122,4 +131,5 @@ public class ServerClient {
     public void flush() throws IOException {
         getOutputStream().flush();
     }
+
 }

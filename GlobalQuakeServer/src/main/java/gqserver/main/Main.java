@@ -42,6 +42,10 @@ public class Main {
         }
     }
 
+    public static boolean isHeadless() {
+        return headless;
+    }
+
     public static void main(String[] args) {
         initErrorHandler();
         GlobalQuake.prepare(Main.MAIN_FOLDER, Main.getErrorHandler());
