@@ -4,7 +4,6 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
-import globalquake.core.analysis.Log;
 import globalquake.core.earthquake.data.*;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
@@ -19,7 +18,6 @@ import globalquake.utils.GeoUtils;
 import globalquake.utils.Point2DGQ;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import org.tinylog.Logger;
-import org.tinylog.core.LogEntry;
 
 import java.util.*;
 import java.util.stream.Collectors;

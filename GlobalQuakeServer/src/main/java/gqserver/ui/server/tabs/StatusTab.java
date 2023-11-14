@@ -2,8 +2,6 @@ package gqserver.ui.server.tabs;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
-import globalquake.core.database.SeedlinkNetwork;
-import globalquake.core.database.SeedlinkStatus;
 import gqserver.events.GlobalQuakeServerEventListener;
 import gqserver.events.specific.ClientJoinedEvent;
 import gqserver.events.specific.ClientLeftEvent;

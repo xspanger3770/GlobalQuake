@@ -20,7 +20,6 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;

@@ -21,7 +21,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 128;
+    public static final int STATIONS = 20;
     public static final double DIST = 5000;
 
     public static final double INACCURACY = 5000;
@@ -77,7 +77,7 @@ public class EarthquakeAnalysisTraining {
                 failed++;
             } else {
                 failed = 0;
-                Settings.hypocenterDetectionResolution += 5.0;
+                Settings.hypocenterDetectionResolution += 4.0;
             }
             if(progressUpdateFunction !=null){
                 progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime, TARGET_TIME), (int) Math.max(0, Math.min(100, ((double)lastTime / TARGET_TIME) * 100.0)));
