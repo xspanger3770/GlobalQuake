@@ -91,11 +91,11 @@ public class GQServerSocket {
         int[] summary = GlobalQuakeServer.instance.getStationDatabaseManager().getSummary();
 
         Logger.info("Server status: Clients: %d / %d, RAM: %.2f / %.2f GB, Seedlinks: %d / %d, Stations: %d / %d"
-                .formatted(clients.size(), Settings.maxClients, maxMem / StatusTab.GB, usedMem / StatusTab.GB,
+                .formatted(clients.size(), Settings.maxClients, usedMem / StatusTab.GB, maxMem / StatusTab.GB,
                         summary[2], summary[3], summary[1], summary[0]));
 
         if (stats != null) {
-            Logger.info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, succes: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull));
+            Logger.info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull));
         }
     }
 
