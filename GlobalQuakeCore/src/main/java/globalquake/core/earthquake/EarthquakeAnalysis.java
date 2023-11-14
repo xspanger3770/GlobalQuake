@@ -206,15 +206,14 @@ public class EarthquakeAnalysis {
             return null;
         }
 
-        if(GQHypocs.isCudaLoaded()){
+        if(GQHypocs.isCudaLoaded()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0);
             if(result == null){
                 Logger.error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
                         "because too many stations were involved in the event, but it might be also different error");
-                Logger.warn("Hypocenter will thus be calculated on CPU");
-            } else {
-                return result;
             }
+
+            return result;
         }
 
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");

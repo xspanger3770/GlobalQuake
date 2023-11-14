@@ -20,7 +20,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 7;
+    public static final int STATIONS = 128;
     public static final double DIST = 5000;
 
     public static final double INACCURACY = 5000;
@@ -32,9 +32,8 @@ public class EarthquakeAnalysisTraining {
         TauPTravelTimeCalculator.init();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
-        measureTest(10,10);
 
-        Settings.hypocenterDetectionResolution = 40.0;
+        Settings.hypocenterDetectionResolution = 200.0;
         Settings.pWaveInaccuracyThreshold = 2000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;

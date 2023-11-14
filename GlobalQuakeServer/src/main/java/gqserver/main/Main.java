@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
+import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.training.EarthquakeAnalysisTraining;
@@ -60,6 +61,10 @@ public class Main {
         maxClientsOption.setRequired(false);
         options.addOption(maxClientsOption);
 
+        Option maxGpuMemOption = new Option("g", "gpu-max-mem", true, "maximum GPU memory limit in GB");
+        maxGpuMemOption.setRequired(false);
+        options.addOption(maxGpuMemOption);
+
         CommandLineParser parser = new org.apache.commons.cli.BasicParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -85,6 +90,20 @@ public class Main {
                 }
                 Settings.maxClients = maxCli;
                 Logger.info("Maximum client count set to %d".formatted(Settings.maxClients));
+            } catch(IllegalArgumentException e){
+                Logger.error(e);
+                System.exit(1);
+            }
+        }
+
+        if(cmd.hasOption(maxGpuMemOption.getOpt())) {
+            try {
+                double maxMem =  Double.parseDouble(cmd.getOptionValue(maxClientsOption.getOpt()));
+                if(maxMem <= 0){
+                    throw new IllegalArgumentException("Invalid maximum GPU memory amount");
+                }
+                GQHypocs.MAX_GPU_MEM = maxMem;
+                Logger.info("Maximum GPU memory allocation will be limited to around %.2f GB".formatted(maxMem));
             } catch(IllegalArgumentException e){
                 Logger.error(e);
                 System.exit(1);

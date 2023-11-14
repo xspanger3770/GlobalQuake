@@ -10,15 +10,22 @@ import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class GQHypocs {
 
+    public static double MAX_GPU_MEM = 3.0;
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
+    // LOWEST DEPTH RESOLUTION MUST BE AT THE LAST POSITION IN THE FIELD !!
     private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
+    // HIGHEST POINT COUNT MUST BE AT THE BEGINNING OF THE FIELD !!
     private static final int[] point_profiles = new int[] { 40_000, 8_000, 4_000, 1600, 400};
     private static final float[] dist_profiles = new float[]{ 90.0f, 20.0f, 4.0f, 0.8f, 0.2f};
+
+    private static boolean stationLimitCalculated = false;
+    private static int stationLimit = 0;
 
     static {
         try {
@@ -60,25 +67,33 @@ public class GQHypocs {
     }
 
     public synchronized static PreliminaryHypocenter findHypocenter(List<PickedEvent> pickedEventList, Cluster cluster, int from) {
-        float[] stations_array = new float[pickedEventList.size() * 4];
+        double point_multiplier = Settings.hypocenterDetectionResolution;
+        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
+
+        if(!stationLimitCalculated){
+            calculateStationLimit(point_multiplier, depth_profiles[depth_profiles.length - 1]);
+        }
+
+        pickedEventList.sort(Comparator.comparing(PickedEvent::maxRatioReversed));
+
+        int station_count = Math.min(stationLimit, pickedEventList.size());
+
+        float[] stations_array = new float[station_count * 4];
 
         long time = pickedEventList.get(0).pWave();
 
-        for (int i = 0; i < pickedEventList.size(); i++) {
+        for (int i = 0; i < station_count; i++) {
             PickedEvent pickedEvent = pickedEventList.get(i);
             stations_array[i] = (float) pickedEvent.lat() * RADIANS;
-            stations_array[i + pickedEventList.size()] = (float) pickedEvent.lon() * RADIANS;
-            stations_array[i + 2 * pickedEventList.size()] = (float) pickedEvent.elevation();
-            stations_array[i + 3 * pickedEventList.size()] = (float) ((pickedEvent.pWave() - time) / 1000.0);
+            stations_array[i + station_count] = (float) pickedEvent.lon() * RADIANS;
+            stations_array[i + 2 * station_count] = (float) pickedEvent.elevation();
+            stations_array[i + 3 * station_count] = (float) ((pickedEvent.pWave() - time) / 1000.0);
         }
 
         float[] result = {
                 (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lat : cluster.getRootLat())  * RADIANS),
                 (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lon : cluster.getRootLon()) * RADIANS)
         };
-
-        double point_multiplier = Settings.hypocenterDetectionResolution;
-        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
 
         for(int i = from; i < depth_profiles.length; i++){
             result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * point_multiplier), i, dist_profiles[i] * RADIANS);
@@ -90,6 +105,16 @@ public class GQHypocs {
         }
 
         return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time),0,0);
+    }
+
+    private static void calculateStationLimit(double pointMultiplier, float depthProfile) {
+        int stations = 128;
+        long bytes = GQNativeFunctions.getAllocationSize((int) (point_profiles[0]*pointMultiplier), stations, depthProfile);
+        double GB = bytes / (1024.0 * 1024 * 1024);
+
+        stationLimitCalculated = true;
+        stationLimit = (int) (stations * (MAX_GPU_MEM / GB));
+        Logger.info("%d stations will use %.2f / %.2f GB, thus limit will be %d stations".formatted(stations, GB, MAX_GPU_MEM, stationLimit));
     }
 
     public static boolean isCudaLoaded() {

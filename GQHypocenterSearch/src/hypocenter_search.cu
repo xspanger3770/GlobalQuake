@@ -46,6 +46,8 @@ int depth_profile_count;
 depth_profile_t* depth_profiles = nullptr;
 float* f_results_device = nullptr;
 
+size_t total_table_size;
+
 void print_err(const char* msg) {
     cudaError err= cudaGetLastError();
     TRACE(2, "%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
@@ -327,6 +329,35 @@ void prepare_travel_table(float* fitted_travel_table, int rows) {
     }
 }
 
+// returns (accurately) estimated total GPU memory allocation size given the parameters
+size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution)
+{
+    size_t result = total_table_size;
+
+    dim3 blocks = {(unsigned int)ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
+    
+    size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
+    size_t station_distances_array_size = sizeof(float) * station_count * points;
+    size_t point_locations_array_size = sizeof(float) * 2 * points;
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
+    size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
+    size_t temp_results_array_size = (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements);
+
+    result += station_array_size;
+    result += station_distances_array_size;
+    result += point_locations_array_size;
+    result += results_size;
+    result += temp_results_array_size;    
+
+    return result;
+}
+
+
+JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize(JNIEnv *, jclass, jint points, jint stations, jfloat depth_resolution) {
+    return get_total_allocation_size(points, stations, depth_resolution);
+}
+
 bool run_hypocenter_search(float* stations, size_t station_count, size_t points, int depth_profile_index, 
     float maxDist, float fromLat, float fromLon, float* final_result)
 {
@@ -511,6 +542,8 @@ bool initDepthProfiles(float* resols, int count){
         return false;
     }
 
+    total_table_size = 0;
+
     for(int i = 0; i < depth_profile_count; i++) {
         float depthRes = resols[i];
         if(depthRes < max_depth_resolution){
@@ -521,6 +554,7 @@ bool initDepthProfiles(float* resols, int count){
 
         int rows = (unsigned int)ceil(max_depth / depthRes) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
+        total_table_size += table_size;
 
         TRACE(1, "Creating depth profile with resolution %.2fkm (%.2fkB)\n", depthRes, table_size / 1024.0);
 

@@ -65,4 +65,7 @@ public class PickedEvent {
     }
 
 
+    public double maxRatioReversed() {
+        return -maxRatio();
+    }
 }
