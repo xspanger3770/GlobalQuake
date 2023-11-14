@@ -69,8 +69,12 @@ public class GlobalQuake {
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
 	}
 
-	public void startRuntime(){
+	public GlobalQuake initStations() {
 		globalStationManager.initStations(stationDatabaseManager);
+		return this;
+	}
+
+	public void startRuntime(){
 		getGlobalQuakeRuntime().runThreads();
 		seedlinkNetworksReader.run();
 	}

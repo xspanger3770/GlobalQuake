@@ -164,6 +164,7 @@ public class Main {
     }
 
     private static void autoStartServer() {
+        GlobalQuakeServer.instance.initStations();
         GlobalQuakeServer.instance.getServerSocket().run(Settings.lastServerIP, Settings.lastServerPORT);
         GlobalQuakeServer.instance.startRuntime();
     }

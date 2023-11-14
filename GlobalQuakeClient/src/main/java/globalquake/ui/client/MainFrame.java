@@ -183,7 +183,7 @@ public class MainFrame extends GQFrame {
     }
 
     public static void launchGlobalQuake() {
-        new GlobalQuakeLocal(databaseManager).createFrame().startRuntime();
+        new GlobalQuakeLocal(databaseManager).createFrame().initStations().startRuntime();
     }
 
     public void onLoad(){
