@@ -98,7 +98,7 @@ public class Main {
 
         if(cmd.hasOption(maxGpuMemOption.getOpt())) {
             try {
-                double maxMem =  Double.parseDouble(cmd.getOptionValue(maxClientsOption.getOpt()));
+                double maxMem =  Double.parseDouble(cmd.getOptionValue(maxGpuMemOption.getOpt()));
                 if(maxMem <= 0){
                     throw new IllegalArgumentException("Invalid maximum GPU memory amount");
                 }

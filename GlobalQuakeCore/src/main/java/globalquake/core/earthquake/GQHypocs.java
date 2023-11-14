@@ -67,16 +67,9 @@ public class GQHypocs {
     }
 
     public synchronized static PreliminaryHypocenter findHypocenter(List<PickedEvent> pickedEventList, Cluster cluster, int from) {
-        double point_multiplier = Settings.hypocenterDetectionResolution;
-        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
-
-        if(!stationLimitCalculated){
-            calculateStationLimit(point_multiplier, depth_profiles[depth_profiles.length - 1]);
-        }
-
         pickedEventList.sort(Comparator.comparing(PickedEvent::maxRatioReversed));
 
-        int station_count = Math.min(stationLimit, pickedEventList.size());
+        int station_count = !stationLimitCalculated ? pickedEventList.size() : Math.min(stationLimit, pickedEventList.size());
 
         float[] stations_array = new float[station_count * 4];
 
@@ -96,7 +89,7 @@ public class GQHypocs {
         };
 
         for(int i = from; i < depth_profiles.length; i++){
-            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * point_multiplier), i, dist_profiles[i] * RADIANS);
+            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * getPointMultiplier()), i, dist_profiles[i] * RADIANS);
 
             if (result == null) {
                 return null;
@@ -107,9 +100,9 @@ public class GQHypocs {
         return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time),0,0);
     }
 
-    private static void calculateStationLimit(double pointMultiplier, float depthProfile) {
+    public static void calculateStationLimit() {
         int stations = 128;
-        long bytes = GQNativeFunctions.getAllocationSize((int) (point_profiles[0]*pointMultiplier), stations, depthProfile);
+        long bytes = GQNativeFunctions.getAllocationSize((int) (point_profiles[0]*getPointMultiplier()), stations, depth_profiles[depth_profiles.length - 1]);
         double GB = bytes / (1024.0 * 1024 * 1024);
 
         stationLimitCalculated = true;
@@ -117,7 +110,14 @@ public class GQHypocs {
         Logger.info("%d stations will use %.2f / %.2f GB, thus limit will be %d stations".formatted(stations, GB, MAX_GPU_MEM, stationLimit));
     }
 
+    private static double getPointMultiplier() {
+        double point_multiplier = Settings.hypocenterDetectionResolution;
+        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
+        return point_multiplier;
+    }
+
     public static boolean isCudaLoaded() {
         return cudaLoaded;
     }
-}
+
+ }

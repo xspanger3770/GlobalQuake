@@ -3,6 +3,7 @@ package globalquake.core.training;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.EarthquakeAnalysis;
+import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.PickedEvent;
@@ -85,6 +86,10 @@ public class EarthquakeAnalysisTraining {
                 slider.setValue(Settings.hypocenterDetectionResolution.intValue());
                 slider.repaint();
             }
+        }
+
+        if(GQHypocs.isCudaLoaded()) {
+            GQHypocs.calculateStationLimit();
         }
     }
 
