@@ -20,6 +20,7 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -95,7 +96,7 @@ public class GQServerSocket {
                         summary[2], summary[3], summary[1], summary[0]));
 
         if (stats != null) {
-            Logger.info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull));
+            Logger.info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
         }
     }
 
@@ -218,7 +219,8 @@ public class GQServerSocket {
                         handshake(client);
                     } catch (IOException e) {
                         Logger.error("Failure when accepting client!");
-                        Logger.error(e);
+                        stats.errors++;
+                        Logger.trace(e);
                     }
                 });
             } catch (IOException e) {

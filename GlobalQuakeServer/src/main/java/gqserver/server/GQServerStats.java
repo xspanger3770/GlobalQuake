@@ -8,4 +8,5 @@ public class GQServerStats {
     public int wrongPacket;
     public int serverFull;
     public int successfull;
+    public int errors;
 }
