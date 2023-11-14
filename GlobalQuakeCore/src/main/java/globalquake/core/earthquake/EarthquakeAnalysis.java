@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
+import globalquake.core.analysis.Log;
 import globalquake.core.earthquake.data.*;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
@@ -18,6 +19,7 @@ import globalquake.utils.GeoUtils;
 import globalquake.utils.Point2DGQ;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import org.tinylog.Logger;
+import org.tinylog.core.LogEntry;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -205,7 +207,14 @@ public class EarthquakeAnalysis {
         }
 
         if(GQHypocs.isCudaLoaded()){
-            return GQHypocs.findHypocenter(selectedEvents, cluster, 0);
+            var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0);
+            if(result == null){
+                Logger.error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
+                        "because too many stations were involved in the event, but it might be also different error");
+                Logger.warn("Hypocenter will thus be calculated on CPU");
+            } else {
+                return result;
+            }
         }
 
         Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
@@ -522,7 +531,7 @@ public class EarthquakeAnalysis {
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
-                Logger.warn("Not updating because: %s".formatted(result));
+                Logger.trace("Not updating because: %s".formatted(result));
             }
         }
 
