@@ -1,6 +1,7 @@
 package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.database.SeedlinkNetwork;
@@ -116,7 +117,9 @@ public class SeedlinkNetworksReader {
 				SeedlinkPacket slp = reader.readPacket();
 				try {
 					newPacket(slp.getMiniSeed());
-				} catch(SocketException se){Logger.trace(se);} catch (Exception e) {
+				} catch(SocketException | SeedFormatException se){
+					Logger.trace(se);
+				} catch (Exception e) {
 					Logger.error(e);
 				}
 			}
