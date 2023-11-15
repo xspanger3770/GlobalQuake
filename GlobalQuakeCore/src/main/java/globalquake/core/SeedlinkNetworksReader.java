@@ -169,7 +169,7 @@ public class SeedlinkNetworksReader {
 		String station = dr.getHeader().getStationIdentifier().replaceAll(" ", "");
 		var globalStation = stationCache.get("%s %s".formatted(network, station));
 		if(globalStation == null){
-			Logger.trace("Warning! Seedlink sent data for %s %s, but that was never selected!!!".formatted(network, station));
+			Logger.trace("Seedlink sent data for %s %s, but that was never selected!".formatted(network, station));
 		}else {
 			globalStation.addRecord(dr);
 		}

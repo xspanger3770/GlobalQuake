@@ -24,13 +24,13 @@ public class ClientReader implements Runnable {
                 GlobalQuakeServer.instance.getServerSocket().getDataService().processPacket(client, packet);
             }
         } catch (Exception | UnknownPacketException e) {
-            Logger.info("Client #%d experienced a crash while reading!".formatted(client.getID()));
-            Logger.trace(e);
+            Logger.tag("Server").warn("Client #%d experienced a crash while reading!".formatted(client.getID()));
+            Logger.tag("Server").trace(e);
         } finally {
             try {
                 client.destroy();
             } catch (IOException e) {
-                Logger.error(e);
+                Logger.tag("Server").error(e);
             }
         }
     }

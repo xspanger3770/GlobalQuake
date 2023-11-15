@@ -33,25 +33,25 @@ public class GQHypocs {
             initCuda();
             if(cudaLoaded) {
                 EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
-                Logger.info("CUDA library loaded successfully!");
+                Logger.tag("Hypocs").info("CUDA library loaded successfully!");
                 printResolution();
             } else {
-                Logger.warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
+                Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
             }
         } catch(Exception | UnsatisfiedLinkError e) {
-            Logger.warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
+            Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
         }
 
     }
 
     private static void printResolution() {
         for(int i = 0; i < depth_profiles.length; i++){
-            Logger.debug("Iteration #%d difficulty: %.2fK".formatted( i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
+            Logger.tag("Hypocs").debug("Iteration #%d difficulty: %.2fK".formatted( i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
         }
 
         for(int i = 0; i < depth_profiles.length; i++) {
             double distKM = dist_profiles[i] / 360.0* GeoUtils.EARTH_CIRCUMFERENCE;
-            Logger.debug("Iteration #%d space H %.2fkm V %fkm".formatted(i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]));
+            Logger.tag("Hypocs").debug("Iteration #%d space H %.2fkm V %fkm".formatted(i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]));
         }
     }
 
@@ -107,7 +107,7 @@ public class GQHypocs {
 
         stationLimitCalculated = true;
         stationLimit = (int) (stations * (MAX_GPU_MEM / GB));
-        Logger.info("%d stations will use %.2f / %.2f GB, thus limit will be %d stations".formatted(stations, GB, MAX_GPU_MEM, stationLimit));
+        Logger.tag("Hypocs").info("%d stations will use %.2f / %.2f GB, thus limit will be %d stations".formatted(stations, GB, MAX_GPU_MEM, stationLimit));
     }
 
     private static double getPointMultiplier() {

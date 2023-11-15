@@ -86,7 +86,7 @@ public class EarthquakeAnalysis {
                     return;
                 }
                 cluster.getEarthquake().nextReportEventCount = (int) (count * 1.2);
-                Logger.debug("Next report will be at " + cluster.getEarthquake().nextReportEventCount + " assigns");
+                Logger.tag("Hypocs").debug("Next report will be at " + cluster.getEarthquake().nextReportEventCount + " assigns");
             }
         }
 
@@ -193,7 +193,7 @@ public class EarthquakeAnalysis {
 
         long limit = 1600 + (long) Math.sqrt(distFromRoot) * 200;
 
-        Logger.debug("deltaP: %d ms, limit for %.1f km is %d ms".formatted(deltaP, distFromRoot, limit));
+        Logger.tag("Hypocs").debug("deltaP: %d ms, limit for %.1f km is %d ms".formatted(deltaP, distFromRoot, limit));
 
         return deltaP >= limit;
     }
@@ -207,14 +207,14 @@ public class EarthquakeAnalysis {
         if(GQHypocs.isCudaLoaded()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0);
             if(result == null){
-                Logger.error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
+                Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
                         "because too many stations were involved in the event, but it might be also different error");
             }
 
             return result;
         }
 
-        Logger.debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
+        Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
 
@@ -222,9 +222,9 @@ public class EarthquakeAnalysis {
         double universalMultiplier = getUniversalResolutionMultiplier(finderSettings);
         double pointMultiplier = universalMultiplier * universalMultiplier * 0.33;
 
-        Logger.debug("Universal multiplier is " + universalMultiplier);
-        Logger.debug("Point multiplier is " + pointMultiplier);
-        Logger.debug("Iterations difference: " + iterationsDifference);
+        Logger.tag("Hypocs").debug("Universal multiplier is " + universalMultiplier);
+        Logger.tag("Hypocs").debug("Point multiplier is " + pointMultiplier);
+        Logger.tag("Hypocs").debug("Iterations difference: " + iterationsDifference);
 
         long timeMillis = System.currentTimeMillis();
 
@@ -237,8 +237,8 @@ public class EarthquakeAnalysis {
         if (far && (previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8)) {
             // phase 1 search far from ANCHOR (it's not very certain)
             bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
-            Logger.debug("FAR: " + (System.currentTimeMillis() - timeMillis));
-            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+            Logger.tag("Hypocs").debug("FAR: " + (System.currentTimeMillis() - timeMillis));
+            Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
             _lat = bestHypocenter.lat;
             _lon = bestHypocenter.lon;
         }
@@ -250,8 +250,8 @@ public class EarthquakeAnalysis {
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
             _lat = bestHypocenter.lat;
             _lon = bestHypocenter.lon;
-            Logger.debug("REGIONAL: " + (System.currentTimeMillis() - timeMillis));
-            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+            Logger.tag("Hypocs").debug("REGIONAL: " + (System.currentTimeMillis() - timeMillis));
+            Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
         } else {
             // phase 2B search region closer BEST or ANCHOR (it assumes it's almost right)
             timeMillis = System.currentTimeMillis();
@@ -259,16 +259,16 @@ public class EarthquakeAnalysis {
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
             _lat = bestHypocenter.lat;
             _lon = bestHypocenter.lon;
-            Logger.debug("CLOSER: " + (System.currentTimeMillis() - timeMillis));
-            Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+            Logger.tag("Hypocs").debug("CLOSER: " + (System.currentTimeMillis() - timeMillis));
+            Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
         }
 
         // phase 3 find exact area
         timeMillis = System.currentTimeMillis();
         PreliminaryHypocenter hyp = scanArea(selectedEvents, 100.0, (int) (4000 * pointMultiplier), _lat, _lon, 8 + iterationsDifference, maxDepth, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        Logger.debug("EXACT: " + (System.currentTimeMillis() - timeMillis));
-        Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+        Logger.tag("Hypocs").debug("EXACT: " + (System.currentTimeMillis() - timeMillis));
+        Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
         // phase 4 find exact depth
         timeMillis = System.currentTimeMillis();
@@ -276,8 +276,8 @@ public class EarthquakeAnalysis {
         _lon = bestHypocenter.lon;
         hyp = scanArea(selectedEvents, 10.0, (int) (4000 * pointMultiplier), _lat, _lon, 10 + iterationsDifference, maxDepth, finderSettings);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
-        Logger.debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
-        Logger.debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
+        Logger.tag("Hypocs").debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
+        Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
         return bestHypocenter;
     }
@@ -306,7 +306,7 @@ public class EarthquakeAnalysis {
                 list.remove(list.size() - 1);
             }
 
-            Logger.debug("Reduced the number of events from %d to the best %d for better accuracy".formatted(selectedEvents.size(), list.size()));
+            Logger.tag("Hypocs").debug("Reduced the number of events from %d to the best %d for better accuracy".formatted(selectedEvents.size(), list.size()));
 
             selectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
 
@@ -477,18 +477,18 @@ public class EarthquakeAnalysis {
         calculateMagnitude(cluster, bestHypocenter);
 
         if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
-            Logger.debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
+            Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
             return;
         }
 
         // There has to be at least some difference in the picked pWave times
         if (!checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
-            Logger.debug("Not Enough Delta-P");
+            Logger.tag("Hypocs").debug("Not Enough Delta-P");
             return;
         }
 
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
-            Logger.debug("Search canceled for %d".formatted(cluster.getId()));
+            Logger.tag("Hypocs").debug("Search canceled for %d".formatted(cluster.getId()));
             return;
         }
 
@@ -503,7 +503,7 @@ public class EarthquakeAnalysis {
 
         bestHypocenter.calculateQuality();
 
-        Logger.debug(bestHypocenter);
+        Logger.tag("Hypocs").debug(bestHypocenter);
 
         double obviousCorrectPct = 1.0;
         if (bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
@@ -522,17 +522,17 @@ public class EarthquakeAnalysis {
                 }
                 cluster.setEarthquake(null);
             }
-            Logger.debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f".formatted(remove, pct, finderSettings.correctnessThreshold()));
+            Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f".formatted(remove, pct, finderSettings.correctnessThreshold()));
         } else {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
-                Logger.trace("Not updating because: %s".formatted(result));
+                Logger.tag("Hypocs").trace("Not updating because: %s".formatted(result));
             }
         }
 
-        Logger.trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
+        Logger.tag("Hypocs").trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
     }
 
     private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
@@ -541,14 +541,14 @@ public class EarthquakeAnalysis {
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
         if (bestHypocenter.locationUncertainty > 500) {
-            Logger.debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
+            Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
             return false;
         }
 
         if(DEPTH_FIX_ALLOWED) {
             if (bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
                     (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)) {
-                Logger.debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
+                Logger.tag("Hypocs").debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
                 fixDepth(bestHypocenter, 10, events);
             }
         }
@@ -583,7 +583,7 @@ public class EarthquakeAnalysis {
         origins.sort(Long::compareTo);
         bestHypocenter.origin = origins.get((origins.size() - 1) / 2);
 
-        Logger.debug("Origin time recalculated");
+        Logger.tag("Hypocs").debug("Origin time recalculated");
     }
 
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {

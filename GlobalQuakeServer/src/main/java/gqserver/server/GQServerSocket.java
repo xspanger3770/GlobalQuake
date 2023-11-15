@@ -55,7 +55,7 @@ public class GQServerSocket {
     }
 
     public void run(String ip, int port) {
-        Logger.info("Creating server...");
+        Logger.tag("Server").info("Creating server...");
         ExecutorService acceptService = Executors.newSingleThreadExecutor();
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
@@ -66,7 +66,7 @@ public class GQServerSocket {
         setStatus(SocketStatus.OPENING);
         try {
             lastSocket = new ServerSocket();
-            Logger.info("Binding port %d...".formatted(port));
+            Logger.tag("Server").info("Binding port %d...".formatted(port));
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
@@ -77,7 +77,7 @@ public class GQServerSocket {
 
             dataService.run();
             setStatus(SocketStatus.RUNNING);
-            Logger.info("Server launched successfully");
+            Logger.tag("Server").info("Server launched successfully");
         } catch (IOException e) {
             setStatus(SocketStatus.IDLE);
             throw new RuntimeApplicationException("Unable to open server", e);
@@ -90,12 +90,12 @@ public class GQServerSocket {
 
         int[] summary = GlobalQuakeServer.instance.getStationDatabaseManager().getSummary();
 
-        Logger.info("Server status: Clients: %d / %d, RAM: %.2f / %.2f GB, Seedlinks: %d / %d, Stations: %d / %d"
+        Logger.tag("ServerStatus").info("Server status: Clients: %d / %d, RAM: %.2f / %.2f GB, Seedlinks: %d / %d, Stations: %d / %d"
                 .formatted(clients.size(), Settings.maxClients, usedMem / StatusTab.GB, maxMem / StatusTab.GB,
                         summary[2], summary[3], summary[1], summary[0]));
 
         if (stats != null) {
-            Logger.info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
+            Logger.tag("ServerStatus").info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
         }
     }
 
@@ -108,15 +108,15 @@ public class GQServerSocket {
                         client.destroy();
                         toRemove.add(client);
                         GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
-                        Logger.info("Client #%d disconnected due to timeout".formatted(client.getID()));
+                        Logger.tag("Server").info("Client #%d disconnected due to timeout".formatted(client.getID()));
                     } catch (Exception e) {
-                        Logger.error(e);
+                        Logger.tag("Server").error(e);
                     }
                 }
             }
             clients.removeAll(toRemove);
         }catch(Exception e) {
-            Logger.error(e);
+            Logger.tag("Server").error(e);
         }
     }
 
@@ -126,7 +126,7 @@ public class GQServerSocket {
             packet = client.readPacket();
         } catch (UnknownPacketException e) {
             client.destroy();
-            Logger.error(e);
+            Logger.tag("Server").error(e);
             return;
         }
 
@@ -139,7 +139,7 @@ public class GQServerSocket {
             client.setClientConfig(handshakePacket.clientConfig());
         } else {
             stats.wrongPacket++;
-            Logger.warn("Client send invalid initial packet!");
+            Logger.tag("Server").warn("Client send invalid initial packet!");
             client.destroy();
         }
 
@@ -148,7 +148,7 @@ public class GQServerSocket {
                 client.destroy("Server is full!");
                 stats.serverFull++;
             } else {
-                Logger.info("Client #%d handshake successfull".formatted(client.getID()));
+                Logger.tag("Server").info("Client #%d handshake successfull".formatted(client.getID()));
                 stats.successfull++;
                 client.sendPacket(new HandshakeSuccessfulPacket());
                 readerService.submit(new ClientReader(client));
@@ -189,7 +189,7 @@ public class GQServerSocket {
                 client.flush();
                 client.destroy();
             } catch (Exception e) {
-                Logger.error(e);
+                Logger.tag("Server").error(e);
             }
         }
 
@@ -208,18 +208,18 @@ public class GQServerSocket {
 
                 stats.accepted++;
 
-                Logger.info("A new client is joining...");
+                Logger.tag("Server").info("A new client is joining...");
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
                 handshakeService.submit(() -> {
                     ServerClient client;
                     try {
                         client = new ServerClient(socket);
-                        Logger.info("Performing handshake for client #%d".formatted(client.getID()));
+                        Logger.tag("Server").info("Performing handshake for client #%d".formatted(client.getID()));
                         handshake(client);
                     } catch (IOException e) {
-                        Logger.error("Failure when accepting client!");
+                        Logger.tag("Server").error("Failure when accepting client!");
                         stats.errors++;
-                        Logger.trace(e);
+                        Logger.tag("Server").trace(e);
                     }
                 });
             } catch (IOException e) {
