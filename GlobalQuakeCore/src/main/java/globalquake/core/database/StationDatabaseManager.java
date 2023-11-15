@@ -8,6 +8,7 @@ import org.tinylog.Logger;
 import java.io.*;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -208,7 +209,7 @@ public class StationDatabaseManager {
                                 Callable<Void> task = () -> {
                                     try {
                                         SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                                    } catch(SocketException ce){
+                                    } catch(SocketException | SocketTimeoutException | UnknownHostException ce){
                                         Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), ce.getMessage()));
                                     } catch(Exception e){
                                         Logger.error(e);
