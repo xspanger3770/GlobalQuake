@@ -2,6 +2,7 @@ package globalquake.core;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.database.SeedlinkNetwork;
@@ -10,8 +11,10 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import org.tinylog.Logger;
 
+import java.io.EOFException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -125,11 +128,9 @@ public class SeedlinkNetworksReader {
 			}
 
 			reader.close();
-		} catch(SocketTimeoutException | SocketException e1){
-			Logger.warn("Unable to connect to seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), e1.getMessage()));
 		} catch (Exception e) {
-			Logger.error(e);
-		} finally{
+			Logger.warn("Seedlink reader failed for seedlink `%s`: %s".formatted(seedlinkNetwork.getHost(), e.getMessage()));
+		} finally {
 			if(reader != null){
                 try {
                     reader.close();
@@ -151,7 +152,7 @@ public class SeedlinkNetworksReader {
 				reconnectDelay *= 2;
 			}
 		} catch (InterruptedException ignored) {
-			Logger.warn("Thread interrupted, nothing will happen");
+			Logger.warn("Seedlink reader thread for %s interrupted".formatted(seedlinkNetwork.getHost()));
 			return;
 		}
 
