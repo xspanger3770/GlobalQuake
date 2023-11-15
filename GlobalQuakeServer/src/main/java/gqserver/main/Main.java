@@ -12,6 +12,7 @@ import globalquake.core.regions.Regions;
 import globalquake.core.intensity.*;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
+import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
 import gqserver.ui.server.DatabaseMonitorFrame;
 import org.apache.commons.cli.*;
@@ -127,9 +128,6 @@ public class Main {
         });
     }
 
-    private static final double PHASES = 7.0;
-    private static int phase = 0;
-
     public static void updateProgressBar(String status, int value) {
         if(headless){
             Logger.info("Initialising... %d%%: %s".formatted(value, status));
@@ -139,12 +137,18 @@ public class Main {
         }
     }
 
+    private static final double PHASES = 8.0;
+    private static int phase = 0;
+
     public static void initAll() throws Exception{
         updateProgressBar("Loading regions...", (int) ((phase++ / PHASES) * 100.0));
         Regions.init();
 
         updateProgressBar("Filling up intensity table...", (int) ((phase++ / PHASES) * 100.0));
         IntensityTable.init();
+
+        updateProgressBar("Loading scale...", (int) ((phase++ / PHASES) * 100.0));
+        Scale.load();
 
         updateProgressBar("Loading travel table...", (int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();
