@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 
 public class EarthquakeArchive {
 
-	public static final File ARCHIVE_FILE = new File(GlobalQuake.mainFolder,  "archive.dat");
-	public static final File TEMP_ARCHIVE_FILE = new File(GlobalQuake.mainFolder, "temp_archive.dat");
+	public static final File ARCHIVE_FILE = new File(GlobalQuake.mainFolder,  "volume/archive.dat");
+	public static final File TEMP_ARCHIVE_FILE = new File(GlobalQuake.mainFolder, "volume/temp_archive.dat");
 	private final ExecutorService executor;
 
 	private List<ArchivedQuake> archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
