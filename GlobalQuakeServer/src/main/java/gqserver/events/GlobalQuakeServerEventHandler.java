@@ -36,7 +36,7 @@ public class GlobalQuakeServerEventHandler {
 
     public void fireEvent(GlobalQuakeServerEvent event){
         executor.submit(() -> {
-            Logger.tag("Event").trace("Server event fired: %s".formatted(event.toString()));
+            Logger.tag("EventServer").trace("Server event fired: %s".formatted(event.toString()));
             for (GlobalQuakeServerEventListener eventListener : eventListeners) {
                 try {
                     event.run(eventListener);
