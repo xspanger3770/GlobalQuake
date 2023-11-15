@@ -14,4 +14,11 @@ public record CinemaEvent(CinemaTarget cinemaTarget) implements GlobalQuakeLocal
     public CinemaTarget cinemaTarget() {
         return cinemaTarget;
     }
+
+    @Override
+    public String toString() {
+        return "CinemaEvent{" +
+                "cinemaTarget=" + cinemaTarget +
+                '}';
+    }
 }

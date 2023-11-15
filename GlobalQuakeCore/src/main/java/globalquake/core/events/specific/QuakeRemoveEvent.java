@@ -9,4 +9,11 @@ public record QuakeRemoveEvent(Earthquake earthquake) implements GlobalQuakeEven
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onQuakeRemove(this);
     }
+
+    @Override
+    public String toString() {
+        return "QuakeRemoveEvent{" +
+                "earthquake=" + earthquake +
+                '}';
+    }
 }

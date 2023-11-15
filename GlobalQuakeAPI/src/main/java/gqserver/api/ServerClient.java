@@ -132,4 +132,16 @@ public class ServerClient {
         getOutputStream().flush();
     }
 
+    @Override
+    public String toString() {
+        return "ServerClient{" +
+                "socket=" + socket +
+                ", id=" + id +
+                ", joinTime=" + joinTime +
+                ", lastHeartbeat=" + lastHeartbeat +
+                ", receivedPackets=" + receivedPackets +
+                ", sentPackets=" + sentPackets +
+                ", clientConfig=" + clientConfig +
+                '}';
+    }
 }

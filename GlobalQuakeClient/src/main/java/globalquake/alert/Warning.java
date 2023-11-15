@@ -10,4 +10,11 @@ public class Warning {
     public final long createdAt;
     public boolean metConditions;
 
+    @Override
+    public String toString() {
+        return "Warning{" +
+                "createdAt=" + createdAt +
+                ", metConditions=" + metConditions +
+                '}';
+    }
 }

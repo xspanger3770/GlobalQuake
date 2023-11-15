@@ -12,4 +12,9 @@ public class ShakeMapsUpdatedEvent implements GlobalQuakeLocalEvent {
     public void run(GlobalQuakeLocalEventListener eventListener) {
         eventListener.onShakemapCreated(this);
     }
+
+    @Override
+    public String toString() {
+        return "ShakeMapsUpdatedEvent{}";
+    }
 }
