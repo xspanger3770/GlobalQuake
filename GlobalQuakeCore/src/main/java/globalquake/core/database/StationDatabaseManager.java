@@ -210,7 +210,7 @@ public class StationDatabaseManager {
                                     try {
                                         SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
                                     } catch(SocketException | SocketTimeoutException | UnknownHostException ce){
-                                        Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getHost(), ce.getMessage()));
+                                        Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
                                     } catch(Exception e){
                                         Logger.error(e);
                                     }

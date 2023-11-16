@@ -79,7 +79,7 @@ public class SeedlinkCommunicator {
                     }
 
                 } catch(NumberFormatException e){
-                    Logger.warn(new RuntimeException("Failed to get delay from %s, %s: %s".formatted(stationCode, seedlinkNetwork.getHost(), e.getMessage())));
+                    Logger.warn(new RuntimeException("Failed to get delay from %s, %s: %s".formatted(stationCode, seedlinkNetwork.getName(), e.getMessage())));
                 }
 
                 addAvailableChannel(networkCode, stationCode, channelName, locationCode, delay, seedlinkNetwork, stationDatabase);
