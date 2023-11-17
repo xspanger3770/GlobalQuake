@@ -29,6 +29,7 @@ public class ServerSelectionFrame extends GQFrame {
 
     private final ClientSocket client;
     private JButton connectButton;
+    private GlobalQuakeLocal gq;
 
     public ServerSelectionFrame() {
         client = new ClientSocket();
@@ -104,6 +105,8 @@ public class ServerSelectionFrame extends GQFrame {
                 Settings.lastServerPORT = port;
                 Settings.save();
 
+                gq = new GlobalQuakeClient(client);
+
                 client.connect(ip, port);
                 client.runReconnectService();
 
@@ -121,7 +124,7 @@ public class ServerSelectionFrame extends GQFrame {
     }
 
     private void launchClientUI() {
-        GlobalQuakeLocal gq = new GlobalQuakeClient(client).createFrame();
+        gq.createFrame();
         gq.getGlobalQuakeFrame().addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {

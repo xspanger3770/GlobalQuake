@@ -59,29 +59,34 @@ public class Sounds {
 			return;
 		}
 
-		soundService.submit(new Runnable() {
-			@Override
-			public void run() {
-
-				var latch = new CountDownLatch(1);
-				clip.addLineListener(new LineListener() {
-					@Override
-					public void update(LineEvent event) {
-						if (event.getType().equals(LineEvent.Type.STOP)) {
-							clip.removeLineListener(this);
-							latch.countDown();
-						}
-					}
-				});
-				clip.setFramePosition(0);
-				clip.start();
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					Logger.error(e);
-				}
+		soundService.submit(() -> {
+			try {
+				playClipRuntime(clip);
+			} catch(Exception e){
+				Logger.error(e);
 			}
 		});
 	}
-	
+
+	private static void playClipRuntime(Clip clip) {
+		var latch = new CountDownLatch(1);
+		clip.addLineListener(new LineListener() {
+			@Override
+			public void update(LineEvent event) {
+				if (event.getType().equals(LineEvent.Type.STOP)) {
+					clip.removeLineListener(this);
+					latch.countDown();
+				}
+			}
+		});
+		clip.setFramePosition(0);
+		clip.start();
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			Logger.error(e);
+		}
+	}
+
+
 }

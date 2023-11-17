@@ -56,7 +56,7 @@ public class FDSNWSDownloader {
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
         downloadFDSNWS(stationSource, result, -180, 180);
-        System.out.printf("%d Networks downloaded.%n", result.size());
+        Logger.info("%d Networks downloaded".formatted(result.size()));
         return result;
     }
 

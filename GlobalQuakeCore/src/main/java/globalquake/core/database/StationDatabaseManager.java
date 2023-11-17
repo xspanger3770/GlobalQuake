@@ -6,7 +6,9 @@ import globalquake.core.exception.FdnwsDownloadException;
 import org.tinylog.Logger;
 
 import java.io.*;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -205,7 +207,13 @@ public class StationDatabaseManager {
                                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
                                 Callable<Void> task = () -> {
-                                    SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                    try {
+                                        SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                    } catch(SocketException | SocketTimeoutException | UnknownHostException ce){
+                                        Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
+                                    } catch(Exception e){
+                                        Logger.error(e);
+                                    }
                                     return null;
                                 };
 
@@ -303,5 +311,28 @@ public class StationDatabaseManager {
         getStationDatabase().getStationSources().removeAll(toBeRemoved);
 
         fireUpdateEvent();
+    }
+
+    /**
+     *
+     * @return {totalStations, connectedStations, runningSeedlinks, totalSeedlinks}
+     */
+    public int[] getSummary() {
+        int totalStations = 0;
+        int connectedStations = 0;
+        int runningSeedlinks = 0;
+        int totalSeedlinks = 0;
+        for (SeedlinkNetwork seedlinkNetwork : getStationDatabase().getSeedlinkNetworks()) {
+            totalStations += seedlinkNetwork.selectedStations;
+            connectedStations += seedlinkNetwork.connectedStations;
+            if (seedlinkNetwork.selectedStations > 0) {
+                totalSeedlinks++;
+            }
+            if (seedlinkNetwork.status == SeedlinkStatus.RUNNING) {
+                runningSeedlinks++;
+            }
+        }
+
+        return new int[] {totalStations, connectedStations, runningSeedlinks, totalSeedlinks};
     }
 }

@@ -9,4 +9,11 @@ public record ClusterCreateEvent(Cluster cluster) implements GlobalQuakeEvent {
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onClusterCreate(this);
     }
+
+    @Override
+    public String toString() {
+        return "ClusterCreateEvent{" +
+                "cluster=" + cluster +
+                '}';
+    }
 }

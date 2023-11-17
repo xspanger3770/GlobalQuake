@@ -10,4 +10,11 @@ public record ClientLeftEvent(ServerClient client) implements GlobalQuakeServerE
     public void run(GlobalQuakeServerEventListener eventListener) {
         eventListener.onClientLeave(this);
     }
+
+    @Override
+    public String toString() {
+        return "ClientLeftEvent{" +
+                "client=" + client +
+                '}';
+    }
 }

@@ -51,7 +51,7 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void nextSample(int v, long time, long currentTime) {
+    public synchronized void nextSample(int v, long time, long currentTime) {
         if (filter == null) {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
@@ -223,7 +223,7 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void second(long time) {
+    public synchronized void second(long time) {
         Iterator<Event> it = getDetectedEvents().iterator();
         List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {

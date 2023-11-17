@@ -1,7 +1,7 @@
 package gqserver.server;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.exception.InvalidPacketException;
+import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.GQApi;
@@ -14,6 +14,8 @@ import gqserver.events.specific.ClientJoinedEvent;
 import gqserver.events.specific.ClientLeftEvent;
 import gqserver.events.specific.ServerStatusChangedEvent;
 import gqserver.api.exception.UnknownPacketException;
+import gqserver.main.Main;
+import gqserver.ui.server.tabs.StatusTab;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -30,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 public class GQServerSocket {
 
     private static final int HANDSHAKE_TIMEOUT = 10 * 1000;
-    public static final int MAX_CLIENTS = 64;
     private static final int WATCHDOG_TIMEOUT = 60 * 1000;
 
     public static final int READ_TIMEOUT = WATCHDOG_TIMEOUT + 10 * 1000;
@@ -39,7 +40,10 @@ public class GQServerSocket {
     private ExecutorService handshakeService;
     private ExecutorService readerService;
     private ScheduledExecutorService clientsWatchdog;
+    private ScheduledExecutorService statusReportingService;
     private final List<ServerClient> clients;
+
+    private GQServerStats stats;
 
     private volatile ServerSocket lastSocket;
     private final Object joinMutex = new Object();
@@ -51,72 +55,106 @@ public class GQServerSocket {
     }
 
     public void run(String ip, int port) {
+        Logger.tag("Server").info("Creating server...");
         ExecutorService acceptService = Executors.newSingleThreadExecutor();
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
         clientsWatchdog = Executors.newSingleThreadScheduledExecutor();
+        statusReportingService = Executors.newSingleThreadScheduledExecutor();
+        stats = new GQServerStats();
 
         setStatus(SocketStatus.OPENING);
         try {
             lastSocket = new ServerSocket();
+            Logger.tag("Server").info("Binding port %d...".formatted(port));
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
+
+            if(Main.isHeadless()){
+                statusReportingService.scheduleAtFixedRate(this::printStatus, 0, 30, TimeUnit.SECONDS);
+            }
+
             dataService.run();
             setStatus(SocketStatus.RUNNING);
+            Logger.tag("Server").info("Server launched successfully");
         } catch (IOException e) {
             setStatus(SocketStatus.IDLE);
             throw new RuntimeApplicationException("Unable to open server", e);
         }
     }
 
+    private void printStatus() {
+        long maxMem = Runtime.getRuntime().maxMemory();
+        long usedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+        int[] summary = GlobalQuakeServer.instance.getStationDatabaseManager().getSummary();
+
+        Logger.tag("ServerStatus").info("Server status: Clients: %d / %d, RAM: %.2f / %.2f GB, Seedlinks: %d / %d, Stations: %d / %d"
+                .formatted(clients.size(), Settings.maxClients, usedMem / StatusTab.GB, maxMem / StatusTab.GB,
+                        summary[2], summary[3], summary[1], summary[0]));
+
+        if (stats != null) {
+            Logger.tag("ServerStatus").info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
+        }
+    }
+
     private void checkClients() {
-        List<ServerClient> toRemove = new LinkedList<>();
-        for (ServerClient client : clients) {
-            if (!client.isConnected() || System.currentTimeMillis() - client.getLastHeartbeat() > WATCHDOG_TIMEOUT) {
-                try {
-                    client.destroy();
-                    toRemove.add(client);
-                    GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
-                    Logger.info("Client #%d disconnected due to timeout".formatted(client.getID()));
-                } catch (Exception e) {
-                    Logger.error(e);
+        try {
+            List<ServerClient> toRemove = new LinkedList<>();
+            for (ServerClient client : clients) {
+                if (!client.isConnected() || System.currentTimeMillis() - client.getLastHeartbeat() > WATCHDOG_TIMEOUT) {
+                    try {
+                        client.destroy();
+                        toRemove.add(client);
+                        GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
+                        Logger.tag("Server").info("Client #%d disconnected due to timeout".formatted(client.getID()));
+                    } catch (Exception e) {
+                        Logger.tag("Server").error(e);
+                    }
                 }
             }
+            clients.removeAll(toRemove);
+        }catch(Exception e) {
+            Logger.tag("Server").error(e);
         }
-        clients.removeAll(toRemove);
     }
 
     private void handshake(ServerClient client) throws IOException {
+        Packet packet;
         try {
-            Packet packet = client.readPacket();
-            if (packet instanceof HandshakePacket handshakePacket) {
-                if (handshakePacket.compatVersion() != GQApi.COMPATIBILITY_VERSION) {
-                    client.sendPacket(new TerminationPacket("Your client version is not compatible with the server!"));
-                    throw new InvalidPacketException("Client's version is not compatible %d != %d"
-                            .formatted(handshakePacket.compatVersion(), GQApi.COMPATIBILITY_VERSION));
-                }
-
-                client.setClientConfig(handshakePacket.clientConfig());
-            } else {
-                throw new InvalidPacketException("Received packet is not handshake!");
-            }
-
-            synchronized (joinMutex) {
-                if (clients.size() >= MAX_CLIENTS) {
-                    client.sendPacket(new TerminationPacket("Server is full!"));
-                    client.destroy();
-                } else {
-                    Logger.info("Client #%d handshake successfull".formatted(client.getID()));
-                    client.sendPacket(new HandshakeSuccessfulPacket());
-                    readerService.submit(new ClientReader(client));
-                    clients.add(client);
-                    GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientJoinedEvent(client));
-                }
-            }
-        } catch (UnknownPacketException | InvalidPacketException e) {
+            packet = client.readPacket();
+        } catch (UnknownPacketException e) {
             client.destroy();
-            Logger.error(e);
+            Logger.tag("Server").error(e);
+            return;
+        }
+
+        if (packet instanceof HandshakePacket handshakePacket) {
+            if (handshakePacket.compatVersion() != GQApi.COMPATIBILITY_VERSION) {
+                stats.wrongVersion++;
+                client.destroy("Your client version is not compatible with the server!");
+            }
+
+            client.setClientConfig(handshakePacket.clientConfig());
+        } else {
+            stats.wrongPacket++;
+            Logger.tag("Server").warn("Client send invalid initial packet!");
+            client.destroy();
+        }
+
+        synchronized (joinMutex) {
+            if (clients.size() >= Settings.maxClients) {
+                client.destroy("Server is full!");
+                stats.serverFull++;
+            } else {
+                Logger.tag("Server").info("Client #%d handshake successfull".formatted(client.getID()));
+                stats.successfull++;
+                client.sendPacket(new HandshakeSuccessfulPacket());
+                readerService.submit(new ClientReader(client));
+                clients.add(client);
+                GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientJoinedEvent(client));
+            }
         }
     }
 
@@ -126,6 +164,7 @@ public class GQServerSocket {
         GlobalQuake.instance.stopService(clientsWatchdog);
         GlobalQuake.instance.stopService(readerService);
         GlobalQuake.instance.stopService(handshakeService);
+        GlobalQuake.instance.stopService(statusReportingService);
 
         dataService.stop();
         // we are the acceptservice
@@ -150,7 +189,7 @@ public class GQServerSocket {
                 client.flush();
                 client.destroy();
             } catch (Exception e) {
-                Logger.error(e);
+                Logger.tag("Server").error(e);
             }
         }
 
@@ -166,17 +205,21 @@ public class GQServerSocket {
             try {
                 lastSocket.setSoTimeout(0); // we can wait for clients forever
                 Socket socket = lastSocket.accept();
-                Logger.info("A new client is joining...");
+
+                stats.accepted++;
+
+                Logger.tag("Server").info("A new client is joining...");
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
                 handshakeService.submit(() -> {
                     ServerClient client;
                     try {
                         client = new ServerClient(socket);
-                        Logger.info("Performing handshake for client #%d".formatted(client.getID()));
+                        Logger.tag("Server").info("Performing handshake for client #%d".formatted(client.getID()));
                         handshake(client);
                     } catch (IOException e) {
-                        Logger.error("Failure when accepting client!");
-                        Logger.error(e);
+                        Logger.tag("Server").error("Failure when accepting client!");
+                        stats.errors++;
+                        Logger.tag("Server").trace(e);
                     }
                 });
             } catch (IOException e) {

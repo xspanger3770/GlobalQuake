@@ -11,6 +11,7 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,15 +42,23 @@ public class SoundsService {
     }
 
     private void checkSounds() {
-        for(Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()){
-            determineSounds(cluster);
-        }
+        try {
+            if(GlobalQuake.instance.getClusterAnalysis() == null ||GlobalQuake.instance.getEarthquakeAnalysis() == null){
+                return;
+            }
 
-        for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-            determineSounds(earthquake.getCluster());
-        }
+            for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
+                determineSounds(cluster);
+            }
 
-        clusterSoundsInfo.entrySet().removeIf(kv -> System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100);
+            for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
+                determineSounds(earthquake.getCluster());
+            }
+
+            clusterSoundsInfo.entrySet().removeIf(kv -> System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100);
+        }catch(Exception e){
+            Logger.error(e);
+        }
     }
 
     public void determineSounds(Cluster cluster) {

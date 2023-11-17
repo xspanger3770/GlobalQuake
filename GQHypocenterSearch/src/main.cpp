@@ -32,7 +32,7 @@ int main()
         return 1;
     }
 
-    Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, points, nullptr);
+    Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, nullptr);
     
     int st_c = 100;
     float stations[st_c * 4];

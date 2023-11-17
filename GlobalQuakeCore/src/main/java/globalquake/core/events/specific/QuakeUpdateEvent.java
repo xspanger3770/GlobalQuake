@@ -22,4 +22,12 @@ public record QuakeUpdateEvent(Earthquake earthquake, Hypocenter previousHypocen
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onQuakeUpdate(this);
     }
+
+    @Override
+    public String toString() {
+        return "QuakeUpdateEvent{" +
+                "earthquake=" + earthquake +
+                ", previousHypocenter=" + previousHypocenter +
+                '}';
+    }
 }

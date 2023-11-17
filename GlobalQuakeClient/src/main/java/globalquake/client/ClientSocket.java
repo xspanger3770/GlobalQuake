@@ -17,8 +17,7 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,8 +66,13 @@ public class ClientSocket {
             sendPacket(new ArchivedQuakesRequestPacket());
             sendPacket(new StationsRequestPacket());
             status = ClientSocketStatus.CONNECTED;
-        }catch(Exception e){
+        } catch(ConnectException | SocketTimeoutException ce){
+            Logger.trace(ce);
             status = ClientSocketStatus.DISCONNECTED;
+            throw ce;
+        } catch(Exception e) {
+            status = ClientSocketStatus.DISCONNECTED;
+            Logger.error(e);
             throw e;
         }
     }
@@ -99,6 +103,9 @@ public class ClientSocket {
     private void sendQuakeRequest() {
         try {
             sendPacket(new EarthquakesRequestPacket());
+        } catch(SocketTimeoutException | SocketException e){
+            Logger.trace(e);
+            onClose();
         } catch (IOException e) {
             Logger.error(e);
             onClose();
@@ -108,6 +115,9 @@ public class ClientSocket {
     private void sendHeartbeat() {
         try {
             sendPacket(new HeartbeatPacket());
+        } catch(SocketTimeoutException | SocketException e){
+            Logger.trace(e);
+            onClose();
         } catch (IOException e) {
             Logger.error(e);
             onClose();
@@ -119,8 +129,12 @@ public class ClientSocket {
         if(socket != null){
             try {
                 socket.close();
+            } catch(SocketTimeoutException | SocketException e){
+                Logger.trace(e);
+                onClose();
             } catch (IOException e) {
                 Logger.error(e);
+                onClose();
             }
         }
 
@@ -137,10 +151,13 @@ public class ClientSocket {
         try {
             while (isConnected()) {
                 Packet packet = (Packet) inputStream.readObject();
-                ((GlobalQuakeClient) GlobalQuake.instance).processPacket(this, packet);
+                ((GlobalQuakeClient) GlobalQuakeClient.instance).processPacket(this, packet);
             }
-        } catch (Exception e){
+        } catch(SocketTimeoutException | SocketException se){
+            Logger.trace(se);
+        }catch (Exception e){
             Logger.error(e);
+        } finally {
             onClose();
         }
     }

@@ -43,8 +43,10 @@ bool cuda_initialised = false;
 float max_depth_resolution;
 
 int depth_profile_count;
-depth_profile_t* depth_profiles;
-float* f_results_device;
+depth_profile_t* depth_profiles = nullptr;
+float* f_results_device = nullptr;
+
+size_t total_table_size;
 
 void print_err(const char* msg) {
     cudaError err= cudaGetLastError();
@@ -143,9 +145,11 @@ __device__ void reduce(float *a, float *b, int grid_size){
     int correct_a = *h_correct(a, grid_size);
     int correct_b = *h_correct(b, grid_size);
 
-    bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
+    /*bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
         (correct_b / (err_b + ADD) > correct_a / (err_a + ADD))
-    );
+    );*/
+
+    bool swap = (correct_b / (err_b + ADD) > correct_a / (err_a + ADD));
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
@@ -203,7 +207,7 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
 
     int station_index = threadIdx.x % station_count;
     float err = 0.0;
-    int correct = 0;
+    int correct = station_count;
 
     for(int i = 0; i < station_count; i++, station_index++) {
         if(station_index >= station_count){
@@ -215,10 +219,17 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
+        /*err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
         if(_err <= THRESHOLD){
             correct++;
+        }*/
+
+        if (_err > THRESHOLD) {
+            correct--;
+            _err = (_err - THRESHOLD) * 0.05f + THRESHOLD;
         }
+
+        err += _err * _err;
     }
 
     s_results[threadIdx.x + blockDim.x * 0] = err;
@@ -318,6 +329,35 @@ void prepare_travel_table(float* fitted_travel_table, int rows) {
     }
 }
 
+// returns (accurately) estimated total GPU memory allocation size given the parameters
+size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution)
+{
+    size_t result = total_table_size;
+
+    dim3 blocks = {(unsigned int)ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
+    
+    size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
+    size_t station_distances_array_size = sizeof(float) * station_count * points;
+    size_t point_locations_array_size = sizeof(float) * 2 * points;
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
+    size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
+    size_t temp_results_array_size = (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements);
+
+    result += station_array_size;
+    result += station_distances_array_size;
+    result += point_locations_array_size;
+    result += results_size;
+    result += temp_results_array_size;    
+
+    return result;
+}
+
+
+JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize(JNIEnv *, jclass, jint points, jint stations, jfloat depth_resolution) {
+    return get_total_allocation_size(points, stations, depth_resolution);
+}
+
 bool run_hypocenter_search(float* stations, size_t station_count, size_t points, int depth_profile_index, 
     float maxDist, float fromLat, float fromLon, float* final_result)
 {
@@ -356,22 +396,25 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
     size_t point_locations_array_size = sizeof(float) * 2 * points;
-    
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
     size_t current_result_count = blocks.x * blocks.y * blocks.z;
-    
+
     const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
     TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
     TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
     TRACE(1, "point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
+    TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_point_locations, point_locations_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
+    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
     
     if(!success){
         print_err("Hypocs initialisation");
@@ -444,6 +487,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     if(d_stations_distances) cudaFree(d_stations_distances);
     if(d_point_locations) cudaFree(d_point_locations);
     if(d_temp_results) cudaFree(d_temp_results);
+    if(f_results_device) cudaFree(f_results_device);
 
     return success;
 }
@@ -498,6 +542,8 @@ bool initDepthProfiles(float* resols, int count){
         return false;
     }
 
+    total_table_size = 0;
+
     for(int i = 0; i < depth_profile_count; i++) {
         float depthRes = resols[i];
         if(depthRes < max_depth_resolution){
@@ -508,6 +554,7 @@ bool initDepthProfiles(float* resols, int count){
 
         int rows = (unsigned int)ceil(max_depth / depthRes) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
+        total_table_size += table_size;
 
         TRACE(1, "Creating depth profile with resolution %.2fkm (%.2fkB)\n", depthRes, table_size / 1024.0);
 
@@ -544,10 +591,10 @@ bool initDepthProfiles(float* resols, int count){
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-      (JNIEnv *env, jclass, jlong max_points, jfloatArray depth_profiles_array){
+      (JNIEnv *env, jclass, jfloatArray depth_profiles_array){
     bool success = true;
 
-    if(depth_profiles_array != nullptr) {
+    if(depth_profiles_array != nullptr && depth_profiles == nullptr) {
         int depth_profile_count = env->GetArrayLength(depth_profiles_array);
         float depthResols[depth_profile_count];
         for(int i = 0; i < depth_profile_count; i++){
@@ -557,19 +604,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
         success &= initDepthProfiles(depthResols, depth_profile_count);
         env->ReleaseFloatArrayElements(depth_profiles_array, env->GetFloatArrayElements(depth_profiles_array, 0), 0);
     }
-
-    dim3 blocks = {(unsigned int)ceil(static_cast<float>(max_points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / max_depth_resolution) + 1, 1};
     
-    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
-
-    printf("Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
-    
-    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
-
-    if(!success){
-        print_err("CUDA malloc");
-    }
-
     cuda_initialised = success;
     return success;
 }

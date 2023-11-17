@@ -29,6 +29,8 @@ import gqserver.api.packets.station.StationsRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,21 +73,25 @@ public class DataService implements GlobalQuakeEventListener {
     }
 
     private void sendIntensityData() {
-        List<StationIntensityData> data = new ArrayList<>();
-        for(AbstractStation abstractStation: GlobalQuake.instance.getStationManager().getStations()){
-            StationStatus status = createStatus(abstractStation);
-            StationStatus previous = stationIntensities.put(abstractStation, status);
-            if(previous == null || !previous.equals(status)){
-                data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
-                if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
-                    broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
-                    data = new ArrayList<>();
+        try {
+            List<StationIntensityData> data = new ArrayList<>();
+            for (AbstractStation abstractStation : GlobalQuake.instance.getStationManager().getStations()) {
+                StationStatus status = createStatus(abstractStation);
+                StationStatus previous = stationIntensities.put(abstractStation, status);
+                if (previous == null || !previous.equals(status)) {
+                    data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
+                    if (data.size() >= STATIONS_INFO_PACKET_MAX_SIZE) {
+                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                        data = new ArrayList<>();
+                    }
                 }
             }
-        }
 
-        if(!data.isEmpty()){
-            broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+            if (!data.isEmpty()) {
+                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+            }
+        } catch(Exception e){
+            Logger.tag("Server").error(e);
         }
     }
 
@@ -249,8 +255,10 @@ public class DataService implements GlobalQuakeEventListener {
         clients.forEach(client -> {
             try {
                 client.sendPacket(packet);
-            } catch (IOException e) {
-                Logger.error(e);
+            } catch(SocketException | SocketTimeoutException e){
+                Logger.tag("Server").trace(e);
+            }catch (Exception e) {
+                Logger.tag("Server").error(e);
             }
         });
     }
@@ -278,8 +286,10 @@ public class DataService implements GlobalQuakeEventListener {
             } else if(packet instanceof StationsRequestPacket){
                 processStationsRequestPacket(client);
             }
-        }catch(IOException e){
-            Logger.error(e);
+        } catch(SocketTimeoutException | SocketException e) {
+            Logger.tag("Server").trace(e);
+        } catch(IOException e){
+            Logger.tag("Server").error(e);
         }
     }
 

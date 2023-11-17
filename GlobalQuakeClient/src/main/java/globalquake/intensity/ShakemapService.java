@@ -10,6 +10,7 @@ import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,26 +55,38 @@ public class ShakemapService {
     }
 
     private void checkShakemaps() {
-        for (Iterator<Map.Entry<UUID, ShakeMap>> iterator = shakeMaps.entrySet().iterator(); iterator.hasNext(); ) {
-            var kv = iterator.next();
-            UUID uuid = kv.getKey();
-            if(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquake(uuid) == null){
-                iterator.remove();
+        try {
+            for (Iterator<Map.Entry<UUID, ShakeMap>> iterator = shakeMaps.entrySet().iterator(); iterator.hasNext(); ) {
+                var kv = iterator.next();
+                UUID uuid = kv.getKey();
+                if (GlobalQuake.instance.getEarthquakeAnalysis().getEarthquake(uuid) == null) {
+                    iterator.remove();
+                }
             }
+        } catch(Exception e){
+            Logger.error(e);
         }
     }
 
     private void removeShakemap(UUID uuid) {
         shakemapService.submit(() -> {
-            shakeMaps.remove(uuid);
-            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+            try {
+                shakeMaps.remove(uuid);
+                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+            }catch(Exception e){
+                Logger.error(e);
+            }
         });
     }
 
     private void updateShakemap(Earthquake earthquake) {
         shakemapService.submit(() -> {
-            shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
-            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+            try {
+                shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
+                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+            }catch(Exception e){
+                Logger.error(e);
+            }
         });
     }
 

@@ -2,6 +2,7 @@ package gqserver.api;
 
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.exception.UnknownPacketException;
+import gqserver.api.packets.system.TerminationPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -57,7 +58,7 @@ public class ServerClient {
             }
 
             throw new UnknownPacketException("Received obj not instance of Packet!", null);
-        }catch(ClassNotFoundException e){
+        }  catch(ClassNotFoundException e){
             throw new UnknownPacketException(e.getMessage(), e);
         }
     }
@@ -77,6 +78,14 @@ public class ServerClient {
 
     public void destroy() throws IOException {
         socket.close();
+    }
+
+    public void destroy(String reason) throws IOException{
+        try {
+            sendPacket(new TerminationPacket(reason));
+        } finally {
+            destroy();
+        }
     }
 
     public int getID() {
@@ -121,5 +130,18 @@ public class ServerClient {
 
     public void flush() throws IOException {
         getOutputStream().flush();
+    }
+
+    @Override
+    public String toString() {
+        return "ServerClient{" +
+                "socket=" + socket +
+                ", id=" + id +
+                ", joinTime=" + joinTime +
+                ", lastHeartbeat=" + lastHeartbeat +
+                ", receivedPackets=" + receivedPackets +
+                ", sentPackets=" + sentPackets +
+                ", clientConfig=" + clientConfig +
+                '}';
     }
 }

@@ -4,7 +4,6 @@ import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalApplicationException;
@@ -18,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
-	public static final String version = "v0.10.0_pre4";
+	public static final String version = "v0.10.0_pre9";
 
 	protected GlobalQuakeRuntime globalQuakeRuntime;
 	protected SeedlinkNetworksReader seedlinkNetworksReader;
@@ -42,7 +41,6 @@ public class GlobalQuake {
 		} catch (FatalApplicationException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println("Cuda loaded: "+GQHypocs.isCudaLoaded());
 	}
 
 	public static void prepare(File mainFolder, ApplicationErrorHandler errorHandler) {
@@ -71,8 +69,12 @@ public class GlobalQuake {
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
 	}
 
-	public void startRuntime(){
+	public GlobalQuake initStations() {
 		globalStationManager.initStations(stationDatabaseManager);
+		return this;
+	}
+
+	public void startRuntime(){
 		getGlobalQuakeRuntime().runThreads();
 		seedlinkNetworksReader.run();
 	}
