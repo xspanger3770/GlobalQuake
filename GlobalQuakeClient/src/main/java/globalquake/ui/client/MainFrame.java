@@ -166,20 +166,20 @@ public class MainFrame extends GQFrame {
     }
 
     private static void finishInit() {
-        updateProgressBar("Calibrating...", (int) ((phase++ / (PHASES + 3)) * 100.0));
+        updateProgressBar("Calibrating...", (int) ((phase++ / (PHASES + 4)) * 100.0));
 
         if(Settings.recalibrateOnLaunch) {
             EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null);
         }
 
-        updateProgressBar("Updating Station Sources...", (int) ((phase++ / (PHASES + 3)) * 100.0));
+        updateProgressBar("Updating Station Sources...", (int) ((phase++ / (PHASES + 4)) * 100.0));
         databaseManager.runUpdate(
                 databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
                     updateProgressBar("Checking Seedlink Networks...", (int) ((phase++ / (PHASES + 3)) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
-                        updateProgressBar("Saving...", (int) ((phase++ / (PHASES + 3)) * 100.0));
+                        updateProgressBar("Saving...", (int) ((phase++ / (PHASES + 4)) * 100.0));
 
                         try {
                             databaseManager.save();
@@ -188,7 +188,7 @@ public class MainFrame extends GQFrame {
                         }
                         databaseMonitorFrame.initDone();
 
-                        updateProgressBar("Done", (int) ((phase++ / (PHASES + 3)) * 100.0));
+                        updateProgressBar("Done", (int) ((phase++ / (PHASES + 4)) * 100.0));
                     });
                 });
     }
