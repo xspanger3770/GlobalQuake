@@ -157,7 +157,7 @@ public class MainFrame extends GQFrame {
         databaseMonitorFrame = new DatabaseMonitorFrame(databaseManager, MainFrame::launchGlobalQuake);
         databaseMonitorFrame.setVisible(true);
 
-        finishInit();
+        SwingUtilities.invokeLater(MainFrame::finishInit);
     }
 
     public static void updateProgressBar(String status, int value) {
