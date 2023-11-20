@@ -46,12 +46,12 @@ public class ServerClient {
     private final Object limitsLock = new Object();
 
     static {
-        limitRules.put(HandshakePacket.class, 1);
-        limitRules.put(HeartbeatPacket.class, 7);
-        limitRules.put(StationsRequestPacket.class, 1);
-        limitRules.put(EarthquakesRequestPacket.class, 5);
-        limitRules.put(EarthquakeRequestPacket.class, 64);
-        limitRules.put(ArchivedQuakesRequestPacket.class, 1);
+        limitRules.put(HandshakePacket.class, 2);
+        limitRules.put(HeartbeatPacket.class, 13);
+        limitRules.put(StationsRequestPacket.class, 4);
+        limitRules.put(EarthquakesRequestPacket.class, 20);
+        limitRules.put(EarthquakeRequestPacket.class, 128);
+        limitRules.put(ArchivedQuakesRequestPacket.class, 4);
     }
 
     public ServerClient(Socket socket) throws IOException {
