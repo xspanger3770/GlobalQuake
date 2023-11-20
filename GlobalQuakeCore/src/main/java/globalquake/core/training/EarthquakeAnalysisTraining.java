@@ -34,7 +34,7 @@ public class EarthquakeAnalysisTraining {
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
-        Settings.hypocenterDetectionResolution = 200.0;
+        Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 2000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;

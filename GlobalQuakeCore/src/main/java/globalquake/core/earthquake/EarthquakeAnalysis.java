@@ -295,16 +295,18 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
-        int reduceLimit = 12;
+        int reduceLimit = 8;
+        double reduceAmount = 0.65;
+        double diffLimit = 1.0;
 
         if (correctSelectedEvents.size() > reduceLimit) {
             Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * 0.65);
+            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
 
             List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
             list.sort(Map.Entry.comparingByValue());
 
-            while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * 0.5) {
+            while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
                 list.remove(list.size() - 1);
             }
 
