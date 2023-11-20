@@ -75,8 +75,8 @@ public abstract class Analysis {
                 time += (long) (1000 / getSampleRate());
             }
         } catch (Exception e) {
-            Logger.warn("Crash occurred at station " + getStation().getStationCode() + ", thread continues.");
-            Logger.warn(e);
+            Logger.warn("There was a problem with data processing on station %s".formatted(getStation().getStationCode()));
+            Logger.trace(e);
         }
     }
 
