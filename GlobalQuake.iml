@@ -8,6 +8,8 @@
       <excludeFolder url="file://$MODULE_DIR$/Container" />
       <excludeFolder url="file://$MODULE_DIR$/latest" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
+      <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/SeisTest" />
+      <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/build" />
     </content>
   </component>
 </module>

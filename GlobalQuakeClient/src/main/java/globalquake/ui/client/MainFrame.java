@@ -17,7 +17,6 @@ import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.settings.SettingsFrame;
 import globalquake.utils.Scale;
-import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
