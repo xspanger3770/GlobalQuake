@@ -87,14 +87,15 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     private void resetIndexing(ClientSocket socket, UUID uuid) {
         if(super.indexing != null) {
             Logger.info("Station indexing has changed, probably because the server has been restarted");
+            try {
+                socket.sendPacket(new StationsRequestPacket());
+            } catch (IOException e) {
+                Logger.error(e);
+            }
         }
+
         super.indexing = uuid;
         stations.clear();
         stationsIdMap.clear();
-        try {
-            socket.sendPacket(new StationsRequestPacket());
-        } catch (IOException e) {
-            Logger.error(e);
-        }
     }
 }
