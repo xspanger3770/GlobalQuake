@@ -1,5 +1,6 @@
 package globalquake.ui.client;
 
+import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
 import globalquake.core.exception.FatalIOException;
@@ -7,6 +8,7 @@ import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.regions.Regions;
+import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.intensity.ShakeMap;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.main.Main;
@@ -15,6 +17,7 @@ import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
 import globalquake.ui.settings.SettingsFrame;
 import globalquake.utils.Scale;
+import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -157,17 +160,26 @@ public class MainFrame extends GQFrame {
         finishInit();
     }
 
+    public static void updateProgressBar(String status, int value) {
+        databaseMonitorFrame.getMainProgressBar().setString(status);
+        databaseMonitorFrame.getMainProgressBar().setValue(value);
+    }
+
     private static void finishInit() {
-        databaseMonitorFrame.getMainProgressBar().setString("Updating Station Sources...");
-        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
-        databaseManager.runUpdate(databaseManager.getStationDatabase().getStationSources().stream()
+        updateProgressBar("Calibrating...", (int) ((phase++ / (PHASES + 3)) * 100.0));
+
+        if(Settings.recalibrateOnLaunch) {
+            EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null);
+        }
+
+        updateProgressBar("Updating Station Sources...", (int) ((phase++ / (PHASES + 3)) * 100.0));
+        databaseManager.runUpdate(
+                databaseManager.getStationDatabase().getStationSources().stream()
                         .filter(StationSource::isOutdated).collect(Collectors.toList()),
                 () -> {
-                    databaseMonitorFrame.getMainProgressBar().setString("Checking Seedlink Networks...");
-                    databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+                    updateProgressBar("Checking Seedlink Networks...", (int) ((phase++ / (PHASES + 3)) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
-                        databaseMonitorFrame.getMainProgressBar().setString("Saving...");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+                        updateProgressBar("Saving...", (int) ((phase++ / (PHASES + 3)) * 100.0));
 
                         try {
                             databaseManager.save();
@@ -176,8 +188,7 @@ public class MainFrame extends GQFrame {
                         }
                         databaseMonitorFrame.initDone();
 
-                        databaseMonitorFrame.getMainProgressBar().setString("Done");
-                        databaseMonitorFrame.getMainProgressBar().setValue((int) ((phase++ / (PHASES + 3)) * 100.0));
+                        updateProgressBar("Done", (int) ((phase++ / (PHASES + 3)) * 100.0));
                     });
                 });
     }
