@@ -9,4 +9,5 @@ public class GQServerStats {
     public int serverFull;
     public int successfull;
     public int errors;
+    public int ipRejects;
 }

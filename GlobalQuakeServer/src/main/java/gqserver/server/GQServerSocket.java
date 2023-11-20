@@ -101,7 +101,9 @@ public class GQServerSocket {
                         summary[2], summary[3], summary[1], summary[0]));
 
         if (stats != null) {
-            Logger.tag("ServerStatus").info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
+            Logger.tag("ServerStatus").info(
+                    "accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, error: %d, ipRejects: %d"
+                    .formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors, stats.ipRejects));
         }
     }
 
@@ -218,8 +220,10 @@ public class GQServerSocket {
                 lastSocket.setSoTimeout(0); // we can wait for clients forever
                 Socket socket = lastSocket.accept();
 
-                if(!checkAddress(socket.getRemoteSocketAddress().toString())){
+                if(!checkAddress(socket)){
                     socket.close();
+                    Logger.tag("Server").warn("Client rejected for reaching max connection count!");
+                    stats.ipRejects++;
                     continue;
                 }
 
@@ -237,8 +241,8 @@ public class GQServerSocket {
                             clientLeft(socket);
                         }
                     } catch (IOException e) {
-                        Logger.tag("Server").error("Failure when accepting client!");
                         stats.errors++;
+                        Logger.tag("Server").error("Failure when accepting client!");
                         Logger.tag("Server").trace(e);
                         clientLeft(socket);
                     }
@@ -254,15 +258,17 @@ public class GQServerSocket {
     }
 
     private void clientLeft(Socket socket) {
-        String clientAddress = socket.getRemoteSocketAddress().toString();
+        String address = getRemoteAddress(socket);
         synchronized (connectionsMapLock) {
-            connectionsMap.put(clientAddress, connectionsMap.get(clientAddress) - 1);
+            connectionsMap.put(address, connectionsMap.get(address) - 1);
         }
     }
 
-    private boolean checkAddress(String address) {
+    private boolean checkAddress(Socket socket) {
+        String address = getRemoteAddress(socket);
         synchronized (connectionsMapLock) {
-            int connections = connectionsMap.getOrDefault(address, 0);
+            int connections = connectionsMap.getOrDefault(address, 1);
+
             if (connections > CONNECTIONS_LIMIT) {
                 return false;
             }
@@ -271,6 +277,10 @@ public class GQServerSocket {
 
             return true;
         }
+    }
+
+    private String getRemoteAddress(Socket socket) {
+        return (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString();
     }
 
     public int getClientCount() {
