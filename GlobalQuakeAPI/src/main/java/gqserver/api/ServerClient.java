@@ -77,9 +77,7 @@ public class ServerClient {
             if(obj instanceof Packet packet) {
                 receivedPackets++;
 
-                if(!checkLimits(packet)){
-                    throw new PacketLimitException("Too many requests received of type %s from client #%d".formatted(packet.getClass(), getID()), null);
-                }
+                checkLimits(packet);
 
                 return packet;
             }
@@ -90,19 +88,18 @@ public class ServerClient {
         }
     }
 
-    private boolean checkLimits(Packet packet) {
+    private void checkLimits(Packet packet) throws PacketLimitException{
         int maximum = limitRules.getOrDefault(packet.getClass(), -1);
         if(maximum == -1) {
-            return false;
+            throw new PacketLimitException("Unknown request of type %s received from client #%d".formatted(packet.getClass(), getID()), null);
         }
 
         int count = limits.getOrDefault(packet.getClass(), 1);
-        if(count > maximum){
-            return false;
+        if(count > maximum) {
+            throw new PacketLimitException("Too many requests (%d / %d) received of type %s from client #%d".formatted(count, maximum, packet.getClass(), getID()), null);
         }
 
         limits.put(packet.getClass(), count + 1);
-        return true;
     }
 
     public void updateLimits() {
