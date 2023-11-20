@@ -296,8 +296,8 @@ public class EarthquakeAnalysis {
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
         int reduceLimit = 8;
-        double reduceAmount = 0.65;
-        double diffLimit = 1.0;
+        double reduceAmount = 0.75;
+        double diffLimit = 0.5;
 
         if (correctSelectedEvents.size() > reduceLimit) {
             Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
