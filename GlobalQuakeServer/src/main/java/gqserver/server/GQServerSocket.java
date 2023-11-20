@@ -7,6 +7,7 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
+import gqserver.api.exception.PacketLimitException;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HandshakeSuccessfulPacket;
 import gqserver.api.packets.system.TerminationPacket;
@@ -37,12 +38,13 @@ public class GQServerSocket {
     private static final int WATCHDOG_TIMEOUT = 60 * 1000;
 
     public static final int READ_TIMEOUT = WATCHDOG_TIMEOUT + 10 * 1000;
-    private static final int CONNECTIONS_LIMIT = 5;
+    private static final int CONNECTIONS_LIMIT = 3;
     private final DataService dataService;
     private SocketStatus status;
     private ExecutorService handshakeService;
     private ExecutorService readerService;
     private ScheduledExecutorService clientsWatchdog;
+    private ScheduledExecutorService clientsLimitWatchdog;
     private ScheduledExecutorService statusReportingService;
     private final List<ServerClient> clients;
 
@@ -66,6 +68,7 @@ public class GQServerSocket {
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
         clientsWatchdog = Executors.newSingleThreadScheduledExecutor();
+        clientsLimitWatchdog = Executors.newSingleThreadScheduledExecutor();
         statusReportingService = Executors.newSingleThreadScheduledExecutor();
         stats = new GQServerStats();
 
@@ -75,6 +78,7 @@ public class GQServerSocket {
             Logger.tag("Server").info("Binding port %d...".formatted(port));
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
+            clientsLimitWatchdog.scheduleAtFixedRate(this::updateLimits, 0, 60, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
 
             if(Main.isHeadless()){
@@ -88,6 +92,10 @@ public class GQServerSocket {
             setStatus(SocketStatus.IDLE);
             throw new RuntimeApplicationException("Unable to open server", e);
         }
+    }
+
+    private void updateLimits() {
+        clients.forEach(ServerClient::updateLimits);
     }
 
     private void printStatus() {
@@ -133,7 +141,7 @@ public class GQServerSocket {
         Packet packet;
         try {
             packet = client.readPacket();
-        } catch (UnknownPacketException e) {
+        } catch (UnknownPacketException | PacketLimitException e) {
             client.destroy();
             Logger.tag("Server").error(e);
             return false;
@@ -175,6 +183,7 @@ public class GQServerSocket {
     private void onClose() {
         clients.clear();
 
+        GlobalQuake.instance.stopService(clientsLimitWatchdog);
         GlobalQuake.instance.stopService(clientsWatchdog);
         GlobalQuake.instance.stopService(readerService);
         GlobalQuake.instance.stopService(handshakeService);
@@ -233,7 +242,7 @@ public class GQServerSocket {
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
 
                 handshakeService.submit(() -> {
-                    ServerClient client = null;
+                    ServerClient client;
                     try {
                         client = new ServerClient(socket);
                         Logger.tag("Server").info("Performing handshake for client #%d".formatted(client.getID()));
@@ -249,8 +258,6 @@ public class GQServerSocket {
                 });
             } catch (IOException e) {
                 break;
-            } finally {
-
             }
         }
 
