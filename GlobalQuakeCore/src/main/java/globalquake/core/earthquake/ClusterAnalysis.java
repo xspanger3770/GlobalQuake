@@ -305,7 +305,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(5000, 1000 + expectedTravel * 0.01) : Settings.pWaveInaccuracyThreshold)) {
+            if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(10000, 1000 + expectedTravel * 0.01) : Settings.pWaveInaccuracyThreshold)) {
                 return true;
             }
         }

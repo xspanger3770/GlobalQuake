@@ -22,7 +22,7 @@ public class GQHypocs {
     private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
     // HIGHEST POINT COUNT MUST BE AT THE BEGINNING OF THE FIELD !!
     private static final int[] point_profiles = new int[] { 40_000, 8_000, 4_000, 1600, 400};
-    private static final float[] dist_profiles = new float[]{ 90.0f, 20.0f, 4.0f, 0.8f, 0.2f};
+    private static final float[] dist_profiles = new float[]{ 135.0f, 30.0f, 4.0f, 0.8f, 0.2f};
 
     private static boolean stationLimitCalculated = false;
     private static int stationLimit = 0;

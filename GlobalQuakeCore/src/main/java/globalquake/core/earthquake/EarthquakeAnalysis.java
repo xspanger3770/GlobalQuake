@@ -474,7 +474,7 @@ public class EarthquakeAnalysis {
     }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
-        postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
+        postProcess(selectedEvents, bestHypocenterPrelim, finderSettings);
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
@@ -527,7 +527,7 @@ public class EarthquakeAnalysis {
                 }
                 cluster.setEarthquake(null);
             }
-            Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f".formatted(remove, pct, finderSettings.correctnessThreshold()));
+            Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), bestHypocenter));
         } else {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {

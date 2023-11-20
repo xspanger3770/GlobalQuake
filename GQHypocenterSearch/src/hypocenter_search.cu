@@ -30,7 +30,7 @@
 
 #define PHI2 2.618033989f
 
-#define THRESHOLD 2.2f
+#define THRESHOLD 4.0f
 #define MUL 1.30f
 #define ADD 2.0f
 
@@ -108,7 +108,7 @@ __device__ float table_interpolate(float* s_travel_table, float ang) {
     float index = ang * K;
 
     if(index >= SHARED_TRAVEL_TABLE_SIZE - 1.0f) {
-        return -ang * ang; // some
+        return s_travel_table[SHARED_TRAVEL_TABLE_SIZE - 1]; // some
     }
 
     int index1 = (int) index;
