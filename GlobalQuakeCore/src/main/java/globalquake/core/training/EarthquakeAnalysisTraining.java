@@ -91,6 +91,8 @@ public class EarthquakeAnalysisTraining {
         if(GQHypocs.isCudaLoaded()) {
             GQHypocs.calculateStationLimit();
         }
+
+        Settings.save();
     }
 
     public static long measureTest(long seed, int stations){
