@@ -21,7 +21,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 20;
+    public static final int STATIONS = 10;
     public static final double DIST = 5000;
 
     public static final double INACCURACY = 5000;
@@ -34,8 +34,8 @@ public class EarthquakeAnalysisTraining {
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
-        Settings.hypocenterDetectionResolution = 200.0;
-        Settings.pWaveInaccuracyThreshold = 2000.0;
+        Settings.hypocenterDetectionResolution = 100.0;
+        Settings.pWaveInaccuracyThreshold = 4000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
         long n = 0;
@@ -91,6 +91,8 @@ public class EarthquakeAnalysisTraining {
         if(GQHypocs.isCudaLoaded()) {
             GQHypocs.calculateStationLimit();
         }
+
+        Settings.save();
     }
 
     public static long measureTest(long seed, int stations){

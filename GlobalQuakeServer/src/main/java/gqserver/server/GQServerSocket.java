@@ -7,6 +7,7 @@ import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
+import gqserver.api.exception.PacketLimitException;
 import gqserver.api.packets.system.HandshakePacket;
 import gqserver.api.packets.system.HandshakeSuccessfulPacket;
 import gqserver.api.packets.system.TerminationPacket;
@@ -22,8 +23,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,11 +38,13 @@ public class GQServerSocket {
     private static final int WATCHDOG_TIMEOUT = 60 * 1000;
 
     public static final int READ_TIMEOUT = WATCHDOG_TIMEOUT + 10 * 1000;
+    private static final int CONNECTIONS_LIMIT = 3;
     private final DataService dataService;
     private SocketStatus status;
     private ExecutorService handshakeService;
     private ExecutorService readerService;
     private ScheduledExecutorService clientsWatchdog;
+    private ScheduledExecutorService clientsLimitWatchdog;
     private ScheduledExecutorService statusReportingService;
     private final List<ServerClient> clients;
 
@@ -47,6 +52,9 @@ public class GQServerSocket {
 
     private volatile ServerSocket lastSocket;
     private final Object joinMutex = new Object();
+    private final Object connectionsMapLock = new Object();
+
+    private final Map<String, Integer> connectionsMap = new HashMap<>();
 
     public GQServerSocket() {
         status = SocketStatus.IDLE;
@@ -60,6 +68,7 @@ public class GQServerSocket {
         handshakeService = Executors.newCachedThreadPool();
         readerService = Executors.newCachedThreadPool();
         clientsWatchdog = Executors.newSingleThreadScheduledExecutor();
+        clientsLimitWatchdog = Executors.newSingleThreadScheduledExecutor();
         statusReportingService = Executors.newSingleThreadScheduledExecutor();
         stats = new GQServerStats();
 
@@ -69,6 +78,7 @@ public class GQServerSocket {
             Logger.tag("Server").info("Binding port %d...".formatted(port));
             lastSocket.bind(new InetSocketAddress(ip, port));
             clientsWatchdog.scheduleAtFixedRate(this::checkClients, 0, 10, TimeUnit.SECONDS);
+            clientsLimitWatchdog.scheduleAtFixedRate(this::updateLimits, 0, 60, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
 
             if(Main.isHeadless()){
@@ -84,6 +94,10 @@ public class GQServerSocket {
         }
     }
 
+    private void updateLimits() {
+        clients.forEach(ServerClient::updateLimits);
+    }
+
     private void printStatus() {
         long maxMem = Runtime.getRuntime().maxMemory();
         long usedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -95,7 +109,9 @@ public class GQServerSocket {
                         summary[2], summary[3], summary[1], summary[0]));
 
         if (stats != null) {
-            Logger.tag("ServerStatus").info("Accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, otherError: %d".formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors));
+            Logger.tag("ServerStatus").info(
+                    "accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, error: %d, ipRejects: %d"
+                    .formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors, stats.ipRejects));
         }
     }
 
@@ -107,6 +123,7 @@ public class GQServerSocket {
                     try {
                         client.destroy();
                         toRemove.add(client);
+                        clientLeft(client.getSocket());
                         GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientLeftEvent(client));
                         Logger.tag("Server").info("Client #%d disconnected due to timeout".formatted(client.getID()));
                     } catch (Exception e) {
@@ -120,20 +137,21 @@ public class GQServerSocket {
         }
     }
 
-    private void handshake(ServerClient client) throws IOException {
+    private boolean handshake(ServerClient client) throws IOException {
         Packet packet;
         try {
             packet = client.readPacket();
-        } catch (UnknownPacketException e) {
+        } catch (UnknownPacketException | PacketLimitException e) {
             client.destroy();
             Logger.tag("Server").error(e);
-            return;
+            return false;
         }
 
         if (packet instanceof HandshakePacket handshakePacket) {
             if (handshakePacket.compatVersion() != GQApi.COMPATIBILITY_VERSION) {
                 stats.wrongVersion++;
                 client.destroy("Your client version is not compatible with the server!");
+                return false;
             }
 
             client.setClientConfig(handshakePacket.clientConfig());
@@ -141,12 +159,14 @@ public class GQServerSocket {
             stats.wrongPacket++;
             Logger.tag("Server").warn("Client send invalid initial packet!");
             client.destroy();
+            return false;
         }
 
         synchronized (joinMutex) {
             if (clients.size() >= Settings.maxClients) {
                 client.destroy("Server is full!");
                 stats.serverFull++;
+                return false;
             } else {
                 Logger.tag("Server").info("Client #%d handshake successfull".formatted(client.getID()));
                 stats.successfull++;
@@ -156,11 +176,14 @@ public class GQServerSocket {
                 GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientJoinedEvent(client));
             }
         }
+
+        return true;
     }
 
     private void onClose() {
         clients.clear();
 
+        GlobalQuake.instance.stopService(clientsLimitWatchdog);
         GlobalQuake.instance.stopService(clientsWatchdog);
         GlobalQuake.instance.stopService(readerService);
         GlobalQuake.instance.stopService(handshakeService);
@@ -206,20 +229,31 @@ public class GQServerSocket {
                 lastSocket.setSoTimeout(0); // we can wait for clients forever
                 Socket socket = lastSocket.accept();
 
+                if(!checkAddress(socket)){
+                    socket.close();
+                    Logger.tag("Server").warn("Client rejected for reaching max connection count!");
+                    stats.ipRejects++;
+                    continue;
+                }
+
                 stats.accepted++;
 
                 Logger.tag("Server").info("A new client is joining...");
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
+
                 handshakeService.submit(() -> {
                     ServerClient client;
                     try {
                         client = new ServerClient(socket);
                         Logger.tag("Server").info("Performing handshake for client #%d".formatted(client.getID()));
-                        handshake(client);
+                        if(!handshake(client)){
+                            clientLeft(socket);
+                        }
                     } catch (IOException e) {
-                        Logger.tag("Server").error("Failure when accepting client!");
                         stats.errors++;
+                        Logger.tag("Server").error("Failure when accepting client!");
                         Logger.tag("Server").trace(e);
+                        clientLeft(socket);
                     }
                 });
             } catch (IOException e) {
@@ -228,6 +262,32 @@ public class GQServerSocket {
         }
 
         onClose();
+    }
+
+    private void clientLeft(Socket socket) {
+        String address = getRemoteAddress(socket);
+        synchronized (connectionsMapLock) {
+            connectionsMap.put(address, connectionsMap.get(address) - 1);
+        }
+    }
+
+    private boolean checkAddress(Socket socket) {
+        String address = getRemoteAddress(socket);
+        synchronized (connectionsMapLock) {
+            int connections = connectionsMap.getOrDefault(address, 1);
+
+            if (connections > CONNECTIONS_LIMIT) {
+                return false;
+            }
+
+            connectionsMap.put(address, connections + 1);
+
+            return true;
+        }
+    }
+
+    private String getRemoteAddress(Socket socket) {
+        return (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString();
     }
 
     public int getClientCount() {

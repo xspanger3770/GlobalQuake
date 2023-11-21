@@ -2,6 +2,7 @@ package gqserver.server;
 
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
+import gqserver.api.exception.PacketLimitException;
 import gqserver.api.exception.UnknownPacketException;
 import org.tinylog.Logger;
 
@@ -23,7 +24,7 @@ public class ClientReader implements Runnable {
                 packet.onServerReceive(client);
                 GlobalQuakeServer.instance.getServerSocket().getDataService().processPacket(client, packet);
             }
-        } catch (Exception | UnknownPacketException e) {
+        } catch (Exception | UnknownPacketException | PacketLimitException e) {
             Logger.tag("Server").warn("Client #%d experienced a crash while reading!".formatted(client.getID()));
             Logger.tag("Server").trace(e);
         } finally {
