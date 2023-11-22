@@ -10,17 +10,8 @@ RUN apt-get update && \
     curl \
     btop \
     htop \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install NVIDIA CUDA Toolkit
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get install -y --no-install-recommends \
     nvtop \
     && rm -rf /var/lib/apt/lists/*
-
-# Set environment variables for CUDA
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-ENV PATH=/usr/local/cuda/bin:$PATH
 
 RUN addgroup --gid 1000 group && \
     adduser --gid 1000 --uid 1000 --disabled-password --gecos user user
