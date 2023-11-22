@@ -15,7 +15,6 @@ RUN apt-get update && \
 # Install NVIDIA CUDA Toolkit
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install -y --no-install-recommends \
-    nvidia-cuda-toolkit \
     nvtop \
     && rm -rf /var/lib/apt/lists/*
 

@@ -10,6 +10,6 @@ public class GQNativeFunctions {
 
     public static native long getAllocationSize(int points, int stations, float depth_resolution);
 
-    public static native float[] findHypocenter(float[] stations, float lat, float lon, long points, int depth_resolution_index, float maxDist);
+    public static native float[] findHypocenter(float[] stations, float lat, float lon, long points, int depth_resolution_index, float maxDist, float p_wave_threshold);
 
 }

@@ -30,7 +30,6 @@
 
 #define PHI2 2.618033989f
 
-#define THRESHOLD 4.0f
 #define MUL 1.30f
 #define ADD 2.0f
 
@@ -161,7 +160,7 @@ __device__ void reduce(float *a, float *b, int grid_size){
 }
 
 __global__ void evaluateHypocenter(float* results, float* travel_table, float* stations, 
-    float* station_distances, int station_count, int points, float maxDist, float max_depth)
+    float* station_distances, int station_count, int points, float maxDist, float max_depth, float p_wave_threshold)
 {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
@@ -219,14 +218,10 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        /*err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
-        if(_err <= THRESHOLD){
-            correct++;
-        }*/
 
-        if (_err > THRESHOLD) {
+        if (_err > p_wave_threshold) {
             correct--;
-            _err = (_err - THRESHOLD) * 0.05f + THRESHOLD;
+            _err = (_err - p_wave_threshold) * 0.05f + p_wave_threshold;
         }
 
         err += _err * _err;
@@ -359,7 +354,7 @@ JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize
 }
 
 bool run_hypocenter_search(float* stations, size_t station_count, size_t points, int depth_profile_index, 
-    float maxDist, float fromLat, float fromLon, float* final_result)
+    float maxDist, float fromLat, float fromLon, float* final_result, float p_wave_threshold)
 {
     if(depth_profile_index < 0 || depth_profile_index >= depth_profile_count){
         TRACE(2, "Error! Invalid depth profile: %d!\n", depth_profile_index);
@@ -436,7 +431,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     }
     
     if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * station_count>>>
-        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth);
+        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth, p_wave_threshold);
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
@@ -494,7 +489,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
 
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, int depthResProfile, jfloat maxDist) {
+  (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, int depthResProfile, jfloat maxDist, jfloat p_wave_threshold) {
     size_t station_count = env->GetArrayLength(stations) / STATION_FILEDS;
     
     bool success = false;
@@ -511,7 +506,7 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
 
     float final_result[HYPOCENTER_FILEDS];
 
-    success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result);
+    success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result, p_wave_threshold);
 
     cleanup:
     if(stationsArray) free(stationsArray);

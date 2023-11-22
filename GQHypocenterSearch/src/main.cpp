@@ -50,7 +50,7 @@ int main()
 
     float final_result[4];
 
-    if(run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result)){
+    if(run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result, 2.2f)){
         printf("FINAL RESULT %f %f %f %f\n", final_result[0], final_result[1], final_result[2], final_result[3]);
     }
 
