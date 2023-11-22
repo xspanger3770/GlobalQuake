@@ -132,7 +132,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingPWave() {
-        sliderPWaveInaccuracy = createSettingsSlider(400, 2500, 200, 100);
+        sliderPWaveInaccuracy = createSettingsSlider(400, 5200, 400, 200);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue()));
