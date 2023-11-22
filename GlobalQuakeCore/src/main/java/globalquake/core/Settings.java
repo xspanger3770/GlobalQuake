@@ -222,7 +222,6 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
-
 		save();
 	}
 

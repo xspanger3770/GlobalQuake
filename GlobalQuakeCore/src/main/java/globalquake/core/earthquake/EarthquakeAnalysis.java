@@ -295,27 +295,30 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
+        int reduceIterations = 2;
         int reduceLimit = 8;
         double reduceAmount = 0.75;
         double diffLimit = 0.5;
 
-        if (correctSelectedEvents.size() > reduceLimit) {
-            Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
+        for(int it = 0; it < reduceIterations; it++) {
+            if (correctSelectedEvents.size() > reduceLimit) {
+                Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
+                int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
 
-            List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
-            list.sort(Map.Entry.comparingByValue());
+                List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
+                list.sort(Map.Entry.comparingByValue());
 
-            while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
-                list.remove(list.size() - 1);
+                while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
+                    list.remove(list.size() - 1);
+                }
+
+                Logger.tag("Hypocs").debug("Reduced the number of events from %d to the best %d for better accuracy"
+                        .formatted(correctSelectedEvents.size(), list.size()));
+
+                correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
+
+                bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
             }
-
-            Logger.tag("Hypocs").debug("Reduced the number of events from %d to the best %d for better accuracy"
-                    .formatted(correctSelectedEvents.size(), list.size()));
-
-            correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
-
-            bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
         }
 
         if(bestHypocenter2 == null) {

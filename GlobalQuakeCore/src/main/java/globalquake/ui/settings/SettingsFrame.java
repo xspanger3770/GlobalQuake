@@ -9,6 +9,7 @@ import org.tinylog.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class SettingsFrame extends GQFrame {
 
 	public static void main(String[] args) throws Exception{
 		TauPTravelTimeCalculator.init();
+		GlobalQuake.prepare(new File("./.GlobalQuakeData/"), null);
 		EventQueue.invokeLater(() -> {
             try {
                 new SettingsFrame(null).setVisible(true);
