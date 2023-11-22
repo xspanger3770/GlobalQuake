@@ -4,3 +4,6 @@ There is more cleanup needed mainly to fix exact border edges where low res poly
 
 New Zealand districts added from:
     https://datafinder.stats.govt.nz/layer/111193-territorial-authority-2023-clipped-generalised/
+
+Italian provinces added from:
+    https://www.istat.it/it/archivio/222527
