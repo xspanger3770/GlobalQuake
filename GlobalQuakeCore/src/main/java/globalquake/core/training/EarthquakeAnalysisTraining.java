@@ -21,7 +21,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 10;
+    public static final int STATIONS = 30;
     public static final double DIST = 5000;
 
     public static final double INACCURACY = 5000;

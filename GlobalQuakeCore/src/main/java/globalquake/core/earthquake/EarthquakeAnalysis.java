@@ -477,7 +477,7 @@ public class EarthquakeAnalysis {
     }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
-        postProcess(selectedEvents, bestHypocenterPrelim, finderSettings);
+        postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
