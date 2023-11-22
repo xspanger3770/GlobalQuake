@@ -75,9 +75,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
         zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
 
-        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,180, Settings.cinemaModeZoomMultiplier);
-        sliderZoomMul.setMinorTickSpacing(5);
-        sliderZoomMul.setMajorTickSpacing(20);
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,500, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul.setMinorTickSpacing(10);
+        sliderZoomMul.setMajorTickSpacing(50);
         sliderZoomMul.setPaintTicks(true);
 
         zoomPanel.add(sliderZoomMul);
