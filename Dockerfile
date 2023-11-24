@@ -4,7 +4,7 @@ LABEL authors="xspanger3770"
 # Update the package list and install essential dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    openjdk-17-jdk \
+    openjdk-17-jre-headless \
     btop \
     htop \
     nvtop \
