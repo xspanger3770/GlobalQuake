@@ -1,5 +1,6 @@
 package gqserver.server;
 
+import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
@@ -13,6 +14,7 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.*;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
 import gqserver.api.data.earthquake.ArchivedEventData;
@@ -31,10 +33,7 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +55,8 @@ public class DataService extends GlobalQuakeEventListener {
 
     private final Map<AbstractStation, StationStatus> stationIntensities = new HashMap<>();
     private ScheduledExecutorService stationIntensityService;
+
+    private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
 
     public DataService() {
         currentEarthquakes = new ArrayList<>();
@@ -93,11 +94,6 @@ public class DataService extends GlobalQuakeEventListener {
         } catch(Exception e){
             Logger.tag("Server").error(e);
         }
-    }
-
-    @Override
-    public void onClusterCreate(ClusterCreateEvent event) {
-
     }
 
     @Override
@@ -151,6 +147,15 @@ public class DataService extends GlobalQuakeEventListener {
         }
 
         broadcast(getEarthquakeReceivingClients(), createArchivedPacket(event.archivedQuake()));
+    }
+
+    @Override
+    public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {
+        GlobalStation station = seedlinkDataEvent.getStation();
+        DataRecord record = seedlinkDataEvent.getDataRecord();
+        Queue<DataRecord> queue = stationDataQueueMap.getOrDefault(station,
+                new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
+        queue.add(record);
     }
 
     private Packet createArchivedPacket(ArchivedQuake archivedQuake) {

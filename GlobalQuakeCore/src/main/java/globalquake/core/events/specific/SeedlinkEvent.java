@@ -1,6 +1,5 @@
 package globalquake.core.events.specific;
 
-import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.events.GlobalQuakeEventListener;
 
 public interface SeedlinkEvent extends GlobalQuakeEvent{
