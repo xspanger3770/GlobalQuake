@@ -49,7 +49,7 @@ public class StationMonitor extends GQFrame {
 		addWindowListener(new WindowAdapter() {
 
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosed(WindowEvent e) {
 				timer.cancel();
 				if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
 					GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorCloseEvent(globalStation));

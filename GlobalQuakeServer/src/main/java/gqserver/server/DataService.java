@@ -121,7 +121,7 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void sendData(ServerClient client, GlobalStation station, DataRecord dataRecord) throws IOException{
-        client.sendPacket(new DataRecordPacket(station.getId(), dataRecord));
+        client.sendPacket(new DataRecordPacket(station.getId(), dataRecord.toByteArray()));
     }
 
     private void cleanup() {

@@ -12,7 +12,7 @@ public record StationMonitorCloseEvent(GlobalStation station) implements GlobalQ
 
     @Override
     public String toString() {
-        return "StationMonitorOpenEvent{" +
+        return "StationMonitorCloseEvent{" +
                 "station=" + station +
                 '}';
     }
