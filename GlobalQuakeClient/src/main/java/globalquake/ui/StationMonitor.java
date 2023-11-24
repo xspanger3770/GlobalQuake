@@ -1,7 +1,6 @@
 package globalquake.ui;
 
 import globalquake.client.GlobalQuakeLocal;
-import globalquake.core.GlobalQuake;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.events.specific.StationMonitorCloseEvent;

@@ -1,6 +1,5 @@
 package globalquake.client.data;
 
-import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 
 public class ClientStation extends GlobalStation {

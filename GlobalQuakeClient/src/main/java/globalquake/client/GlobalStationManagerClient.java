@@ -5,7 +5,6 @@ import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.core.station.GlobalStationManager;
 import gqserver.api.Packet;
 import gqserver.api.data.station.StationInfoData;
@@ -63,10 +62,8 @@ public class GlobalStationManagerClient extends GlobalStationManager {
 
         try {
             station.getAnalysis().analyse((DataRecord) DataRecord.read(dataRecordPacket.data()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (SeedFormatException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | SeedFormatException e) {
+            Logger.error(e);
         }
     }
 

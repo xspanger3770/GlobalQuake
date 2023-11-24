@@ -27,10 +27,8 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
             @Override
             public void onStationMonitorOpened(StationMonitorOpenEvent event) {
-                System.err.println("AAAA");
                 try {
                     clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), false));
-                    System.err.println("SUCCCESSS");
                 } catch (IOException e) {
                     Logger.trace(e);
                 }

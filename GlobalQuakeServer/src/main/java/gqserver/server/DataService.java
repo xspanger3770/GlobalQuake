@@ -132,12 +132,7 @@ public class DataService extends GlobalQuakeEventListener {
                 }
             }
         }
-        for (Iterator<Map.Entry<ServerClient, Set<DataRequest>>> iterator = clientDataRequestMap.entrySet().iterator(); iterator.hasNext(); ) {
-            var kv = iterator.next();
-            if(isOld(kv.getKey())){
-                iterator.remove();
-            }
-        }
+        clientDataRequestMap.entrySet().removeIf(kv -> isOld(kv.getKey()));
     }
 
     private boolean isOld(ServerClient client) {
