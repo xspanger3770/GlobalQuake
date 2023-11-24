@@ -61,7 +61,8 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         }
 
         try {
-            station.getAnalysis().analyse((DataRecord) DataRecord.read(dataRecordPacket.data()));
+            DataRecord dataRecord = (DataRecord) DataRecord.read(dataRecordPacket.data());
+            station.getAnalysis().analyse(dataRecord);
         } catch (IOException | SeedFormatException e) {
             Logger.error(e);
         }

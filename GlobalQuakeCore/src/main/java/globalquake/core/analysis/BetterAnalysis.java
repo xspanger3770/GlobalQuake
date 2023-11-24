@@ -218,9 +218,7 @@ public class BetterAnalysis extends Analysis {
                 e.endBadly();
             }
         }
-
     }
-
 
     @Override
     public synchronized void second(long time) {

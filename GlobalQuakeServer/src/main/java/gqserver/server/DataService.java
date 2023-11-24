@@ -105,6 +105,7 @@ public class DataService extends GlobalQuakeEventListener {
                     continue;
                 }
 
+                // TODO THIS IS INCORRECT BECAUSE PQ ITERATOR DOESNT ITERATE IN ORDER!
                 for(DataRecord dataRecord : dataRecords){
                     if(dataRequest.getLastRecord() == null || dataRecord.getStartBtime().after(dataRequest.getLastRecord().getStartBtime())){
                         try {
@@ -230,7 +231,7 @@ public class DataService extends GlobalQuakeEventListener {
         DataRecord record = seedlinkDataEvent.getDataRecord();
         synchronized (stationDataQueueLock) {
             stationDataQueueMap.putIfAbsent(station,
-                    new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
+                    new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli())));
             stationDataQueueMap.get(station).add(record);
         }
     }

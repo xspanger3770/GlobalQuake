@@ -37,6 +37,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorClosed(StationMonitorCloseEvent event) {
                 try {
+                    event.station().getAnalysis().fullReset();
                     clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), true));
                 } catch (IOException e) {
                     Logger.trace(e);
