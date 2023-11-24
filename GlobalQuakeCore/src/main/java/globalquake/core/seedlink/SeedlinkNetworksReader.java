@@ -1,9 +1,10 @@
-package globalquake.core;
+package globalquake.core.seedlink;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.core.GlobalQuake;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.core.station.AbstractStation;
@@ -28,6 +29,12 @@ public class SeedlinkNetworksReader {
 	private ExecutorService seedlinkReaderService;
 
 	private final Queue<SeedlinkReader> activeReaders = new ConcurrentLinkedQueue<>();
+
+	private final SeedlinkEventManager seedlinkEventManager;
+
+	public SeedlinkNetworksReader(){
+		seedlinkEventManager = new SeedlinkEventManager();
+	}
 
 	public static void main(String[] args) throws Exception{
 		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
@@ -56,6 +63,7 @@ public class SeedlinkNetworksReader {
 	public void run() {
 		createCache();
 		seedlinkReaderService = Executors.newCachedThreadPool();
+		seedlinkEventManager.run();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(
@@ -197,5 +205,6 @@ public class SeedlinkNetworksReader {
 			}
 		}
 		stationCache.clear();
+		seedlinkEventManager.stop();
 	}
 }
