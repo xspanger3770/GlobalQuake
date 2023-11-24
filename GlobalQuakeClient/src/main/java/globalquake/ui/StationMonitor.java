@@ -1,6 +1,11 @@
 package globalquake.ui;
 
+import globalquake.client.GlobalQuakeLocal;
+import globalquake.core.GlobalQuake;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
+import globalquake.events.specific.StationMonitorCloseEvent;
+import globalquake.events.specific.StationMonitorOpenEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +19,11 @@ public class StationMonitor extends GQFrame {
 
 	public StationMonitor(Component parent, AbstractStation station, int refreshTime) {
 		this.station = station;
+
+		if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
+			GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorOpenEvent(globalStation));
+		}
+
 		setLayout(new BorderLayout());
 
 		add(createControlPanel(), BorderLayout.NORTH);
@@ -41,6 +51,9 @@ public class StationMonitor extends GQFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				timer.cancel();
+				if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
+					GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorCloseEvent(globalStation));
+				}
 			}
 		});
 
