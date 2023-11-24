@@ -163,6 +163,9 @@ public class ClientSocket {
     }
 
     public synchronized void sendPacket(Packet packet) throws IOException {
+        if(outputStream == null){
+            return;
+        }
         outputStream.writeObject(packet);
     }
 

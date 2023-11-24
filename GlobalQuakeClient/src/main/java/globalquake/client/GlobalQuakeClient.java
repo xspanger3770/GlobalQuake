@@ -1,8 +1,12 @@
 package globalquake.client;
 
+import globalquake.events.GlobalQuakeLocalEventListener;
+import globalquake.events.specific.StationMonitorCloseEvent;
+import globalquake.events.specific.StationMonitorOpenEvent;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
 import gqserver.api.Packet;
+import gqserver.api.packets.data.DataRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -19,6 +23,26 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         super.archive = new EarthquakeArchiveClient();
         super.seedlinkNetworksReader = new SeedlinkNetworksReaderClient();
         this.clientSocket = clientSocket;
+
+        getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
+            @Override
+            public void onStationMonitorOpened(StationMonitorOpenEvent event) {
+                try {
+                    clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), false));
+                } catch (IOException e) {
+                    Logger.trace(e);
+                }
+            }
+
+            @Override
+            public void onStationMonitorClosed(StationMonitorCloseEvent event) {
+                try {
+                    clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), true));
+                } catch (IOException e) {
+                    Logger.trace(e);
+                }
+            }
+        });
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {

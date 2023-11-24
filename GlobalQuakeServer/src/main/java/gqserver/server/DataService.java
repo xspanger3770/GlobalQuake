@@ -67,6 +67,7 @@ public class DataService extends GlobalQuakeEventListener {
     private final Object stationDataQueueLock = new Object();
 
     private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
+    private final Map<Integer, GlobalStation> stationIdMap = new HashMap<>();
     private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService cleanupService;
     private ScheduledExecutorService dataRequestsService;
@@ -107,7 +108,7 @@ public class DataService extends GlobalQuakeEventListener {
                 for(DataRecord dataRecord : dataRecords){
                     if(dataRequest.getLastRecord() == null || dataRecord.getStartBtime().after(dataRequest.getLastRecord().getStartBtime())){
                         try {
-                            sendData(kv.getKey(), dataRecord);
+                            sendData(kv.getKey(), dataRequest.getStation(), dataRecord);
                         } catch (IOException e) {
                             Logger.tag("Server").warn(e);
                             continue mainLoop;
@@ -119,8 +120,8 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
-    private void sendData(ServerClient client, DataRecord dataRecord) throws IOException{
-        client.sendPacket(new DataRecordPacket(dataRecord));
+    private void sendData(ServerClient client, GlobalStation station, DataRecord dataRecord) throws IOException{
+        client.sendPacket(new DataRecordPacket(station.getId(), dataRecord));
     }
 
     private void cleanup() {
@@ -382,7 +383,8 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processDataRequest(ServerClient client, DataRequestPacket packet) {
-        GlobalStation station = GlobalQuake.instance.getSeedlinkReader().getStationCache().get("%s %s".formatted(packet.networkCode(), packet.stationCode()));
+        stationIdMap.putIfAbsent(packet.stationIndex(), (GlobalStation) GlobalQuake.instance.getStationManager().getStation(packet.stationIndex()));
+        GlobalStation station = stationIdMap.get(packet.stationIndex());
         if(station == null){
             Logger.tag("Server").warn("Received data request for non-existing station!");
             return;
@@ -463,6 +465,9 @@ public class DataService extends GlobalQuakeEventListener {
         GlobalQuake.instance.stopService(cleanupService);
         GlobalQuake.instance.stopService(dataRequestsService);
 
+        stationIdMap.clear();
+        clientDataRequestMap.clear();
+        stationDataQueueMap.clear();
         stationIntensities.clear();
         currentEarthquakes.clear();
     }

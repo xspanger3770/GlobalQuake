@@ -121,6 +121,15 @@ public class GlobalStationManager {
         return indexing;
     }
 
+    public AbstractStation getStation(int id) {
+        for(AbstractStation station : stations){
+            if(station.getId() == id){
+                return station;
+            }
+        }
+        return null;
+    }
+
 
     record StationDistanceInfo(int id, double dist, double ang) {
 
