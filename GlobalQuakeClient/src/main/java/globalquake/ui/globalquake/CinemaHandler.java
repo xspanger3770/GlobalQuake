@@ -177,7 +177,7 @@ public class CinemaHandler {
     private Cluster lastCluster = null;
 
     private CinemaTarget selectNextTarget() {
-        CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5, 0, null);
+        CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0), 0, null);
         if (GlobalQuake.instance == null) {
             return result;
         }
