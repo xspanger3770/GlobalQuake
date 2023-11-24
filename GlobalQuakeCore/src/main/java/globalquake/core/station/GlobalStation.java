@@ -88,4 +88,5 @@ public class GlobalStation extends AbstractStation {
 		Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
 		return event != null && event.isValid() && !event.hasEnded();
 	}
+
 }

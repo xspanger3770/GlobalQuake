@@ -3,6 +3,8 @@ package gqserver.server;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.GlobalStation;
 
+import java.util.Objects;
+
 public class DataRequest {
 
     private final GlobalStation station;
@@ -23,5 +25,18 @@ public class DataRequest {
 
     public void setLastRecord(DataRecord lastRecord) {
         this.lastRecord = lastRecord;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DataRequest that = (DataRequest) o;
+        return Objects.equals(station, that.station);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(station);
     }
 }

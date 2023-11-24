@@ -7,6 +7,7 @@ import globalquake.core.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -185,5 +186,18 @@ public abstract class AbstractStation {
 	@Override
 	public String toString() {
 		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		AbstractStation that = (AbstractStation) o;
+		return id == that.id;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
 	}
 }
