@@ -2,6 +2,7 @@ package gqserver.server;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Cluster;
@@ -33,6 +34,8 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,8 +58,11 @@ public class DataService extends GlobalQuakeEventListener {
 
     private final Map<AbstractStation, StationStatus> stationIntensities = new HashMap<>();
     private ScheduledExecutorService stationIntensityService;
+    private final Object stationDataQueueLock = new Object();
 
     private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
+    private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new HashMap<>();
+    private ScheduledExecutorService cleanupService;
 
     public DataService() {
         currentEarthquakes = new ArrayList<>();
@@ -67,6 +73,24 @@ public class DataService extends GlobalQuakeEventListener {
 
         stationIntensityService = Executors.newSingleThreadScheduledExecutor();
         stationIntensityService.scheduleAtFixedRate(this::sendIntensityData, 0, 1, TimeUnit.SECONDS);
+
+        cleanupService = Executors.newSingleThreadScheduledExecutor();
+        cleanupService.scheduleAtFixedRate(this::cleanup, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private void cleanup() {
+        synchronized (stationDataQueueLock){
+            for(Queue<DataRecord> queue : stationDataQueueMap.values()){
+                while(!queue.isEmpty() && isOld(queue.peek())){
+                    queue.remove();
+                }
+            }
+        }
+    }
+
+    private boolean isOld(DataRecord dataRecord) {
+        return dataRecord.getStartBtime().toInstant().isBefore(
+                Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
     }
 
     public StationStatus createStatus(AbstractStation station){
@@ -153,9 +177,11 @@ public class DataService extends GlobalQuakeEventListener {
     public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
-        Queue<DataRecord> queue = stationDataQueueMap.getOrDefault(station,
-                new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
-        queue.add(record);
+        synchronized (stationDataQueueLock) {
+            Queue<DataRecord> queue = stationDataQueueMap.getOrDefault(station,
+                    new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
+            queue.add(record);
+        }
     }
 
     private Packet createArchivedPacket(ArchivedQuake archivedQuake) {
@@ -357,6 +383,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     public void stop() {
         GlobalQuake.instance.stopService(stationIntensityService);
+        GlobalQuake.instance.stopService(cleanupService);
 
         stationIntensities.clear();
         currentEarthquakes.clear();
