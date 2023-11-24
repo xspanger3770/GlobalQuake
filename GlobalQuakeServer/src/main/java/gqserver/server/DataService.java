@@ -25,10 +25,14 @@ import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
+import gqserver.api.packets.data.DataRecordPacket;
+import gqserver.api.packets.data.DataRequestPacket;
 import gqserver.api.packets.earthquake.*;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
 import gqserver.api.packets.station.StationsRequestPacket;
+import gqserver.events.GlobalQuakeServerEventListener;
+import gqserver.events.specific.ClientLeftEvent;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -37,6 +41,7 @@ import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +54,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     private static final int MAX_ARCHIVED_QUAKES = 100;
     private static final int STATIONS_INFO_PACKET_MAX_SIZE = 64;
+    private static final int DATA_REQUESTS_MAX_COUNT = 16;
     private final ReadWriteLock quakesRWLock = new ReentrantReadWriteLock();
 
     private final Lock quakesReadLock = quakesRWLock.readLock();
@@ -61,8 +67,9 @@ public class DataService extends GlobalQuakeEventListener {
     private final Object stationDataQueueLock = new Object();
 
     private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
-    private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new HashMap<>();
+    private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService cleanupService;
+    private ScheduledExecutorService dataRequestsService;
 
     public DataService() {
         currentEarthquakes = new ArrayList<>();
@@ -70,12 +77,49 @@ public class DataService extends GlobalQuakeEventListener {
 
     public void run(){
         GlobalQuakeServer.instance.getEventHandler().registerEventListener(this);
+        GlobalQuakeServer.instance.getServerEventHandler().registerEventListener(new GlobalQuakeServerEventListener(){
+            @Override
+            public void onClientLeave(ClientLeftEvent event) {
+                clientDataRequestMap.remove(event.client());
+            }
+        });
 
         stationIntensityService = Executors.newSingleThreadScheduledExecutor();
         stationIntensityService.scheduleAtFixedRate(this::sendIntensityData, 0, 1, TimeUnit.SECONDS);
 
+        dataRequestsService = Executors.newSingleThreadScheduledExecutor();
+        dataRequestsService.scheduleAtFixedRate(this::processDataRequests, 0, 1, TimeUnit.SECONDS);
+
         cleanupService = Executors.newSingleThreadScheduledExecutor();
         cleanupService.scheduleAtFixedRate(this::cleanup, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private void processDataRequests() {
+        mainLoop:
+        for(var kv : clientDataRequestMap.entrySet()){
+            for(DataRequest dataRequest : kv.getValue()){
+                Collection<DataRecord> dataRecords = stationDataQueueMap.get(dataRequest.getStation());
+                if(dataRecords == null){
+                    continue;
+                }
+
+                for(DataRecord dataRecord : dataRecords){
+                    if(dataRequest.getLastRecord() == null || dataRecord.getStartBtime().after(dataRequest.getLastRecord().getStartBtime())){
+                        try {
+                            sendData(kv.getKey(), dataRecord);
+                        } catch (IOException e) {
+                            Logger.tag("Server").warn(e);
+                            continue mainLoop;
+                        }
+                        dataRequest.setLastRecord(dataRecord);
+                    }
+                }
+            }
+        }
+    }
+
+    private void sendData(ServerClient client, DataRecord dataRecord) throws IOException{
+        client.sendPacket(new DataRecordPacket(dataRecord));
     }
 
     private void cleanup() {
@@ -86,6 +130,16 @@ public class DataService extends GlobalQuakeEventListener {
                 }
             }
         }
+        for (Iterator<Map.Entry<ServerClient, Set<DataRequest>>> iterator = clientDataRequestMap.entrySet().iterator(); iterator.hasNext(); ) {
+            var kv = iterator.next();
+            if(isOld(kv.getKey())){
+                iterator.remove();
+            }
+        }
+    }
+
+    private boolean isOld(ServerClient client) {
+        return System.currentTimeMillis() - client.getLastHeartbeat() > 5 * 60 * 1000;
     }
 
     private boolean isOld(DataRecord dataRecord) {
@@ -178,7 +232,7 @@ public class DataService extends GlobalQuakeEventListener {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
         synchronized (stationDataQueueLock) {
-            Queue<DataRecord> queue = stationDataQueueMap.getOrDefault(station,
+            Queue<DataRecord> queue = stationDataQueueMap.putIfAbsent(station,
                     new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
             queue.add(record);
         }
@@ -316,11 +370,32 @@ public class DataService extends GlobalQuakeEventListener {
                 processArchivedQuakesRequest(client);
             } else if(packet instanceof StationsRequestPacket){
                 processStationsRequestPacket(client);
+            } else if(packet instanceof DataRequestPacket dataRequestPacket){
+                processDataRequest(client, dataRequestPacket);
             }
         } catch(SocketTimeoutException | SocketException e) {
             Logger.tag("Server").trace(e);
         } catch(IOException e){
             Logger.tag("Server").error(e);
+        }
+    }
+
+    private void processDataRequest(ServerClient client, DataRequestPacket packet) {
+        GlobalStation station = GlobalQuake.instance.getSeedlinkReader().getStationCache().get("%s %s".formatted(packet.networkCode(), packet.stationCode()));
+        if(station == null){
+            Logger.tag("Server").warn("Received data request for non-existing station!");
+            return;
+        }
+
+        Set<DataRequest> dataRequests = clientDataRequestMap.putIfAbsent(client, new HashSet<>());
+        if(!packet.cancel()) {
+            if(dataRequests.size() >= DATA_REQUESTS_MAX_COUNT){
+                Logger.tag("Server").warn("Too many data requests for client #%d!".formatted(client.getID()));
+            } else {
+                dataRequests.add(new DataRequest(station));
+            }
+        } else {
+            dataRequests.removeIf(dataRequest -> dataRequest.getStation().equals(station));
         }
     }
 
@@ -384,6 +459,7 @@ public class DataService extends GlobalQuakeEventListener {
     public void stop() {
         GlobalQuake.instance.stopService(stationIntensityService);
         GlobalQuake.instance.stopService(cleanupService);
+        GlobalQuake.instance.stopService(dataRequestsService);
 
         stationIntensities.clear();
         currentEarthquakes.clear();

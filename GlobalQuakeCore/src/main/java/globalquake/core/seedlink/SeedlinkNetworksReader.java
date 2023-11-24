@@ -201,4 +201,8 @@ public class SeedlinkNetworksReader {
 		}
 		stationCache.clear();
 	}
+
+	public Map<String, GlobalStation> getStationCache() {
+		return stationCache;
+	}
 }
