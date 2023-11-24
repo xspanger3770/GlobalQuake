@@ -7,6 +7,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
+import globalquake.core.events.specific.SeedlinkDataEvent;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import org.tinylog.Logger;
@@ -29,12 +30,6 @@ public class SeedlinkNetworksReader {
 	private ExecutorService seedlinkReaderService;
 
 	private final Queue<SeedlinkReader> activeReaders = new ConcurrentLinkedQueue<>();
-
-	private final SeedlinkEventManager seedlinkEventManager;
-
-	public SeedlinkNetworksReader(){
-		seedlinkEventManager = new SeedlinkEventManager();
-	}
 
 	public static void main(String[] args) throws Exception{
 		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
@@ -63,7 +58,6 @@ public class SeedlinkNetworksReader {
 	public void run() {
 		createCache();
 		seedlinkReaderService = Executors.newCachedThreadPool();
-		seedlinkEventManager.run();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(
@@ -175,7 +169,7 @@ public class SeedlinkNetworksReader {
 			Logger.trace("Seedlink sent data for %s %s, but that was never selected!".formatted(network, station));
 		}else {
 			globalStation.addRecord(dr);
-			seedlinkEventManager.fireEvent(new SeedlinkDataEvent(dr));
+			GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(dr));
 		}
 	}
 
@@ -206,6 +200,5 @@ public class SeedlinkNetworksReader {
 			}
 		}
 		stationCache.clear();
-		seedlinkEventManager.stop();
 	}
 }

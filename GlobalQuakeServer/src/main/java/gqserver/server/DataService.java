@@ -43,7 +43,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public class DataService implements GlobalQuakeEventListener {
+public class DataService extends GlobalQuakeEventListener {
 
     private static final int MAX_ARCHIVED_QUAKES = 100;
     private static final int STATIONS_INFO_PACKET_MAX_SIZE = 64;

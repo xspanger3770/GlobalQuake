@@ -6,7 +6,7 @@ import globalquake.core.alert.Warnable;
 import globalquake.alert.Warning;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
@@ -59,7 +59,7 @@ public class CinemaHandler {
 
         cinemaTargetService.schedule(task, 0, TimeUnit.SECONDS);
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 CinemaTarget target = createTarget(event.earthquake());
