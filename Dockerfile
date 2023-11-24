@@ -5,9 +5,13 @@ LABEL authors="xspanger3770"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+# Update the package list and install additional helpful packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     btop \
     htop \
-    nvtop \
     && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --gid 1000 group && \
@@ -25,9 +29,9 @@ COPY Container ./.GlobalQuakeServerData
 # Copy CUDA library
 COPY GQHypocenterSearch/build/lib ./lib
 
-RUN chown -R user:group ./.GlobalQuakeServerData
-RUN chown -R user:group GlobalQuakeServer.jar
-RUN chown -R user:group ./lib
+RUN chown -R user:group ./.GlobalQuakeServerData &&  \
+    chown -R user:group GlobalQuakeServer.jar && \
+    chown -R user:group ./lib
 USER 1000
 
 # Run GQ Server
