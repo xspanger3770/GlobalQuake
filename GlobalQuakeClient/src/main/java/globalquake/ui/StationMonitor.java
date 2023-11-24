@@ -59,7 +59,9 @@ public class StationMonitor extends GQFrame {
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
+				System.err.println("K");
 				if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+					System.err.println("ESC");
 					dispose();
 				}
 			}

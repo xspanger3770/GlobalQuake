@@ -25,7 +25,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>globalquake.main.Main</mainClass>
+                            <mainClass>gqserver.main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
