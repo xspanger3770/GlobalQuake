@@ -5,9 +5,6 @@ LABEL authors="xspanger3770"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     openjdk-17-jdk \
-    maven \
-    build-essential \
-    curl \
     btop \
     htop \
     nvtop \
