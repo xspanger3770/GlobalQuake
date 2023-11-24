@@ -95,6 +95,7 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processDataRequests() {
+        // TODO sub-optimal
         mainLoop:
         for(var kv : clientDataRequestMap.entrySet()){
             for(DataRequest dataRequest : kv.getValue()){
@@ -232,9 +233,9 @@ public class DataService extends GlobalQuakeEventListener {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
         synchronized (stationDataQueueLock) {
-            Queue<DataRecord> queue = stationDataQueueMap.putIfAbsent(station,
+            stationDataQueueMap.putIfAbsent(station,
                     new PriorityQueue<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant())));
-            queue.add(record);
+            stationDataQueueMap.get(station).add(record);
         }
     }
 
@@ -387,7 +388,8 @@ public class DataService extends GlobalQuakeEventListener {
             return;
         }
 
-        Set<DataRequest> dataRequests = clientDataRequestMap.putIfAbsent(client, new HashSet<>());
+        clientDataRequestMap.putIfAbsent(client, new HashSet<>());
+        Set<DataRequest> dataRequests = clientDataRequestMap.get(client);
         if(!packet.cancel()) {
             if(dataRequests.size() >= DATA_REQUESTS_MAX_COUNT){
                 Logger.tag("Server").warn("Too many data requests for client #%d!".formatted(client.getID()));
