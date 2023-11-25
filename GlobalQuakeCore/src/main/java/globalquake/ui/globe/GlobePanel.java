@@ -386,8 +386,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private void handleClick(int x, int y) {
         ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
-            for (RenderEntity<?> e : feature.getEntities()) {
-                Point2D centerCoords = feature.getCenterCoords(e);
+            for (RenderEntity<?> entity : feature.getEntities()) {
+                if(!feature.isEntityVisible(entity)){
+                    continue;
+                }
+                Point2D centerCoords = feature.getCenterCoords(entity);
                 if (centerCoords != null) {
                     Vector3D pos = new Vector3D(GlobeRenderer.getX_3D(centerCoords.x, centerCoords.y, 0),
                             GlobeRenderer.getY_3D(centerCoords.x, centerCoords.y, 0), GlobeRenderer.getZ_3D(centerCoords.x, centerCoords.y, 0));
@@ -400,7 +403,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     double distOnScreen = Math.sqrt(Math.pow(centerProjected.x - x, 2) + Math.pow(centerProjected.y - y, 2));
                     if (distOnScreen <= 10) {
                         synchronized (clicked) {
-                            clicked.add(e);
+                            clicked.add(entity);
                         }
                     }
                 }

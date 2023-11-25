@@ -39,7 +39,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
         private final ArchivedEvent event;
 
-        public static AtomicInteger nextID = new AtomicInteger(0);
+        public static final AtomicInteger nextID = new AtomicInteger(0);
 
         public AnimatedStation(ArchivedQuakeAnimation animation, ArchivedEvent event) {
             super("", "", "", "", event.lat(), event.lon(), 0, nextID.getAndIncrement(), null);

@@ -1,7 +1,6 @@
 package globalquake.main;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.Settings;
 import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalIOException;

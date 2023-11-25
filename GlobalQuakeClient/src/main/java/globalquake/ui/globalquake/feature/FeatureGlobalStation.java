@@ -4,6 +4,7 @@ import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -89,11 +90,18 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        if(Settings.hideDeadStations && !entity.getOriginal().hasDisplayableData()){
-            return;
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        GlobalStation station = (GlobalStation) entity.getOriginal();
+
+        if(Settings.hideDeadStations && !station.hasDisplayableData()){
+            return false;
         }
 
+        return !station.disabled;
+    }
+
+    @Override
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
         if(!elementStationCircle.shouldDraw){
@@ -116,11 +124,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         }
 
         graphics.setStroke(new BasicStroke(1f));
-
-        if(entity.getOriginal().disabled){
-            return;
-        }
-
 
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
         var centerPonint = renderer.projectPoint(point3D, renderProperties);
