@@ -7,7 +7,6 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.GlobalQuake;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
-import globalquake.core.events.specific.SeedlinkDataEvent;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import org.tinylog.Logger;

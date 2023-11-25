@@ -2,29 +2,30 @@ package gqserver.server;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.station.GlobalStation;
+import gqserver.api.ServerClient;
+import gqserver.api.packets.data.DataRecordPacket;
 
+import java.io.IOException;
 import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class DataRequest {
 
     private final GlobalStation station;
-    private DataRecord lastRecord;
+    private final ServerClient client;
+    public boolean ready;
 
-    public DataRequest(GlobalStation station) {
+    private final Queue<DataRecord> dataRecordQueue = new PriorityQueue<>(DataService.getDataRecordComparator());
+
+    public DataRequest(GlobalStation station, ServerClient client) {
         this.station = station;
-        this.lastRecord = null;
+        this.client = client;
+        this.ready = false;
     }
 
     public GlobalStation getStation() {
         return station;
-    }
-
-    public DataRecord getLastRecord() {
-        return lastRecord;
-    }
-
-    public void setLastRecord(DataRecord lastRecord) {
-        this.lastRecord = lastRecord;
     }
 
     @Override
@@ -38,5 +39,16 @@ public class DataRequest {
     @Override
     public int hashCode() {
         return Objects.hash(station);
+    }
+
+    public synchronized void enqueue(DataRecord dataRecord) {
+        dataRecordQueue.add(dataRecord);
+    }
+
+    public synchronized void sendAll() throws IOException {
+        while(!dataRecordQueue.isEmpty()){
+            DataRecord dataRecord = dataRecordQueue.remove();
+            client.sendPacket(new DataRecordPacket(station.getId(), dataRecord.toByteArray()));
+        }
     }
 }

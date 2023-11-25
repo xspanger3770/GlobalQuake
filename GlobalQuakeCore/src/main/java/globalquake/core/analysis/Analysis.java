@@ -95,7 +95,7 @@ public abstract class Analysis {
         synchronized (previousLogsLock) {
             getPreviousLogs().clear();
         }
-    };
+    }
 
     public double getSampleRate() {
         return sampleRate;
