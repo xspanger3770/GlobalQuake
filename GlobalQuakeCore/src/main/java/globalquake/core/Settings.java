@@ -135,6 +135,7 @@ public final class Settings {
 
 	static {
 		load();
+		save();
 		try {
 			runUpdateService();
 		} catch (IOException e) {
@@ -146,7 +147,7 @@ public final class Settings {
 		WatchService watchService = FileSystems.getDefault().newWatchService();
 
 		// Register the directory for certain events
-		optionsFile.toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
 
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.submit(new Runnable() {
@@ -163,7 +164,12 @@ public final class Settings {
 					// Handle the event
 					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
 						Path modifiedFile = (Path) event.context();
-						System.out.println("File modified: " + modifiedFile);
+						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
+							if(System.currentTimeMillis() - lastSave >= 2000){
+								Logger.info("Properties file changed, reloading!");
+								load();
+							}
+						}
 					}
 				}
 
@@ -264,7 +270,6 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
-		save();
 	}
 
 
@@ -374,8 +379,11 @@ public final class Settings {
 			return null;
 		}
 	}
+
+	private static long lastSave;
 	
 	public static void save() {
+		lastSave = System.currentTimeMillis();
 		changes++;
 
 		try {
