@@ -169,7 +169,6 @@ public class SeedlinkNetworksReader {
 			Logger.trace("Seedlink sent data for %s %s, but that was never selected!".formatted(network, station));
 		}else {
 			globalStation.addRecord(dr);
-			GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(globalStation, dr));
 		}
 	}
 

@@ -4,6 +4,7 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.events.specific.SeedlinkDataEvent;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -70,6 +71,7 @@ public class GlobalStation extends AbstractStation {
 	private void process(DataRecord record) {
 		nextExpectedLog = record.getPredictedNextStartBtime().toInstant();
 		getAnalysis().analyse(record);
+		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
 		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 	}
 
