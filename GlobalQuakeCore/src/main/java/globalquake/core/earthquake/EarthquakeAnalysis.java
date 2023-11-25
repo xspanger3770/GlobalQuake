@@ -1017,9 +1017,9 @@ public class EarthquakeAnalysis {
             60, 60, // M7+
     };
 
-    public static boolean shouldRemove(Earthquake earthquake){
-        int store_minutes = STORE_TABLE[Math.max(0,
-                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
+    public static boolean shouldRemove(Earthquake earthquake, int marginSeconds){
+        double store_minutes = STORE_TABLE[Math.max(0,
+                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))] - marginSeconds / 60.0;
         return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                 && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }
@@ -1029,7 +1029,7 @@ public class EarthquakeAnalysis {
         List<Earthquake> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Earthquake earthquake = it.next();
-            if(shouldRemove(earthquake)){
+            if(shouldRemove(earthquake, 0)){
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
                 }
