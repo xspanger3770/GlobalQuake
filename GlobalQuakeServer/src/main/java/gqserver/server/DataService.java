@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 
 public class DataService extends GlobalQuakeEventListener {
 
-    private static final int MAX_ARCHIVED_QUAKES = 100;
     private static final int STATIONS_INFO_PACKET_MAX_SIZE = 64;
     private static final int DATA_REQUESTS_MAX_COUNT = 16;
     private final ReadWriteLock quakesRWLock = new ReentrantReadWriteLock();
@@ -429,9 +428,6 @@ public class DataService extends GlobalQuakeEventListener {
         for(ArchivedQuake archivedQuake : GlobalQuake.instance.getArchive().getArchivedQuakes()){
             client.sendPacket(createArchivedPacket(archivedQuake));
             count++;
-            if(count > MAX_ARCHIVED_QUAKES){
-                break;
-            }
         }
     }
 
