@@ -128,8 +128,9 @@ public final class Settings {
 
 	public static Integer lastServerPORT;
 	public static Integer maxClients;
+	public static Boolean displayShakemaps;
 
-    static {
+	static {
 		load();
 	}
 
@@ -158,6 +159,7 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayShakemaps", "true");
 		loadProperty("displayTime", "true");
 		loadProperty("displayAlertBox", "true");
 		loadProperty("displaySystemInfo", "true");
