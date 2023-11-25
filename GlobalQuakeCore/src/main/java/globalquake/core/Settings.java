@@ -9,12 +9,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.*;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public final class Settings {
@@ -132,6 +135,43 @@ public final class Settings {
 
 	static {
 		load();
+		try {
+			runUpdateService();
+		} catch (IOException e) {
+			Logger.error(new RuntimeApplicationException("Unable to launch settings file update service!", e));
+		}
+	}
+
+	private static void runUpdateService() throws IOException{
+		WatchService watchService = FileSystems.getDefault().newWatchService();
+
+		// Register the directory for certain events
+		optionsFile.toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				WatchKey key;
+				try {
+					key = watchService.take(); // Wait for a key to be available
+				} catch (InterruptedException ex) {
+					return;
+				}
+
+				for (WatchEvent<?> event : key.pollEvents()) {
+					// Handle the event
+					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+						Path modifiedFile = (Path) event.context();
+						System.out.println("File modified: " + modifiedFile);
+					}
+				}
+
+				if(key.reset()){
+					executorService.submit(this);
+				}
+			}
+		});
 	}
 
 	private static void load() {
