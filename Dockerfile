@@ -12,6 +12,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     btop \
     htop \
+    nano \
     && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --gid 1000 group && \
