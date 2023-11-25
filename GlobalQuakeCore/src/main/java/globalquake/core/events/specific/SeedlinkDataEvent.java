@@ -25,4 +25,9 @@ public class SeedlinkDataEvent implements SeedlinkEvent {
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onNewData(this);
     }
+
+    @Override
+    public boolean shouldLog() {
+        return false;
+    }
 }
