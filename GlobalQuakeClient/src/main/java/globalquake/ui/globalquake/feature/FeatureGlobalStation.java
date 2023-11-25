@@ -4,7 +4,6 @@ import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -91,7 +90,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
-        GlobalStation station = (GlobalStation) entity.getOriginal();
+        AbstractStation station = (AbstractStation) entity.getOriginal();
 
         if(Settings.hideDeadStations && !station.hasDisplayableData()){
             return false;
