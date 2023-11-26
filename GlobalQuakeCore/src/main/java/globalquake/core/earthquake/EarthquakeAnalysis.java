@@ -608,7 +608,7 @@ public class EarthquakeAnalysis {
     private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
         int correct = 0;
         for (PickedEvent event : selectedEvents) {
-            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false, true)) {
+            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false, false)) {
                 correct++;
             }
         }
