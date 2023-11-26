@@ -386,7 +386,11 @@ public class DataService extends GlobalQuakeEventListener {
         dataRequests.add(dataRequest);
 
         Queue<DataRecord> dataRecords = new PriorityQueue<>(getDataRecordComparator());
-        dataRecords.addAll(stationDataQueueMap.get(dataRequest.getStation()));
+
+        Queue<DataRecord> data = stationDataQueueMap.get(dataRequest.getStation());
+        if(data != null){
+            dataRecords.addAll(data);
+        }
 
         while(!dataRecords.isEmpty()){
             DataRecord dataRecord = dataRecords.remove();
