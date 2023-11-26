@@ -16,4 +16,23 @@ public class RegionsTest {
         assertEquals("Poland", Regions.getRegion(51.8, 18.3));
     }
 
+    @Test
+    public void getShorelineDistanceTest() throws IOException {
+        Regions.init();
+
+        double lat = 62.659630,
+               lon = -42.440372;
+
+        assertEquals(19.53736973813437, Regions.getShorelineDistance(lat, lon), 0.1);
+
+        lat = 63.185109;
+        lon = -44.750247;
+
+        assertEquals(0, Regions.getShorelineDistance(lat, lon), 0);
+
+        lat = 58.664108;
+        lon = -67.243589;
+
+        assertEquals(55, Regions.getShorelineDistance(lat, lon), 1);
+    }
 }
