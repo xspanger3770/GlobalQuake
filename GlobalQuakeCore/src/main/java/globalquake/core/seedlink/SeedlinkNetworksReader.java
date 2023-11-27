@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class SeedlinkNetworksReader {
 
 	protected static final int RECONNECT_DELAY = 10;
+	private static final int MAX_STATI0NS = 500;
 	private Instant lastData;
 
     private long lastReceivedRecord;
@@ -79,13 +80,16 @@ public class SeedlinkNetworksReader {
 		seedlinkNetwork.status = SeedlinkStatus.CONNECTING;
 		seedlinkNetwork.connectedStations = 0;
 
-		SeedlinkReader reader = null;
+		SeedlinkReader[] readers = new SeedlinkReader[(int)Math.ceil(seedlinkNetwork.selectedStations / (double)MAX_STATI0NS)];
+		System.err.println(seedlinkNetwork.selectedStations+" is "+readers.length);
 		try {
-			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getName() + "\"");
-			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
-			activeReaders.add(reader);
+			for(int i = 0; i < readers.length; i++) {
+				Logger.info("Connecting to seedlink server \"%s\" (instance %d / %d)".formatted(seedlinkNetwork.getName(), i + 1, readers.length));
+				readers[i] = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+				activeReaders.add(readers[i]);
 
-			reader.sendHello();
+				readers[i].sendHello();
+			}
 
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
 			boolean first = true;
@@ -94,11 +98,11 @@ public class SeedlinkNetworksReader {
 				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
 					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
 					if(!first) {
-						reader.sendCmd("DATA");
+						readers[seedlinkNetwork.connectedStations / MAX_STATI0NS].sendCmd("DATA");
 					} else{
 						first = false;
 					}
-					reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
+					readers[seedlinkNetwork.connectedStations / MAX_STATI0NS].select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 							s.getChannelName());
 					seedlinkNetwork.connectedStations++;
 				}
@@ -110,31 +114,51 @@ public class SeedlinkNetworksReader {
 				return;
 			}
 
-			reader.startData();
+			for(int i  = 0; i < readers.length; i++) {
+				readers[i].startData();
+			}
 			seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
-			while (reader.hasNext()) {
-				SeedlinkPacket slp = reader.readPacket();
-				try {
-					newPacket(slp.getMiniSeed());
-				} catch(SocketException | SeedFormatException se){
-					Logger.trace(se);
-				} catch (Exception e) {
-					Logger.error(e);
-				}
+			ExecutorService readerService = Executors.newFixedThreadPool(readers.length);
+			for(int i  = 0; i < readers.length; i++) {
+				int finalI = i;
+				readerService.submit(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							while (readers[finalI].hasNext()) {
+								SeedlinkPacket slp = readers[finalI].readPacket();
+								newPacket(slp.getMiniSeed());
+							}
+						} catch(SocketException | SeedFormatException se){
+							Logger.trace(se);
+						} catch (Exception e) {
+							Logger.error(e);
+						}
+						readers[finalI].close();
+					}
+				});
 			}
 
-			reader.close();
+			readerService.shutdown();
+			try {
+				readerService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			} catch (InterruptedException e) {
+				Logger.error(e);
+			}
 		} catch (Exception e) {
 			Logger.warn("Seedlink reader failed for seedlink `%s`: %s".formatted(seedlinkNetwork.getName(), e.getMessage()));
+			Logger.debug(e);
 		} finally {
-			if(reader != null){
-                try {
-                    reader.close();
-                } catch (Exception ex) {
-                    Logger.error(ex);
-                }
-                activeReaders.remove(reader);
+			for(int i  = 0; i < readers.length; i++) {
+				if (readers[i] != null) {
+					try {
+						readers[i].close();
+					} catch (Exception ex) {
+						Logger.error(ex);
+					}
+					activeReaders.remove(readers[i]);
+				}
 			}
 		}
 
