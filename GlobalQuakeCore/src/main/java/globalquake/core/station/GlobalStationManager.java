@@ -35,7 +35,7 @@ public class GlobalStationManager {
                     if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
-                    s.getSelectedChannel().selectBestSeedlinkNetwork().selectedStations++;
+                    (s.getSelectedChannel().selectedSeedlinkNetwork = s.getSelectedChannel().selectBestSeedlinkNetwork()).selectedStations++;
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
                     stations.add(station);
                 }
@@ -106,7 +106,7 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
                 station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID.getAndIncrement(), ch.selectBestSeedlinkNetwork());
+                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork);
     }
 
     public List<AbstractStation> getStations() {

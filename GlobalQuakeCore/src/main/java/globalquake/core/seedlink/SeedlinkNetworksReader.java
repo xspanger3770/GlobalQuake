@@ -59,6 +59,9 @@ public class SeedlinkNetworksReader {
 		createCache();
 		seedlinkReaderService = Executors.newCachedThreadPool();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
+
+		Collections.shuffle(GlobalQuake.instance.getStationManager().getStations());
+
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(
 					seedlinkServer -> seedlinkReaderService.submit(() -> runSeedlinkThread(seedlinkServer, RECONNECT_DELAY)));
