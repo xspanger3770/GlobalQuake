@@ -83,30 +83,26 @@ public class SeedlinkNetworksReader {
 		seedlinkNetwork.status = SeedlinkStatus.CONNECTING;
 		seedlinkNetwork.connectedStations = 0;
 
-		SeedlinkReader[] readers = new SeedlinkReader[(int)Math.ceil(seedlinkNetwork.selectedStations / (double)MAX_STATI0NS)];
+		SeedlinkReader reader = null;
 		try {
-			for(int i = 0; i < readers.length; i++) {
-				Logger.info("Connecting to seedlink server \"%s\" (instance %d / %d)".formatted(seedlinkNetwork.getName(), i + 1, readers.length));
-				readers[i] = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
-				activeReaders.add(readers[i]);
+			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
+			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+			activeReaders.add(reader);
 
-				readers[i].sendHello();
-			}
+			reader.sendHello();
 
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
-			boolean[] first = new boolean[readers.length];
-			Arrays.fill(first, true);
+			boolean first = true;
 
 			for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-					int readerN = seedlinkNetwork.connectedStations % readers.length;
-					Logger.trace("Connecting to %s %s %s %s [%s] %d".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName(), readerN));
-					if(!first[readerN]) {
-						readers[readerN].sendCmd("DATA");
+					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
+					if(!first) {
+						reader.sendCmd("DATA");
 					} else{
-						first[readerN] = false;
+						first = false;
 					}
-					readers[readerN].select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
+					reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 							s.getChannelName());
 					seedlinkNetwork.connectedStations++;
 				}
@@ -118,57 +114,38 @@ public class SeedlinkNetworksReader {
 				return;
 			}
 
-			for(int i  = 0; i < readers.length; i++) {
-				readers[i].startData();
-			}
+			reader.startData();
 			seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
-			ExecutorService readerService = Executors.newFixedThreadPool(readers.length);
-			for(int i  = 0; i < readers.length; i++) {
-				int finalI = i;
-				readerService.submit(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							while (readers[finalI].hasNext()) {
-								SeedlinkPacket slp = readers[finalI].readPacket();
-								newPacket(slp.getMiniSeed());
-							}
-						} catch(SocketException | SeedFormatException se){
-							Logger.trace(se);
-						} catch (Exception e) {
-							Logger.error(e);
-						}
-						readers[finalI].close();
-					}
-				});
+			while (reader.hasNext()) {
+				SeedlinkPacket slp = reader.readPacket();
+				try {
+					newPacket(slp.getMiniSeed());
+				} catch (Exception e) {
+					Logger.error(e);
+				}
 			}
 
-			readerService.shutdown();
-			try {
-				readerService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			} catch (InterruptedException e) {
-				Logger.error(e);
-			}
+			reader.close();
 		} catch (Exception e) {
-			Logger.warn("Seedlink reader failed for seedlink `%s`: %s".formatted(seedlinkNetwork.getName(), e.getMessage()));
-			Logger.debug(e);
-		} finally {
-			for(int i  = 0; i < readers.length; i++) {
-				if (readers[i] != null) {
-					try {
-						readers[i].close();
-					} catch (Exception ex) {
-						Logger.error(ex);
-					}
-					activeReaders.remove(readers[i]);
+			Logger.error(e);
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (Exception ex) {
+					Logger.error(ex);
 				}
+			}
+		}finally{
+			if(reader != null){
+				activeReaders.remove(reader);
 			}
 		}
 
 		seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
 		seedlinkNetwork.connectedStations = 0;
-		Logger.warn("%s Disconnected, Reconnecting after %d seconds...".formatted(seedlinkNetwork.getName(), reconnectDelay));
+		Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
+				+ " seconds...");
 
 		try {
 			Thread.sleep(reconnectDelay * 1000L);
@@ -176,7 +153,7 @@ public class SeedlinkNetworksReader {
 				reconnectDelay *= 2;
 			}
 		} catch (InterruptedException ignored) {
-			Logger.warn("Seedlink reader thread for %s interrupted".formatted(seedlinkNetwork.getName()));
+			Logger.warn("Thread interrupted, nothing will happen");
 			return;
 		}
 
