@@ -107,8 +107,11 @@ public final class Channel implements Serializable {
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork() {
-        var leastStations = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
-        return leastStations.map(Map.Entry::getKey).orElse(null);
+        //var lowestDelay = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
+        //return lowestDelay.map(Map.Entry::getKey).orElse(null);
+        return getSeedlinkNetworks().keySet().stream().sorted(Comparator.comparing(
+                seedlinkNetwork -> seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu") ? 99999 : seedlinkNetwork.selectedStations))
+                .findFirst().orElse(null);
     }
 
 }
