@@ -59,6 +59,9 @@ public class SeedlinkNetworksReader {
 		createCache();
 		seedlinkReaderService = Executors.newCachedThreadPool();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
+
+		Collections.shuffle(GlobalQuake.instance.getStationManager().getStations());
+
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(
 					seedlinkServer -> seedlinkReaderService.submit(() -> runSeedlinkThread(seedlinkServer, RECONNECT_DELAY)));
@@ -81,7 +84,6 @@ public class SeedlinkNetworksReader {
 		seedlinkNetwork.connectedStations = 0;
 
 		SeedlinkReader[] readers = new SeedlinkReader[(int)Math.ceil(seedlinkNetwork.selectedStations / (double)MAX_STATI0NS)];
-		System.err.println(seedlinkNetwork.selectedStations+" is "+readers.length);
 		try {
 			for(int i = 0; i < readers.length; i++) {
 				Logger.info("Connecting to seedlink server \"%s\" (instance %d / %d)".formatted(seedlinkNetwork.getName(), i + 1, readers.length));
@@ -92,16 +94,17 @@ public class SeedlinkNetworksReader {
 			}
 
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
-			boolean first = true;
+			boolean[] first = new boolean[readers.length];
+			Arrays.fill(first, true);
 
 			for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
 					int readerN = seedlinkNetwork.connectedStations % readers.length;
 					Logger.trace("Connecting to %s %s %s %s [%s] %d".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName(), readerN));
-					if(!first) {
+					if(!first[readerN]) {
 						readers[readerN].sendCmd("DATA");
 					} else{
-						first = false;
+						first[readerN] = false;
 					}
 					readers[readerN].select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 							s.getChannelName());
