@@ -96,13 +96,14 @@ public class SeedlinkNetworksReader {
 
 			for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
 				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
+					int readerN = seedlinkNetwork.connectedStations % readers.length;
+					Logger.trace("Connecting to %s %s %s %s [%s] %d".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName(), readerN));
 					if(!first) {
-						readers[seedlinkNetwork.connectedStations % readers.length].sendCmd("DATA");
+						readers[readerN].sendCmd("DATA");
 					} else{
 						first = false;
 					}
-					readers[seedlinkNetwork.connectedStations % readers.length].select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
+					readers[readerN].select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
 							s.getChannelName());
 					seedlinkNetwork.connectedStations++;
 				}
