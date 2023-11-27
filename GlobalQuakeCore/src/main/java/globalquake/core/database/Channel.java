@@ -19,6 +19,8 @@ public final class Channel implements Serializable {
 
     private final Set<StationSource> stationSources = new HashSet<>();
 
+    public transient SeedlinkNetwork selectedSeedlinkNetwork = null;
+
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -110,7 +112,7 @@ public final class Channel implements Serializable {
         //var lowestDelay = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
         //return lowestDelay.map(Map.Entry::getKey).orElse(null);
         return getSeedlinkNetworks().keySet().stream().sorted(Comparator.comparing(
-                seedlinkNetwork -> seedlinkNetwork.getHost().equals("rtserve.iris.washington.edu") ? 99999 : seedlinkNetwork.selectedStations))
+                seedlinkNetwork -> seedlinkNetwork.selectedStations))
                 .findFirst().orElse(null);
     }
 
