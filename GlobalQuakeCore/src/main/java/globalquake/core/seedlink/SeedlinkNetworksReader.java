@@ -85,7 +85,7 @@ public class SeedlinkNetworksReader {
 
 		SeedlinkReader reader = null;
 		try {
-			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getHost() + "\"");
+			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getName() + "\"");
 			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
 			activeReaders.add(reader);
 
@@ -121,6 +121,8 @@ public class SeedlinkNetworksReader {
 				SeedlinkPacket slp = reader.readPacket();
 				try {
 					newPacket(slp.getMiniSeed());
+				} catch(SocketException | SeedFormatException se){
+					Logger.trace(se);
 				} catch (Exception e) {
 					Logger.error(e);
 				}
@@ -128,24 +130,21 @@ public class SeedlinkNetworksReader {
 
 			reader.close();
 		} catch (Exception e) {
-			Logger.error(e);
-			if (reader != null) {
+			Logger.warn("Seedlink reader failed for seedlink `%s`: %s".formatted(seedlinkNetwork.getName(), e.getMessage()));
+		} finally {
+			if(reader != null){
 				try {
 					reader.close();
 				} catch (Exception ex) {
 					Logger.error(ex);
 				}
-			}
-		}finally{
-			if(reader != null){
 				activeReaders.remove(reader);
 			}
 		}
 
 		seedlinkNetwork.status = SeedlinkStatus.DISCONNECTED;
 		seedlinkNetwork.connectedStations = 0;
-		Logger.warn(seedlinkNetwork.getHost() + " Disconnected, Reconnecting after " + reconnectDelay
-				+ " seconds...");
+		Logger.warn("%s Disconnected, Reconnecting after %d seconds...".formatted(seedlinkNetwork.getName(), reconnectDelay));
 
 		try {
 			Thread.sleep(reconnectDelay * 1000L);
@@ -153,7 +152,7 @@ public class SeedlinkNetworksReader {
 				reconnectDelay *= 2;
 			}
 		} catch (InterruptedException ignored) {
-			Logger.warn("Thread interrupted, nothing will happen");
+			Logger.warn("Seedlink reader thread for %s interrupted".formatted(seedlinkNetwork.getName()));
 			return;
 		}
 
