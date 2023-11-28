@@ -193,6 +193,10 @@ public class DataService extends GlobalQuakeEventListener {
     public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
+        if (!isValid(record)) {
+            Logger.tag("Server").warn("Data log has invalid timestamp and has to be disregarded!");
+            return;
+        }
         synchronized (stationDataQueueLock) {
             stationDataQueueMap.putIfAbsent(station,
                     new PriorityQueue<>(getDataRecordComparator()));
@@ -213,6 +217,12 @@ public class DataService extends GlobalQuakeEventListener {
                 }
             }
         }
+    }
+
+    private boolean isValid(DataRecord record) {
+        Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
+        Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
+        return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
     }
 
     public static Comparator<DataRecord> getDataRecordComparator() {
