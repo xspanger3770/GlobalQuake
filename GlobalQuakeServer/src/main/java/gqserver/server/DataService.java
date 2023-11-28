@@ -98,7 +98,27 @@ public class DataService extends GlobalQuakeEventListener {
                 }
             }
         }
+
+        // remove clients that timed out, but for whatever reason didn't fire the client left event
         clientDataRequestMap.entrySet().removeIf(kv -> isOld(kv.getKey()));
+
+        // remove earthquakes that are not really on the list
+        quakesWriteLock.lock();
+        try {
+            for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
+                EarthquakeInfo earthquakeInfo = iterator.next();
+
+                for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+                    if(earthquake.getUuid().equals(earthquakeInfo.uuid())){
+                        continue;
+                    }
+                }
+
+                iterator.remove();
+            }
+        }finally {
+            quakesWriteLock.unlock();
+        }
     }
 
     private boolean isOld(ServerClient client) {
