@@ -3,6 +3,7 @@ package gqserver.server;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
+import globalquake.core.analysis.Log;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Cluster;
@@ -207,6 +208,16 @@ public class DataService extends GlobalQuakeEventListener {
             for(DataRequest dr : kv.getValue()){
                 if(dr.getStation().getId() == station.getId()){
                     dr.enqueue(record);
+                    if(dr.getQueueSize() > 20 && !dr.ready) {
+                        Logger.tag("Server").warn("Client data queue exceeded a certain limit, sending everyting...");
+                        dr.ready = true;
+                    }
+
+                    if(dr.getQueueSize() > 30){
+                        Logger.tag("Server").warn("Client data queue exceeded another limit, clearing it!");
+                        dr.clear();
+                    }
+
                     if(dr.ready){
                         try {
                             dr.sendAll();

@@ -51,4 +51,12 @@ public class DataRequest {
             client.sendPacket(new DataRecordPacket(station.getId(), dataRecord.toByteArray()));
         }
     }
+
+    public int getQueueSize() {
+        return dataRecordQueue.size();
+    }
+
+    public void clear() {
+        dataRecordQueue.clear();
+    }
 }
