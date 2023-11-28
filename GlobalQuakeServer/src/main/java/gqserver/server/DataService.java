@@ -215,7 +215,6 @@ public class DataService extends GlobalQuakeEventListener {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
         if (!isValid(record)) {
-            Logger.tag("Server").warn("Data log has invalid timestamp and has to be disregarded!");
             return;
         }
         synchronized (stationDataQueueLock) {
