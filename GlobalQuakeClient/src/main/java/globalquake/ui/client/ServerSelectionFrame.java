@@ -18,6 +18,7 @@ import globalquake.utils.Scale;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.Executors;
@@ -35,9 +36,11 @@ public class ServerSelectionFrame extends GQFrame {
         client = new ClientSocket();
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(400,200));
+        setPreferredSize(new Dimension(400,160));
 
         add(createServerSelectionPanel());
+
+        setResizable(false);
 
         pack();
         setLocationRelativeTo(null);
@@ -71,11 +74,14 @@ public class ServerSelectionFrame extends GQFrame {
 
         var gridl2 = new GridLayout(1,2);
         gridl2.setVgap(5);
+        gridl2.setHgap(5);
+
         JPanel buttonsPanel = new JPanel(gridl2);
         buttonsPanel.setBorder(new EmptyBorder(5,5,5,5));
 
         connectButton = new JButton("Connect");
-        connectButton.addActionListener(actionEvent1 -> connect());
+        ActionListener connectEvent = actionEvent1 -> connect();
+        connectButton.addActionListener(connectEvent);
 
         JButton backButton = new JButton("Back");
         backButton.addActionListener(actionEvent -> {
@@ -83,10 +89,19 @@ public class ServerSelectionFrame extends GQFrame {
             new MainFrame().setVisible(true);
         });
 
-        buttonsPanel.add(connectButton);
+        addressField.addActionListener(connectEvent);
+        portField.addActionListener(connectEvent);
+
         buttonsPanel.add(backButton);
+        buttonsPanel.add(connectButton);
 
         panel.add(buttonsPanel);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                addressField.requestFocusInWindow();
+            }
+        });
 
         return panel;
     }
