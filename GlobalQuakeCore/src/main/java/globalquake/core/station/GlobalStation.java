@@ -28,7 +28,7 @@ public class GlobalStation extends AbstractStation {
 						 int id, SeedlinkNetwork seedlinkNetwork) {
 		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
-		this.isAccelerometer = channelName.length() == 3 && channelName.charAt(1) == 'N';
+		this.isAccelerometer = channelName.length() >= 2 && channelName.charAt(1) == 'N';
 	}
 
 	public void addRecord(DataRecord dr) {
