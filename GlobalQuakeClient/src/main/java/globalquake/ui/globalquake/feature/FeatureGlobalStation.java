@@ -58,7 +58,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             renderer.createTriangle(elementStationCircle.getPolygon(),
                     entity.getOriginal().getLatitude(),
                     entity.getOriginal().getLongitude(),
-                    size * 1.41, 0);
+                    size * 1.41, 0, entity.getOriginal().isAccelerometer() ? 180 : 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
