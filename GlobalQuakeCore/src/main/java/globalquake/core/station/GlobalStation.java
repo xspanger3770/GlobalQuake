@@ -28,7 +28,10 @@ public class GlobalStation extends AbstractStation {
 						 int id, SeedlinkNetwork seedlinkNetwork) {
 		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
-		this.isAccelerometer = channelName.length() >= 2 && channelName.charAt(1) == 'N';
+
+		// technically, G and M aren't really an accelerometers, but they behave similarly in terms of maximum intensity
+		this.isAccelerometer = channelName.length() >= 2 &&
+				(channelName.charAt(1) == 'N' || channelName.charAt(1) == 'G' || channelName.charAt(1) == 'M');
 	}
 
 	public void addRecord(DataRecord dr) {

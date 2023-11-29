@@ -132,8 +132,9 @@ public final class Settings {
 	public static Integer lastServerPORT;
 	public static Integer maxClients;
 	public static Boolean displayShakemaps;
+	public static Boolean invertAccelerometers;
 
-	static {
+    static {
 		load();
 		save();
 		try {
@@ -186,6 +187,8 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("invertAccelerometers", "false");
 
 		loadProperty("maxClients", "64",
 				o -> validateInt(2, 10000, (Integer) o));
