@@ -122,7 +122,7 @@ public class BetterAnalysis extends Analysis {
                 ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                 if (!_logs.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs);
+                    Event event = new Event(this, time, _logs, getStation().isAccelerometer());
                     getDetectedEvents().add(0, event);
                 }
             }

@@ -21,11 +21,14 @@ public class GlobalStation extends AbstractStation {
 
 	private Instant nextExpectedLog = null;
 
+	private final boolean isAccelerometer;
+
 	public GlobalStation(String networkCode, String stationCode, String channelName,
 						 String locationCode, double lat, double lon, double alt,
 						 int id, SeedlinkNetwork seedlinkNetwork) {
 		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
+		this.isAccelerometer = channelName.length() == 3 && channelName.charAt(1) == 'N';
 	}
 
 	public void addRecord(DataRecord dr) {
@@ -66,6 +69,11 @@ public class GlobalStation extends AbstractStation {
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean isAccelerometer() {
+		return isAccelerometer;
 	}
 
 	private void process(DataRecord record) {

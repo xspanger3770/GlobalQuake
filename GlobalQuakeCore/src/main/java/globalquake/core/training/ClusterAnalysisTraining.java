@@ -37,6 +37,10 @@ public class ClusterAnalysisTraining {
             super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null);
         }
 
+        @Override
+        public boolean isAccelerometer() {
+            return false;
+        }
     }
 
     @SuppressWarnings("unused")

@@ -53,6 +53,11 @@ public class ArchivedQuakePanel extends GlobePanel {
         }
 
         @Override
+        public boolean isAccelerometer() {
+            return false;
+        }
+
+        @Override
         public boolean hasData() {
             return true;
         }

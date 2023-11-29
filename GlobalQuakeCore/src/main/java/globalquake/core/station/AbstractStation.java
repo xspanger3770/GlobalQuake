@@ -200,4 +200,6 @@ public abstract class AbstractStation {
 	public int hashCode() {
 		return Objects.hash(id);
 	}
+
+	public abstract boolean isAccelerometer();
 }

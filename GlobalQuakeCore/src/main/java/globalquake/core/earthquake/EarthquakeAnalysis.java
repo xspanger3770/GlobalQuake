@@ -984,10 +984,17 @@ public class EarthquakeAnalysis {
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-            mags.add(new MagnitudeReading(IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul), distGC));
+
+            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul) + getSensorTypeCorrection(event);
+
+            mags.add(new MagnitudeReading(magnitude, distGC));
         }
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
+    }
+
+    private double getSensorTypeCorrection(Event event) {
+        return event.isFromAccelerometer() ? 0.7 : 0.0;
     }
 
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
