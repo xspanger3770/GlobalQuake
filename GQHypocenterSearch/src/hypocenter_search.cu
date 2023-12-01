@@ -286,7 +286,7 @@ __global__ void results_reduce(float* out, float* in, int total_size){
 }
 
 __global__ void calculate_station_distances(
-        float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
+        float* station_distances, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     if(index >= points){
@@ -296,9 +296,6 @@ __global__ void calculate_station_distances(
     float lat, lon, dist;
     
     calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
-
-    point_locations[index] = lat;
-    point_locations[index + points] = lon;
 
     int station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {
@@ -333,7 +330,6 @@ size_t get_total_allocation_size(size_t points, size_t station_count, float dept
     
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
-    size_t point_locations_array_size = sizeof(float) * 2 * points;
     size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
 
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
@@ -341,7 +337,6 @@ size_t get_total_allocation_size(size_t points, size_t station_count, float dept
 
     result += station_array_size;
     result += station_distances_array_size;
-    result += point_locations_array_size;
     result += results_size;
     result += temp_results_array_size;    
 
@@ -365,7 +360,6 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     float* d_stations;
     float* d_stations_distances;
-    float* d_point_locations;
     float* d_temp_results;
 
     if(points < 2){
@@ -390,7 +384,6 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
-    size_t point_locations_array_size = sizeof(float) * 2 * points;
     size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
 
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
@@ -400,14 +393,12 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
     TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
-    TRACE(1, "point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
     TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
-    success &= cudaMalloc(&d_point_locations, point_locations_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
     success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
     
@@ -421,7 +412,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     TRACE(1, "total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
     if(success) calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>
-        (d_stations_distances, d_point_locations, d_stations, station_count, points, maxDist, fromLat, fromLon);
+        (d_stations_distances, d_stations, station_count, points, maxDist, fromLat, fromLon);
     
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
@@ -480,7 +471,6 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     if(d_stations) cudaFree(d_stations);
     if(d_stations_distances) cudaFree(d_stations_distances);
-    if(d_point_locations) cudaFree(d_point_locations);
     if(d_temp_results) cudaFree(d_temp_results);
     if(f_results_device) cudaFree(f_results_device);
 
