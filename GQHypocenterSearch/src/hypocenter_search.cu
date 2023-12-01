@@ -52,7 +52,7 @@ void print_err(const char* msg) {
     TRACE(2, "%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
 }
 
-__host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
+__host__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
 {
     // calculate angles
     float delta = angular_distance;
@@ -80,25 +80,59 @@ __host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, 
     *lon = atan2f(y, x);
 }
 
+__device__ void moveOnGlobeDevice(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
+{
+    // calculate angles
+    float delta = angular_distance;
+    float theta = fromLat;
+    float phi = fromLon;
+    float gamma = angle;
+
+    // calculate sines and cosines
+    float c_theta = __cosf(theta);
+    float s_theta = __sinf(theta);
+    float c_phi = __cosf(phi);
+    float s_phi = __sinf(phi);
+    float c_delta = __cosf(delta);
+    float s_delta = __sinf(delta);
+    float c_gamma = __cosf(gamma);
+    float s_gamma = __sinf(gamma);
+
+    // calculate end vector
+    float x = c_delta * c_theta * c_phi - s_delta * (s_theta * c_phi * c_gamma + s_phi * s_gamma);
+    float y = c_delta * c_theta * s_phi - s_delta * (s_theta * s_phi * c_gamma - c_phi * s_gamma);
+    float z = s_delta * c_theta * c_gamma + c_delta * s_theta;
+
+    // calculate end lat long
+    *lat = asinf(z);
+    *lon = atan2f(y, x);
+}
+
 // everything is in radians
-__device__ __host__ float haversine (float lat1, float lon1, 
+__device__ float haversine (float lat1, float lon1, 
                             float lat2, float lon2)
 {
     float dlat = lat2 - lat1;
     float dlon = lon2 - lon1;
 
     // Haversine formula
-    float a = powf(sinf(dlat / 2.0f), 2.0f) + cosf(lat1) * cosf(lat2) * powf(sinf(dlon / 2.0f), 2.0f);
+    float a = powf(__sinf(dlat / 2.0f), 2.0f) + __cosf(lat1) * __cosf(lat2) * powf(__sinf(dlon / 2.0f), 2.0f);
     float c = 2.0f * atan2f(sqrtf(a), sqrtf(1.0f - a));
 
     return c; // Angular distance in radians
 }
 
 // everything in radians
-__device__ __host__ void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
+void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
     float ang = (2.0f * PI * (float)index) / PHI2;
     *dist = sqrtf(index) * (maxDist / sqrtf(points - 1.0f));
     moveOnGlobe(fromLat, fromLon, ang, *dist, lat, lon);
+}
+
+__device__ void calculateParamsDevice(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
+    float ang = (2.0f * PI * (float)index) / PHI2;
+    *dist = sqrtf(index) * (maxDist / sqrtf(points - 1.0f));
+    moveOnGlobeDevice(fromLat, fromLon, ang, *dist, lat, lon);
 }
 
 const float K = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG;
@@ -295,7 +329,7 @@ __global__ void calculate_station_distances(
 
     float lat, lon, dist;
     
-    calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+    calculateParamsDevice(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
 
     int station_index = threadIdx.x % station_count;
     for(int i = 0; i < station_count; i++, station_index++) {

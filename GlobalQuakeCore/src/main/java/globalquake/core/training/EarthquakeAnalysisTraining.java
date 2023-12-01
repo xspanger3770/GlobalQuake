@@ -62,6 +62,7 @@ public class EarthquakeAnalysisTraining {
         System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
         System.err.printf("FAILURES = %d%n", fails);
         System.err.println("============================================");
+        System.exit(0);
     }
 
     private static final long TARGET_TIME = 400;
