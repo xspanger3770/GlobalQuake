@@ -45,7 +45,7 @@ JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize
  * Signature: ([FFFJIF)[F
  */
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jint, jfloat);
+  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jint, jfloat, jfloat);
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,7 @@ import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalApplicationException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.seedlink.SeedlinkNetworksReader;
 import globalquake.core.station.GlobalStationManager;
 import org.tinylog.Logger;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
-	public static final String version = "v0.10.0_pre11";
+	public static final String version = "v0.10.0_pre14";
 
 	protected GlobalQuakeRuntime globalQuakeRuntime;
 	protected SeedlinkNetworksReader seedlinkNetworksReader;

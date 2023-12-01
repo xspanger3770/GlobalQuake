@@ -1,9 +1,10 @@
-package globalquake.core;
+package globalquake.core.seedlink;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import globalquake.core.GlobalQuake;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.core.station.AbstractStation;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class SeedlinkNetworksReader {
 
 	protected static final int RECONNECT_DELAY = 10;
+	private static final int MAX_STATI0NS = 500;
 	private Instant lastData;
 
     private long lastReceivedRecord;
@@ -57,6 +59,9 @@ public class SeedlinkNetworksReader {
 		createCache();
 		seedlinkReaderService = Executors.newCachedThreadPool();
 		GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getDatabaseReadLock().lock();
+
+		Collections.shuffle(GlobalQuake.instance.getStationManager().getStations());
+
 		try{
 			GlobalQuake.instance.getStationDatabaseManager().getStationDatabase().getSeedlinkNetworks().forEach(
 					seedlinkServer -> seedlinkReaderService.submit(() -> runSeedlinkThread(seedlinkServer, RECONNECT_DELAY)));
@@ -128,12 +133,12 @@ public class SeedlinkNetworksReader {
 			Logger.warn("Seedlink reader failed for seedlink `%s`: %s".formatted(seedlinkNetwork.getName(), e.getMessage()));
 		} finally {
 			if(reader != null){
-                try {
-                    reader.close();
-                } catch (Exception ex) {
-                    Logger.error(ex);
-                }
-                activeReaders.remove(reader);
+				try {
+					reader.close();
+				} catch (Exception ex) {
+					Logger.error(ex);
+				}
+				activeReaders.remove(reader);
 			}
 		}
 
@@ -198,4 +203,5 @@ public class SeedlinkNetworksReader {
 		}
 		stationCache.clear();
 	}
+
 }

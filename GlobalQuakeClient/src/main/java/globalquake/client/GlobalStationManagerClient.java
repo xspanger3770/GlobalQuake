@@ -1,5 +1,7 @@
 package globalquake.client;
 
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
@@ -7,6 +9,7 @@ import globalquake.core.station.GlobalStationManager;
 import gqserver.api.Packet;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
+import gqserver.api.packets.data.DataRecordPacket;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
 import gqserver.api.packets.station.StationsRequestPacket;
@@ -45,6 +48,23 @@ public class GlobalStationManagerClient extends GlobalStationManager {
             processStationsInfoPacket(socket, stationsInfoPacket);
         } else if (packet instanceof StationsIntensityPacket stationsIntensityPacket) {
             processStationsIntensityPacket(socket, stationsIntensityPacket);
+        } else if (packet instanceof DataRecordPacket dataRecordPacket){
+            processDataRecordPacket(dataRecordPacket);
+        }
+    }
+
+    private void processDataRecordPacket(DataRecordPacket dataRecordPacket) {
+        ClientStation station = stationsIdMap.get(dataRecordPacket.stationIndex());
+        if(station == null){
+            Logger.warn("Received data record but for unkown station!");
+            return;
+        }
+
+        try {
+            DataRecord dataRecord = (DataRecord) DataRecord.read(dataRecordPacket.data());
+            station.getAnalysis().analyse(dataRecord);
+        } catch (IOException | SeedFormatException e) {
+            Logger.error(e);
         }
     }
 

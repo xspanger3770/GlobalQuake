@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
@@ -57,7 +58,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             renderer.createTriangle(elementStationCircle.getPolygon(),
                     entity.getOriginal().getLatitude(),
                     entity.getOriginal().getLongitude(),
-                    size * 1.41, 0);
+                    size * 1.41, 0, Settings.invertAccelerometers && entity.getOriginal().isAccelerometer() ? 180 : 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
@@ -88,11 +89,18 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        if(Settings.hideDeadStations && !entity.getOriginal().hasDisplayableData()){
-            return;
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        AbstractStation station = (AbstractStation) entity.getOriginal();
+
+        if(Settings.hideDeadStations && !station.hasDisplayableData()){
+            return false;
         }
 
+        return !station.disabled;
+    }
+
+    @Override
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
         if(!elementStationCircle.shouldDraw){
@@ -115,11 +123,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         }
 
         graphics.setStroke(new BasicStroke(1f));
-
-        if(entity.getOriginal().disabled){
-            return;
-        }
-
 
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
         var centerPonint = renderer.projectPoint(point3D, renderProperties);
@@ -203,7 +206,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             return Color.gray;
         }
 
-        if (station.getAnalysis().getStatus() == AnalysisStatus.INIT || !station.hasDisplayableData()) {
+        if ((GlobalQuakeClient.instance == null && station.getAnalysis().getStatus() == AnalysisStatus.INIT) || !station.hasDisplayableData()) {
             return Color.lightGray;
         } else {
             return Scale.getColorRatio(station.getMaxRatio60S());

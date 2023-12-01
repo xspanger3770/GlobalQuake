@@ -21,7 +21,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 10;
+    public static final int STATIONS = 30;
     public static final double DIST = 5000;
 
     public static final double INACCURACY = 5000;
@@ -34,7 +34,7 @@ public class EarthquakeAnalysisTraining {
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
-        Settings.hypocenterDetectionResolution = 100.0;
+        Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 4000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
@@ -62,6 +62,7 @@ public class EarthquakeAnalysisTraining {
         System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
         System.err.printf("FAILURES = %d%n", fails);
         System.err.println("============================================");
+        System.exit(0);
     }
 
     private static final long TARGET_TIME = 400;

@@ -1,8 +1,8 @@
 package globalquake.client.data;
 
-import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
 
-public class ClientStation extends AbstractStation {
+public class ClientStation extends GlobalStation {
     private double intensity = -1;
     private long lastDataTime;
 

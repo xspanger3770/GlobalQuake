@@ -8,7 +8,7 @@ public class GlobalQuakeServerEventListener {
     public void onClientJoin(ClientJoinedEvent ignoredEvent) {
     }
 
-    public void onClientLeave(ClientLeftEvent ignoredEvent) {
+    public void onClientLeave(ClientLeftEvent event) {
     }
 
     public void onServerStatusChanged(ServerStatusChangedEvent serverStatusChangedEvent) {

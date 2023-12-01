@@ -4,6 +4,7 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.events.specific.SeedlinkDataEvent;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -20,11 +21,17 @@ public class GlobalStation extends AbstractStation {
 
 	private Instant nextExpectedLog = null;
 
+	private final boolean isAccelerometer;
+
 	public GlobalStation(String networkCode, String stationCode, String channelName,
 						 String locationCode, double lat, double lon, double alt,
 						 int id, SeedlinkNetwork seedlinkNetwork) {
 		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
+
+		// technically, G and M aren't really an accelerometers, but they behave similarly in terms of maximum intensity
+		this.isAccelerometer = channelName.length() >= 2 &&
+				(channelName.charAt(1) == 'N' || channelName.charAt(1) == 'G' || channelName.charAt(1) == 'M');
 	}
 
 	public void addRecord(DataRecord dr) {
@@ -67,9 +74,15 @@ public class GlobalStation extends AbstractStation {
 		}
 	}
 
+	@Override
+	public boolean isAccelerometer() {
+		return isAccelerometer;
+	}
+
 	private void process(DataRecord record) {
 		nextExpectedLog = record.getPredictedNextStartBtime().toInstant();
 		getAnalysis().analyse(record);
+		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
 		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 	}
 
@@ -88,4 +101,5 @@ public class GlobalStation extends AbstractStation {
 		Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
 		return event != null && event.isValid() && !event.hasEnded();
 	}
+
 }

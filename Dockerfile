@@ -4,24 +4,16 @@ LABEL authors="xspanger3770"
 # Update the package list and install essential dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    openjdk-17-jdk \
-    maven \
-    build-essential \
-    curl \
+    openjdk-17-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+# Update the package list and install additional helpful packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     btop \
     htop \
+    nano \
     && rm -rf /var/lib/apt/lists/*
-
-# Install NVIDIA CUDA Toolkit
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get install -y --no-install-recommends \
-    nvidia-cuda-toolkit \
-    nvtop \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set environment variables for CUDA
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-ENV PATH=/usr/local/cuda/bin:$PATH
 
 RUN addgroup --gid 1000 group && \
     adduser --gid 1000 --uid 1000 --disabled-password --gecos user user
@@ -38,9 +30,9 @@ COPY Container ./.GlobalQuakeServerData
 # Copy CUDA library
 COPY GQHypocenterSearch/build/lib ./lib
 
-RUN chown -R user:group ./.GlobalQuakeServerData
-RUN chown -R user:group GlobalQuakeServer.jar
-RUN chown -R user:group ./lib
+RUN chown -R user:group ./.GlobalQuakeServerData &&  \
+    chown -R user:group GlobalQuakeServer.jar && \
+    chown -R user:group ./lib
 USER 1000
 
 # Run GQ Server

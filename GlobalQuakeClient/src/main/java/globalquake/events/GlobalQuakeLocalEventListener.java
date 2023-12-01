@@ -10,4 +10,8 @@ public class GlobalQuakeLocalEventListener {
     public void onShakemapCreated(ShakeMapsUpdatedEvent event) {}
 
     public void onCinemaModeTargetSwitch(CinemaEvent event) {}
+
+    public void onStationMonitorOpened(StationMonitorOpenEvent stationMonitorOpenEvent) {}
+
+    public void onStationMonitorClosed(StationMonitorCloseEvent stationMonitorCloseEvent) {}
 }

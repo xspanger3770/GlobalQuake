@@ -32,7 +32,7 @@ public class EarthquakeAnalysis {
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
-    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 64.0;
+    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
     private static final boolean CHECK_QUADRANTS = false;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
 
@@ -205,7 +205,7 @@ public class EarthquakeAnalysis {
         }
 
         if(GQHypocs.isCudaLoaded()) {
-            var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0);
+            var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0, finderSettings);
             if(result == null){
                 Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
                         "because too many stations were involved in the event, but it might be also different error");
@@ -295,27 +295,30 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
+        int reduceIterations = 2;
         int reduceLimit = 8;
         double reduceAmount = 0.75;
         double diffLimit = 0.5;
 
-        if (correctSelectedEvents.size() > reduceLimit) {
-            Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
-            int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
+        for(int it = 0; it < reduceIterations; it++) {
+            if (correctSelectedEvents.size() > reduceLimit) {
+                Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
+                int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
 
-            List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
-            list.sort(Map.Entry.comparingByValue());
+                List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
+                list.sort(Map.Entry.comparingByValue());
 
-            while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
-                list.remove(list.size() - 1);
+                while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
+                    list.remove(list.size() - 1);
+                }
+
+                Logger.tag("Hypocs").debug("Reduced the number of events from %d to the best %d for better accuracy"
+                        .formatted(correctSelectedEvents.size(), list.size()));
+
+                correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
+
+                bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
             }
-
-            Logger.tag("Hypocs").debug("Reduced the number of events from %d to the best %d for better accuracy"
-                    .formatted(correctSelectedEvents.size(), list.size()));
-
-            correctSelectedEvents = list.stream().map(Map.Entry::getKey).collect(Collectors.toList());
-
-            bestHypocenter2 = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, false);
         }
 
         if(bestHypocenter2 == null) {
@@ -474,7 +477,7 @@ public class EarthquakeAnalysis {
     }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
-        postProcess(selectedEvents, bestHypocenterPrelim, finderSettings);
+        postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
@@ -594,10 +597,10 @@ public class EarthquakeAnalysis {
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<PolygonConfidenceInterval> result = new ArrayList<>();
 
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 6.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 4.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.5));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.8));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.25));
 
         return result;
     }
@@ -605,7 +608,7 @@ public class EarthquakeAnalysis {
     private void calculateActualCorrectEvents(List<PickedEvent> selectedEvents, Hypocenter bestHypocenter) {
         int correct = 0;
         for (PickedEvent event : selectedEvents) {
-            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false, true)) {
+            if (ClusterAnalysis.couldBeArrival(event, bestHypocenter, false, false, false)) {
                 correct++;
             }
         }
@@ -981,10 +984,17 @@ public class EarthquakeAnalysis {
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
-            mags.add(new MagnitudeReading(IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul), distGC));
+
+            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul) + getSensorTypeCorrection(event);
+
+            mags.add(new MagnitudeReading(magnitude, distGC));
         }
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
+    }
+
+    private double getSensorTypeCorrection(Event event) {
+        return event.isFromAccelerometer() ? 0.7 : 0.0;
     }
 
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
@@ -1014,9 +1024,9 @@ public class EarthquakeAnalysis {
             60, 60, // M7+
     };
 
-    public static boolean shouldRemove(Earthquake earthquake){
-        int store_minutes = STORE_TABLE[Math.max(0,
-                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))];
+    public static boolean shouldRemove(Earthquake earthquake, int marginSeconds){
+        double store_minutes = STORE_TABLE[Math.max(0,
+                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))] - marginSeconds / 60.0;
         return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                 && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }
@@ -1026,7 +1036,7 @@ public class EarthquakeAnalysis {
         List<Earthquake> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Earthquake earthquake = it.next();
-            if(shouldRemove(earthquake)){
+            if(shouldRemove(earthquake, 0)){
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
                 }

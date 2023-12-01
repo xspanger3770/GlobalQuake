@@ -1,5 +1,6 @@
 package globalquake.core.report;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.utils.Scale;
@@ -21,6 +22,7 @@ public class IntensityGraphs {
 
 	public static void main(String[] args) throws IOException {
 		Scale.load();
+		GlobalQuake.prepare(new File("."), null);
 		int w = 800;
 		int h = 600;
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
@@ -48,7 +50,7 @@ public class IntensityGraphs {
 		recs.add(new DistanceIntensityRecord(5.0,9000,30));
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa9.png"));
+		ImageIO.write(img, "PNG", new File("aaa10.png"));
 
 		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getMaxIntensity(5.7, 800));
 		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getMaxIntensity(5.7, 300));
@@ -62,6 +64,8 @@ public class IntensityGraphs {
 		System.out.printf("M3.8 800km: %s / 10\n", (int) IntensityTable.getMaxIntensity(3.8, 800));
 
 		System.out.printf("M3.1 82km: %s / 200\n", (int) IntensityTable.getMaxIntensity(3.1, 82));
+
+		System.exit(0);
 	}
 
 	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,

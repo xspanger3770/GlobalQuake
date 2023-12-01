@@ -2,6 +2,7 @@ package globalquake.ui.globalquake.feature;
 
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
+import globalquake.core.Settings;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.intensity.IntensityHex;
@@ -168,6 +169,11 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
                     (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
                     (int)centerPonint.y + graphics.getFont().getSize() / 2);
         }
+    }
+
+    @Override
+    protected boolean isVisible(RenderProperties properties) {
+        return Settings.displayShakemaps;
     }
 
     @Override

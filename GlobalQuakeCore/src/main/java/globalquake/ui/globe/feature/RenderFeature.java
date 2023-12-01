@@ -103,9 +103,11 @@ public abstract class RenderFeature<E> {
         return true;
     }
 
+    public boolean isEntityVisible(RenderEntity<?> entity) {return true;}
+
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
         if(isVisible(properties)){
-            getEntities().forEach(entity -> render(renderer, graphics, entity, properties));
+            getEntities().stream().filter(this::isEntityVisible).forEach(entity -> render(renderer, graphics, entity, properties));
         }
     }
 

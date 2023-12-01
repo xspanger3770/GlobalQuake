@@ -2,6 +2,7 @@ package globalquake.core.earthquake;
 
 import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
@@ -66,7 +67,7 @@ public class GQHypocs {
         }
     }
 
-    public synchronized static PreliminaryHypocenter findHypocenter(List<PickedEvent> pickedEventList, Cluster cluster, int from) {
+    public synchronized static PreliminaryHypocenter findHypocenter(List<PickedEvent> pickedEventList, Cluster cluster, int from, HypocenterFinderSettings finderSettings) {
         pickedEventList.sort(Comparator.comparing(PickedEvent::maxRatioReversed));
 
         int station_count = !stationLimitCalculated ? pickedEventList.size() : Math.min(stationLimit, pickedEventList.size());
@@ -89,7 +90,7 @@ public class GQHypocs {
         };
 
         for(int i = from; i < depth_profiles.length; i++){
-            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * getPointMultiplier()), i, dist_profiles[i] * RADIANS);
+            result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * getPointMultiplier()), i, dist_profiles[i] * RADIANS, (float) (finderSettings.pWaveInaccuracyThreshold() / 1000.0));
 
             if (result == null) {
                 return null;

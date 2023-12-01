@@ -15,6 +15,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArchivedQuakePanel extends GlobePanel {
     private final ArchivedQuake quake;
@@ -29,10 +30,8 @@ public class ArchivedQuakePanel extends GlobePanel {
         setPreferredSize(new Dimension(600,480));
         setCinemaMode(true);
 
-        List<Earthquake> fakeQuakes = createFakeQuake(quake);
-
-        getRenderer().addFeature(new FeatureEarthquake(fakeQuakes));
         getRenderer().addFeature(new FeatureGlobalStation(createFakeStations()));
+        getRenderer().addFeature(new FeatureEarthquake(createFakeQuake(quake)));
     }
 
     static class AnimatedStation extends AbstractStation{
@@ -40,8 +39,10 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
         private final ArchivedEvent event;
 
+        public static final AtomicInteger nextID = new AtomicInteger(0);
+
         public AnimatedStation(ArchivedQuakeAnimation animation, ArchivedEvent event) {
-            super("", "", "", "", event.lat(), event.lon(), 0, 0, null);
+            super("", "", "", "", event.lat(), event.lon(), 0, nextID.getAndIncrement(), null);
             this.animation = animation;
             this.event = event;
         }
@@ -49,6 +50,11 @@ public class ArchivedQuakePanel extends GlobePanel {
         @Override
         public double getMaxRatio60S() {
             return animation.getCurrentTime() >= event.pWave() ? event.maxRatio() : 1;
+        }
+
+        @Override
+        public boolean isAccelerometer() {
+            return false;
         }
 
         @Override

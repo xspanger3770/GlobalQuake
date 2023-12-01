@@ -46,7 +46,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0);
+                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0, 0);
     }
 
     @Override

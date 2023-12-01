@@ -487,7 +487,7 @@ public class ClusterAnalysis {
             Earthquake earthquake = cluster.getEarthquake();
 
             boolean notEnoughEvents = cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE;
-            boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake);
+            boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake, 0);
             boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 
             if ( notEnoughEvents || eqRemoved || tooOld) {

@@ -108,7 +108,7 @@ public class IntensityTable {
         if (dist > 1200) {
             dist = 1200 + Math.pow(dist - 1200, 0.4) * 22.0;
         }
-        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1 * Math.pow(5, mag));
+        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1000 + 1 * Math.pow(5, mag));
 
     }
 

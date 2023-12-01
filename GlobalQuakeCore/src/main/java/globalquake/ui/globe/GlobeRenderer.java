@@ -378,8 +378,8 @@ public class GlobeRenderer {
         createNGon(polygon3D, lat, lon, radius, altitude, 0, quality);
     }
 
-    public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {
-        createNGon(polygon3D, lat, lon, radius, altitude, 0, 120);
+    public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double angleOffset) {
+        createNGon(polygon3D, lat, lon, radius, altitude, angleOffset, 120);
     }
 
     public void createSquare(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {

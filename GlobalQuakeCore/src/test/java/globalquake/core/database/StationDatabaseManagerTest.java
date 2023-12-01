@@ -121,6 +121,8 @@ public class StationDatabaseManagerTest {
         Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2);
         Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2);
         dummyChannel2.getSeedlinkNetworks().put(dummySeedlinkNetwork, 1000L);
+        dummySeedlinkNetwork2.selectedStations = 10;
+        dummySeedlinkNetwork.selectedStations = 100;
         dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork, 500L);
         dummyChannel.getSeedlinkNetworks().put(dummySeedlinkNetwork2, 100L);
         assertEquals(dummySeedlinkNetwork2, dummyChannel.selectBestSeedlinkNetwork());

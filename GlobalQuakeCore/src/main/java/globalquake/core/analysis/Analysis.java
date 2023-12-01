@@ -89,6 +89,14 @@ public abstract class Analysis {
         station.reset();
     }
 
+    public void fullReset() {
+        reset();
+        lastRecord = 0;
+        synchronized (previousLogsLock) {
+            getPreviousLogs().clear();
+        }
+    }
+
     public double getSampleRate() {
         return sampleRate;
     }

@@ -3,6 +3,7 @@ package gqserver.api;
 import gqserver.api.data.system.ServerClientConfig;
 import gqserver.api.exception.PacketLimitException;
 import gqserver.api.exception.UnknownPacketException;
+import gqserver.api.packets.data.DataRequestPacket;
 import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.EarthquakesRequestPacket;
@@ -52,6 +53,7 @@ public class ServerClient {
         limitRules.put(EarthquakesRequestPacket.class, 20);
         limitRules.put(EarthquakeRequestPacket.class, 128);
         limitRules.put(ArchivedQuakesRequestPacket.class, 4);
+        limitRules.put(DataRequestPacket.class, 60);
     }
 
     public ServerClient(Socket socket) throws IOException {

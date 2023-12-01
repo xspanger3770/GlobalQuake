@@ -3,7 +3,7 @@ package globalquake.intensity;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
-import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
@@ -29,7 +29,7 @@ public class ShakemapService {
     private final ScheduledExecutorService checkService = Executors.newSingleThreadScheduledExecutor();
 
     public ShakemapService(){
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 updateShakemap(event.earthquake());

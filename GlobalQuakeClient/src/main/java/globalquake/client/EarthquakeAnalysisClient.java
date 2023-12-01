@@ -46,7 +46,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         try {
             List<Earthquake> toRemove = new ArrayList<>();
             for (Earthquake earthquake : getEarthquakes()) {
-                if (shouldRemove(earthquake)) {
+                if (shouldRemove(earthquake, 0)) {
                     toRemove.add(earthquake);
                     clientEarthquakeMap.remove(earthquake.getUuid());
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
@@ -101,7 +101,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         Earthquake newQuake = createEarthquake(data, hypocenterData.advancedHypocenterData());
 
         // ignore quake data that are too old
-        if(shouldRemove(newQuake)){
+        if(shouldRemove(newQuake, 30)){
             return;
         }
 

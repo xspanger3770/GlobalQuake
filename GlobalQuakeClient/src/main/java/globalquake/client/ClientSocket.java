@@ -79,7 +79,7 @@ public class ClientSocket {
 
     public void runReconnectService(){
         reconnectService = Executors.newSingleThreadScheduledExecutor();
-        reconnectService.scheduleAtFixedRate(this::checkReconnect, 0, 1, TimeUnit.SECONDS);
+        reconnectService.scheduleAtFixedRate(this::checkReconnect, 0, 10, TimeUnit.SECONDS);
     }
 
     public void destroy(){
@@ -163,6 +163,9 @@ public class ClientSocket {
     }
 
     public synchronized void sendPacket(Packet packet) throws IOException {
+        if(outputStream == null){
+            return;
+        }
         outputStream.writeObject(packet);
     }
 

@@ -5,7 +5,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.IntensityScales;
@@ -28,7 +28,7 @@ public class SoundsService {
         soundCheckService = Executors.newSingleThreadScheduledExecutor();
         soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 Sounds.playSound(Sounds.found);

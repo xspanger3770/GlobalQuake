@@ -35,7 +35,7 @@ public class GlobalStationManager {
                     if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
-                    s.getSelectedChannel().selectBestSeedlinkNetwork().selectedStations++;
+                    (s.getSelectedChannel().selectedSeedlinkNetwork = s.getSelectedChannel().selectBestSeedlinkNetwork()).selectedStations++;
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
                     stations.add(station);
                 }
@@ -66,7 +66,7 @@ public class GlobalStationManager {
                         double ang = GeoUtils.calculateAngle(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
                                 stat2.getLongitude());
                         int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
                         int ray2 = ray + 1;
                         if (ray2 == RAYS) {
                             ray2 = 0;
@@ -75,8 +75,8 @@ public class GlobalStationManager {
                         if (ray3 == -1) {
                             ray3 = RAYS - 1;
                         }
-                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
+                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
                         num++;
                     }
                 }
@@ -106,7 +106,7 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
                 station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID.getAndIncrement(), ch.selectBestSeedlinkNetwork());
+                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork);
     }
 
     public List<AbstractStation> getStations() {
@@ -121,8 +121,17 @@ public class GlobalStationManager {
         return indexing;
     }
 
+    public AbstractStation getStation(int id) {
+        for(AbstractStation station : stations){
+            if(station.getId() == id){
+                return station;
+            }
+        }
+        return null;
+    }
 
-    record StationDistanceInfo(int id, double dist, double ang) {
+
+    record StationDistanceInfo(int id, float dist, float ang) {
 
     }
 
