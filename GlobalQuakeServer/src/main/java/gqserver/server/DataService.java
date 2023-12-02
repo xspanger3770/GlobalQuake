@@ -3,7 +3,6 @@ package gqserver.server;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
-import globalquake.core.analysis.Log;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Cluster;
@@ -66,7 +65,7 @@ public class DataService extends GlobalQuakeEventListener {
     private final Object stationDataQueueLock = new Object();
 
     private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
-    private final Map<UUID, GlobalStation> stationIdMap = new HashMap<>();
+    private final Map<Integer, GlobalStation> stationHashHashMap = new HashMap<>();
     private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService cleanupService;
 
@@ -402,8 +401,8 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processDataRequest(ServerClient client, DataRequestPacket packet) throws IOException{
-        stationIdMap.putIfAbsent(packet.uuid(), (GlobalStation) GlobalQuake.instance.getStationManager().getStation(packet.uuid()));
-        GlobalStation station = stationIdMap.get(packet.uuid());
+        stationHashHashMap.putIfAbsent(packet.hash(), (GlobalStation) GlobalQuake.instance.getStationManager().getStation(packet.hash()));
+        GlobalStation station = stationHashHashMap.get(packet.hash());
         if(station == null){
             Logger.tag("Server").warn("Received data request for non-existing station!");
             return;
@@ -502,7 +501,7 @@ public class DataService extends GlobalQuakeEventListener {
         GlobalQuake.instance.stopService(stationIntensityService);
         GlobalQuake.instance.stopService(cleanupService);
 
-        stationIdMap.clear();
+        stationHashHashMap.clear();
         clientDataRequestMap.clear();
         stationDataQueueMap.clear();
         stationIntensities.clear();

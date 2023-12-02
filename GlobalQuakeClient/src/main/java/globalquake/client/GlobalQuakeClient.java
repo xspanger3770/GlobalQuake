@@ -19,7 +19,7 @@ import java.util.UUID;
 public class GlobalQuakeClient extends GlobalQuakeLocal {
     private final ClientSocket clientSocket;
 
-    private final List<UUID> openedStationMonitors = new ArrayList<>();
+    private final List<Integer> openedStationMonitors = new ArrayList<>();
 
     public GlobalQuakeClient(ClientSocket clientSocket) {
         instance = this;
@@ -35,11 +35,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorOpened(StationMonitorOpenEvent event) {
                 try {
-                    if(!openedStationMonitors.contains(event.station().getUuid())) {
-                        clientSocket.sendPacket(new DataRequestPacket(event.station().getUuid(), false));
+                    if(!openedStationMonitors.contains(event.station().getHash())) {
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getHash(), false));
                     }
 
-                    openedStationMonitors.add(event.station().getUuid());
+                    openedStationMonitors.add(event.station().getHash());
                 } catch (IOException e) {
                     Logger.trace(e);
                 }
@@ -48,10 +48,10 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorClosed(StationMonitorCloseEvent event) {
                 try {
-                    openedStationMonitors.remove(event.station().getUuid());
-                    if(!openedStationMonitors.contains(event.station().getUuid())) {
+                    openedStationMonitors.remove((Integer) event.station().getHash());
+                    if(!openedStationMonitors.contains(event.station().getHash())) {
                         event.station().getAnalysis().fullReset();
-                        clientSocket.sendPacket(new DataRequestPacket(event.station().getUuid(), true));
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getHash(), true));
                     }
                 } catch (IOException e) {
                     Logger.trace(e);
@@ -61,8 +61,8 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onSocketReconnect(SocketReconnectEvent socketReconnectEvent) {
                 try {
-                    for(UUID uuid : new HashSet<UUID>(openedStationMonitors)){
-                        clientSocket.sendPacket(new DataRequestPacket(uuid, false));
+                    for(int hash : new HashSet<Integer>(openedStationMonitors)){
+                        clientSocket.sendPacket(new DataRequestPacket(hash, false));
                     }
                 } catch (IOException e) {
                     Logger.trace(e);

@@ -122,21 +122,11 @@ public class GlobalStationManager {
     }
 
     public AbstractStation getStation(int id) {
-        for(AbstractStation station : stations){
-            if(station.getId() == id){
-                return station;
-            }
-        }
-        return null;
+        return stations.stream().filter(station -> station.getId() == id).findFirst().orElse(null);
     }
 
-    public AbstractStation getStation(UUID uuid) {
-        for(AbstractStation station : stations){
-            if(station.getUuid().equals(uuid)){
-                return station;
-            }
-        }
-        return null;
+    public AbstractStation getStationByHash(int hash) {
+        return stations.stream().filter(station -> station.getHash() == hash).findFirst().orElse(null);
     }
 
 
