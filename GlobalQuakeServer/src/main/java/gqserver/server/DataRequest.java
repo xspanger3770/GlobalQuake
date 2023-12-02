@@ -33,12 +33,12 @@ public class DataRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DataRequest that = (DataRequest) o;
-        return Objects.equals(station, that.station);
+        return Objects.equals(station.getId(), that.station.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(station);
+        return Objects.hash(station.getId());
     }
 
     public synchronized void enqueue(DataRecord dataRecord) {

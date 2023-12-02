@@ -188,18 +188,5 @@ public abstract class AbstractStation {
 		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		AbstractStation that = (AbstractStation) o;
-		return id == that.id;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
 	public abstract boolean isAccelerometer();
 }
