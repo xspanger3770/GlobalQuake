@@ -188,12 +188,13 @@ public abstract class AbstractStation {
 
 	@Override
 	public String toString() {
+		return getIdentifier();
+	}
+
+	public String getIdentifier(){
 		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
 	}
 
 	public abstract boolean isAccelerometer();
 
-	public int getHash() {
-		return hash;
-	}
 }
