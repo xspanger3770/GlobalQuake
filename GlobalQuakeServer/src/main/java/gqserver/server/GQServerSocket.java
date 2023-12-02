@@ -150,7 +150,8 @@ public class GQServerSocket {
         if (packet instanceof HandshakePacket handshakePacket) {
             if (handshakePacket.compatVersion() != GQApi.COMPATIBILITY_VERSION) {
                 stats.wrongVersion++;
-                client.destroy("Your client version is not compatible with the server!");
+                client.destroy(("Your client version is not compatible with the server!" +
+                        " The server is running on version %s").formatted(GlobalQuake.version));
                 return false;
             }
 
