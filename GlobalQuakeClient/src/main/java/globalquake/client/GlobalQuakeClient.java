@@ -10,9 +10,13 @@ import gqserver.api.packets.data.DataRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GlobalQuakeClient extends GlobalQuakeLocal {
     private final ClientSocket clientSocket;
+
+    private final List<Integer> openedStationMonitors = new ArrayList<>();
 
     public GlobalQuakeClient(ClientSocket clientSocket) {
         instance = this;
@@ -28,7 +32,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorOpened(StationMonitorOpenEvent event) {
                 try {
-                    clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), false));
+                    if(!openedStationMonitors.contains(event.station().getId())) {
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), false));
+                    }
+
+                    openedStationMonitors.add(event.station().getId());
                 } catch (IOException e) {
                     Logger.trace(e);
                 }
@@ -37,8 +45,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorClosed(StationMonitorCloseEvent event) {
                 try {
-                    event.station().getAnalysis().fullReset();
-                    clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), true));
+                    openedStationMonitors.remove((Integer) event.station().getId());
+                    if(!openedStationMonitors.contains(event.station().getId())) {
+                        event.station().getAnalysis().fullReset();
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), true));
+                    }
                 } catch (IOException e) {
                     Logger.trace(e);
                 }

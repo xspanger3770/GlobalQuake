@@ -423,7 +423,10 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void sendDataRequest(Set<DataRequest> dataRequests, DataRequest dataRequest) throws IOException{
-        dataRequests.add(dataRequest);
+        if(!dataRequests.add(dataRequest)){
+            // data request from that client to this station already exists
+            return;
+        }
 
         Queue<DataRecord> dataRecords = new PriorityQueue<>(getDataRecordComparator());
 
