@@ -14,6 +14,7 @@ import java.util.TimerTask;
 
 public class StationMonitor extends GQFrame {
 
+	private final StationMonitorPanel stationMonitorPanel;
 	private AbstractStation station;
 
 	public StationMonitor(Component parent, AbstractStation station, int refreshTime) {
@@ -27,8 +28,8 @@ public class StationMonitor extends GQFrame {
 
 		add(createControlPanel(), BorderLayout.NORTH);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		StationMonitorPanel panel = new StationMonitorPanel(station);
-		add(panel, BorderLayout.CENTER);
+		stationMonitorPanel = new StationMonitorPanel(station);
+		add(stationMonitorPanel, BorderLayout.CENTER);
 
 		pack();
 
@@ -40,8 +41,8 @@ public class StationMonitor extends GQFrame {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				panel.updateImage();
-				panel.repaint();
+				stationMonitorPanel.updateImage();
+				stationMonitorPanel.repaint();
 			}
 		}, 0, refreshTime);
 
@@ -67,11 +68,11 @@ public class StationMonitor extends GQFrame {
 			}
 		});
 
-		panel.addComponentListener(new ComponentAdapter() {
+		stationMonitorPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				panel.updateImage();
-				panel.repaint();
+				stationMonitorPanel.updateImage();
+				stationMonitorPanel.repaint();
 			}
 		});
 
@@ -100,5 +101,6 @@ public class StationMonitor extends GQFrame {
 
 	public void swapStation(GlobalStation station) {
 		this.station = station;
+		stationMonitorPanel.setStation(station);
 	}
 }

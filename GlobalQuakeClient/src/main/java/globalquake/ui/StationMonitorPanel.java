@@ -23,7 +23,7 @@ import globalquake.core.Settings;
 public class StationMonitorPanel extends JPanel {
 
 	private BufferedImage image;
-	private final AbstractStation station;
+	private AbstractStation station;
 
 	public StationMonitorPanel(AbstractStation station) {
 		this.station = station;
@@ -325,4 +325,7 @@ public class StationMonitorPanel extends JPanel {
 		g.drawImage(image, 0, 0, null);
 	}
 
+	public void setStation(AbstractStation station) {
+		this.station = station;
+	}
 }
