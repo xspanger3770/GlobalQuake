@@ -16,8 +16,10 @@ import globalquake.events.specific.*;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.ui.globe.GlobePanel;
 import globalquake.core.Settings;
+import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
+import java.awt.geom.GeneralPath;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -236,6 +238,12 @@ public class CinemaHandler {
         if(AlertManager.meetsConditions(earthquake)){
             priority += 10000.0;
         }
+
+        double distGEO = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(),
+                Settings.homeLat, Settings.homeLon, 0.0);
+        double pgaHome = GeoUtils.pgaFunction(earthquake.getMag(), distGEO);
+
+        priority += pgaHome * 2000.0;
 
         return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom, priority, earthquake);
     }
