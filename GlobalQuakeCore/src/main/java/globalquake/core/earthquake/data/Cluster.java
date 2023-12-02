@@ -23,8 +23,6 @@ public class Cluster implements Warnable {
 	private long lastUpdate;
 
 	private Earthquake earthquake;
-	@SuppressWarnings("unused")
-	public final double bestAngle;
 	private Hypocenter previousHypocenter;
 
 	private int level;
@@ -56,7 +54,6 @@ public class Cluster implements Warnable {
 		this.assignedEvents = new ConcurrentHashMap<>();
 		this.updateCount = 0;
 		this.earthquake = null;
-		this.bestAngle = -1;
 		this.rootLat = NONE;
 		this.rootLon = NONE;
 		this.lastUpdate = System.currentTimeMillis();

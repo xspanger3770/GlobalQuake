@@ -329,15 +329,11 @@ __global__ void calculate_station_distances(
     
     calculateParamsDevice(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
 
-    //int station_index = threadIdx.x % station_count;
-    for(int i = 0; i < station_count; i++/*, station_index++*/) {
-        /*if(station_index >= station_count){
-            station_index = 0;
-        }*/
+    for(int i = 0; i < station_count; i++) {
         float s_lat = stations[i + 0 * station_count];
         float s_lon = stations[i + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI; // because travel table is in degrees
-        station_distances[index + i * points] = ang_dist * K;
+        station_distances[index + i * points] = ang_dist * K; // precompute
     }
 }
 
@@ -513,28 +509,27 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
   (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, int depthResProfile, jfloat maxDist, jfloat p_wave_threshold) {
     size_t station_count = env->GetArrayLength(stations) / STATION_FILEDS;
-    
+
     bool success = false;
     
     float* stationsArray = static_cast<float*>(malloc(sizeof(float) * station_count * STATION_FILEDS));
     if(!stationsArray){
         perror("malloc");
-        goto cleanup;
+        return nullptr;
     }
     
-    for(int i = 0; i < env->GetArrayLength(stations); i++){        
-        stationsArray[i] = env->GetFloatArrayElements(stations, 0)[i];
+    jfloat *elements = env->GetFloatArrayElements(stations, 0);
+    for (int i = 0; i < station_count * STATION_FILEDS; i++) {
+        stationsArray[i] = elements[i];
     }
+
+    env->ReleaseFloatArrayElements(stations, elements, 0);
 
     float final_result[HYPOCENTER_FILEDS];
 
     success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result, p_wave_threshold);
 
-    cleanup:
-    if(stationsArray) free(stationsArray);
-
-    jfloat *elements = env->GetFloatArrayElements(stations, 0);
-    env->ReleaseFloatArrayElements(stations, elements, 0);
+    free(stationsArray);
 
     jfloatArray result = nullptr;
 
@@ -611,17 +606,20 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
       (JNIEnv *env, jclass, jfloatArray depth_profiles_array){
     bool success = true;
 
-    if(depth_profiles_array != nullptr && depth_profiles == nullptr) {
+    if (depth_profiles_array != nullptr && depth_profiles == nullptr) {
         int depth_profile_count = env->GetArrayLength(depth_profiles_array);
+        jfloat* depthResolsArray = env->GetFloatArrayElements(depth_profiles_array, 0);
+
         float depthResols[depth_profile_count];
-        for(int i = 0; i < depth_profile_count; i++){
-            depthResols[i] = env->GetFloatArrayElements(depth_profiles_array, 0)[i];
+        for (int i = 0; i < depth_profile_count; i++) {
+            depthResols[i] = depthResolsArray[i];
         }
 
+        env->ReleaseFloatArrayElements(depth_profiles_array, depthResolsArray, 0);
+
         success &= initDepthProfiles(depthResols, depth_profile_count);
-        env->ReleaseFloatArrayElements(depth_profiles_array, env->GetFloatArrayElements(depth_profiles_array, 0), 0);
     }
-    
+   
     cuda_initialised = success;
     return success;
 }
