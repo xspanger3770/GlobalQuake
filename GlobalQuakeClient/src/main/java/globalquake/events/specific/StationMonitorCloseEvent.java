@@ -2,8 +2,9 @@ package globalquake.events.specific;
 
 import globalquake.core.station.GlobalStation;
 import globalquake.events.GlobalQuakeLocalEventListener;
+import globalquake.ui.StationMonitor;
 
-public record StationMonitorCloseEvent(GlobalStation station) implements GlobalQuakeLocalEvent {
+public record StationMonitorCloseEvent(StationMonitor monitor, GlobalStation station) implements GlobalQuakeLocalEvent {
 
     @Override
     public void run(GlobalQuakeLocalEventListener eventListener) {
@@ -13,7 +14,7 @@ public record StationMonitorCloseEvent(GlobalStation station) implements GlobalQ
     @Override
     public String toString() {
         return "StationMonitorCloseEvent{" +
-                "station=" + station +
+                ", station=" + station +
                 '}';
     }
 }

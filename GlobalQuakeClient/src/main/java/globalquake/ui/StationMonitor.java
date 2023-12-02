@@ -14,13 +14,13 @@ import java.util.TimerTask;
 
 public class StationMonitor extends GQFrame {
 
-	private final AbstractStation station;
+	private AbstractStation station;
 
 	public StationMonitor(Component parent, AbstractStation station, int refreshTime) {
 		this.station = station;
 
 		if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
-			GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorOpenEvent(globalStation));
+			GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorOpenEvent(StationMonitor.this, globalStation));
 		}
 
 		setLayout(new BorderLayout());
@@ -51,7 +51,7 @@ public class StationMonitor extends GQFrame {
 			public void windowClosed(WindowEvent e) {
 				timer.cancel();
 				if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
-					GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorCloseEvent(globalStation));
+					GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorCloseEvent(StationMonitor.this, globalStation));
 				}
 			}
 		});
@@ -94,4 +94,11 @@ public class StationMonitor extends GQFrame {
 		return panel;
 	}
 
+	public AbstractStation getStation() {
+		return station;
+	}
+
+	public void swapStation(GlobalStation station) {
+		this.station = station;
+	}
 }

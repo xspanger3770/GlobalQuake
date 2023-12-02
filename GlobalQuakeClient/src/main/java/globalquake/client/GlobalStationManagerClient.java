@@ -6,6 +6,7 @@ import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
+import globalquake.events.specific.StationCreateEvent;
 import gqserver.api.Packet;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
@@ -98,6 +99,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
                         infoData.index()));
                 station.setIntensity(infoData.maxIntensity(), infoData.time(), infoData.eventMode());
                 stationsIdMap.put(infoData.index(), station);
+                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationCreateEvent(station));
             }
         }
 
