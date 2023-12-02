@@ -14,4 +14,6 @@ public class GlobalQuakeLocalEventListener {
     public void onStationMonitorOpened(StationMonitorOpenEvent stationMonitorOpenEvent) {}
 
     public void onStationMonitorClosed(StationMonitorCloseEvent stationMonitorCloseEvent) {}
+
+    public void onSocketReconnect(SocketReconnectEvent socketReconnectEvent) {}
 }

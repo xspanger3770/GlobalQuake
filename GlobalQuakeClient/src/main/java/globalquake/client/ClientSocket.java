@@ -2,6 +2,7 @@ package globalquake.client;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.exception.RuntimeApplicationException;
+import globalquake.events.specific.SocketReconnectEvent;
 import gqserver.api.GQApi;
 import gqserver.api.Packet;
 import gqserver.api.data.system.ServerClientConfig;
@@ -65,6 +66,7 @@ public class ClientSocket {
 
             sendPacket(new ArchivedQuakesRequestPacket());
             sendPacket(new StationsRequestPacket());
+            GlobalQuakeClient.instance.getLocalEventHandler().fireEvent(new SocketReconnectEvent());
             status = ClientSocketStatus.CONNECTED;
         } catch(ConnectException | SocketTimeoutException ce){
             Logger.trace(ce);

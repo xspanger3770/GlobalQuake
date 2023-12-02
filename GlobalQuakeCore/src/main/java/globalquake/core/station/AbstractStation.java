@@ -8,6 +8,7 @@ import globalquake.core.database.SeedlinkNetwork;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -26,6 +27,7 @@ public abstract class AbstractStation {
 	private final double alt;
 	private final BetterAnalysis analysis;
 	private final int id;
+	private final UUID uuid;
 	private final SeedlinkNetwork seedlinkNetwork;
 
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
@@ -41,6 +43,7 @@ public abstract class AbstractStation {
 		this.stationCode = stationCode;
 		this.channelName = channelName;
 		this.locationCode = locationCode;
+		this.uuid = UUID.fromString("%s%s%s%s".formatted(networkCode, stationCode, channelName, locationCode));
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
@@ -189,4 +192,8 @@ public abstract class AbstractStation {
 	}
 
 	public abstract boolean isAccelerometer();
+
+	public UUID getUuid() {
+		return uuid;
+	}
 }

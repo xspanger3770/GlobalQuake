@@ -130,6 +130,15 @@ public class GlobalStationManager {
         return null;
     }
 
+    public AbstractStation getStation(UUID uuid) {
+        for(AbstractStation station : stations){
+            if(station.getUuid().equals(uuid)){
+                return station;
+            }
+        }
+        return null;
+    }
+
 
     record StationDistanceInfo(int id, float dist, float ang) {
 

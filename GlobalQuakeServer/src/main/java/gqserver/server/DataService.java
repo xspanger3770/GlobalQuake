@@ -66,7 +66,7 @@ public class DataService extends GlobalQuakeEventListener {
     private final Object stationDataQueueLock = new Object();
 
     private final Map<GlobalStation, Queue<DataRecord>> stationDataQueueMap = new HashMap<>();
-    private final Map<Integer, GlobalStation> stationIdMap = new HashMap<>();
+    private final Map<UUID, GlobalStation> stationIdMap = new HashMap<>();
     private final Map<ServerClient, Set<DataRequest>> clientDataRequestMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService cleanupService;
 
@@ -402,8 +402,8 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processDataRequest(ServerClient client, DataRequestPacket packet) throws IOException{
-        stationIdMap.putIfAbsent(packet.stationIndex(), (GlobalStation) GlobalQuake.instance.getStationManager().getStation(packet.stationIndex()));
-        GlobalStation station = stationIdMap.get(packet.stationIndex());
+        stationIdMap.putIfAbsent(packet.uuid(), (GlobalStation) GlobalQuake.instance.getStationManager().getStation(packet.uuid()));
+        GlobalStation station = stationIdMap.get(packet.uuid());
         if(station == null){
             Logger.tag("Server").warn("Received data request for non-existing station!");
             return;

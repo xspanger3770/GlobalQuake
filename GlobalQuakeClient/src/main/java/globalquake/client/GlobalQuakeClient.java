@@ -1,6 +1,7 @@
 package globalquake.client;
 
 import globalquake.events.GlobalQuakeLocalEventListener;
+import globalquake.events.specific.SocketReconnectEvent;
 import globalquake.events.specific.StationMonitorCloseEvent;
 import globalquake.events.specific.StationMonitorOpenEvent;
 import globalquake.main.Main;
@@ -11,12 +12,14 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class GlobalQuakeClient extends GlobalQuakeLocal {
     private final ClientSocket clientSocket;
 
-    private final List<Integer> openedStationMonitors = new ArrayList<>();
+    private final List<UUID> openedStationMonitors = new ArrayList<>();
 
     public GlobalQuakeClient(ClientSocket clientSocket) {
         instance = this;
@@ -32,11 +35,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorOpened(StationMonitorOpenEvent event) {
                 try {
-                    if(!openedStationMonitors.contains(event.station().getId())) {
-                        clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), false));
+                    if(!openedStationMonitors.contains(event.station().getUuid())) {
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getUuid(), false));
                     }
 
-                    openedStationMonitors.add(event.station().getId());
+                    openedStationMonitors.add(event.station().getUuid());
                 } catch (IOException e) {
                     Logger.trace(e);
                 }
@@ -45,10 +48,21 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onStationMonitorClosed(StationMonitorCloseEvent event) {
                 try {
-                    openedStationMonitors.remove((Integer) event.station().getId());
-                    if(!openedStationMonitors.contains(event.station().getId())) {
+                    openedStationMonitors.remove(event.station().getUuid());
+                    if(!openedStationMonitors.contains(event.station().getUuid())) {
                         event.station().getAnalysis().fullReset();
-                        clientSocket.sendPacket(new DataRequestPacket(event.station().getId(), true));
+                        clientSocket.sendPacket(new DataRequestPacket(event.station().getUuid(), true));
+                    }
+                } catch (IOException e) {
+                    Logger.trace(e);
+                }
+            }
+
+            @Override
+            public void onSocketReconnect(SocketReconnectEvent socketReconnectEvent) {
+                try {
+                    for(UUID uuid : new HashSet<UUID>(openedStationMonitors)){
+                        clientSocket.sendPacket(new DataRequestPacket(uuid, false));
                     }
                 } catch (IOException e) {
                     Logger.trace(e);
