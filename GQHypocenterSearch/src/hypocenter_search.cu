@@ -229,7 +229,6 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
     }
 
     int j = blockIdx.y % station_count;
-    //int station_index2 = (threadIdx.x + j) % station_count;
     float final_origin = 0.0f;
         
     {
@@ -241,14 +240,10 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
         final_origin = predicted_origin;
     }
 
-    //int station_index = threadIdx.x % station_count;
     float err = 0.0;
     int correct = station_count;
 
-    for(int i = 0; i < station_count; i++/*, station_index++*/) {
-        /*if(station_index >= station_count){
-            station_index = 0;
-        }*/
+    for(int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
         float s_pwave = s_stations[i];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
