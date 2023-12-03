@@ -40,10 +40,7 @@ import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -53,12 +50,8 @@ public class DataService extends GlobalQuakeEventListener {
 
     private static final int STATIONS_INFO_PACKET_MAX_SIZE = 64;
     private static final int DATA_REQUESTS_MAX_COUNT = 16;
-    private final ReadWriteLock quakesRWLock = new ReentrantReadWriteLock();
 
-    private final Lock quakesReadLock = quakesRWLock.readLock();
-    private final Lock quakesWriteLock = quakesRWLock.writeLock();
-
-    private final List<EarthquakeInfo> currentEarthquakes;
+    private final Queue<EarthquakeInfo> currentEarthquakes;
 
     private final Map<AbstractStation, StationStatus> stationIntensities = new HashMap<>();
     private ScheduledExecutorService stationIntensityService;
@@ -70,7 +63,7 @@ public class DataService extends GlobalQuakeEventListener {
     private ScheduledExecutorService cleanupService;
 
     public DataService() {
-        currentEarthquakes = new ArrayList<>();
+        currentEarthquakes = new ConcurrentLinkedQueue<>();
     }
 
     public void run(){
@@ -102,22 +95,18 @@ public class DataService extends GlobalQuakeEventListener {
         clientDataRequestMap.entrySet().removeIf(kv -> isOld(kv.getKey()));
 
         // remove earthquakes that are not really on the list
-        quakesWriteLock.lock();
-        try {
-            for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
-                EarthquakeInfo earthquakeInfo = iterator.next();
+        for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
+            EarthquakeInfo earthquakeInfo = iterator.next();
 
-                for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-                    if(earthquake.getUuid().equals(earthquakeInfo.uuid())){
-                        continue;
-                    }
+            for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+                if(earthquake.getUuid().equals(earthquakeInfo.uuid())){
+                    continue;
                 }
-
-                iterator.remove();
             }
-        }finally {
-            quakesWriteLock.unlock();
+
+            iterator.remove();
         }
+
     }
 
     private boolean isOld(ServerClient client) {
@@ -160,52 +149,35 @@ public class DataService extends GlobalQuakeEventListener {
     public void onQuakeCreate(QuakeCreateEvent event) {
         Earthquake earthquake = event.earthquake();
 
-        quakesWriteLock.lock();
-        try{
-            currentEarthquakes.add(new EarthquakeInfo(earthquake.getUuid(), earthquake.getRevisionID()));
-        } finally {
-            quakesWriteLock.unlock();
-        }
+        currentEarthquakes.add(new EarthquakeInfo(earthquake.getUuid(), earthquake.getRevisionID()));
 
         broadcast(getEarthquakeReceivingClients(), createQuakePacket(earthquake));
     }
 
     @Override
     public void onQuakeRemove(QuakeRemoveEvent event) {
-        quakesWriteLock.lock();
-        try{
-            currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
-        } finally {
-            quakesWriteLock.unlock();
-        }
+        currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
 
         broadcast(getEarthquakeReceivingClients(), new EarthquakeCheckPacket(new EarthquakeInfo(event.earthquake().getUuid(), EarthquakeInfo.REMOVED)));
     }
 
     @Override
     public void onQuakeUpdate(QuakeUpdateEvent event) {
-        quakesWriteLock.lock();
         Earthquake earthquake = event.earthquake();
 
-        try{
-            currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
-            currentEarthquakes.add(new EarthquakeInfo(earthquake.getUuid(), earthquake.getRevisionID()));
-        } finally {
-            quakesWriteLock.unlock();
+        if(earthquake == null){
+            return;
         }
+
+        currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
+        currentEarthquakes.add(new EarthquakeInfo(earthquake.getUuid(), earthquake.getRevisionID()));
 
         broadcast(getEarthquakeReceivingClients(), createQuakePacket(earthquake));
     }
 
     @Override
     public void onQuakeArchive(QuakeArchiveEvent event) {
-        quakesWriteLock.lock();
-        try{
-            currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
-        } finally {
-            quakesWriteLock.unlock();
-        }
-
+        currentEarthquakes.removeIf(earthquakeInfo -> earthquakeInfo.uuid().equals(event.earthquake().getUuid()));
         broadcast(getEarthquakeReceivingClients(), createArchivedPacket(event.archivedQuake()));
     }
 
@@ -487,13 +459,8 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processEarthquakesRequest(ServerClient client) throws IOException {
-        quakesReadLock.lock();
-        try {
-            for (EarthquakeInfo info : currentEarthquakes) {
-                client.sendPacket(new EarthquakeCheckPacket(info));
-            }
-        } finally {
-            quakesReadLock.unlock();
+        for (EarthquakeInfo info : currentEarthquakes) {
+            client.sendPacket(new EarthquakeCheckPacket(info));
         }
     }
 

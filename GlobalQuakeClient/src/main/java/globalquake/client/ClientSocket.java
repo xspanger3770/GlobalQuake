@@ -153,6 +153,7 @@ public class ClientSocket {
         try {
             while (isConnected()) {
                 Packet packet = (Packet) inputStream.readObject();
+                Logger.trace("Received packet: %s".formatted(packet.toString()));
                 ((GlobalQuakeClient) GlobalQuakeClient.instance).processPacket(this, packet);
             }
         } catch(SocketTimeoutException | SocketException se){
@@ -168,6 +169,9 @@ public class ClientSocket {
         if(outputStream == null){
             return;
         }
+
+        Logger.trace("Sending packet: %s".formatted(packet.toString()));
+
         outputStream.writeObject(packet);
     }
 
