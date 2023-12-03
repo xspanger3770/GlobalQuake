@@ -121,10 +121,6 @@ public class GlobalStationManager {
         return indexing;
     }
 
-    public AbstractStation getStation(int id) {
-        return stations.stream().filter(station -> station.getId() == id).findFirst().orElse(null);
-    }
-
     public AbstractStation getStationByIdentifier(String identifier) {
         return stations.stream().filter(station -> station.getIdentifier().equals(identifier)).findFirst().orElse(null);
     }

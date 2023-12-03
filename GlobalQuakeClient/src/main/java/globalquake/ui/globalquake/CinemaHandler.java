@@ -19,7 +19,6 @@ import globalquake.core.Settings;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
-import java.awt.geom.GeneralPath;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

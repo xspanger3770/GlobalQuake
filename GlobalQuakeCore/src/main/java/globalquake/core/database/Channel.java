@@ -109,11 +109,8 @@ public final class Channel implements Serializable {
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork() {
-        //var lowestDelay = getSeedlinkNetworks().entrySet().stream().min(Map.Entry.comparingByValue());
-        //return lowestDelay.map(Map.Entry::getKey).orElse(null);
-        return getSeedlinkNetworks().keySet().stream().sorted(Comparator.comparing(
-                seedlinkNetwork -> seedlinkNetwork.selectedStations))
-                .findFirst().orElse(null);
+        return getSeedlinkNetworks().keySet().stream().min(Comparator.comparing(
+                seedlinkNetwork -> seedlinkNetwork.selectedStations)).orElse(null);
     }
 
 }

@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 public class SeedlinkNetworksReader {
 
 	protected static final int RECONNECT_DELAY = 10;
-	private static final int MAX_STATI0NS = 500;
 	private Instant lastData;
 
     private long lastReceivedRecord;

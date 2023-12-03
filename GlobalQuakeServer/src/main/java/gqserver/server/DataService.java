@@ -41,9 +41,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class DataService extends GlobalQuakeEventListener {
@@ -130,7 +127,7 @@ public class DataService extends GlobalQuakeEventListener {
                 StationStatus status = createStatus(abstractStation);
                 StationStatus previous = stationIntensities.put(abstractStation, status);
                 if (previous == null || !previous.equals(status)) {
-                    data.add(new StationIntensityData(abstractStation.getId(), (float) status.intensity(), status.eventMode()));
+                    data.add(new StationIntensityData(abstractStation.getId(), status.intensity(), status.eventMode()));
                     if (data.size() >= STATIONS_INFO_PACKET_MAX_SIZE) {
                         broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
                         data = new ArrayList<>();

@@ -3,7 +3,6 @@ package globalquake.events.specific;
 import globalquake.events.GlobalQuakeLocalEventListener;
 
 public class SocketReconnectEvent implements GlobalQuakeLocalEvent {
-    @SuppressWarnings({"unused"})
 
     public SocketReconnectEvent() {
     }
@@ -13,8 +12,4 @@ public class SocketReconnectEvent implements GlobalQuakeLocalEvent {
         eventListener.onSocketReconnect(this);
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }

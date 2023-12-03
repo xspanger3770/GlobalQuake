@@ -2,7 +2,6 @@ package globalquake.events.specific;
 
 import globalquake.core.station.GlobalStation;
 import globalquake.events.GlobalQuakeLocalEventListener;
-import globalquake.ui.StationMonitor;
 
 public record StationCreateEvent(GlobalStation station) implements GlobalQuakeLocalEvent {
 
