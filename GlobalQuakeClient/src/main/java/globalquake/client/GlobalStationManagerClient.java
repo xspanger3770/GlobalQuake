@@ -64,6 +64,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
         try {
             DataRecord dataRecord = (DataRecord) DataRecord.read(dataRecordPacket.data());
             station.getAnalysis().analyse(dataRecord);
+            station.getAnalysis().second(System.currentTimeMillis());
         } catch (IOException | SeedFormatException e) {
             Logger.error(e);
         }
