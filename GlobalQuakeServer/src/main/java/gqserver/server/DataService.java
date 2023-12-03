@@ -95,12 +95,13 @@ public class DataService extends GlobalQuakeEventListener {
         clientDataRequestMap.entrySet().removeIf(kv -> isOld(kv.getKey()));
 
         // remove earthquakes that are not really on the list
+        mainloop:
         for (Iterator<EarthquakeInfo> iterator = currentEarthquakes.iterator(); iterator.hasNext(); ) {
             EarthquakeInfo earthquakeInfo = iterator.next();
 
             for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
                 if(earthquake.getUuid().equals(earthquakeInfo.uuid())){
-                    continue;
+                    continue mainloop;
                 }
             }
 
