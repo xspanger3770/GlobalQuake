@@ -6,7 +6,7 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.0_pre15</version>
+        <version>0.10.0_pre16</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
-            <version>0.10.0_pre15</version>
+            <version>0.10.0_pre16</version>
             <scope>compile</scope>
         </dependency>
 
