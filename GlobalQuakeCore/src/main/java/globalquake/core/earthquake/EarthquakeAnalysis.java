@@ -90,7 +90,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if (cluster.lastEpicenterUpdate == cluster.updateCount) {
+        if (cluster.lastEpicenterUpdate >= cluster.updateCount) {
             return;
         }
 
