@@ -56,6 +56,10 @@ It can also, estimate the earthquake magnitude using some empirical methods, but
 
 A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/tree/main/tutorials)
 
+## Livestream
+
+You can also watch our live-stream on YouTube [here.](https://www.youtube.com/channel/UCZmcd4cQ2H_ELWAuUdOMgRQ/live)
+
 ## Contributing
 
 If you are considering to contribute to the project, make sure you have read the [Contributing guidelines](https://github.com/xspanger3770/GlobalQuake/blob/main/CONTRIBUTING.md)
