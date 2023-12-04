@@ -44,11 +44,12 @@ hs_err_pid*
 
 #Other
 idea.png
-GlobalQuake/
+.GlobalQuakeData/
+.GlobalQuakeServerData/
 old/
 out/
 training_datasets/
 science/
 .idea/
-/src/main/resources/META-INF/MANIFEST.MF
 /screenshots/
+latest/

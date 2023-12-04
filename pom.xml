@@ -3,67 +3,23 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.morce.GlobalQuake</groupId>
+	<groupId>xspanger.GlobalQuake</groupId>
 	<artifactId>GlobalQuake</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.10.0_pre1</version>
+	<packaging>pom</packaging>
+	<modules>
+		<module>GlobalQuakeClient</module>
+		<module>GlobalQuakeCore</module>
+		<module>GlobalQuakeAPI</module>
+		<module>GlobalQuakeServer</module>
+    </modules>
+
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
     <dependencies>
-		<dependency>
-			<groupId>edu.sc.seis</groupId>
-			<artifactId>seisFile</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.geotools/gt-geojson -->
-		<dependency>
-			<groupId>de.grundid.opendatalab</groupId>
-			<artifactId>geojson-jackson</artifactId>
-			<version>1.14</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
-		<dependency>
-			<groupId>edu.sc.seis</groupId>
-			<artifactId>seedCodec</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/edu.sc.seis/TauP -->
-		<dependency>
-			<groupId>edu.sc.seis</groupId>
-			<artifactId>TauP</artifactId>
-			<version>2.6.1</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/uk.me.berndporr/iirj -->
-		<dependency>
-			<groupId>uk.me.berndporr</groupId>
-			<artifactId>iirj</artifactId>
-			<version>1.3</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms -->
-		<dependency>
-			<groupId>com.github.wendykierp</groupId>
-			<artifactId>JTransforms</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20230227</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tinylog</groupId>
-			<artifactId>tinylog-api</artifactId>
-			<version>2.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tinylog</groupId>
-			<artifactId>tinylog-impl</artifactId>
-			<version>2.5.0</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
