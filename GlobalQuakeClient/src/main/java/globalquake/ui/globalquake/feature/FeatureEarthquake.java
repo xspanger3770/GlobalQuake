@@ -160,16 +160,18 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if (elementPWave.shouldDraw) {
-            graphics.setColor(Color.BLUE);
-            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-            graphics.draw(elementPWave.getShape());
-        }
+        if(drawWaves(entity.getOriginal())) {
+            if (elementPWave.shouldDraw) {
+                graphics.setColor(Color.BLUE);
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+                graphics.draw(elementPWave.getShape());
+            }
 
-        if (elementSWave.shouldDraw) {
-            graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-            graphics.draw(elementSWave.getShape());
+            if (elementSWave.shouldDraw) {
+                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+                graphics.draw(elementSWave.getShape());
+            }
         }
 
         if (Settings.displayCoreWaves) {
@@ -218,6 +220,16 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private boolean drawWaves(Earthquake original) {
+        double ageMins = (System.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
+
+        return ageMins < waveDisplayTimeMinutes(original.getMag());
+    }
+
+    private double waveDisplayTimeMinutes(double mag) {
+        return 2.0 + 0.01 * Math.pow(mag, 4);
     }
 
     private Color polygonColor(int i) {
