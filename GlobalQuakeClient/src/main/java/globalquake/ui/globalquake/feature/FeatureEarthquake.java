@@ -160,18 +160,16 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if(drawWaves(entity.getOriginal())) {
-            if (elementPWave.shouldDraw) {
-                graphics.setColor(Color.BLUE);
-                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-                graphics.draw(elementPWave.getShape());
-            }
+        if (elementPWave.shouldDraw) {
+            graphics.setColor(alphaColor(Color.BLUE, getAlphaMul(entity.getOriginal())));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementPWave.getShape());
+        }
 
-            if (elementSWave.shouldDraw) {
-                graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
-                graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
-                graphics.draw(elementSWave.getShape());
-            }
+        if (elementSWave.shouldDraw) {
+            graphics.setColor(alphaColor(getColorSWave(entity.getOriginal().getMag()), getAlphaMul(entity.getOriginal())));
+            graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
+            graphics.draw(elementSWave.getShape());
         }
 
         if (Settings.displayCoreWaves) {
@@ -222,10 +220,15 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
-    private boolean drawWaves(Earthquake original) {
-        double ageMins = (System.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
+    private Color alphaColor(Color color, double mul) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (255.0 * mul));
+    }
 
-        return ageMins < waveDisplayTimeMinutes(original.getMag());
+    private double getAlphaMul(Earthquake original) {
+        double ageMins = (System.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
+        double limit = waveDisplayTimeMinutes(original.getMag());
+
+        return Math.max(0, Math.min(1.0, 2.0 - 2.0 * ageMins / limit));
     }
 
     private double waveDisplayTimeMinutes(double mag) {
