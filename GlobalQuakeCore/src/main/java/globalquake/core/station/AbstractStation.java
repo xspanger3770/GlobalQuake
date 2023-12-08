@@ -146,7 +146,7 @@ public abstract class AbstractStation {
 
     public void second(long time) {
 		if (getAnalysis()._maxRatio > 0) {
-			ratioHistory.add(getAnalysis()._maxCounts);
+			ratioHistory.add(getAnalysis()._maxRatio);
 			getAnalysis()._maxRatioReset = true;
 
 			if (ratioHistory.size() >= RATIO_HISTORY_SECONDS) {
