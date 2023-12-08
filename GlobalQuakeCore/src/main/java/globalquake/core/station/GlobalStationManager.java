@@ -106,7 +106,7 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
                 station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork);
+                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork, ch.getSensitivity());
     }
 
     public List<AbstractStation> getStations() {

@@ -24,9 +24,9 @@ public class GlobalStation extends AbstractStation {
 	private final boolean isAccelerometer;
 
 	public GlobalStation(String networkCode, String stationCode, String channelName,
-						 String locationCode, double lat, double lon, double alt,
-						 int id, SeedlinkNetwork seedlinkNetwork) {
-		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
+                         String locationCode, double lat, double lon, double alt,
+                         int id, SeedlinkNetwork seedlinkNetwork, long sensitivity) {
+		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork, sensitivity);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
 
 		// technically, G and M aren't really an accelerometers, but they behave similarly in terms of maximum intensity

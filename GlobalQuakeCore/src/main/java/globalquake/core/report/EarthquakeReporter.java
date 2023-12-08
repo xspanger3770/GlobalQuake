@@ -137,7 +137,7 @@ public class EarthquakeReporter {
 			double x = getX(event.report.lon());
 			double y = getY(event.report.lat());
 			double r = 12;
-			g.setColor(Scale.getColorRatio(event.getMaxRatio()));
+			g.setColor(Scale.getColorRatio(event.getMaxCounts() * 0.10));
 			Ellipse2D.Double ell1 = new Ellipse2D.Double(x - r / 2, y - r / 2, r, r);
 			g.fill(ell1);
 		}

@@ -34,7 +34,7 @@ public class ClusterAnalysisTraining {
         public final List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
 
         public SimulatedStation(double lat, double lon, double alt) {
-            super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null);
+            super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null, -1);
         }
 
         @Override

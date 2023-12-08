@@ -10,7 +10,7 @@ public class ClientStation extends GlobalStation {
 
     public ClientStation(String networkCode, String stationCode, String channelName,
                          String locationCode, double lat, double lon, int id) {
-        super(networkCode, stationCode, channelName, locationCode, lat, lon, 0, id, null);
+        super(networkCode, stationCode, channelName, locationCode, lat, lon, 0, id, null, -1);
     }
 
     public void setIntensity(double intensity, long time, boolean eventMode) {

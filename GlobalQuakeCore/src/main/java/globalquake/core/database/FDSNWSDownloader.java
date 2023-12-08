@@ -11,6 +11,7 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -168,6 +169,16 @@ public class FDSNWSDownloader {
             double alt = Double.parseDouble(
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
 
+            long sensitivity = -1;
+            try {
+                sensitivity = new BigDecimal(((Element) ((Element) (channelNode.getChildNodes()))
+                        .getElementsByTagName("InstrumentSensitivity").item(0))
+                        .getElementsByTagName("Value").item(0).getTextContent()).longValue();
+            } catch (NullPointerException e) {
+                System.err.println(
+                        "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel);
+            }
+
             var item = ((Element) channelNode)
                     .getElementsByTagName("SampleRate").item(0);
 
@@ -183,7 +194,7 @@ public class FDSNWSDownloader {
             }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
-                    locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt);
+                    locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt, sensitivity);
         }
     }
 
@@ -203,10 +214,10 @@ public class FDSNWSDownloader {
             List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
             String stationCode, String stationSite, String channelCode, String locationCode,
             double lat, double lon, double alt, double sampleRate,
-            double stationLat, double stationLon, double stationAlt) {
+            double stationLat, double stationLon, double stationAlt, long sensitivity) {
         Network network = StationDatabase.getOrCreateNetwork(result, networkCode, networkDescription);
         Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, stationLat, stationLon, stationAlt);
-        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource);
+        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource, sensitivity);
     }
 
     public static String obtainElement(Node item, String name, String defaultValue) {

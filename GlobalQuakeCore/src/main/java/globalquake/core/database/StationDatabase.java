@@ -156,13 +156,14 @@ public class StationDatabase implements Serializable {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate, StationSource stationSource) {
+    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode,
+                                             double lat, double lon, double alt, double sampleRate, StationSource stationSource, long sensitivity) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
             return channel;
         }
 
-        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource);
+        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource, sensitivity);
         station.getChannels().add(channel);
 
         return channel;
