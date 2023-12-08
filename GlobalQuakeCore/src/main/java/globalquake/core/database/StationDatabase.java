@@ -160,6 +160,9 @@ public class StationDatabase implements Serializable {
                                              double lat, double lon, double alt, double sampleRate, StationSource stationSource, long sensitivity) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
+            if(channel.getSensitivity() <= 0 && sensitivity > 0){
+                channel.setSensitivity(sensitivity);
+            }
             return channel;
         }
 
@@ -260,7 +263,7 @@ public class StationDatabase implements Serializable {
         Network networkFound = getOrInsertNetwork(networks, network);
         Station stationFound = getOrInsertStation(networkFound, station);
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
-        if(channelFound != null){
+        if(channelFound != null) {
             channelFound.merge(channel);
         } else {
             stationFound.getChannels().add(channel);

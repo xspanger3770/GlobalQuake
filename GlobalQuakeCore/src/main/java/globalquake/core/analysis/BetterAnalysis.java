@@ -46,6 +46,8 @@ public class BetterAnalysis extends Analysis {
 
     public static final double DEFAULT_SENSITIVITY = 1E8;
 
+    double countsSum = 0.0;
+
 
     public BetterAnalysis(AbstractStation station) {
         super(station);
@@ -155,17 +157,27 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
-        double counts = absFilteredV * (getStation().getSensitivity() / DEFAULT_SENSITIVITY);
+        double sensitivity = getStation().getSensitivity();
+        if(sensitivity <= 1){
+            sensitivity = DEFAULT_SENSITIVITY;
+        }
 
-        if(absFilteredV > _maxCounts){
-            _maxCounts = counts;
+        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity);
+
+        countsSum += counts / getSampleRate();
+        countsSum *= 0.999;
+
+        double countsResult = Math.abs(getStation().isAccelerometer() ? countsSum : counts);
+
+        if(countsResult > _maxCounts){
+            _maxCounts = countsResult;
         }
 
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
 
             if(_maxRatioReset){
-                _maxCounts = counts;
+                _maxCounts = countsResult;
             }
 
             _maxRatioReset = false;

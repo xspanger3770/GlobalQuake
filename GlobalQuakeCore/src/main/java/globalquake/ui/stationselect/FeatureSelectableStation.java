@@ -103,6 +103,12 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
                 graphics.drawString("!", x, (int) centerPonint.y + 9);
             }
+
+            if(entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().getSensitivity() <= 0){
+                graphics.setColor(Color.blue);
+                graphics.setFont(new Font("Calibri", Font.BOLD, 14));
+                graphics.drawString("%d".formatted(entity.getOriginal().getSelectedChannel().getSensitivity()), x + 20, (int) centerPonint.y + 9);
+            }
         }
     }
 

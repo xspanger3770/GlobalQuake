@@ -11,7 +11,7 @@ public final class Channel implements Serializable {
     private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
-    private final long sensitivity;
+    private long sensitivity;
     private double sampleRate;
     private double latitude;
     private double longitude;
@@ -108,6 +108,9 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
+        if(sensitivity <= 0 && newChannel.sensitivity > 0){
+            sensitivity = newChannel.sensitivity;
+        }
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork() {
@@ -117,5 +120,9 @@ public final class Channel implements Serializable {
 
     public long getSensitivity() {
         return sensitivity;
+    }
+
+    public void setSensitivity(long sensitivity) {
+        this.sensitivity = sensitivity;
     }
 }

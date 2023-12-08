@@ -65,9 +65,9 @@ public class FDSNWSDownloader {
         List<String> supportedAttributes = downloadWadl(stationSource);
         URL url;
         if(supportedAttributes.contains("endafter")){
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=response&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
         } else {
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=response&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
         }
 
 

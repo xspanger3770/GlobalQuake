@@ -994,7 +994,7 @@ public class EarthquakeAnalysis {
     }
 
     private double getSensorTypeCorrection(Event event) {
-        return event.isFromAccelerometer() ? 0.7 : 0.0;
+        return event.isFromAccelerometer() ? 0.0 : 0.0;
     }
 
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
