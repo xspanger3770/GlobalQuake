@@ -38,6 +38,7 @@ public class Event implements Serializable {
 	private final transient Analysis analysis;
 
 	private boolean isSWave;
+	private double maxCounts;
 
 	public Event(Analysis analysis, long start, List<Log> logs, boolean fromAccelerometer) {
 		this(analysis);
@@ -52,6 +53,7 @@ public class Event implements Serializable {
 	public Event(Analysis analysis) {
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
+		this.maxCounts = 0;
 		this.valid = true;
 		this.analysis = analysis;
 		this.assignedCluster = null;
@@ -139,10 +141,14 @@ public class Event implements Serializable {
 		return getAnalysis().getStation().getAlt();
 	}
 
-	public void log(Log currentLog) {
+	public void log(Log currentLog, double counts) {
 		logs.add(0, currentLog);
 		if (currentLog.getRatio() > this.maxRatio) {
 			this.maxRatio = currentLog.getRatio();
+		}
+
+		if(counts > this.maxCounts){
+			this.maxCounts = counts;
 		}
 
 		boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
@@ -263,5 +269,9 @@ public class Event implements Serializable {
 
 	public List<Log> getLogs() {
 		return logs;
+	}
+
+	public double getMaxCounts() {
+		return maxCounts;
 	}
 }

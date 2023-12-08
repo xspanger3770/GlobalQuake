@@ -100,18 +100,19 @@ public class BetterAnalysis extends Analysis {
             return;
         }
         double filteredV = filter.filter(v - initialOffset);
-        shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
-        mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
-        thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
+        double absFilteredV = Math.abs(filteredV);
+        shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
+        mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
+        thirdAverage -= (thirdAverage - absFilteredV) / (getSampleRate() * 30.0);
 
-        if (Math.abs(filteredV) > specialAverage) {
-            specialAverage = Math.abs(filteredV);
+        if (absFilteredV > specialAverage) {
+            specialAverage = absFilteredV;
         } else {
-            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 40.0);
+            specialAverage -= (specialAverage - absFilteredV) / (getSampleRate() * 40.0);
         }
 
         if (shortAverage / longAverage < 4.0) {
-            longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
+            longAverage -= (longAverage - absFilteredV) / (getSampleRate() * 200.0);
         }
         double ratio = shortAverage / longAverage;
         if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
@@ -152,8 +153,17 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
+        if(absFilteredV > _maxCounts){
+            _maxCounts = absFilteredV;
+        }
+
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
+
+            if(_maxRatioReset){
+                _maxCounts = absFilteredV;
+            }
+
             _maxRatioReset = false;
         }
 
@@ -167,7 +177,7 @@ public class BetterAnalysis extends Analysis {
             // from latest event to the oldest event
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                    e.log(currentLog);
+                    e.log(currentLog, absFilteredV);
                 }
             }
         }
@@ -203,6 +213,7 @@ public class BetterAnalysis extends Analysis {
     @Override
     public void reset() {
         _maxRatio = 0;
+        _maxCounts = 0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
