@@ -44,6 +44,8 @@ public class BetterAnalysis extends Analysis {
     private Butterworth filter;
     private double initialOffset;
 
+    public static final double DEFAULT_SENSITIVITY = 1E8;
+
 
     public BetterAnalysis(AbstractStation station) {
         super(station);
@@ -153,15 +155,17 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
+        double counts = absFilteredV * (getStation().getSensitivity() / DEFAULT_SENSITIVITY);
+
         if(absFilteredV > _maxCounts){
-            _maxCounts = absFilteredV;
+            _maxCounts = counts;
         }
 
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
 
             if(_maxRatioReset){
-                _maxCounts = absFilteredV;
+                _maxCounts = counts;
             }
 
             _maxRatioReset = false;
