@@ -161,11 +161,12 @@ public class BetterAnalysis extends Analysis {
         }
 
         double sensitivity = getStation().getSensitivity();
-        if(sensitivity <= 1){
+
+        if(sensitivity <= 10){
             sensitivity = DEFAULT_SENSITIVITY;
         }
 
-        double counts = (filteredV - offset) * (DEFAULT_SENSITIVITY / sensitivity);
+        double counts = (filteredV - offset) * (DEFAULT_SENSITIVITY / sensitivity) * 0.1;
 
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
