@@ -44,7 +44,7 @@ public class BetterAnalysis extends Analysis {
     private Butterworth filter;
     private double initialOffset;
 
-    public static final double DEFAULT_SENSITIVITY = 1E8;
+    public static final double DEFAULT_SENSITIVITY = 1E9;
 
     double countsSum = 0.0;
 
@@ -193,7 +193,7 @@ public class BetterAnalysis extends Analysis {
             // from latest event to the oldest event
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                    e.log(currentLog, absFilteredV);
+                    e.log(currentLog, countsResult);
                 }
             }
         }

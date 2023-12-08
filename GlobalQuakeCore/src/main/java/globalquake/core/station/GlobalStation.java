@@ -31,7 +31,7 @@ public class GlobalStation extends AbstractStation {
 
 		// technically, G and M aren't really an accelerometers, but they behave similarly in terms of maximum intensity
 		this.isAccelerometer = channelName.length() >= 2 &&
-				(channelName.charAt(1) == 'N' || channelName.charAt(1) == 'G' || channelName.charAt(1) == 'M');
+				(channelName.charAt(1) == 'N' || channelName.charAt(1) == 'G' || channelName.charAt(1) == 'M' || channelName.charAt(1) == 'L');
 	}
 
 	public void addRecord(DataRecord dr) {

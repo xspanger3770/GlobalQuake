@@ -74,7 +74,7 @@ public class EarthquakeReporter {
 			double lon = event.report.lon();
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
 					-earthquake.getDepth(), lat, lon, event.report.alt() / 1000.0);
-			recs.add(new DistanceIntensityRecord(0, distGE, event.maxRatio));
+			recs.add(new DistanceIntensityRecord(0, distGE, event.getMaxCounts()));
 		}
 
 		IntensityGraphs.drawGraph(g, w, h, recs);
@@ -137,7 +137,7 @@ public class EarthquakeReporter {
 			double x = getX(event.report.lon());
 			double y = getY(event.report.lat());
 			double r = 12;
-			g.setColor(Scale.getColorRatio(event.getMaxCounts() * 0.10));
+			g.setColor(Scale.getColorRatio(event.getMaxCounts()));
 			Ellipse2D.Double ell1 = new Ellipse2D.Double(x - r / 2, y - r / 2, r, r);
 			g.fill(ell1);
 		}

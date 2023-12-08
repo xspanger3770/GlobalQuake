@@ -634,7 +634,7 @@ public class EarthquakeAnalysis {
                 continue;
             }
 
-            double expectedIntensity = IntensityTable.getMaxIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
+            double expectedIntensity = IntensityTable.getIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
             if (expectedIntensity < OBVIOUS_CORRECT_INTENSITY_THRESHOLD) {
                 continue;
             }
@@ -985,7 +985,7 @@ public class EarthquakeAnalysis {
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
 
-            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxCounts() * 0.1 * mul) + getSensorTypeCorrection(event);
+            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul) + getSensorTypeCorrection(event);
 
             mags.add(new MagnitudeReading(magnitude, distGC));
         }

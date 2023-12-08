@@ -165,7 +165,6 @@ public class ServerSelectionFrame extends GQFrame {
         Scale.load();
         ShakeMap.init();
         Sounds.load();
-        IntensityTable.init();
         TauPTravelTimeCalculator.init();
     }
 

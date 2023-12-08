@@ -286,7 +286,7 @@ public class ClusterAnalysisTraining {
                 if (P && rawTravelP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelP && !station.passedPWaves.contains(earthquake)) {
                     station.passedPWaves.add(earthquake);
 
-                    double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC);
+                    double expectedRatio = IntensityTable.getIntensity(earthquake.mag, distGC);
                     expectedRatio *= station.sensitivityMultiplier;
 
                     if (expectedRatio > 8.0) {
@@ -302,7 +302,7 @@ public class ClusterAnalysisTraining {
                 if (PKIKP && rawTravelPKIKP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelPKIKP && !station.passedPKIKPWaves.contains(earthquake)) {
                     station.passedPKIKPWaves.add(earthquake);
 
-                    double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC) * 1.5;
+                    double expectedRatio = IntensityTable.getIntensity(earthquake.mag, distGC) * 1.5;
                     expectedRatio *= station.sensitivityMultiplier;
 
                     if (expectedRatio > 8.0) {

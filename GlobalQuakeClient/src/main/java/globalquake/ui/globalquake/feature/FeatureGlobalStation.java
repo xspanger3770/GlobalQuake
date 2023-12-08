@@ -209,7 +209,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         if ((GlobalQuakeClient.instance == null && station.getAnalysis().getStatus() == AnalysisStatus.INIT) || !station.hasDisplayableData()) {
             return Color.lightGray;
         } else {
-            return Scale.getColorRatio(station.getMaxRatio60S() * 0.10);
+            return Scale.getColorRatio(station.getMaxRatio60S());
         }
 
     }

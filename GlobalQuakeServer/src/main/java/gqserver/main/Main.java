@@ -137,15 +137,12 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 8.0;
+    private static final double PHASES = 7.0;
     private static int phase = 0;
 
     public static void initAll() throws Exception{
         updateProgressBar("Loading regions...", (int) ((phase++ / PHASES) * 100.0));
         Regions.init();
-
-        updateProgressBar("Filling up intensity table...", (int) ((phase++ / PHASES) * 100.0));
-        IntensityTable.init();
 
         updateProgressBar("Loading scale...", (int) ((phase++ / PHASES) * 100.0));
         Scale.load();
