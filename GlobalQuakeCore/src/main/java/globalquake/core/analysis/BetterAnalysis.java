@@ -163,7 +163,7 @@ public class BetterAnalysis extends Analysis {
             sensitivity = DEFAULT_SENSITIVITY;
         }
 
-        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.06;
+        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.07;
 
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
