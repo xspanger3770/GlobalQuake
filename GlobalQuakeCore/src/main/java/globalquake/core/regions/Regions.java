@@ -332,19 +332,7 @@ public class Regions {
 
         double p = ((y1 - y)/(y1 - y0) * r1) + ((y - y0)/(y1 - y0) * r2);
 
-        value = (((f00)/((x1 - x0) * (y1 - y0))) * (x1 - x) * (y1 - y))
-                + (((f10)/((x1 - x0) * (y1 - y0))) * (x - x1) * (y1 - y))
-                + (((f01)/((x1 - x0) * (y1 - y0))) * (x1 - x) * (y - y0))
-                + (((f11)/((x1 - x0) * (y1 - y0))) * (x - x0) * (y - y0));
-
-        value = f00 * (x1 - x) * (y1 - y)
-                + f10 * (x - x0) * (y1 - y)
-                + f01 * (x1 - x) * (y - y0)
-                + f11 * (x - x0) * (y - y0)
-                / ((x1 - x0) * (y1 - y0));
-
-
-        return value;
+        return p;
     }
 
 
@@ -359,7 +347,7 @@ public class Regions {
             getRegion(58.79,-150.80);
         }
         System.out.println(getRegion(33.78,135.74));*/
-        double lat = 53.716646,
+        double lat = 53.717646,
                 lon = -33.199733;
         assert shorelineLookup != null;
         double interpolation = interpolate(lat, lon, shorelineLookup);
