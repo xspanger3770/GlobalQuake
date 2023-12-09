@@ -14,6 +14,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
 	@Serial
@@ -28,6 +31,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final QualityClass qualityClass;
 	private double maxRatio;
 	private String region;
+    private long finalUpdateMillis;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 
@@ -46,7 +50,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this(earthquake.getUuid(), earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
 				earthquake.getOrigin(),
 				earthquake.getHypocenter() == null || earthquake.getHypocenter().quality == null ? null :
-						earthquake.getHypocenter().quality.getSummary());
+						earthquake.getHypocenter().quality.getSummary(), earthquake.getLastUpdate());
 		copyEvents(earthquake);
 	}
 
@@ -75,7 +79,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 	}
 
-	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass) {
+	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass, long finalUpdateMillis) {
 		this.uuid = uuid;
 		this.lat = lat;
 		this.lon = lon;
@@ -85,6 +89,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.archivedEvents = new ArrayList<>();
 		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
+        this.finalUpdateMillis = finalUpdateMillis;
 	}
 
 	public double getDepth() {
@@ -168,4 +173,46 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 				", wrong=" + wrong +
 				'}';
 	}
+
+    public JSONObject getGeoJSON() {
+        JSONObject earthquakeJSON = new JSONObject();
+
+        earthquakeJSON.put("type", "Feature");
+        earthquakeJSON.put("id", getUuid());
+
+        JSONObject properties = new JSONObject();
+        properties.put("lastupdate", finalUpdateMillis);
+        //properties.put("magtype", quake.getMagnitudeType());
+        properties.put("evtype", "earthquake"); // TODO: this will need to be changed when there are other event types.
+        properties.put("lon", getLon());
+        properties.put("auth", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("lat", getLat());
+        properties.put("depth", getDepth());
+        properties.put("unid", getUuid());
+        
+        properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
+
+        String timeOrigin = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new java.util.Date(getOrigin()));
+        properties.put("time", timeOrigin);
+
+        properties.put("source_id", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("flynn_region", getRegion());
+
+        earthquakeJSON.put("properties", properties);
+
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "Point");
+
+        JSONArray coordinates = new JSONArray();
+        coordinates.put(getLon());
+        coordinates.put(getLat());
+        coordinates.put(getDepth()*-1000); // convert km to m and flip it to create altitude in meters
+
+        geometry.put("coordinates", coordinates);
+
+        earthquakeJSON.put("geometry", geometry);
+
+        return earthquakeJSON;
+     }
 }
