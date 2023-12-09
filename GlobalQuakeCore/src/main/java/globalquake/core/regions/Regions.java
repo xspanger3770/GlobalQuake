@@ -1,7 +1,8 @@
-package globalquake.regions;
+package globalquake.core.regions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import globalquake.geo.GeoUtils;
+import globalquake.utils.GeoUtils;
+import globalquake.utils.LookupTableIO;
 import org.geojson.*;
 import org.json.JSONObject;
 import org.tinylog.Logger;
@@ -14,7 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Regions {
@@ -51,6 +56,8 @@ public class Regions {
 
 
     private static final ArrayList<Region> regionSearchHD = new ArrayList<>();
+    private static HashMap<String, Double> shorelineLookup;
+
 
     public static void init() throws IOException {
         parseGeoJson("polygons/countriesMD.json", raw_polygonsMD, regionsMD, NONE);
@@ -68,6 +75,20 @@ public class Regions {
         for(ArrayList<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
             regionSearchHD.addAll(list);
         }
+
+        shorelineLookup = LookupTableIO.importLookupTableFromFile();
+
+        if(shorelineLookup == null){
+            System.err.println("No lookup table found! Generating...");
+            double start = System.currentTimeMillis();
+            LookupTableIO.exportLookupTableToFile();
+            System.out.println("Generating took: " + (System.currentTimeMillis() - start)/1000 + "s");
+
+            System.out.println("Lookup table successfully generated! Loading...");
+            shorelineLookup = LookupTableIO.importLookupTableFromFile();
+        }
+
+        System.out.println(shorelineLookup.size());
     }
 
 
@@ -177,16 +198,194 @@ public class Regions {
         return name;
     }
 
+    public static double getShorelineDistance(double lat, double lon) {
+        String extendedName = getExtendedName(lat, lon);
+        if(extendedName != null){
+            return 0;
+        }
+
+        double closestDistance = Double.MAX_VALUE;
+        for (Region reg : regionsMD) {
+            for (Polygon polygon : reg.raws()) {
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                    }
+                }
+            }
+        }
+
+
+        return closestDistance;
+    }
+
+    private static HashMap<String, Double> generateLookupTable(double minLat, double maxLat, double minLon, double maxLon) {
+        final double STEP_LAT = 0.5;
+        final double STEP_LON = 0.5;
+        HashMap<String, Double> lookupTable = new HashMap<>();
+
+        for (double lat = minLat; lat < maxLat; lat += STEP_LAT) {
+            for (double lon = minLon; lon < maxLon; lon += STEP_LON) {
+                double distance = getShorelineDistance(lat, lon);
+
+                if (distance != 0) {
+                    lookupTable.put(String.format("%f,%f", lat, lon), distance);
+                }
+            }
+        }
+
+        return lookupTable;
+    }
+
+    public static List<HashMap<String, Double>> generateLookupTablesInParallel() {
+        final double MIN_LAT = -90;
+        final double MAX_LAT = 90;
+        final double MIN_LON = -180;
+        final double MAX_LON = 180;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        List<HashMap<String, Double>> allLookupTables = new ArrayList<>();
+
+        for (double latStart = MIN_LAT; latStart < MAX_LAT; latStart += (MAX_LAT - MIN_LAT) / 2) {
+            for (double lonStart = MIN_LON; lonStart < MAX_LON; lonStart += (MAX_LON - MIN_LON) / 2) {
+                double latEnd = latStart + (MAX_LAT - MIN_LAT) / 2;
+                double lonEnd = lonStart + (MAX_LON - MIN_LON) / 2;
+
+                double finalLatStart = latStart;
+                double finalLonStart = lonStart;
+                executorService.submit(() -> {
+                    HashMap<String, Double> lookupTable = generateLookupTable(finalLatStart, latEnd, finalLonStart, lonEnd);
+                    synchronized (allLookupTables) {
+                        allLookupTables.add(lookupTable);
+                    }
+                });
+            }
+        }
+
+        executorService.shutdown();
+        try {
+            boolean ignored = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
+        return allLookupTables;
+    }
+
+    private static boolean isValidPoint(double x, double y) {
+        return x >= -90 && x <= 90 && y >= -180 && y <= 180;
+    }
+
+    public static double interpolate(
+            double x, double y,
+            HashMap<String, Double> lookupTable
+    ) {
+        if(lookupTable.containsKey(String.format("%.6f,%.6f", x, y))){
+            return lookupTable.get(String.format("%.6f,%.6f", x, y));
+        }
+
+        double tmp = x - Math.floor(x);
+        double x0, x1, y0, y1;
+
+        if(tmp < 0.5) {
+            x0 = (int) Math.floor(x);
+            x1 = x0 + 0.5;
+        } else {
+            x0 = (int) Math.floor(x) + 0.5;
+            x1 = x0 + 0.5;
+        }
+
+        tmp = y - Math.floor(y);
+
+        if(tmp < 0.5) {
+            y0 = (int) Math.floor(y);
+            y1 = y0 + 0.5;
+        } else {
+            y0 = (int) Math.floor(y) + 0.5;
+            y1 = y0 + 0.5;
+        }
+
+        if (!isValidPoint(x0, y0) ||
+                !isValidPoint(x1, y1)) {
+            return -1;
+        }
+
+        String first    = String.format("%.6f,%.6f", x0, y0);
+        String second   = String.format("%.6f,%.6f", x0, y1);
+        String third    = String.format("%.6f,%.6f", x1, y0);
+        String fourth   = String.format("%.6f,%.6f", x1, y1);
+
+        double f00 = lookupTable.getOrDefault(first, Double.NaN);
+        double f01 = lookupTable.getOrDefault(second, Double.NaN);
+        double f10 = lookupTable.getOrDefault(third, Double.NaN);
+        double f11 = lookupTable.getOrDefault(fourth, Double.NaN);
+
+        double value = (f00 * (x1 - x) * (y1 - y) +
+                f10 * (x - x0) * (y1 - y) +
+                f01 * (x1 - x) * (y - y0) +
+                f11 * (x - x0) * (y - y0));
+
+        double r1 = ((x1 - x)/(x1 - x0) * f00) + ((x - x0)/(x1 - x0) * f10);
+        double r2 = ((x1 - x)/(x1 - x0) * f01) + ((x - x0)/(x1 - x0) * f11);
+
+        double p = ((y1 - y)/(y1 - y0) * r1) + ((y - y0)/(y1 - y0) * r2);
+
+        value = (((f00)/((x1 - x0) * (y1 - y0))) * (x1 - x) * (y1 - y))
+                + (((f10)/((x1 - x0) * (y1 - y0))) * (x - x1) * (y1 - y))
+                + (((f01)/((x1 - x0) * (y1 - y0))) * (x1 - x) * (y - y0))
+                + (((f11)/((x1 - x0) * (y1 - y0))) * (x - x0) * (y - y0));
+
+        value = f00 * (x1 - x) * (y1 - y)
+                + f10 * (x - x0) * (y1 - y)
+                + f01 * (x1 - x) * (y - y0)
+                + f11 * (x - x0) * (y - y0)
+                / ((x1 - x0) * (y1 - y0));
+
+
+        return value;
+    }
+
+
     public static void main(String[] args) throws Exception{
         System.out.println("INIT");
         init();
+
+        boolean updateTable = false;
         System.out.println("FIND");
-        long a = System.currentTimeMillis();
-        for(int i = 0; i < 500; i++){
+        //long a = System.currentTimeMillis();
+        /*for(int i = 0; i < 500; i++){
             getRegion(58.79,-150.80);
         }
-        System.out.println(getRegion(33.78,135.74));
-        System.err.println(System.currentTimeMillis()-a);
+        System.out.println(getRegion(33.78,135.74));*/
+        double lat = 53.716646,
+                lon = -33.199733;
+        assert shorelineLookup != null;
+        double interpolation = interpolate(lat, lon, shorelineLookup);
+
+        if (Double.isNaN(interpolation)){
+            System.err.println("Values couldn't be found in the lookup table, updating...");
+            interpolation = getShorelineDistance(lat,lon);
+            shorelineLookup.put(String.format("%.6f,%.6f", lat, lon), interpolation);
+            updateTable = false;
+        }
+        System.out.println(interpolation);
+
+        if(updateTable) LookupTableIO.exportLookupTableToFile(shorelineLookup);
+
+        double start = System.currentTimeMillis();
+        interpolation = interpolate(lat, lon, shorelineLookup);
+        double end = System.currentTimeMillis();
+        System.out.println("Calculation using lookup table took " + (end - start) + "ms");
+        System.out.println("Result is: " + interpolation);
+
+        start = System.currentTimeMillis();
+        interpolation = getShorelineDistance(lat, lon);
+        end = System.currentTimeMillis();
+        System.out.println("Calculation using legacy approach took " + (end - start) + "ms");
+        System.out.println("Result is: " + interpolation);
+
     }
 
     public static void parseGeoJson(String path, ArrayList<Polygon> raw, ArrayList<Region> regions, List<String> remove) throws IOException {
