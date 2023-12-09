@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class Earthquake implements Regional, Warnable {
 
 	private final UUID uuid;
@@ -143,4 +146,50 @@ public class Earthquake implements Regional, Warnable {
 	public UUID getUuid() {
 		return uuid;
 	}
+
+     public JSONObject getGeoJSON() {
+        JSONObject earthquakeJSON = new JSONObject();
+
+        earthquakeJSON.put("type", "Feature");
+        earthquakeJSON.put("id", getUuid());
+
+        JSONObject properties = new JSONObject();
+        //properties.put("lastupdate", quake.get());
+        //properties.put("magtype", quake.getMagnitudeType());
+        properties.put("evtype", "earthquake"); // TODO: this will need to be changed when there are other event types.
+        properties.put("lon", getLon());
+        properties.put("auth", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("lat", getLat());
+        properties.put("depth", getDepth());
+        properties.put("unid", getUuid());
+
+        //round to 1 decimal place
+        properties.put("mag", Math.round(getMag() * 10.0) / 10.0);
+
+        Long millisOrigin = getOrigin();
+        String timeOrigin = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new java.util.Date(millisOrigin));
+        properties.put("time", timeOrigin);
+
+        properties.put("source_id", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("flynn_region", getRegion());
+
+        earthquakeJSON.put("properties", properties);
+
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "Point");
+
+        JSONArray coordinates = new JSONArray();
+        coordinates.put(getLon());
+        coordinates.put(getLat());
+        coordinates.put(getDepth()*-1000); // convert km to m and flip it to create altitude in meters
+
+        geometry.put("coordinates", coordinates);
+
+        earthquakeJSON.put("geometry", geometry);
+
+        return earthquakeJSON;
+     }
+
+
 }
