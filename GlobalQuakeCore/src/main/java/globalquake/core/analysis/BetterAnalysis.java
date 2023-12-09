@@ -30,8 +30,6 @@ public class BetterAnalysis extends Analysis {
     private double specialAverage;
     private double thirdAverage;
     private long eventTimer;
-    private double offset;
-
 
 
     public static final double min_frequency = 2.0;
@@ -110,7 +108,6 @@ public class BetterAnalysis extends Analysis {
         shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
         mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
         thirdAverage -= (thirdAverage - absFilteredV) / (getSampleRate() * 30.0);
-        offset -= (offset - filteredV) / (getSampleRate() * 30.0);
 
         if (absFilteredV > specialAverage) {
             specialAverage = absFilteredV;
@@ -166,7 +163,7 @@ public class BetterAnalysis extends Analysis {
             sensitivity = DEFAULT_SENSITIVITY;
         }
 
-        double counts = (filteredV - offset) * (DEFAULT_SENSITIVITY / sensitivity) * 0.1;
+        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.06;
 
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
@@ -234,7 +231,6 @@ public class BetterAnalysis extends Analysis {
     public void reset() {
         _maxRatio = 0;
         _maxCounts = 0;
-        offset = 0.0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
