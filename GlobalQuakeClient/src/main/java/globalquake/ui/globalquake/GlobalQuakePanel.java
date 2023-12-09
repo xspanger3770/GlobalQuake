@@ -194,7 +194,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
             double dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            double pga = GeoUtils.pgaFunction(earthquake.getMag(), dist);
+            double pga = GeoUtils.pgaFunction(earthquake.getMag(), dist, earthquake.getDepth());
             if(pga > maxPGA){
                 maxPGA = pga;
 
@@ -211,7 +211,7 @@ public class GlobalQuakePanel extends GlobePanel {
             quake = createDebugQuake();
 
             double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist);
+            maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist, quake.getDepth());
         }
 
 

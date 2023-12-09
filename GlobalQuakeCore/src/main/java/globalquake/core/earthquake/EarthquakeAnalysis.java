@@ -985,12 +985,19 @@ public class EarthquakeAnalysis {
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
 
-            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul) + getSensorTypeCorrection(event);
+            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
+            magnitude += getSensorTypeCorrection(event);
+            magnitude -= getDepthCorrection(hypocenter.depth);
 
             mags.add(new MagnitudeReading(magnitude, distGC));
         }
+
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
+    }
+
+    public static double getDepthCorrection(double depth) {
+        return Math.log10(depth + 40.0) - Math.log10(40.0);
     }
 
     private double getSensorTypeCorrection(Event event) {
