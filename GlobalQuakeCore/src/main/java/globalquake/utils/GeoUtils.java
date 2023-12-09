@@ -159,7 +159,7 @@ public interface GeoUtils {
 	}
 
 	static double pgaFunction(double mag, double distKm, double depth) {
-		return pgaFunctionGen2(mag + 1.50 * EarthquakeAnalysis.getDepthCorrection(depth), distKm);
+		return pgaFunctionGen2(mag + 2.0 * EarthquakeAnalysis.getDepthCorrection(depth), distKm);
 	}
 
 	static double pgaFunctionGen2(double mag, double distKm) {
