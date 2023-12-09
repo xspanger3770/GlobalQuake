@@ -151,6 +151,7 @@ public class Earthquake implements Regional, Warnable {
     public JSONObject getGeoJSON() {
         //logic for this is already implemented in ArchivedQuake
         ArchivedQuake archivedQuake = new ArchivedQuake(this);
+        archivedQuake.setRegion(this.getRegion());
         return archivedQuake.getGeoJSON();
      }
 

@@ -158,6 +158,10 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
 	}
 
+    public long getFinalUpdateMillis() {
+        return finalUpdateMillis;
+    }
+
 	@Override
 	public String toString() {
 		return "ArchivedQuake{" +
