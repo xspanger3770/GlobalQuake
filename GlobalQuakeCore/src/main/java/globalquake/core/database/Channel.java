@@ -11,7 +11,7 @@ public final class Channel implements Serializable {
     private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
-    private final InputType inputType;
+    private InputType inputType;
     private double sensitivity2;
     private double sampleRate;
     private double latitude;
@@ -112,6 +112,10 @@ public final class Channel implements Serializable {
         this.elevation = newChannel.elevation;
         if(sensitivity2 <= 0 && newChannel.sensitivity2 > 0){
             sensitivity2 = newChannel.sensitivity2;
+        }
+
+        if(inputType == InputType.UNKNOWN && newChannel.inputType != InputType.UNKNOWN){
+            inputType = newChannel.inputType;
         }
     }
 

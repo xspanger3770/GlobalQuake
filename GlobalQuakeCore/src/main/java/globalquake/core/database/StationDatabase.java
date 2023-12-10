@@ -21,7 +21,7 @@ public class StationDatabase implements Serializable {
     @Serial
     private static final long serialVersionUID = -679301102141884137L;
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     private int version = 0;
 
@@ -47,7 +47,7 @@ public class StationDatabase implements Serializable {
     }
 
     private void convert() {
-        if(version < 1){
+        if(version < VERSION){
             Logger.warn("Database updated!");
             networks.clear();
             stationSources.forEach(stationSource -> stationSource.setLastUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())));

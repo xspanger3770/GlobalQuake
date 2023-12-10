@@ -152,24 +152,39 @@ public class FDSNWSDownloader {
     }
 
     private static boolean isWithinDateRange(String startDateStr, String endDateStr) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        // Try parsing with 'Z' and without 'Z'
+        SimpleDateFormat dateFormatWithZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat dateFormatWithoutZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
         try {
-            Date startDate = dateFormat.parse(startDateStr);
+            Date startDate = parseDate(startDateStr, dateFormatWithZ, dateFormatWithoutZ);
             Date currentDate = new Date();
 
             if (endDateStr != null) {
-                Date endDate = dateFormat.parse(endDateStr);
+                Date endDate = parseDate(endDateStr, dateFormatWithZ, dateFormatWithoutZ);
                 // Check if the current date is within the start and end dates
-                return currentDate.after(startDate) && currentDate.before(endDate);
+                return (startDate == null || currentDate.after(startDate)) && currentDate.before(endDate);
             } else {
                 // If there is no end date, check if the current date is after the start date
-                return currentDate.after(startDate);
+                return startDate == null || currentDate.after(startDate);
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            Logger.error(e);
             // Handle the parsing exception if necessary
             return false;
         }
+    }
+
+    private static Date parseDate(String dateString, SimpleDateFormat... dateFormats) throws ParseException {
+        for (SimpleDateFormat dateFormat : dateFormats) {
+            try {
+                return dateFormat.parse(dateString);
+            } catch (ParseException ignored) {
+                // Try the next format if the current one fails
+            }
+        }
+        // If none of the formats match, throw an exception
+        throw new ParseException("Unparseable date: " + dateString, 0);
     }
 
     private static void parseChannels(
@@ -183,7 +198,8 @@ public class FDSNWSDownloader {
             Node channelNode = channels.item(k);
             String channel = channelNode.getAttributes().getNamedItem("code").getNodeValue();
 
-            String startDateStr = channelNode.getAttributes().getNamedItem("startDate").getNodeValue();
+            String startDateStr = channelNode.getAttributes().getNamedItem("startDate") != null ?
+                    channelNode.getAttributes().getNamedItem("startDate").getNodeValue() : null;
 
             // Get the "endDate" attribute if available
             String endDateStr = channelNode.getAttributes().getNamedItem("endDate") != null ?
