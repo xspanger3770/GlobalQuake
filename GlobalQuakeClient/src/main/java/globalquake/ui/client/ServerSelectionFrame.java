@@ -7,7 +7,6 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.intensity.IntensityTable;
 import globalquake.intensity.ShakeMap;
 import globalquake.main.Main;
 import globalquake.core.regions.Regions;

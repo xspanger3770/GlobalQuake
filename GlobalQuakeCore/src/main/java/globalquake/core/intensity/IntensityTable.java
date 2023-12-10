@@ -1,7 +1,5 @@
 package globalquake.core.intensity;
 
-import org.tinylog.Logger;
-
 public class IntensityTable {
 
     public static double getIntensity(double mag, double dist) {

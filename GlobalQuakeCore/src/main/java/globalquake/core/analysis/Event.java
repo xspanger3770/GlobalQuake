@@ -1,6 +1,5 @@
 package globalquake.core.analysis;
 
-import globalquake.core.database.InputType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.report.StationReport;
 

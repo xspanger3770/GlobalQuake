@@ -6,7 +6,6 @@ import globalquake.core.database.StationSource;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.intensity.IntensityTable;
 import globalquake.core.regions.Regions;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.intensity.ShakeMap;
