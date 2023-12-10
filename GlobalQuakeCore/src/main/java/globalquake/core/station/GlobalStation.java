@@ -3,6 +3,7 @@ package globalquake.core.station;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.Event;
+import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.events.specific.SeedlinkDataEvent;
 
@@ -18,20 +19,17 @@ public class GlobalStation extends AbstractStation {
 	private final Object recordsQueueLock = new Object();
 
 	private final SortedSet<DataRecord> records;
+	private final InputType inputType;
 
 	private Instant nextExpectedLog = null;
 
-	private final boolean isAccelerometer;
 
 	public GlobalStation(String networkCode, String stationCode, String channelName,
-                         String locationCode, double lat, double lon, double alt,
-                         int id, SeedlinkNetwork seedlinkNetwork, double sensitivity) {
+						 String locationCode, double lat, double lon, double alt,
+						 int id, SeedlinkNetwork seedlinkNetwork, double sensitivity, InputType inputType) {
 		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork, sensitivity);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
-
-		// technically, G and M aren't really an accelerometers, but they behave similarly in terms of maximum intensity
-		this.isAccelerometer = channelName.length() >= 2 &&
-				(channelName.charAt(1) == 'N' || channelName.charAt(1) == 'G' || channelName.charAt(1) == 'M' || channelName.charAt(1) == 'L');
+		this.inputType = inputType;
 	}
 
 	public void addRecord(DataRecord dr) {
@@ -75,8 +73,8 @@ public class GlobalStation extends AbstractStation {
 	}
 
 	@Override
-	public boolean isAccelerometer() {
-		return isAccelerometer;
+	public InputType getInputType() {
+		return inputType;
 	}
 
 	private void process(DataRecord record) {

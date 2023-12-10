@@ -170,6 +170,7 @@ public class FDSNWSDownloader {
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
 
             double sensitivity = -1;
+            InputType inputType = InputType.UNKNOWN;
             try {
                 sensitivity = new BigDecimal(((Element) ((Element) (channelNode.getChildNodes()))
                         .getElementsByTagName("InstrumentSensitivity").item(0))
@@ -178,7 +179,9 @@ public class FDSNWSDownloader {
                 String inputUnits = ((Element)((Element) ((Element) (channelNode.getChildNodes()))
                         .getElementsByTagName("InstrumentSensitivity").item(0))
                         .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
-                // TODO
+
+                sensitivity *= getInputUnitsMultiplier(inputUnits);
+                inputType = getInputType(inputUnits);
             } catch (NullPointerException e) {
                 System.err.println(
                         "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel);
@@ -199,8 +202,41 @@ public class FDSNWSDownloader {
             }
 
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
-                    locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt, sensitivity);
+                    locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt, sensitivity, inputType);
         }
+    }
+
+    private static InputType getInputType(String inputUnits) {
+        if (inputUnits.equalsIgnoreCase("m") || inputUnits.equalsIgnoreCase("nm")){
+            return InputType.DISPLACEMENT;
+        }
+
+        if (inputUnits.equalsIgnoreCase("m/s") || inputUnits.equalsIgnoreCase("nm/s")){
+            return InputType.VELOCITY;
+        }
+
+        if (inputUnits.equalsIgnoreCase("m/s**2") || inputUnits.equalsIgnoreCase("nm/s**2")) {
+            return InputType.ACCELERATION;
+        }
+
+        Logger.warn("Unknown input units: %s".formatted(inputUnits));
+        return InputType.UNKNOWN;
+    }
+
+    private static double getInputUnitsMultiplier(String inputUnits) {
+        if (inputUnits.equalsIgnoreCase("nm")){
+            return 1E9;
+        }
+
+        if (inputUnits.equalsIgnoreCase("nm/s")){
+            return 1E9;
+        }
+
+        if (inputUnits.equalsIgnoreCase("nm/s**2")) {
+            return 1E9;
+        }
+
+        return 1.0;
     }
 
     private static boolean isSupported(String channel) {
@@ -219,10 +255,10 @@ public class FDSNWSDownloader {
             List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
             String stationCode, String stationSite, String channelCode, String locationCode,
             double lat, double lon, double alt, double sampleRate,
-            double stationLat, double stationLon, double stationAlt, double sensitivity) {
+            double stationLat, double stationLon, double stationAlt, double sensitivity, InputType inputType) {
         Network network = StationDatabase.getOrCreateNetwork(result, networkCode, networkDescription);
         Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, stationLat, stationLon, stationAlt);
-        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource, sensitivity);
+        StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource, sensitivity, inputType);
     }
 
     public static String obtainElement(Node item, String name, String defaultValue) {

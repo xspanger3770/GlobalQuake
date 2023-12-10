@@ -49,22 +49,33 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties)) * Settings.stationsSizeMul;
 
-        if(!Settings.stationsTriangles) {
-            renderer.createCircle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size, 0, 30);
-        }else{
-            renderer.createTriangle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size * 1.41, 0, Settings.invertAccelerometers && entity.getOriginal().isAccelerometer() ? 180 : 0);
+        switch (entity.getOriginal().getInputType()){
+            case UNKNOWN ->
+                    renderer.createCircle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size, 0, 30);
+            case VELOCITY ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 0);
+            case ACCELERATION ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 180);
+            case DISPLACEMENT ->
+                    renderer.createSquare(elementStationSquare.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size * (Settings.stationsTriangles ? 2.0 : 1.75), 0);
+                size * 2.0, 0);
     }
 
     @Override

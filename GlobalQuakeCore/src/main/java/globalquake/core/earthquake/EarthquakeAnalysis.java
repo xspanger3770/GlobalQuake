@@ -991,7 +991,6 @@ public class EarthquakeAnalysis {
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
 
             double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
-            magnitude += getSensorTypeCorrection(event);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
             mags.add(new MagnitudeReading(magnitude, distGC));
@@ -1003,10 +1002,6 @@ public class EarthquakeAnalysis {
 
     public static double getDepthCorrection(double depth) {
         return Math.log10(depth + 160.0) - Math.log10(160.0);
-    }
-
-    private double getSensorTypeCorrection(Event event) {
-        return event.isFromAccelerometer() ? 0.0 : 0.0;
     }
 
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {

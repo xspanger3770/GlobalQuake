@@ -1,6 +1,7 @@
 package globalquake.core.analysis;
 
 import globalquake.core.Settings;
+import globalquake.core.database.InputType;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -47,6 +48,9 @@ public class BetterAnalysis extends Analysis {
     public static final double DEFAULT_SENSITIVITY = 1E9;
 
     double countsSum = 0.0;
+    private double lastCounts;
+
+    private boolean lastCountsInitialised = false;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -127,7 +131,7 @@ public class BetterAnalysis extends Analysis {
                 ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                 if (!_logs.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs, getStation().isAccelerometer());
+                    Event event = new Event(this, time, _logs);
                     getDetectedEvents().add(0, event);
                 }
             }
@@ -165,10 +169,17 @@ public class BetterAnalysis extends Analysis {
 
         double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.07;
 
+        double derived = lastCountsInitialised ? (counts - lastCounts) * getSampleRate() : 0;
+
+        lastCounts = counts;
+        lastCountsInitialised = true;
+
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
 
-        double countsResult = Math.abs(getStation().isAccelerometer() ? countsSum : counts);
+        double countsResult = Math.abs(
+                getStation().getInputType() == InputType.ACCELERATION ? countsSum :
+                getStation().getInputType() == InputType.VELOCITY ? counts : derived);
 
         if(countsResult > _maxCounts){
             _maxCounts = countsResult;
@@ -239,6 +250,7 @@ public class BetterAnalysis extends Analysis {
         initialRatioCnt = 0;
         numRecords = 0;
         latestLogTime = 0;
+        lastCountsInitialised = false;
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {

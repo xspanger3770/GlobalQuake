@@ -2,6 +2,7 @@ package globalquake.core.training;
 
 import globalquake.core.Settings;
 import globalquake.core.analysis.Event;
+import globalquake.core.database.InputType;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
@@ -38,8 +39,8 @@ public class ClusterAnalysisTraining {
         }
 
         @Override
-        public boolean isAccelerometer() {
-            return false;
+        public InputType getInputType() {
+            return InputType.UNKNOWN;
         }
     }
 

@@ -1,5 +1,6 @@
 package globalquake.core.analysis;
 
+import globalquake.core.database.InputType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.report.StationReport;
 
@@ -28,8 +29,6 @@ public class Event implements Serializable {
 
 	private boolean valid;
 
-	private boolean fromAccelerometer;
-
 	public Cluster assignedCluster;
 	private int updatesCount;
 	public StationReport report;
@@ -40,13 +39,12 @@ public class Event implements Serializable {
 	private boolean isSWave;
 	private double maxCounts;
 
-	public Event(Analysis analysis, long start, List<Log> logs, boolean fromAccelerometer) {
+	public Event(Analysis analysis, long start, List<Log> logs) {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
 		this.firstLogTime = logs.get(logs.size() - 1).time();
 		this.valid = true;
-		this.fromAccelerometer = fromAccelerometer;
 	}
 
 	// used in emulator
@@ -59,10 +57,6 @@ public class Event implements Serializable {
 		this.assignedCluster = null;
 		this.updatesCount = 1;
 		this.isSWave = false;
-	}
-
-	public boolean isFromAccelerometer() {
-		return fromAccelerometer;
 	}
 
 	public void end(long end) {

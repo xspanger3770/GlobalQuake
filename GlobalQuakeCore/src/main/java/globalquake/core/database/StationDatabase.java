@@ -157,7 +157,8 @@ public class StationDatabase implements Serializable {
 
     @SuppressWarnings("UnusedReturnValue")
     public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode,
-                                             double lat, double lon, double alt, double sampleRate, StationSource stationSource, double sensitivity) {
+                                             double lat, double lon, double alt, double sampleRate,
+                                             StationSource stationSource, double sensitivity, InputType inputType) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
             if(channel.getSensitivity() <= 0 && sensitivity > 0){
@@ -166,7 +167,7 @@ public class StationDatabase implements Serializable {
             return channel;
         }
 
-        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource, sensitivity);
+        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource, sensitivity, inputType);
         station.getChannels().add(channel);
 
         return channel;

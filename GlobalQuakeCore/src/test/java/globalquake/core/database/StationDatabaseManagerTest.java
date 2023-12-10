@@ -22,7 +22,7 @@ public class StationDatabaseManagerTest {
     public void testAcceptChannel(){
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
 
         StationDatabase stationDatabase = new StationDatabase();
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
@@ -38,7 +38,7 @@ public class StationDatabaseManagerTest {
     public void testAcceptAnotherChannel(){
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
 
         StationDatabase stationDatabase = new StationDatabase();
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel);
@@ -49,7 +49,7 @@ public class StationDatabaseManagerTest {
         assertTrue(opt.isPresent());
         assertEquals(1, stationDatabase.getNetworks().get(0).getStations().stream().findAny().get().getChannels().size());
 
-        Channel dummyChannel2 = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1);
+        Channel dummyChannel2 = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1, InputType.UNKNOWN);
         stationDatabase.acceptChannel(dummyNetwork, dummyStation, dummyChannel2);
 
         assertEquals(1, stationDatabase.getNetworks().size());
@@ -68,9 +68,9 @@ public class StationDatabaseManagerTest {
         StationSource stationSource2 = new StationSource("2", "");
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1, -1);
-        Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2, -1);
-        Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1, -1, InputType.UNKNOWN);
+        Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2, -1, InputType.UNKNOWN);
+        Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2, -1, InputType.UNKNOWN);
 
         StationDatabase stationDatabase = new StationDatabase();
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
@@ -116,9 +116,9 @@ public class StationDatabaseManagerTest {
         StationSource stationSource2 = new StationSource("2", "");
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1, -1);
-        Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2, -1);
-        Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource1, -1, InputType.UNKNOWN);
+        Channel dummyChannelDup = new Channel("coolChannel", "00", 50, 0, 0, 0, stationSource2, -1, InputType.UNKNOWN);
+        Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2, -1, InputType.UNKNOWN);
         dummyChannel2.getSeedlinkNetworks().put(dummySeedlinkNetwork, 1000L);
         dummySeedlinkNetwork2.selectedStations = 10;
         dummySeedlinkNetwork.selectedStations = 100;
@@ -184,8 +184,8 @@ public class StationDatabaseManagerTest {
     public void testChannelUpdate(){
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1);
-        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1, InputType.UNKNOWN);
 
         dummyNetwork.getStations().add(dummyStation);
         dummyStation.getChannels().add(dummyChannel);
@@ -207,8 +207,8 @@ public class StationDatabaseManagerTest {
     public void testAcceptNetworks(){
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1);
-        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1, InputType.UNKNOWN);
 
         dummyNetwork.getStations().add(dummyStation);
         dummyStation.getChannels().add(dummyChannel);
@@ -223,8 +223,8 @@ public class StationDatabaseManagerTest {
         SeedlinkNetwork seedlinkNetwork = new SeedlinkNetwork("dummy", "D", 5);
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
-        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1);
-        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1);
+        Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
+        Channel dummyChannelNew = new Channel("coolChannel", "00", 50, 50, 0, 0, null, -1, InputType.UNKNOWN);
 
         dummyNetwork.getStations().add(dummyStation);
         dummyStation.getChannels().add(dummyChannel);
