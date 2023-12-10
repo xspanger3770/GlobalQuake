@@ -15,11 +15,12 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class FDSNWSDownloader {
 
@@ -150,6 +151,27 @@ public class FDSNWSDownloader {
         }
     }
 
+    private static boolean isWithinDateRange(String startDateStr, String endDateStr) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        try {
+            Date startDate = dateFormat.parse(startDateStr);
+            Date currentDate = new Date();
+
+            if (endDateStr != null) {
+                Date endDate = dateFormat.parse(endDateStr);
+                // Check if the current date is within the start and end dates
+                return currentDate.after(startDate) && currentDate.before(endDate);
+            } else {
+                // If there is no end date, check if the current date is after the start date
+                return currentDate.after(startDate);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // Handle the parsing exception if necessary
+            return false;
+        }
+    }
+
     private static void parseChannels(
             List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
             Element stationNode, String stationCode, String stationSite,
@@ -160,6 +182,17 @@ public class FDSNWSDownloader {
 
             Node channelNode = channels.item(k);
             String channel = channelNode.getAttributes().getNamedItem("code").getNodeValue();
+
+            String startDateStr = channelNode.getAttributes().getNamedItem("startDate").getNodeValue();
+
+            // Get the "endDate" attribute if available
+            String endDateStr = channelNode.getAttributes().getNamedItem("endDate") != null ?
+                    channelNode.getAttributes().getNamedItem("endDate").getNodeValue() : null;
+
+            if(!isWithinDateRange(startDateStr, endDateStr)){
+                continue;
+            }
+
             String locationCode = channelNode.getAttributes().getNamedItem("locationCode")
                     .getNodeValue();
             double lat = Double.parseDouble(
@@ -183,8 +216,8 @@ public class FDSNWSDownloader {
                 sensitivity *= getInputUnitsMultiplier(inputUnits);
                 inputType = getInputType(inputUnits);
             } catch (NullPointerException e) {
-                System.err.println(
-                        "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel);
+                Logger.debug(
+                        "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel+" @ "+stationSource.getUrl());
             }
 
             var item = ((Element) channelNode)
@@ -206,37 +239,50 @@ public class FDSNWSDownloader {
         }
     }
 
+    private static final Set<String> unknownUnits = new HashSet<>();
+
+    private static final Map<String, InputType> unitTypeMap = new HashMap<>();
+    private static final Map<String, Double> unitMultiplierMap = new HashMap<>();
+
+    static {
+        // Unit to InputType mapping
+        unitTypeMap.put("m", InputType.DISPLACEMENT);
+        unitTypeMap.put("nm", InputType.DISPLACEMENT);
+        unitTypeMap.put("mm", InputType.DISPLACEMENT);
+
+        unitTypeMap.put("m/s", InputType.VELOCITY);
+        unitTypeMap.put("nm/s", InputType.VELOCITY);
+        unitTypeMap.put("mm/s", InputType.VELOCITY);
+
+        unitTypeMap.put("m/s**2", InputType.ACCELERATION);
+        unitTypeMap.put("nm/s**2", InputType.ACCELERATION);
+        unitTypeMap.put("mm/s**2", InputType.ACCELERATION);
+
+        // Unit to Multiplier mapping
+        unitMultiplierMap.put("nm", 1E9);
+        unitMultiplierMap.put("nm/s", 1E9);
+        unitMultiplierMap.put("nm/s**2", 1E9);
+
+        unitMultiplierMap.put("mm", 1E3);
+        unitMultiplierMap.put("mm/s", 1E3);
+        unitMultiplierMap.put("mm/s**2", 1E3);
+
+        // other unidentified units: [volts, , m/s/s, counts, nt, none.specified, g, count, m/m, none, radians, rad/s, 1m/s**2, rad/sec, t, v, volt, r/s, kpa]
+    }
+
     private static InputType getInputType(String inputUnits) {
-        if (inputUnits.equalsIgnoreCase("m") || inputUnits.equalsIgnoreCase("nm")){
-            return InputType.DISPLACEMENT;
+        InputType inputType = unitTypeMap.getOrDefault(inputUnits.toLowerCase(), InputType.UNKNOWN);
+
+        if (inputType == InputType.UNKNOWN) {
+            unknownUnits.add(inputUnits.toLowerCase());
+            Logger.warn("Unknown input units: %s".formatted(Arrays.toString(unknownUnits.toArray())));
         }
 
-        if (inputUnits.equalsIgnoreCase("m/s") || inputUnits.equalsIgnoreCase("nm/s")){
-            return InputType.VELOCITY;
-        }
-
-        if (inputUnits.equalsIgnoreCase("m/s**2") || inputUnits.equalsIgnoreCase("nm/s**2")) {
-            return InputType.ACCELERATION;
-        }
-
-        Logger.warn("Unknown input units: %s".formatted(inputUnits));
-        return InputType.UNKNOWN;
+        return inputType;
     }
 
     private static double getInputUnitsMultiplier(String inputUnits) {
-        if (inputUnits.equalsIgnoreCase("nm")){
-            return 1E9;
-        }
-
-        if (inputUnits.equalsIgnoreCase("nm/s")){
-            return 1E9;
-        }
-
-        if (inputUnits.equalsIgnoreCase("nm/s**2")) {
-            return 1E9;
-        }
-
-        return 1.0;
+        return unitMultiplierMap.getOrDefault(inputUnits.toLowerCase(), 1.0);
     }
 
     private static boolean isSupported(String channel) {
@@ -246,7 +292,6 @@ public class FDSNWSDownloader {
         if(!(SUPPORTED_BANDS.contains(band))){
             return false;
         }
-
 
         return SUPPORTED_INSTRUMENTS.contains(instrument);
     }
