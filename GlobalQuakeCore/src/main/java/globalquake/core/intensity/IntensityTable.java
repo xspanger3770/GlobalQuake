@@ -3,7 +3,7 @@ package globalquake.core.intensity;
 public class IntensityTable {
 
     public static double getIntensity(double mag, double dist) {
-        mag = 1.2 * mag - (0.022) * mag * mag - 1;
+        mag = 1.2 * mag - (0.010) * mag * mag - 1.1;
         if (dist > 6000) {
             dist = 6000 + Math.pow(dist - 6000, 0.4) * 22;
         }
