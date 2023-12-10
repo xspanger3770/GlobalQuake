@@ -975,7 +975,7 @@ public class EarthquakeAnalysis {
         }
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
-            if (!event.isValid()) {
+            if (!event.isValid() || event.getMaxCounts() < 0) {
                 continue;
             }
             double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
