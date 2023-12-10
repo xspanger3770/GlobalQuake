@@ -1,9 +1,14 @@
 package globalquake.core.database;
 
+import org.tinylog.Logger;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -15,6 +20,10 @@ public class StationDatabase implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -679301102141884137L;
+
+    public static final int VERSION = 1;
+
+    private int version = 0;
 
     private final List<Network> networks = new ArrayList<>();
     private final List<SeedlinkNetwork> seedlinkNetworks = new ArrayList<>();
@@ -33,6 +42,18 @@ public class StationDatabase implements Serializable {
         databaseLock = new ReentrantReadWriteLock();
         databaseReadLock = databaseLock.readLock();
         databaseWriteLock = databaseLock.writeLock();
+
+        convert();
+    }
+
+    private void convert() {
+        if(version < 1){
+            Logger.warn("Database updated!");
+            networks.clear();
+            stationSources.forEach(stationSource -> stationSource.setLastUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())));
+        }
+
+        version = VERSION;
     }
 
     public StationDatabase() {

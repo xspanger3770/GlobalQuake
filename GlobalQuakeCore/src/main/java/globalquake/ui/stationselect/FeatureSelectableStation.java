@@ -1,6 +1,7 @@
 package globalquake.ui.stationselect;
 
 import globalquake.core.database.Channel;
+import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkCommunicator;
 import globalquake.core.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
@@ -43,10 +44,32 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
             entity.getRenderElement(0).setPolygon(new Polygon3D());
         }
 
-        renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
-                entity.getOriginal().getLatitude(),
-                entity.getOriginal().getLongitude(),
-                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0, 0);
+        double size = Math.min(50, renderer.pxToDeg(8.0, renderProperties));
+
+        InputType inputType = entity.getOriginal().getSelectedChannel() == null ? InputType.UNKNOWN : entity.getOriginal().getSelectedChannel().getInputType();
+
+        switch (inputType){
+            case UNKNOWN ->
+                    renderer.createCircle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size, 0, 30);
+            case VELOCITY ->
+                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 0);
+            case ACCELERATION ->
+                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 180);
+            case DISPLACEMENT ->
+                    renderer.createSquare(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0);
+        }
     }
 
     @Override
