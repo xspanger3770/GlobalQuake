@@ -21,7 +21,7 @@ public class StationDatabase implements Serializable {
     @Serial
     private static final long serialVersionUID = -679301102141884137L;
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     private int version = 0;
 

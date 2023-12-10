@@ -157,7 +157,8 @@ public class FDSNWSDownloader {
         SimpleDateFormat dateFormatWithoutZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         try {
-            Date startDate = parseDate(startDateStr, dateFormatWithZ, dateFormatWithoutZ);
+            Date startDate = startDateStr != null ?
+                    parseDate(startDateStr, dateFormatWithZ, dateFormatWithoutZ) : null;
             Date currentDate = new Date();
 
             if (endDateStr != null) {
@@ -166,10 +167,10 @@ public class FDSNWSDownloader {
                 return (startDate == null || currentDate.after(startDate)) && currentDate.before(endDate);
             } else {
                 // If there is no end date, check if the current date is after the start date
-                return startDate == null || currentDate.after(startDate);
+                return (startDate == null || currentDate.after(startDate));
             }
         } catch (ParseException e) {
-            Logger.error(e);
+            e.printStackTrace();
             // Handle the parsing exception if necessary
             return false;
         }
