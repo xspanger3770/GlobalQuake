@@ -484,6 +484,11 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
+        if(bestHypocenter.magnitude == -999.0){
+            Logger.tag("Hypocs").debug("No magnitude!");
+            return;
+        }
+
         if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
             return;
@@ -1010,12 +1015,16 @@ public class EarthquakeAnalysis {
         int targetSize = (int) Math.max(25, mags.size() * 0.40);
         List<MagnitudeReading> list = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() < 5000 || list.size() < targetSize) {
+            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 8000.0) {
                 list.add(magnitudeReading);
             } else break;
         }
 
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
+
+        if(list.isEmpty()){
+            return -999.0;
+        }
 
         return list.get((int) ((list.size() - 1) * 0.5)).magnitude();
     }
