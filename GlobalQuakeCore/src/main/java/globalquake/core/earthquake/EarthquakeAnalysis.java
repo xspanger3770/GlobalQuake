@@ -1007,10 +1007,10 @@ public class EarthquakeAnalysis {
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
         mags.sort(Comparator.comparing(MagnitudeReading::distance));
 
-        int targetSize = (int) Math.max(25, mags.size() * 0.25);
+        int targetSize = (int) Math.max(25, mags.size() * 0.40);
         List<MagnitudeReading> list = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() < 1000 || list.size() < targetSize) {
+            if (magnitudeReading.distance() < 5000 || list.size() < targetSize) {
                 list.add(magnitudeReading);
             } else break;
         }
