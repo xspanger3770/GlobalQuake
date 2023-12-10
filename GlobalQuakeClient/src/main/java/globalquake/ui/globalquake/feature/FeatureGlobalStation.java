@@ -66,7 +66,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                             entity.getOriginal().getLongitude(),
                             size * 1.41, 0, 180);
             case DISPLACEMENT ->
-                    renderer.createSquare(elementStationSquare.getPolygon(),
+                    renderer.createSquare(elementStationCircle.getPolygon(),
                             entity.getOriginal().getLatitude(),
                             entity.getOriginal().getLongitude(),
                             size * 1.41, 0);

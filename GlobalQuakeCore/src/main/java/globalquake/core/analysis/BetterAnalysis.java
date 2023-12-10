@@ -177,7 +177,7 @@ public class BetterAnalysis extends Analysis {
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
 
-        double countsResult = Math.abs(
+        double countsResult = sensitivity <= 0 ? -1 : Math.abs(
                 getStation().getInputType() == InputType.ACCELERATION ? countsSum :
                 getStation().getInputType() == InputType.VELOCITY ? counts : derived);
 
