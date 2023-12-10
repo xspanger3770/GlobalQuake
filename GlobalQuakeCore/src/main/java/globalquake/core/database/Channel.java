@@ -11,7 +11,7 @@ public final class Channel implements Serializable {
     private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
-    private double sensitivity;
+    private double sensitivity2;
     private double sampleRate;
     private double latitude;
     private double longitude;
@@ -37,7 +37,7 @@ public final class Channel implements Serializable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
-        this.sensitivity = sensitivity;
+        this.sensitivity2 = sensitivity;
         this.getStationSources().add(stationSource);
     }
 
@@ -108,8 +108,8 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
-        if(sensitivity <= 0 && newChannel.sensitivity > 0){
-            sensitivity = newChannel.sensitivity;
+        if(sensitivity2 <= 0 && newChannel.sensitivity2 > 0){
+            sensitivity2 = newChannel.sensitivity2;
         }
     }
 
@@ -119,10 +119,10 @@ public final class Channel implements Serializable {
     }
 
     public double getSensitivity() {
-        return sensitivity;
+        return sensitivity2;
     }
 
     public void setSensitivity(double sensitivity) {
-        this.sensitivity = sensitivity;
+        this.sensitivity2 = sensitivity;
     }
 }

@@ -5,9 +5,9 @@ import org.tinylog.Logger;
 public class IntensityTable {
 
     public static double getIntensity(double mag, double dist) {
-        mag = 1.2 * mag - 0.022 * mag * mag - 1;
-        if (dist > 1200) {
-            dist = 1200 + Math.pow(dist - 1200, 0.4) * 22.0;
+        mag = 1.2 * mag - (0.022) * mag * mag - 1;
+        if (dist > 6000) {
+            dist = 6000 + Math.pow(dist - 6000, 0.4) * 22;
         }
         return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1000 + 1 * Math.pow(5, mag));
 

@@ -997,7 +997,7 @@ public class EarthquakeAnalysis {
     }
 
     public static double getDepthCorrection(double depth) {
-        return Math.log10(depth + 40.0) - Math.log10(40.0);
+        return Math.log10(depth + 160.0) - Math.log10(160.0);
     }
 
     private double getSensorTypeCorrection(Event event) {

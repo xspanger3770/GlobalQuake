@@ -178,8 +178,7 @@ public class FDSNWSDownloader {
                 String inputUnits = ((Element)((Element) ((Element) (channelNode.getChildNodes()))
                         .getElementsByTagName("InstrumentSensitivity").item(0))
                         .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
-
-                System.err.println(inputUnits);
+                // TODO
             } catch (NullPointerException e) {
                 System.err.println(
                         "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel);
