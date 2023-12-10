@@ -65,9 +65,9 @@ public class FDSNWSDownloader {
         List<String> supportedAttributes = downloadWadl(stationSource);
         URL url;
         if(supportedAttributes.contains("endafter")){
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=response&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
         } else {
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=response&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
         }
 
 
@@ -169,11 +169,17 @@ public class FDSNWSDownloader {
             double alt = Double.parseDouble(
                     ((Element) channelNode).getElementsByTagName("Elevation").item(0).getTextContent());
 
-            long sensitivity = -1;
+            double sensitivity = -1;
             try {
                 sensitivity = new BigDecimal(((Element) ((Element) (channelNode.getChildNodes()))
                         .getElementsByTagName("InstrumentSensitivity").item(0))
-                        .getElementsByTagName("Value").item(0).getTextContent()).longValue();
+                        .getElementsByTagName("Value").item(0).getTextContent()).doubleValue();
+
+                String inputUnits = ((Element)((Element) ((Element) (channelNode.getChildNodes()))
+                        .getElementsByTagName("InstrumentSensitivity").item(0))
+                        .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
+
+                System.err.println(inputUnits);
             } catch (NullPointerException e) {
                 System.err.println(
                         "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel);
@@ -214,7 +220,7 @@ public class FDSNWSDownloader {
             List<Network> result, StationSource stationSource, String networkCode, String networkDescription,
             String stationCode, String stationSite, String channelCode, String locationCode,
             double lat, double lon, double alt, double sampleRate,
-            double stationLat, double stationLon, double stationAlt, long sensitivity) {
+            double stationLat, double stationLon, double stationAlt, double sensitivity) {
         Network network = StationDatabase.getOrCreateNetwork(result, networkCode, networkDescription);
         Station station = StationDatabase.getOrCreateStation(network, stationCode, stationSite, stationLat, stationLon, stationAlt);
         StationDatabase.getOrCreateChannel(station, channelCode, locationCode, lat, lon, alt, sampleRate, stationSource, sensitivity);

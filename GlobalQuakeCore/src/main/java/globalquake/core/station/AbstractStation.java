@@ -28,7 +28,7 @@ public abstract class AbstractStation {
 	private final SeedlinkNetwork seedlinkNetwork;
 
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
-	private final long sensitivity;
+	private final double sensitivity;
 	public boolean disabled = false;
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
@@ -36,7 +36,7 @@ public abstract class AbstractStation {
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, double lat, double lon, double alt,
-						   int id, SeedlinkNetwork seedlinkNetwork, long sensitivity) {
+						   int id, SeedlinkNetwork seedlinkNetwork, double sensitivity) {
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
@@ -195,7 +195,7 @@ public abstract class AbstractStation {
 
 	public abstract boolean isAccelerometer();
 
-	public long getSensitivity() {
+	public double getSensitivity() {
 		return sensitivity;
 	}
 }
