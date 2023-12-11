@@ -34,7 +34,7 @@ public class ShakeMap {
 
     private void generate(Hypocenter hypocenter, int res) {
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
-        double pga = GeoUtils.pgaFunction(hypocenter.magnitude, hypocenter.depth);
+        double pga = GeoUtils.pgaFunction(hypocenter.magnitude, hypocenter.depth, hypocenter.depth);
         Level level = intensityScale.getLevel(pga);
         if(level == null){
             return;
@@ -64,7 +64,7 @@ public class ShakeMap {
                 LatLng latLng = h3.cellToLatLng(neighbor);
                 double dist = GeoUtils.geologicalDistance(hypocenter.lat, hypocenter.lon, -hypocenter.depth, latLng.lat, latLng.lng, 0);
                 dist = Math.max(0, dist - h3.getHexagonEdgeLengthAvg(res, LengthUnit.km) * 0.5);
-                double pga = GeoUtils.pgaFunction(hypocenter.magnitude, dist);
+                double pga = GeoUtils.pgaFunction(hypocenter.magnitude, dist, hypocenter.depth);
 
                 Level level = intensityScale.getLevel(pga);
                 if (level == null) {
