@@ -12,6 +12,7 @@ import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
+import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
@@ -57,7 +58,7 @@ public class GlobalQuakePanel extends GlobePanel {
     private static final Color BLUE_COLOR = new Color(20, 20, 160);
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = false; // todo dontfg
 
     private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;
@@ -90,7 +91,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+                        GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
                     }
 
                     if (e.getKeyCode() == KeyEvent.VK_U) {
@@ -99,7 +100,7 @@ public class GlobalQuakePanel extends GlobePanel {
                         if(ex != null) {
                             Earthquake earthquake = createDebugQuake();
                             ex.update(earthquake);
-                            GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
                         }
                     }
 
@@ -321,6 +322,10 @@ public class GlobalQuakePanel extends GlobePanel {
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
 
         hyp.usedEvents = 20;
+
+        hyp.magnitude = 6.1;
+        hyp.depth = (System.currentTimeMillis() % 10000)/10000.0 * 1000;
+
         hyp.correctEvents = 6;
 
         hyp.calculateQuality();
