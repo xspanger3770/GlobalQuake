@@ -64,6 +64,12 @@
             <version>0.10.0_pre17</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-api</artifactId>
+            <version>2.5.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
