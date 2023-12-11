@@ -6,7 +6,6 @@ import globalquake.core.database.StationSource;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.intensity.IntensityTable;
 import globalquake.core.regions.Regions;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.intensity.ShakeMap;
@@ -67,7 +66,7 @@ public class MainFrame extends GQFrame {
         }
     }
 
-    private static final double PHASES = 6.0;
+    private static final double PHASES = 5.0;
     private static int phase = 0;
 
     private void initAll() throws Exception {
@@ -89,9 +88,6 @@ public class MainFrame extends GQFrame {
             RuntimeApplicationException error = new RuntimeApplicationException("Failed to load sounds. Sound will be disabled", e);
             Main.getErrorHandler().handleWarning(error);
         }
-        getProgressBar().setString("Filling up intensity table...");
-        getProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
-        IntensityTable.init();
         getProgressBar().setString("Loading travel table...");
         getProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();

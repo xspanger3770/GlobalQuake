@@ -95,7 +95,7 @@ public class SoundsService {
                 Sounds.playSound(Sounds.intensify);
                 info.meets = true;
             }
-            double pga = GeoUtils.pgaFunction(cluster.getEarthquake().getMag(), cluster.getEarthquake().getDepth());
+            double pga = GeoUtils.pgaFunction(quake.getMag(), quake.getDepth(), quake.getDepth());
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
                 if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
@@ -106,7 +106,7 @@ public class SoundsService {
 
             double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
                     Settings.homeLat, Settings.homeLon, 0.0);
-            double pgaHome = GeoUtils.pgaFunction(quake.getMag(), distGEO);
+            double pgaHome = GeoUtils.pgaFunction(quake.getMag(), distGEO, quake.getDepth());
 
             if (pgaHome > info.maxPGAHome) {
                 double threshold = IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();

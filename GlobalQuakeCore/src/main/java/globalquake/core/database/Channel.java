@@ -11,6 +11,8 @@ public final class Channel implements Serializable {
     private static final long serialVersionUID = 6513039511077454262L;
     private final String code;
     private final String locationCode;
+    private InputType inputType;
+    private double sensitivity2;
     private double sampleRate;
     private double latitude;
     private double longitude;
@@ -29,13 +31,15 @@ public final class Channel implements Serializable {
     }
 
     public Channel(String code, String locationCode, double sampleRate, double latitude, double longitude,
-                   double elevation, StationSource stationSource) {
+                   double elevation, StationSource stationSource, double sensitivity, InputType inputType) {
         this.code = code;
         this.locationCode = locationCode;
         this.sampleRate = sampleRate;
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
+        this.sensitivity2 = sensitivity;
+        this.inputType = inputType;
         this.getStationSources().add(stationSource);
     }
 
@@ -106,6 +110,13 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
+        if(sensitivity2 <= 0 && newChannel.sensitivity2 > 0){
+            sensitivity2 = newChannel.sensitivity2;
+        }
+
+        if(inputType == InputType.UNKNOWN && newChannel.inputType != InputType.UNKNOWN){
+            inputType = newChannel.inputType;
+        }
     }
 
     public SeedlinkNetwork selectBestSeedlinkNetwork() {
@@ -113,4 +124,15 @@ public final class Channel implements Serializable {
                 seedlinkNetwork -> seedlinkNetwork.selectedStations)).orElse(null);
     }
 
+    public double getSensitivity() {
+        return sensitivity2;
+    }
+
+    public void setSensitivity(double sensitivity) {
+        this.sensitivity2 = sensitivity;
+    }
+
+    public InputType getInputType() {
+        return inputType;
+    }
 }

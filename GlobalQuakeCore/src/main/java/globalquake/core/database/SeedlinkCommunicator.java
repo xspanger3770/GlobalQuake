@@ -103,7 +103,7 @@ public class SeedlinkCommunicator {
 
                 if(channel != null){
                     var any = channel.getStationSources().stream().findAny();
-                    Channel newChannel = StationDatabase.getOrCreateChannel(station, channelName, locationCode, channel.getLatitude(), channel.getLongitude(), channel.getElevation(), channel.getSampleRate(), any.orElse(null));
+                    Channel newChannel = StationDatabase.getOrCreateChannel(station, channelName, locationCode, channel.getLatitude(), channel.getLongitude(), channel.getElevation(), channel.getSampleRate(), any.orElse(null), -1, InputType.UNKNOWN);
                     Logger.warn("Did not find exact match for [%s %s %s `%s`], assuming the location code is `%s`".formatted(networkCode, stationCode, channelName, locationCode, channel.getLocationCode()));
                     channel = newChannel;
                 }

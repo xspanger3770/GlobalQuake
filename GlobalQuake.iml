@@ -6,10 +6,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.GlobalQuakeServerData" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/Container" />
-      <excludeFolder url="file://$MODULE_DIR$/latest" />
-      <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/SeisTest" />
       <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/build" />
+      <excludeFolder url="file://$MODULE_DIR$/latest" />
+      <excludeFolder url="file://$MODULE_DIR$/out" />
     </content>
   </component>
 </module>

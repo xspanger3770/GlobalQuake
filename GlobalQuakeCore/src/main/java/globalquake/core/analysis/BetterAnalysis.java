@@ -1,6 +1,7 @@
 package globalquake.core.analysis;
 
 import globalquake.core.Settings;
+import globalquake.core.database.InputType;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -43,6 +44,13 @@ public class BetterAnalysis extends Analysis {
 
     private Butterworth filter;
     private double initialOffset;
+
+    public static final double DEFAULT_SENSITIVITY = 1E9;
+
+    double countsSum = 0.0;
+    private double lastCounts;
+
+    private boolean lastCountsInitialised = false;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -100,18 +108,19 @@ public class BetterAnalysis extends Analysis {
             return;
         }
         double filteredV = filter.filter(v - initialOffset);
-        shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
-        mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
-        thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
+        double absFilteredV = Math.abs(filteredV);
+        shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
+        mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
+        thirdAverage -= (thirdAverage - absFilteredV) / (getSampleRate() * 30.0);
 
-        if (Math.abs(filteredV) > specialAverage) {
-            specialAverage = Math.abs(filteredV);
+        if (absFilteredV > specialAverage) {
+            specialAverage = absFilteredV;
         } else {
-            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 40.0);
+            specialAverage -= (specialAverage - absFilteredV) / (getSampleRate() * 40.0);
         }
 
         if (shortAverage / longAverage < 4.0) {
-            longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
+            longAverage -= (longAverage - absFilteredV) / (getSampleRate() * 200.0);
         }
         double ratio = shortAverage / longAverage;
         if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
@@ -122,7 +131,7 @@ public class BetterAnalysis extends Analysis {
                 ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                 if (!_logs.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs, getStation().isAccelerometer());
+                    Event event = new Event(this, time, _logs, !getStation().isSensitivityValid());
                     getDetectedEvents().add(0, event);
                 }
             }
@@ -152,8 +161,38 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
+        double sensitivity = getStation().getSensitivity();
+
+        if(sensitivity <= 0){
+            sensitivity = -1.0;
+        }
+
+        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.07;
+
+        double derived = lastCountsInitialised ? (counts - lastCounts) * getSampleRate() : 0;
+
+        lastCounts = counts;
+        lastCountsInitialised = true;
+
+        countsSum += counts / getSampleRate();
+        countsSum *= 0.999;
+
+
+        double countsResult = !getStation().isSensitivityValid() ? -1 : Math.abs(
+                getStation().getInputType() == InputType.ACCELERATION ? countsSum :
+                getStation().getInputType() == InputType.VELOCITY ? counts : derived);
+
+        if(countsResult > _maxCounts){
+            _maxCounts = countsResult;
+        }
+
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
+
+            if(_maxRatioReset){
+                _maxCounts = countsResult;
+            }
+
             _maxRatioReset = false;
         }
 
@@ -167,7 +206,7 @@ public class BetterAnalysis extends Analysis {
             // from latest event to the oldest event
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                    e.log(currentLog);
+                    e.log(currentLog, countsResult);
                 }
             }
         }
@@ -203,6 +242,7 @@ public class BetterAnalysis extends Analysis {
     @Override
     public void reset() {
         _maxRatio = 0;
+        _maxCounts = 0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
@@ -211,6 +251,7 @@ public class BetterAnalysis extends Analysis {
         initialRatioCnt = 0;
         numRecords = 0;
         latestLogTime = 0;
+        lastCountsInitialised = false;
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {

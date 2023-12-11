@@ -3,6 +3,7 @@ package globalquake.ui.archived;
 import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.database.InputType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
@@ -42,7 +43,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         public static final AtomicInteger nextID = new AtomicInteger(0);
 
         public AnimatedStation(ArchivedQuakeAnimation animation, ArchivedEvent event) {
-            super("", "", "", "", event.lat(), event.lon(), 0, nextID.getAndIncrement(), null);
+            super("", "", "", "", event.lat(), event.lon(), 0, nextID.getAndIncrement(), null, -1);
             this.animation = animation;
             this.event = event;
         }
@@ -53,8 +54,8 @@ public class ArchivedQuakePanel extends GlobePanel {
         }
 
         @Override
-        public boolean isAccelerometer() {
-            return false;
+        public InputType getInputType() {
+            return InputType.UNKNOWN;
         }
 
         @Override
