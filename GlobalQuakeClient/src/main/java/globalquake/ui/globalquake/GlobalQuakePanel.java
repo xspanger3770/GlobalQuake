@@ -20,7 +20,6 @@ import globalquake.core.database.SeedlinkStatus;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
-import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
@@ -58,7 +57,7 @@ public class GlobalQuakePanel extends GlobePanel {
     private static final Color BLUE_COLOR = new Color(20, 20, 160);
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private static final boolean DEBUG = false; // todo dontfg
+    private static final boolean DEBUG = false;
 
     private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;

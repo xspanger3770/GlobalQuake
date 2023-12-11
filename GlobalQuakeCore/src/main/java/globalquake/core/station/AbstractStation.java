@@ -200,6 +200,7 @@ public abstract class AbstractStation {
 
 	public abstract InputType getInputType();
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean isSensitivityValid(){
 		return getInputType() != InputType.UNKNOWN && sensitivity > 0;
 	}
