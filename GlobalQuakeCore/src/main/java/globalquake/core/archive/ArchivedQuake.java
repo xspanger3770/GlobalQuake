@@ -186,12 +186,12 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 
         JSONObject properties = new JSONObject();
         properties.put("lastupdate", finalUpdateMillis);
-        //properties.put("magtype", quake.getMagnitudeType());
+        properties.put("magtype", "gqm");
         properties.put("evtype", "earthquake"); // TODO: this will need to be changed when there are other event types.
         properties.put("lon", getLon());
         properties.put("auth", "GlobalQuake"); // TODO: allow user to set this
         properties.put("lat", getLat());
-        properties.put("depth", getDepth());
+        properties.put("depth", Math.round(getDepth() * 1000.0) / 1000.0); //round to 3 decimal places
         properties.put("unid", getUuid());
         
         properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
@@ -211,7 +211,10 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
         JSONArray coordinates = new JSONArray();
         coordinates.put(getLon());
         coordinates.put(getLat());
-        coordinates.put(getDepth()*-1000); // convert km to m and flip it to create altitude in meters
+
+
+        //Depth is rounded to 3 decimal places and flipped to create altitude
+        coordinates.put(Math.round(getDepth() * 1000.0) / 1000.0 * -1);
 
         geometry.put("coordinates", coordinates);
 
