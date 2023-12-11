@@ -80,7 +80,7 @@ public class ClusterAnalysis {
                 for (Event event : station.getAnalysis().getDetectedEvents()) {
                     if (event.isValid() && event.isSWave() && !couldBeArrival(event, cluster.getEarthquake(), true, false, true)) {
                         double distGC = GeoUtils.greatCircleDistance(event.getLatFromStation(), event.getLonFromStation(), cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon());
-                        double expectedIntensity = IntensityTable.getMaxIntensity(cluster.getEarthquake().getMag(), GeoUtils.gcdToGeo(distGC));
+                        double expectedIntensity = IntensityTable.getIntensity(cluster.getEarthquake().getMag(), GeoUtils.gcdToGeo(distGC));
                         EventIntensityInfo eventIntensityInfo = new EventIntensityInfo(cluster, station, expectedIntensity);
                         EventIntensityInfo old = map.putIfAbsent(event, eventIntensityInfo);
                         if(old != null && eventIntensityInfo.expectedIntensity > old.expectedIntensity){
@@ -230,7 +230,7 @@ public class ClusterAnalysis {
                 angle);
 
 
-        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
+        double expectedIntensity = IntensityTable.getIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
         if (expectedIntensity < 3.0) {
             return false;
         }
@@ -297,7 +297,7 @@ public class ClusterAnalysis {
                 angle);
 
         if(considerIntensity) {
-            double expectedIntensity = IntensityTable.getMaxIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
+            double expectedIntensity = IntensityTable.getIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
             if (expectedIntensity < 3.0) {
                 return false;
             }

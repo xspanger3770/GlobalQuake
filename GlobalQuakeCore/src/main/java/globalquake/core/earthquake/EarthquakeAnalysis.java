@@ -484,6 +484,11 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
+        if(bestHypocenter.magnitude == -999.0){
+            Logger.tag("Hypocs").debug("No magnitude!");
+            return;
+        }
+
         if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
             return;
@@ -634,7 +639,7 @@ public class EarthquakeAnalysis {
                 continue;
             }
 
-            double expectedIntensity = IntensityTable.getMaxIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
+            double expectedIntensity = IntensityTable.getIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
             if (expectedIntensity < OBVIOUS_CORRECT_INTENSITY_THRESHOLD) {
                 continue;
             }
@@ -970,7 +975,7 @@ public class EarthquakeAnalysis {
         }
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
-            if (!event.isValid()) {
+            if (!event.isValid() || event.getMaxCounts() < 0) {
                 continue;
             }
             double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
@@ -985,30 +990,37 @@ public class EarthquakeAnalysis {
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
 
-            double magnitude = IntensityTable.getMagnitude(distGE, event.getMaxRatio() * mul) + getSensorTypeCorrection(event);
+            double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
+                    IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
+            magnitude -= getDepthCorrection(hypocenter.depth);
 
             mags.add(new MagnitudeReading(magnitude, distGC));
         }
+
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
     }
 
-    private double getSensorTypeCorrection(Event event) {
-        return event.isFromAccelerometer() ? 0.7 : 0.0;
+    public static double getDepthCorrection(double depth) {
+        return Math.log10(depth + 160.0) - Math.log10(160.0);
     }
 
     private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
         mags.sort(Comparator.comparing(MagnitudeReading::distance));
 
-        int targetSize = (int) Math.max(25, mags.size() * 0.25);
+        int targetSize = (int) Math.max(25, mags.size() * 0.40);
         List<MagnitudeReading> list = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() < 1000 || list.size() < targetSize) {
+            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 8000.0) {
                 list.add(magnitudeReading);
             } else break;
         }
 
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
+
+        if(list.isEmpty()){
+            return -999.0;
+        }
 
         return list.get((int) ((list.size() - 1) * 0.5)).magnitude();
     }

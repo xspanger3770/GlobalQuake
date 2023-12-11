@@ -3,6 +3,7 @@ package globalquake.core.station;
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
+import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkNetwork;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public abstract class AbstractStation {
 	private final SeedlinkNetwork seedlinkNetwork;
 
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
+	private final double sensitivity;
 	public boolean disabled = false;
 	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
 
@@ -35,7 +37,7 @@ public abstract class AbstractStation {
 
 	public AbstractStation(String networkCode, String stationCode, String channelName,
 						   String locationCode, double lat, double lon, double alt,
-						   int id, SeedlinkNetwork seedlinkNetwork) {
+						   int id, SeedlinkNetwork seedlinkNetwork, double sensitivity) {
 		this.networkCode = networkCode;
 		this.stationCode = stationCode;
 		this.channelName = channelName;
@@ -46,6 +48,7 @@ public abstract class AbstractStation {
 		this.analysis = new BetterAnalysis(this);
 		this.id = id;
 		this.seedlinkNetwork = seedlinkNetwork;
+		this.sensitivity = sensitivity;
 	}
 
 	public StationState getStateAt(long time) {
@@ -191,6 +194,13 @@ public abstract class AbstractStation {
 		return "%s %s %s %s".formatted(getNetworkCode(), getStationCode(), getChannelName(), getLocationCode());
 	}
 
-	public abstract boolean isAccelerometer();
+	public double getSensitivity() {
+		return sensitivity;
+	}
 
+	public abstract InputType getInputType();
+
+	public boolean isSensitivityValid(){
+		return getInputType() != InputType.UNKNOWN && sensitivity > 0;
+	}
 }

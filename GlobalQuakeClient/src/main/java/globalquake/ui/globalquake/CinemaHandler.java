@@ -240,7 +240,7 @@ public class CinemaHandler {
 
         double distGEO = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(),
                 Settings.homeLat, Settings.homeLon, 0.0);
-        double pgaHome = GeoUtils.pgaFunction(earthquake.getMag(), distGEO);
+        double pgaHome = GeoUtils.pgaFunction(earthquake.getMag(), distGEO, earthquake.getDepth());
 
         priority += pgaHome * 2000.0;
 

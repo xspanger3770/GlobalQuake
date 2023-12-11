@@ -9,7 +9,6 @@ import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.core.regions.Regions;
-import globalquake.core.intensity.*;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
 import globalquake.utils.Scale;
@@ -137,15 +136,12 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 8.0;
+    private static final double PHASES = 7.0;
     private static int phase = 0;
 
     public static void initAll() throws Exception{
         updateProgressBar("Loading regions...", (int) ((phase++ / PHASES) * 100.0));
         Regions.init();
-
-        updateProgressBar("Filling up intensity table...", (int) ((phase++ / PHASES) * 100.0));
-        IntensityTable.init();
 
         updateProgressBar("Loading scale...", (int) ((phase++ / PHASES) * 100.0));
         Scale.load();

@@ -16,6 +16,7 @@ public abstract class Analysis {
     public long numRecords;
     public long latestLogTime;
     public double _maxRatio;
+    public double _maxCounts;
     public boolean _maxRatioReset;
     public final Object previousLogsLock;
     private final ArrayList<Log> previousLogs;

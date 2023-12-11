@@ -1,5 +1,6 @@
 package globalquake.utils;
 
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import org.apache.commons.math3.util.FastMath;
 
@@ -157,11 +158,13 @@ public interface GeoUtils {
 		return FastMath.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	}
 
-	static double pgaFunction(double mag, double distKm) {
-		return pgaFunctionGen2(mag, distKm);
+	static double pgaFunction(double mag, double distKm, double depth) {
+		return pgaFunctionGen2(
+				mag + 0.5 * EarthquakeAnalysis.getDepthCorrection(depth),
+				distKm / (1.0 + 0.5 * EarthquakeAnalysis.getDepthCorrection(depth)));
 	}
 
-	static double pgaFunctionGen2(double mag, double distKm){
+	static double pgaFunctionGen2(double mag, double distKm) {
 		return Math.pow(10, mag * 0.575) / (0.36 * Math.pow(distKm, 1.25 + mag / 22.0) + 10);
 	}
 
