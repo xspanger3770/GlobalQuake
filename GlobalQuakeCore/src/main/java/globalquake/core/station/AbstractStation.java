@@ -199,4 +199,8 @@ public abstract class AbstractStation {
 	}
 
 	public abstract InputType getInputType();
+
+	public boolean isSensitivityValid(){
+		return getInputType() != InputType.UNKNOWN && sensitivity > 0;
+	}
 }

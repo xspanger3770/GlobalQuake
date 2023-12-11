@@ -131,7 +131,7 @@ public class BetterAnalysis extends Analysis {
                 ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
                 if (!_logs.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs);
+                    Event event = new Event(this, time, _logs, !getStation().isSensitivityValid());
                     getDetectedEvents().add(0, event);
                 }
             }
@@ -177,7 +177,8 @@ public class BetterAnalysis extends Analysis {
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
 
-        double countsResult = sensitivity <= 0 ? -1 : Math.abs(
+
+        double countsResult = !getStation().isSensitivityValid() ? -1 : Math.abs(
                 getStation().getInputType() == InputType.ACCELERATION ? countsSum :
                 getStation().getInputType() == InputType.VELOCITY ? counts : derived);
 
