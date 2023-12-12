@@ -92,7 +92,7 @@ public class ShakemapService {
 
     private ShakeMap createShakemap(Earthquake earthquake) {
         Hypocenter hyp = earthquake.getCluster().getPreviousHypocenter();
-        double mag = hyp.magnitude;
+        double mag = hyp.magnitude + hyp.depth / 200.0;
         return new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
     }
 

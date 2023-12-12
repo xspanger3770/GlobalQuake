@@ -170,8 +170,7 @@ public class FDSNWSDownloader {
                 return (startDate == null || currentDate.after(startDate));
             }
         } catch (ParseException e) {
-            e.printStackTrace();
-            // Handle the parsing exception if necessary
+            Logger.error(e);
             return false;
         }
     }

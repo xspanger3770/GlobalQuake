@@ -220,8 +220,7 @@ public class Regions {
             }
 
             GeoJsonObject o = f.getGeometry();
-            if (o instanceof org.geojson.Polygon) {
-                Polygon pol = (org.geojson.Polygon) o;
+            if (o instanceof Polygon pol) {
                 ArrayList<Path2D.Double> paths = new ArrayList<>();
                 ArrayList<Polygon> raws = new ArrayList<>();
 
