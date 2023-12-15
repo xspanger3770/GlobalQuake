@@ -214,7 +214,7 @@ public class EarthquakeAnalysis {
             return result;
         }
 
-        Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
+        Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getUuid() + " ====");
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
 
@@ -501,7 +501,7 @@ public class EarthquakeAnalysis {
         }
 
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
-            Logger.tag("Hypocs").debug("Search canceled for %d".formatted(cluster.getId()));
+            Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             return;
         }
 

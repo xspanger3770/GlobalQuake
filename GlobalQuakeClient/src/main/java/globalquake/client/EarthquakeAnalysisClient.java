@@ -125,7 +125,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
         hypocenter.magnitude = hypocenterData.magnitude();
 
-        Cluster cluster = new Cluster(0);
+        Cluster cluster = new Cluster();
         cluster.revisionID = hypocenterData.revisionID();
 
         if(advancedHypocenterData != null){

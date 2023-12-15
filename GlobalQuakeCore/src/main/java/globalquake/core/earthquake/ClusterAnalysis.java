@@ -491,7 +491,7 @@ public class ClusterAnalysis {
             boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 
             if ( notEnoughEvents || eqRemoved || tooOld) {
-                Logger.tag("Hypocs").debug("Cluster #" + cluster.getId() + " marked for removal");
+                Logger.tag("Hypocs").debug("Cluster #" + cluster.id + " marked for removal");
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
@@ -502,7 +502,7 @@ public class ClusterAnalysis {
     }
 
     private Cluster createCluster(ArrayList<Event> validEvents) {
-        Cluster cluster = new Cluster(nextClusterId.getAndIncrement());
+        Cluster cluster = new Cluster();
         for (Event ev : validEvents) {
             if (cluster.getAssignedEvents().putIfAbsent(ev.getAnalysis().getStation(), ev) == null) {
                 ev.assignedCluster = cluster;
@@ -512,7 +512,7 @@ public class ClusterAnalysis {
 
         cluster.calculateRoot();
 
-        Logger.tag("Hypocs").debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
+        Logger.tag("Hypocs").debug("New Cluster #" + cluster.id + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
 

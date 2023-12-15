@@ -10,11 +10,13 @@ import java.util.List;
 import java.awt.*;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Cluster implements Warnable {
 
-	private final int id;
+	private final UUID uuid;
 	private final Map<AbstractStation, Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
@@ -37,6 +39,12 @@ public class Cluster implements Warnable {
 
 	public final Color color = randomColor();
 
+	public int lastSentLevel = -1;
+
+	public final int id;
+
+	private static final AtomicInteger nextID = new AtomicInteger(0);
+
 	private Color randomColor() {
 		Random random = new Random();
 
@@ -49,8 +57,9 @@ public class Cluster implements Warnable {
 	}
 
 
-	public Cluster(int id) {
-		this.id = id;
+	public Cluster() {
+		this.uuid = UUID.randomUUID();
+		this.id = nextID.incrementAndGet();
 		this.assignedEvents = new ConcurrentHashMap<>();
 		this.updateCount = 0;
 		this.earthquake = null;
@@ -67,8 +76,8 @@ public class Cluster implements Warnable {
 		this.previousHypocenter = previousHypocenter;
 	}
 
-	public int getId() {
-		return id;
+	public UUID getUuid() {
+		return uuid;
 	}
 
 	public void addEvent() {
@@ -236,7 +245,7 @@ public class Cluster implements Warnable {
 	@Override
 	public String toString() {
 		return "Cluster{" +
-				"id=" + id +
+				"uuid=" + uuid +
 				", rootLat=" + rootLat +
 				", rootLon=" + rootLon +
 				", size=" + size +

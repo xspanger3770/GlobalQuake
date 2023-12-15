@@ -118,7 +118,7 @@ public class EarthquakeAnalysisTraining {
         }
 
         List<PickedEvent> pickedEvents = new ArrayList<>();
-        var cluster = new Cluster(0);
+        var cluster = new Cluster();
         cluster.updateCount = 6543541;
 
         Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, 200, 0, 0,0, null, null);
