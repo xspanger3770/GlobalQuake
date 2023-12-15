@@ -71,7 +71,7 @@ public class Sounds {
 	}
 
 	public static void load() throws Exception {
-		/*weak = loadSound("sounds/weak.wav");
+		weak = loadSound("sounds/weak.wav");
 		moderate = loadSound("sounds/moderate.wav");
 		shindo5 = loadSound("sounds/shindo5.wav");
 		intensify = loadSound("sounds/intensify.wav");
@@ -79,8 +79,8 @@ public class Sounds {
 		update = loadSound("sounds/update.wav");
 		warning = loadSound("sounds/warning.wav");
 		eew_warning = loadSound("sounds/eew_warning.wav");
-		felt = loadSound("sounds/felt.wav");*/
-		dong = loadSoundMP3("sounds/dong.mp3");
+		felt = loadSound("sounds/felt.wav");
+		dong = loadSound("sounds/dong.wav");
 	}
 
 	public static void playSound(Clip clip) {
@@ -103,12 +103,12 @@ public class Sounds {
 		clip.setFramePosition(0);
 		clip.loop(2);
         try {
-            Thread.sleep(10010101);
+            Thread.sleep(clip.getMicrosecondLength() / 1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-		//clip.stop();
+		clip.stop();
     }
 
 	public static void main(String[] args) throws InterruptedException {
