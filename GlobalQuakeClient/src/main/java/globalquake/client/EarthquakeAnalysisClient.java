@@ -13,6 +13,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import gqserver.api.Packet;
+import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
@@ -93,12 +94,12 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         }
     }
 
-    private void processQuakeDataPacket(HypocenterDataPacket hypocenterData) {
-        UUID uuid = hypocenterData.data().uuid();
+    private void processQuakeDataPacket(HypocenterDataPacket hypocenterDataPacket) {
+        UUID uuid = hypocenterDataPacket.data().uuid();
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
-        HypocenterData data = hypocenterData.data();
+        HypocenterData data = hypocenterDataPacket.data();
 
-        Earthquake newQuake = createEarthquake(data, hypocenterData.advancedHypocenterData());
+        Earthquake newQuake = createEarthquake(data, hypocenterDataPacket.advancedHypocenterData(), hypocenterDataPacket.clusterData());
 
         // ignore quake data that are too old
         if(shouldRemove(newQuake, 30)){
@@ -115,7 +116,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         }
     }
 
-    private Earthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData) {
+    private Earthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData, ClusterData clusterData) {
         DepthConfidenceInterval depthConfidenceInterval = advancedHypocenterData == null ? null : createDepthConfidenceInterval(advancedHypocenterData.depthIntervalData());
         var polygonConfidenceIntervals =advancedHypocenterData == null ? null : createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData());
 
@@ -125,7 +126,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
         hypocenter.magnitude = hypocenterData.magnitude();
 
-        Cluster cluster = new Cluster();
+        Cluster cluster = ((ClusterAnalysisClient)GlobalQuakeClient.instance.getClusterAnalysis()).getCluster(clusterData);
         cluster.revisionID = hypocenterData.revisionID();
 
         if(advancedHypocenterData != null){

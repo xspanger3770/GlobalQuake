@@ -18,6 +18,7 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import gqserver.api.Packet;
 import gqserver.api.ServerClient;
+import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.data.earthquake.ArchivedEventData;
 import gqserver.api.data.earthquake.ArchivedQuakeData;
 import gqserver.api.data.earthquake.EarthquakeInfo;
@@ -25,6 +26,7 @@ import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
+import gqserver.api.packets.cluster.ClusterPacket;
 import gqserver.api.packets.data.DataRequestPacket;
 import gqserver.api.packets.earthquake.*;
 import gqserver.api.packets.station.StationsInfoPacket;
@@ -218,6 +220,15 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
+    @Override
+    public void onClusterLevelup(ClusterLevelUpEvent event) {
+        broadcast(getEarthquakeReceivingClients(), new ClusterPacket(createClusterData(event.cluster())));
+    }
+
+    private ClusterData createClusterData(Cluster cluster) {
+        return new ClusterData(cluster.getUuid(), cluster.getRootLat(), cluster.getRootLon(), cluster.getLevel());
+    }
+
     private boolean isValid(DataRecord record) {
         Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
         Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
@@ -252,7 +263,7 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private Packet createQuakePacket(Earthquake earthquake) {
-        return new HypocenterDataPacket(createHypocenterData(earthquake), createAdvancedHypocenterData(earthquake));
+        return new HypocenterDataPacket(createHypocenterData(earthquake), createAdvancedHypocenterData(earthquake), createClusterData(earthquake.getCluster()));
     }
 
     private AdvancedHypocenterData createAdvancedHypocenterData(Earthquake earthquake) {

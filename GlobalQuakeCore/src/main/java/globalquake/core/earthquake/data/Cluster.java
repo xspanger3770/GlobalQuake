@@ -56,15 +56,19 @@ public class Cluster implements Warnable {
 		return new Color(red, 255, blue);
 	}
 
+	public Cluster(UUID uuid, double rootLat, double rootLon, int level) {
+		this.assignedEvents = new ConcurrentHashMap<>();
+		this.level = level;
+		this.id = nextID.incrementAndGet();
+		this.uuid = uuid;
+		this.rootLat = rootLat;
+		this.rootLon = rootLon;
+	}
 
 	public Cluster() {
-		this.uuid = UUID.randomUUID();
-		this.id = nextID.incrementAndGet();
-		this.assignedEvents = new ConcurrentHashMap<>();
+		this(UUID.randomUUID(), NONE, NONE, 0);
 		this.updateCount = 0;
 		this.earthquake = null;
-		this.rootLat = NONE;
-		this.rootLon = NONE;
 		this.lastUpdate = System.currentTimeMillis();
 	}
 
@@ -289,5 +293,10 @@ public class Cluster implements Warnable {
 	public void resetAnchor() {
 		this.anchorLat = rootLat;
 		this.anchorLon = rootLon;
+	}
+
+	public void updateLevel(int level) {
+		lastUpdate = System.currentTimeMillis();
+		this.level = level;
 	}
 }
