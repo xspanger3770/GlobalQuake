@@ -1,10 +1,14 @@
 package globalquake.sounds;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,11 +30,12 @@ public class Sounds {
 
 	public static boolean soundsAvailable = true;
 
-	private static final ExecutorService soundService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService soundService = Executors.newCachedThreadPool();
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
-			AudioInputStream audioIn = AudioSystem.getAudioInputStream(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(res)));
+			AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+					new BufferedInputStream(ClassLoader.getSystemClassLoader().getResource(res).openStream(), 65565));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
@@ -40,8 +45,33 @@ public class Sounds {
 		}
 	}
 
+	private static Clip loadSoundMP3(String res) throws FatalIOException {
+		try {
+			AudioInputStream audioIn = AudioSystem.getAudioInputStream(ClassLoader.getSystemClassLoader().getResource(res).openStream());
+
+			AudioFormat baseFormat = audioIn.getFormat();
+			AudioFormat decodedFormat = new AudioFormat(
+					AudioFormat.Encoding.PCM_SIGNED,
+					baseFormat.getSampleRate(),
+					16,
+					baseFormat.getChannels(),
+					baseFormat.getChannels() * 2,
+					baseFormat.getSampleRate(),
+					false);
+
+			AudioInputStream decodedAudioInputStream = AudioSystem.getAudioInputStream(decodedFormat, audioIn);
+
+			Clip clip = AudioSystem.getClip();
+			clip.open(decodedFormat, decodedAudioInputStream.readAllBytes(), 0, 1024 * 1024 * 4);
+			return clip;
+		} catch(Exception e){
+			soundsAvailable = false;
+			throw new FatalIOException("Failed to load sound: "+res, e);
+		}
+	}
+
 	public static void load() throws Exception {
-		weak = loadSound("sounds/weak.wav");
+		/*weak = loadSound("sounds/weak.wav");
 		moderate = loadSound("sounds/moderate.wav");
 		shindo5 = loadSound("sounds/shindo5.wav");
 		intensify = loadSound("sounds/intensify.wav");
@@ -49,9 +79,8 @@ public class Sounds {
 		update = loadSound("sounds/update.wav");
 		warning = loadSound("sounds/warning.wav");
 		eew_warning = loadSound("sounds/eew_warning.wav");
-		felt = loadSound("sounds/felt.wav");
-		dong = loadSound("sounds/dong.wav");
-
+		felt = loadSound("sounds/felt.wav");*/
+		dong = loadSoundMP3("sounds/dong.mp3");
 	}
 
 	public static void playSound(Clip clip) {
@@ -69,24 +98,33 @@ public class Sounds {
 	}
 
 	private static void playClipRuntime(Clip clip) {
-		var latch = new CountDownLatch(1);
-		clip.addLineListener(new LineListener() {
-			@Override
-			public void update(LineEvent event) {
-				if (event.getType().equals(LineEvent.Type.STOP)) {
-					clip.removeLineListener(this);
-					latch.countDown();
-				}
-			}
-		});
+		clip.stop();
+		clip.flush();
 		clip.setFramePosition(0);
-		clip.start();
-		try {
-			latch.await();
-		} catch (InterruptedException e) {
-			Logger.error(e);
-		}
-	}
+		clip.loop(2);
+        try {
+            Thread.sleep(10010101);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+		//clip.stop();
+    }
+
+	public static void main(String[] args) throws InterruptedException {
+		GlobalQuake.prepare(new File("./idk/"), null);
+
+        try {
+            load();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        for (Clip clip : Arrays.asList(dong)) {
+            playSound(clip);
+        };
+
+    }
 
 
 }
