@@ -37,7 +37,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         renderer.createNGon(elementRoot.getPolygon(),
                 entity.getOriginal().getRootLat(),
                 entity.getOriginal().getRootLon(),
-                size * 1.5, 0, 45, 90);
+                size * 1.5, 0, 0, 90);
     }
 
     @Override
@@ -65,8 +65,12 @@ public class FeatureCluster extends RenderFeature<Cluster> {
             return;
         }
 
+        graphics.setStroke(new BasicStroke(1f));
+
         graphics.setColor(getColorLevel(entity.getOriginal().getLevel()));
         graphics.fill(elementRoot.getShape());
+
+        graphics.setStroke(new BasicStroke(2f));
         graphics.setColor(Color.black);
         graphics.draw(elementRoot.getShape());
     }
