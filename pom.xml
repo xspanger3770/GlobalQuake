@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xspanger.GlobalQuake</groupId>
 	<artifactId>GlobalQuake</artifactId>
-	<version>0.10.0_pre17</version>
+	<version>0.10.0_pre18</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>GlobalQuakeClient</module>

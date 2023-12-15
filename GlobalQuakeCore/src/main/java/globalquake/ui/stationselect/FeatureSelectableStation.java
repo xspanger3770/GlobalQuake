@@ -1,7 +1,7 @@
 package globalquake.ui.stationselect;
 
+import globalquake.core.Settings;
 import globalquake.core.database.Channel;
-import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkCommunicator;
 import globalquake.core.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
@@ -12,6 +12,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
@@ -44,7 +45,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
             entity.getRenderElement(0).setPolygon(new Polygon3D());
         }
 
-        double size = Math.min(50, renderer.pxToDeg(8.0, renderProperties));
+        double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties));
 
         InputType inputType = entity.getOriginal().getSelectedChannel() == null ? InputType.UNKNOWN : entity.getOriginal().getSelectedChannel().getInputType();
 
@@ -74,7 +75,12 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<Station> entity, boolean propertiesChanged) {
-        return propertiesChanged;
+        return true;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<Station> entity, boolean propertiesChanged) {
+        return true;
     }
 
     @Override

@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.ClusterLevelUpEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -34,7 +34,6 @@ public class ClusterAnalysis {
     private final List<Cluster> clusters;
     private final List<Earthquake> earthquakes;
     private final List<AbstractStation> stations;
-    private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
     private static final double MERGE_THRESHOLD = 0.45;
 
@@ -491,10 +490,14 @@ public class ClusterAnalysis {
             boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 
             if ( notEnoughEvents || eqRemoved || tooOld) {
-                Logger.tag("Hypocs").debug("Cluster #" + cluster.getId() + " marked for removal");
+                Logger.tag("Hypocs").debug("Cluster #" + cluster.id + " marked for removal");
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
+                if(cluster.getLevel() != cluster.lastLevel){
+                    GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
+                    cluster.lastLevel = cluster.getLevel();
+                }
             }
         }
 
@@ -502,7 +505,7 @@ public class ClusterAnalysis {
     }
 
     private Cluster createCluster(ArrayList<Event> validEvents) {
-        Cluster cluster = new Cluster(nextClusterId.getAndIncrement());
+        Cluster cluster = new Cluster();
         for (Event ev : validEvents) {
             if (cluster.getAssignedEvents().putIfAbsent(ev.getAnalysis().getStation(), ev) == null) {
                 ev.assignedCluster = cluster;
@@ -512,7 +515,7 @@ public class ClusterAnalysis {
 
         cluster.calculateRoot();
 
-        Logger.tag("Hypocs").debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
+        Logger.tag("Hypocs").debug("New Cluster #" + cluster.id + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
 

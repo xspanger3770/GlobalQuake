@@ -10,11 +10,13 @@ import java.util.List;
 import java.awt.*;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Cluster implements Warnable {
 
-	private final int id;
+	private final UUID uuid;
 	private final Map<AbstractStation, Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
@@ -37,6 +39,12 @@ public class Cluster implements Warnable {
 
 	public final Color color = randomColor();
 
+	public int lastLevel = -1;
+
+	public final int id;
+
+	private static final AtomicInteger nextID = new AtomicInteger(0);
+
 	private Color randomColor() {
 		Random random = new Random();
 
@@ -48,14 +56,19 @@ public class Cluster implements Warnable {
 		return new Color(red, 255, blue);
 	}
 
-
-	public Cluster(int id) {
-		this.id = id;
+	public Cluster(UUID uuid, double rootLat, double rootLon, int level) {
 		this.assignedEvents = new ConcurrentHashMap<>();
+		this.level = level;
+		this.id = nextID.incrementAndGet();
+		this.uuid = uuid;
+		this.rootLat = rootLat;
+		this.rootLon = rootLon;
+	}
+
+	public Cluster() {
+		this(UUID.randomUUID(), NONE, NONE, 0);
 		this.updateCount = 0;
 		this.earthquake = null;
-		this.rootLat = NONE;
-		this.rootLon = NONE;
 		this.lastUpdate = System.currentTimeMillis();
 	}
 
@@ -67,8 +80,8 @@ public class Cluster implements Warnable {
 		this.previousHypocenter = previousHypocenter;
 	}
 
-	public int getId() {
-		return id;
+	public UUID getUuid() {
+		return uuid;
 	}
 
 	public void addEvent() {
@@ -153,18 +166,35 @@ public class Cluster implements Warnable {
 	public void calculateRoot() {
 		int n = 0;
 		double sumLat = 0;
-		double sumLon = 0;
+		double sumLonSin = 0;
+		double sumLonCos = 0;
+
 		for (Event e : getAssignedEvents().values()) {
-			if(!e.isValid()){
+			if (!e.isValid()) {
 				continue;
 			}
-			sumLat += e.getLatFromStation();
-			sumLon += e.getLonFromStation();
+
+			double lat = e.getLatFromStation();
+			double lon = Math.toRadians(e.getLonFromStation()); // Convert longitude to radians
+
+			sumLat += lat;
+			sumLonSin += Math.sin(lon); // Sum of sin values for longitude
+			sumLonCos += Math.cos(lon); // Sum of cos values for longitude
 			n++;
 		}
+
 		if (n > 0) {
 			rootLat = sumLat / n;
-			rootLon = sumLon / n;
+			double avgLonSin = sumLonSin / n;
+			double avgLonCos = sumLonCos / n;
+			rootLon = Math.toDegrees(Math.atan2(avgLonSin, avgLonCos)); // Convert average vector back to degrees
+
+			if (rootLon < -180) {
+				rootLon += 360; // Normalize longitude
+			} else if (rootLon > 180) {
+				rootLon -= 360; // Normalize longitude
+			}
+
 			anchorLat = rootLat;
 			anchorLon = rootLon;
 		}
@@ -216,7 +246,7 @@ public class Cluster implements Warnable {
 		this.earthquake = earthquake;
 	}
 
-	public int getActualLevel() {
+	public int getLevel() {
 		return level;
 	}
 
@@ -236,7 +266,7 @@ public class Cluster implements Warnable {
 	@Override
 	public String toString() {
 		return "Cluster{" +
-				"id=" + id +
+				"uuid=" + uuid +
 				", rootLat=" + rootLat +
 				", rootLon=" + rootLon +
 				", size=" + size +
@@ -258,5 +288,15 @@ public class Cluster implements Warnable {
 	@Override
 	public double getWarningLon() {
 		return getAnchorLon();
+	}
+
+	public void resetAnchor() {
+		this.anchorLat = rootLat;
+		this.anchorLon = rootLon;
+	}
+
+	public void updateLevel(int level) {
+		lastUpdate = System.currentTimeMillis();
+		this.level = level;
 	}
 }

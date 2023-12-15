@@ -214,7 +214,7 @@ public class EarthquakeAnalysis {
             return result;
         }
 
-        Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getId() + " ====");
+        Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getUuid() + " ====");
 
         double maxDepth = TauPTravelTimeCalculator.MAX_DEPTH;
 
@@ -501,7 +501,7 @@ public class EarthquakeAnalysis {
         }
 
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
-            Logger.tag("Hypocs").debug("Search canceled for %d".formatted(cluster.getId()));
+            Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             return;
         }
 
@@ -534,6 +534,7 @@ public class EarthquakeAnalysis {
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
                 }
                 cluster.setEarthquake(null);
+                cluster.resetAnchor();
             }
             Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), bestHypocenter));
         } else {
@@ -1038,7 +1039,7 @@ public class EarthquakeAnalysis {
 
     public static boolean shouldRemove(Earthquake earthquake, int marginSeconds){
         double store_minutes = STORE_TABLE[Math.max(0,
-                Math.min(STORE_TABLE.length - 1, (int) (earthquake.getMag() * 2.0)))] - marginSeconds / 60.0;
+                Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))] - marginSeconds / 60.0;
         return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                 && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }

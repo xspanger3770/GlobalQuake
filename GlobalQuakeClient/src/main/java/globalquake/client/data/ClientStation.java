@@ -1,6 +1,6 @@
 package globalquake.client.data;
 
-import globalquake.core.database.InputType;
+import gqserver.api.packets.station.InputType;
 import globalquake.core.station.GlobalStation;
 
 public class ClientStation extends GlobalStation {

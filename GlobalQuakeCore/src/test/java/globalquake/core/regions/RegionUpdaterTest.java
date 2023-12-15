@@ -28,7 +28,7 @@ public class RegionUpdaterTest {
 
     @Test
     public void testEarthquakeRegion(){
-        Earthquake earthquake = new Earthquake(new Cluster(0));
+        Earthquake earthquake = new Earthquake(new Cluster());
         assertNotNull(earthquake.getRegion());
     }
 

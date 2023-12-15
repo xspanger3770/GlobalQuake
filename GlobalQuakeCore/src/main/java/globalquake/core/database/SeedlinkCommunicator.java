@@ -1,6 +1,7 @@
 package globalquake.core.database;
 
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

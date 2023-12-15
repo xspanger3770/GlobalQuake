@@ -15,4 +15,6 @@ public class GlobalQuakeEventListener {
     public void onQuakeArchive(QuakeArchiveEvent quakeArchiveEvent) {}
 
     public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {}
+
+    public void onClusterLevelup(ClusterLevelUpEvent clusterLevelUpEvent) {}
 }

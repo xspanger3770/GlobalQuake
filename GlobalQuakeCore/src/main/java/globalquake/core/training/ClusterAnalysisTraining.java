@@ -2,7 +2,6 @@ package globalquake.core.training;
 
 import globalquake.core.Settings;
 import globalquake.core.analysis.Event;
-import globalquake.core.database.InputType;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
@@ -12,6 +11,7 @@ import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.utils.GeoUtils;
+import gqserver.api.packets.station.InputType;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;

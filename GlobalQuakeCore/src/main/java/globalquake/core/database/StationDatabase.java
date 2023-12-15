@@ -1,5 +1,6 @@
 package globalquake.core.database;
 
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 
 import java.io.IOException;

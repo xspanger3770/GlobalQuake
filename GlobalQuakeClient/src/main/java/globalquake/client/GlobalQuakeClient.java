@@ -81,6 +81,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         ((EarthquakeAnalysisClient)getEarthquakeAnalysis()).processPacket(socket, packet);
         ((EarthquakeArchiveClient)getArchive()).processPacket(socket, packet);
         ((GlobalStationManagerClient)getStationManager()).processPacket(socket, packet);
+        ((ClusterAnalysisClient)getClusterAnalysis()).processPacket(socket, packet);
     }
 
     @Override

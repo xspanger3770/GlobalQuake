@@ -150,7 +150,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
                     graphics.setColor(c);
                     graphics.draw(elementStationSquare.getShape());
-                    graphics.drawString("Cluster #"+event2.assignedCluster.getId(), (int) centerPonint.x + 12, _y);
+                    graphics.drawString("Cluster #"+event2.assignedCluster.id, (int) centerPonint.x + 12, _y);
                     _y += 16;
                 }
             }

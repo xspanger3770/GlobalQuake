@@ -1,10 +1,10 @@
 package globalquake.core.analysis;
 
 import globalquake.core.Settings;
-import globalquake.core.database.InputType;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 import uk.me.berndporr.iirj.Butterworth;
 

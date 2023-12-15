@@ -223,7 +223,7 @@ public class CinemaHandler {
 
     private CinemaTarget createTarget(Cluster cluster) {
         return new CinemaTarget(cluster.getAnchorLat(), cluster.getAnchorLon(), 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0),
-                1 + cluster.getActualLevel(), cluster);
+                1 + cluster.getLevel(), cluster);
     }
 
     private CinemaTarget createTarget(Earthquake earthquake) {
