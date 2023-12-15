@@ -7,7 +7,6 @@ import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.packets.cluster.ClusterPacket;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +23,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
         return clusters;
     }
 
-    public void processPacket(ClientSocket socket, Packet packet) {
+    public void processPacket(ClientSocket ignoredSocket, Packet packet) {
         if(packet instanceof ClusterPacket clusterPacket){
             getCluster(clusterPacket.clusterData());
         }

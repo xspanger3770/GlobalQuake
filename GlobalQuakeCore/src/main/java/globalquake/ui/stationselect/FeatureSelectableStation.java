@@ -1,6 +1,5 @@
 package globalquake.ui.stationselect;
 
-import globalquake.core.Settings;
 import globalquake.core.database.Channel;
 import globalquake.core.database.SeedlinkCommunicator;
 import globalquake.core.database.Station;

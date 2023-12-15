@@ -1,20 +1,13 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.client.GlobalQuakeClient;
 import globalquake.core.Settings;
-import globalquake.core.analysis.AnalysisStatus;
-import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.data.Cluster;
-import globalquake.core.station.AbstractStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
-import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
-import globalquake.ui.stationselect.FeatureSelectableStation;
-import globalquake.utils.Scale;
 
 import java.awt.*;
 import java.util.Collection;
@@ -83,7 +76,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return null;
     }
 
-    private static Color[] colors = {Color.WHITE, Color.BLUE, Color.GREEN, Color.YELLOW, Color.RED};
+    private static final Color[] colors = {Color.WHITE, Color.BLUE, Color.GREEN, Color.YELLOW, Color.RED};
 
     private Color getColorLevel(int level) {
         return level >= 0 && level < colors.length ? colors[level] : Color.GRAY;
