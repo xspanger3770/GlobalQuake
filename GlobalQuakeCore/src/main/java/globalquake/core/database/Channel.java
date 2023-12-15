@@ -1,5 +1,7 @@
 package globalquake.core.database;
 
+import gqserver.api.packets.station.InputType;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;

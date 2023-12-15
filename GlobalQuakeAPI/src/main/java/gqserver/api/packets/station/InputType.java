@@ -1,4 +1,4 @@
-package globalquake.core.database;
+package gqserver.api.packets.station;
 
 public enum InputType {
 

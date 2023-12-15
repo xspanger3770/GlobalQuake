@@ -3,9 +3,9 @@ package globalquake.core.station;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.Event;
-import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.events.specific.SeedlinkDataEvent;
+import gqserver.api.packets.station.InputType;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

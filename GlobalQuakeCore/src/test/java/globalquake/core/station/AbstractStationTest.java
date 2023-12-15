@@ -1,6 +1,6 @@
 package globalquake.core.station;
 
-import globalquake.core.database.InputType;
+import gqserver.api.packets.station.InputType;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

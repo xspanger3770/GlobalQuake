@@ -426,7 +426,8 @@ public class DataService extends GlobalQuakeEventListener {
                                 station.getLocationCode(),
                                 System.currentTimeMillis(),
                                 (float) station.getMaxRatio60S(),
-                                station.isInEventMode()
+                                station.isInEventMode(),
+                                station.getInputType()
                                 ));
             if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
                 client.sendPacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));

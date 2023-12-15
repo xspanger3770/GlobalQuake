@@ -1,6 +1,7 @@
 package globalquake.core.database;
 
 import globalquake.core.exception.FdnwsDownloadException;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

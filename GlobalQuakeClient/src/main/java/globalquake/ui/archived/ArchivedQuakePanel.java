@@ -3,7 +3,7 @@ package globalquake.ui.archived;
 import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
-import globalquake.core.database.InputType;
+import gqserver.api.packets.station.InputType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;

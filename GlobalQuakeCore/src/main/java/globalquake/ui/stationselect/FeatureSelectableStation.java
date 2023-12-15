@@ -1,7 +1,6 @@
 package globalquake.ui.stationselect;
 
 import globalquake.core.database.Channel;
-import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkCommunicator;
 import globalquake.core.database.Station;
 import globalquake.ui.globe.GlobeRenderer;
@@ -12,6 +11,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;

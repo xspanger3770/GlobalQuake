@@ -3,8 +3,8 @@ package globalquake.core.station;
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
-import globalquake.core.database.InputType;
 import globalquake.core.database.SeedlinkNetwork;
+import gqserver.api.packets.station.InputType;
 
 import java.util.ArrayList;
 import java.util.Deque;
