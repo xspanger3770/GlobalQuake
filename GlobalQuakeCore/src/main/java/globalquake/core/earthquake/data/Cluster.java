@@ -268,4 +268,9 @@ public class Cluster implements Warnable {
 	public double getWarningLon() {
 		return getAnchorLon();
 	}
+
+	public void resetAnchor() {
+		this.anchorLat = rootLat;
+		this.anchorLon = rootLon;
+	}
 }
