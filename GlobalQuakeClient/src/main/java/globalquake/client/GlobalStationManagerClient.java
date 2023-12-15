@@ -3,7 +3,6 @@ package globalquake.client;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import globalquake.client.data.ClientStation;
-import gqserver.api.packets.station.InputType;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
@@ -99,7 +98,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
                         infoData.lat(),
                         infoData.lon(),
                         infoData.index(),
-                        InputType.VELOCITY)); // TODO SEND
+                        infoData.sensorType()));
                 station.setIntensity(infoData.maxIntensity(), infoData.time(), infoData.eventMode());
                 stationsIdMap.put(infoData.index(), station);
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationCreateEvent(station));

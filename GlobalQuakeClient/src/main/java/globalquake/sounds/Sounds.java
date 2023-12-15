@@ -1,16 +1,12 @@
 package globalquake.sounds;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,7 +31,7 @@ public class Sounds {
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(
-					new BufferedInputStream(ClassLoader.getSystemClassLoader().getResource(res).openStream(), 65565));
+					new BufferedInputStream(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(res)).openStream(), 65565));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
@@ -85,21 +81,5 @@ public class Sounds {
 
 		clip.stop();
     }
-
-	public static void main(String[] args) throws InterruptedException {
-		GlobalQuake.prepare(new File("./idk/"), null);
-
-        try {
-            load();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Clip clip : Arrays.asList(dong)) {
-            playSound(clip);
-        };
-
-    }
-
 
 }

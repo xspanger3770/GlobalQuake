@@ -190,8 +190,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         RenderElement elementCross = entity.getRenderElement(4);
         if (elementCross.shouldDraw) {
-            QualityClass qualityClass = entity.getOriginal().getHypocenter().quality.getSummary();
-
             boolean isUncertain = isUncertain(entity.getOriginal().getHypocenter());
 
             if((System.currentTimeMillis() / 500) % 2 == 0 && !isUncertain) {

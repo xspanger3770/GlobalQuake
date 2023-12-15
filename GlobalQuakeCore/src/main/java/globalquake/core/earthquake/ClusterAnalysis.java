@@ -34,7 +34,6 @@ public class ClusterAnalysis {
     private final List<Cluster> clusters;
     private final List<Earthquake> earthquakes;
     private final List<AbstractStation> stations;
-    private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
     private static final double MERGE_THRESHOLD = 0.45;
 
