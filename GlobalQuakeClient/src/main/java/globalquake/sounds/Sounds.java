@@ -45,38 +45,13 @@ public class Sounds {
 		}
 	}
 
-	private static Clip loadSoundMP3(String res) throws FatalIOException {
-		try {
-			AudioInputStream audioIn = AudioSystem.getAudioInputStream(ClassLoader.getSystemClassLoader().getResource(res).openStream());
-
-			AudioFormat baseFormat = audioIn.getFormat();
-			AudioFormat decodedFormat = new AudioFormat(
-					AudioFormat.Encoding.PCM_SIGNED,
-					baseFormat.getSampleRate(),
-					16,
-					baseFormat.getChannels(),
-					baseFormat.getChannels() * 2,
-					baseFormat.getSampleRate(),
-					false);
-
-			AudioInputStream decodedAudioInputStream = AudioSystem.getAudioInputStream(decodedFormat, audioIn);
-
-			Clip clip = AudioSystem.getClip();
-			clip.open(decodedFormat, decodedAudioInputStream.readAllBytes(), 0, 1024 * 1024 * 4);
-			return clip;
-		} catch(Exception e){
-			soundsAvailable = false;
-			throw new FatalIOException("Failed to load sound: "+res, e);
-		}
-	}
-
 	public static void load() throws Exception {
 		weak = loadSound("sounds/weak.wav");
 		moderate = loadSound("sounds/moderate.wav");
 		shindo5 = loadSound("sounds/shindo5.wav");
 		intensify = loadSound("sounds/intensify.wav");
 		found = loadSound("sounds/found.wav");
-		update = loadSound("sounds/update.wav");
+		update = loadSound("sounds/update2.wav");
 		warning = loadSound("sounds/warning.wav");
 		eew_warning = loadSound("sounds/eew_warning.wav");
 		felt = loadSound("sounds/felt.wav");
