@@ -73,7 +73,7 @@ public class SoundsService {
             info.firstSound = true;
         }
 
-        int level = cluster.getActualLevel();
+        int level = cluster.getLevel();
         if (level > info.maxLevel) {
             if (level >= 1 && info.maxLevel < 1) {
                 Sounds.playSound(Sounds.moderate);

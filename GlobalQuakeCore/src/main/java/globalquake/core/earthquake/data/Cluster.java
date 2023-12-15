@@ -39,7 +39,7 @@ public class Cluster implements Warnable {
 
 	public final Color color = randomColor();
 
-	public int lastSentLevel = -1; // TODO
+	public int lastLevel = -1; // TODO
 
 	public final int id;
 
@@ -242,7 +242,7 @@ public class Cluster implements Warnable {
 		this.earthquake = earthquake;
 	}
 
-	public int getActualLevel() {
+	public int getLevel() {
 		return level;
 	}
 

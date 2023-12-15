@@ -12,7 +12,7 @@ public class ClusterTableModel extends FilterableTableModel<Cluster> {
     private final List<Column<Cluster, ?>> columns = List.of(
             Column.readonly("ID", UUID.class, Cluster::getUuid, new TableCellRendererAdapter<>()),
             Column.readonly("Assigned Events", Integer.class, cluster -> cluster.getAssignedEvents().size(), new TableCellRendererAdapter<>()),
-            Column.readonly("level", Integer.class, Cluster::getActualLevel, new TableCellRendererAdapter<>()),
+            Column.readonly("level", Integer.class, Cluster::getLevel, new TableCellRendererAdapter<>()),
             Column.readonly("rootLat", Double.class, Cluster::getRootLat, new TableCellRendererAdapter<>()),
             Column.readonly("rootLon", Double.class, Cluster::getRootLon, new TableCellRendererAdapter<>()));
 

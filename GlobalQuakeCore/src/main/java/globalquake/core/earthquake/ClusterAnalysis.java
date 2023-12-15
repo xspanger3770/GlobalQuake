@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.ClusterLevelUpEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
@@ -493,6 +494,10 @@ public class ClusterAnalysis {
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
+                if(cluster.getLevel() != cluster.lastLevel){
+                    GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
+                    cluster.lastLevel = cluster.getLevel();
+                }
             }
         }
 
