@@ -2,6 +2,7 @@ package globalquake.client;
 
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.data.Cluster;
+import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.packets.cluster.ClusterPacket;
@@ -15,7 +16,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
     private final List<Cluster> clusters;
 
     public ClusterAnalysisClient() {
-        clusters = new ArrayList<>();
+        clusters = new MonitorableCopyOnWriteArrayList<>();
     }
 
     @Override
