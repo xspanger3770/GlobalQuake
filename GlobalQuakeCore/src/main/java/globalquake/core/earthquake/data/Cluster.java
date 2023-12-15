@@ -162,18 +162,35 @@ public class Cluster implements Warnable {
 	public void calculateRoot() {
 		int n = 0;
 		double sumLat = 0;
-		double sumLon = 0;
+		double sumLonSin = 0;
+		double sumLonCos = 0;
+
 		for (Event e : getAssignedEvents().values()) {
-			if(!e.isValid()){
+			if (!e.isValid()) {
 				continue;
 			}
-			sumLat += e.getLatFromStation();
-			sumLon += e.getLonFromStation();
+
+			double lat = e.getLatFromStation();
+			double lon = Math.toRadians(e.getLonFromStation()); // Convert longitude to radians
+
+			sumLat += lat;
+			sumLonSin += Math.sin(lon); // Sum of sin values for longitude
+			sumLonCos += Math.cos(lon); // Sum of cos values for longitude
 			n++;
 		}
+
 		if (n > 0) {
 			rootLat = sumLat / n;
-			rootLon = sumLon / n;
+			double avgLonSin = sumLonSin / n;
+			double avgLonCos = sumLonCos / n;
+			rootLon = Math.toDegrees(Math.atan2(avgLonSin, avgLonCos)); // Convert average vector back to degrees
+
+			if (rootLon < -180) {
+				rootLon += 360; // Normalize longitude
+			} else if (rootLon > 180) {
+				rootLon -= 360; // Normalize longitude
+			}
+
 			anchorLat = rootLat;
 			anchorLon = rootLon;
 		}
