@@ -302,4 +302,9 @@ public class Cluster implements Warnable {
 		lastUpdate = System.currentTimeMillis();
 		this.level = level;
 	}
+
+	public void updateRoot(double rootLat, double rootLon) {
+		this.rootLat = rootLat;
+		this.rootLon = rootLon;
+	}
 }

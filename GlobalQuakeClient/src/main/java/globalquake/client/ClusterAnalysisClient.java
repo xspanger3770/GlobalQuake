@@ -56,6 +56,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
         Cluster existing = findCluster(clusterData.uuid());
         if(existing != null) {
             existing.updateLevel(clusterData.level());
+            existing.updateRoot(clusterData.rootLat(), clusterData.rootLon());
         } else {
             clusters.add(existing = new Cluster(clusterData.uuid(), clusterData.rootLat(), clusterData.rootLon(), clusterData.level()));
             GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(existing));
