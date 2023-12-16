@@ -66,6 +66,9 @@ public class ClusterAnalysis {
         }
     }
 
+    public void destroy() {
+    }
+
     record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){}
 
     private void stealEvents() {

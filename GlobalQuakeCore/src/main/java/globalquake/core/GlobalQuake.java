@@ -96,6 +96,7 @@ public class GlobalQuake {
 		getArchive().destroy();
 		getEarthquakeAnalysis().destroy();
 		getEventHandler().stopHandler();
+		getClusterAnalysis().destroy();
 	}
 
 	public void stopService(ExecutorService service) {

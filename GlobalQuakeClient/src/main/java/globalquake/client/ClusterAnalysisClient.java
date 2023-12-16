@@ -1,5 +1,6 @@
 package globalquake.client;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -7,15 +8,36 @@ import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.packets.cluster.ClusterPacket;
 
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ClusterAnalysisClient extends ClusterAnalysis {
 
     private final List<Cluster> clusters;
 
+    private ScheduledExecutorService executorService;
+
     public ClusterAnalysisClient() {
         clusters = new MonitorableCopyOnWriteArrayList<>();
+
+        executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(this::checkClusters, 0, 1, TimeUnit.MINUTES);
+    }
+
+    private void checkClusters() {
+        List<Cluster> toRemove = new ArrayList<>();
+        for(Cluster cluster : clusters){
+            if(System.currentTimeMillis() - cluster.getLastUpdate() > 30 * 60 * 1000){
+                toRemove.add(cluster);
+            }
+        }
+
+        clusters.removeAll(toRemove);
     }
 
     @Override
@@ -43,4 +65,8 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
         return clusters.stream().filter(cluster -> cluster.getUuid().equals(uuid)).findFirst().orElse(null);
     }
 
+    @Override
+    public void destroy() {
+        GlobalQuake.instance.stopService(executorService);
+    }
 }
