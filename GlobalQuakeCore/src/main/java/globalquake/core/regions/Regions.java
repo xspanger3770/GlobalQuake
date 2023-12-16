@@ -145,6 +145,22 @@ public class Regions {
         return getName(lat, lon, regionsUHD);
     }
 
+    public static double computeOceanDist(double lat, double lon){
+        double closestDistance = Double.MAX_VALUE;
+        for (Region reg : regionsHD) {
+            for (Polygon polygon : reg.raws()) {
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                    }
+                }
+            }
+        }
+
+        return closestDistance;
+    }
+
     public static String getRegion(double lat, double lon) {
         String extendedName = getExtendedName(lat, lon);
         if(extendedName != null){
