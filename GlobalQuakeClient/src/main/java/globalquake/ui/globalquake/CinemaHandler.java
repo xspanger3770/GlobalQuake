@@ -201,7 +201,7 @@ public class CinemaHandler {
 
         next = false;
         for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
-            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60 || cluster.getRootLon() == Cluster.NONE) { // ignore older than 1 minute
+            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60 || cluster.getRootLon() < -500 || cluster.getRootLat() < -500) { // ignore older than 1 minute
                 continue;
             }
             if (next || lastCluster == null) {
@@ -215,7 +215,7 @@ public class CinemaHandler {
         var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
         if (cluster.isPresent()) {
             Cluster cluster1 = cluster.get();
-            if (! (System.currentTimeMillis() - cluster1.getLastUpdate() > 1000 * 60 || cluster1.getRootLon() == Cluster.NONE)) {
+            if (! (System.currentTimeMillis() - cluster1.getLastUpdate() > 1000 * 60 ||  cluster1.getRootLon() < -500 || cluster1.getRootLat() < -500)) {
                 lastCluster = cluster1;
                 return createTarget(cluster1);
             }
