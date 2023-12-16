@@ -497,9 +497,10 @@ public class ClusterAnalysis {
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
-                if(cluster.getLevel() != cluster.lastLevel){
+                if(cluster.getLevel() != cluster.lastLevel || cluster.lastLastUpdate != cluster.getLastUpdate()){
                     GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
                     cluster.lastLevel = cluster.getLevel();
+                    cluster.lastLastUpdate = cluster.getLastUpdate();
                 }
             }
         }

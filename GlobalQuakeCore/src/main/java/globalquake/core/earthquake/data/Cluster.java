@@ -40,6 +40,7 @@ public class Cluster implements Warnable {
 	public final Color color = randomColor();
 
 	public int lastLevel = -1;
+	public long lastLastUpdate = -1;
 
 	public final int id;
 

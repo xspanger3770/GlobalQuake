@@ -9,7 +9,6 @@ import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.packets.cluster.ClusterPacket;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +20,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
 
     private final List<Cluster> clusters;
 
-    private ScheduledExecutorService executorService;
+    private final ScheduledExecutorService executorService;
 
     public ClusterAnalysisClient() {
         clusters = new MonitorableCopyOnWriteArrayList<>();
