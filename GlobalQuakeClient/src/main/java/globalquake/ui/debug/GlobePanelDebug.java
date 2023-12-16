@@ -3,6 +3,7 @@ package globalquake.ui.debug;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
+import globalquake.core.h3.H3Table;
 import globalquake.main.Main;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
@@ -23,6 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -38,7 +40,14 @@ public class GlobePanelDebug extends GQFrame {
 	private boolean _containsSettings;
 
 	public GlobePanelDebug() {
-		createArchived();
+        try {
+            H3Table.init();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        createArchived();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(800, 600));
@@ -66,7 +75,8 @@ public class GlobePanelDebug extends GQFrame {
 				g.setColor(Color.black);
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
 
-				String region = Regions.getRegion(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon);
+				//String region = Regions.getRegion(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon);
+				String region = "%.02f".formatted(H3Table.interpolate(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon, cell -> cell.oceanDist));
 				g.setColor(Color.white);
 				g.drawString(region, getWidth() / 2 - g.getFontMetrics().stringWidth(region), getHeight() - 16);
 

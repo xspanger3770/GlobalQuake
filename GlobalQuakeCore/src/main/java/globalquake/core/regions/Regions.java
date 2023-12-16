@@ -1,6 +1,7 @@
 package globalquake.core.regions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import globalquake.core.h3.H3Table;
 import globalquake.utils.GeoUtils;
 import org.geojson.*;
 import org.json.JSONObject;
@@ -147,7 +148,14 @@ public class Regions {
 
     public static double computeOceanDist(double lat, double lon){
         double closestDistance = Double.MAX_VALUE;
+        boolean inside = false;
+        Point2D.Double pt = new Point2D.Double(lon, lat);
         for (Region reg : regionsHD) {
+            for(var pol : reg.paths()){
+                if(pol.contains(pt)){
+                    inside = true;
+                }
+            }
             for (Polygon polygon : reg.raws()) {
                 for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
                     double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
@@ -155,6 +163,10 @@ public class Regions {
                         closestDistance = dist;
                     }
                 }
+            }
+
+            if(inside){
+                return -closestDistance;
             }
         }
 
