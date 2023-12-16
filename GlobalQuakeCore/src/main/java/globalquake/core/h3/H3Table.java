@@ -40,6 +40,15 @@ public class H3Table {
         init();
         System.err.println("find");
         System.err.println(interpolate(0,0, h3TableCell -> h3TableCell.oceanDist));
+
+        Random r = new Random();
+
+        long a = System.currentTimeMillis();
+        for(int i = 0; i < 10000; i++){
+            interpolate(r.nextDouble() * 90.0, r.nextDouble() * 180.0, cell -> cell.oceanDist);
+        }
+
+        System.err.println(System.currentTimeMillis() - a);
     }
 
     private static void generateTable() throws IOException {
@@ -62,8 +71,6 @@ public class H3Table {
 
         for (long neighbor : h3.gridDisk(index, RESOLUTION)) {
             cell = map.get(neighbor);
-
-            System.err.println(function.apply(cell));
 
             p += function.apply(cell) / GeoUtils.greatCircleDistance(lat, lon, coords.lat, coords.lng);
             q += 1 / GeoUtils.greatCircleDistance(lat, lon, coords.lat, coords.lng);
