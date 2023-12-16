@@ -201,7 +201,7 @@ public class CinemaHandler {
 
         next = false;
         for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
-            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60) {
+            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60) { // ignore older than 1 minute
                 continue;
             }
             if (next || lastCluster == null) {

@@ -3,6 +3,7 @@ package globalquake.client;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
@@ -57,6 +58,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
             existing.updateLevel(clusterData.level());
         } else {
             clusters.add(existing = new Cluster(clusterData.uuid(), clusterData.rootLat(), clusterData.rootLon(), clusterData.level()));
+            GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(existing));
         }
         return existing;
     }

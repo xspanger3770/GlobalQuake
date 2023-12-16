@@ -182,7 +182,7 @@ public class EarthquakeAnalysis {
         events.sort(Comparator.comparing(PickedEvent::pWave));
 
         if (cluster.getRootLat() == Cluster.NONE) {
-            cluster.calculateRoot();
+            cluster.calculateRoot(false);
         }
 
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),

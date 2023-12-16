@@ -516,7 +516,7 @@ public class ClusterAnalysis {
             }
         }
 
-        cluster.calculateRoot();
+        cluster.calculateRoot(true);
 
         Logger.tag("Hypocs").debug("New Cluster #" + cluster.id + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");

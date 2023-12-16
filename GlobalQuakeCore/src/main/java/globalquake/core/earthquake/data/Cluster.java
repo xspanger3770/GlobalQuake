@@ -63,13 +63,15 @@ public class Cluster implements Warnable {
 		this.uuid = uuid;
 		this.rootLat = rootLat;
 		this.rootLon = rootLon;
+		this.anchorLon = NONE;
+		this.anchorLat = NONE;
+		this.lastUpdate = System.currentTimeMillis();
+		this.updateCount = 0;
+		this.earthquake = null;
 	}
 
 	public Cluster() {
 		this(UUID.randomUUID(), NONE, NONE, 0);
-		this.updateCount = 0;
-		this.earthquake = null;
-		this.lastUpdate = System.currentTimeMillis();
 	}
 
 	public Hypocenter getPreviousHypocenter() {
@@ -98,8 +100,7 @@ public class Cluster implements Warnable {
 
 	public void tick() {
 		if (checkForUpdates()) {
-			if (rootLat == NONE)
-				calculateRoot();
+			calculateRoot(anchorLat == NONE);
 			calculateSize();
 			lastUpdate = System.currentTimeMillis();
 		}
@@ -163,7 +164,7 @@ public class Cluster implements Warnable {
 		this.size = _size;
 	}
 
-	public void calculateRoot() {
+	public void calculateRoot(boolean useAsAnchor) {
 		int n = 0;
 		double sumLat = 0;
 		double sumLonSin = 0;
@@ -195,8 +196,10 @@ public class Cluster implements Warnable {
 				rootLon -= 360; // Normalize longitude
 			}
 
-			anchorLat = rootLat;
-			anchorLon = rootLon;
+			if(useAsAnchor) {
+				anchorLat = rootLat;
+				anchorLon = rootLon;
+			}
 		}
 	}
 
