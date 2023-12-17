@@ -65,6 +65,10 @@ public class FeatureCluster extends RenderFeature<Cluster> {
             return;
         }
 
+        if((System.currentTimeMillis() / 500) % 2 != 0){
+            return;
+        }
+
         graphics.setStroke(new BasicStroke(1f));
 
         graphics.setColor(getColorLevel(entity.getOriginal().getLevel()));
