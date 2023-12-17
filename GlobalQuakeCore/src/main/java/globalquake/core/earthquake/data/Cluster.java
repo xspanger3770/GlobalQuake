@@ -20,7 +20,6 @@ public class Cluster implements Warnable {
 	private final Map<AbstractStation, Event> assignedEvents;
 	private double rootLat;
 	private double rootLon;
-	private double size;
 	public int updateCount;
 	private long lastUpdate;
 
@@ -102,7 +101,7 @@ public class Cluster implements Warnable {
 	public void tick() {
 		if (checkForUpdates()) {
 			calculateRoot(anchorLat == NONE);
-			calculateSize();
+			calculateLevel();
 			lastUpdate = System.currentTimeMillis();
 		}
 	}
@@ -119,50 +118,52 @@ public class Cluster implements Warnable {
 		return b;
 	}
 
-	private void calculateSize() {
-		double _size = 0;
-		int r128 = 0;
-		int r1024 = 0;
-		int r8192 = 0;
-		int r32K = 0;
+	private void calculateLevel() {
+		double _dist_sum = 0;
+		int n = 0;
+		int lvl_1 = 0;
+		int lvl_2 = 0;
+		int lvl_3 = 0;
+		int lvl_4 = 0;
 		for (Event e : getAssignedEvents().values()) {
 			if(!e.isValid()){
 				continue;
 			}
-			double dist = GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
+
+			_dist_sum += GeoUtils.greatCircleDistance(rootLat, rootLon, e.getAnalysis().getStation().getLatitude(),
 					e.getAnalysis().getStation().getLongitude());
-			if (dist > _size) {
-				_size = dist;
+			n++;
+
+			if (e.getMaxRatio() >= 64) {
+				lvl_1++;
 			}
-			if (e.getMaxRatio() >= 128) {
-				r128++;
+			if (e.getMaxRatio() >= 512) {
+				lvl_2++;
 			}
-			if (e.getMaxRatio() >= 1024) {
-				r1024++;
+			if (e.getMaxRatio() >= 4096) {
+				lvl_3++;
 			}
-			if (e.getMaxRatio() >= 8192) {
-				r8192++;
-			}
-			if (e.getMaxRatio() >= 32768) {
-				r32K++;
+			if (e.getMaxRatio() >= 16384) {
+				lvl_4++;
 			}
 		}
 
+		double dist_avg = _dist_sum / n;
+
 		int _level = 0;
-		if (r128 > 8 || r1024 > 3) {
+		if ((lvl_1 > 6 || lvl_2 > 3) && dist_avg > 10) {
 			_level = 1;
 		}
-		if (r1024 > 6 || r8192 > 3) {
+		if ((lvl_2 > 6 || lvl_3 > 3) && dist_avg > 25) {
 			_level = 2;
 		}
-		if (r8192 > 4 || r32K >= 3) {
+		if ((lvl_3 > 4 || lvl_4 >= 3) && dist_avg > 50) {
 			_level = 3;
 		}
-		if (r32K > 3) {
+		if ((lvl_4 > 3) && dist_avg > 75) {
 			_level = 4;
 		}
 		level = _level;
-		this.size = _size;
 	}
 
 	public void calculateRoot(boolean useAsAnchor) {
@@ -228,11 +229,6 @@ public class Cluster implements Warnable {
 		return rootLon;
 	}
 
-	@SuppressWarnings("unused")
-	public double getSize() {
-		return size;
-	}
-
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean containsStation(AbstractStation station) {
 		return getAssignedEvents().containsKey(station);
@@ -273,7 +269,6 @@ public class Cluster implements Warnable {
 				"uuid=" + uuid +
 				", rootLat=" + rootLat +
 				", rootLon=" + rootLon +
-				", size=" + size +
 				", updateCount=" + updateCount +
 				", lastUpdate=" + lastUpdate +
 				", earthquake=" + earthquake +
