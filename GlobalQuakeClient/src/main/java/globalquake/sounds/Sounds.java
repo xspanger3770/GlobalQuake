@@ -12,10 +12,10 @@ import java.util.concurrent.Executors;
 
 public class Sounds {
 
-	public static Clip weak;
-	public static Clip moderate;
-	public static Clip shindo5;
-	public static Clip warning;
+	public static Clip level_0;
+	public static Clip level_1;
+	public static Clip level_2;
+	public static Clip level_3;
 	public static Clip intensify;
 	public static Clip eew_warning;
 	public static Clip felt;
@@ -42,15 +42,24 @@ public class Sounds {
 	}
 
 	public static void load() throws Exception {
-		weak = loadSound("sounds/weak.wav");
-		moderate = loadSound("sounds/moderate.wav");
-		shindo5 = loadSound("sounds/shindo5.wav");
-		intensify = loadSound("sounds/intensify.wav");
+		// CLUSTER
+		level_0 = loadSound("sounds/level_0.wav");
+		level_1 = loadSound("sounds/level_1.wav");
+		level_2 = loadSound("sounds/level_2.wav");
+		level_3 = loadSound("sounds/level_3.wav");
+		// lvl 4 ?
+
+		// QUAKE
 		found = loadSound("sounds/found.wav");
 		update = loadSound("sounds/update2.wav");
-		warning = loadSound("sounds/warning.wav");
-		eew_warning = loadSound("sounds/eew_warning.wav");
+
+		// LOCAL
+		intensify = loadSound("sounds/intensify.wav");
 		felt = loadSound("sounds/felt.wav");
+		// strong_felt ?
+
+		// ???
+		eew_warning = loadSound("sounds/eew_warning.wav");
 		dong = loadSound("sounds/dong.wav");
 	}
 

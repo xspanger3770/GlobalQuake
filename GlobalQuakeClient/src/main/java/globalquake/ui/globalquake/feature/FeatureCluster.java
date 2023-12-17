@@ -61,7 +61,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Cluster> entity, RenderProperties renderProperties) {
         RenderElement elementRoot = entity.getRenderElement(0);
 
-        if(!elementRoot.shouldDraw || !Settings.displayClusters){
+        if(!elementRoot.shouldDraw) { // todo setting for this
             return;
         }
 

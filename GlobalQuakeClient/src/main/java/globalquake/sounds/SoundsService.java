@@ -69,20 +69,20 @@ public class SoundsService {
         }
 
         if (!info.firstSound) {
-            Sounds.playSound(Sounds.weak);
+            Sounds.playSound(Sounds.level_0);
             info.firstSound = true;
         }
 
         int level = cluster.getLevel();
         if (level > info.maxLevel) {
             if (level >= 1 && info.maxLevel < 1) {
-                Sounds.playSound(Sounds.moderate);
+                Sounds.playSound(Sounds.level_1);
             }
             if (level >= 2 && info.maxLevel < 2) {
-                Sounds.playSound(Sounds.shindo5);
+                Sounds.playSound(Sounds.level_2);
             }
             if (level >= 3 && info.maxLevel < 3) {
-                Sounds.playSound(Sounds.warning);
+                Sounds.playSound(Sounds.level_3);
             }
             info.maxLevel = level;
         }
