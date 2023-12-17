@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StationDatabaseManager {
 
@@ -24,9 +25,10 @@ public class StationDatabaseManager {
     private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
     private boolean updating = false;
 
-    public StationDatabaseManager(){}
+    public StationDatabaseManager() {
+    }
 
-    public StationDatabaseManager(StationDatabase stationDatabase){
+    public StationDatabaseManager(StationDatabase stationDatabase) {
         this.stationDatabase = stationDatabase;
     }
 
@@ -200,47 +202,62 @@ public class StationDatabaseManager {
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
-                            try {
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                            synchronized (statusSync) {
+                                seedlinkNetwork.setStatus(0, attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
+                            }
+
+                            ExecutorService executor = Executors.newSingleThreadExecutor();
+
+                            Callable<Boolean> task = () -> {
+                                try {
+                                    SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+                                } catch (SocketException | SocketTimeoutException | UnknownHostException ce) {
+                                    Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
+                                    synchronized (statusSync) {
+                                        seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
+                                    }
+
+                                    return false;
+                                } catch (Exception e) {
+                                    Logger.error(e);
+                                    synchronized (statusSync) {
+                                        seedlinkNetwork.setStatus(0, "Unknown error occurred");
+                                    }
+                                    return false;
                                 }
 
-                                ExecutorService executor = Executors.newSingleThreadExecutor();
+                                return true;
+                            };
 
-                                Callable<Void> task = () -> {
-                                    try {
-                                        SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                                    } catch(SocketException | SocketTimeoutException | UnknownHostException ce){
-                                        Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
-                                    } catch(Exception e){
-                                        Logger.error(e);
-                                    }
-                                    return null;
-                                };
+                            Future<Boolean> future = executor.submit(task);
 
-                                Future<Void> future = executor.submit(task);
-                                future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                            boolean success = false;
 
+                            try {
+                                success = future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                            } catch (InterruptedException | ExecutionException e) {
+                                Logger.error("Error executing task", e);
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(0, "Error during execution: " + e.getMessage());
+                                }
+                            } catch (TimeoutException e) {
+                                Logger.warn("Task timed out");
+                                synchronized (statusSync) {
+                                    seedlinkNetwork.setStatus(0, "Timeout occurred");
+                                }
+                            } finally {
+                                executor.shutdown();
+                            }
+
+                            if (success) {
                                 synchronized (statusSync) {
                                     seedlinkNetwork.setStatus(100, "Done");
                                 }
-
-                                break;
-                            } catch(TimeoutException e){
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Timed out!");
-                                }
-                                break;
-                            } catch (Exception e) {
-                                Logger.error(e);
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Error!");
-                                }
-
-                            } finally {
-                                fireUpdateEvent();
                             }
+
+                            break;
                         }
+                        fireUpdateEvent();
                     }
             );
             this.updating = false;
@@ -274,7 +291,7 @@ public class StationDatabaseManager {
                 for (Channel channel : station.getChannels()) {
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
                 }
-                if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
+                if (station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
                     station.selectBestAvailableChannel();
                 }
             }
@@ -315,7 +332,6 @@ public class StationDatabaseManager {
     }
 
     /**
-     *
      * @return {totalStations, connectedStations, runningSeedlinks, totalSeedlinks}
      */
     public int[] getSummary() {
@@ -334,6 +350,6 @@ public class StationDatabaseManager {
             }
         }
 
-        return new int[] {totalStations, connectedStations, runningSeedlinks, totalSeedlinks};
+        return new int[]{totalStations, connectedStations, runningSeedlinks, totalSeedlinks};
     }
 }
