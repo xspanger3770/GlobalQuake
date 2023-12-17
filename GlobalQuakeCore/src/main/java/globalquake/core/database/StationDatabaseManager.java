@@ -253,9 +253,8 @@ public class StationDatabaseManager {
                                 synchronized (statusSync) {
                                     seedlinkNetwork.setStatus(100, "Done");
                                 }
+                                break;
                             }
-
-                            break;
                         }
                         fireUpdateEvent();
                     }
