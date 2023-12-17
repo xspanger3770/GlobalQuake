@@ -52,6 +52,8 @@ public class Regions {
 
 
     private static final ArrayList<Region> regionSearchHD = new ArrayList<>();
+    public static final ArrayList<Polygon> subductions = new ArrayList<>();
+    public static final ArrayList<Path2D.Double> subductionsPaths = new ArrayList<>();
 
     public static void init() throws IOException {
         parseGeoJson("polygons/countriesMD.json", raw_polygonsMD, regionsMD, NONE);
@@ -67,6 +69,8 @@ public class Regions {
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/region_dataset.geojson", null, regionSearchHD, NONE);
+        parseGeoJson("polygons_faults/subductions.geojson", subductions, null, NONE);
+        subductions.forEach(polygon -> subductionsPaths.add(toPath(polygon)));
     }
 
 
@@ -146,32 +150,64 @@ public class Regions {
         return getName(lat, lon, regionsUHD);
     }
 
-    public static double computeOceanDist(double lat, double lon){
-        double closestDistance = Double.MAX_VALUE;
-        boolean inside = false;
+    public static double computeSubductionDist(double lat, double lon){
         Point2D.Double pt = new Point2D.Double(lon, lat);
-        for (Region reg : regionsHD) {
-            for(var pol : reg.paths()){
-                if(pol.contains(pt)){
-                    inside = true;
-                }
-            }
-            for (Polygon polygon : reg.raws()) {
-                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
-                    if (dist < closestDistance) {
-                        closestDistance = dist;
-                    }
-                }
-            }
+        return calculateClosestDistance(pt, subductions, subductionsPaths);
+    }
 
-            if(inside){
-                return -closestDistance;
+    public static double calculateClosestDistance(Point2D.Double pt, List<Polygon> polygons, List<Path2D.Double> paths) {
+        double closestDistance = Double.MAX_VALUE;
+
+        for(Path2D.Double path : paths){
+            if(path.contains(pt)){
+                return 0.0;
             }
+        }
+
+        for (Polygon pol : polygons) {
+            double distance = calculateDistanceToPolygon(pt, pol);
+            closestDistance = Math.min(closestDistance, distance);
         }
 
         return closestDistance;
     }
+
+    private static double calculateDistanceToPolygon(Point2D.Double pt, Polygon polygon) {
+        // Implement the logic to calculate the distance from the point to the polygon.
+        // This could be a simple point-to-line distance calculation for each segment of the polygon.
+        double minDistance = Double.MAX_VALUE;
+        List<List<LngLatAlt>> coordinates = polygon.getCoordinates();
+
+        for (List<LngLatAlt> points : coordinates) {
+            for (int i = 0; i < points.size() - 1; i++) {
+                LngLatAlt p1 = points.get(i);
+                LngLatAlt p2 = points.get(i + 1);
+                double distance = calculateDistanceToSegment(pt, p1, p2);
+                minDistance = Math.min(minDistance, distance);
+            }
+        }
+
+        return minDistance;
+    }
+
+    private static double calculateDistanceToSegment(Point2D.Double pt, LngLatAlt p1, LngLatAlt p2) {
+        Point2D.Double a = new Point2D.Double(p1.getLongitude(), p1.getLatitude());
+        Point2D.Double b = new Point2D.Double(p2.getLongitude(), p2.getLatitude());
+
+        // Calculate the projection of pt onto the line segment
+        double lineLength = a.distance(b);
+        double t = ((pt.x - a.x) * (b.x - a.x) + (pt.y - a.y) * (b.y - a.y)) / (lineLength * lineLength);
+
+        // Clamp t to the range [0,1]
+        t = Math.max(0, Math.min(1, t));
+
+        // Find the projection point
+        Point2D.Double projection = new Point2D.Double(a.x + t * (b.x - a.x), a.y + t * (b.y - a.y));
+
+        // Calculate the distance from pt to the projection point
+        return GeoUtils.greatCircleDistance(projection.y, projection.x, pt.y, pt.x);
+    }
+
 
     public static String getRegion(double lat, double lon) {
         String extendedName = getExtendedName(lat, lon);
@@ -258,9 +294,14 @@ public class Regions {
                 if(raw != null) {
                     raw.add(pol);
                 }
-                regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+
+                if(regions != null) {
+                    regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+                }
             } else if (o instanceof MultiPolygon mp) {
-                createRegion(regions, mp, name);
+                if(regions != null) {
+                    createRegion(regions, mp, name);
+                }
 
                 List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
                 for (List<List<LngLatAlt>> polygon : polygons) {
@@ -295,6 +336,7 @@ public class Regions {
             paths.add(toPath(pol));
             raws.add(pol);
         }
+
         regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
     }
 

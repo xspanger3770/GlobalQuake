@@ -34,19 +34,28 @@ public class ShakeMap {
 
     private void generate(Hypocenter hypocenter, int res) {
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
-        double pga = GeoUtils.pgaFunction(hypocenter.magnitude, hypocenter.depth, hypocenter.depth);
+        long id = h3.latLngToCell(hypocenter.lat, hypocenter.lon, res);
+
+        LatLng latLng = h3.cellToLatLng(id);
+
+        double pga = GeoUtils.pgaFunction(hypocenter.magnitude, hypocenter.depth, hypocenter.depth) * getLocationMultiplier(latLng.lat, latLng.lng, hypocenter.depth);
         Level level = intensityScale.getLevel(pga);
         if(level == null){
             return;
         }
 
-        long id = h3.latLngToCell(hypocenter.lat, hypocenter.lon, res);
-
-        LatLng latLng = h3.cellToLatLng(id);
         IntensityHex intensityHex = new IntensityHex(id, pga,
                 new Point2D(latLng.lat, latLng.lng));
         hexList = new ArrayList<>(bfs(intensityHex, hypocenter, intensityScale, res));
         maxPGA = hexList.stream().map(IntensityHex::pga).max(Double::compareTo).orElse(0.0);
+    }
+
+    private double getLocationMultiplier(double lat, double lon, double depth) {
+        double subductionDistance = Regions.computeSubductionDist(lat, lon);
+        double subductionMultiplier = 1 + 9 * Math.pow(Math.E, -0.00022 * subductionDistance * subductionDistance);
+        subductionMultiplier *= (Math.log10(0.2 * depth + 10) - 0.9);
+
+        return subductionMultiplier + 1.0;
     }
 
     private Set<IntensityHex> bfs(IntensityHex intensityHex, Hypocenter hypocenter, IntensityScale intensityScale, int res) {
@@ -64,7 +73,7 @@ public class ShakeMap {
                 LatLng latLng = h3.cellToLatLng(neighbor);
                 double dist = GeoUtils.geologicalDistance(hypocenter.lat, hypocenter.lon, -hypocenter.depth, latLng.lat, latLng.lng, 0);
                 dist = Math.max(0, dist - h3.getHexagonEdgeLengthAvg(res, LengthUnit.km) * 0.5);
-                double pga = GeoUtils.pgaFunction(hypocenter.magnitude, dist, hypocenter.depth);
+                double pga = GeoUtils.pgaFunction(hypocenter.magnitude, dist, hypocenter.depth) * getLocationMultiplier(latLng.lat, latLng.lng, hypocenter.depth);
 
                 Level level = intensityScale.getLevel(pga);
                 if (level == null) {

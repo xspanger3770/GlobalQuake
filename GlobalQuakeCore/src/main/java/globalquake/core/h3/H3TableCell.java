@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public class H3TableCell implements Serializable {
 
-    public float oceanDist;
+    public float subductionDist;
 
 }

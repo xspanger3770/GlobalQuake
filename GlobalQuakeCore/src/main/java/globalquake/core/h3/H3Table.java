@@ -15,7 +15,7 @@ public class H3Table {
 
     private static Map<Long, H3TableCell> map = new ConcurrentHashMap<>();
 
-    private static final int RESOLUTION = 3;
+    private static final int RESOLUTION = 4;
     private static final H3Core h3;
 
     static {
@@ -37,20 +37,20 @@ public class H3Table {
     }
 
     public static void main(String[] args) throws Exception {
-        //generateTable();
-        testTable();
+        generateTable();
+        //testTable();
     }
 
     private static void testTable() throws IOException, ClassNotFoundException {
         init();
         System.err.println("find");
-        System.err.println(interpolate(0,0, h3TableCell -> h3TableCell.oceanDist));
+        System.err.println(interpolate(0,0, h3TableCell -> h3TableCell.subductionDist));
 
         Random r = new Random();
 
         long a = System.currentTimeMillis();
         for(int i = 0; i < 10000; i++){
-            interpolate(r.nextDouble() * 90.0, r.nextDouble() * 180.0, cell -> cell.oceanDist);
+            interpolate(r.nextDouble() * 90.0, r.nextDouble() * 180.0, cell -> cell.subductionDist);
         }
 
         System.err.println(System.currentTimeMillis() - a);
@@ -127,7 +127,7 @@ public class H3Table {
     private static H3TableCell createCell(LatLng coords) {
         H3TableCell cell = new H3TableCell();
 
-        cell.oceanDist = (float) Regions.computeOceanDist(coords.lat, coords.lng);
+        cell.subductionDist = (float) Regions.computeSubductionDist(coords.lat, coords.lng);
         return cell;
     }
 

@@ -86,7 +86,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     setCinemaMode(!isCinemaMode());
                 }
 
-                if (DEBUG) {
+                if (true) { // TODO
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
@@ -322,8 +322,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 6.1;
-        hyp.depth = (System.currentTimeMillis() % 10000)/10000.0 * 1000;
+        hyp.magnitude =5.1;
+        hyp.depth = (System.currentTimeMillis() % 10000.0) / 10.0;
 
         hyp.correctEvents = 6;
 

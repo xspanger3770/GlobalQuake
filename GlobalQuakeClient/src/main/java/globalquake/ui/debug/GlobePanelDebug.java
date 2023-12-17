@@ -76,7 +76,7 @@ public class GlobePanelDebug extends GQFrame {
 				g.drawString("S", getWidth() - 15, getHeight() - 8);
 
 				//String region = Regions.getRegion(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon);
-				String region = "%.02f".formatted(H3Table.interpolate(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon, cell -> cell.oceanDist));
+				String region = "%.02f".formatted(H3Table.interpolate(getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon, cell -> cell.subductionDist));
 				g.setColor(Color.white);
 				g.drawString(region, getWidth() / 2 - g.getFontMetrics().stringWidth(region), getHeight() - 16);
 
