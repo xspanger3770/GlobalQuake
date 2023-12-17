@@ -1,6 +1,5 @@
 package globalquake.core.archive;
 
-import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;

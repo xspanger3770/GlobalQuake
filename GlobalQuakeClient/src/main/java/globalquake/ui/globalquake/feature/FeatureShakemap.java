@@ -24,11 +24,14 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private final H3Core h3;
     private final MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList<>();
+    private final ExecutorService hexService = Executors.newSingleThreadExecutor();
 
     public FeatureShakemap() {
         super(1);
@@ -39,10 +42,9 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
 
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
-            @SuppressWarnings("unused")
             @Override
             public void onShakemapCreated(ShakeMapsUpdatedEvent event) {
-                updateHexes();
+                hexService.submit(() -> updateHexes());
             }
         });
     }
@@ -62,7 +64,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         return true;
     }
 
-    private synchronized void updateHexes() {
+    private void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
                 .sorted(Comparator.comparing(kv -> -kv.getValue().getMag())).toList()){
