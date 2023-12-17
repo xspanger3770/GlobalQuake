@@ -96,6 +96,28 @@ public class Regions {
         }
     }
 
+    public static double getOceanDistance(double lat, double lon) {
+        double closestDistance = Double.MAX_VALUE;
+        Point2D.Double point = new Point2D.Double(lon, lat);
+        for (Region reg : regionsMD) {
+            for(Path2D.Double path : reg.paths()){
+                if(path.contains(point)){
+                    return 0.0;
+                }
+            }
+            for (Polygon polygon : reg.raws()) {
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                    }
+                }
+            }
+        }
+
+        return closestDistance;
+    }
+
     public static boolean isOcean(double lat, double lng, boolean uhd) {
         return isOcean(lat, lng, uhd ? regionsUHD : regionsHD);
     }
@@ -290,5 +312,4 @@ public class Regions {
 
         return path;
     }
-
 }

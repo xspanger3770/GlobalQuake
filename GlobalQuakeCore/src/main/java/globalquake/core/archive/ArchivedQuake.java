@@ -1,11 +1,13 @@
 package globalquake.core.archive;
 
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
+import globalquake.utils.GeoUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,6 +29,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final UUID uuid;
 	private final QualityClass qualityClass;
 	private double maxRatio;
+	private final double maxPGA;
 	private String region;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
@@ -85,6 +88,9 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.archivedEvents = new ArrayList<>();
 		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
+
+		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon);
+		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
 	}
 
 	public double getDepth() {
@@ -151,6 +157,10 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	@Override
 	public int compareTo(ArchivedQuake archivedQuake) {
 		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
+	}
+
+	public double getMaxPGA() {
+		return maxPGA;
 	}
 
 	@Override
