@@ -21,6 +21,7 @@ public class Sounds {
 	public static Clip intensify;
 	public static Clip felt;
 	public static Clip countdown;
+	public static Clip countdown2;
 	public static Clip update;
 
 	public static Clip found;
@@ -61,6 +62,7 @@ public class Sounds {
 
 		// ???
 		countdown = loadSound("sounds/countdown.wav");
+		countdown2 = loadSound("sounds/countdown.wav");
 	}
 
 	public static void playSound(Clip clip) {
@@ -82,11 +84,6 @@ public class Sounds {
 		clip.flush();
 		clip.setFramePosition(0);
 		clip.start();
-        try {
-            Thread.sleep(clip.getMicrosecondLength() / 1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 	public static void main(String[] args) throws Exception {

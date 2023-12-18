@@ -125,11 +125,12 @@ public class SoundsService {
                 double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(distGCD)));
                 double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
-                int secondsS = (int) Math.max(-1, Math.ceil(sTravel - age));
+                int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
 
                 if (secondsS < info.lastCountdown && secondsS <= 10) {
                     info.lastCountdown = secondsS;
-                    Sounds.playSound(Sounds.countdown);
+                    // little workaround
+                    Sounds.playSound(secondsS % 2 == 0 ? Sounds.countdown2 : Sounds.countdown);
                 }
             }
         }

@@ -12,6 +12,7 @@ import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
+import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
@@ -91,7 +92,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
+                        GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
                     }
 
                     if (e.getKeyCode() == KeyEvent.VK_U) {
@@ -324,7 +325,7 @@ public class GlobalQuakePanel extends GlobePanel {
         hyp.usedEvents = 20;
 
         hyp.magnitude = 6.1;
-        hyp.depth = (System.currentTimeMillis() % 10000)/10000.0 * 1000;
+        hyp.depth = 50;
 
         hyp.correctEvents = 6;
 
@@ -334,6 +335,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         quake = new Earthquake(clus);
 
+        clus.setEarthquake(quake);
         hyp.magnitude = quake.getMag();
 
         List<MagnitudeReading> mags = new ArrayList<>();
