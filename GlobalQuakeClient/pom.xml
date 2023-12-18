@@ -13,7 +13,7 @@
     <artifactId>GlobalQuakeClient</artifactId>
 
     <build>
-        <finalName>GlobalQuake-${version}</finalName>
+        <finalName>GlobalQuake-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

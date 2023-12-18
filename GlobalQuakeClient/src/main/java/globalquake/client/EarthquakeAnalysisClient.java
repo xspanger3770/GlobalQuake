@@ -97,12 +97,12 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     private void processQuakeDataPacket(HypocenterDataPacket hypocenterDataPacket) {
         UUID uuid = hypocenterDataPacket.data().uuid();
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
-        HypocenterData data = hypocenterDataPacket.data();
 
+        HypocenterData data = hypocenterDataPacket.data();
         Earthquake newQuake = createEarthquake(data, hypocenterDataPacket.advancedHypocenterData(), hypocenterDataPacket.clusterData());
 
         // ignore quake data that are too old
-        if(shouldRemove(newQuake, 30)){
+        if(shouldRemove(newQuake, 30)) {
             return;
         }
 
@@ -112,6 +112,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newQuake));
         } else if(existingQuake.getRevisionID() < data.revisionID()) {
             existingQuake.update(newQuake);
+            existingQuake.getCluster().revisionID = data.revisionID();
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(existingQuake, null));
         }
     }
@@ -127,7 +128,6 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         hypocenter.magnitude = hypocenterData.magnitude();
 
         Cluster cluster = ((ClusterAnalysisClient)GlobalQuakeClient.instance.getClusterAnalysis()).getCluster(clusterData);
-        cluster.revisionID = hypocenterData.revisionID();
 
         if(advancedHypocenterData != null){
             hypocenter.quality = createQuality(advancedHypocenterData.qualityData());

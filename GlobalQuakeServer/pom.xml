@@ -19,7 +19,7 @@
     </properties>
 
     <build>
-        <finalName>GlobalQuakeServer-${version}</finalName>
+        <finalName>GlobalQuakeServer-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

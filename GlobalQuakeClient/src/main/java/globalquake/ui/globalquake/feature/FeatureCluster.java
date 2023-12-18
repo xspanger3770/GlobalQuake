@@ -16,6 +16,8 @@ public class FeatureCluster extends RenderFeature<Cluster> {
 
     private final List<Cluster> clusters;
 
+    private static final long FLASH_TIME = 1000 * 90;
+
 
     public FeatureCluster(List<Cluster> clusters) {
         super(1);
@@ -61,6 +63,10 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         RenderElement elementRoot = entity.getRenderElement(0);
 
         if(!elementRoot.shouldDraw) { // todo setting for this
+            return;
+        }
+
+        if(System.currentTimeMillis() - entity.getOriginal().getLastUpdate() > FLASH_TIME){
             return;
         }
 

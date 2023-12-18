@@ -1,11 +1,13 @@
 package globalquake.sounds;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,5 +88,13 @@ public class Sounds {
             throw new RuntimeException(e);
         }
     }
+
+	public static void main(String[] args) throws Exception {
+		GlobalQuake.prepare(new File("./"), null);
+		load();
+		playSound(update);
+		Thread.sleep(2000);
+		System.exit(0);
+	}
 
 }
