@@ -6,14 +6,18 @@ import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
-import java.io.BufferedInputStream;
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Sounds {
 
+	private static final File EXPORT_DIR = new File(GlobalQuake.mainFolder, "sounds/");
 	public static Clip level_0;
 	public static Clip level_1;
 	public static Clip level_2;
@@ -32,37 +36,69 @@ public class Sounds {
 
 	private static Clip loadSound(String res) throws FatalIOException {
 		try {
+			Path soundPath = Paths.get(EXPORT_DIR.getAbsolutePath(), res);
+			InputStream audioInStream = Files.exists(soundPath) ?
+					new FileInputStream(soundPath.toFile()) :
+					ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + res);
+
+			if (audioInStream == null) {
+				throw new IOException("Sound file not found: " + res);
+			}
+
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(
-					new BufferedInputStream(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(res)).openStream(), 65565));
+					new BufferedInputStream(audioInStream, 65565));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
-		} catch(Exception e){
+		} catch(Exception e) {
 			soundsAvailable = false;
-			throw new FatalIOException("Failed to load sound: "+res, e);
+			throw new FatalIOException("Failed to load sound: " + res, e);
+		}
+	}
+
+	public static void exportSounds() throws IOException {
+		Path exportPath = Paths.get(EXPORT_DIR.getAbsolutePath());
+		if (!Files.exists(exportPath)) {
+			Files.createDirectory(exportPath);
+		}
+
+		String[] soundFiles = {"level_0.wav", "level_1.wav", "level_2.wav", "level_3.wav",
+				"intensify.wav", "felt.wav", "countdown.wav", "update.wav", "found.wav"};
+
+		for (String soundFile : soundFiles) {
+			Path exportedFilePath = exportPath.resolve(soundFile);
+			if (!Files.exists(exportedFilePath)) { // Check if the file already exists
+				InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + soundFile);
+				if (is != null) {
+					Files.copy(is, exportedFilePath, StandardCopyOption.REPLACE_EXISTING);
+					is.close();
+				}
+			}
 		}
 	}
 
 	public static void load() throws Exception {
+		exportSounds();
+
 		// CLUSTER
-		level_0 = loadSound("sounds/level_0.wav");
-		level_1 = loadSound("sounds/level_1.wav");
-		level_2 = loadSound("sounds/level_2.wav");
-		level_3 = loadSound("sounds/level_3.wav");
+		level_0 = loadSound("level_0.wav");
+		level_1 = loadSound("level_1.wav");
+		level_2 = loadSound("level_2.wav");
+		level_3 = loadSound("level_3.wav");
 		// lvl 4 ?
 
 		// QUAKE
-		found = loadSound("sounds/found.wav");
-		update = loadSound("sounds/update.wav");
+		found = loadSound("found.wav");
+		update = loadSound("update.wav");
 
 		// LOCAL
-		intensify = loadSound("sounds/intensify.wav");
-		felt = loadSound("sounds/felt.wav");
+		intensify = loadSound("intensify.wav");
+		felt = loadSound("felt.wav");
 		// strong_felt ?
 
 		// ???
-		countdown = loadSound("sounds/countdown.wav");
-		countdown2 = loadSound("sounds/countdown.wav");
+		countdown = loadSound("countdown.wav");
+		countdown2 = loadSound("countdown.wav");
 	}
 
 	public static void playSound(Clip clip) {
@@ -83,15 +119,15 @@ public class Sounds {
 		clip.stop();
 		clip.flush();
 		clip.setFramePosition(0);
-		clip.start();
-    }
+		clip.loop(2);
 
-	public static void main(String[] args) throws Exception {
-		GlobalQuake.prepare(new File("./"), null);
-		load();
-		playSound(update);
-		Thread.sleep(2000);
-		System.exit(0);
-	}
+        try {
+            Thread.sleep(clip.getMicrosecondLength() / 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+		clip.stop();
+    }
 
 }
