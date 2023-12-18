@@ -99,7 +99,7 @@ public class SoundsService {
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
                 if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
-                    Sounds.playSound(Sounds.eew_warning);
+                    //Sounds.playSound(Sounds.eew_warning);
                     info.warningPlayed = true;
                 }
             }

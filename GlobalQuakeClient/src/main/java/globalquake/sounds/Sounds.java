@@ -17,7 +17,6 @@ public class Sounds {
 	public static Clip level_2;
 	public static Clip level_3;
 	public static Clip intensify;
-	public static Clip eew_warning;
 	public static Clip felt;
 	public static Clip dong;
 	public static Clip update;
@@ -59,7 +58,6 @@ public class Sounds {
 		// strong_felt ?
 
 		// ???
-		eew_warning = loadSound("sounds/eew_warning.wav");
 		dong = loadSound("sounds/dong.wav");
 	}
 
