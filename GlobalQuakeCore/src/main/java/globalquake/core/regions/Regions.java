@@ -126,6 +126,50 @@ public class Regions {
         }
     }
 
+    public static double getOceanDistance(double lat, double lon) {
+        double closestDistance = Double.MAX_VALUE;
+        Point2D.Double point = new Point2D.Double(lon, lat);
+        for (Region reg : regionsMD) {
+            for(Path2D.Double path : reg.paths()){
+                if(path.contains(point)){
+                    return 0.0;
+                }
+            }
+            for (Polygon polygon : reg.raws()) {
+                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
+                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                    }
+                }
+            }
+        }
+
+        return closestDistance;
+    }
+
+    public static boolean isOcean(double lat, double lng, boolean uhd) {
+        return isOcean(lat, lng, uhd ? regionsUHD : regionsHD);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static boolean isOcean(double lat, double lng, ArrayList<Region> regions) {
+        Point2D.Double point = new Point2D.Double(lng, lat);
+        for (Region reg : regions) {
+            int i = 0;
+            for (Path2D.Double path : reg.paths()) {
+                if (reg.bounds().get(i).contains(point)) {
+                    if(path.contains(point)) {
+                        return false;
+                    }
+                }
+                i++;
+            }
+        }
+
+        return true;
+    }
+
     public static String getName(double lat, double lon, List<Region> regions){
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regions) {
