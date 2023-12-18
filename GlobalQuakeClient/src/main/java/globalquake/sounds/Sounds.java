@@ -7,10 +7,7 @@ import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,6 +57,7 @@ public class Sounds {
 		Path exportPath = Paths.get(EXPORT_DIR.getAbsolutePath());
 		if (!Files.exists(exportPath)) {
 			Files.createDirectory(exportPath);
+			writeReadmeFile(exportPath);
 		}
 
 		String[] soundFiles = {"level_0.wav", "level_1.wav", "level_2.wav", "level_3.wav",
@@ -76,6 +74,17 @@ public class Sounds {
 			}
 		}
 	}
+
+	private static void writeReadmeFile(Path exportPath) throws IOException {
+		String readmeContent = "README\n\n" +
+				"This directory contains the exported sound files from GlobalQuake.\n" +
+				"You can edit these sound files as per your preference.\n" +
+				"Please note that the sounds will only be exported once, meaning that any changes you make here will be kept and used by GlobalQuake.\n\n" +
+				"Enjoy customizing your sound experience!";
+
+		Files.writeString(exportPath.resolve("README.txt"), readmeContent, StandardOpenOption.CREATE);
+	}
+
 
 	public static void load() throws Exception {
 		exportSounds();
