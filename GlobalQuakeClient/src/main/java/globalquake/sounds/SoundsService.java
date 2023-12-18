@@ -8,6 +8,7 @@ import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
@@ -26,7 +27,7 @@ public class SoundsService {
 
     public SoundsService(){
         soundCheckService = Executors.newSingleThreadScheduledExecutor();
-        soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
+        soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 200, TimeUnit.MILLISECONDS);
 
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
@@ -106,6 +107,7 @@ public class SoundsService {
 
             double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
                     Settings.homeLat, Settings.homeLon, 0.0);
+            double distGCD = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat, Settings.homeLon);
             double pgaHome = GeoUtils.pgaFunction(quake.getMag(), distGEO, quake.getDepth());
 
             if (pgaHome > info.maxPGAHome) {
@@ -116,10 +118,18 @@ public class SoundsService {
                 info.maxPGAHome = pgaHome;
             }
 
-            if (info.maxPGAHome >= ShindoIntensityScale.ICHI.getPga()) {
-                if (info.lastCountdown == 0) {
-                    info.lastCountdown = -999;
-                    Sounds.playSound(Sounds.dong);
+
+            boolean shakingExpected = info.maxPGAHome >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
+
+            if (shakingExpected) {
+                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
+                        TauPTravelTimeCalculator.toAngle(distGCD)));
+                double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
+                int secondsS = (int) Math.max(-1, Math.ceil(sTravel - age));
+
+                if (secondsS < info.lastCountdown && secondsS <= 10) {
+                    info.lastCountdown = secondsS;
+                    Sounds.playSound(Sounds.countdown);
                 }
             }
         }

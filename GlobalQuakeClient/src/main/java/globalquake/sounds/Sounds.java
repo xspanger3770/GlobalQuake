@@ -20,7 +20,7 @@ public class Sounds {
 	public static Clip level_3;
 	public static Clip intensify;
 	public static Clip felt;
-	public static Clip dong;
+	public static Clip countdown;
 	public static Clip update;
 
 	public static Clip found;
@@ -52,7 +52,7 @@ public class Sounds {
 
 		// QUAKE
 		found = loadSound("sounds/found.wav");
-		update = loadSound("sounds/update2.wav");
+		update = loadSound("sounds/update.wav");
 
 		// LOCAL
 		intensify = loadSound("sounds/intensify.wav");
@@ -60,7 +60,7 @@ public class Sounds {
 		// strong_felt ?
 
 		// ???
-		dong = loadSound("sounds/dong.wav");
+		countdown = loadSound("sounds/countdown.wav");
 	}
 
 	public static void playSound(Clip clip) {
