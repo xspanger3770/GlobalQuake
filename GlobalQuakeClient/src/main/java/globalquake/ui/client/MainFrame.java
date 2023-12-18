@@ -119,7 +119,7 @@ public class MainFrame extends GQFrame {
             }
         });
 
-        connectButton = new JButton("Conect to Server");
+        connectButton = new JButton("Connect to Server");
         connectButton.setEnabled(loaded);
         panel.add(connectButton);
 
