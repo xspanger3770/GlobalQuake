@@ -364,10 +364,10 @@ public class Regions {
         String third    = String.format("%.6f,%.6f", x1, y0);
         String fourth   = String.format("%.6f,%.6f", x1, y1);
 
-        double f00 = lookupTable.getOrDefault(first, Double.NaN);
-        double f01 = lookupTable.getOrDefault(second, Double.NaN);
-        double f10 = lookupTable.getOrDefault(third, Double.NaN);
-        double f11 = lookupTable.getOrDefault(fourth, Double.NaN);
+        double f00 = lookupTable.getOrDefault(first, (double) 0);
+        double f01 = lookupTable.getOrDefault(second, (double) 0);
+        double f10 = lookupTable.getOrDefault(third, (double) 0);
+        double f11 = lookupTable.getOrDefault(fourth, (double) 0);
 
         double r1 = ((x1 - lat)/(x1 - x0) * f00) + ((lat - x0)/(x1 - x0) * f10);
         double r2 = ((x1 - lat)/(x1 - x0) * f01) + ((lat - x0)/(x1 - x0) * f11);
@@ -384,8 +384,8 @@ public class Regions {
 
         System.out.println("FIND");
 
-        double lat = 44.881268,
-                lon = -1.753643;
+        double lat = 39.59763558387561,
+                lon = -9.14040362258988;
 
         assert shorelineLookup != null;
         double interpolation = interpolate(lat, lon, shorelineLookup);
