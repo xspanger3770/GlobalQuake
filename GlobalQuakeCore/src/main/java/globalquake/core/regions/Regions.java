@@ -328,7 +328,9 @@ public class Regions {
         double r1 = ((x1 - lat)/(x1 - x0) * f00) + ((lat - x0)/(x1 - x0) * f10);
         double r2 = ((x1 - lat)/(x1 - x0) * f01) + ((lat - x0)/(x1 - x0) * f11);
 
-        return ((y1 - lon)/(y1 - y0) * r1) + ((lon - y0)/(y1 - y0) * r2);
+        double result = ((y1 - lon)/(y1 - y0) * r1) + ((lon - y0)/(y1 - y0) * r2);
+
+        return Double.isNaN(result) ? 0 : result;
     }
 
 
@@ -338,8 +340,8 @@ public class Regions {
 
         System.out.println("FIND");
 
-        double lat = 47.541266,
-                lon = 4.056526;
+        double lat = 44.881268,
+                lon = -1.753643;
 
         assert shorelineLookup != null;
         double interpolation = interpolate(lat, lon, shorelineLookup);
