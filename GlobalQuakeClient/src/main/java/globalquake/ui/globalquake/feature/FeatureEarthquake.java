@@ -232,7 +232,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     private boolean isUncertain(Hypocenter hypocenter) {
-        return hypocenter.quality == null || hypocenter.quality.getSummary() == QualityClass.D;
+        return hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
     }
 
     private Color alphaColor(Color color, double mul) {
