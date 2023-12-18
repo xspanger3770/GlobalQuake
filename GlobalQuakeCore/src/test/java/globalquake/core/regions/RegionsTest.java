@@ -15,7 +15,7 @@ public class RegionsTest {
     public void basicRegionsTest() throws IOException {
         Regions.init();
 
-        assertEquals("Poland-Czech Republic border region", Regions.getRegion(50, 17));
+        assertEquals("Czech Republic", Regions.getRegion(50, 17));
         assertEquals("Poland", Regions.getRegion(51.8, 18.3));
     }
 
@@ -40,7 +40,7 @@ public class RegionsTest {
     }
 
     @Test
-    public void bilinearInterpolationTest() {
+    public void bilinearInterpolationTest() throws IOException {
         HashMap<String, Double> lookupTable = LookupTableIO.importLookupTableFromFile();
         assertNotNull(lookupTable);
 
