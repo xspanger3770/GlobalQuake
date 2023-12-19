@@ -3,6 +3,7 @@ package globalquake.core;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
+import globalquake.ui.settings.StationsShape;
 import org.tinylog.Logger;
 
 import java.io.File;
@@ -101,7 +102,6 @@ public final class Settings {
 	public static final int maxEventsDefault = 60;
 	public static Boolean displayCoreWaves;
 	public static Boolean recalibrateOnLaunch;
-	public static Boolean stationsTriangles;
 	public static Double stationsSizeMul;
     public static Integer selectedEventColorIndex;
 
@@ -132,7 +132,8 @@ public final class Settings {
 	public static Integer lastServerPORT;
 	public static Integer maxClients;
 	public static Boolean displayShakemaps;
-	public static Boolean invertAccelerometers;
+
+	public static Integer stationsShapeIndex; // todo use
 
     static {
 		load();
@@ -187,8 +188,8 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
-
-		loadProperty("invertAccelerometers", "false");
+		loadProperty("stationsShapeIndex", "0",
+				o -> validateInt(0, StationsShape.values().length, (Integer) o));
 
 		loadProperty("maxClients", "64",
 				o -> validateInt(2, 10000, (Integer) o));
@@ -250,7 +251,6 @@ public final class Settings {
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
-		loadProperty("stationsTriangles", "false");
 		loadProperty("maxArchivedQuakes", "100", o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
 
 		loadProperty("enableAlarmDialogs", "false");
