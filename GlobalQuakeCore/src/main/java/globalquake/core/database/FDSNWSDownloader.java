@@ -271,6 +271,7 @@ public class FDSNWSDownloader {
         unitTypeMap.put("nm/s", InputType.VELOCITY);
         unitTypeMap.put("mm/s", InputType.VELOCITY);
 
+        unitTypeMap.put("1m/s**2", InputType.ACCELERATION);
         unitTypeMap.put("m/s**2", InputType.ACCELERATION);
         unitTypeMap.put("nm/s**2", InputType.ACCELERATION);
         unitTypeMap.put("mm/s**2", InputType.ACCELERATION);
@@ -292,7 +293,7 @@ public class FDSNWSDownloader {
 
         if (inputType == InputType.UNKNOWN) {
             unknownUnits.add(inputUnits.toLowerCase());
-            Logger.warn("Unknown input units: %s".formatted(Arrays.toString(unknownUnits.toArray())));
+            Logger.debug("Unknown input units: %s".formatted(Arrays.toString(unknownUnits.toArray())));
         }
 
         return inputType;
