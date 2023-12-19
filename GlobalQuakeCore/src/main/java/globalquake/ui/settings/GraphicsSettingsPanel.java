@@ -26,7 +26,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
-    private JCheckBox chkBoxTriangles;
     private JSlider sliderStationsSize;
     private JRadioButton[] colorButtons;
 
@@ -42,7 +41,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxAlertBox;
     private JCheckBox chkBoxTime;
     private JCheckBox chkBoxShakemap;
-    private JCheckBox chkBoxInvertAccelerometers;
 
 
     public GraphicsSettingsPanel() {
@@ -297,10 +295,23 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         JRadioButton[] buttons = new JRadioButton[]{buttonCircles, buttonTriangles, buttonDepends};
 
+        var shapeActionListener = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                for (int i = 0; i < buttons.length; i++) {
+                    JRadioButton button = buttons[i];
+                    if(button.isSelected()){
+                        Settings.stationsShapeIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
         for(JRadioButton button : buttons){
             buttonGroup.add(button);
             stationsShapePanel.add(button);
-
+            button.addActionListener(shapeActionListener);
         }
 
         buttons[Settings.stationsShapeIndex].setSelected(true);

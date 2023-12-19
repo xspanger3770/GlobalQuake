@@ -66,7 +66,7 @@ public class RegionsTest {
         double legacyEndTime = System.currentTimeMillis();
 
         double lookupStartTime = System.currentTimeMillis();
-        ignored = Regions.interpolate(lat, lon, lookupTable);
+        Regions.interpolate(lat, lon, lookupTable);
         double lookupEndTime = System.currentTimeMillis();
 
         double legacy = legacyEndTime - legacyStartTime;

@@ -134,7 +134,7 @@ public final class Settings {
 	public static Integer maxClients;
 	public static Boolean displayShakemaps;
 
-	public static Integer stationsShapeIndex; // todo use
+	public static Integer stationsShapeIndex;
 
     static {
 		load();

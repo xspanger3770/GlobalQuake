@@ -95,10 +95,6 @@ public class Regions {
     }
 
 
-    @SuppressWarnings("EmptyMethod")
-    public static synchronized void awaitDownload() {
-    }
-
     @Deprecated
     public static synchronized String downloadRegion(double lat, double lon) {
         if (!enabled) {
@@ -325,6 +321,7 @@ public class Regions {
         return x >= -90 && x <= 90 && y >= -180 && y <= 180;
     }
 
+    @SuppressWarnings("IfStatementWithIdenticalBranches")
     public static double interpolate(
             double lat, double lon,
             HashMap<String, Double> lookupTable

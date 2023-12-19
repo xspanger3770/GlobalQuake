@@ -10,7 +10,6 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
-import globalquake.core.intensity.ShindoIntensityScale;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 

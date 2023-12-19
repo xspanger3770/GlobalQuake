@@ -18,13 +18,11 @@ public class LookupTableIO {
         return performExport(lookupTable);
     }
 
-    public static boolean exportLookupTableToFile(HashMap<String, Double> lookupTable) throws IOException {
+    public static boolean exportLookupTableToFile(HashMap<String, Double> lookupTable) {
         return performExport(lookupTable);
     }
 
     private static boolean performExport(HashMap<String, Double> lookupTable) {
-        String path = "lookup/lookupTable.dat";
-        URL resource = ClassLoader.getSystemClassLoader().getResource(path);
 
         try{
             ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream("lookupTable.dat"));
@@ -38,6 +36,7 @@ public class LookupTableIO {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public static HashMap<String, Double> importLookupTableFromFile() throws IOException {
         String path = "lookup/lookupTable.dat";
         URL resource = ClassLoader.getSystemClassLoader().getResource(path);

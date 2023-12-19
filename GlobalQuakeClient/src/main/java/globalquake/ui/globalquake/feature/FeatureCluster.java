@@ -64,6 +64,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return Settings.displayClusterRoots;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
         Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
