@@ -21,11 +21,10 @@ public class SeedlinkCommunicator {
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_SHORT = new ThreadLocal<>();
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG = new ThreadLocal<>();
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
-    public static final int SEEDLINK_TIMEOUT_SECONDS = 60;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.setStatus(0, "Connecting...");
-        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT_SECONDS, false);
+        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), seedlinkNetwork.getTimeout(), false);
 
         seedlinkNetwork.setStatus(33, "Downloading...");
         String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS).trim().replaceAll("[^\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]", " ");

@@ -13,7 +13,7 @@ public final class SeedlinkNetwork implements Serializable {
     private final String host;
     private final int port;
 
-    public int timeout = DEFAULT_TIMEOUT;
+    private int timeout = DEFAULT_TIMEOUT;
 
     private transient JProgressBar statusBar;
 
@@ -84,5 +84,12 @@ public final class SeedlinkNetwork implements Serializable {
 
     public int getConnectedStations() {
         return connectedStations;
+    }
+
+    public int getTimeout() {
+        if(timeout < 5){
+            timeout = DEFAULT_TIMEOUT;
+        }
+        return timeout;
     }
 }

@@ -200,59 +200,11 @@ public class StationDatabaseManager {
 
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-                        synchronized (statusSync) {
-                            seedlinkNetwork.setStatus(0, "Updating...");
-                        }
-
-                        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-                        Callable<Boolean> task = () -> {
-                            try {
-                                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                            } catch (SocketException | SocketTimeoutException | UnknownHostException ce) {
-                                Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
-                                }
-
-                                return false;
-                            } catch (Exception e) {
-                                Logger.error(e);
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Unknown error occurred");
-                                }
-                                return false;
-                            }
-
-                            return true;
-                        };
-
-                        Future<Boolean> future = executor.submit(task);
-
-                        boolean success = false;
-
-                        try {
-                            success = future.get(seedlinkNetwork.timeout, TimeUnit.SECONDS);
-                        } catch (InterruptedException | ExecutionException e) {
-                            Logger.error("Error executing task", e);
-                            synchronized (statusSync) {
-                                seedlinkNetwork.setStatus(0, "Error during execution: " + e.getMessage());
-                            }
-                        } catch (TimeoutException e) {
-                            Logger.warn("Task timed out");
-                            synchronized (statusSync) {
-                                seedlinkNetwork.setStatus(0, "Timeout occurred");
-                            }
-                        } finally {
-                            executor.shutdown();
-                        }
-
-                        if (success) {
-                            synchronized (statusSync) {
-                                seedlinkNetwork.setStatus(100, "Done");
+                        for (int attempt = 0; attempt < 3; attempt++) {
+                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync)){
+                                break;
                             }
                         }
-                        fireUpdateEvent();
                     }
             );
             this.updating = false;
@@ -261,6 +213,65 @@ public class StationDatabaseManager {
                 onFinish.run();
             }
         }).start();
+    }
+
+    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync) {
+        synchronized (statusSync) {
+            seedlinkNetwork.setStatus(0, "Updating...");
+        }
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Boolean> task = () -> {
+            try {
+                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+            } catch (SocketException | SocketTimeoutException | UnknownHostException ce) {
+                Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
+                }
+
+                return false;
+            } catch (Exception e) {
+                Logger.error(e);
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(0, "Unknown error occurred");
+                }
+                return false;
+            }
+
+            return true;
+        };
+
+        Future<Boolean> future = executor.submit(task);
+
+        boolean success = false;
+
+        try {
+            success = future.get(seedlinkNetwork.getTimeout(), TimeUnit.SECONDS);
+
+            if (success) {
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(100, "Done");
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Logger.error("Error executing task for: %s".formatted(seedlinkNetwork.getName()), e);
+            synchronized (statusSync) {
+                seedlinkNetwork.setStatus(0, "Error during execution: " + e.getMessage());
+            }
+        } catch (TimeoutException e) {
+            Logger.warn("Task timed out for: %s".formatted(seedlinkNetwork.getName()));
+            synchronized (statusSync) {
+                future.cancel(true);
+                seedlinkNetwork.setStatus(0, "Timeout occurred");
+            }
+        } finally {
+            executor.shutdown();
+        }
+
+        fireUpdateEvent();
+        return success;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
