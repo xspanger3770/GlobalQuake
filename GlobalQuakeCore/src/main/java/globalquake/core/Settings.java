@@ -66,6 +66,7 @@ public final class Settings {
 	public static Double oldEventsOpacity;
 
 	public static Boolean displayClusters;
+	public static Boolean displayClusterRoots;
 	public static Integer selectedDateFormatIndex;
 
 	public static Integer maxArchivedQuakes;
@@ -246,6 +247,7 @@ public final class Settings {
 		loadProperty("alertGlobalMag", "6.0",  o -> validateDouble(0, 10, (Double) o));
 
 		loadProperty("reportsEnabled", "false");
+		loadProperty("displayClusterRoots", "false");
 		loadProperty("displayClusters", "false");
 		loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));

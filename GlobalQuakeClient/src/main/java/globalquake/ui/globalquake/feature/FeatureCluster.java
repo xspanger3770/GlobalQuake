@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -59,14 +60,21 @@ public class FeatureCluster extends RenderFeature<Cluster> {
    }
 
     @Override
+    protected boolean isVisible(RenderProperties properties) {
+        return Settings.displayClusterRoots;
+    }
+
+    @Override
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
+        return System.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME;
+    }
+
+    @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Cluster> entity, RenderProperties renderProperties) {
         RenderElement elementRoot = entity.getRenderElement(0);
 
-        if(!elementRoot.shouldDraw) { // todo setting for this
-            return;
-        }
-
-        if(System.currentTimeMillis() - entity.getOriginal().getLastUpdate() > FLASH_TIME){
+        if(!elementRoot.shouldDraw) {
             return;
         }
 
