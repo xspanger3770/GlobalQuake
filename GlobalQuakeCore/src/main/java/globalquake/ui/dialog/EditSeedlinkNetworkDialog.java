@@ -14,6 +14,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
     private final JTextField nameField;
     private final JTextField hostField;
     private final SeedlinkNetwork seedlinkNetwork;
+    private final JTextField timeoutField;
 
     public EditSeedlinkNetworkDialog(Window parent, StationDatabaseManager databaseManager, SeedlinkNetwork seedlinkNetwork) {
         super(parent);
@@ -36,6 +37,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         nameField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getName(), 40);
         hostField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getHost(), 40);
         portField = new JTextField(seedlinkNetwork==null ? "18000" : String.valueOf(seedlinkNetwork.getPort()), 40);
+        timeoutField = new JTextField(seedlinkNetwork==null ? String.valueOf(SeedlinkNetwork.DEFAULT_TIMEOUT) : String.valueOf(seedlinkNetwork.timeout), 40);
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");
@@ -49,6 +51,8 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         fieldsPanel.add(hostField);
         fieldsPanel.add(new JLabel("Port:"));
         fieldsPanel.add(portField);
+        fieldsPanel.add(new JLabel("Timeout (seconds):"));
+        fieldsPanel.add(timeoutField);
         buttonsPanel.add(cancelButton);
         buttonsPanel.add(saveButton);
 
@@ -66,9 +70,22 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         try {
             port = Integer.parseInt(portField.getText());
         }catch(NumberFormatException e){
-            throw new RuntimeApplicationException("Cannot parse port!", e);
+            throw new RuntimeApplicationException("Invalid port!", e);
         }
-        SeedlinkNetwork newSeedlinkNetwork = new SeedlinkNetwork(nameField.getText(), hostField.getText(), port);
+
+        int timeout;
+
+        try {
+            timeout = Integer.parseInt(timeoutField.getText());
+        }catch(NumberFormatException e){
+            throw new RuntimeApplicationException("Invalid timeout!", e);
+        }
+
+        if(timeout < 5 || timeout > 300){
+            throw new RuntimeApplicationException("Timeout must be between 5s and 300s!");
+        }
+
+        SeedlinkNetwork newSeedlinkNetwork = new SeedlinkNetwork(nameField.getText(), hostField.getText(), port, timeout);
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);

@@ -8,9 +8,12 @@ import java.util.Objects;
 public final class SeedlinkNetwork implements Serializable {
     @Serial
     private static final long serialVersionUID = 0L;
+    public static final int DEFAULT_TIMEOUT = 20;
     private final String name;
     private final String host;
     private final int port;
+
+    public int timeout = DEFAULT_TIMEOUT;
 
     private transient JProgressBar statusBar;
 
@@ -23,9 +26,14 @@ public final class SeedlinkNetwork implements Serializable {
     public transient SeedlinkStatus status = SeedlinkStatus.DISCONNECTED;
 
     public SeedlinkNetwork(String name, String host, int port) {
+        this(name, host, port, DEFAULT_TIMEOUT);
+    }
+
+    public SeedlinkNetwork(String name, String host, int port, int timeout) {
         this.name = name;
         this.host = host;
         this.port = port;
+        this.timeout = timeout;
     }
 
     public String getName() {
