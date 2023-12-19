@@ -42,7 +42,7 @@ public class Sounds {
 			}
 
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(
-					new BufferedInputStream(audioInStream, 65565));
+					new BufferedInputStream(audioInStream));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			return clip;
@@ -138,6 +138,17 @@ public class Sounds {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+	}
+
+	public static void main(String[] args) throws Exception {
+		GlobalQuake.prepare(new File("."), null);
+		load();
+
+		playSound(level_2);
+
+		Thread.sleep(3000);
+
+		System.exit(0);
 	}
 
 }
