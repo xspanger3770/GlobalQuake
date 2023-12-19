@@ -19,7 +19,7 @@ public class RegionsTest {
         assertEquals("Poland", Regions.getRegion(51.8, 18.3));
     }
 
-    @Test
+    @SuppressWarnings("unused")
     public void getShorelineDistanceTest() throws IOException {
         Regions.init();
 
@@ -38,8 +38,7 @@ public class RegionsTest {
 
         assertEquals(55, Regions.getShorelineDistance(lat, lon), 1);
     }
-
-    @Test
+    @SuppressWarnings("unused")
     public void bilinearInterpolationTest() throws IOException {
         HashMap<String, Double> lookupTable = LookupTableIO.importLookupTableFromFile();
         assertNotNull(lookupTable);
@@ -50,8 +49,7 @@ public class RegionsTest {
         interpolation = interpolate(-2.376240, -38.963751, lookupTable);
         assertEquals(125, interpolation, 5);
     }
-
-    @Test
+    @SuppressWarnings("unused")
     public void lookupTableEffectivityTest() throws IOException {
         Regions.init();
 
@@ -75,14 +73,14 @@ public class RegionsTest {
         assert(lookup < legacy);
     }
 
-    @Test
+    @SuppressWarnings("unused")
     public void isValidPointTest() {
         assertTrue(Regions.isValidPoint(0, 0));
         assertFalse(Regions.isValidPoint(0, -270));
         assertFalse(Regions.isValidPoint(270, 0));
     }
 
-    @Test
+    @SuppressWarnings("unused")
     public void lookupTableGenerationTest() {
         HashMap<String, Double> testLookupTable = Regions.generateLookupTable(0, 1, 0, 1);
 
