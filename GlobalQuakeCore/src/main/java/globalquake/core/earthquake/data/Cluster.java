@@ -137,13 +137,13 @@ public class Cluster implements Warnable {
 			if (e.getMaxRatio() >= 64) {
 				lvl_1++;
 			}
-			if (e.getMaxRatio() >= 512) {
+			if (e.getMaxRatio() >= 1000) {
 				lvl_2++;
 			}
-			if (e.getMaxRatio() >= 4096) {
+			if (e.getMaxRatio() >= 10000) {
 				lvl_3++;
 			}
-			if (e.getMaxRatio() >= 16384) {
+			if (e.getMaxRatio() >= 50000) {
 				lvl_4++;
 			}
 		}
