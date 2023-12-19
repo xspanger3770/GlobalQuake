@@ -56,6 +56,11 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 		JOptionPane.showMessageDialog(parent, message, "Warning", JOptionPane.WARNING_MESSAGE);
 	}
 
+
+	public void info(String s) {
+		JOptionPane.showMessageDialog(parent, s, "Info", JOptionPane.INFORMATION_MESSAGE);
+	}
+
 	private void showDetailedError(Throwable e) {
 		errorCount++;
 		if (errorCount == 2) {
@@ -103,4 +108,5 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 		return new Component[] { new JButton(new TerminateAction()), new JButton(new OpenURLAction("https://github.com/xspanger3770/GlobalQuake/issues", "Open issue on GitHub")),
 				new JButton(new IgnoreAction()) };
 	}
+
 }
