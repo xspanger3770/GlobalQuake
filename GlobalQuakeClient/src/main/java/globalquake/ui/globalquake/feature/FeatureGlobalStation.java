@@ -4,6 +4,7 @@ import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.StationState;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
@@ -12,8 +13,10 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.core.Settings;
+import globalquake.ui.settings.StationsShape;
 import globalquake.ui.stationselect.FeatureSelectableStation;
 import globalquake.utils.Scale;
+import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
@@ -49,7 +52,17 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties)) * Settings.stationsSizeMul;
 
-        switch (entity.getOriginal().getInputType()){
+        InputType inputType = entity.getOriginal().getInputType();
+
+        StationsShape shape = StationsShape.values()[Settings.stationsShapeIndex];
+
+        if(shape == StationsShape.CIRCLE){
+            inputType = InputType.UNKNOWN;
+        } else if(shape == StationsShape.TRIANGLE){
+            inputType = InputType.VELOCITY;
+        }
+
+        switch (inputType){
             case UNKNOWN ->
                     renderer.createCircle(elementStationCircle.getPolygon(),
                             entity.getOriginal().getLatitude(),
