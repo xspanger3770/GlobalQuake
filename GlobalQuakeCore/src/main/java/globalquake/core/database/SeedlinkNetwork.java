@@ -3,7 +3,6 @@ package globalquake.core.database;
 import javax.swing.*;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
 
 public final class SeedlinkNetwork implements Serializable {
     @Serial
@@ -13,7 +12,7 @@ public final class SeedlinkNetwork implements Serializable {
     private final String host;
     private final int port;
 
-    private int timeout = DEFAULT_TIMEOUT;
+    private int timeout;
 
     private transient JProgressBar statusBar;
 

@@ -200,7 +200,7 @@ public class StationDatabaseManager {
 
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-                        for (int attempt = 0; attempt < 3; attempt++) {
+                        for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
                             if(runSeedlinkUpdate(seedlinkNetwork, statusSync)){
                                 break;
                             }

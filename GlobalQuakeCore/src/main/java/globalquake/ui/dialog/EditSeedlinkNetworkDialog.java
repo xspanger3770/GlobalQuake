@@ -66,6 +66,21 @@ public class EditSeedlinkNetworkDialog extends JDialog {
     }
 
     private void saveChanges() {
+        SeedlinkNetwork newSeedlinkNetwork = getSeedlinkNetwork();
+        databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
+        try{
+            databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);
+            databaseManager.getStationDatabase().getSeedlinkNetworks().add(newSeedlinkNetwork);
+        }finally {
+            databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
+        }
+
+        databaseManager.fireUpdateEvent();
+
+        this.dispose();
+    }
+
+    private SeedlinkNetwork getSeedlinkNetwork() {
         int port;
         try {
             port = Integer.parseInt(portField.getText());
@@ -85,17 +100,6 @@ public class EditSeedlinkNetworkDialog extends JDialog {
             throw new RuntimeApplicationException("Timeout must be between 5s and 300s!");
         }
 
-        SeedlinkNetwork newSeedlinkNetwork = new SeedlinkNetwork(nameField.getText(), hostField.getText(), port, timeout);
-        databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
-            databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);
-            databaseManager.getStationDatabase().getSeedlinkNetworks().add(newSeedlinkNetwork);
-        }finally {
-            databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
-        }
-
-        databaseManager.fireUpdateEvent();
-
-        this.dispose();
+        return new SeedlinkNetwork(nameField.getText(), hostField.getText(), port, timeout);
     }
 }
