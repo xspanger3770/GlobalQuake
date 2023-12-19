@@ -98,6 +98,8 @@ To add Java to system variables follow these steps:
 <a name="EnvironmentLinux"></a>
 Under Construction
 
+
+
 #### MacOS
 <a name="EnvironmentMacOS"></a>
 Under Construction
@@ -118,7 +120,24 @@ If you do put it in a folder you can create a shortcut to the jar file for easie
 
 ### Running
 <a name="GlobalQuakeRun"></a>
-Run it by simply double clicking the jar file, or in a terminal or command line going to the directory it is located and using the command `java -jar [filename].jar`.
+In Windows you can run it by simply double clicking the jar file, or in a Linux Distro (ie. Ubuntu) terminal or Windows command line by going to the directory it is located and using the command `java -jar [filename].jar`.
 > [!NOTE]<br>
 > You can add `-Xms8G -Xmx8G` parameters to specify the maximum amount of ram in gigabytes, replacing "8" with your own number.
 > Experimental: You can also improve your FPS by adding the parameter `-Dsun.java2d.opengl=True`.
+
+For example the full teminal or command line to start GlobalQuake (assuming you have already navigated to the appropriate folder) should look something like this:
+
+> [!TIP]
+> This Won't Work with a shortcut (on windows)
+
+\
+*Simple*\
+`$ java -jar GlobalQuake0.10.x_pre10.jar`\
+or\
+*With The Extra Variables Added* (remember the instructions in the note above)\
+`$ java -jar -Xms8G -Xmx8G -Dsun.java2d.opengl=true GlobalQuake0.10.x_pre10.jar`
+
+> [!NOTE]
+> ONLY work with the Minimum RAM needed as you can stall the system and cause a ton of complications by setting the `-Xms_G` and `-Xmx_G` numbers too high.\
+> for instance if you have 8GB of RAM in you system the OS needs a minimum of 50% to work so the `-Xms_G` and `-Xmx_G` should not be higher than 4.\
+> **Examples** `-Xms4G -Xmx4G` would be ok to run GlobalQuake Locally with a total of 8GB of ram.
