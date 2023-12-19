@@ -131,15 +131,13 @@ public class Sounds {
 		clip.stop();
 		clip.flush();
 		clip.setFramePosition(0);
-		clip.loop(2);
+		clip.start();
 
         try {
             Thread.sleep(clip.getMicrosecondLength() / 1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-		clip.stop();
-    }
+	}
 
 }
