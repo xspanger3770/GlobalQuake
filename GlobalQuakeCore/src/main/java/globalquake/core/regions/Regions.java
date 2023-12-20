@@ -55,6 +55,7 @@ public class Regions {
     public static final ArrayList<Region> regionsIT = new ArrayList<>();
 
 
+    private static final ArrayList<Region> shorelinePolygons = new ArrayList<>();
     private static final ArrayList<Region> regionSearchHD = new ArrayList<>();
     private static HashMap<String, Double> shorelineLookup;
 
@@ -125,7 +126,7 @@ public class Regions {
     public static double getOceanDistance(double lat, double lon, boolean gcd, double depth) {
         double closestDistance = Double.MAX_VALUE;
         Point2D.Double point = new Point2D.Double(lon, lat);
-        for (Region reg : regionsMD) {
+        for (Region reg : regionsUHD) {
             for(Path2D.Double path : reg.paths()){
                 if(path.contains(point)){
                     return depth;
