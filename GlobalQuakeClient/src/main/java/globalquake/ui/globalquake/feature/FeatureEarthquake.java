@@ -270,7 +270,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     public static Color getCrossColor(double mag) {
         if (mag < 3) {
-            return Color.lightGray;
+            return Color.white;
         }
         if (mag < 4) {
             return Color.green;

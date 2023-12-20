@@ -98,7 +98,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return null;
     }
 
-    private static final Color[] colors = {Color.WHITE, Color.CYAN, Color.GREEN, Color.ORANGE, new Color(200,0,0)};
+    private static final Color[] colors = {Color.WHITE, Color.CYAN, Color.GREEN, new Color(255,200,0), new Color(200,0,0)};
 
     private Color getColorLevel(int level) {
         return level >= 0 && level < colors.length ? colors[level] : Color.GRAY;
