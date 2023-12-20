@@ -14,6 +14,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
@@ -28,7 +30,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final UUID uuid;
 	private final QualityClass qualityClass;
 	private double maxRatio;
-	private final double maxPGA;
+	private double maxPGA;
 	private String region;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
@@ -36,6 +38,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private boolean wrong;
 
 	private transient RegionUpdater regionUpdater;
+	private static ExecutorService pgaService = Executors.newSingleThreadExecutor();
 
 	@Serial
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -87,7 +90,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.archivedEvents = new ArrayList<>();
 		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
+		this.maxPGA = 0.0;
 
+		pgaService.submit(this::calculatePGA);
+
+
+	}
+
+	private void calculatePGA() {
 		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
 		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
 	}
