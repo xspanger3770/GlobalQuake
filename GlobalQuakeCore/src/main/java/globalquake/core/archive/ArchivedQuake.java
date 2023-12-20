@@ -88,7 +88,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
 
-		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon);
+		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
 		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
 	}
 
