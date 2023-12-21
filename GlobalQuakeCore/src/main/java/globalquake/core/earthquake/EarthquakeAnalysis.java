@@ -542,11 +542,48 @@ public class EarthquakeAnalysis {
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
+                updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").trace("Not updating because: %s".formatted(result));
             }
         }
 
         Logger.tag("Hypocs").trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
+    }
+
+    private void updateMagnitudeOnly(Cluster cluster, Hypocenter bestHypocenter) {
+         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
+             cluster.revisionID += 1;
+
+             cluster.getPreviousHypocenter().magnitudeUpdate(bestHypocenter);
+
+             if (GlobalQuake.instance != null) {
+                 GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
+             }
+        }
+    }
+
+    private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
+        cluster.updateAnchor(bestHypocenter);
+
+        cluster.revisionID += 1;
+        cluster.setPreviousHypocenter(bestHypocenter);
+
+        if (cluster.getEarthquake() == null) {
+            Earthquake newEarthquake = new Earthquake(cluster);
+            if (!testing) {
+                getEarthquakes().add(newEarthquake);
+                if (GlobalQuake.instance != null) {
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
+                }
+            }
+            cluster.setEarthquake(newEarthquake);
+        } else {
+            cluster.getEarthquake().update();
+
+            if (GlobalQuake.instance != null) {
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
+            }
+        }
     }
 
     private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
@@ -912,6 +949,10 @@ public class EarthquakeAnalysis {
             }
         }
 
+        if(previousHypocenter != null && (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal())){
+            return HypocenterCondition.PREVIOUS_WAS_BETTER_QUALITY;
+        }
+
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
         if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
@@ -926,30 +967,6 @@ public class EarthquakeAnalysis {
             return null;
         }
         return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctEvents);
-    }
-
-    private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
-        cluster.updateAnchor(bestHypocenter);
-
-        cluster.revisionID += 1;
-        cluster.setPreviousHypocenter(bestHypocenter);
-
-        if (cluster.getEarthquake() == null) {
-            Earthquake newEarthquake = new Earthquake(cluster);
-            if (!testing) {
-                getEarthquakes().add(newEarthquake);
-                if (GlobalQuake.instance != null) {
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
-                }
-            }
-            cluster.setEarthquake(newEarthquake);
-        } else {
-            cluster.getEarthquake().update();
-
-            if (GlobalQuake.instance != null) {
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
-            }
-        }
     }
 
     private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
