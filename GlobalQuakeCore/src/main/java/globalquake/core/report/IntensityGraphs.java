@@ -29,28 +29,24 @@ public class IntensityGraphs {
 		Graphics2D g = img.createGraphics();
 		
 		List<DistanceIntensityRecord> recs = new ArrayList<>();
-		recs.add(new DistanceIntensityRecord(5.7,800,200));
-		recs.add(new DistanceIntensityRecord(5.7,300,5000));
-		recs.add(new DistanceIntensityRecord(4.2,200,1000));
-		recs.add(new DistanceIntensityRecord(4.2,500,50));
-		recs.add(new DistanceIntensityRecord(3.8,100,1000));
-		recs.add(new DistanceIntensityRecord(3.8,330,100));
-		recs.add(new DistanceIntensityRecord(3.8,800,10));
-		recs.add(new DistanceIntensityRecord(3.1,82,200));
-		recs.add(new DistanceIntensityRecord(2.1,10,1000));
-		recs.add(new DistanceIntensityRecord(2.1,50,30));
-		
-		recs.add(new DistanceIntensityRecord(5.5,7000,5));
-		recs.add(new DistanceIntensityRecord(6.5,7000,50));
+		recs.add(new DistanceIntensityRecord(6.1,100,2E5));
+		recs.add(new DistanceIntensityRecord(6.1,300,1E4));
+		recs.add(new DistanceIntensityRecord(6.1,1000,3E2));
+		recs.add(new DistanceIntensityRecord(6.1,3000,2E1));
 
-		recs.add(new DistanceIntensityRecord(6.9,800,1000));
-		recs.add(new DistanceIntensityRecord(6.9,1100,300));
-		recs.add(new DistanceIntensityRecord(5.5,3000,40));
-		recs.add(new DistanceIntensityRecord(5.0,3000,40));
-		recs.add(new DistanceIntensityRecord(5.0,9000,30));
+		recs.add(new DistanceIntensityRecord(4.8,30,1E5));
+		recs.add(new DistanceIntensityRecord(4.8,80,1E4));
+		recs.add(new DistanceIntensityRecord(4.8,250,1E3));
+		recs.add(new DistanceIntensityRecord(4.8,500,1E2));
+
+		recs.add(new DistanceIntensityRecord(3.6,1,1E5));
+		recs.add(new DistanceIntensityRecord(3.6,30,1E4));
+		recs.add(new DistanceIntensityRecord(3.6,90,1E3));
+		recs.add(new DistanceIntensityRecord(3.6,250,1E2));
+		recs.add(new DistanceIntensityRecord(3.6,600,1E1));
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa15.png"));
+		ImageIO.write(img, "PNG", new File("aaa17.png"));
 
 		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getIntensity(5.7, 800));
 		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getIntensity(5.7, 300));
