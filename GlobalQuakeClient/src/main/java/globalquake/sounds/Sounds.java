@@ -18,8 +18,11 @@ public class Sounds {
 	public static Clip level_1;
 	public static Clip level_2;
 	public static Clip level_3;
+	public static Clip level_4;
 	public static Clip intensify;
 	public static Clip felt;
+	public static Clip eew_warning;
+	public static Clip felt_strong;
 	public static Clip countdown;
 	public static Clip countdown2;
 	public static Clip update;
@@ -59,8 +62,8 @@ public class Sounds {
 			writeReadmeFile(exportPath);
 		}
 
-		String[] soundFiles = {"level_0.wav", "level_1.wav", "level_2.wav", "level_3.wav",
-				"intensify.wav", "felt.wav", "countdown.wav", "update.wav", "found.wav"};
+		String[] soundFiles = {"level_0.wav", "level_1.wav", "level_2.wav", "level_3.wav", "level_4.wav",
+				"intensify.wav", "felt.wav", "felt_strong.wav", "eew_warning.wav", "countdown.wav", "update.wav", "found.wav"};
 
 		for (String soundFile : soundFiles) {
 			Path exportedFilePath = exportPath.resolve(soundFile);
@@ -97,7 +100,7 @@ public class Sounds {
 		level_1 = loadSound("level_1.wav");
 		level_2 = loadSound("level_2.wav");
 		level_3 = loadSound("level_3.wav");
-		// lvl 4 ?
+		level_4 = loadSound("level_4.wav");
 
 		// QUAKE
 		found = loadSound("found.wav");
@@ -106,6 +109,8 @@ public class Sounds {
 		// LOCAL
 		intensify = loadSound("intensify.wav");
 		felt = loadSound("felt.wav");
+		felt_strong = loadSound("felt_strong.wav");
+		eew_warning = loadSound("eew_warning.wav");
 		// strong_felt ?
 
 		// ???
