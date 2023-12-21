@@ -949,8 +949,12 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if(previousHypocenter != null && (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal())){
-            return HypocenterCondition.PREVIOUS_WAS_BETTER_QUALITY;
+        if(previousHypocenter != null ){
+            if (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal())  {
+                return HypocenterCondition.PREVIOUS_WAS_BETTER_QUALITY;
+            } else if(bestHypocenter.quality.getSummary().ordinal() < previousHypocenter.quality.getSummary().ordinal()){
+                return HypocenterCondition.OK;
+            }
         }
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
