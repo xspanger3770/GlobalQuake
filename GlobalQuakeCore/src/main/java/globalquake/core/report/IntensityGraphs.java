@@ -46,7 +46,7 @@ public class IntensityGraphs {
 		recs.add(new DistanceIntensityRecord(3.6,600,1E1));
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa17.png"));
+		ImageIO.write(img, "PNG", new File("aaa18.png"));
 
 		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getIntensity(5.7, 800));
 		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getIntensity(5.7, 300));
