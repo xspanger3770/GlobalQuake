@@ -12,7 +12,10 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.TimeZone;
 import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -196,8 +199,11 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
         
         properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
 
-        String timeOrigin = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new java.util.Date(getOrigin()));
-        properties.put("time", timeOrigin);
+        //format milliseconds since epoch to UTC time
+        SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String utcTimeOrigin = utcFormat.format(new Date(getOrigin()));
+        properties.put("time", utcTimeOrigin);
 
         properties.put("source_id", "GlobalQuake"); // TODO: allow user to set this
         properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
