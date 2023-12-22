@@ -1036,7 +1036,7 @@ public class EarthquakeAnalysis {
         int targetSize = (int) Math.max(25, mags.size() * 0.40);
         List<MagnitudeReading> list = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 8000.0) {
+            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 6400.0) {
                 list.add(magnitudeReading);
             } else break;
         }
