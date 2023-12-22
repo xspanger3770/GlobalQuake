@@ -551,8 +551,11 @@ public class EarthquakeAnalysis {
     }
 
     private void updateMagnitudeOnly(Cluster cluster, Hypocenter bestHypocenter) {
-         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
-             cluster.revisionID += 1;
+        if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
+            // calculate magnitudes, but using the previous hypocenter, that is believed to be more accurate
+            calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+
+            cluster.revisionID += 1;
 
              cluster.getPreviousHypocenter().magnitudeUpdate(bestHypocenter);
 
