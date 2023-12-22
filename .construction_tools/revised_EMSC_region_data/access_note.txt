@@ -7,3 +7,11 @@ New Zealand districts added from:
 
 Italian provinces added from:
     https://www.istat.it/it/archivio/222527
+
+UNHCR is the, United Nation High Commissioner for Refugees. They provide many datasets for country geo data.
+
+Several European country borders have been sourced from UNHCR.
+
+HUMDATA is the Humanitarian data Exchange which is provided by, OCHA Regional Office for Asia and the Pacific.
+
+Japan prefectures have been added from HUMDATA
