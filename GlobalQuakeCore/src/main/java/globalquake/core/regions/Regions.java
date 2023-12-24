@@ -54,8 +54,6 @@ public class Regions {
     public static final ArrayList<Polygon> raw_polygonsIT = new ArrayList<>();
     public static final ArrayList<Region> regionsIT = new ArrayList<>();
 
-
-    private static final ArrayList<Region> shorelinePolygons = new ArrayList<>();
     private static final ArrayList<Region> regionSearchHD = new ArrayList<>();
     private static HashMap<String, Double> shorelineLookup;
 

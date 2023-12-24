@@ -35,7 +35,6 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.core.Settings;
 import globalquake.utils.Scale;
-import org.apache.commons.collections.list.GrowthList;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -171,6 +170,7 @@ public class GlobalQuakePanel extends GlobePanel {
             new StationMonitor(this, selectedStation, 500);
     }
 
+    @SuppressWarnings("ConstantValue")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
@@ -205,7 +205,6 @@ public class GlobalQuakePanel extends GlobePanel {
         int maxCities = 16;
 
         List<CityIntensity> cityIntensities = GlobalQuakeLocal.instance.getShakemapService().getCityIntensities();
-        int count = Math.min(maxCities, cityIntensities.size());
         int y = getHeight() / 2 - maxCities * cellHeight / 2;
 
         int n = 1;

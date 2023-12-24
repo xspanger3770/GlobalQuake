@@ -38,7 +38,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private boolean wrong;
 
 	private transient RegionUpdater regionUpdater;
-	private static ExecutorService pgaService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService pgaService = Executors.newSingleThreadExecutor();
 
 	@Serial
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {

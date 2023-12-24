@@ -4,7 +4,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import globalquake.core.GlobalQuake;
-import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.events.GlobalQuakeEventListener;
@@ -43,7 +42,7 @@ public class ShakemapService {
 
     private static void load() {
         int errors = 0;
-        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(ClassLoader.getSystemClassLoader().getResource("cities/worldcities.csv").openStream())).withSkipLines(1).build()) {
+        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("cities/worldcities.csv")).openStream())).withSkipLines(1).build()) {
             String[] fields;
             while ((fields = reader.readNext()) != null) {
                 String cityName = fields[1];
@@ -62,7 +61,7 @@ public class ShakemapService {
                 cities.add(new CityLocation(cityName, lat, lon, population));
             }
         } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
 
         Logger.warn("%d cities have unknown population!".formatted(errors));
@@ -134,7 +133,7 @@ public class ShakemapService {
 
     private void updateCities() {
         List<CityIntensity> result = new ArrayList<>();
-        cities.stream().forEach( cityLocation -> {
+        cities.forEach(cityLocation -> {
             double maxPGA = 0;
             for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
                 double pga = calculatePGA(cityLocation, earthquake);

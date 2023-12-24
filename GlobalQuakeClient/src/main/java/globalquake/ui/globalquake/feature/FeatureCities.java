@@ -3,7 +3,6 @@ package globalquake.ui.globalquake.feature;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
-import globalquake.core.Settings;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
@@ -13,14 +12,11 @@ import globalquake.ui.globe.feature.RenderFeature;
 import org.tinylog.Logger;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 
 public class FeatureCities extends RenderFeature<CityLocation> {
 
@@ -33,8 +29,7 @@ public class FeatureCities extends RenderFeature<CityLocation> {
     }
 
     private void load() {
-        int errors = 0;
-        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(ClassLoader.getSystemClassLoader().getResource("cities/country-capital-lat-long-population.csv").openStream())).withSkipLines(1).build()) {
+        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("cities/country-capital-lat-long-population.csv")).openStream())).withSkipLines(1).build()) {
             String[] fields;
             while ((fields = reader.readNext()) != null) {
                 String cityName = fields[1];
@@ -49,7 +44,7 @@ public class FeatureCities extends RenderFeature<CityLocation> {
                 cityLocations.add(new CityLocation(cityName, lat, lon, population));
             }
         } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 
