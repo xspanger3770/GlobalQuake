@@ -198,7 +198,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     private void drawCityIntensities(Graphics2D g) {
-        g.setFont(new Font("Calibri", Font.BOLD, 14));
+        g.setFont(new Font("Calibri", Font.BOLD, 17));
 
         int cellHeight = (int) (g.getFont().getSize() * 1.2);
 
