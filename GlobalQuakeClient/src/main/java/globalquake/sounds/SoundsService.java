@@ -8,8 +8,9 @@ import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
-import globalquake.core.intensity.ShindoIntensityScale;
+import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
@@ -26,7 +27,7 @@ public class SoundsService {
 
     public SoundsService(){
         soundCheckService = Executors.newSingleThreadScheduledExecutor();
-        soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 1, TimeUnit.SECONDS);
+        soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 200, TimeUnit.MILLISECONDS);
 
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
@@ -69,20 +70,23 @@ public class SoundsService {
         }
 
         if (!info.firstSound) {
-            Sounds.playSound(Sounds.weak);
+            Sounds.playSound(Sounds.level_0);
             info.firstSound = true;
         }
 
         int level = cluster.getLevel();
         if (level > info.maxLevel) {
             if (level >= 1 && info.maxLevel < 1) {
-                Sounds.playSound(Sounds.moderate);
+                Sounds.playSound(Sounds.level_1);
             }
             if (level >= 2 && info.maxLevel < 2) {
-                Sounds.playSound(Sounds.shindo5);
+                Sounds.playSound(Sounds.level_2);
             }
             if (level >= 3 && info.maxLevel < 3) {
-                Sounds.playSound(Sounds.warning);
+                Sounds.playSound(Sounds.level_3);
+            }
+            if (level >= 4 && info.maxLevel < 4) {
+                Sounds.playSound(Sounds.level_4);
             }
             info.maxLevel = level;
         }
@@ -98,7 +102,7 @@ public class SoundsService {
             double pga = GeoUtils.pgaFunction(quake.getMag(), quake.getDepth(), quake.getDepth());
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
-                if (info.maxPGA >= 100 && !info.warningPlayed && level >= 2) {
+                if (info.maxPGA >= MMIIntensityScale.VI.getPga() && !info.warningPlayed && level >= 2) {
                     Sounds.playSound(Sounds.eew_warning);
                     info.warningPlayed = true;
                 }
@@ -106,20 +110,34 @@ public class SoundsService {
 
             double distGEO = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(),
                     Settings.homeLat, Settings.homeLon, 0.0);
+            double distGCD = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat, Settings.homeLon);
             double pgaHome = GeoUtils.pgaFunction(quake.getMag(), distGEO, quake.getDepth());
 
             if (pgaHome > info.maxPGAHome) {
-                double threshold = IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
-                if (pgaHome >= threshold && info.maxPGAHome < threshold) {
+                double threshold_felt = IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
+                double threshold_felt_strong = IntensityScales.INTENSITY_SCALES[Settings.strongShakingLevelScale].getLevels().get(Settings.strongShakingLevelIndex).getPga();
+                if (pgaHome >= threshold_felt && info.maxPGAHome < threshold_felt) {
                     Sounds.playSound(Sounds.felt);
+                }
+                if (pgaHome >= threshold_felt_strong && info.maxPGAHome < threshold_felt_strong) {
+                    Sounds.playSound(Sounds.felt_strong);
                 }
                 info.maxPGAHome = pgaHome;
             }
 
-            if (info.maxPGAHome >= ShindoIntensityScale.ICHI.getPga()) {
-                if (info.lastCountdown == 0) {
-                    info.lastCountdown = -999;
-                    Sounds.playSound(Sounds.dong);
+
+            boolean shakingExpected = info.maxPGAHome >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga();
+
+            if (shakingExpected) {
+                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
+                        TauPTravelTimeCalculator.toAngle(distGCD)));
+                double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
+                int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
+
+                if (secondsS < info.lastCountdown && secondsS <= 10) {
+                    info.lastCountdown = secondsS;
+                    // little workaround
+                    Sounds.playSound(secondsS % 2 == 0 ? Sounds.countdown2 : Sounds.countdown);
                 }
             }
         }

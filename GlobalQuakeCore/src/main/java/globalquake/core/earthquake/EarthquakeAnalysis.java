@@ -90,7 +90,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if (cluster.lastEpicenterUpdate >= cluster.updateCount) {
+        if (cluster.lastEpicenterUpdate >= cluster.updateCount * (Settings.reduceRevisions ? 0.91 : 1.0)) {
             return;
         }
 
@@ -182,7 +182,7 @@ public class EarthquakeAnalysis {
         events.sort(Comparator.comparing(PickedEvent::pWave));
 
         if (cluster.getRootLat() == Cluster.NONE) {
-            cluster.calculateRoot();
+            cluster.calculateRoot(false);
         }
 
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
@@ -542,6 +542,7 @@ public class EarthquakeAnalysis {
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else {
+                updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").trace("Not updating because: %s".formatted(result));
             }
         }
@@ -549,12 +550,51 @@ public class EarthquakeAnalysis {
         Logger.tag("Hypocs").trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
     }
 
+    private void updateMagnitudeOnly(Cluster cluster, Hypocenter bestHypocenter) {
+        if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
+            // calculate magnitudes, but using the previous hypocenter, that is believed to be more accurate
+            calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+
+            cluster.revisionID += 1;
+
+             cluster.getPreviousHypocenter().magnitudeUpdate(bestHypocenter);
+
+             if (GlobalQuake.instance != null) {
+                 GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
+             }
+        }
+    }
+
+    private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
+        cluster.updateAnchor(bestHypocenter);
+
+        cluster.revisionID += 1;
+        cluster.setPreviousHypocenter(bestHypocenter);
+
+        if (cluster.getEarthquake() == null) {
+            Earthquake newEarthquake = new Earthquake(cluster);
+            if (!testing) {
+                getEarthquakes().add(newEarthquake);
+                if (GlobalQuake.instance != null) {
+                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
+                }
+            }
+            cluster.setEarthquake(newEarthquake);
+        } else {
+            cluster.getEarthquake().update();
+
+            if (GlobalQuake.instance != null) {
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
+            }
+        }
+    }
+
     private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
         bestHypocenter.depthUncertainty = bestHypocenter.depthConfidenceInterval.maxDepth() - bestHypocenter.depthConfidenceInterval.minDepth();
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
-        if (bestHypocenter.locationUncertainty > 500) {
+        if (bestHypocenter.locationUncertainty > 200) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
             return false;
         }
@@ -912,6 +952,14 @@ public class EarthquakeAnalysis {
             }
         }
 
+        if(previousHypocenter != null ){
+            if (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal())  {
+                return HypocenterCondition.PREVIOUS_WAS_BETTER_QUALITY;
+            } else if(bestHypocenter.quality.getSummary().ordinal() < previousHypocenter.quality.getSummary().ordinal()){
+                return HypocenterCondition.OK;
+            }
+        }
+
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
         if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
@@ -926,30 +974,6 @@ public class EarthquakeAnalysis {
             return null;
         }
         return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctEvents);
-    }
-
-    private void updateHypocenter(Cluster cluster, Hypocenter bestHypocenter) {
-        cluster.updateAnchor(bestHypocenter);
-
-        cluster.revisionID += 1;
-        cluster.setPreviousHypocenter(bestHypocenter);
-
-        if (cluster.getEarthquake() == null) {
-            Earthquake newEarthquake = new Earthquake(cluster);
-            if (!testing) {
-                getEarthquakes().add(newEarthquake);
-                if (GlobalQuake.instance != null) {
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newEarthquake));
-                }
-            }
-            cluster.setEarthquake(newEarthquake);
-        } else {
-            cluster.getEarthquake().update();
-
-            if (GlobalQuake.instance != null) {
-                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
-            }
-        }
     }
 
     private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
@@ -1012,7 +1036,7 @@ public class EarthquakeAnalysis {
         int targetSize = (int) Math.max(25, mags.size() * 0.40);
         List<MagnitudeReading> list = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 8000.0) {
+            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 6400.0) {
                 list.add(magnitudeReading);
             } else break;
         }
@@ -1039,7 +1063,8 @@ public class EarthquakeAnalysis {
 
     public static boolean shouldRemove(Earthquake earthquake, int marginSeconds){
         double store_minutes = STORE_TABLE[Math.max(0,
-                Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))] - marginSeconds / 60.0;
+                Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))]
+                - marginSeconds / 60.0;
         return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
                 && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }

@@ -66,6 +66,9 @@ public class ClusterAnalysis {
         }
     }
 
+    public void destroy() {
+    }
+
     record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){}
 
     private void stealEvents() {
@@ -494,9 +497,10 @@ public class ClusterAnalysis {
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
-                if(cluster.getLevel() != cluster.lastLevel){
+                if(cluster.getLevel() != cluster.lastLevel || cluster.lastLastUpdate != cluster.getLastUpdate()){
                     GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
                     cluster.lastLevel = cluster.getLevel();
+                    cluster.lastLastUpdate = cluster.getLastUpdate();
                 }
             }
         }
@@ -513,7 +517,7 @@ public class ClusterAnalysis {
             }
         }
 
-        cluster.calculateRoot();
+        cluster.calculateRoot(true);
 
         Logger.tag("Hypocs").debug("New Cluster #" + cluster.id + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");

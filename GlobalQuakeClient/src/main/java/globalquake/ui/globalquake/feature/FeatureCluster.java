@@ -1,20 +1,13 @@
 package globalquake.ui.globalquake.feature;
 
-import globalquake.client.GlobalQuakeClient;
 import globalquake.core.Settings;
-import globalquake.core.analysis.AnalysisStatus;
-import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.data.Cluster;
-import globalquake.core.station.AbstractStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
-import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
-import globalquake.ui.stationselect.FeatureSelectableStation;
-import globalquake.utils.Scale;
 
 import java.awt.*;
 import java.util.Collection;
@@ -23,6 +16,8 @@ import java.util.List;
 public class FeatureCluster extends RenderFeature<Cluster> {
 
     private final List<Cluster> clusters;
+
+    private static final long FLASH_TIME = 1000 * 90;
 
 
     public FeatureCluster(List<Cluster> clusters) {
@@ -44,7 +39,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         renderer.createNGon(elementRoot.getPolygon(),
                 entity.getOriginal().getRootLat(),
                 entity.getOriginal().getRootLon(),
-                size * 1.5, 0, 45, 90);
+                size * 1.5, 0, 0, 90);
     }
 
     @Override
@@ -65,15 +60,35 @@ public class FeatureCluster extends RenderFeature<Cluster> {
    }
 
     @Override
+    protected boolean isVisible(RenderProperties properties) {
+        return Settings.displayClusterRoots;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
+        return System.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
+    }
+
+    @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Cluster> entity, RenderProperties renderProperties) {
         RenderElement elementRoot = entity.getRenderElement(0);
 
-        if(!elementRoot.shouldDraw || !Settings.displayClusters){
+        if(!elementRoot.shouldDraw) {
             return;
         }
 
+        if((System.currentTimeMillis() / 500) % 2 != 0){
+            return;
+        }
+
+        graphics.setStroke(new BasicStroke(1f));
+
         graphics.setColor(getColorLevel(entity.getOriginal().getLevel()));
         graphics.fill(elementRoot.getShape());
+
+        graphics.setStroke(new BasicStroke(2f));
         graphics.setColor(Color.black);
         graphics.draw(elementRoot.getShape());
     }
@@ -83,7 +98,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return null;
     }
 
-    private static Color[] colors = {Color.WHITE, Color.BLUE, Color.GREEN, Color.YELLOW, Color.RED};
+    private static final Color[] colors = {Color.WHITE, new Color(10, 100, 255), Color.GREEN, new Color(255,200,0), new Color(200,0,0)};
 
     private Color getColorLevel(int level) {
         return level >= 0 && level < colors.length ? colors[level] : Color.GRAY;

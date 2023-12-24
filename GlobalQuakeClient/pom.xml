@@ -6,14 +6,14 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.0_pre18</version>
+        <version>0.10.0_pre19</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>GlobalQuakeClient</artifactId>
 
     <build>
-        <finalName>GlobalQuake-${version}</finalName>
+        <finalName>GlobalQuake-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
-            <version>0.10.0_pre18</version>
+            <version>0.10.0_pre19</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

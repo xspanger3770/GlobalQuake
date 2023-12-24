@@ -1,5 +1,6 @@
 package globalquake.core.database;
 
+import globalquake.core.GlobalQuake;
 import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 
@@ -24,7 +25,7 @@ public class StationDatabase implements Serializable {
 
     public static final int VERSION = 3;
 
-    private int version = 0;
+    private int version = VERSION;
 
     private final List<Network> networks = new ArrayList<>();
     private final List<SeedlinkNetwork> seedlinkNetworks = new ArrayList<>();
@@ -52,6 +53,7 @@ public class StationDatabase implements Serializable {
             Logger.warn("Database updated!");
             networks.clear();
             stationSources.forEach(stationSource -> stationSource.setLastUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())));
+            GlobalQuake.errorHandler.info("Your station database was upgraded to newer version. You need to select stations again.");
         }
 
         version = VERSION;

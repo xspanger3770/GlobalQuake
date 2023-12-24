@@ -232,7 +232,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     private boolean isUncertain(Hypocenter hypocenter) {
-        return hypocenter.quality.getSummary() == QualityClass.D;
+        return hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
     }
 
     private Color alphaColor(Color color, double mul) {
@@ -270,7 +270,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     public static Color getCrossColor(double mag) {
         if (mag < 3) {
-            return Color.lightGray;
+            return Color.white;
         }
         if (mag < 4) {
             return Color.green;

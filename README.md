@@ -56,6 +56,10 @@ It can also, estimate the earthquake magnitude using some empirical methods, but
 
 A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/tree/main/tutorials)
 
+## Livestream
+
+You can also watch our live-stream on YouTube [here.](https://www.youtube.com/channel/UCZmcd4cQ2H_ELWAuUdOMgRQ/live)
+
 ## Contributing
 
 If you are considering to contribute to the project, make sure you have read the [Contributing guidelines](https://github.com/xspanger3770/GlobalQuake/blob/main/CONTRIBUTING.md)
@@ -63,9 +67,9 @@ If you are considering to contribute to the project, make sure you have read the
 ## Project Licensing
 
 This project is released under the terms of the MIT License.\
-However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses.\
+~~However, please note that this repository includes sound effects sourced from two other projects, each governed by their respective licenses.\
 The sound effects with the [`LICENSE_J`](https://github.com/xspanger3770/GlobalQuake/blob/main/LICENSE_J) designation are used under the terms of their specific license - [JQuake](https://jquake.net/), and the sound effects with the [`LICENSE_K`](https://github.com/xspanger3770/GlobalQuake/blob/main/LICENSE_K) designation are also subject to their own unique license - [KiwiMonitor](https://kiwimonitor.amebaownd.com/).\
-It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.
+It's important to review and adhere to these additional licenses when using or distributing this project. Refer to the corresponding license files for more details.~~
 
 ## Special thanks to
 

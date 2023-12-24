@@ -2,14 +2,13 @@
 <module version="4">
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$" dumb="true">
-      <excludeFolder url="file://$MODULE_DIR$/.GlobalQuakeData" />
-      <excludeFolder url="file://$MODULE_DIR$/.GlobalQuakeServerData" />
-      <excludeFolder url="file://$MODULE_DIR$/.idea" />
-      <excludeFolder url="file://$MODULE_DIR$/Container" />
+      <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/SeisTest" />
       <excludeFolder url="file://$MODULE_DIR$/GQHypocenterSearch/build" />
+      <excludeFolder url="file://$MODULE_DIR$/idk" />
       <excludeFolder url="file://$MODULE_DIR$/latest" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
+      <excludeFolder url="file://$MODULE_DIR$/tutorials" />
     </content>
   </component>
 </module>

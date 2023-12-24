@@ -18,7 +18,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
-	public static final String version = "v0.10.0_pre18";
+
+	public static final String version = "v0.10.0_pre19";
 
 	protected GlobalQuakeRuntime globalQuakeRuntime;
 	protected SeedlinkNetworksReader seedlinkNetworksReader;
@@ -96,6 +97,7 @@ public class GlobalQuake {
 		getArchive().destroy();
 		getEarthquakeAnalysis().destroy();
 		getEventHandler().stopHandler();
+		getClusterAnalysis().destroy();
 	}
 
 	public void stopService(ExecutorService service) {
