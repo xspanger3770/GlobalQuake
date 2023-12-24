@@ -13,9 +13,18 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.TimeZone;
 import java.util.UUID;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
@@ -32,6 +41,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private double maxRatio;
 	private double maxPGA;
 	private String region;
+    private long finalUpdateMillis;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 
@@ -51,7 +61,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this(earthquake.getUuid(), earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
 				earthquake.getOrigin(),
 				earthquake.getHypocenter() == null || earthquake.getHypocenter().quality == null ? null :
-						earthquake.getHypocenter().quality.getSummary());
+						earthquake.getHypocenter().quality.getSummary(), earthquake.getLastUpdate());
 		copyEvents(earthquake);
 	}
 
@@ -80,7 +90,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 	}
 
-	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass) {
+	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass, long finalUpdateMillis) {
 		this.uuid = uuid;
 		this.lat = lat;
 		this.lon = lon;
@@ -93,6 +103,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.maxPGA = 0.0;
 
 		pgaService.submit(this::calculatePGA);
+    this.finalUpdateMillis = finalUpdateMillis;
 
 
 	}
@@ -100,6 +111,8 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private void calculatePGA() {
 		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
 		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
+        
+
 	}
 
 	public double getDepth() {
@@ -168,9 +181,15 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
 	}
 
+
 	public double getMaxPGA() {
 		return maxPGA;
 	}
+
+  public long getFinalUpdateMillis() {
+      return finalUpdateMillis;
+  }
+
 
 	@Override
 	public String toString() {
@@ -187,4 +206,52 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 				", wrong=" + wrong +
 				'}';
 	}
+
+    public JSONObject getGeoJSON() {
+        JSONObject earthquakeJSON = new JSONObject();
+
+        earthquakeJSON.put("type", "Feature");
+        earthquakeJSON.put("id", getUuid());
+
+        JSONObject properties = new JSONObject();
+        properties.put("lastupdate", finalUpdateMillis);
+        properties.put("magtype", "gqm");
+        properties.put("evtype", "earthquake"); // TODO: this will need to be changed when there are other event types.
+        properties.put("lon", getLon());
+        properties.put("auth", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("lat", getLat());
+        properties.put("depth", Math.round(getDepth() * 1000.0) / 1000.0); //round to 3 decimal places
+        properties.put("unid", getUuid());
+        
+        properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
+
+        //format milliseconds since epoch to UTC time
+        SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String utcTimeOrigin = utcFormat.format(new Date(getOrigin()));
+        properties.put("time", utcTimeOrigin);
+
+        properties.put("source_id", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("flynn_region", getRegion());
+
+        earthquakeJSON.put("properties", properties);
+
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "Point");
+
+        JSONArray coordinates = new JSONArray();
+        coordinates.put(getLon());
+        coordinates.put(getLat());
+
+
+        //Depth is rounded to 3 decimal places and flipped to create altitude
+        coordinates.put(Math.round(getDepth() * 1000.0) / 1000.0 * -1);
+
+        geometry.put("coordinates", coordinates);
+
+        earthquakeJSON.put("geometry", geometry);
+
+        return earthquakeJSON;
+     }
 }

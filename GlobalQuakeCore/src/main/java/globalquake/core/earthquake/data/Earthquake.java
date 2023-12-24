@@ -1,6 +1,7 @@
 package globalquake.core.earthquake.data;
 
 import globalquake.core.alert.Warnable;
+import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
 
@@ -8,6 +9,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Earthquake implements Regional, Warnable {
 
@@ -143,4 +147,12 @@ public class Earthquake implements Regional, Warnable {
 	public UUID getUuid() {
 		return uuid;
 	}
+
+    public JSONObject getGeoJSON() {
+        //logic for this is already implemented in ArchivedQuake
+        ArchivedQuake archivedQuake = new ArchivedQuake(this);
+        return archivedQuake.getGeoJSON();
+     }
+
+
 }
