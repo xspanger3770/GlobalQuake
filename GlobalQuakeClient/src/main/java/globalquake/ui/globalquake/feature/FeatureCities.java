@@ -40,7 +40,7 @@ public class FeatureCities extends RenderFeature<CityLocation> {
                 String cityName = fields[1];
                 double lat = Double.parseDouble(fields[2]);
                 double lon = Double.parseDouble(fields[3]);
-                int population = Integer.parseInt(fields[4]);;
+                int population = Integer.parseInt(fields[4]);
 
                 if(population < MIN_POPULATION){
                     continue;

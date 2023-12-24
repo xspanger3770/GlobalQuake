@@ -35,7 +35,7 @@ public class ShakemapService {
 
     private static final List<CityLocation> cities = new ArrayList<>();
 
-    private Map<CityLocation, Double> cityIntensities = new HashMap<>();
+    private List<CityIntensity> cityIntensities = new ArrayList<>();
 
     static {
         load();
@@ -43,7 +43,7 @@ public class ShakemapService {
 
     private static void load() {
         int errors = 0;
-        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(ClassLoader.getSystemClassLoader().getResource("cities/country-capital-lat-long-population.csv").openStream())).withSkipLines(1).build()) {
+        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(ClassLoader.getSystemClassLoader().getResource("cities/worldcities.csv").openStream())).withSkipLines(1).build()) {
             String[] fields;
             while ((fields = reader.readNext()) != null) {
                 String cityName = fields[1];
@@ -64,10 +64,11 @@ public class ShakemapService {
         } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
         }
+
         Logger.warn("%d cities have unknown population!".formatted(errors));
     }
 
-    public ShakemapService(){
+    public ShakemapService() {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
@@ -112,6 +113,7 @@ public class ShakemapService {
             try {
                 shakeMaps.remove(uuid);
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+                updateCities();
             }catch(Exception e){
                 Logger.error(e);
             }
@@ -123,20 +125,29 @@ public class ShakemapService {
             try {
                 shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
-                updateCities(earthquake);
+                updateCities();
             }catch(Exception e){
                 Logger.error(e);
             }
         });
     }
 
-    private void updateCities(Earthquake earthquake) {
-        Map<CityLocation, Double> cityLocationDoubleMap = new HashMap<>();
+    private void updateCities() {
+        List<CityIntensity> result = new ArrayList<>();
         cities.stream().forEach( cityLocation -> {
-            cityLocationDoubleMap.put(cityLocation, calculatePGA(cityLocation, earthquake));
+            double maxPGA = 0;
+            for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
+                double pga = calculatePGA(cityLocation, earthquake);
+                if(pga > maxPGA){
+                    maxPGA = pga;
+                }
+            }
+            result.add(new CityIntensity(cityLocation, maxPGA));
         });
 
-        cityIntensities = cityLocationDoubleMap;
+        result.sort(Comparator.comparing(cityIntensity -> -cityIntensity.pga()));
+
+        cityIntensities = result;
     }
 
     private double calculatePGA(CityLocation cityLocation, Earthquake earthquake) {
@@ -158,5 +169,9 @@ public class ShakemapService {
 
     public Map<UUID, ShakeMap> getShakeMaps() {
         return shakeMaps;
+    }
+
+    public List<CityIntensity> getCityIntensities() {
+        return cityIntensities;
     }
 }

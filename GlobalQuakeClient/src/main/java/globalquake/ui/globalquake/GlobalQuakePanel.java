@@ -22,6 +22,7 @@ import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.client.GlobalQuakeLocal;
+import globalquake.intensity.CityIntensity;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
@@ -34,6 +35,7 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.core.Settings;
 import globalquake.utils.Scale;
+import org.apache.commons.collections.list.GrowthList;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -189,6 +191,47 @@ public class GlobalQuakePanel extends GlobePanel {
                 Logger.error(e);
             }
         }
+
+        if(true) { // TODO
+            drawCityIntensities(g);
+        }
+    }
+
+    private void drawCityIntensities(Graphics2D g) {
+        g.setFont(new Font("Calibri", Font.BOLD, 14));
+
+        int cellHeight = (int) (g.getFont().getSize() * 1.2);
+
+        int maxCities = 16;
+
+        List<CityIntensity> cityIntensities = GlobalQuakeLocal.instance.getShakemapService().getCityIntensities();
+        int count = Math.min(maxCities, cityIntensities.size());
+        int y = getHeight() / 2 - maxCities * cellHeight / 2;
+
+        int n = 1;
+
+        for(CityIntensity city : cityIntensities){
+            if(city.pga() < IntensityScales.getIntensityScale().getLevels().get(0).getPga()){
+                break;
+            }
+
+            Level level = IntensityScales.getIntensityScale().getLevel(city.pga());
+            String levelStr = "%s%s".formatted(level.getName(), level.getSuffix());
+
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(level.getColor());
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "%s: ".formatted(city.city().name());
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+            y += cellHeight;
+            n++;
+            if(n > maxCities){
+                break;
+            }
+        }
     }
 
     private void drawAlertsBox(Graphics2D g) {
@@ -325,8 +368,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 6.1;
-        hyp.depth = 50;
+        hyp.magnitude = 4.1;
+        hyp.depth = 0;
 
         hyp.correctEvents = 6;
 
