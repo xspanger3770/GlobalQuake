@@ -81,7 +81,7 @@ public class EarthquakeAnalysis {
         // Calculation starts only if number of events increases by some %
         if (cluster.getEarthquake() != null) {
             int count = pickedEvents.size();
-            if (count >= 24 && Settings.reduceRevisions) {
+            if (Settings.reduceRevisions) {
                 if (count < cluster.getEarthquake().nextReportEventCount) {
                     return;
                 }
@@ -90,7 +90,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if (cluster.lastEpicenterUpdate >= cluster.updateCount * (Settings.reduceRevisions ? 0.91 : 1.0)) {
+        if (cluster.lastEpicenterUpdate * (Settings.reduceRevisions ? 1.1 : 1.0) >= cluster.updateCount) {
             return;
         }
 
