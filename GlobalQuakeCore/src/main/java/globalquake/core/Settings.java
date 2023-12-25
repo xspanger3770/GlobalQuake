@@ -138,6 +138,7 @@ public final class Settings {
 
     public static String FDSNWSEventIP;
     public static Integer FDSNWSEventPort;
+    public static Boolean autoStartFDSNWSEventServer;
 
     static {
 		load();
@@ -203,6 +204,7 @@ public final class Settings {
 
         loadProperty("FDSNWSEventIP", "localhost"); //As a default, localhost is used for security.
         loadProperty("FDSNWSEventPort", "8080");
+        loadProperty("autoStartFDSNWSEventServer", "false");
 
 		loadProperty("shakingLevelScale", "0",
 				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
