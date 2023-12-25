@@ -1,33 +1,22 @@
 package gqserver.FDSNWSEventsHTTPServer;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import org.json.JSONObject;
-
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import gqserver.FDSNWSEventsHTTPServer.eventsV1Handler;
+import globalquake.core.Settings;
+import org.tinylog.Logger;
+
 
 public class FDSNWSEventsHTTPServer {
     private static FDSNWSEventsHTTPServer instance;
     private boolean serverRunning;
     private HttpServer server;
 
-    //TODO: make these configurable
-    private int listenPort = 8741;
-    private String listenAddress = "localhost";
-
     private Duration clientCleanExitTime = Duration.ofSeconds(3);
 
     private FDSNWSEventsHTTPServer() {
-        // Private constructor to prevent direct instantiation
         if(instance != null){
             return;
         }
@@ -36,8 +25,9 @@ public class FDSNWSEventsHTTPServer {
     }
 
     private void initRoutes(){
-        HttpHandler v1Handler = new eventsV1Handler();
-        server.createContext("/fdsnws/event/1/query", v1Handler);
+        server.createContext("/", new HTTPCatchAllLogger());
+
+        server.createContext("/fdsnws/event/1/query", new eventsV1Handler());
     }
 
     public static FDSNWSEventsHTTPServer getInstance() {
@@ -49,31 +39,34 @@ public class FDSNWSEventsHTTPServer {
 
     public void startServer() {
         if(serverRunning){
-            //TODO: log that server is already running and was attempted to be started again
+            Logger.warn("fdsnws_event Server was attempted to be started but was already running");
             return;
         }
 
         server = null;
         try {
-            server = HttpServer.create(new InetSocketAddress(listenAddress, listenPort), 0);
-        } catch (IOException e) {
-            //TODO: log that server could not be started
+            server = HttpServer.create(new InetSocketAddress(Settings.FDSNWSEventIP, Settings.FDSNWSEventPort), 0);
+        } catch (Exception e) {
+            Logger.error(e);
+            return;
         }
 
         initRoutes();
         server.setExecutor(null); // creates a default executor
         server.start();
         serverRunning = true;
+        Logger.info("fdsnws_event Server started on " + Settings.FDSNWSEventIP + ":" + Settings.FDSNWSEventPort);
     }
 
     public void stopServer() {
         if (!serverRunning) {
-            //TODO: log that server was attempted to be stopped but was not running
+            Logger.warn("fdsnws_event Server was attempted to be stopped but was not running");
             return;
         }
 
         server.stop((int)clientCleanExitTime.getSeconds());
-
+        serverRunning = false;
+        Logger.info("fdsnws_event Server stopped");
     }
 
 }
