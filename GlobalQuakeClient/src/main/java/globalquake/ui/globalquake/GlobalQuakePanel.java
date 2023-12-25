@@ -194,7 +194,7 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
 
-        if(true) { // TODO
+        if(Settings.displayCityIntensities) {
             try {
                 drawCityIntensities(g);
             } catch (Exception e) {

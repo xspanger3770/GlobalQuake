@@ -135,8 +135,9 @@ public final class Settings {
 	public static Boolean displayShakemaps;
 
 	public static Integer stationsShapeIndex;
+	public static Boolean displayCityIntensities;
 
-    static {
+	static {
 		load();
 		save();
 		try {
@@ -210,6 +211,7 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayCityIntensities", "true");
 		loadProperty("displayShakemaps", "true");
 		loadProperty("displayTime", "true");
 		loadProperty("displayAlertBox", "true");
