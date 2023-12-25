@@ -205,7 +205,7 @@ public class GlobalQuakePanel extends GlobePanel {
     }
 
     public static String formatNumber(double number) {
-        if (number < 200_000) {
+        if (number < 1_000_000) {
             return String.format("%.1fk", number / 1_000);
         } else {
             return String.format("%.1fM", number / 1_000_000);
