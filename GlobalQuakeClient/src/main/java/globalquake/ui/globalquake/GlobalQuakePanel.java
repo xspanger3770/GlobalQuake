@@ -232,8 +232,8 @@ public class GlobalQuakePanel extends GlobePanel {
                 maxPGA=pga;
             }
 
-            countFelt += city.city().population() * feltMultiplier(pga);
-            countStrong += city.city().population() * feltStrongMultiplier(pga);
+            countFelt += (int) (city.city().population() * feltMultiplier(pga));
+            countStrong += (int) (city.city().population() * feltStrongMultiplier(pga));
 
             if(count <= maxCities){
                 count++;
@@ -297,7 +297,6 @@ public class GlobalQuakePanel extends GlobePanel {
             String str = "Possibly heavily felt by: ";
             g.setColor(Color.white);
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
-            y += cellHeight;
         }
     }
 
