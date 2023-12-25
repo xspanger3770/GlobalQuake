@@ -31,6 +31,26 @@ public class eventsV1Handler implements HttpHandler{
     public void handle(HttpExchange exchange) throws IOException {
         HTTPCatchAllLogger.logIncomingRequest(exchange);
 
+
+
+        //check if application.wadl was requested
+        if(exchange.getRequestURI().toString().endsWith("application.wadl")){
+            URL wadlURL = getClass().getClassLoader().getResource("fdsnws_event_application.wadl");
+            String wadl = "";
+            try{
+                wadl = new String(wadlURL.openStream().readAllBytes());
+            }catch(Exception e){
+                Logger.error(e);
+                HTTPRequestException ex = new HTTPRequestException(500, "Internal Server Error");
+                ex.transmitToClient(exchange);
+                return;
+            }
+
+            HTTPResponse response = new HTTPResponse(200, wadl, "application/xml");
+            sendResponse(exchange, response);
+            return;
+        }
+
         //Parse the query string first to avoid extra work if there is an error
         FDSNWSEventsRequest request = null;
         try{

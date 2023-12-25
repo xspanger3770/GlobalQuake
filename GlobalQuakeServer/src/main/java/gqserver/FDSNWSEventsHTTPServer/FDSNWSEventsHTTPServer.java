@@ -27,7 +27,10 @@ public class FDSNWSEventsHTTPServer {
     private void initRoutes(){
         server.createContext("/", new HTTPCatchAllLogger());
 
-        server.createContext("/fdsnws/event/1/query", new eventsV1Handler());
+        eventsV1Handler ev1handler = new eventsV1Handler();
+
+        server.createContext("/fdsnws/event/1/query", ev1handler);
+        server.createContext("/fdsnws/event/1/application.wadl", ev1handler);
     }
 
     public static FDSNWSEventsHTTPServer getInstance() {
