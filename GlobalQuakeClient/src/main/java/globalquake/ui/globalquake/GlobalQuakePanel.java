@@ -14,6 +14,7 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
@@ -35,6 +36,7 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.core.Settings;
 import globalquake.utils.Scale;
+import org.apache.commons.lang3.StringUtils;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -90,7 +92,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     setCinemaMode(!isCinemaMode());
                 }
 
-                if (DEBUG) {
+                if (true) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
@@ -193,28 +195,86 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         if(true) { // TODO
-            drawCityIntensities(g);
+            try {
+                drawCityIntensities(g);
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        }
+    }
+
+    public static String formatNumber(double number) {
+        if (number < 200_000) {
+            return String.format("%.1fk", number / 1_000);
+        } else {
+            return String.format("%.1fM", number / 1_000_000);
         }
     }
 
     private void drawCityIntensities(Graphics2D g) {
-        g.setFont(new Font("Calibri", Font.BOLD, 17));
+        g.setFont(new Font("Calibri", Font.BOLD, 16));
 
         int cellHeight = (int) (g.getFont().getSize() * 1.2);
 
-        int maxCities = 16;
+        int maxCities = 14;
+
+        int countFelt = 0;
+        int countStrong = 0;
 
         List<CityIntensity> cityIntensities = GlobalQuakeLocal.instance.getShakemapService().getCityIntensities();
-        int y = getHeight() / 2 - maxCities * cellHeight / 2;
-
-        int n = 1;
-
-        for(CityIntensity city : cityIntensities){
-            if(city.pga() < IntensityScales.getIntensityScale().getLevels().get(0).getPga()){
+        int count = 0;
+        double maxPGA = 0.0;
+        for(CityIntensity city : cityIntensities) {
+            double pga = city.pga();
+            if (pga < IntensityScales.getIntensityScale().getLevels().get(0).getPga()) {
                 break;
+            } else if (pga > maxPGA){
+                maxPGA=pga;
             }
 
+            countFelt += city.city().population() * feltMultiplier(pga);
+            countStrong += city.city().population() * feltStrongMultiplier(pga);
+
+            if(count <= maxCities){
+                count++;
+            }
+        }
+
+        if(count == 0){
+            return;
+        }
+
+        int countReal = count;
+
+        if(countFelt > 0){
+            count++;
+        }
+
+        if(countStrong > 0){
+            count++;
+        }
+
+        int y = getHeight() / 2 - count * cellHeight / 2;
+
+        String str1 = countStrong > 0 ? "Possibly heavily felt by: %s  ".formatted(formatNumber(countStrong)):
+               "Possibly felt by: %s     ".formatted(formatNumber(countFelt));
+        int wTot = (int) (g.getFontMetrics().stringWidth(str1));
+
+        Level maxLevel = IntensityScales.getIntensityScale().getLevel(maxPGA);
+
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        RoundRectangle2D.Double rect = new RoundRectangle2D.Double(getWidth() - wTot - 3, y - g.getFont().getSize() - 3, wTot + 6, (count) * cellHeight + 8, 10, 10);
+        g.setColor(maxLevel == null ? Color.white : maxLevel.getColor());
+        g.fill(rect);
+
+        g.setColor(Color.black);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.fillRect(getWidth() - wTot, y - g.getFont().getSize(), wTot, (count) * cellHeight + 2);
+
+        for(int i = 0; i < countReal; i++) {
+            CityIntensity city = cityIntensities.get(i);
             Level level = IntensityScales.getIntensityScale().getLevel(city.pga());
+
             String levelStr = "%s%s".formatted(level.getName(), level.getSuffix());
 
             int levelW = g.getFontMetrics().stringWidth(levelStr);
@@ -222,15 +282,46 @@ public class GlobalQuakePanel extends GlobePanel {
             g.setColor(level.getColor());
             g.drawString(levelStr, getWidth() - levelW-6, y);
 
-            String str = "%s: ".formatted(city.city().name());
+            String str = "%s: ".formatted(StringUtils.truncate(city.city().name(), 18));
             g.setColor(Color.white);
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
             y += cellHeight;
-            n++;
-            if(n > maxCities){
-                break;
-            }
         }
+
+        if(countFelt > 0){
+            String levelStr = "%s".formatted(formatNumber(countFelt));
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(Color.yellow);
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "Possibly felt by: ";
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+            y += cellHeight;
+        }
+
+
+        if(countStrong > 0){
+            String levelStr = "%s".formatted(formatNumber(countStrong));
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(Color.orange);
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "Possibly heavily felt by: ";
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+            y += cellHeight;
+        }
+    }
+
+    private double feltMultiplier(double pga) {
+        return Math.atan(pga * 0.2) * 2 / 3.14159;
+    }
+
+    private double feltStrongMultiplier(double pga){
+        return Math.max(0, Math.atan((pga - MMIIntensityScale.V.getPga()) * 0.2) * 2 / 3.14159);
     }
 
     private void drawAlertsBox(Graphics2D g) {
@@ -367,7 +458,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 4.1;
+        hyp.magnitude = 6.4;
         hyp.depth = 0;
 
         hyp.correctEvents = 6;

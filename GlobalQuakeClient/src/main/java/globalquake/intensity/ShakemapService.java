@@ -54,7 +54,7 @@ public class ShakemapService {
                 try{
                     population = Integer.parseInt(fields[9]);
                 } catch(Exception e){
-                    population = 100_000;
+                    population = -1;
                     errors++;
                 }
 
