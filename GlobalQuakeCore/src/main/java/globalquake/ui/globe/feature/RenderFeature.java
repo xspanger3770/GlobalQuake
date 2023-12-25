@@ -106,7 +106,10 @@ public abstract class RenderFeature<E> {
     public boolean isEntityVisible(RenderEntity<?> entity) {return true;}
 
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
-        getEntities().stream().filter(this::isEntityVisible).forEach(entity -> render(renderer, graphics, entity, properties));
+        getEntities().stream().filter(this::isEntityVisible).forEach(entity -> {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            render(renderer, graphics, entity, properties);
+        });
     }
 
     public abstract Point2D getCenterCoords(RenderEntity<?> entity);

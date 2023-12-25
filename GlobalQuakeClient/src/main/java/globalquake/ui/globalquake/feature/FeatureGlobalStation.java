@@ -91,6 +91,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties renderProperties) {
+        return true;
+    }
+
+    @Override
     public boolean needsUpdateEntities() {
         return true;
     }

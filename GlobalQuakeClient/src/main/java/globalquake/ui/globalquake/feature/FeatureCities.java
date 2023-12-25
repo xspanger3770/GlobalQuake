@@ -78,7 +78,7 @@ public class FeatureCities extends RenderFeature<CityLocation> {
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<CityLocation> entity, boolean propertiesChanged) {
-        return false;
+        return propertiesChanged;
     }
 
     @Override
