@@ -37,18 +37,23 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayHomeLocation;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<LocationPlaceholder> entity, boolean propertiesChanged) {
-        return true;
+        return propertiesChanged;
     }
 
     @Override
     public boolean needsProject(RenderEntity<LocationPlaceholder> entity, boolean propertiesChanged) {
-        return true;
+        return propertiesChanged;
     }
 
     @Override
     public boolean needsUpdateEntities() {
-        return true;
+        return false;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class FeatureHomeLoc extends RenderFeature<LocationPlaceholder> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<LocationPlaceholder> entity, RenderProperties renderProperties) {
         RenderElement elementCross = entity.getRenderElement(0);
-        if (elementCross.shouldDraw && Settings.displayHomeLocation) {
+        if (elementCross.shouldDraw) {
             graphics.setColor(Color.magenta);
             graphics.setStroke(new BasicStroke(3f));
             graphics.draw(elementCross.getShape());

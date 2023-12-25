@@ -46,9 +46,6 @@ public class Hypocenter {
 	}
 
 	public void magnitudeUpdate(Hypocenter bestHypocenter) {
-		this.magnitude = bestHypocenter.magnitude;
-		this.mags = bestHypocenter.mags;
-
 		this.usedEvents = bestHypocenter.usedEvents;
 		this.correctEvents = bestHypocenter.correctEvents;
 		this.reducedEvents = bestHypocenter.reducedEvents;

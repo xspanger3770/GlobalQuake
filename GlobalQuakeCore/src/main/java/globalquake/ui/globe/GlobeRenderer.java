@@ -301,8 +301,10 @@ public class GlobeRenderer {
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
         graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        renderFeatures.forEach(feature -> feature.process(this, props));
-        renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
+        renderFeatures.stream().filter(renderFeature -> renderFeature.isEnabled(props)).forEach(feature -> {
+            feature.process(this, props);
+            feature.renderAll(this, graphics, props);
+        });
     }
 
     public synchronized void addFeature(RenderFeature<?> renderFeature){

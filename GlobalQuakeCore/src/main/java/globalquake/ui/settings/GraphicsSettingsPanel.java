@@ -41,6 +41,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxAlertBox;
     private JCheckBox chkBoxTime;
     private JCheckBox chkBoxShakemap;
+    private JCheckBox chkBoxCityIntensities;
+    private JCheckBox chkBoxCapitals;
 
 
     public GraphicsSettingsPanel() {
@@ -137,7 +139,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(dateFormatPanel);
 
-        JPanel mainWindowPanel = new JPanel(new GridLayout(3,2));
+        JPanel mainWindowPanel = new JPanel(new GridLayout(4,2));
         mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
 
         mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
@@ -146,6 +148,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         mainWindowPanel.add(chkBoxAlertBox = new JCheckBox("Display alert box for nearby earthquakes", Settings.displayAlertBox));
         mainWindowPanel.add(chkBoxShakemap = new JCheckBox("Display shakemap hexagons", Settings.displayShakemaps));
         mainWindowPanel.add(chkBoxTime = new JCheckBox("Display time", Settings.displayTime));
+        mainWindowPanel.add(chkBoxCityIntensities = new JCheckBox("Display estimated intensities in cities", Settings.displayCityIntensities));
+        mainWindowPanel.add(chkBoxCapitals = new JCheckBox("Display capital cities", Settings.displayCapitalCities));
 
         panel.add(mainWindowPanel);
 
@@ -390,6 +394,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayAlertBox = chkBoxAlertBox.isSelected();
         Settings.displayShakemaps = chkBoxShakemap.isSelected();
         Settings.displayTime = chkBoxTime.isSelected();
+        Settings.displayCityIntensities = chkBoxCityIntensities.isSelected();
+        Settings.displayCapitalCities = chkBoxCapitals.isSelected();
     }
 
     @Override

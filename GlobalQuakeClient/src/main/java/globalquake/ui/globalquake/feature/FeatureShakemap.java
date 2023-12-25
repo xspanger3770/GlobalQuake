@@ -50,6 +50,16 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayShakemaps;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
@@ -57,11 +67,6 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     @Override
     public boolean needsProject(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
         return propertiesChanged;
-    }
-
-    @Override
-    public boolean needsUpdateEntities() {
-        return true;
     }
 
     private void updateHexes() {
@@ -171,11 +176,6 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
                     (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
                     (int)centerPonint.y + graphics.getFont().getSize() / 2);
         }
-    }
-
-    @Override
-    protected boolean isVisible(RenderProperties properties) {
-        return Settings.displayShakemaps;
     }
 
     @Override

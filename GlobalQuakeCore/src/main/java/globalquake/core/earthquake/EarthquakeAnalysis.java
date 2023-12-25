@@ -81,8 +81,8 @@ public class EarthquakeAnalysis {
         // Calculation starts only if number of events increases by some %
         if (cluster.getEarthquake() != null) {
             int count = pickedEvents.size();
-            if (count >= 24 && Settings.reduceRevisions) {
-                if (count < cluster.getEarthquake().nextReportEventCount) {
+            if (Settings.reduceRevisions) {
+                if (count <= cluster.getEarthquake().nextReportEventCount) {
                     return;
                 }
                 cluster.getEarthquake().nextReportEventCount = (int) (count * 1.2);
@@ -90,7 +90,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if (cluster.lastEpicenterUpdate >= cluster.updateCount * (Settings.reduceRevisions ? 0.91 : 1.0)) {
+        if (cluster.lastEpicenterUpdate * (Settings.reduceRevisions ? 1.1 : 1.0) >= cluster.updateCount) {
             return;
         }
 
@@ -204,9 +204,9 @@ public class EarthquakeAnalysis {
             return null;
         }
 
-        if(GQHypocs.isCudaLoaded()) {
+        if (GQHypocs.isCudaLoaded()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0, finderSettings);
-            if(result == null){
+            if (result == null) {
                 Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
                         "because too many stations were involved in the event, but it might be also different error");
             }
@@ -289,7 +289,7 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter = runHypocenterFinder(correctSelectedEvents, cluster, finderSettings, true);
 
-        if(bestHypocenter == null) {
+        if (bestHypocenter == null) {
             return;
         }
 
@@ -300,7 +300,7 @@ public class EarthquakeAnalysis {
         double reduceAmount = 0.75;
         double diffLimit = 0.5;
 
-        for(int it = 0; it < reduceIterations; it++) {
+        for (int it = 0; it < reduceIterations; it++) {
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
                 int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
@@ -321,7 +321,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if(bestHypocenter2 == null) {
+        if (bestHypocenter2 == null) {
             return;
         }
 
@@ -380,8 +380,8 @@ public class EarthquakeAnalysis {
     private static final double CONFIDENCE_LEVEL = 1.2;
 
     public Earthquake getEarthquake(UUID uuid) {
-        for(Earthquake earthquake : getEarthquakes()){
-            if(earthquake.getUuid().equals(uuid)){
+        for (Earthquake earthquake : getEarthquakes()) {
+            if (earthquake.getUuid().equals(uuid)) {
                 return earthquake;
             }
         }
@@ -448,7 +448,7 @@ public class EarthquakeAnalysis {
         int correct = 0;
         double err = 0;
 
-        for(PickedEvent event : selectedEvents){
+        for (PickedEvent event : selectedEvents) {
             long actualTravel = event.pWave() - bestHypocenterPrelim.origin;
 
             double distGC = GeoUtils.greatCircleDistance(bestHypocenterPrelim.lat, bestHypocenterPrelim.lon,
@@ -484,12 +484,12 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
-        if(bestHypocenter.magnitude == -999.0){
+        if (bestHypocenter.magnitude == -999.0) {
             Logger.tag("Hypocs").debug("No magnitude!");
             return;
         }
 
-        if(bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0){
+        if (bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0) {
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
             return;
         }
@@ -530,7 +530,7 @@ public class EarthquakeAnalysis {
             Earthquake earthquake1 = cluster.getEarthquake();
             if (remove && earthquake1 != null) {
                 getEarthquakes().remove(earthquake1);
-                if(GlobalQuake.instance != null){
+                if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
                 }
                 cluster.setEarthquake(null);
@@ -557,11 +557,11 @@ public class EarthquakeAnalysis {
 
             cluster.revisionID += 1;
 
-             cluster.getPreviousHypocenter().magnitudeUpdate(bestHypocenter);
+            cluster.getPreviousHypocenter().magnitudeUpdate(bestHypocenter);
 
-             if (GlobalQuake.instance != null) {
-                 GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
-             }
+            if (GlobalQuake.instance != null) {
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(cluster.getEarthquake(), cluster.getPreviousHypocenter()));
+            }
         }
     }
 
@@ -599,7 +599,7 @@ public class EarthquakeAnalysis {
             return false;
         }
 
-        if(DEPTH_FIX_ALLOWED) {
+        if (DEPTH_FIX_ALLOWED) {
             if (bestHypocenter.depthUncertainty > 200.0 || bestHypocenter.depthUncertainty > 20.0 &&
                     (bestHypocenter.depthConfidenceInterval.minDepth() <= 10.0 && bestHypocenter.depthConfidenceInterval.maxDepth() >= 10.0)) {
                 Logger.tag("Hypocs").debug("Depth uncertainty of %.1f is too high, defaulting the depth to 10km!".formatted(bestHypocenter.depthUncertainty));
@@ -630,7 +630,7 @@ public class EarthquakeAnalysis {
             origins.add(origin);
         }
 
-        if(origins.isEmpty()){
+        if (origins.isEmpty()) {
             return;
         }
 
@@ -760,7 +760,7 @@ public class EarthquakeAnalysis {
         return result;
     }
 
-    private static double calculateHeuristic(PreliminaryHypocenter hypocenter){
+    private static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
         return (hypocenter.correctStations) / (hypocenter.err);
     }
 
@@ -952,10 +952,10 @@ public class EarthquakeAnalysis {
             }
         }
 
-        if(previousHypocenter != null ){
-            if (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal())  {
+        if (previousHypocenter != null) {
+            if (bestHypocenter.quality.getSummary().ordinal() > previousHypocenter.quality.getSummary().ordinal()) {
                 return HypocenterCondition.PREVIOUS_WAS_BETTER_QUALITY;
-            } else if(bestHypocenter.quality.getSummary().ordinal() < previousHypocenter.quality.getSummary().ordinal()){
+            } else if (bestHypocenter.quality.getSummary().ordinal() < previousHypocenter.quality.getSummary().ordinal()) {
                 return HypocenterCondition.OK;
             }
         }
@@ -1043,7 +1043,7 @@ public class EarthquakeAnalysis {
 
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
 
-        if(list.isEmpty()){
+        if (list.isEmpty()) {
             return -999.0;
         }
 
@@ -1061,7 +1061,7 @@ public class EarthquakeAnalysis {
             60, 60, // M7+
     };
 
-    public static boolean shouldRemove(Earthquake earthquake, int marginSeconds){
+    public static boolean shouldRemove(Earthquake earthquake, int marginSeconds) {
         double store_minutes = STORE_TABLE[Math.max(0,
                 Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))]
                 - marginSeconds / 60.0;
@@ -1074,7 +1074,7 @@ public class EarthquakeAnalysis {
         List<Earthquake> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Earthquake earthquake = it.next();
-            if(shouldRemove(earthquake, 0)){
+            if (shouldRemove(earthquake, 0)) {
                 if (GlobalQuake.instance != null) {
                     GlobalQuake.instance.getArchive().archiveQuakeAndSave(earthquake);
                 }
@@ -1085,6 +1085,7 @@ public class EarthquakeAnalysis {
         earthquakes.removeAll(toBeRemoved);
     }
 
-    public void destroy(){}
+    public void destroy() {
+    }
 
 }

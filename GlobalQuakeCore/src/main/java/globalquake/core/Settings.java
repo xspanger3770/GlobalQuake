@@ -135,6 +135,8 @@ public final class Settings {
 	public static Boolean displayShakemaps;
 
 	public static Integer stationsShapeIndex;
+	public static Boolean displayCityIntensities;
+	public static Boolean displayCapitalCities;
 
     public static String FDSNWSEventIP;
     public static Integer FDSNWSEventPort;
@@ -218,6 +220,8 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayCapitalCities", "true");
+		loadProperty("displayCityIntensities", "true");
 		loadProperty("displayShakemaps", "true");
 		loadProperty("displayTime", "true");
 		loadProperty("displayAlertBox", "true");

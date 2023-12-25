@@ -117,17 +117,22 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return true;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<Earthquake> entity, boolean propertiesChanged) {
         return true;
     }
 
     @Override
     public boolean needsProject(RenderEntity<Earthquake> entity, boolean propertiesChanged) {
-        return true;
-    }
-
-    @Override
-    public boolean needsUpdateEntities() {
         return true;
     }
 

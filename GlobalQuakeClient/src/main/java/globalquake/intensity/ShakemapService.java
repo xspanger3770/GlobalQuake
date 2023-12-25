@@ -1,5 +1,8 @@
 package globalquake.intensity;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
@@ -8,14 +11,16 @@ import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.intensity.CityIntensity;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
+import globalquake.core.intensity.CityLocation;
+import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +33,40 @@ public class ShakemapService {
     private final ExecutorService shakemapService = Executors.newSingleThreadExecutor();
     private final ScheduledExecutorService checkService = Executors.newSingleThreadScheduledExecutor();
 
-    public ShakemapService(){
+    private static final List<CityLocation> cities = new ArrayList<>();
+
+    static {
+        load();
+    }
+
+    private static void load() {
+        int errors = 0;
+        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("cities/worldcities.csv")).openStream())).withSkipLines(1).build()) {
+            String[] fields;
+            while ((fields = reader.readNext()) != null) {
+                String cityName = fields[1];
+                double lat = Double.parseDouble(fields[2]);
+                double lon = Double.parseDouble(fields[3]);
+
+                int population;
+
+                try{
+                    population = Integer.parseInt(fields[9]);
+                } catch(Exception e){
+                    population = -1;
+                    errors++;
+                }
+
+                cities.add(new CityLocation(cityName, lat, lon, population));
+            }
+        } catch (IOException | CsvValidationException e) {
+            Logger.error(e);
+        }
+
+        Logger.warn("%d cities have unknown population!".formatted(errors));
+    }
+
+    public ShakemapService() {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
@@ -84,10 +122,26 @@ public class ShakemapService {
             try {
                 shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
+                updateCities(earthquake);
             }catch(Exception e){
                 Logger.error(e);
             }
         });
+    }
+
+    private void updateCities(Earthquake earthquake) {
+        List<CityIntensity> result = new ArrayList<>();
+        cities.forEach(cityLocation -> result.add(new CityIntensity(cityLocation, calculatePGA(cityLocation, earthquake))));
+
+        result.sort(Comparator.comparing(cityIntensity -> -cityIntensity.pga()));
+
+        earthquake.cityIntensities = result;
+    }
+
+    private double calculatePGA(CityLocation cityLocation, Earthquake earthquake) {
+        double dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(),
+                cityLocation.lat(), cityLocation.lon(), 0);
+        return GeoUtils.pgaFunction(earthquake.getMag(), dist, earthquake.getDepth());
     }
 
     private ShakeMap createShakemap(Earthquake earthquake) {
@@ -104,4 +158,5 @@ public class ShakemapService {
     public Map<UUID, ShakeMap> getShakeMaps() {
         return shakeMaps;
     }
+
 }

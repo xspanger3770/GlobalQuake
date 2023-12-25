@@ -91,12 +91,22 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties renderProperties) {
+        return true;
+    }
+
+    @Override
     public boolean needsUpdateEntities() {
         return true;
     }
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
 

@@ -52,16 +52,20 @@ public abstract class RenderFeature<E> {
         return false;
     }
 
+    public boolean isEnabled(RenderProperties renderProperties){
+        return true;
+    }
+
+    public boolean needsUpdateEntities() {
+        return getEntities().isEmpty();
+    }
+
     public boolean needsCreatePolygon(RenderEntity<E> entity, boolean propertiesChanged){
         return Arrays.stream(entity.getRenderElements()).anyMatch(renderElement -> renderElement.getPolygon() == null);
     }
 
     public boolean needsProject(RenderEntity<E> entity, boolean propertiesChanged){
-        return Arrays.stream(entity.getRenderElements()).anyMatch(renderElement -> renderElement.getShape() == null) || propertiesChanged;
-    }
-
-    public boolean needsUpdateEntities() {
-        return getEntities().isEmpty();
+        return propertiesChanged || Arrays.stream(entity.getRenderElements()).anyMatch(renderElement -> renderElement.getShape() == null);
     }
 
     public final boolean propertiesChanged(RenderProperties properties){
@@ -99,16 +103,13 @@ public abstract class RenderFeature<E> {
 
     public abstract void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<E> entity, RenderProperties renderProperties);
 
-    protected boolean isVisible(RenderProperties properties){
-        return true;
-    }
-
     public boolean isEntityVisible(RenderEntity<?> entity) {return true;}
 
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
-        if(isVisible(properties)){
-            getEntities().stream().filter(this::isEntityVisible).forEach(entity -> render(renderer, graphics, entity, properties));
-        }
+        getEntities().stream().filter(this::isEntityVisible).forEach(entity -> {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            render(renderer, graphics, entity, properties);
+        });
     }
 
     public abstract Point2D getCenterCoords(RenderEntity<?> entity);

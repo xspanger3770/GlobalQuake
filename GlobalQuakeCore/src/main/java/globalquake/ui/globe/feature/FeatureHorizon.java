@@ -39,8 +39,23 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     }
 
     @Override
+    public boolean isEnabled(RenderProperties renderProperties) {
+        return true;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return false;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<Point2D> entity, boolean propertiesChanged) {
-        return super.needsCreatePolygon(entity, propertiesChanged) || propertiesChanged;
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<Point2D> entity, boolean propertiesChanged) {
+        return propertiesChanged;
     }
 
     @Override
