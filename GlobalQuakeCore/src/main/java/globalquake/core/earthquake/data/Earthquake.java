@@ -147,12 +147,4 @@ public class Earthquake implements Regional, Warnable {
 	public UUID getUuid() {
 		return uuid;
 	}
-
-    public JSONObject getGeoJSON() {
-        //logic for this is already implemented in ArchivedQuake
-        ArchivedQuake archivedQuake = new ArchivedQuake(this);
-        return archivedQuake.getGeoJSON();
-     }
-
-
 }

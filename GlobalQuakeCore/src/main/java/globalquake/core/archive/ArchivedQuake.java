@@ -189,6 +189,11 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
   public long getFinalUpdateMillis() {
       return finalUpdateMillis;
   }
+  public String formattedUtcOrigin() {
+      SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      return utcFormat.format(new Date(getOrigin()));
+  }
 
 
 	@Override
@@ -225,13 +230,9 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
         
         properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
 
-        //format milliseconds since epoch to UTC time
-        SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String utcTimeOrigin = utcFormat.format(new Date(getOrigin()));
-        properties.put("time", utcTimeOrigin);
+        properties.put("time", formattedUtcOrigin());
 
-        properties.put("source_id", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("source_id", "GlobalQuake_"+getUuid().toString()); // TODO: allow user to set this
         properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
         properties.put("flynn_region", getRegion());
 
@@ -254,4 +255,48 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 
         return earthquakeJSON;
      }
+
+    public String getQuakeML() {
+        String quakeml = "<event publicID=\"quakeml:GlobalQuake:"+getUuid().toString()+"\">";
+        quakeml += "<description>";
+        quakeml += "<type>Flinn-Engdahl region</type>";
+        quakeml += "<text>"+getRegion()+"</text>";
+        quakeml += "</description>";
+        quakeml += "<origin>";
+        quakeml += "<time>";
+        quakeml += "<value>"+formattedUtcOrigin()+"</value>";
+        quakeml += "</time>";
+        quakeml += "<latitude>";
+        quakeml += "<value>"+getLat()+"</value>";
+        quakeml += "</latitude>";
+        quakeml += "<longitude>";
+        quakeml += "<value>"+getLon()+"</value>";
+        quakeml += "</longitude>";
+        quakeml += "<depth>";
+        quakeml += "<value>"+getDepth()+"</value>";
+        quakeml += "</depth>";
+        quakeml += "</origin>";
+        quakeml += "<magnitude>";
+        quakeml += "<mag>";
+        quakeml += "<value>"+getMag()+"</value>";
+        quakeml += "</mag>";
+        quakeml += "</magnitude>";
+        quakeml += "</event>\n";
+        return quakeml;
+      }
+
+    public String getFdsnText() {
+        //EventID|Time|Latitude|Longitude|Depth/km|Author|Catalog|Contributor|ContributorID|MagType|Magnitude|MagAuthor|EventLocationName
+        String fdsnText = "GlobalQuake_"+getUuid().toString()+"|";
+        fdsnText += formattedUtcOrigin()+"|";
+        fdsnText += getLat()+"|";
+        fdsnText += getLon()+"|";
+        fdsnText += getDepth()+"|";
+        fdsnText += "GlobalQuake|GlobalQuake|GlobalQuake|GlobalQuake_"+getUuid().toString()+"|";
+        fdsnText += "gqm|";
+        fdsnText += getMag()+"|";
+        fdsnText += "GlobalQuake|";
+        fdsnText += getRegion();
+        return fdsnText;
+        }
 }
