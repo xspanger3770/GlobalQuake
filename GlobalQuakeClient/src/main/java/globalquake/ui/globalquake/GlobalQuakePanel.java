@@ -256,21 +256,6 @@ public class GlobalQuakePanel extends GlobePanel {
 
         int y = getHeight() / 2 - count * cellHeight / 2;
 
-        String str1 = countStrong > 0 ? "Possibly heavily felt by: %s  ".formatted(formatNumber(countStrong)):
-               "Possibly felt by: %s     ".formatted(formatNumber(countFelt));
-        int wTot = (int) (g.getFontMetrics().stringWidth(str1));
-
-        Level maxLevel = IntensityScales.getIntensityScale().getLevel(maxPGA);
-
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        RoundRectangle2D.Double rect = new RoundRectangle2D.Double(getWidth() - wTot - 3, y - g.getFont().getSize() - 3, wTot + 6, (count) * cellHeight + 8, 10, 10);
-        g.setColor(maxLevel == null ? Color.white : maxLevel.getColor());
-        g.fill(rect);
-
-        g.setColor(Color.black);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        g.fillRect(getWidth() - wTot, y - g.getFont().getSize(), wTot, (count) * cellHeight + 2);
-
         for(int i = 0; i < countReal; i++) {
             CityIntensity city = cityIntensities.get(i);
             Level level = IntensityScales.getIntensityScale().getLevel(city.pga());
