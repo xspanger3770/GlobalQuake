@@ -82,7 +82,7 @@ public class EarthquakeAnalysis {
         if (cluster.getEarthquake() != null) {
             int count = pickedEvents.size();
             if (Settings.reduceRevisions) {
-                if (count < cluster.getEarthquake().nextReportEventCount) {
+                if (count <= cluster.getEarthquake().nextReportEventCount) {
                     return;
                 }
                 cluster.getEarthquake().nextReportEventCount = (int) (count * 1.2);
