@@ -14,6 +14,7 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
@@ -22,6 +23,7 @@ import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.client.GlobalQuakeLocal;
+import globalquake.intensity.CityIntensity;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
@@ -34,6 +36,7 @@ import globalquake.ui.globe.GlobePanel;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.core.Settings;
 import globalquake.utils.Scale;
+import org.apache.commons.lang3.StringUtils;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -71,6 +74,7 @@ public class GlobalQuakePanel extends GlobePanel {
         getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
+        getRenderer().addFeature(new FeatureCities());
         getRenderer().addFeature(new FeatureHomeLoc());
 
         frame.addKeyListener(new KeyAdapter() {
@@ -168,6 +172,7 @@ public class GlobalQuakePanel extends GlobePanel {
             new StationMonitor(this, selectedStation, 500);
     }
 
+    @SuppressWarnings("ConstantValue")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
@@ -188,6 +193,119 @@ public class GlobalQuakePanel extends GlobePanel {
                 Logger.error(e);
             }
         }
+
+        if(Settings.displayCityIntensities) {
+            try {
+                drawCityIntensities(g);
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        }
+    }
+
+    public static String formatNumber(double number) {
+        if (number < 200_000) {
+            return String.format("%.1fk", number / 1_000);
+        } else {
+            return String.format("%.1fM", number / 1_000_000);
+        }
+    }
+
+    private void drawCityIntensities(Graphics2D g) {
+        g.setFont(new Font("Calibri", Font.BOLD, 16));
+
+        int cellHeight = (int) (g.getFont().getSize() * 1.2);
+
+        int maxCities = 14;
+
+        int countFelt = 0;
+        int countStrong = 0;
+
+        List<CityIntensity> cityIntensities = GlobalQuakeLocal.instance.getShakemapService().getCityIntensities();
+        int count = 0;
+        double maxPGA = 0.0;
+        for(CityIntensity city : cityIntensities) {
+            double pga = city.pga();
+            if (pga < IntensityScales.getIntensityScale().getLevels().get(0).getPga()) {
+                break;
+            } else if (pga > maxPGA){
+                maxPGA=pga;
+            }
+
+            countFelt += (int) (city.city().population() * feltMultiplier(pga));
+            countStrong += (int) (city.city().population() * feltStrongMultiplier(pga));
+
+            if(count <= maxCities){
+                count++;
+            }
+        }
+
+        if(count == 0){
+            return;
+        }
+
+        int countReal = count;
+
+        if(countFelt > 0){
+            count++;
+        }
+
+        if(countStrong > 0){
+            count++;
+        }
+
+        int y = getHeight() / 2 - count * cellHeight / 2;
+
+        for(int i = 0; i < countReal; i++) {
+            CityIntensity city = cityIntensities.get(i);
+            Level level = IntensityScales.getIntensityScale().getLevel(city.pga());
+
+            String levelStr = "%s%s".formatted(level.getName(), level.getSuffix());
+
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(level.getColor());
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "%s: ".formatted(StringUtils.truncate(city.city().name(), 18));
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+            y += cellHeight;
+        }
+
+        if(countFelt > 0){
+            String levelStr = "%s".formatted(formatNumber(countFelt));
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(Color.yellow);
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "Possibly felt by: ";
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+            y += cellHeight;
+        }
+
+
+        if(countStrong > 0){
+            String levelStr = "%s".formatted(formatNumber(countStrong));
+            int levelW = g.getFontMetrics().stringWidth(levelStr);
+
+            g.setColor(Color.orange);
+            g.drawString(levelStr, getWidth() - levelW-6, y);
+
+            String str = "Possibly heavily felt by: ";
+            g.setColor(Color.white);
+            g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - levelW - 8, y);
+        }
+    }
+
+    private double feltMultiplier(double pga) {
+        return Math.atan(pga * 0.2) * 2 / 3.14159;
+    }
+
+    private double feltStrongMultiplier(double pga){
+        return Math.max(0, Math.atan((pga - MMIIntensityScale.V.getPga()) * 0.2) * 2 / 3.14159);
     }
 
     private void drawAlertsBox(Graphics2D g) {
@@ -324,8 +442,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 6.1;
-        hyp.depth = 50;
+        hyp.magnitude = 6.4;
+        hyp.depth = 0;
 
         hyp.correctEvents = 6;
 
