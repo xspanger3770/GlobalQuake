@@ -43,6 +43,12 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayClusterRoots;
+    }
+
+
+    @Override
     public boolean needsUpdateEntities() {
         return true;
     }
@@ -53,16 +59,16 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     }
 
     @Override
+    public boolean needsProject(RenderEntity<Cluster> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
     public void project(GlobeRenderer renderer, RenderEntity<Cluster> entity, RenderProperties renderProperties) {
         RenderElement elementRoot = entity.getRenderElement(0);
         elementRoot.getShape().reset();
         elementRoot.shouldDraw = renderer.project3D(elementRoot.getShape(), elementRoot.getPolygon(), true, renderProperties);
    }
-
-    @Override
-    protected boolean isVisible(RenderProperties properties) {
-        return Settings.displayClusterRoots;
-    }
 
     @SuppressWarnings("unchecked")
     @Override

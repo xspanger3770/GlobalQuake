@@ -3,6 +3,7 @@ package globalquake.ui.globalquake.feature;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
+import globalquake.core.Settings;
 import globalquake.core.intensity.CityLocation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -66,18 +67,23 @@ public class FeatureCities extends RenderFeature<CityLocation> {
     }
 
     @Override
-    public boolean needsCreatePolygon(RenderEntity<CityLocation> entity, boolean propertiesChanged) {
-        return propertiesChanged;
-    }
-
-    @Override
-    public boolean needsProject(RenderEntity<CityLocation> entity, boolean propertiesChanged) {
-        return propertiesChanged;
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayCapitalCities;
     }
 
     @Override
     public boolean needsUpdateEntities() {
         return false;
+    }
+
+    @Override
+    public boolean needsCreatePolygon(RenderEntity<CityLocation> entity, boolean propertiesChanged) {
+        return false;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<CityLocation> entity, boolean propertiesChanged) {
+        return propertiesChanged;
     }
 
     @Override

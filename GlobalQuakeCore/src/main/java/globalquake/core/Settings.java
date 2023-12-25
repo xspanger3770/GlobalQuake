@@ -136,8 +136,9 @@ public final class Settings {
 
 	public static Integer stationsShapeIndex;
 	public static Boolean displayCityIntensities;
+	public static Boolean displayCapitalCities;
 
-	static {
+    static {
 		load();
 		save();
 		try {
@@ -211,6 +212,7 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayCapitalCities", "true");
 		loadProperty("displayCityIntensities", "true");
 		loadProperty("displayShakemaps", "true");
 		loadProperty("displayTime", "true");

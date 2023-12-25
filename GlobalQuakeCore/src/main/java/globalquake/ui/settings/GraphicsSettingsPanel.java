@@ -42,6 +42,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxTime;
     private JCheckBox chkBoxShakemap;
     private JCheckBox chkBoxCityIntensities;
+    private JCheckBox chkBoxCapitals;
 
 
     public GraphicsSettingsPanel() {
@@ -148,6 +149,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         mainWindowPanel.add(chkBoxShakemap = new JCheckBox("Display shakemap hexagons", Settings.displayShakemaps));
         mainWindowPanel.add(chkBoxTime = new JCheckBox("Display time", Settings.displayTime));
         mainWindowPanel.add(chkBoxCityIntensities = new JCheckBox("Display estimated intensities in cities", Settings.displayCityIntensities));
+        mainWindowPanel.add(chkBoxCapitals = new JCheckBox("Display capital cities", Settings.displayCapitalCities));
 
         panel.add(mainWindowPanel);
 
@@ -393,6 +395,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayShakemaps = chkBoxShakemap.isSelected();
         Settings.displayTime = chkBoxTime.isSelected();
         Settings.displayCityIntensities = chkBoxCityIntensities.isSelected();
+        Settings.displayCapitalCities = chkBoxCapitals.isSelected();
     }
 
     @Override

@@ -101,6 +101,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
+    public boolean needsProject(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
     public void project(GlobeRenderer renderer, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
         elementStationCircle.getShape().reset();
