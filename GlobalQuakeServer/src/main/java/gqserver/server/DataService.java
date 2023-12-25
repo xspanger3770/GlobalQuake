@@ -247,7 +247,8 @@ public class DataService extends GlobalQuakeEventListener {
                 (float) archivedQuake.getDepth(),
                 (float) archivedQuake.getMag(),
                 archivedQuake.getOrigin(),
-                (byte) archivedQuake.getQualityClass().ordinal()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
+                (byte) archivedQuake.getQualityClass().ordinal(),
+                (long) archivedQuake.getFinalUpdateMillis()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
     }
 
     private List<ArchivedEventData> createArchivedEventsData(ArrayList<ArchivedEvent> archivedEvents) {
