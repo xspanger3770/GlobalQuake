@@ -3,6 +3,7 @@ package globalquake.ui.globalquake.feature;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
+import globalquake.core.intensity.CityLocation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;

@@ -1,18 +1,22 @@
 package globalquake.core.earthquake.data;
 
 import globalquake.core.alert.Warnable;
+import globalquake.core.intensity.CityIntensity;
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Earthquake implements Regional, Warnable {
 
 	private final UUID uuid;
-	private long lastUpdate;
+	public List<CityIntensity> cityIntensities = new ArrayList<>();
+    private long lastUpdate;
 	private final Cluster cluster;
 	public int nextReportEventCount;
 	private String region;

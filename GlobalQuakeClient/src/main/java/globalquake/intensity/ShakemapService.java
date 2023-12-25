@@ -11,9 +11,10 @@ import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.intensity.CityIntensity;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
-import globalquake.ui.globalquake.feature.CityLocation;
+import globalquake.core.intensity.CityLocation;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
@@ -33,8 +34,6 @@ public class ShakemapService {
     private final ScheduledExecutorService checkService = Executors.newSingleThreadScheduledExecutor();
 
     private static final List<CityLocation> cities = new ArrayList<>();
-
-    private List<CityIntensity> cityIntensities = new ArrayList<>();
 
     static {
         load();
@@ -112,7 +111,6 @@ public class ShakemapService {
             try {
                 shakeMaps.remove(uuid);
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
-                updateCities();
             }catch(Exception e){
                 Logger.error(e);
             }
@@ -124,29 +122,20 @@ public class ShakemapService {
             try {
                 shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
-                updateCities();
+                updateCities(earthquake);
             }catch(Exception e){
                 Logger.error(e);
             }
         });
     }
 
-    private void updateCities() {
+    private void updateCities(Earthquake earthquake) {
         List<CityIntensity> result = new ArrayList<>();
-        cities.forEach(cityLocation -> {
-            double maxPGA = 0;
-            for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-                double pga = calculatePGA(cityLocation, earthquake);
-                if(pga > maxPGA){
-                    maxPGA = pga;
-                }
-            }
-            result.add(new CityIntensity(cityLocation, maxPGA));
-        });
+        cities.forEach(cityLocation -> result.add(new CityIntensity(cityLocation, calculatePGA(cityLocation, earthquake))));
 
         result.sort(Comparator.comparing(cityIntensity -> -cityIntensity.pga()));
 
-        cityIntensities = result;
+        earthquake.cityIntensities = result;
     }
 
     private double calculatePGA(CityLocation cityLocation, Earthquake earthquake) {
@@ -170,7 +159,4 @@ public class ShakemapService {
         return shakeMaps;
     }
 
-    public List<CityIntensity> getCityIntensities() {
-        return cityIntensities;
-    }
 }

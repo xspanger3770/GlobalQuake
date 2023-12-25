@@ -23,7 +23,7 @@ import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.client.GlobalQuakeLocal;
-import globalquake.intensity.CityIntensity;
+import globalquake.core.intensity.CityIntensity;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
@@ -66,6 +66,7 @@ public class GlobalQuakePanel extends GlobePanel {
     private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;
     private volatile long lastCinemaModeEvent;
+    private Earthquake lastDisplayedQuake;
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
@@ -221,7 +222,13 @@ public class GlobalQuakePanel extends GlobePanel {
         int countFelt = 0;
         int countStrong = 0;
 
-        List<CityIntensity> cityIntensities = GlobalQuakeLocal.instance.getShakemapService().getCityIntensities();
+        Earthquake quake = lastDisplayedQuake;
+
+        if(quake == null){
+            return;
+        }
+
+        List<CityIntensity> cityIntensities = quake.cityIntensities;
         int count = 0;
         double maxPGA = 0.0;
         for(CityIntensity city : cityIntensities) {
@@ -621,6 +628,8 @@ public class GlobalQuakePanel extends GlobePanel {
         if (DEBUG) {
             quake = createDebugQuake();
         }
+
+        lastDisplayedQuake = quake;
 
         int xOffset = 0;
         int baseHeight = quake == null ? 24 : 132;
