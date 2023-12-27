@@ -2,6 +2,7 @@ package globalquake.core.station;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.events.specific.SeedlinkDataEvent;
@@ -79,9 +80,21 @@ public class GlobalStation extends AbstractStation {
 
 	private void process(DataRecord record) {
 		nextExpectedLog = record.getPredictedNextStartBtime().toInstant();
+
+		if (!isTimeValid(record)) {
+			return;
+		}
+
 		getAnalysis().analyse(record);
 		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
 		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
+	}
+
+
+	private boolean isTimeValid(DataRecord record) {
+		Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
+		Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
+		return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
 	}
 
 	@Override
