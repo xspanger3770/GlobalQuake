@@ -112,8 +112,8 @@ public class ServerSelectionFrame extends GQFrame {
             connectButton.setEnabled(false);
             connectButton.setText("Connecting...");
             try {
-                String ip = addressField.getText();
-                int port = Integer.parseInt(portField.getText());
+                String ip = addressField.getText().trim();
+                int port = Integer.parseInt(portField.getText().trim());
 
                 Settings.lastServerIP = ip;
                 Settings.lastServerPORT = port;
