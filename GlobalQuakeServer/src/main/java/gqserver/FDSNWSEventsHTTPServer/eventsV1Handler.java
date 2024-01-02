@@ -281,7 +281,6 @@ public class eventsV1Handler implements HttpHandler{
         */
 
         public FDSNWSEventsRequest(HttpExchange exchange) throws HTTPRequestException{
-            setNotImplementedParameters();
             initDefaultParameters();
             ParseQuery(exchange.getRequestURI());
         }
