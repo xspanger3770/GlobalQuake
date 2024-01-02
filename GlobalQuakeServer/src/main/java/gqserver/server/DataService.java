@@ -185,9 +185,6 @@ public class DataService extends GlobalQuakeEventListener {
     public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
-        if (!isValid(record)) {
-            return;
-        }
         synchronized (stationDataQueueLock) {
             stationDataQueueMap.putIfAbsent(station,
                     new PriorityQueue<>(getDataRecordComparator()));
@@ -227,12 +224,6 @@ public class DataService extends GlobalQuakeEventListener {
 
     private ClusterData createClusterData(Cluster cluster) {
         return new ClusterData(cluster.getUuid(), cluster.getRootLat(), cluster.getRootLon(), cluster.getLevel());
-    }
-
-    private boolean isValid(DataRecord record) {
-        Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
-        Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
-        return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
     }
 
     public static Comparator<DataRecord> getDataRecordComparator() {
