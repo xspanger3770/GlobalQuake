@@ -255,7 +255,7 @@ public class eventsV1Handler implements HttpHandler{
         private int nodata;                //HTTP status code to return when no data is found. Default is 204, no content.
         
 
-        /*Create list of not implemented parameters*/
+        /*Create list of not implemented parameters
         public Set<String> notImplementedParameters = new HashSet<>();
         private void setNotImplementedParameters(){
             notImplementedParameters.add("lat");
@@ -278,6 +278,7 @@ public class eventsV1Handler implements HttpHandler{
             notImplementedParameters.add("contributor");
             notImplementedParameters.add("updatedafter");
         }
+        */
 
         public FDSNWSEventsRequest(HttpExchange exchange) throws HTTPRequestException{
             setNotImplementedParameters();
