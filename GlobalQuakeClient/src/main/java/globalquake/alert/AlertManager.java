@@ -80,15 +80,15 @@ public class AlertManager {
         double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
                 Settings.homeLon);
 
-        if (Settings.alertLocal && distGC < Settings.alertLocalDist) {
+        if (Settings.alertLocal && distGC <= Settings.alertLocalDist) {
             return true;
         }
 
-        if (Settings.alertRegion && distGC < Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
+        if (Settings.alertRegion && distGC <= Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
             return true;
         }
 
-        return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
+        return Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
     }
 }
 
