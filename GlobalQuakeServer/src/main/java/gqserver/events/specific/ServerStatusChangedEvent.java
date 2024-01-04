@@ -10,4 +10,11 @@ public record ServerStatusChangedEvent(SocketStatus status) implements GlobalQua
     public void run(GlobalQuakeServerEventListener eventListener) {
         eventListener.onServerStatusChanged(this);
     }
+
+    @Override
+    public String toString() {
+        return "ServerStatusChangedEvent{" +
+                "status=" + status +
+                '}';
+    }
 }

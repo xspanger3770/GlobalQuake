@@ -1,12 +1,16 @@
 package globalquake.client;
 
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import globalquake.client.data.ClientStation;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
+import globalquake.events.specific.StationCreateEvent;
 import gqserver.api.Packet;
 import gqserver.api.data.station.StationInfoData;
 import gqserver.api.data.station.StationIntensityData;
+import gqserver.api.packets.data.DataRecordPacket;
 import gqserver.api.packets.station.StationsInfoPacket;
 import gqserver.api.packets.station.StationsIntensityPacket;
 import gqserver.api.packets.station.StationsRequestPacket;
@@ -45,6 +49,24 @@ public class GlobalStationManagerClient extends GlobalStationManager {
             processStationsInfoPacket(socket, stationsInfoPacket);
         } else if (packet instanceof StationsIntensityPacket stationsIntensityPacket) {
             processStationsIntensityPacket(socket, stationsIntensityPacket);
+        } else if (packet instanceof DataRecordPacket dataRecordPacket){
+            processDataRecordPacket(dataRecordPacket);
+        }
+    }
+
+    private void processDataRecordPacket(DataRecordPacket dataRecordPacket) {
+        ClientStation station = stationsIdMap.get(dataRecordPacket.stationIndex());
+        if(station == null){
+            Logger.warn("Received data record but for unkown station!");
+            return;
+        }
+
+        try {
+            DataRecord dataRecord = (DataRecord) DataRecord.read(dataRecordPacket.data());
+            station.getAnalysis().analyse(dataRecord);
+            station.getAnalysis().second(System.currentTimeMillis());
+        } catch (IOException | SeedFormatException e) {
+            Logger.error(e);
         }
     }
 
@@ -75,9 +97,11 @@ public class GlobalStationManagerClient extends GlobalStationManager {
                         infoData.location(),
                         infoData.lat(),
                         infoData.lon(),
-                        infoData.index()));
+                        infoData.index(),
+                        infoData.sensorType()));
                 station.setIntensity(infoData.maxIntensity(), infoData.time(), infoData.eventMode());
                 stationsIdMap.put(infoData.index(), station);
+                GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationCreateEvent(station));
             }
         }
 
@@ -85,14 +109,17 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void resetIndexing(ClientSocket socket, UUID uuid) {
-        Logger.info("Station indexing has changed!");
+        if(super.indexing != null) {
+            Logger.info("Station indexing has changed, probably because the server has been restarted");
+            try {
+                socket.sendPacket(new StationsRequestPacket());
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        }
+
         super.indexing = uuid;
         stations.clear();
         stationsIdMap.clear();
-        try {
-            socket.sendPacket(new StationsRequestPacket());
-        } catch (IOException e) {
-            Logger.error(e);
-        }
     }
 }

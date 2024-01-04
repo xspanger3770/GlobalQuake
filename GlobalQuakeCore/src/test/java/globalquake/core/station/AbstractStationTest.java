@@ -1,5 +1,6 @@
 package globalquake.core.station;
 
+import gqserver.api.packets.station.InputType;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -8,7 +9,7 @@ public class AbstractStationTest {
 
     @Test
     public void testIntervals(){
-        AbstractStation abstractStation = new GlobalStation("", "", "", "",5,5,5,5,null);
+        AbstractStation abstractStation = new GlobalStation("", "", "", "",5,5,5,5,null, -1, InputType.UNKNOWN);
         StationInterval int1 = new StationInterval(10, 50, StationState.INACTIVE);
         StationInterval int2 = new StationInterval(50, 70, StationState.ACTIVE);
         StationInterval int3 = new StationInterval(100, 150, StationState.ACTIVE);
@@ -24,7 +25,7 @@ public class AbstractStationTest {
 
     @Test
     public void testReport(){
-        AbstractStation abstractStation = new GlobalStation("", "", "", "",5,5,5,5,null);
+        AbstractStation abstractStation = new GlobalStation("", "", "", "",5,5,5,5,null, -1, InputType.UNKNOWN);
         abstractStation.reportState(StationState.ACTIVE, 0);
         abstractStation.reportState(StationState.ACTIVE, 10);
 

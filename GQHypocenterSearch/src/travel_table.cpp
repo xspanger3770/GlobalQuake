@@ -44,6 +44,16 @@ float p_interpolate(float ang, float depth) {
     return interpolated_value;
 }
 
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    isInitialized
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableReady
+  (JNIEnv *, jclass){
+    return is_initialised();
+  }
+
 static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {
     int size = env->GetArrayLength(matrix);
     for (int i = 0; i < size; i++) {
@@ -54,16 +64,6 @@ static void releaseMatrixArray(JNIEnv *env, jobjectArray matrix) {
         env->DeleteLocalRef(oneDim);
     }
 }
-
-/*
- * Class:     globalquake_jni_GQNativeFunctions
- * Method:    isInitialized
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableReady
-  (JNIEnv *, jclass){
-    return is_initialised();
-  }
 
 /*
  * Class:     globalquake_jni_GQNativeFunctions

@@ -3,18 +3,22 @@ package globalquake.core;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
+import globalquake.ui.settings.StationsShape;
 import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.*;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public final class Settings {
@@ -31,7 +35,6 @@ public final class Settings {
 	public static Double hypocenterCorrectThreshold;
 
 	public static final double hypocenterDetectionResolutionDefault = 40;
-	public static final double hypocenterDetectionResolutionMax = 160.0;
 	public static Double hypocenterDetectionResolution;
 
 	public static Boolean parallelHypocenterLocations;
@@ -63,6 +66,7 @@ public final class Settings {
 	public static Double oldEventsOpacity;
 
 	public static Boolean displayClusters;
+	public static Boolean displayClusterRoots;
 	public static Integer selectedDateFormatIndex;
 
 	public static Integer maxArchivedQuakes;
@@ -99,7 +103,6 @@ public final class Settings {
 	public static final int maxEventsDefault = 60;
 	public static Boolean displayCoreWaves;
 	public static Boolean recalibrateOnLaunch;
-	public static Boolean stationsTriangles;
 	public static Double stationsSizeMul;
     public static Integer selectedEventColorIndex;
 
@@ -128,9 +131,58 @@ public final class Settings {
 	public static String lastServerIP;
 
 	public static Integer lastServerPORT;
+	public static Integer maxClients;
+	public static Boolean displayShakemaps;
 
-	static {
+	public static Integer stationsShapeIndex;
+	public static Boolean displayCityIntensities;
+	public static Boolean displayCapitalCities;
+
+    static {
 		load();
+		save();
+		try {
+			runUpdateService();
+		} catch (IOException e) {
+			Logger.error(new RuntimeApplicationException("Unable to launch settings file update service!", e));
+		}
+	}
+
+	private static void runUpdateService() throws IOException{
+		WatchService watchService = FileSystems.getDefault().newWatchService();
+
+		// Register the directory for certain events
+		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				WatchKey key;
+				try {
+					key = watchService.take(); // Wait for a key to be available
+				} catch (InterruptedException ex) {
+					return;
+				}
+
+				for (WatchEvent<?> event : key.pollEvents()) {
+					// Handle the event
+					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+						Path modifiedFile = (Path) event.context();
+						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
+							if(System.currentTimeMillis() - lastSave >= 2000){
+								Logger.info("Properties file changed, reloading!");
+								load();
+							}
+						}
+					}
+				}
+
+				if(key.reset()){
+					executorService.submit(this);
+				}
+			}
+		});
 	}
 
 	private static void load() {
@@ -139,6 +191,11 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+		loadProperty("stationsShapeIndex", "0",
+				o -> validateInt(0, StationsShape.values().length, (Integer) o));
+
+		loadProperty("maxClients", "64",
+				o -> validateInt(2, 10000, (Integer) o));
 
 		loadProperty("lastServerIP", "0.0.0.0");
 		loadProperty("lastServerPORT", "38000");
@@ -155,6 +212,9 @@ public final class Settings {
 
 		loadProperty("reduceRevisions", "true");
 
+		loadProperty("displayCapitalCities", "true");
+		loadProperty("displayCityIntensities", "true");
+		loadProperty("displayShakemaps", "true");
 		loadProperty("displayTime", "true");
 		loadProperty("displayAlertBox", "true");
 		loadProperty("displaySystemInfo", "true");
@@ -191,12 +251,12 @@ public final class Settings {
 		loadProperty("alertGlobalMag", "6.0",  o -> validateDouble(0, 10, (Double) o));
 
 		loadProperty("reportsEnabled", "false");
+		loadProperty("displayClusterRoots", "false");
 		loadProperty("displayClusters", "false");
 		loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
 		loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("use24HFormat", "true");
 		loadProperty("hideDeadStations", "false");
-		loadProperty("stationsTriangles", "false");
 		loadProperty("maxArchivedQuakes", "100", o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
 
 		loadProperty("enableAlarmDialogs", "false");
@@ -219,8 +279,6 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
-
-		save();
 	}
 
 
@@ -330,8 +388,11 @@ public final class Settings {
 			return null;
 		}
 	}
+
+	private static long lastSave;
 	
 	public static void save() {
+		lastSave = System.currentTimeMillis();
 		changes++;
 
 		try {

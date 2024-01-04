@@ -105,6 +105,7 @@ public class ServerStatusPanel extends JPanel {
                     Settings.lastServerPORT = port;
                     Settings.save();
 
+                    GlobalQuakeServer.instance.initStations();
                     GlobalQuakeServer.instance.getServerSocket().run(ip, port);
                     GlobalQuakeServer.instance.startRuntime();
                 } catch(Exception e){

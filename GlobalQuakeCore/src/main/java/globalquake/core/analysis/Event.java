@@ -16,6 +16,7 @@ public class Event implements Serializable {
 	public static final double[] RECALCULATE_P_WAVE_THRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
 	public static final double[] SLOW_THRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
+	private boolean usingRatio;
 
 	private long start;// time when first detected
 	private long end;// time when end threshold reached
@@ -36,19 +37,22 @@ public class Event implements Serializable {
 	private final transient Analysis analysis;
 
 	private boolean isSWave;
+	private double maxCounts;
 
-	public Event(Analysis analysis, long start, List<Log> logs) {
+	public Event(Analysis analysis, long start, List<Log> logs, boolean usingRatio) {
 		this(analysis);
 		this.start = start;
 		this.logs = logs;
 		this.firstLogTime = logs.get(logs.size() - 1).time();
 		this.valid = true;
+		this.usingRatio = usingRatio;
 	}
 
 	// used in emulator
 	public Event(Analysis analysis) {
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
+		this.maxCounts = 0;
 		this.valid = true;
 		this.analysis = analysis;
 		this.assignedCluster = null;
@@ -132,10 +136,14 @@ public class Event implements Serializable {
 		return getAnalysis().getStation().getAlt();
 	}
 
-	public void log(Log currentLog) {
+	public void log(Log currentLog, double counts) {
 		logs.add(0, currentLog);
 		if (currentLog.getRatio() > this.maxRatio) {
 			this.maxRatio = currentLog.getRatio();
+		}
+
+		if(counts > this.maxCounts){
+			this.maxCounts = counts;
 		}
 
 		boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
@@ -256,5 +264,13 @@ public class Event implements Serializable {
 
 	public List<Log> getLogs() {
 		return logs;
+	}
+
+	public double getMaxCounts() {
+		return maxCounts;
+	}
+
+	public boolean isUsingRatio() {
+		return usingRatio;
 	}
 }

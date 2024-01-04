@@ -69,7 +69,7 @@ public final class StationSource implements Serializable {
     }
 
     public boolean isOutdated() {
-        return lastUpdate == null || lastUpdate.isAfter(LocalDateTime.now().plusDays(UPDATE_INTERVAL_DAYS));
+        return lastUpdate == null || lastUpdate.isBefore(LocalDateTime.now().minusDays(UPDATE_INTERVAL_DAYS));
     }
 
 }

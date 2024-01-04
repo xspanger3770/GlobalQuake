@@ -6,6 +6,7 @@ import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
+import globalquake.utils.GeoUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,6 +14,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
@@ -27,6 +30,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private final UUID uuid;
 	private final QualityClass qualityClass;
 	private double maxRatio;
+	private double maxPGA;
 	private String region;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
@@ -34,6 +38,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private boolean wrong;
 
 	private transient RegionUpdater regionUpdater;
+	private static final ExecutorService pgaService = Executors.newSingleThreadExecutor();
 
 	@Serial
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -85,6 +90,16 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.archivedEvents = new ArrayList<>();
 		this.qualityClass = qualityClass;
 		regionUpdater = new RegionUpdater(this);
+		this.maxPGA = 0.0;
+
+		pgaService.submit(this::calculatePGA);
+
+
+	}
+
+	private void calculatePGA() {
+		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
+		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
 	}
 
 	public double getDepth() {
@@ -151,5 +166,25 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	@Override
 	public int compareTo(ArchivedQuake archivedQuake) {
 		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
+	}
+
+	public double getMaxPGA() {
+		return maxPGA;
+	}
+
+	@Override
+	public String toString() {
+		return "ArchivedQuake{" +
+				"lat=" + lat +
+				", lon=" + lon +
+				", depth=" + depth +
+				", origin=" + origin +
+				", mag=" + mag +
+				", uuid=" + uuid +
+				", qualityClass=" + qualityClass +
+				", maxRatio=" + maxRatio +
+				", region='" + region + '\'' +
+				", wrong=" + wrong +
+				'}';
 	}
 }

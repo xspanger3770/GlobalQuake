@@ -1,9 +1,16 @@
 package globalquake.core.database;
 
+import globalquake.core.GlobalQuake;
+import gqserver.api.packets.station.InputType;
+import org.tinylog.Logger;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -15,6 +22,10 @@ public class StationDatabase implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -679301102141884137L;
+
+    public static final int VERSION = 3;
+
+    private int version = VERSION;
 
     private final List<Network> networks = new ArrayList<>();
     private final List<SeedlinkNetwork> seedlinkNetworks = new ArrayList<>();
@@ -33,6 +44,19 @@ public class StationDatabase implements Serializable {
         databaseLock = new ReentrantReadWriteLock();
         databaseReadLock = databaseLock.readLock();
         databaseWriteLock = databaseLock.writeLock();
+
+        convert();
+    }
+
+    private void convert() {
+        if(version < VERSION){
+            Logger.warn("Database updated!");
+            networks.clear();
+            stationSources.forEach(stationSource -> stationSource.setLastUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())));
+            GlobalQuake.errorHandler.info("Your station database was upgraded to newer version. You need to select stations again.");
+        }
+
+        version = VERSION;
     }
 
     public StationDatabase() {
@@ -156,13 +180,18 @@ public class StationDatabase implements Serializable {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode, double lat, double lon, double alt, double sampleRate, StationSource stationSource) {
+    public static Channel getOrCreateChannel(Station station, String channelCode, String locationCode,
+                                             double lat, double lon, double alt, double sampleRate,
+                                             StationSource stationSource, double sensitivity, InputType inputType) {
         Channel channel = getChannel(station, channelCode, locationCode);
         if(channel != null){
+            if(channel.getSensitivity() <= 0 && sensitivity > 0){
+                channel.setSensitivity(sensitivity);
+            }
             return channel;
         }
 
-        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource);
+        channel = new Channel(channelCode, locationCode, sampleRate, lat, lon, alt, stationSource, sensitivity, inputType);
         station.getChannels().add(channel);
 
         return channel;
@@ -259,7 +288,7 @@ public class StationDatabase implements Serializable {
         Network networkFound = getOrInsertNetwork(networks, network);
         Station stationFound = getOrInsertStation(networkFound, station);
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
-        if(channelFound != null){
+        if(channelFound != null) {
             channelFound.merge(channel);
         } else {
             stationFound.getChannels().add(channel);

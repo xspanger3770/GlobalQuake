@@ -3,6 +3,7 @@ package globalquake.ui.archived;
 import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
+import gqserver.api.packets.station.InputType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
@@ -15,6 +16,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArchivedQuakePanel extends GlobePanel {
     private final ArchivedQuake quake;
@@ -29,10 +31,8 @@ public class ArchivedQuakePanel extends GlobePanel {
         setPreferredSize(new Dimension(600,480));
         setCinemaMode(true);
 
-        List<Earthquake> fakeQuakes = createFakeQuake(quake);
-
-        getRenderer().addFeature(new FeatureEarthquake(fakeQuakes));
         getRenderer().addFeature(new FeatureGlobalStation(createFakeStations()));
+        getRenderer().addFeature(new FeatureEarthquake(createFakeQuake(quake)));
     }
 
     static class AnimatedStation extends AbstractStation{
@@ -40,8 +40,10 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
         private final ArchivedEvent event;
 
+        public static final AtomicInteger nextID = new AtomicInteger(0);
+
         public AnimatedStation(ArchivedQuakeAnimation animation, ArchivedEvent event) {
-            super("", "", "", "", event.lat(), event.lon(), 0, 0, null);
+            super("", "", "", "", event.lat(), event.lon(), 0, nextID.getAndIncrement(), null, -1);
             this.animation = animation;
             this.event = event;
         }
@@ -49,6 +51,11 @@ public class ArchivedQuakePanel extends GlobePanel {
         @Override
         public double getMaxRatio60S() {
             return animation.getCurrentTime() >= event.pWave() ? event.maxRatio() : 1;
+        }
+
+        @Override
+        public InputType getInputType() {
+            return InputType.UNKNOWN;
         }
 
         @Override
@@ -72,7 +79,7 @@ public class ArchivedQuakePanel extends GlobePanel {
         private final ArchivedQuakeAnimation animation;
 
         public AnimatedEarthquake(ArchivedQuakeAnimation animation, double lat, double lon, double depth) {
-            super(new Cluster(0));
+            super(new Cluster());
 
             Hypocenter hypocenter = new Hypocenter(lat, lon, depth, 0, 0, 0, null, null);
             getCluster().setPreviousHypocenter(hypocenter);

@@ -77,7 +77,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingAccuracy() {
-        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) Settings.hypocenterDetectionResolutionMax, 10, 5);
+        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax, 10, 5);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent ->
@@ -144,7 +144,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
 
     private String getNameForResolution(int value) {
-        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / Settings.hypocenterDetectionResolutionMax) * (RESOLUTION_NAMES.length))))];
+        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax) * (RESOLUTION_NAMES.length))))];
     }
 
     @Override

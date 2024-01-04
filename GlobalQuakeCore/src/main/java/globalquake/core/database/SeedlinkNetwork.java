@@ -3,14 +3,16 @@ package globalquake.core.database;
 import javax.swing.*;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
 
 public final class SeedlinkNetwork implements Serializable {
     @Serial
     private static final long serialVersionUID = 0L;
+    public static final int DEFAULT_TIMEOUT = 20;
     private final String name;
     private final String host;
     private final int port;
+
+    private int timeout;
 
     private transient JProgressBar statusBar;
 
@@ -23,9 +25,14 @@ public final class SeedlinkNetwork implements Serializable {
     public transient SeedlinkStatus status = SeedlinkStatus.DISCONNECTED;
 
     public SeedlinkNetwork(String name, String host, int port) {
+        this(name, host, port, DEFAULT_TIMEOUT);
+    }
+
+    public SeedlinkNetwork(String name, String host, int port, int timeout) {
         this.name = name;
         this.host = host;
         this.port = port;
+        this.timeout = timeout;
     }
 
     public String getName() {
@@ -38,21 +45,6 @@ public final class SeedlinkNetwork implements Serializable {
 
     public int getPort() {
         return port;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (SeedlinkNetwork) obj;
-        return Objects.equals(this.name, that.name) &&
-                Objects.equals(this.host, that.host) &&
-                this.port == that.port;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, host, port);
     }
 
     @Override
@@ -91,5 +83,12 @@ public final class SeedlinkNetwork implements Serializable {
 
     public int getConnectedStations() {
         return connectedStations;
+    }
+
+    public int getTimeout() {
+        if(timeout < 5){
+            timeout = DEFAULT_TIMEOUT;
+        }
+        return timeout;
     }
 }

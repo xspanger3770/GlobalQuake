@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.ClusterLevelUpEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -34,7 +34,6 @@ public class ClusterAnalysis {
     private final List<Cluster> clusters;
     private final List<Earthquake> earthquakes;
     private final List<AbstractStation> stations;
-    private final AtomicInteger nextClusterId = new AtomicInteger(0);
 
     private static final double MERGE_THRESHOLD = 0.45;
 
@@ -67,6 +66,9 @@ public class ClusterAnalysis {
         }
     }
 
+    public void destroy() {
+    }
+
     record EventIntensityInfo(Cluster cluster, AbstractStation station, double expectedIntensity){}
 
     private void stealEvents() {
@@ -80,7 +82,7 @@ public class ClusterAnalysis {
                 for (Event event : station.getAnalysis().getDetectedEvents()) {
                     if (event.isValid() && event.isSWave() && !couldBeArrival(event, cluster.getEarthquake(), true, false, true)) {
                         double distGC = GeoUtils.greatCircleDistance(event.getLatFromStation(), event.getLonFromStation(), cluster.getEarthquake().getLat(), cluster.getEarthquake().getLon());
-                        double expectedIntensity = IntensityTable.getMaxIntensity(cluster.getEarthquake().getMag(), GeoUtils.gcdToGeo(distGC));
+                        double expectedIntensity = IntensityTable.getIntensity(cluster.getEarthquake().getMag(), GeoUtils.gcdToGeo(distGC));
                         EventIntensityInfo eventIntensityInfo = new EventIntensityInfo(cluster, station, expectedIntensity);
                         EventIntensityInfo old = map.putIfAbsent(event, eventIntensityInfo);
                         if(old != null && eventIntensityInfo.expectedIntensity > old.expectedIntensity){
@@ -230,7 +232,7 @@ public class ClusterAnalysis {
                 angle);
 
 
-        double expectedIntensity = IntensityTable.getMaxIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
+        double expectedIntensity = IntensityTable.getIntensity(earthquake.getMag(), GeoUtils.gcdToGeo(distGC));
         if (expectedIntensity < 3.0) {
             return false;
         }
@@ -297,7 +299,7 @@ public class ClusterAnalysis {
                 angle);
 
         if(considerIntensity) {
-            double expectedIntensity = IntensityTable.getMaxIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
+            double expectedIntensity = IntensityTable.getIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
             if (expectedIntensity < 3.0) {
                 return false;
             }
@@ -305,7 +307,7 @@ public class ClusterAnalysis {
 
         if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
             long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(5000, 1000 + expectedTravel * 0.01) : Settings.pWaveInaccuracyThreshold)) {
+            if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(10000, 1000 + expectedTravel * 0.01) : Settings.pWaveInaccuracyThreshold)) {
                 return true;
             }
         }
@@ -483,11 +485,23 @@ public class ClusterAnalysis {
                     numberOfActiveEvents++;
                 }
             }
-            if (cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE || (numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000)) {
-                Logger.debug("Cluster #" + cluster.getId() + " died");
+
+            Earthquake earthquake = cluster.getEarthquake();
+
+            boolean notEnoughEvents = cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE;
+            boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake, 0);
+            boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
+
+            if ( notEnoughEvents || eqRemoved || tooOld) {
+                Logger.tag("Hypocs").debug("Cluster #" + cluster.id + " marked for removal");
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
+                if(cluster.getLevel() != cluster.lastLevel || cluster.lastLastUpdate != cluster.getLastUpdate()){
+                    GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
+                    cluster.lastLevel = cluster.getLevel();
+                    cluster.lastLastUpdate = cluster.getLastUpdate();
+                }
             }
         }
 
@@ -495,7 +509,7 @@ public class ClusterAnalysis {
     }
 
     private Cluster createCluster(ArrayList<Event> validEvents) {
-        Cluster cluster = new Cluster(nextClusterId.getAndIncrement());
+        Cluster cluster = new Cluster();
         for (Event ev : validEvents) {
             if (cluster.getAssignedEvents().putIfAbsent(ev.getAnalysis().getStation(), ev) == null) {
                 ev.assignedCluster = cluster;
@@ -503,9 +517,9 @@ public class ClusterAnalysis {
             }
         }
 
-        cluster.calculateRoot();
+        cluster.calculateRoot(true);
 
-        Logger.debug("New Cluster #" + cluster.getId() + " Has been created. It contains "
+        Logger.tag("Hypocs").debug("New Cluster #" + cluster.id + " Has been created. It contains "
                 + cluster.getAssignedEvents().size() + " events");
         clusters.add(cluster);
 

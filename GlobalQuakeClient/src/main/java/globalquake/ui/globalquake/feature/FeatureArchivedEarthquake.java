@@ -39,7 +39,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         renderer.createCircle(element.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                getSize(archivedQuake, renderer, renderProperties), 0, 4);
+                getSize(archivedQuake, renderer, renderProperties), 0, 12);
     }
 
     private double getSize(ArchivedQuake quake, GlobeRenderer renderer, RenderProperties renderProperties) {
@@ -48,8 +48,8 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     @Override
-    public boolean needsCreatePolygon(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
-        return propertiesChanged;
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayArchivedQuakes;
     }
 
     @Override
@@ -58,9 +58,19 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     @Override
+    public boolean needsCreatePolygon(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
     public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        boolean displayed = !entity.getOriginal().isWrong();
         if(Settings.oldEventsMagnitudeFilterEnabled) {
             displayed &= (entity.getOriginal().getMag() >= Settings.oldEventsMagnitudeFilter);
         }
@@ -79,13 +89,13 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
-        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        boolean displayed = !entity.getOriginal().isWrong();
         if (!entity.getRenderElement(0).shouldDraw || !displayed) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(getColor(entity.getOriginal()));
-        graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
+        graphics.setStroke(new BasicStroke((float) Math.max(0.1, 1.4 + entity.getOriginal().getMag() * 0.4)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 

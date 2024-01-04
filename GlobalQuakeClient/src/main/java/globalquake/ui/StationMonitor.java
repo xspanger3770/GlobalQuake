@@ -1,6 +1,10 @@
 package globalquake.ui;
 
+import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
+import globalquake.events.specific.StationMonitorCloseEvent;
+import globalquake.events.specific.StationMonitorOpenEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,16 +14,22 @@ import java.util.TimerTask;
 
 public class StationMonitor extends GQFrame {
 
-	private final AbstractStation station;
+	private final StationMonitorPanel stationMonitorPanel;
+	private AbstractStation station;
 
 	public StationMonitor(Component parent, AbstractStation station, int refreshTime) {
 		this.station = station;
+
+		if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
+			GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorOpenEvent(StationMonitor.this, globalStation));
+		}
+
 		setLayout(new BorderLayout());
 
 		add(createControlPanel(), BorderLayout.NORTH);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		StationMonitorPanel panel = new StationMonitorPanel(station);
-		add(panel, BorderLayout.CENTER);
+		stationMonitorPanel = new StationMonitorPanel(station);
+		add(stationMonitorPanel, BorderLayout.CENTER);
 
 		pack();
 
@@ -31,33 +41,38 @@ public class StationMonitor extends GQFrame {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				panel.updateImage();
-				panel.repaint();
+				stationMonitorPanel.updateImage();
+				stationMonitorPanel.repaint();
 			}
 		}, 0, refreshTime);
 
 		addWindowListener(new WindowAdapter() {
 
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosed(WindowEvent e) {
 				timer.cancel();
+				if(GlobalQuakeLocal.instance != null && station instanceof GlobalStation globalStation){
+					GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new StationMonitorCloseEvent(StationMonitor.this, globalStation));
+				}
 			}
 		});
 
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
+				System.err.println("K");
 				if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+					System.err.println("ESC");
 					dispose();
 				}
 			}
 		});
 
-		panel.addComponentListener(new ComponentAdapter() {
+		stationMonitorPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				panel.updateImage();
-				panel.repaint();
+				stationMonitorPanel.updateImage();
+				stationMonitorPanel.repaint();
 			}
 		});
 
@@ -80,4 +95,12 @@ public class StationMonitor extends GQFrame {
 		return panel;
 	}
 
+	public AbstractStation getStation() {
+		return station;
+	}
+
+	public void swapStation(GlobalStation station) {
+		this.station = station;
+		stationMonitorPanel.setStation(station);
+	}
 }

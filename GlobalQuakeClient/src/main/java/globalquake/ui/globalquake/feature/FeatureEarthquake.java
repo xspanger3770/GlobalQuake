@@ -1,9 +1,11 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
+import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.globe.GlobeRenderer;
@@ -115,17 +117,22 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return true;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<Earthquake> entity, boolean propertiesChanged) {
         return true;
     }
 
     @Override
     public boolean needsProject(RenderEntity<Earthquake> entity, boolean propertiesChanged) {
-        return true;
-    }
-
-    @Override
-    public boolean needsUpdateEntities() {
         return true;
     }
 
@@ -161,13 +168,13 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (elementPWave.shouldDraw) {
-            graphics.setColor(Color.BLUE);
+            graphics.setColor(alphaColor(Color.BLUE, getAlphaMul(entity.getOriginal())));
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
             graphics.draw(elementPWave.getShape());
         }
 
         if (elementSWave.shouldDraw) {
-            graphics.setColor(getColorSWave(entity.getOriginal().getMag()));
+            graphics.setColor(alphaColor(getColorSWave(entity.getOriginal().getMag()), getAlphaMul(entity.getOriginal())));
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
             graphics.draw(elementSWave.getShape());
         }
@@ -188,7 +195,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         RenderElement elementCross = entity.getRenderElement(4);
         if (elementCross.shouldDraw) {
-            if((System.currentTimeMillis() / 500) % 2 == 0) {
+            boolean isUncertain = isUncertain(entity.getOriginal().getHypocenter());
+
+            if((System.currentTimeMillis() / 500) % 2 == 0 && !isUncertain) {
                 graphics.setStroke(new BasicStroke(4f));
                 graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
                 graphics.draw(elementCross.getShape());
@@ -196,6 +205,13 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
             var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
             var centerPonint = renderer.projectPoint(point3D, renderProperties);
+
+            if(isUncertain && (System.currentTimeMillis() / 500) % 2 == 0){
+                graphics.setColor(Color.WHITE);
+                graphics.setFont(new Font("Calibri", Font.BOLD, 32));
+                String str = "?";
+                graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 10));
+            }
 
             String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
 
@@ -220,6 +236,25 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
+    private boolean isUncertain(Hypocenter hypocenter) {
+        return hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
+    }
+
+    private Color alphaColor(Color color, double mul) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (255.0 * mul));
+    }
+
+    private double getAlphaMul(Earthquake original) {
+        double ageMins = (System.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
+        double limit = waveDisplayTimeMinutes(original.getMag(), original.getDepth());
+
+        return Math.max(0, Math.min(1.0, 2.0 - 2.0 * ageMins / limit));
+    }
+
+    private double waveDisplayTimeMinutes(double mag, double depth) {
+        return 2.0 + 0.01 * Math.pow(mag + EarthquakeAnalysis.getDepthCorrection(depth), 4);
+    }
+
     private Color polygonColor(int i) {
         if(i == 0){
             return Color.blue;
@@ -240,7 +275,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     public static Color getCrossColor(double mag) {
         if (mag < 3) {
-            return Color.lightGray;
+            return Color.white;
         }
         if (mag < 4) {
             return Color.green;

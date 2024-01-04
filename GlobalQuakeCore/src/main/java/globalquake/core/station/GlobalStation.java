@@ -2,8 +2,11 @@ package globalquake.core.station;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
+import globalquake.core.events.specific.SeedlinkDataEvent;
+import gqserver.api.packets.station.InputType;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -17,14 +20,17 @@ public class GlobalStation extends AbstractStation {
 	private final Object recordsQueueLock = new Object();
 
 	private final SortedSet<DataRecord> records;
+	private final InputType inputType;
 
 	private Instant nextExpectedLog = null;
 
+
 	public GlobalStation(String networkCode, String stationCode, String channelName,
 						 String locationCode, double lat, double lon, double alt,
-						 int id, SeedlinkNetwork seedlinkNetwork) {
-		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork);
+						 int id, SeedlinkNetwork seedlinkNetwork, double sensitivity, InputType inputType) {
+		super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, seedlinkNetwork, sensitivity);
 		this.records = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
+		this.inputType = inputType;
 	}
 
 	public void addRecord(DataRecord dr) {
@@ -67,10 +73,28 @@ public class GlobalStation extends AbstractStation {
 		}
 	}
 
+	@Override
+	public InputType getInputType() {
+		return inputType;
+	}
+
 	private void process(DataRecord record) {
 		nextExpectedLog = record.getPredictedNextStartBtime().toInstant();
+
+		if (!isTimeValid(record)) {
+			return;
+		}
+
 		getAnalysis().analyse(record);
+		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
 		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
+	}
+
+
+	private boolean isTimeValid(DataRecord record) {
+		Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
+		Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
+		return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
 	}
 
 	@Override
@@ -88,4 +112,5 @@ public class GlobalStation extends AbstractStation {
 		Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
 		return event != null && event.isValid() && !event.hasEnded();
 	}
+
 }

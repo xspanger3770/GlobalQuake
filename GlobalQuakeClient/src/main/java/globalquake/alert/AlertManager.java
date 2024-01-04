@@ -6,7 +6,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.alert.Warnable;
 import globalquake.core.earthquake.data.Earthquake;
-import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
@@ -21,7 +21,7 @@ public class AlertManager {
     public AlertManager() {
         this.warnings = new HashMap<>();
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 tick();
@@ -80,15 +80,15 @@ public class AlertManager {
         double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
                 Settings.homeLon);
 
-        if (Settings.alertLocal && distGC < Settings.alertLocalDist) {
+        if (Settings.alertLocal && distGC <= Settings.alertLocalDist) {
             return true;
         }
 
-        if (Settings.alertRegion && distGC < Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
+        if (Settings.alertRegion && distGC <= Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
             return true;
         }
 
-        return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
+        return Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
     }
 }
 

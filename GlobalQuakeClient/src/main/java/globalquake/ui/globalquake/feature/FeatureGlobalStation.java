@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
@@ -11,8 +12,10 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.core.Settings;
+import globalquake.ui.settings.StationsShape;
 import globalquake.ui.stationselect.FeatureSelectableStation;
 import globalquake.utils.Scale;
+import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
@@ -48,22 +51,48 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties)) * Settings.stationsSizeMul;
 
-        if(!Settings.stationsTriangles) {
-            renderer.createCircle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size, 0, 30);
-        }else{
-            renderer.createTriangle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size * 1.41, 0);
+        InputType inputType = entity.getOriginal().getInputType();
+
+        StationsShape shape = StationsShape.values()[Settings.stationsShapeIndex];
+
+        if(shape == StationsShape.CIRCLE){
+            inputType = InputType.UNKNOWN;
+        } else if(shape == StationsShape.TRIANGLE){
+            inputType = InputType.VELOCITY;
+        }
+
+        switch (inputType){
+            case UNKNOWN ->
+                    renderer.createCircle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size, 0, 30);
+            case VELOCITY ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 0);
+            case ACCELERATION ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 180);
+            case DISPLACEMENT ->
+                    renderer.createSquare(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size * (Settings.stationsTriangles ? 2.0 : 1.75), 0);
+                size * 2.0, 0);
+    }
+
+    @Override
+    public boolean isEnabled(RenderProperties renderProperties) {
+        return true;
     }
 
     @Override
@@ -73,6 +102,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
 
@@ -88,11 +122,18 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        if(Settings.hideDeadStations && !entity.getOriginal().hasDisplayableData()){
-            return;
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        AbstractStation station = (AbstractStation) entity.getOriginal();
+
+        if(Settings.hideDeadStations && !station.hasDisplayableData()){
+            return false;
         }
 
+        return !station.disabled;
+    }
+
+    @Override
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
         if(!elementStationCircle.shouldDraw){
@@ -116,11 +157,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         graphics.setStroke(new BasicStroke(1f));
 
-        if(entity.getOriginal().disabled){
-            return;
-        }
-
-
         var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
         var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
@@ -136,7 +172,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
                     graphics.setColor(c);
                     graphics.draw(elementStationSquare.getShape());
-                    graphics.drawString("Cluster #"+event2.assignedCluster.getId(), (int) centerPonint.x + 12, _y);
+                    graphics.drawString("Cluster #"+event2.assignedCluster.id, (int) centerPonint.x + 12, _y);
                     _y += 16;
                 }
             }
@@ -203,7 +239,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             return Color.gray;
         }
 
-        if (station.getAnalysis().getStatus() == AnalysisStatus.INIT || !station.hasDisplayableData()) {
+        if ((GlobalQuakeClient.instance == null && station.getAnalysis().getStatus() == AnalysisStatus.INIT) || !station.hasDisplayableData()) {
             return Color.lightGray;
         } else {
             return Scale.getColorRatio(station.getMaxRatio60S());

@@ -1,5 +1,7 @@
 package globalquake.core.geo.taup;
 
+import org.tinylog.Logger;
+
 import java.util.ArrayList;
 
 @SuppressWarnings("unused")
@@ -615,7 +617,8 @@ public class TravelTimeTableOld {
 				}
 			}
 		}
-		System.out.println("[TravelTimeTable] found " + errors + " errors.");
+
+		Logger.debug("[TravelTimeTable] found " + errors + " errors.");
 	}
 
 	@SuppressWarnings("unused")

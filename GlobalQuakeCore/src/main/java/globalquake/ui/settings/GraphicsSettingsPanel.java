@@ -26,7 +26,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
-    private JCheckBox chkBoxTriangles;
     private JSlider sliderStationsSize;
     private JRadioButton[] colorButtons;
 
@@ -41,6 +40,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDisplayQuakeAdditionalInfo;
     private JCheckBox chkBoxAlertBox;
     private JCheckBox chkBoxTime;
+    private JCheckBox chkBoxShakemap;
+    private JCheckBox chkBoxCityIntensities;
+    private JCheckBox chkBoxCapitals;
 
 
     public GraphicsSettingsPanel() {
@@ -75,9 +77,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
         zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
 
-        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,180, Settings.cinemaModeZoomMultiplier);
-        sliderZoomMul.setMinorTickSpacing(5);
-        sliderZoomMul.setMajorTickSpacing(20);
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,500, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul.setMinorTickSpacing(10);
+        sliderZoomMul.setMajorTickSpacing(50);
         sliderZoomMul.setPaintTicks(true);
 
         zoomPanel.add(sliderZoomMul);
@@ -137,14 +139,17 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(dateFormatPanel);
 
-        JPanel mainWindowPanel = new JPanel(new GridLayout(5,1));
+        JPanel mainWindowPanel = new JPanel(new GridLayout(4,2));
         mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
 
         mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
         mainWindowPanel.add(chkBoxDisplayMagnitudeHistogram = new JCheckBox("Display magnitude histogram", Settings.displayMagnitudeHistogram));
         mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical earthquake data", Settings.displayAdditionalQuakeInfo));
         mainWindowPanel.add(chkBoxAlertBox = new JCheckBox("Display alert box for nearby earthquakes", Settings.displayAlertBox));
-        mainWindowPanel.add(chkBoxTime = new JCheckBox("Display latest data time", Settings.displayTime));
+        mainWindowPanel.add(chkBoxShakemap = new JCheckBox("Display shakemap hexagons", Settings.displayShakemaps));
+        mainWindowPanel.add(chkBoxTime = new JCheckBox("Display time", Settings.displayTime));
+        mainWindowPanel.add(chkBoxCityIntensities = new JCheckBox("Display estimated intensities in cities", Settings.displayCityIntensities));
+        mainWindowPanel.add(chkBoxCapitals = new JCheckBox("Display capital cities", Settings.displayCapitalCities));
 
         panel.add(mainWindowPanel);
 
@@ -269,6 +274,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         stationsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
         JPanel checkBoxes = new JPanel(new GridLayout(2,2));
+        checkBoxes.setBorder(BorderFactory.createTitledBorder("Appearance"));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
@@ -279,9 +285,42 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         checkBoxes.add(chkBoxAntialiasing);
 
         checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
-        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
 
         stationsPanel.add(checkBoxes);
+
+        JPanel stationsShapePanel = new JPanel();
+        stationsShapePanel.setBorder(BorderFactory.createTitledBorder("Shape"));
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+
+        JRadioButton buttonCircles = new JRadioButton("Circles");
+        JRadioButton buttonTriangles = new JRadioButton("Triangles");
+        JRadioButton buttonDepends = new JRadioButton("Based on sensor type");
+
+        JRadioButton[] buttons = new JRadioButton[]{buttonCircles, buttonTriangles, buttonDepends};
+
+        var shapeActionListener = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                for (int i = 0; i < buttons.length; i++) {
+                    JRadioButton button = buttons[i];
+                    if(button.isSelected()){
+                        Settings.stationsShapeIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
+        for(JRadioButton button : buttons){
+            buttonGroup.add(button);
+            stationsShapePanel.add(button);
+            button.addActionListener(shapeActionListener);
+        }
+
+        buttons[Settings.stationsShapeIndex].setSelected(true);
+
+        stationsPanel.add(stationsShapePanel);
 
         JPanel intensityPanel = new JPanel(new GridLayout(2,1));
         intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
@@ -317,7 +356,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         stationSizePanel.add(sliderStationsSize);
         stationsPanel.add(stationSizePanel);
 
-        fill(stationsPanel, 20);
+        fill(stationsPanel, 6);
 
         return stationsPanel;
     }
@@ -339,7 +378,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.use24HFormat = chkBox24H.isSelected();
 
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
-        Settings.stationsTriangles = chkBoxTriangles.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
@@ -354,7 +392,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayMagnitudeHistogram = chkBoxDisplayMagnitudeHistogram.isSelected();
         Settings.displayAdditionalQuakeInfo = chkBoxDisplayQuakeAdditionalInfo.isSelected();
         Settings.displayAlertBox = chkBoxAlertBox.isSelected();
+        Settings.displayShakemaps = chkBoxShakemap.isSelected();
         Settings.displayTime = chkBoxTime.isSelected();
+        Settings.displayCityIntensities = chkBoxCityIntensities.isSelected();
+        Settings.displayCapitalCities = chkBoxCapitals.isSelected();
     }
 
     @Override

@@ -7,7 +7,6 @@ import globalquake.core.intensity.Level;
 import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.core.Settings;
-import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,7 +138,7 @@ public class EarthquakeListPanel extends JPanel {
                     continue;
                 }
                 Color col;
-                Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunction(quake.getMag(), quake.getDepth()));
+                Level level = IntensityScales.getIntensityScale().getLevel(quake.getMaxPGA());
                 if (level != null) {
                     col = level.getColor();
 

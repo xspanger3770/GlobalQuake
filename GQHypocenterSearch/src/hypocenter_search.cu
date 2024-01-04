@@ -20,7 +20,7 @@
 */
 
 
-#define BLOCK_HYPOCS 240
+#define BLOCK_HYPOCS 512
 #define BLOCK_REDUCE 256
 #define BLOCK_DISTANCES 64
 
@@ -30,7 +30,6 @@
 
 #define PHI2 2.618033989f
 
-#define THRESHOLD 2.2f
 #define MUL 1.30f
 #define ADD 2.0f
 
@@ -43,15 +42,17 @@ bool cuda_initialised = false;
 float max_depth_resolution;
 
 int depth_profile_count;
-depth_profile_t* depth_profiles;
-float* f_results_device;
+depth_profile_t* depth_profiles = nullptr;
+float* f_results_device = nullptr;
+
+size_t total_table_size;
 
 void print_err(const char* msg) {
     cudaError err= cudaGetLastError();
     TRACE(2, "%s failed: %s (%d)\n", msg, cudaGetErrorString(err), err);
 }
 
-__host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
+__host__ void moveOnGlobe(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
 {
     // calculate angles
     float delta = angular_distance;
@@ -79,34 +80,71 @@ __host__ __device__ void moveOnGlobe(float fromLat, float fromLon, float angle, 
     *lon = atan2f(y, x);
 }
 
+__device__ void moveOnGlobeDevice(float fromLat, float fromLon, float angle, float angular_distance, float* lat, float* lon)
+{
+    // calculate angles
+    float delta = angular_distance;
+    float theta = fromLat;
+    float phi = fromLon;
+    float gamma = angle;
+
+    // calculate sines and cosines
+    float c_theta = __cosf(theta);
+    float s_theta = __sinf(theta);
+    float c_phi = __cosf(phi);
+    float s_phi = __sinf(phi);
+    float c_delta = __cosf(delta);
+    float s_delta = __sinf(delta);
+    float c_gamma = __cosf(gamma);
+    float s_gamma = __sinf(gamma);
+
+    // calculate end vector
+    float x = c_delta * c_theta * c_phi - s_delta * (s_theta * c_phi * c_gamma + s_phi * s_gamma);
+    float y = c_delta * c_theta * s_phi - s_delta * (s_theta * s_phi * c_gamma - c_phi * s_gamma);
+    float z = s_delta * c_theta * c_gamma + c_delta * s_theta;
+
+    // calculate end lat long
+    *lat = asinf(z);
+    *lon = atan2f(y, x);
+}
+
 // everything is in radians
-__device__ __host__ float haversine (float lat1, float lon1, 
+__device__ float haversine (float lat1, float lon1, 
                             float lat2, float lon2)
 {
     float dlat = lat2 - lat1;
     float dlon = lon2 - lon1;
 
     // Haversine formula
-    float a = powf(sinf(dlat / 2.0f), 2.0f) + cosf(lat1) * cosf(lat2) * powf(sinf(dlon / 2.0f), 2.0f);
-    float c = 2.0f * atan2f(sqrtf(a), sqrtf(1.0f - a));
+    float v1 = __sinf(dlat / 2.0f);
+    float v2 = __sinf(dlon / 2.0f);
+    float a = v1 * v1 + __cosf(lat1) * __cosf(lat2) * v2 * v2;
 
-    return c; // Angular distance in radians
+    float y = __fsqrt_rn(a);
+    float x = __fsqrt_rn(1.0f - a);
+    float c = atan2f(y, x); // bottleneck of station distances calculation
+
+    return c * 2.0f; // Angular distance in radians
 }
 
 // everything in radians
-__device__ __host__ void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
+void calculateParams(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
     float ang = (2.0f * PI * (float)index) / PHI2;
     *dist = sqrtf(index) * (maxDist / sqrtf(points - 1.0f));
     moveOnGlobe(fromLat, fromLon, ang, *dist, lat, lon);
 }
 
+__device__ void calculateParamsDevice(int points, int index, float maxDist, float fromLat, float fromLon, float* lat, float* lon, float* dist) {
+    float ang = (2.0f * PI * (float)index) / PHI2;
+    *dist = __fsqrt_rn(index) * (maxDist / __fsqrt_rn(points - 1.0f));
+    moveOnGlobeDevice(fromLat, fromLon, ang, *dist, lat, lon);
+}
+
 const float K = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG;
 
-__device__ float table_interpolate(float* s_travel_table, float ang) {
-    float index = ang * K;
-
+__device__ float table_interpolate(float* s_travel_table, float index) {
     if(index >= SHARED_TRAVEL_TABLE_SIZE - 1.0f) {
-        return -ang * ang; // some
+        return s_travel_table[SHARED_TRAVEL_TABLE_SIZE - 1]; // some
     }
 
     int index1 = (int) index;
@@ -143,9 +181,11 @@ __device__ void reduce(float *a, float *b, int grid_size){
     int correct_a = *h_correct(a, grid_size);
     int correct_b = *h_correct(b, grid_size);
 
-    bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
+    /*bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
         (correct_b / (err_b + ADD) > correct_a / (err_a + ADD))
-    );
+    );*/
+
+    bool swap = (correct_b / (err_b + ADD) > correct_a / (err_a + ADD));
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
@@ -157,7 +197,7 @@ __device__ void reduce(float *a, float *b, int grid_size){
 }
 
 __global__ void evaluateHypocenter(float* results, float* travel_table, float* stations, 
-    float* station_distances, int station_count, int points, float maxDist, float max_depth)
+    float* station_distances, int station_count, int points, float maxDist, float max_depth, float p_wave_threshold)
 {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
@@ -189,36 +229,34 @@ __global__ void evaluateHypocenter(float* results, float* travel_table, float* s
     }
 
     int j = blockIdx.y % station_count;
-    int station_index2 = (threadIdx.x + j) % station_count;
     float final_origin = 0.0f;
         
     {
         float ang_dist = station_distances[point_index + j * points];
-        float s_pwave = s_stations[station_index2];
+        float s_pwave = s_stations[j];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
         final_origin = predicted_origin;
     }
 
-    int station_index = threadIdx.x % station_count;
     float err = 0.0;
-    int correct = 0;
+    int correct = station_count;
 
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
-        }
+    for(int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
-        float s_pwave = s_stations[station_index];
+        float s_pwave = s_stations[i];
         float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        err += fminf(THRESHOLD * THRESHOLD, _err * _err);    
-        if(_err <= THRESHOLD){
-            correct++;
+
+        if (_err > p_wave_threshold) {
+            correct--;
+            _err = (_err - p_wave_threshold) * 0.1f + p_wave_threshold;
         }
+
+        err += _err * _err;
     }
 
     s_results[threadIdx.x + blockDim.x * 0] = err;
@@ -280,7 +318,7 @@ __global__ void results_reduce(float* out, float* in, int total_size){
 }
 
 __global__ void calculate_station_distances(
-        float* station_distances, float* point_locations, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
+        float* station_distances, float* stations, int station_count, int points, float maxDist, float fromLat, float fromLon){
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     if(index >= points){
@@ -289,20 +327,13 @@ __global__ void calculate_station_distances(
 
     float lat, lon, dist;
     
-    calculateParams(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
+    calculateParamsDevice(points, index, maxDist, fromLat, fromLon, &lat, &lon, &dist);
 
-    point_locations[index] = lat;
-    point_locations[index + points] = lon;
-
-    int station_index = threadIdx.x % station_count;
-    for(int i = 0; i < station_count; i++, station_index++) {
-        if(station_index >= station_count){
-            station_index = 0;
-        }
-        float s_lat = stations[station_index + 0 * station_count];
-        float s_lon = stations[station_index + 1 * station_count];
+    for(int i = 0; i < station_count; i++) {
+        float s_lat = stations[i + 0 * station_count];
+        float s_lon = stations[i + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI; // because travel table is in degrees
-        station_distances[index + i * points] = ang_dist;
+        station_distances[index + i * points] = ang_dist * K; // precompute
     }
 }
 
@@ -318,8 +349,35 @@ void prepare_travel_table(float* fitted_travel_table, int rows) {
     }
 }
 
+// returns (accurately) estimated total GPU memory allocation size given the parameters
+size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution)
+{
+    size_t result = total_table_size;
+
+    dim3 blocks = {(unsigned int)ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / depth_resolution) + 1, 1};
+    
+    size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
+    size_t station_distances_array_size = sizeof(float) * station_count * points;
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
+    size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
+    size_t temp_results_array_size = (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements);
+
+    result += station_array_size;
+    result += station_distances_array_size;
+    result += results_size;
+    result += temp_results_array_size;    
+
+    return result;
+}
+
+
+JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize(JNIEnv *, jclass, jint points, jint stations, jfloat depth_resolution) {
+    return get_total_allocation_size(points, stations, depth_resolution);
+}
+
 bool run_hypocenter_search(float* stations, size_t station_count, size_t points, int depth_profile_index, 
-    float maxDist, float fromLat, float fromLon, float* final_result)
+    float maxDist, float fromLat, float fromLon, float* final_result, float p_wave_threshold)
 {
     if(depth_profile_index < 0 || depth_profile_index >= depth_profile_count){
         TRACE(2, "Error! Invalid depth profile: %d!\n", depth_profile_index);
@@ -330,7 +388,6 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     float* d_stations;
     float* d_stations_distances;
-    float* d_point_locations;
     float* d_temp_results;
 
     if(points < 2){
@@ -355,23 +412,23 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
-    size_t point_locations_array_size = sizeof(float) * 2 * points;
-    
+    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
+
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
     size_t current_result_count = blocks.x * blocks.y * blocks.z;
-    
+
     const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
     TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
     TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
-    TRACE(1, "point locations array size %.2fkB\n", point_locations_array_size / (1024.0));
     TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
+    TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
     
     success &= cudaMalloc(&d_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(d_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&d_stations_distances, station_distances_array_size) == cudaSuccess;
-    success &= cudaMalloc(&d_point_locations, point_locations_array_size) == cudaSuccess;
     success &= cudaMalloc(&d_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
+    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
     
     if(!success){
         print_err("Hypocs initialisation");
@@ -383,7 +440,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     TRACE(1, "total points: %lld\n", (((long long)(blocks.x * blocks.y * blocks.z)) * (long long)(threads.x * threads.y * threads.z)));
 
     if(success) calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>
-        (d_stations_distances, d_point_locations, d_stations, station_count, points, maxDist, fromLat, fromLon);
+        (d_stations_distances, d_stations, station_count, points, maxDist, fromLat, fromLon);
     
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
@@ -393,7 +450,7 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
     }
     
     if(success) evaluateHypocenter<<<blocks, threads, sizeof(float) * station_count>>>
-        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth);
+        (f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth, p_wave_threshold);
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
     
@@ -442,38 +499,37 @@ bool run_hypocenter_search(float* stations, size_t station_count, size_t points,
 
     if(d_stations) cudaFree(d_stations);
     if(d_stations_distances) cudaFree(d_stations_distances);
-    if(d_point_locations) cudaFree(d_point_locations);
     if(d_temp_results) cudaFree(d_temp_results);
+    if(f_results_device) cudaFree(f_results_device);
 
     return success;
 }
 
 
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, int depthResProfile, jfloat maxDist) {
+  (JNIEnv *env, jclass, jfloatArray stations, jfloat fromLat, jfloat fromLon, jlong points, int depthResProfile, jfloat maxDist, jfloat p_wave_threshold) {
     size_t station_count = env->GetArrayLength(stations) / STATION_FILEDS;
-    
+
     bool success = false;
     
     float* stationsArray = static_cast<float*>(malloc(sizeof(float) * station_count * STATION_FILEDS));
     if(!stationsArray){
         perror("malloc");
-        goto cleanup;
+        return nullptr;
     }
     
-    for(int i = 0; i < env->GetArrayLength(stations); i++){        
-        stationsArray[i] = env->GetFloatArrayElements(stations, 0)[i];
+    jfloat *elements = env->GetFloatArrayElements(stations, 0);
+    for (int i = 0; i < station_count * STATION_FILEDS; i++) {
+        stationsArray[i] = elements[i];
     }
+
+    env->ReleaseFloatArrayElements(stations, elements, 0);
 
     float final_result[HYPOCENTER_FILEDS];
 
-    success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result);
+    success = run_hypocenter_search(stationsArray, station_count, points, depthResProfile, maxDist, fromLat, fromLon, final_result, p_wave_threshold);
 
-    cleanup:
-    if(stationsArray) free(stationsArray);
-
-    jfloat *elements = env->GetFloatArrayElements(stations, 0);
-    env->ReleaseFloatArrayElements(stations, elements, 0);
+    free(stationsArray);
 
     jfloatArray result = nullptr;
 
@@ -498,6 +554,8 @@ bool initDepthProfiles(float* resols, int count){
         return false;
     }
 
+    total_table_size = 0;
+
     for(int i = 0; i < depth_profile_count; i++) {
         float depthRes = resols[i];
         if(depthRes < max_depth_resolution){
@@ -508,6 +566,7 @@ bool initDepthProfiles(float* resols, int count){
 
         int rows = (unsigned int)ceil(max_depth / depthRes) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
+        total_table_size += table_size;
 
         TRACE(1, "Creating depth profile with resolution %.2fkm (%.2fkB)\n", depthRes, table_size / 1024.0);
 
@@ -544,32 +603,23 @@ bool initDepthProfiles(float* resols, int count){
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-      (JNIEnv *env, jclass, jlong max_points, jfloatArray depth_profiles_array){
+      (JNIEnv *env, jclass, jfloatArray depth_profiles_array){
     bool success = true;
 
-    if(depth_profiles_array != nullptr) {
+    if (depth_profiles_array != nullptr && depth_profiles == nullptr) {
         int depth_profile_count = env->GetArrayLength(depth_profiles_array);
+        jfloat* depthResolsArray = env->GetFloatArrayElements(depth_profiles_array, 0);
+
         float depthResols[depth_profile_count];
-        for(int i = 0; i < depth_profile_count; i++){
-            depthResols[i] = env->GetFloatArrayElements(depth_profiles_array, 0)[i];
+        for (int i = 0; i < depth_profile_count; i++) {
+            depthResols[i] = depthResolsArray[i];
         }
 
+        env->ReleaseFloatArrayElements(depth_profiles_array, depthResolsArray, 0);
+
         success &= initDepthProfiles(depthResols, depth_profile_count);
-        env->ReleaseFloatArrayElements(depth_profiles_array, env->GetFloatArrayElements(depth_profiles_array, 0), 0);
     }
-
-    dim3 blocks = {(unsigned int)ceil(static_cast<float>(max_points) / BLOCK_HYPOCS), (unsigned int)ceil(max_depth / max_depth_resolution) + 1, 1};
-    
-    size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * blocks.y * blocks.z);  
-
-    printf("Results array has size %.2fMB\n", (results_size / (1024.0*1024.0)));
-    
-    success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
-
-    if(!success){
-        print_err("CUDA malloc");
-    }
-
+   
     cuda_initialised = success;
     return success;
 }

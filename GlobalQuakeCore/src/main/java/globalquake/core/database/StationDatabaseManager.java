@@ -6,7 +6,9 @@ import globalquake.core.exception.FdnwsDownloadException;
 import org.tinylog.Logger;
 
 import java.io.*;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -22,9 +24,10 @@ public class StationDatabaseManager {
     private final List<Runnable> statusListeners = new CopyOnWriteArrayList<>();
     private boolean updating = false;
 
-    public StationDatabaseManager(){}
+    public StationDatabaseManager() {
+    }
 
-    public StationDatabaseManager(StationDatabase stationDatabase){
+    public StationDatabaseManager(StationDatabase stationDatabase) {
         this.stationDatabase = stationDatabase;
     }
 
@@ -44,7 +47,8 @@ public class StationDatabaseManager {
 
                 Logger.info("Database load successfull");
             } catch (ClassNotFoundException | IOException e) {
-                GlobalQuake.getErrorHandler().handleException(new FatalIOException("Unable to read station database!", e));
+                GlobalQuake.getErrorHandler().handleException(
+                        new FatalIOException("Unable to load station database, it probably got corrupted!", e));
             }
         }
 
@@ -196,40 +200,9 @@ public class StationDatabaseManager {
 
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
-                        for (int attempt = 1; attempt <= ATTEMPTS; attempt++) {
-                            try {
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, attempt > 1 ? "Attempt %d...".formatted(attempt) : "Updating...");
-                                }
-
-                                ExecutorService executor = Executors.newSingleThreadExecutor();
-
-                                Callable<Void> task = () -> {
-                                    SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-                                    return null;
-                                };
-
-                                Future<Void> future = executor.submit(task);
-                                future.get(SeedlinkCommunicator.SEEDLINK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(100, "Done");
-                                }
-
+                        for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
+                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync)){
                                 break;
-                            } catch(TimeoutException e){
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Timed out!");
-                                }
-                                break;
-                            } catch (Exception e) {
-                                Logger.error(e);
-                                synchronized (statusSync) {
-                                    seedlinkNetwork.setStatus(0, "Error!");
-                                }
-
-                            } finally {
-                                fireUpdateEvent();
                             }
                         }
                     }
@@ -240,6 +213,65 @@ public class StationDatabaseManager {
                 onFinish.run();
             }
         }).start();
+    }
+
+    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync) {
+        synchronized (statusSync) {
+            seedlinkNetwork.setStatus(0, "Updating...");
+        }
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Boolean> task = () -> {
+            try {
+                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+            } catch (SocketException | SocketTimeoutException | UnknownHostException ce) {
+                Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
+                }
+
+                return false;
+            } catch (Exception e) {
+                Logger.error(e);
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(0, "Unknown error occurred");
+                }
+                return false;
+            }
+
+            return true;
+        };
+
+        Future<Boolean> future = executor.submit(task);
+
+        boolean success = false;
+
+        try {
+            success = future.get(seedlinkNetwork.getTimeout(), TimeUnit.SECONDS);
+
+            if (success) {
+                synchronized (statusSync) {
+                    seedlinkNetwork.setStatus(100, "Done");
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Logger.error("Error executing task for: %s".formatted(seedlinkNetwork.getName()), e);
+            synchronized (statusSync) {
+                seedlinkNetwork.setStatus(0, "Error during execution: " + e.getMessage());
+            }
+        } catch (TimeoutException e) {
+            Logger.warn("Task timed out for: %s".formatted(seedlinkNetwork.getName()));
+            synchronized (statusSync) {
+                future.cancel(true);
+                seedlinkNetwork.setStatus(0, "Timeout occurred");
+            }
+        } finally {
+            executor.shutdown();
+        }
+
+        fireUpdateEvent();
+        return success;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -265,7 +297,7 @@ public class StationDatabaseManager {
                 for (Channel channel : station.getChannels()) {
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
                 }
-                if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
+                if (station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
                     station.selectBestAvailableChannel();
                 }
             }
@@ -303,5 +335,27 @@ public class StationDatabaseManager {
         getStationDatabase().getStationSources().removeAll(toBeRemoved);
 
         fireUpdateEvent();
+    }
+
+    /**
+     * @return {totalStations, connectedStations, runningSeedlinks, totalSeedlinks}
+     */
+    public int[] getSummary() {
+        int totalStations = 0;
+        int connectedStations = 0;
+        int runningSeedlinks = 0;
+        int totalSeedlinks = 0;
+        for (SeedlinkNetwork seedlinkNetwork : getStationDatabase().getSeedlinkNetworks()) {
+            totalStations += seedlinkNetwork.selectedStations;
+            connectedStations += seedlinkNetwork.connectedStations;
+            if (seedlinkNetwork.selectedStations > 0) {
+                totalSeedlinks++;
+            }
+            if (seedlinkNetwork.status == SeedlinkStatus.RUNNING) {
+                runningSeedlinks++;
+            }
+        }
+
+        return new int[]{totalStations, connectedStations, runningSeedlinks, totalSeedlinks};
     }
 }

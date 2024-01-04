@@ -301,8 +301,10 @@ public class GlobeRenderer {
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
         graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        renderFeatures.forEach(feature -> feature.process(this, props));
-        renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
+        renderFeatures.stream().filter(renderFeature -> renderFeature.isEnabled(props)).forEach(feature -> {
+            feature.process(this, props);
+            feature.renderAll(this, graphics, props);
+        });
     }
 
     public synchronized void addFeature(RenderFeature<?> renderFeature){
@@ -378,8 +380,8 @@ public class GlobeRenderer {
         createNGon(polygon3D, lat, lon, radius, altitude, 0, quality);
     }
 
-    public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {
-        createNGon(polygon3D, lat, lon, radius, altitude, 0, 120);
+    public void createTriangle(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double angleOffset) {
+        createNGon(polygon3D, lat, lon, radius, altitude, angleOffset, 120);
     }
 
     public void createSquare(Polygon3D polygon3D, double lat, double lon, double radius, double altitude) {

@@ -36,8 +36,23 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties properties) {
+        return properties.scroll >=minScroll && properties.scroll < maxScroll;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return false;
+    }
+
+    @Override
     public boolean needsProject(RenderEntity<Polygon> entity, boolean propertiesChanged) {
-        return true;
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsCreatePolygon(RenderEntity<Polygon> entity, boolean propertiesChanged) {
+        return false;
     }
 
     @Override
@@ -57,11 +72,6 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
         element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
-    }
-
-    @Override
-    protected boolean isVisible(RenderProperties properties) {
-        return properties.scroll >=minScroll && properties.scroll < maxScroll;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package gqserver.ui.server.tabs;
 
-import globalquake.core.events.GlobalQuakeEventAdapter;
+import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeArchiveEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
@@ -21,7 +21,7 @@ public class EarthquakesTab extends JPanel {
         add(new JScrollPane(new GQTable<>(
                 model = new EarthquakeTableModel(GlobalQuakeServer.instance.getEarthquakeAnalysis().getEarthquakes()))));
 
-        GlobalQuakeServer.instance.getEventHandler().registerEventListener(new GlobalQuakeEventAdapter(){
+        GlobalQuakeServer.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
                 model.applyFilter();

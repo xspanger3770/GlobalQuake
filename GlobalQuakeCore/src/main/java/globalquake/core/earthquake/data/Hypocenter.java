@@ -45,6 +45,13 @@ public class Hypocenter {
 		this.polygonConfidenceIntervals = polygonConfidenceIntervals;
 	}
 
+	public void magnitudeUpdate(Hypocenter bestHypocenter) {
+		this.usedEvents = bestHypocenter.usedEvents;
+		this.correctEvents = bestHypocenter.correctEvents;
+		this.reducedEvents = bestHypocenter.reducedEvents;
+		this.totalEvents = bestHypocenter.totalEvents;
+	}
+
 	public double getCorrectness(){
 		return (correctEvents) / (double) usedEvents;
 	}

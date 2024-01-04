@@ -10,4 +10,12 @@ public record QuakeArchiveEvent(Earthquake earthquake, ArchivedQuake archivedQua
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onQuakeArchive(this);
     }
+
+    @Override
+    public String toString() {
+        return "QuakeArchiveEvent{" +
+                "earthquake=" + earthquake +
+                ", archivedQuake=" + archivedQuake +
+                '}';
+    }
 }

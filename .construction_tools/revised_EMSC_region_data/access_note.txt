@@ -1,3 +1,17 @@
 This data has been scraped from https://www.seismicportal.eu/fe_regions_ws/query and cleaned up to remove overlapping polygons. It includes a src attribute and a lookup table. This will support future region curation from different sources. The lookup table is to avoid having to much data while the program is running.
 
 There is more cleanup needed mainly to fix exact border edges where low res polygons still exist.
+
+New Zealand districts added from:
+    https://datafinder.stats.govt.nz/layer/111193-territorial-authority-2023-clipped-generalised/
+
+Italian provinces added from:
+    https://www.istat.it/it/archivio/222527
+
+UNHCR is the, United Nation High Commissioner for Refugees. They provide many datasets for country geo data.
+
+Several European country borders have been sourced from UNHCR.
+
+HUMDATA is the Humanitarian data Exchange which is provided by, OCHA Regional Office for Asia and the Pacific.
+
+Japan prefectures have been added from HUMDATA

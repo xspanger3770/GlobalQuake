@@ -26,18 +26,26 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableR
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    initCUDA
- * Signature: (JF)Z
+ * Signature: ([F)Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA
-  (JNIEnv *, jclass, jlong, jfloatArray);
+  (JNIEnv *, jclass, jfloatArray);
+
+/*
+ * Class:     globalquake_jni_GQNativeFunctions
+ * Method:    getAllocationSize
+ * Signature: (IIF)J
+ */
+JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize
+  (JNIEnv *, jclass, jint, jint, jfloat);
 
 /*
  * Class:     globalquake_jni_GQNativeFunctions
  * Method:    findHypocenter
- * Signature: ([FFFJF)[F
+ * Signature: ([FFFJIF)[F
  */
 JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter
-  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jint, jfloat);
+  (JNIEnv *, jclass, jfloatArray, jfloat, jfloat, jlong, jint, jfloat, jfloat);
 
 #ifdef __cplusplus
 }

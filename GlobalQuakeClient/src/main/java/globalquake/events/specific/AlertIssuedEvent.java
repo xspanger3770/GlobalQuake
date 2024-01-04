@@ -10,4 +10,12 @@ public record AlertIssuedEvent(Warnable warnable, Warning warning) implements Gl
     public void run(GlobalQuakeLocalEventListener eventListener) {
         eventListener.onWarningIssued(this);
     }
+
+    @Override
+    public String toString() {
+        return "AlertIssuedEvent{" +
+                "warnable=" + warnable +
+                ", warning=" + warning +
+                '}';
+    }
 }

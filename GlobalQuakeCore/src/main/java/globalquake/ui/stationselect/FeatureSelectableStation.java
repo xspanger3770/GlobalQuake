@@ -11,6 +11,7 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
@@ -43,15 +44,42 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
             entity.getRenderElement(0).setPolygon(new Polygon3D());
         }
 
-        renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
-                entity.getOriginal().getLatitude(),
-                entity.getOriginal().getLongitude(),
-                Math.min(50, renderer.pxToDeg(8.0, renderProperties)), 0);
+        double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties));
+
+        InputType inputType = entity.getOriginal().getSelectedChannel() == null ? InputType.UNKNOWN : entity.getOriginal().getSelectedChannel().getInputType();
+
+        switch (inputType){
+            case UNKNOWN ->
+                    renderer.createCircle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size, 0, 30);
+            case VELOCITY ->
+                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 0);
+            case ACCELERATION ->
+                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 180);
+            case DISPLACEMENT ->
+                    renderer.createSquare(entity.getRenderElement(0).getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0);
+        }
     }
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<Station> entity, boolean propertiesChanged) {
-        return propertiesChanged;
+        return true;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<Station> entity, boolean propertiesChanged) {
+        return true;
     }
 
     @Override
@@ -102,6 +130,12 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
                 graphics.setColor(Color.yellow);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
                 graphics.drawString("!", x, (int) centerPonint.y + 9);
+            }
+
+            if(entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().getSensitivity() <= 0){
+                graphics.setColor(Color.blue);
+                graphics.setFont(new Font("Calibri", Font.BOLD, 14));
+                graphics.drawString("%.1f".formatted(entity.getOriginal().getSelectedChannel().getSensitivity()), x + 20, (int) centerPonint.y + 9);
             }
         }
     }

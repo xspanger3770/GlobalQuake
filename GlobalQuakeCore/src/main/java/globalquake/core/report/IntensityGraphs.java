@@ -1,5 +1,6 @@
 package globalquake.core.report;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.utils.Scale;
@@ -21,47 +22,41 @@ public class IntensityGraphs {
 
 	public static void main(String[] args) throws IOException {
 		Scale.load();
+		GlobalQuake.prepare(new File("."), null);
 		int w = 800;
 		int h = 600;
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = img.createGraphics();
 		
 		List<DistanceIntensityRecord> recs = new ArrayList<>();
-		recs.add(new DistanceIntensityRecord(5.7,800,200));
-		recs.add(new DistanceIntensityRecord(5.7,300,5000));
-		recs.add(new DistanceIntensityRecord(4.2,200,1000));
-		recs.add(new DistanceIntensityRecord(4.2,500,50));
-		recs.add(new DistanceIntensityRecord(3.8,100,1000));
-		recs.add(new DistanceIntensityRecord(3.8,330,100));
-		recs.add(new DistanceIntensityRecord(3.8,800,10));
-		recs.add(new DistanceIntensityRecord(3.1,82,200));
-		recs.add(new DistanceIntensityRecord(2.1,10,1000));
-		recs.add(new DistanceIntensityRecord(2.1,50,30));
-		
-		recs.add(new DistanceIntensityRecord(5.5,7000,5));
-		recs.add(new DistanceIntensityRecord(6.5,7000,50));
+		recs.add(new DistanceIntensityRecord(6.1,100,2E5));
+		recs.add(new DistanceIntensityRecord(6.1,300,1E4));
+		recs.add(new DistanceIntensityRecord(6.1,1000,3E2));
+		recs.add(new DistanceIntensityRecord(6.1,3000,2E1));
+		recs.add(new DistanceIntensityRecord(6.1,10000,8E0));
 
-		recs.add(new DistanceIntensityRecord(6.9,800,1000));
-		recs.add(new DistanceIntensityRecord(6.9,1100,300));
-		recs.add(new DistanceIntensityRecord(5.5,3000,40));
-		recs.add(new DistanceIntensityRecord(5.0,3000,40));
-		recs.add(new DistanceIntensityRecord(5.0,9000,30));
+		recs.add(new DistanceIntensityRecord(4.8,30,1E5));
+		recs.add(new DistanceIntensityRecord(4.8,80,1E4));
+		recs.add(new DistanceIntensityRecord(4.8,250,1E3));
+		recs.add(new DistanceIntensityRecord(4.8,500,1E2));
+
+		recs.add(new DistanceIntensityRecord(3.6,1,1E5));
+		recs.add(new DistanceIntensityRecord(3.6,30,1E4));
+		recs.add(new DistanceIntensityRecord(3.6,90,1E3));
+		recs.add(new DistanceIntensityRecord(3.6,250,1E2));
+		recs.add(new DistanceIntensityRecord(3.6,600,1E1));
+
+		recs.add(new DistanceIntensityRecord(2.2,10,1E2));
+		recs.add(new DistanceIntensityRecord(2.2,70,1E1));
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa9.png"));
+		ImageIO.write(img, "PNG", new File("aaa18.png"));
 
-		System.out.printf("M5.7 800km: %s / 200\n", (int) IntensityTable.getMaxIntensity(5.7, 800));
-		System.out.printf("M5.7 300km: %s / 5000\n", (int) IntensityTable.getMaxIntensity(5.7, 300));
+		for(DistanceIntensityRecord dr: recs){
+			System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));
+		}
 
-		System.out.printf("M4.2 200km: %s / 1000\n", (int) IntensityTable.getMaxIntensity(4.2, 200));
-
-		System.out.printf("M4.2 500km: %s / 50\n", (int) IntensityTable.getMaxIntensity(4.2, 500));
-
-		System.out.printf("M3.8 100km: %s / 1000\n", (int) IntensityTable.getMaxIntensity(3.8, 100));
-		System.out.printf("M3.8 330km: %s / 100\n", (int) IntensityTable.getMaxIntensity(3.8, 330));
-		System.out.printf("M3.8 800km: %s / 10\n", (int) IntensityTable.getMaxIntensity(3.8, 800));
-
-		System.out.printf("M3.1 82km: %s / 200\n", (int) IntensityTable.getMaxIntensity(3.1, 82));
+		System.exit(0);
 	}
 
 	public static final BasicStroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
@@ -96,12 +91,13 @@ public class IntensityGraphs {
 		}
 
 		double maxMag = Math.pow(10, 8);
+		int minP = -2;
 
 		int maxP = (int) Math.ceil(Math.log10(maxMag));
-		for (int p = 0; p <= maxP; p++) {
+		for (int p = minP; p <= maxP; p++) {
 			for (int n = 1; n < 10; n++) {
 				double mag = n * Math.pow(10, p - 1);
-				double y = (h - wry) - (h - wry) * (Math.log10(mag * 10) / (maxP + 1));
+				double y = (h - wry) - (h - wry) * ((Math.log10(mag * 10) - minP) / (maxP - minP + 1));
 				g.setColor(n == 1 ? Color.black : Color.blue);
 				g.setStroke(n == 1 ? new BasicStroke(2) : dashed);
 				g.draw(new Line2D.Double(wrx, y, w, y));
@@ -120,10 +116,10 @@ public class IntensityGraphs {
 				double dist2 = dist1 * 2;
 				double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);
 				double x2 = wrx + (Math.log10(dist2) / 5) * (w - wrx);
-				double v1 = IntensityTable.getMaxIntensity(mag/10.0, dist1);
-				double v2 = IntensityTable.getMaxIntensity(mag/10.0, dist2);
-				double y1 = (h - wry) - (h - wry) * ((Math.log10(v1)) / (maxP + 1));
-				double y2 = (h - wry) - (h - wry) * ((Math.log10(v2)) / (maxP + 1));
+				double v1 = IntensityTable.getIntensity(mag/10.0, dist1);
+				double v2 = IntensityTable.getIntensity(mag/10.0, dist2);
+				double y1 = (h - wry) - (h - wry) * ((Math.log10(v1) - minP) / (maxP - minP + 1));
+				double y2 = (h - wry) - (h - wry) * ((Math.log10(v2) - minP) / (maxP - minP + 1));
 				if (y2 < h - wry) {
 					double fakeMag = IntensityTable.getMagnitude(dist1, v1);
 					g.setColor(Scale.getColorEasily((fakeMag+1)/10.0));
@@ -138,7 +134,7 @@ public class IntensityGraphs {
 		
 		for(DistanceIntensityRecord rec:recs) {
 			double x = wrx + (Math.log10(rec.dist) / 5) * (w - wrx);
-			double y = (h - wry) - (h - wry) * ((Math.log10(rec.intensity)) / (maxP + 1));
+			double y = (h - wry) - (h - wry) * ((Math.log10(rec.intensity) - minP) / (maxP - minP + 1));
 			g.setColor(Scale.getColorEasily((rec.mag+1)/10.0));
 			
 			g.setStroke(new BasicStroke(3f));

@@ -1,9 +1,6 @@
 package globalquake.core.station;
 
-import globalquake.core.database.Channel;
-import globalquake.core.database.Network;
-import globalquake.core.database.Station;
-import globalquake.core.database.StationDatabaseManager;
+import globalquake.core.database.*;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
@@ -38,7 +35,7 @@ public class GlobalStationManager {
                     if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
                         continue;
                     }
-                    s.getSelectedChannel().selectBestSeedlinkNetwork().selectedStations++;
+                    (s.getSelectedChannel().selectedSeedlinkNetwork = s.getSelectedChannel().selectBestSeedlinkNetwork()).selectedStations++;
                     GlobalStation station = createGlobalStation(s, s.getSelectedChannel());
                     stations.add(station);
                 }
@@ -69,7 +66,7 @@ public class GlobalStationManager {
                         double ang = GeoUtils.calculateAngle(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
                                 stat2.getLongitude());
                         int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
                         int ray2 = ray + 1;
                         if (ray2 == RAYS) {
                             ray2 = 0;
@@ -78,8 +75,8 @@ public class GlobalStationManager {
                         if (ray3 == -1) {
                             ray3 = RAYS - 1;
                         }
-                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), dist, ang));
-                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), dist, ang));
+                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
+                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
                         num++;
                     }
                 }
@@ -109,7 +106,7 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
                 station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID.getAndIncrement(), ch.selectBestSeedlinkNetwork());
+                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork, ch.getSensitivity(), ch.getInputType());
     }
 
     public List<AbstractStation> getStations() {
@@ -124,7 +121,12 @@ public class GlobalStationManager {
         return indexing;
     }
 
-    record StationDistanceInfo(int id, double dist, double ang) {
+    public AbstractStation getStationByIdentifier(String identifier) {
+        return stations.stream().filter(station -> station.getIdentifier().equals(identifier)).findFirst().orElse(null);
+    }
+
+
+    record StationDistanceInfo(int id, float dist, float ang) {
 
     }
 

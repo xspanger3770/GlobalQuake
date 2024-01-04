@@ -16,6 +16,7 @@ public abstract class Analysis {
     public long numRecords;
     public long latestLogTime;
     public double _maxRatio;
+    public double _maxCounts;
     public boolean _maxRatioReset;
     public final Object previousLogsLock;
     private final ArrayList<Log> previousLogs;
@@ -75,8 +76,8 @@ public abstract class Analysis {
                 time += (long) (1000 / getSampleRate());
             }
         } catch (Exception e) {
-            Logger.warn("Crash occurred at station " + getStation().getStationCode() + ", thread continues.");
-            Logger.warn(e);
+            Logger.warn("There was a problem with data processing on station %s".formatted(getStation().getStationCode()));
+            Logger.trace(e);
         }
     }
 
@@ -87,6 +88,14 @@ public abstract class Analysis {
 
     public void reset() {
         station.reset();
+    }
+
+    public void fullReset() {
+        reset();
+        lastRecord = 0;
+        synchronized (previousLogsLock) {
+            getPreviousLogs().clear();
+        }
     }
 
     public double getSampleRate() {
