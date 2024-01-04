@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.alert.AlertManager;
 import globalquake.client.ClientSocket;
 import globalquake.client.ClientSocketStatus;
 import globalquake.client.GlobalQuakeClient;
@@ -328,7 +329,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
 
                 if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
-                        || distGC <= Settings.alertLocalDist) {
+                        || AlertManager.meetsConditions(quake)) {
                     quake = earthquake;
                 }
             }
