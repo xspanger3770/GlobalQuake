@@ -319,6 +319,7 @@ public class GlobalQuakePanel extends GlobePanel {
     private void drawAlertsBox(Graphics2D g) {
         Earthquake quake = null;
         double maxPGA = 0;
+        double quakeDist = 1000;
 
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
             double dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
@@ -331,6 +332,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
                         || AlertManager.meetsConditions(earthquake)) {
                     quake = earthquake;
+                    quakeDist = dist;
                 }
             }
         }
@@ -340,6 +342,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
             double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
             maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist, quake.getDepth());
+            quakeDist = dist;
         }
 
 
@@ -357,7 +360,7 @@ public class GlobalQuakePanel extends GlobePanel {
             height = 136;
             color = new Color(0, 90, 192);
             g.setFont(new Font("Calibri", Font.BOLD, 22));
-            str = "Earthquake detected nearby!";
+            str = quakeDist <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
             width = 400;
         }
 
