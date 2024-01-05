@@ -68,7 +68,7 @@ public class AlertManager {
 
     private boolean meetsConditions(Warnable warnable) {
         if(warnable instanceof Earthquake){
-            return meetsConditions((Earthquake) warnable);
+            return meetsConditions((Earthquake) warnable, true);
         }
 
         // TODO cluster warnings
@@ -76,7 +76,7 @@ public class AlertManager {
         return false;
     }
 
-    public static boolean meetsConditions(Earthquake quake) {
+    public static boolean meetsConditions(Earthquake quake, boolean considerGlobal) {
         double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
                 Settings.homeLon);
 
@@ -88,7 +88,7 @@ public class AlertManager {
             return true;
         }
 
-        return Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
+        return considerGlobal && Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
     }
 }
 

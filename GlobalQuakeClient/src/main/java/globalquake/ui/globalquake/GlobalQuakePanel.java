@@ -330,7 +330,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
 
                 if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
-                        || AlertManager.meetsConditions(earthquake)) {
+                        || AlertManager.meetsConditions(earthquake, true)) {
                     quake = earthquake;
                     quakeDist = dist;
                 }
