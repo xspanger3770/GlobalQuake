@@ -350,7 +350,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
                         || AlertManager.meetsConditions(earthquake, false)) {
                     quake = earthquake;
-                    distGC = distGC;
+                    distGC = _distGC;
                     secondsS = Math.max(0, _secondsS);
                     secondsP = Math.max(0, _secondsP);
                 }
