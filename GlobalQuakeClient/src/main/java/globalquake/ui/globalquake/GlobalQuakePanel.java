@@ -318,8 +318,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
     private void drawAlertsBox(Graphics2D g) {
         Earthquake quake = null;
-        double maxPGA = 0;
-        double distGC = 1000;
+        double maxPGA = 0.0;
+        double distGC = 0;
 
         int secondsP = 0;
         int secondsS = 0;
@@ -336,9 +336,9 @@ public class GlobalQuakePanel extends GlobePanel {
                 double age = (System.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
                 double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-                        TauPTravelTimeCalculator.toAngle(distGC)));
+                        TauPTravelTimeCalculator.toAngle(_distGC)));
                 double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
-                        TauPTravelTimeCalculator.toAngle(distGC)));
+                        TauPTravelTimeCalculator.toAngle(_distGC)));
 
                 int _secondsP = (int) Math.ceil(pTravel - age);
                 int _secondsS = (int) Math.ceil(sTravel - age);
@@ -357,14 +357,9 @@ public class GlobalQuakePanel extends GlobePanel {
             }
         }
 
-        if (DEBUG) {
-            quake = createDebugQuake();
-
-            double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist, quake.getDepth());
-            distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat, Settings.homeLon);;
+        if(quake == null){
+            return;
         }
-
 
         int width = 240;
         int x = getWidth() / 2 - width / 2;
@@ -376,13 +371,11 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setFont(new Font("Calibri", Font.BOLD, 16));
 
-        if(quake != null) {
-            height = 136;
-            color = new Color(0, 90, 192);
-            g.setFont(new Font("Calibri", Font.BOLD, 22));
-            str = distGC <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
-            width = 400;
-        }
+        height = 136;
+        color = new Color(0, 90, 192);
+        g.setFont(new Font("Calibri", Font.BOLD, 22));
+        str = distGC <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
+        width = 400;
 
         if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()){
             color = new Color(255,200,0);
