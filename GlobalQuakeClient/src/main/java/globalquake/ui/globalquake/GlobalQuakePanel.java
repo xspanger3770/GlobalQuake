@@ -783,7 +783,7 @@ public class GlobalQuakePanel extends GlobePanel {
         drawAccuracyBox(g, true, "Err. Origin ", (int) (x + width * 0.55), y + 80,
                 "%.1fs".formatted(quality.getQualityOrigin().getValue()), quality.getQualityOrigin().getQualityClass().getColor());
         drawAccuracyBox(g, true, "No. Stations ", (int) (x + width * 0.55), y + 104,
-                "%d".formatted((int) quality.getQualityStations().getValue()), quality.getQualityStations().getQualityClass().getColor());
+                "%.0f".formatted((int) quality.getQualityStations().getValue()), quality.getQualityStations().getQualityClass().getColor());
         drawAccuracyBox(g, true, "Err. N-S ", x + width, y + 56,
                 units.format(quality.getQualityNS().getValue(), 1), quality.getQualityNS().getQualityClass().getColor());
         drawAccuracyBox(g, true, "Err. E-W ", x + width, y + 80,

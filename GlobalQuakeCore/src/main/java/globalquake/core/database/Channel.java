@@ -85,11 +85,11 @@ public final class Channel implements Serializable {
     @Override
     public String toString() {
         if (seedlinkNetworks.isEmpty()) {
-            return "%s %s %dsps (unavailable)".formatted(getCode(), getLocationCode(), (int) getSampleRate());
+            return "%s %s %.1fsps (unavailable)".formatted(getCode(), getLocationCode(), getSampleRate());
         } else if (seedlinkNetworks.size() == 1) {
-            return "%s %s %dsps (%d seedlink)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+            return "%s %s %.1fsps (%d seedlink)".formatted(getCode(), getLocationCode(), getSampleRate(), seedlinkNetworks.size());
         } else {
-            return "%s %s %dsps (%d seedlinks)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+            return "%s %s %.1fsps (%d seedlinks)".formatted(getCode(), getLocationCode(), getSampleRate(), seedlinkNetworks.size());
         }
     }
 
