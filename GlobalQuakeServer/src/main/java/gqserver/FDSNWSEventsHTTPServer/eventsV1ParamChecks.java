@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import gqserver.FDSNWSEventsHTTPServer.eventsV1Handler.HTTPRequestException;
+import gqserver.FDSNWSEventsHTTPServer.EventsV1Handler.HttpRequestException;
 
 
-public class eventsV1ParamChecks {
+public class EventsV1ParamChecks {
     //2011-03-11T05:00:00 UTC
-    static public Date ParseDate(String date){
+    static public Date parseDate(String date){
         /*Takes a string in the format of "YYYY-MM-DDTHH:MM:SS" UTC time and returns a Date object*/
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
@@ -23,7 +23,7 @@ public class eventsV1ParamChecks {
 
     //A bunch of fancy parseFloats that check for stuff
 
-    static public Float ParseLatitude(String latitude){
+    static public Float parseLatitude(String latitude){
         /*Takes a string in the format of "[-]DD.DD" and returns a Float object*/
         Float parsedLatitude = null;
         try{
@@ -37,7 +37,7 @@ public class eventsV1ParamChecks {
 
     //radius
 
-    static public Float ParseLongitude(String longitude){
+    static public Float parseLongitude(String longitude){
         /*Takes a string in the format of "[-]DDD.DD" and returns a Float object*/
         Float parsedLongitude = null;
         try{
@@ -49,7 +49,7 @@ public class eventsV1ParamChecks {
         return parsedLongitude;
     }
 
-    static public Float ParseDepth(String depth){
+    static public Float parseDepth(String depth){
         /*Takes a string and makes sure it is a valid depth
          *In the future, this will need an appropriate range check
         */
@@ -60,7 +60,7 @@ public class eventsV1ParamChecks {
         return parsedDepth;
     }
 
-    static public Float ParseMagnitude(String magnitude){
+    static public Float parseMagnitude(String magnitude){
         /*Takes a string and makes sure it is a valid magnitude
         */
         Float parsedMagnitude = null;
@@ -75,7 +75,7 @@ public class eventsV1ParamChecks {
 
     //several other things
 
-    static public String ParseFormat(String format) throws HTTPRequestException{
+    static public String parseFormat(String format) throws HttpRequestException{
         /*Takes a string and makes sure it is a valid format*/
         List<String> validFormats = Arrays.asList("quakeml", "geojson", "text", "json", "xml");
         List<String> disallowedDroids = Arrays.asList("xmlp", "geojsonp", "jsonp", "quakemlp", "textp");
@@ -85,7 +85,7 @@ public class eventsV1ParamChecks {
         }
 
         if(disallowedDroids.contains(format)){
-            throw new HTTPRequestException(400, "Invalid format. The format " + format + " are not the droids you're looking for");
+            throw new HttpRequestException(400, "Invalid format. The format " + format + " are not the droids you're looking for");
         }
 
         //If we get here, the format is invalid
@@ -93,7 +93,7 @@ public class eventsV1ParamChecks {
 
     }
 
-    static public int ParseNoData(String noData){
+    static public int parseNoData(String noData){
         /*Takes a string and makes sure it is a valid nodata*/
         int parsedNoData = 0;
         try{

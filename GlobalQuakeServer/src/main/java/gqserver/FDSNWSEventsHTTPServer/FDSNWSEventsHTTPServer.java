@@ -9,14 +9,14 @@ import globalquake.core.Settings;
 import org.tinylog.Logger;
 
 
-public class FDSNWSEventsHTTPServer {
-    private static FDSNWSEventsHTTPServer instance;
+public class FdsnwsEventsHTTPServer {
+    private static FdsnwsEventsHTTPServer instance;
     private boolean serverRunning;
     private HttpServer server;
 
     private Duration clientCleanExitTime = Duration.ofSeconds(3);
 
-    private FDSNWSEventsHTTPServer() {
+    private FdsnwsEventsHTTPServer() {
         if(instance != null){
             return;
         }
@@ -25,17 +25,17 @@ public class FDSNWSEventsHTTPServer {
     }
 
     private void initRoutes(){
-        server.createContext("/", new HTTPCatchAllLogger());
+        server.createContext("/", new HttpCatchAllLogger());
 
-        eventsV1Handler ev1handler = new eventsV1Handler();
+        EventsV1Handler ev1handler = new EventsV1Handler();
 
         server.createContext("/fdsnws/event/1/query", ev1handler);
         server.createContext("/fdsnws/event/1/application.wadl", ev1handler);
     }
 
-    public static FDSNWSEventsHTTPServer getInstance() {
+    public static FdsnwsEventsHTTPServer getInstance() {
         if (instance == null) {
-            instance = new FDSNWSEventsHTTPServer();
+            instance = new FdsnwsEventsHTTPServer();
         }
         return instance;
     }

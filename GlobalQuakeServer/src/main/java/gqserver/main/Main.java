@@ -11,7 +11,7 @@ import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.core.regions.Regions;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
-import gqserver.FDSNWSEventsHTTPServer.FDSNWSEventsHTTPServer;
+import gqserver.FDSNWSEventsHTTPServer.FdsnwsEventsHTTPServer;
 
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
@@ -186,7 +186,7 @@ public class Main {
         //start up the FDSNWS_Event Server, if enabled
         updateProgressBar("Starting FDSNWS_Event Server...", (int) ((phase++ / PHASES) * 100.0));
         if(Settings.autoStartFDSNWSEventServer){
-            FDSNWSEventsHTTPServer.getInstance().startServer();
+            FdsnwsEventsHTTPServer.getInstance().startServer();
         }
     }
 

@@ -32,7 +32,7 @@ public class EarthquakeDataExport {
         return earthquakes;
     }
 
-    public static String GetQuakeMl(List<ArchivedQuake> earthquakes) {
+    public static String getQuakeMl(List<ArchivedQuake> earthquakes) {
         String quakeml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<q:quakeml xmlns=\"http://quakeml.org/xmlns/bed/1.2\" xmlns:q=\"http://quakeml.org/xmlns/quakeml/1.2\">\n" +
                 "<eventParameters>\n";

@@ -3,12 +3,11 @@ package gqserver.FDSNWSEventsHTTPServer;
 import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.util.stream.Collectors;
 
 import org.tinylog.Logger;
 
 
-public class HTTPCatchAllLogger implements HttpHandler {
+public class HttpCatchAllLogger implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         logIncomingRequest(exchange);
