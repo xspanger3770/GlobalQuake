@@ -94,7 +94,7 @@ public class SoundsService {
         Earthquake quake = cluster.getEarthquake();
 
         if (quake != null) {
-            boolean meets = AlertManager.meetsConditions(quake);
+            boolean meets = AlertManager.meetsConditions(quake, true);
             if (meets && !info.meets) {
                 Sounds.playSound(Sounds.intensify);
                 info.meets = true;

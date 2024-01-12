@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.alert.AlertManager;
 import globalquake.client.ClientSocket;
 import globalquake.client.ClientSocketStatus;
 import globalquake.client.GlobalQuakeClient;
@@ -317,30 +318,48 @@ public class GlobalQuakePanel extends GlobePanel {
 
     private void drawAlertsBox(Graphics2D g) {
         Earthquake quake = null;
-        double maxPGA = 0;
+        double maxPGA = 0.0;
+        double distGC = 0;
+
+        int secondsP = 0;
+        int secondsS = 0;
+
+        // Select quake to be displayed
 
         for(Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()){
-            double dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            double pga = GeoUtils.pgaFunction(earthquake.getMag(), dist, earthquake.getDepth());
+            double _dist = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(), -earthquake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
+            double pga = GeoUtils.pgaFunction(earthquake.getMag(), _dist, earthquake.getDepth());
             if(pga > maxPGA){
                 maxPGA = pga;
 
-                double distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
+                double _distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
+                double age = (System.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
+
+                double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                        TauPTravelTimeCalculator.toAngle(_distGC)));
+                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                        TauPTravelTimeCalculator.toAngle(_distGC)));
+
+                int _secondsP = (int) Math.ceil(pTravel - age);
+                int _secondsS = (int) Math.ceil(sTravel - age);
+
+                if(_secondsS < - 60 * 5) {
+                    continue; // S wave already passed
+                }
 
                 if(pga > IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()
-                        || distGC <= Settings.alertLocalDist) {
+                        || AlertManager.meetsConditions(earthquake, false)) {
                     quake = earthquake;
+                    distGC = _distGC;
+                    secondsS = Math.max(0, _secondsS);
+                    secondsP = Math.max(0, _secondsP);
                 }
             }
         }
 
-        if (DEBUG) {
-            quake = createDebugQuake();
-
-            double dist = GeoUtils.geologicalDistance(quake.getLat(), quake.getLon(), -quake.getDepth(), Settings.homeLat, Settings.homeLon, 0);
-            maxPGA = GeoUtils.pgaFunction(quake.getMag(), dist, quake.getDepth());
+        if(quake == null){
+            return;
         }
-
 
         int width = 240;
         int x = getWidth() / 2 - width / 2;
@@ -352,13 +371,11 @@ public class GlobalQuakePanel extends GlobePanel {
 
         g.setFont(new Font("Calibri", Font.BOLD, 16));
 
-        if(quake != null) {
-            height = 136;
-            color = new Color(0, 90, 192);
-            g.setFont(new Font("Calibri", Font.BOLD, 22));
-            str = "Earthquake detected nearby!";
-            width = 400;
-        }
+        height = 136;
+        color = new Color(0, 90, 192);
+        g.setFont(new Font("Calibri", Font.BOLD, 22));
+        str = distGC <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
+        width = 400;
 
         if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()){
             color = new Color(255,200,0);
@@ -387,7 +404,6 @@ public class GlobalQuakePanel extends GlobePanel {
             return;
         }
 
-        double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat, Settings.homeLon);
         Level level = IntensityScales.getIntensityScale().getLevel(maxPGA);
 
         drawIntensityBox(g, level, x + 4,y + 30,height - 34);
@@ -404,16 +420,6 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString(str, _x, y + 48);
         str = "Depth: %s".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1));
         g.drawString(str, _x, y + 72);
-
-        double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
-
-        double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(quake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(distGC)));
-        double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(distGC)));
-
-        int secondsP = (int) Math.max(0, Math.ceil(pTravel - age));
-        int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
 
         drawAccuracyBox(g, false, "P Wave arrival: ",x + intW + 15,y + 96, "%ds".formatted(secondsP), secondsP == 0 ? Color.gray : new Color(0,100,220));
         drawAccuracyBox(g, false, "S Wave arrival: ",x + intW + 15,y + 122, "%ds".formatted(secondsS), secondsS == 0 ? Color.gray : new Color(255,50,0));
@@ -770,7 +776,7 @@ public class GlobalQuakePanel extends GlobePanel {
         drawAccuracyBox(g, true, "Err. Origin ", (int) (x + width * 0.55), y + 80,
                 "%.1fs".formatted(quality.getQualityOrigin().getValue()), quality.getQualityOrigin().getQualityClass().getColor());
         drawAccuracyBox(g, true, "No. Stations ", (int) (x + width * 0.55), y + 104,
-                "%d".formatted((int) quality.getQualityStations().getValue()), quality.getQualityStations().getQualityClass().getColor());
+                "%.0f".formatted(quality.getQualityStations().getValue()), quality.getQualityStations().getQualityClass().getColor());
         drawAccuracyBox(g, true, "Err. N-S ", x + width, y + 56,
                 units.format(quality.getQualityNS().getValue(), 1), quality.getQualityNS().getQualityClass().getColor());
         drawAccuracyBox(g, true, "Err. E-W ", x + width, y + 80,

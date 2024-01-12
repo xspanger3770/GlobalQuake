@@ -237,7 +237,7 @@ public class CinemaHandler {
         }
 
         double priority = 100 + Math.max(0, earthquake.getMag() * 100.0);
-        if(AlertManager.meetsConditions(earthquake)){
+        if(AlertManager.meetsConditions(earthquake, true)){
             priority += 10000.0;
         }
 
