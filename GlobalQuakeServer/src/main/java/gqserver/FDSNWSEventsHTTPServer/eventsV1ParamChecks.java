@@ -11,7 +11,7 @@ import gqserver.FDSNWSEventsHTTPServer.EventsV1Handler.HttpRequestException;
 public class EventsV1ParamChecks {
     //2011-03-11T05:00:00 UTC
     static public Date parseDate(String date){
-        /*Takes a string in the format of "YYYY-MM-DDTHH:MM:SS" UTC time and returns a Date object*/
+        //Takes a string in the format of "YYYY-MM-DDTHH:MM:SS" UTC time and returns a Date object
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
         Date parsedDate = null;
@@ -24,7 +24,7 @@ public class EventsV1ParamChecks {
     //A bunch of fancy parseFloats that check for stuff
 
     static public Float parseLatitude(String latitude){
-        /*Takes a string in the format of "[-]DD.DD" and returns a Float object*/
+        //Takes a string in the format of "[-]DD.DD" and returns a Float object
         Float parsedLatitude = null;
         try{
             parsedLatitude = Float.parseFloat(latitude);
@@ -38,7 +38,7 @@ public class EventsV1ParamChecks {
     //radius
 
     static public Float parseLongitude(String longitude){
-        /*Takes a string in the format of "[-]DDD.DD" and returns a Float object*/
+        //Takes a string in the format of "[-]DDD.DD" and returns a Float object
         Float parsedLongitude = null;
         try{
             parsedLongitude = Float.parseFloat(longitude);
@@ -61,8 +61,7 @@ public class EventsV1ParamChecks {
     }
 
     static public Float parseMagnitude(String magnitude){
-        /*Takes a string and makes sure it is a valid magnitude
-        */
+        //Takes a string and makes sure it is a valid magnitude
         Float parsedMagnitude = null;
         try{
             parsedMagnitude = Float.parseFloat(magnitude);
@@ -76,7 +75,7 @@ public class EventsV1ParamChecks {
     //several other things
 
     static public String parseFormat(String format) throws HttpRequestException{
-        /*Takes a string and makes sure it is a valid format*/
+        //Takes a string and makes sure it is a valid format
         List<String> validFormats = Arrays.asList("quakeml", "geojson", "text", "json", "xml");
         List<String> disallowedDroids = Arrays.asList("xmlp", "geojsonp", "jsonp", "quakemlp", "textp");
 
@@ -94,7 +93,7 @@ public class EventsV1ParamChecks {
     }
 
     static public int parseNoData(String noData){
-        /*Takes a string and makes sure it is a valid nodata*/
+        //Takes a string and makes sure it is a valid nodata
         int parsedNoData = 0;
         try{
             parsedNoData = Integer.parseInt(noData);
