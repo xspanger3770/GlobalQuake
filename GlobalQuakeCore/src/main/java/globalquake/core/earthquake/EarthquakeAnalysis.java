@@ -448,12 +448,13 @@ public class EarthquakeAnalysis {
     private void postProcess(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
+        calculateDistances(pickedEvents,  bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
         getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
                 bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData);
 
         bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
         bestHypocenterPrelim.err = threadData.bestHypocenter.err;
-    }
+   }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
