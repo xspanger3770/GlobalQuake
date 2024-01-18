@@ -15,12 +15,12 @@ import java.util.List;
 
 public class FeatureCluster extends RenderFeature<Cluster> {
 
-    private final List<Cluster> clusters;
+    private final Collection<Cluster> clusters;
 
     private static final long FLASH_TIME = 1000 * 90;
 
 
-    public FeatureCluster(List<Cluster> clusters) {
+    public FeatureCluster(Collection<Cluster> clusters) {
         super(1);
         this.clusters = clusters;
     }

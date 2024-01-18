@@ -9,10 +9,11 @@ import globalquake.ui.globe.RenderProperties;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class FeatureHorizon extends RenderFeature<Point2D>{
 
-    private final ArrayList<Point2D> points = new ArrayList<>();
+    private final java.util.List<Point2D> points = Collections.unmodifiableList(new ArrayList<>());
     private final double quality;
 
     public FeatureHorizon(Point2D center, double quality){
