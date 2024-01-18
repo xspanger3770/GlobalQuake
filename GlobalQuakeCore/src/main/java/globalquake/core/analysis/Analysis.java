@@ -62,12 +62,12 @@ public abstract class Analysis {
         int[] data;
         try {
             if (!dataRecord.isDecompressable()) {
-                Logger.warn("Not Decompressable!");
+                Logger.debug("Not Decompressable!");
                 return;
             }
             data = dataRecord.decompress().getAsInt();
             if (data == null) {
-                Logger.warn("Decompressed array is null!");
+                Logger.debug("Decompressed array is null!");
                 return;
             }
 
