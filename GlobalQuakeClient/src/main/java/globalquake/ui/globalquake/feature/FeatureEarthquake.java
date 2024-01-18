@@ -28,11 +28,11 @@ import java.util.Locale;
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private static final int ELEMENT_COUNT = 5 + 4;
-    private final List<Earthquake> earthquakes;
+    private final Collection<Earthquake> earthquakes;
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public FeatureEarthquake(List<Earthquake> earthquakes) {
+    public FeatureEarthquake(Collection<Earthquake> earthquakes) {
         super(ELEMENT_COUNT);
         this.earthquakes = earthquakes;
     }

@@ -15,6 +15,7 @@ import globalquake.ui.globe.GlobePanel;
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -100,13 +101,13 @@ public class ArchivedQuakePanel extends GlobePanel {
             result.add(new AnimatedStation(animation, event));
         }
 
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     private List<Earthquake> createFakeQuake(ArchivedQuake quake) {
         Earthquake fake = new AnimatedEarthquake(animation,quake.getLat(),quake.getLon(),quake.getDepth());
         fake.getHypocenter().magnitude = quake.getMag();
-        return List.of(fake);
+        return Collections.unmodifiableList(List.of(fake));
     }
 
     @SuppressWarnings("UnusedAssignment")

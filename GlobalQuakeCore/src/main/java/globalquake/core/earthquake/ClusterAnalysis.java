@@ -35,7 +35,7 @@ public class ClusterAnalysis {
 
     private static final double MERGE_THRESHOLD = 0.45;
 
-    public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
+    public ClusterAnalysis(List<Earthquake> earthquakes, Collection<AbstractStation> stations) {
         this.earthquakes = earthquakes;
         this.stations = stations;
         clusters = new ConcurrentLinkedQueue<>();

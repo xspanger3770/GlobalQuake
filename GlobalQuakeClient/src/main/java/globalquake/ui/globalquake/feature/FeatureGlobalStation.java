@@ -19,16 +19,17 @@ import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
-    private final List<AbstractStation> globalStations;
+    private final Collection<AbstractStation> globalStations;
 
     public static final double RATIO_YELLOW = 2000.0;
     public static final double RATIO_RED = 20000.0;
 
-    public FeatureGlobalStation(List<AbstractStation> globalStations) {
+    public FeatureGlobalStation(Collection<AbstractStation> globalStations) {
         super(2);
         this.globalStations = globalStations;
     }
