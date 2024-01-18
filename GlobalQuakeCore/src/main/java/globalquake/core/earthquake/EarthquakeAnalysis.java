@@ -35,6 +35,7 @@ public class EarthquakeAnalysis {
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
     private static final boolean CHECK_QUADRANTS = false;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
+    private static final int DEPTH_ITERS_POLYGONS = 12;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -415,7 +416,7 @@ public class EarthquakeAnalysis {
                 threadData.bestHypocenter.correctStations = 0;
 
                 calculateDistances(pickedEvents, lat, lon);
-                getBestAtDepth(12, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
+                getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
                 boolean stillValid = calculateHeuristic(threadData.bestHypocenter) > calculateHeuristic(bestHypocenter) / confidenceThreshold;
                 if (stillValid) {
                     dist += step;
@@ -445,35 +446,13 @@ public class EarthquakeAnalysis {
 
     // calculate correct stations and err
     private void postProcess(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
-        int correct = 0;
-        double err = 0;
+        List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
+        HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
+        getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
+                bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData);
 
-        for (PickedEvent event : selectedEvents) {
-            long actualTravel = event.pWave() - bestHypocenterPrelim.origin;
-
-            double distGC = GeoUtils.greatCircleDistance(bestHypocenterPrelim.lat, bestHypocenterPrelim.lon,
-                    event.lat(), event.lon());
-            double angle = TauPTravelTimeCalculator.toAngle(distGC);
-            double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(bestHypocenterPrelim.depth,
-                    angle);
-
-            if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
-                long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.elevation())) * 1000);
-                double _err = Math.abs(expectedTravel - actualTravel);
-                if (_err < finderSettings.pWaveInaccuracyThreshold()) {
-                    correct++;
-                } else {
-                    _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
-                }
-
-                _err /= 1000.0;
-
-                err += _err * _err;
-            }
-        }
-
-        bestHypocenterPrelim.correctStations = correct;
-        bestHypocenterPrelim.err = err;
+        bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
+        bestHypocenterPrelim.err = threadData.bestHypocenter.err;
     }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
