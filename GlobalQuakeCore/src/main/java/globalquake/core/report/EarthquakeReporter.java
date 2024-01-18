@@ -94,7 +94,7 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
+        java.util.List<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
                 : scroll < 4.8 ? Regions.raw_polygonsHD : Regions.raw_polygonsMD;
         for (org.geojson.Polygon polygon : pols) {
             java.awt.Polygon awt = new java.awt.Polygon();

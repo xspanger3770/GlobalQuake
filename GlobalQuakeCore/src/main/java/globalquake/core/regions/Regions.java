@@ -24,37 +24,37 @@ import java.util.stream.Collectors;
 
 public class Regions {
     public static final String UNKNOWN_REGION = "Unknown Region";
-    public static final ArrayList<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<>();
-    public static final ArrayList<org.geojson.Polygon> raw_polygonsHD = new ArrayList<>();
-    public static final ArrayList<org.geojson.Polygon> raw_polygonsMD = new ArrayList<>();
-    public static final ArrayList<org.geojson.Polygon> raw_polygonsHDFiltered = new ArrayList<>();
-    public static final ArrayList<org.geojson.Polygon> raw_polygonsUHDFiltered = new ArrayList<>();
+    public static final List<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<>();
+    public static final List<org.geojson.Polygon> raw_polygonsHD = new ArrayList<>();
+    public static final List<org.geojson.Polygon> raw_polygonsMD = new ArrayList<>();
+    public static final List<org.geojson.Polygon> raw_polygonsHDFiltered = new ArrayList<>();
+    public static final List<org.geojson.Polygon> raw_polygonsUHDFiltered = new ArrayList<>();
 
-    public static final ArrayList<Region> regionsMD = new ArrayList<>();
-    public static final ArrayList<Region> regionsHD = new ArrayList<>();
-    public static final ArrayList<Region> regionsUHD = new ArrayList<>();
-    public static final ArrayList<Region> regionsHDFiltered = new ArrayList<>();
-    public static final ArrayList<Region> regionsUHDFiltered = new ArrayList<>();
+    public static final List<Region> regionsMD = new ArrayList<>();
+    public static final List<Region> regionsHD = new ArrayList<>();
+    public static final List<Region> regionsUHD = new ArrayList<>();
+    public static final List<Region> regionsHDFiltered = new ArrayList<>();
+    public static final List<Region> regionsUHDFiltered = new ArrayList<>();
 
     public static boolean enabled = true;
-    public static final ArrayList<Region> regionsUS = new ArrayList<>();
-    public static final ArrayList<Polygon> raw_polygonsUS = new ArrayList<>();
+    public static final List<Region> regionsUS = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsUS = new ArrayList<>();
 
     public static final List<String> NONE = List.of();
-    public static final ArrayList<Polygon> raw_polygonsAK = new ArrayList<>();
-    public static final ArrayList<Region> regionsAK = new ArrayList<>();
-    public static final ArrayList<Polygon> raw_polygonsJP = new ArrayList<>();
-    public static final ArrayList<Region> regionsJP = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsAK = new ArrayList<>();
+    public static final List<Region> regionsAK = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsJP = new ArrayList<>();
+    public static final List<Region> regionsJP = new ArrayList<>();
 
-    public static final ArrayList<Polygon> raw_polygonsNZ = new ArrayList<>();
-    public static final ArrayList<Region> regionsNZ = new ArrayList<>();
-    public static final ArrayList<Polygon> raw_polygonsHW = new ArrayList<>();
-    public static final ArrayList<Region> regionsHW = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsNZ = new ArrayList<>();
+    public static final List<Region> regionsNZ = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsHW = new ArrayList<>();
+    public static final List<Region> regionsHW = new ArrayList<>();
 
-    public static final ArrayList<Polygon> raw_polygonsIT = new ArrayList<>();
-    public static final ArrayList<Region> regionsIT = new ArrayList<>();
+    public static final List<Polygon> raw_polygonsIT = new ArrayList<>();
+    public static final List<Region> regionsIT = new ArrayList<>();
 
-    private static final ArrayList<Region> regionSearchHD = new ArrayList<>();
+    private static final List<Region> regionSearchHD = new ArrayList<>();
     private static HashMap<String, Double> shorelineLookup;
 
 
@@ -72,7 +72,7 @@ public class Regions {
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/region_dataset.geojson", null, regionSearchHD, NONE);
 
-        for(ArrayList<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
+        for(List<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
             regionSearchHD.addAll(list);
         }
 
@@ -150,7 +150,7 @@ public class Regions {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static boolean isOcean(double lat, double lng, ArrayList<Region> regions) {
+    private static boolean isOcean(double lat, double lng, List<Region> regions) {
         Point2D.Double point = new Point2D.Double(lng, lat);
         for (Region reg : regions) {
             int i = 0;
@@ -400,7 +400,7 @@ public class Regions {
         }
     }
 
-    public static void parseGeoJson(String path, ArrayList<Polygon> raw, ArrayList<Region> regions, List<String> remove) throws IOException {
+    public static void parseGeoJson(String path, List<Polygon> raw, List<Region> regions, List<String> remove) throws IOException {
         URL resource = ClassLoader.getSystemClassLoader().getResource(path);
         if (resource == null) {
             throw new IOException("Unable to load polygons: %s".formatted(path));
@@ -458,10 +458,10 @@ public class Regions {
         return null;
     }
 
-    private static void createRegion(ArrayList<Region> regions, MultiPolygon mp, String name) {
-        ArrayList<Path2D.Double> paths = new ArrayList<>();
+    private static void createRegion(List<Region> regions, MultiPolygon mp, String name) {
+        List<Path2D.Double> paths = new ArrayList<>();
         List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
-        ArrayList<Polygon> raws = new ArrayList<>();
+        List<Polygon> raws = new ArrayList<>();
         for (List<List<LngLatAlt>> polygon : polygons) {
             org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
             paths.add(toPath(pol));
