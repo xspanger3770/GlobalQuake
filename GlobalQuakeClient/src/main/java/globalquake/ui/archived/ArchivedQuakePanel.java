@@ -107,7 +107,7 @@ public class ArchivedQuakePanel extends GlobePanel {
     private List<Earthquake> createFakeQuake(ArchivedQuake quake) {
         Earthquake fake = new AnimatedEarthquake(animation,quake.getLat(),quake.getLon(),quake.getDepth());
         fake.getHypocenter().magnitude = quake.getMag();
-        return Collections.unmodifiableList(List.of(fake));
+        return List.of(fake);
     }
 
     @SuppressWarnings("UnusedAssignment")

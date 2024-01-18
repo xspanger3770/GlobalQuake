@@ -117,11 +117,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     @Override
-    public boolean isEnabled(RenderProperties props) {
-        return true;
-    }
-
-    @Override
     public boolean needsUpdateEntities() {
         return true;
     }

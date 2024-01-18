@@ -11,7 +11,6 @@ import globalquake.ui.globe.feature.RenderFeature;
 
 import java.awt.*;
 import java.util.Collection;
-import java.util.List;
 
 public class FeatureCluster extends RenderFeature<Cluster> {
 

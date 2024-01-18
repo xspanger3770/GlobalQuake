@@ -49,7 +49,7 @@ public class GlobalStationManager {
 
     public static void createListOfClosestStations(Collection<AbstractStation> stations){
         stations.parallelStream().forEach(station -> {
-            Queue<NearbyStationDistanceInfo>[] rays = new Queue[RAYS];
+            @SuppressWarnings("unchecked") Queue<NearbyStationDistanceInfo>[] rays = new Queue[RAYS];
             for (int i = 0; i < RAYS; i++) {
                 rays[i] = new PriorityQueue<>(Comparator.comparing(NearbyStationDistanceInfo::dist));
             }

@@ -19,8 +19,6 @@ import gqserver.api.packets.station.InputType;
 
 import java.awt.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
@@ -89,11 +87,6 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
                 size * 2.0, 0);
-    }
-
-    @Override
-    public boolean isEnabled(RenderProperties renderProperties) {
-        return true;
     }
 
     @Override
