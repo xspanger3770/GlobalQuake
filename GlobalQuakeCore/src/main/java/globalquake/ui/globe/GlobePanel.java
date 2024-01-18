@@ -220,7 +220,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
             return;
         }
 
-        int steps = 250;
+        int fps = Settings.fpsIdle;
+
+        int steps = fps * 5;
         final int[] step = {0};
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -262,7 +264,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 step[0]++;
             }
-        }, 0, 20);
+        }, 0, 1000 / fps);
 
         try {
             // Block the main thread until the animation is finished to avoid multiple animations running at once
