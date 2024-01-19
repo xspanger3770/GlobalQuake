@@ -154,4 +154,7 @@ public class GlobalQuake {
 		return errorHandler;
 	}
 
+    public long currentTimeMillis() {
+    	return System.currentTimeMillis();
+	}
 }

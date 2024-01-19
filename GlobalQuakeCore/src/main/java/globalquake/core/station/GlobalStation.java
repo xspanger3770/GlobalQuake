@@ -104,7 +104,7 @@ public class GlobalStation extends AbstractStation {
 
 	@Override
 	public long getDelayMS() {
-		return getAnalysis().getLastRecord() == 0 ? -1 : System.currentTimeMillis() - getAnalysis().getLastRecord();
+		return getAnalysis().getLastRecord() == 0 ? -1 : GlobalQuake.instance.currentTimeMillis() - getAnalysis().getLastRecord();
 	}
 
 	@Override

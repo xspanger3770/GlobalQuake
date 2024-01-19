@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.ui.globe.GlobeRenderer;
@@ -73,7 +74,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
         Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
-        return System.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
+        return GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
     }
 
     @Override

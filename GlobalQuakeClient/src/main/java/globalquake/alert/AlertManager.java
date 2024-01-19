@@ -40,14 +40,14 @@ public class AlertManager {
     }
 
     public synchronized void tick() {
-        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning()));
+        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning(GlobalQuake.instance.currentTimeMillis())));
 
         for (Iterator<Map.Entry<Warnable, Warning>> iterator = warnings.entrySet().iterator(); iterator.hasNext(); ) {
             var kv = iterator.next();
             Warnable warnable = kv.getKey();
             Warning warning = kv.getValue();
 
-            long age = System.currentTimeMillis() - warning.createdAt;
+            long age = GlobalQuake.instance.currentTimeMillis() - warning.createdAt;
             if(age > 1000 * 60 * STORE_TIME_MINUTES){
                 iterator.remove();
                 continue;

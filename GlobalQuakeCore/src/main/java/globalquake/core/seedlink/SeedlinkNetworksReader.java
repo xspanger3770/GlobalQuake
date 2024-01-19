@@ -177,7 +177,7 @@ public class SeedlinkNetworksReader {
     }
 
     public void logRecord(long time) {
-        if (time > lastReceivedRecord && time <= System.currentTimeMillis()) {
+        if (time > lastReceivedRecord && time <= GlobalQuake.instance.currentTimeMillis()) {
             lastReceivedRecord = time;
         }
     }

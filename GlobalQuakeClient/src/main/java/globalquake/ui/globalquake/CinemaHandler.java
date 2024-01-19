@@ -109,7 +109,7 @@ public class CinemaHandler {
                     var kv = iterator.next();
                     Warning warning = kv.getValue();
 
-                    if (System.currentTimeMillis() - warning.createdAt > WARNING_TIMEOUT) {
+                    if (GlobalQuake.instance.currentTimeMillis() - warning.createdAt > WARNING_TIMEOUT) {
                         iterator.remove();
                     }
                 }
@@ -166,7 +166,7 @@ public class CinemaHandler {
 
     private boolean isWarningInProgress() {
         for(Warning warning : warnings.values()){
-            if(System.currentTimeMillis() - warning.createdAt < WARNING_VALID){
+            if(GlobalQuake.instance.currentTimeMillis() - warning.createdAt < WARNING_VALID){
                 return true;
             }
         }
@@ -201,7 +201,7 @@ public class CinemaHandler {
 
         next = false;
         for (Cluster cluster : GlobalQuake.instance.getClusterAnalysis().getClusters()) {
-            if (System.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60 || cluster.getRootLon() < -500 || cluster.getRootLat() < -500) { // ignore older than 1 minute
+            if (GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 1000 * 60 || cluster.getRootLon() < -500 || cluster.getRootLat() < -500) { // ignore older than 1 minute
                 continue;
             }
             if (next || lastCluster == null) {
@@ -215,7 +215,7 @@ public class CinemaHandler {
         var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
         if (cluster.isPresent()) {
             Cluster cluster1 = cluster.get();
-            if (! (System.currentTimeMillis() - cluster1.getLastUpdate() > 1000 * 60 ||  cluster1.getRootLon() < -500 || cluster1.getRootLat() < -500)) {
+            if (! (GlobalQuake.instance.currentTimeMillis()- cluster1.getLastUpdate() > 1000 * 60 ||  cluster1.getRootLon() < -500 || cluster1.getRootLat() < -500)) {
                 lastCluster = cluster1;
                 return createTarget(cluster1);
             }
@@ -230,9 +230,9 @@ public class CinemaHandler {
     }
 
     private CinemaTarget createTarget(Earthquake earthquake) {
-        double ageMin = (System.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
+        double ageMin = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
         double zoom = Math.max(0.1, Math.min(1.6, ageMin / 5.0)) / (Settings.cinemaModeZoomMultiplier / 100.0);
-        if(ageMin >= 3.0 && (System.currentTimeMillis() % 60000 < 22000)){
+        if(ageMin >= 3.0 && (GlobalQuake.instance.currentTimeMillis() % 60000 < 22000)){
             zoom = Math.max(0.02, earthquake.getMag() / 50.0);
         }
 

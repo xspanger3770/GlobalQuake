@@ -1058,8 +1058,8 @@ public class EarthquakeAnalysis {
         double store_minutes = STORE_TABLE[Math.max(0,
                 Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))]
                 - marginSeconds / 60.0;
-        return System.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
-                && System.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
+        return GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin() > (long) store_minutes * 60 * 1000
+                && GlobalQuake.instance.currentTimeMillis() - earthquake.getLastUpdate() > 0.25 * store_minutes * 60 * 1000;
     }
 
     public void second() {

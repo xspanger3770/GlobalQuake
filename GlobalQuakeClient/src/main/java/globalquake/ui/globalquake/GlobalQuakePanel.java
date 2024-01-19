@@ -333,7 +333,7 @@ public class GlobalQuakePanel extends GlobePanel {
                 maxPGA = pga;
 
                 double _distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
-                double age = (System.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
+                double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
                 double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(_distGC)));
@@ -490,7 +490,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = Settings.formatDateTime(Instant.ofEpochMilli(time));
                 }
 
-                if (System.currentTimeMillis() - time < 1000 * 120) {
+                if (GlobalQuake.instance.currentTimeMillis() - time < 1000 * 120) {
                     g.setColor(Color.white);
                 }
 

@@ -131,7 +131,7 @@ public class SoundsService {
             if (shakingExpected) {
                 double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(distGCD)));
-                double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
+                double age = (GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) / 1000.0;
                 int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
 
                 if (secondsS < info.lastCountdown && secondsS <= 10) {

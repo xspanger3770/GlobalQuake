@@ -1,5 +1,6 @@
 package globalquake.core.earthquake.data;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.alert.Warnable;
 import globalquake.core.intensity.CityIntensity;
 import globalquake.core.regions.RegionUpdater;
@@ -41,7 +42,7 @@ public class Earthquake implements Regional, Warnable {
 		this.lastLat = getLat();
 		this.lastLon = getLon();
 
-		this.lastUpdate = System.currentTimeMillis();
+		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	public void updateRegion(){
@@ -95,7 +96,7 @@ public class Earthquake implements Regional, Warnable {
 
 		lastLat = getLat();
 		lastLon = getLon();
-		this.lastUpdate = System.currentTimeMillis();
+		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	public Cluster getCluster() {

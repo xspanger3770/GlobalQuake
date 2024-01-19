@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.intensity.IntensityScales;
@@ -42,7 +43,7 @@ public class EarthquakeListPanel extends JPanel {
                 return false;
             }
 
-            return !Settings.oldEventsTimeFilterEnabled || !((System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
+            return !Settings.oldEventsTimeFilterEnabled || !((GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
         }).collect(Collectors.toList());
     }
 

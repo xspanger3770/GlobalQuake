@@ -1,5 +1,6 @@
 package globalquake.core.earthquake.data;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.alert.Warnable;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.analysis.Event;
@@ -65,7 +66,7 @@ public class Cluster implements Warnable {
 		this.rootLon = rootLon;
 		this.anchorLon = NONE;
 		this.anchorLat = NONE;
-		this.lastUpdate = System.currentTimeMillis();
+		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		this.updateCount = 0;
 		this.earthquake = null;
 	}
@@ -87,7 +88,7 @@ public class Cluster implements Warnable {
 	}
 
 	public void addEvent() {
-		lastUpdate = System.currentTimeMillis();
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class Cluster implements Warnable {
 		if (checkForUpdates()) {
 			calculateRoot(anchorLat == NONE);
 			calculateLevel();
-			lastUpdate = System.currentTimeMillis();
+			lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		}
 	}
 
@@ -295,7 +296,7 @@ public class Cluster implements Warnable {
 	}
 
 	public void updateLevel(int level) {
-		lastUpdate = System.currentTimeMillis();
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		this.level = level;
 	}
 
