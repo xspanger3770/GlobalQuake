@@ -25,9 +25,9 @@ public class Main {
         initErrorHandler();
         initMainDirectory();
         GlobalQuake.prepare(MAIN_FOLDER, getErrorHandler());
-
+        
         Options options = new Options();
-
+        
         Option maxGpuMemOption = new Option("g", "gpu-max-mem", true, "maximum GPU memory limit in GB");
         maxGpuMemOption.setRequired(false);
         options.addOption(maxGpuMemOption);
@@ -35,7 +35,7 @@ public class Main {
         CommandLineParser parser = new org.apache.commons.cli.BasicParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
-
+        
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
@@ -67,6 +67,12 @@ public class Main {
         if (!MAIN_FOLDER.exists()) {
             if (!MAIN_FOLDER.mkdirs()) {
                 getErrorHandler().handleException(new FatalIOException("Unable to create main directory!", null));
+            }
+        }
+        File VOLUME_FOLDER = new File(MAIN_FOLDER, "volume/");
+        if (!VOLUME_FOLDER.exists()) {
+            if (!VOLUME_FOLDER.mkdirs()) {
+                getErrorHandler().handleException(new FatalIOException("Unable to create volume directory!", null));
             }
         }
     }
