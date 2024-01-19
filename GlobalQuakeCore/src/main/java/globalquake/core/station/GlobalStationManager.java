@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GlobalStationManager {
 
     private static final int RAYS = 9;
-    private static final int STATIONS_PER_RAY = 4;
+    private static final int STATIONS_PER_RAY = 3;
     private final Collection<AbstractStation> stations = new ConcurrentLinkedQueue<>();
 
 
@@ -59,7 +59,7 @@ public class GlobalStationManager {
                     double dist = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), station2.getLatitude(),
                             station2.getLongitude());
 
-                    if(dist > 12000){
+                    if(dist > 4000){
                         continue;
                     }
 
