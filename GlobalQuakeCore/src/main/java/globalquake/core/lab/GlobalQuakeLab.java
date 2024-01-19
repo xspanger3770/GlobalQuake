@@ -1,6 +1,7 @@
 package globalquake.core.lab;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
@@ -37,6 +38,8 @@ public class GlobalQuakeLab {
         }
 
         findFiles();
+
+        HypocsSettings.save();
 
         System.exit(0);
     }

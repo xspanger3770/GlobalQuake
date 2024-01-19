@@ -1,6 +1,7 @@
 package globalquake.core.earthquake;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
@@ -302,20 +303,19 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestHypocenter2 = bestHypocenter;
 
-        int reduceIterations = 2;
-        int reduceLimit = 8;
-        double reduceAmount = 0.75;
-        double diffLimit = 0.5;
+        int reduceIterations = HypocsSettings.getOrDefaultInt("reduceIterations", 2);
+        int reduceLimit = HypocsSettings.getOrDefaultInt("reduceLimit", 12);
+        double reduceAmount = HypocsSettings.getOrDefault("reduceAmount", 0.2f);
 
         for (int it = 0; it < reduceIterations; it++) {
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
-                int targetSize = reduceLimit + (int) ((residuals.size() - reduceLimit) * reduceAmount);
+                int targetSize = residuals.size() - (int) Math.max(1, (residuals.size() - reduceLimit) * reduceAmount);
 
                 List<Map.Entry<PickedEvent, Long>> list = new ArrayList<>(residuals.entrySet());
                 list.sort(Map.Entry.comparingByValue());
 
-                while (list.size() > targetSize && list.get(list.size() - 1).getValue() > finderSettings.pWaveInaccuracyThreshold() * diffLimit) {
+                while (list.size() > targetSize) {
                     list.remove(list.size() - 1);
                 }
 

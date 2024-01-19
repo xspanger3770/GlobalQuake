@@ -395,6 +395,12 @@ public final class Settings {
 		lastSave = System.currentTimeMillis();
 		changes++;
 
+		try{
+			HypocsSettings.save();
+		} catch (IOException e){
+			Logger.error(e);
+		}
+
 		try {
 			Field[] fields = Settings.class.getDeclaredFields();
 			for (Field field : fields) {

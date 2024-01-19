@@ -29,7 +29,7 @@ public class Quality {
 
     private QualityClass summarize() {
         QualityClass result = QualityClass.S;
-        QualityCriteria[] allCriteria = {qualityDepth, qualityOrigin, qualityNS, qualityEW, qualityPercentage, qualityStations};
+        QualityCriteria[] allCriteria = {qualityDepth, qualityOrigin, qualityNS, qualityEW, qualityStations};
         for(QualityCriteria criteria : allCriteria){
             if(criteria.getQualityClass().ordinal() > result.ordinal()){
                 result = criteria.getQualityClass();
