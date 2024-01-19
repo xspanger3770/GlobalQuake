@@ -36,6 +36,7 @@ public class EarthquakeAnalysis {
     private static final boolean CHECK_QUADRANTS = false;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
     private static final int DEPTH_ITERS_POLYGONS = 12;
+    protected static final double NO_MAGNITUDE = -999.0;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -464,7 +465,7 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
-        if (bestHypocenter.magnitude == -999.0) {
+        if (bestHypocenter.magnitude == NO_MAGNITUDE) {
             Logger.tag("Hypocs").debug("No magnitude!");
             return;
         }
@@ -1011,7 +1012,7 @@ public class EarthquakeAnalysis {
         return Math.log10(depth + 160.0) - Math.log10(160.0);
     }
 
-    private double selectMagnitude(ArrayList<MagnitudeReading> mags) {
+    protected static double selectMagnitude(List<MagnitudeReading> mags) {
         mags.sort(Comparator.comparing(MagnitudeReading::distance));
 
         int targetSize = (int) Math.max(25, mags.size() * 0.40);
@@ -1025,7 +1026,7 @@ public class EarthquakeAnalysis {
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
 
         if (list.isEmpty()) {
-            return -999.0;
+            return NO_MAGNITUDE;
         }
 
         return list.get((int) ((list.size() - 1) * 0.5)).magnitude();
