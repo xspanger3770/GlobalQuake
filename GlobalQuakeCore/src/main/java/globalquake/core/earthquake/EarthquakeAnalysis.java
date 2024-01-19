@@ -98,7 +98,10 @@ public class EarthquakeAnalysis {
 
         cluster.lastEpicenterUpdate = cluster.updateCount;
 
+        preprocess(cluster, pickedEvents);
+    }
 
+    private void preprocess(Cluster cluster, List<PickedEvent> pickedEvents) {
         pickedEvents.sort(Comparator.comparing(PickedEvent::maxRatio));
 
         // if there is no event stronger than MIN_RATIO, abort
