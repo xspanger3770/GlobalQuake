@@ -989,7 +989,6 @@ public class EarthquakeAnalysis {
         }
         Collection<Event> goodEvents = cluster.getAssignedEvents().values();
         if (goodEvents.isEmpty()) {
-            Logger.tag("Hypocs").error("Fatal error: goodEvents is empty!");
             return;
         }
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
