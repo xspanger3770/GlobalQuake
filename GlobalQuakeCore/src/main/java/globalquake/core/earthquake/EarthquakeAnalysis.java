@@ -517,15 +517,18 @@ public class EarthquakeAnalysis {
                 cluster.setEarthquake(null);
                 cluster.setPreviousHypocenter(null);
                 cluster.resetAnchor();
+                Logger.tag("Hypocs").info("Quake removed!");
             }
-            Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), bestHypocenter));
+            Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, obvious_correct_pct=%.2f/%.2f was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), obviousCorrectPct, OBVIOUS_CORRECT_THRESHOLD, bestHypocenter));
         } else {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
-            } else {
+            } else if (result != HypocenterCondition.NULL){
                 updateMagnitudeOnly(cluster, bestHypocenter);
-                Logger.tag("Hypocs").trace("Not updating because: %s".formatted(result));
+                Logger.tag("Hypocs").trace("Performed magnitude-only revision because: %s".formatted(result));
+            } else {
+                Logger.tag("Hypocs").error("Fatal error: %s".formatted(result));
             }
         }
 
@@ -912,7 +915,6 @@ public class EarthquakeAnalysis {
             return HypocenterCondition.NULL;
         }
 
-
         double distFromRoot = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, cluster.getRootLat(),
                 cluster.getRootLon());
 
@@ -977,10 +979,12 @@ public class EarthquakeAnalysis {
         hypocenter.mags = null;
 
         if (cluster == null || hypocenter == null) {
+            Logger.tag("Hypocs").error("Fatal error: cluster or hypocenter is null!");
             return;
         }
         Collection<Event> goodEvents = cluster.getAssignedEvents().values();
         if (goodEvents.isEmpty()) {
+            Logger.tag("Hypocs").error("Fatal error: goodEvents is empty!");
             return;
         }
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
