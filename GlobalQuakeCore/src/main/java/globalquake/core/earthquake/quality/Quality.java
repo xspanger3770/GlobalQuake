@@ -66,4 +66,17 @@ public class Quality {
     public QualityClass getSummary() {
         return summary;
     }
+
+    @Override
+    public String toString() {
+        return "Quality{" +
+                "qualityOrigin=" + qualityOrigin +
+                ", qualityDepth=" + qualityDepth +
+                ", qualityNS=" + qualityNS +
+                ", qualityEW=" + qualityEW +
+                ", qualityStations=" + qualityStations +
+                ", qualityPercentage=" + qualityPercentage +
+                ", summary=" + summary +
+                '}';
+    }
 }

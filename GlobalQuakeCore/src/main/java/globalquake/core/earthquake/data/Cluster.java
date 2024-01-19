@@ -219,6 +219,8 @@ public class Cluster implements Warnable {
 		if (n > 0) {
 			rootLat = sumLat / n;
 			rootLon = sumLon / n;
+			anchorLat = rootLat;
+			anchorLon = rootLon;
 		}
 	}
 

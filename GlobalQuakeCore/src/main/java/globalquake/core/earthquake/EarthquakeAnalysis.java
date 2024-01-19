@@ -284,6 +284,8 @@ public class EarthquakeAnalysis {
         Logger.tag("Hypocs").debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
 
+        Logger.tag("Hypocs").trace(bestHypocenter);
+
         return bestHypocenter;
     }
 
@@ -468,7 +470,7 @@ public class EarthquakeAnalysis {
 
         calculateMagnitude(cluster, bestHypocenter);
 
-        if (bestHypocenter.magnitude == NO_MAGNITUDE) {
+        if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
             Logger.tag("Hypocs").debug("No magnitude!");
             return;
         }
