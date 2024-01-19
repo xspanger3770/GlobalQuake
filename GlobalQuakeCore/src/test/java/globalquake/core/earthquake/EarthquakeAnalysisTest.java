@@ -20,6 +20,15 @@ public class EarthquakeAnalysisTest {
     }
 
     @Test
+    public void testMagnitudeSelectionSingleVal(){
+        List<MagnitudeReading> mags = new ArrayList<>();
+
+        mags.add(new MagnitudeReading(4,1));
+
+        assertEquals(EarthquakeAnalysis.selectMagnitude(mags), 4.0, 0.1);
+    }
+
+    @Test
     public void testMagnitudeSelectionSimple(){
         List<MagnitudeReading> mags = new ArrayList<>();
 
