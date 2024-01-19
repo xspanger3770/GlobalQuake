@@ -973,6 +973,9 @@ public class EarthquakeAnalysis {
     }
 
     private void calculateMagnitude(Cluster cluster, Hypocenter hypocenter) {
+        hypocenter.magnitude = NO_MAGNITUDE;
+        hypocenter.mags = null;
+
         if (cluster == null || hypocenter == null) {
             return;
         }
@@ -1026,6 +1029,7 @@ public class EarthquakeAnalysis {
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
 
         if (list.isEmpty()) {
+            Logger.tag("Hypocs").warn("Magnitude readings list is empty! (%d -> %d)".formatted(mags.size(), list.size()));
             return NO_MAGNITUDE;
         }
 
