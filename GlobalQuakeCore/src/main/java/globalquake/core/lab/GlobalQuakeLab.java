@@ -21,15 +21,16 @@ import java.util.Random;
 
 public class GlobalQuakeLab {
 
-    private static File archivedFolder = new File("./TrainingData/archived/");
+    private static File mainFolder = new File("./TrainingData/");
+    private static File archivedFolder = new File(mainFolder,"./archived/");
 
     public static void main(String[] args) throws Exception{
         TauPTravelTimeCalculator.init();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
-        GlobalQuake.prepare(new File(archivedFolder, "/gq/"), null);
+        GlobalQuake.prepare(new File(mainFolder, "/settings/"), null);
 
         Settings.hypocenterDetectionResolution = 80.0;
-        Settings.pWaveInaccuracyThreshold = 4000.0;
+        Settings.pWaveInaccuracyThreshold = 3000.0;
         Settings.parallelHypocenterLocations = true;
 
         if(!archivedFolder.exists()){

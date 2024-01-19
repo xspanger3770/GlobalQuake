@@ -38,7 +38,7 @@ public class HypocsSettings {
             properties.setProperty(kv.getKey(), String.valueOf(kv.getValue()));
         }
 
-        properties.store(new FileOutputStream(file), "");
+        properties.store(new FileOutputStream(file), "If you don't know what those mean then dont touch it!");
     }
 
     private static Float get(String key, float def){
