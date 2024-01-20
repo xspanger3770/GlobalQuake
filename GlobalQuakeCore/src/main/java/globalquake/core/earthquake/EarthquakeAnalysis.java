@@ -197,7 +197,7 @@ public class EarthquakeAnalysis {
         long deltaP = events.get((int) ((events.size() - 1) * 0.75)).pWave()
                 - events.get((int) ((events.size() - 1) * 0.25)).pWave();
 
-        long limit = 1600 + (long) Math.sqrt(distFromRoot) * 200;
+        long limit = 600 + (long) Math.sqrt(distFromRoot) * 60;
 
         Logger.tag("Hypocs").debug("deltaP: %d ms, limit for %.1f km is %d ms".formatted(deltaP, distFromRoot, limit));
 
