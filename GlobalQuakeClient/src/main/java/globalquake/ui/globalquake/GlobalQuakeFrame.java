@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
@@ -118,7 +119,7 @@ public class GlobalQuakeFrame extends GQFrame {
 		settings.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				new SettingsFrame(GlobalQuakeFrame.this).setVisible(true);
+				new SettingsFrame(GlobalQuakeFrame.this, GlobalQuakeClient.instance != null).setVisible(true);
 			}
 		});
 
