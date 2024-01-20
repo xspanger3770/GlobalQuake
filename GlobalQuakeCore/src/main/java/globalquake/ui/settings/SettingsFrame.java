@@ -89,7 +89,6 @@ public class SettingsFrame extends GQFrame {
 		panels.add(new GeneralSettingsPanel(this));
 		panels.add(new GraphicsSettingsPanel());
 		panels.add(new AlertSettingsPanel());
-		System.err.println(isClient);
 		if(!isClient) {
 			panels.add(new PerformanceSettingsPanel());
 			panels.add(new HypocenterAnalysisSettingsPanel());

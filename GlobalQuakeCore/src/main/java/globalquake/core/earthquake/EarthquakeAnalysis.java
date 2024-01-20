@@ -1051,8 +1051,8 @@ public class EarthquakeAnalysis {
             5, 6, // M3
             8, 16, // M4
             30, 30, // M5
-            30, 45, // M6
-            60, 60, // M7+
+            30, 40, // M6
+            40, 40, // M7+
     };
 
     public static boolean shouldRemove(Earthquake earthquake, int marginSeconds) {
