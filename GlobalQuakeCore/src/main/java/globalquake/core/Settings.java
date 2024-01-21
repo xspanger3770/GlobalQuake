@@ -138,6 +138,8 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
+	public static Double globalVolume;
+
     static {
 		load();
 		save();
@@ -191,6 +193,11 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("globalVolume", "100",
+				o -> validateInt(0, 100, (Integer) o));
+
+
 		loadProperty("stationsShapeIndex", "0",
 				o -> validateInt(0, StationsShape.values().length, (Integer) o));
 

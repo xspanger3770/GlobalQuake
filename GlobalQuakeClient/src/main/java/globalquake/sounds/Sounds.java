@@ -131,7 +131,7 @@ public class Sounds {
 		clip.flush();
 		clip.setFramePosition(0);
 
-		double volume = Math.max(0.0, Math.min(1.0, sound.volume)); // TODO global volume slider
+		double volume = Math.max(0.0, Math.min(1.0, sound.volume * (Settings.globalVolume / 100.0)));
 		FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 		gainControl.setValue(20f * (float) Math.log10(volume));
 
