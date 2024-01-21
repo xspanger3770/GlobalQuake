@@ -9,6 +9,9 @@ import globalquake.core.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.time.ZoneId;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JComboBox<IntensityScale> comboBoxScale;
@@ -33,9 +36,12 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
 	private void createOtherSettings(SettingsFrame settingsFrame) {
 		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.setBorder(BorderFactory.createTitledBorder("Other"));
 
-		panel.add(new JLabel("Distance units: "));
+		JPanel row1 = new JPanel();
+
+		row1.add(new JLabel("Distance units: "));
 
 		distanceUnitJComboBox = new JComboBox<>(DistanceUnit.values());
 		distanceUnitJComboBox.setSelectedIndex(Math.max(0, Math.min(distanceUnitJComboBox.getItemCount() - 1, Settings.distanceUnitsIndex)));
@@ -45,7 +51,23 @@ public class GeneralSettingsPanel extends SettingsPanel {
 			settingsFrame.refreshUI();
         });
 
-		panel.add(distanceUnitJComboBox);
+		row1.add(distanceUnitJComboBox);
+
+		JPanel row2 = new JPanel();
+
+		row2.add(new JLabel("Timezone: "));
+		JComboBox<String> timezoneCombobox = new JComboBox<>();
+
+		for(String zoneId : ZoneId.getAvailableZoneIds()){
+			timezoneCombobox.addItem(zoneId);
+		}
+
+		timezoneCombobox.setSelectedItem(TimeZone.getDefault().getID());
+
+		row2.add(timezoneCombobox);
+
+		panel.add(row1);
+		panel.add(row2);
 
 		add(panel);
 	}
