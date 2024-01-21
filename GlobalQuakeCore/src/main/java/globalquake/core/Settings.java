@@ -11,9 +11,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.time.zone.ZoneRulesException;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
@@ -140,6 +142,8 @@ public final class Settings {
 
 	public static Integer globalVolume;
 
+	public static String timezoneStr;
+
     static {
 		load();
 		save();
@@ -187,12 +191,26 @@ public final class Settings {
 		});
 	}
 
+	public static ZoneId getTimezone(){
+		ZoneId zoneId = ZoneId.systemDefault();
+		try {
+			zoneId = ZoneId.of(timezoneStr);
+		}catch(DateTimeException e){
+			Logger.warn("Failed to parse timezone %s, defaulting to %s".formatted(timezoneStr, ZoneId.systemDefault().getId()));
+			timezoneStr = ZoneId.systemDefault().getId();
+		}
+
+		return zoneId;
+	}
+
 	private static void load() {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("timezoneStr", ZoneId.systemDefault().getId());
 
 		loadProperty("globalVolume", "100",
 				o -> validateInt(0, 100, (Integer) o));

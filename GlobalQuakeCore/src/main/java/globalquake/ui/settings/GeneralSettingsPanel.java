@@ -9,8 +9,12 @@ import globalquake.core.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.Comparator;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class GeneralSettingsPanel extends SettingsPanel {
@@ -56,13 +60,46 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		JPanel row2 = new JPanel();
 
 		row2.add(new JLabel("Timezone: "));
-		JComboBox<String> timezoneCombobox = new JComboBox<>();
+		Comparator<ZoneId> zoneIdComparator = Comparator.comparingInt(zone -> zone.getRules().getOffset(Instant.now()).getTotalSeconds());
 
-		for(String zoneId : ZoneId.getAvailableZoneIds()){
-			timezoneCombobox.addItem(zoneId);
-		}
+		// Use a DefaultComboBoxModel for better control and management
+		DefaultComboBoxModel<ZoneId> timezoneModel = new DefaultComboBoxModel<>();
 
-		timezoneCombobox.setSelectedItem(TimeZone.getDefault().getID());
+		// Populate the model with available timezones and sort them using the custom Comparator
+		ZoneId.getAvailableZoneIds().stream()
+				.map(ZoneId::of)
+				.sorted(zoneIdComparator)
+				.forEach(timezoneModel::addElement);
+
+		// Create the JComboBox with the populated and sorted model
+		JComboBox<ZoneId> timezoneCombobox = new JComboBox<>(timezoneModel);
+
+		// this assures that default timezone will always be selected
+		timezoneCombobox.setSelectedItem(ZoneId.systemDefault());
+
+		// if theres valid timezone in the settings then it will be selected
+		timezoneCombobox.setSelectedItem(Settings.timezoneStr);
+
+		// Add the JComboBox to your UI
+		row2.add(timezoneCombobox);
+
+		timezoneCombobox.setRenderer(new DefaultListCellRenderer(){
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+														  boolean isSelected, boolean cellHasFocus) {
+				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+				if (value instanceof ZoneId) {
+					ZoneId zoneId = (ZoneId) value;
+
+					String offset = zoneId.getRules().getOffset(Instant.now()).toString();
+
+					label.setText(String.format("%s (%s)", zoneId, offset));
+				}
+
+				return label;
+			}
+		});
 
 		row2.add(timezoneCombobox);
 
