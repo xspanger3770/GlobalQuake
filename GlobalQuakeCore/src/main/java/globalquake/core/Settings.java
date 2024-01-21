@@ -73,18 +73,16 @@ public final class Settings {
 
 	public static Integer maxArchivedQuakes;
 
-	public static final DateTimeFormatter[] DATE_FORMATS = {
-			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
+	public static DateTimeFormatter[] DATE_FORMATS = {DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
 			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
-			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()),
-	};
+			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault())};
 
 	public static Boolean use24HFormat;
 	public static Double stationIntensityVisibilityZoomLevel;
 	public static Boolean hideDeadStations;
 
-	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
-	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
 
 	public static Boolean alertLocal;
 	public static Double alertLocalDist;
@@ -306,6 +304,15 @@ public final class Settings {
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
 	}
 
+	public static void initTimezoneSettings() {
+		DATE_FORMATS = new DateTimeFormatter[]{DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(getTimezone())};
+
+		formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(getTimezone());
+		formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(getTimezone());
+	}
+
 
 	public static String formatDateTime(TemporalAccessor temporalAccessor) {
 		return selectedDateTimeFormat().format(temporalAccessor) +
@@ -444,6 +451,8 @@ public final class Settings {
 		} catch (IOException e) {
 			GlobalQuake.getErrorHandler().handleException(e);
 		}
+
+		initTimezoneSettings();
 
 	}
 

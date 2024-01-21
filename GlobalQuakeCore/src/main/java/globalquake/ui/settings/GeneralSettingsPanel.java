@@ -9,6 +9,7 @@ import globalquake.core.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
@@ -24,6 +25,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	private JTextField textFieldLat;
 	private JTextField textFieldLon;
 	private JComboBox<DistanceUnit> distanceUnitJComboBox;
+	private JComboBox<ZoneId> timezoneCombobox;
 
 	public GeneralSettingsPanel(SettingsFrame settingsFrame) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -33,9 +35,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		add(createIntensitySettingsPanel());
 		createOtherSettings(settingsFrame);
 
-		for(int i = 0; i < 20; i++){
-			add(new JPanel()); // fillers
-		}
+		fill(this, 12);
 	}
 
 	private void createOtherSettings(SettingsFrame settingsFrame) {
@@ -72,13 +72,13 @@ public class GeneralSettingsPanel extends SettingsPanel {
 				.forEach(timezoneModel::addElement);
 
 		// Create the JComboBox with the populated and sorted model
-		JComboBox<ZoneId> timezoneCombobox = new JComboBox<>(timezoneModel);
+		timezoneCombobox = new JComboBox<>(timezoneModel);
 
 		// this assures that default timezone will always be selected
 		timezoneCombobox.setSelectedItem(ZoneId.systemDefault());
 
 		// if theres valid timezone in the settings then it will be selected
-		timezoneCombobox.setSelectedItem(Settings.timezoneStr);
+		timezoneCombobox.setSelectedItem(ZoneId.of(Settings.timezoneStr));
 
 		// Add the JComboBox to your UI
 		row2.add(timezoneCombobox);
@@ -98,6 +98,14 @@ public class GeneralSettingsPanel extends SettingsPanel {
 				}
 
 				return label;
+			}
+		});
+
+		timezoneCombobox.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				Settings.timezoneStr = ((ZoneId)timezoneCombobox.getSelectedItem()).getId();
+				Settings.initTimezoneSettings();
 			}
 		});
 
@@ -187,6 +195,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 		Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
+		Settings.timezoneStr = ((ZoneId)timezoneCombobox.getSelectedItem()).getId();
 	}
 
 	@Override
