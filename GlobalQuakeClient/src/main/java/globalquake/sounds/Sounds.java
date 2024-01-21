@@ -118,18 +118,23 @@ public class Sounds {
 
 		soundService.submit(() -> {
 			try {
-				playClipRuntime(sound.getClip());
+				playClipRuntime(sound);
 			} catch(Exception e){
 				Logger.error(e);
 			}
 		});
 	}
 
-	private static void playClipRuntime(Clip clip) {
-		// TODO VOLUME!
+	private static void playClipRuntime(GQSound sound) {
+		Clip clip = sound.getClip();
 		clip.stop();
 		clip.flush();
 		clip.setFramePosition(0);
+
+		double volume = Math.max(0.0, Math.min(1.0, sound.volume)); // TODO global volume slider
+		FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+		gainControl.setValue(20f * (float) Math.log10(volume));
+
 		clip.start();
 
         try {
