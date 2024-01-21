@@ -1,8 +1,9 @@
 package globalquake.sounds;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.exception.FatalIOException;
 import globalquake.core.Settings;
+import globalquake.core.exception.FatalIOException;
+import globalquake.core.exception.RuntimeApplicationException;
 import org.tinylog.Logger;
 
 import javax.sound.sampled.*;
@@ -13,47 +14,55 @@ import java.util.concurrent.Executors;
 
 public class Sounds {
 
-	private static final File EXPORT_DIR = new File(GlobalQuake.mainFolder, "sounds/");
-	public static Clip level_0;
-	public static Clip level_1;
-	public static Clip level_2;
-	public static Clip level_3;
-	public static Clip level_4;
-	public static Clip intensify;
-	public static Clip felt;
-	public static Clip eew_warning;
-	public static Clip felt_strong;
-	public static Clip countdown;
-	public static Clip countdown2;
-	public static Clip update;
+	public static final File EXPORT_DIR = new File(GlobalQuake.mainFolder, "sounds/");
+	public static GQSound level_0 = new GQSound("level_0.wav");
+	public static GQSound level_1 = new GQSound("level_1.wav");
+	public static GQSound level_2 = new GQSound("level_2.wav");
+	public static GQSound level_3 = new GQSound("level_3.wav");
+	public static GQSound level_4 = new GQSound("level_4.wav");
+	public static GQSound intensify = new GQSound("intensify.wav");
+	public static GQSound felt = new GQSound("felt.wav");
+	public static GQSound eew_warning = new GQSound("eew_warning.wav");
+	public static GQSound felt_strong = new GQSound("felt_strong.wav");
+	public static GQSound countdown = new GQSound("countdown.wav");
+	public static GQSound countdown2 = new GQSound("countdown.wav");
+	public static GQSound update = new GQSound("update.wav");
+	public static GQSound found = new GQSound("found.wav");
 
-	public static Clip found;
+	public static GQSound[] ALL_SOUNDS = {
+			level_0,
+			level_1,
+			level_2,
+			level_3,
+			level_4,
+			intensify,
+			felt,
+			eew_warning,
+			felt_strong,
+			countdown,
+			countdown2, // workaround
+			update,
+			found
+	};
+
+	public static GQSound[] ALL_ACTUAL_SOUNDS = {
+			level_0,
+			level_1,
+			level_2,
+			level_3,
+			level_4,
+			intensify,
+			felt,
+			eew_warning,
+			felt_strong,
+			countdown,
+			update,
+			found
+	};
 
 	public static boolean soundsAvailable = true;
 
 	private static final ExecutorService soundService = Executors.newCachedThreadPool();
-
-	private static Clip loadSound(String res) throws FatalIOException {
-		try {
-			Path soundPath = Paths.get(EXPORT_DIR.getAbsolutePath(), res);
-			InputStream audioInStream = Files.exists(soundPath) ?
-					new FileInputStream(soundPath.toFile()) :
-					ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + res);
-
-			if (audioInStream == null) {
-				throw new IOException("Sound file not found: " + res);
-			}
-
-			AudioInputStream audioIn = AudioSystem.getAudioInputStream(
-					new BufferedInputStream(audioInStream));
-			Clip clip = AudioSystem.getClip();
-			clip.open(audioIn);
-			return clip;
-		} catch(Exception e) {
-			soundsAvailable = false;
-			throw new FatalIOException("Failed to load sound: " + res, e);
-		}
-	}
 
 	public static void exportSounds() throws IOException {
 		Path exportPath = Paths.get(EXPORT_DIR.getAbsolutePath());
@@ -62,18 +71,24 @@ public class Sounds {
 			writeReadmeFile(exportPath);
 		}
 
-		String[] soundFiles = {"level_0.wav", "level_1.wav", "level_2.wav", "level_3.wav", "level_4.wav",
-				"intensify.wav", "felt.wav", "felt_strong.wav", "eew_warning.wav", "countdown.wav", "update.wav", "found.wav"};
-
-		for (String soundFile : soundFiles) {
-			Path exportedFilePath = exportPath.resolve(soundFile);
-			if (!Files.exists(exportedFilePath)) { // Check if the file already exists
-				InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + soundFile);
-				if (is != null) {
-					Files.copy(is, exportedFilePath, StandardCopyOption.REPLACE_EXISTING);
-					is.close();
-				}
+		try {
+			for (GQSound gqSound : ALL_ACTUAL_SOUNDS) {
+				gqSound.export(exportPath);
 			}
+		} catch(IOException e){
+			GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to export sounds to %s!".formatted(exportPath.toString())));
+		}
+	}
+
+
+	private static void loadSounds() {
+		try {
+			for (GQSound gqSound : ALL_SOUNDS) {
+				gqSound.load();
+			}
+		} catch(FatalIOException e){
+			soundsAvailable = false;
+			GlobalQuake.errorHandler.handleWarning(e);
 		}
 	}
 
@@ -91,41 +106,19 @@ public class Sounds {
 		Files.writeString(exportPath.resolve("README.txt"), readmeContent, StandardOpenOption.CREATE);
 	}
 
-
 	public static void load() throws Exception {
 		exportSounds();
-
-		// CLUSTER
-		level_0 = loadSound("level_0.wav");
-		level_1 = loadSound("level_1.wav");
-		level_2 = loadSound("level_2.wav");
-		level_3 = loadSound("level_3.wav");
-		level_4 = loadSound("level_4.wav");
-
-		// QUAKE
-		found = loadSound("found.wav");
-		update = loadSound("update.wav");
-
-		// LOCAL
-		intensify = loadSound("intensify.wav");
-		felt = loadSound("felt.wav");
-		felt_strong = loadSound("felt_strong.wav");
-		eew_warning = loadSound("eew_warning.wav");
-		// strong_felt ?
-
-		// ???
-		countdown = loadSound("countdown.wav");
-		countdown2 = loadSound("countdown.wav");
+		loadSounds();
 	}
 
-	public static void playSound(Clip clip) {
-		if(!Settings.enableSound || !soundsAvailable || clip == null) {
+	public static void playSound(GQSound sound) {
+		if(!Settings.enableSound || !soundsAvailable || sound == null || sound.getClip() == null) {
 			return;
 		}
 
 		soundService.submit(() -> {
 			try {
-				playClipRuntime(clip);
+				playClipRuntime(sound.getClip());
 			} catch(Exception e){
 				Logger.error(e);
 			}
@@ -133,6 +126,7 @@ public class Sounds {
 	}
 
 	private static void playClipRuntime(Clip clip) {
+		// TODO VOLUME!
 		clip.stop();
 		clip.flush();
 		clip.setFramePosition(0);
