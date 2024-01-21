@@ -5,7 +5,6 @@ import globalquake.sounds.GQSound;
 import globalquake.sounds.Sounds;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -91,6 +90,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
     @Override
     public void save() throws NumberFormatException {
+        // TODO save volumes
     }
 
     @Override

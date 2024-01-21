@@ -1,6 +1,5 @@
 package globalquake.core.database;
 
-import globalquake.core.analysis.Log;
 import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 

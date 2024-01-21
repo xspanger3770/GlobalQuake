@@ -11,18 +11,16 @@ import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.training.EarthquakeAnalysisTraining;
-import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GlobalQuakeLab {
 
-    private static File mainFolder = new File("./TrainingData/");
-    private static File archivedFolder = new File(mainFolder,"./archived/");
+    private static final File mainFolder = new File("./TrainingData/");
+    private static final File archivedFolder = new File(mainFolder,"./archived/");
 
     public static void main(String[] args) throws Exception{
         TauPTravelTimeCalculator.init();
@@ -34,6 +32,7 @@ public class GlobalQuakeLab {
         Settings.parallelHypocenterLocations = true;
 
         if(!archivedFolder.exists()){
+            //noinspection ResultOfMethodCallIgnored
             archivedFolder.mkdirs();
             System.out.printf("Created archived quakes folder at %s".formatted(archivedFolder.getAbsolutePath()));
         }
@@ -45,7 +44,8 @@ public class GlobalQuakeLab {
         System.exit(0);
     }
 
-    private static void findFiles() throws Exception{
+    @SuppressWarnings("DataFlowIssue")
+    private static void findFiles() {
         for(File file : archivedFolder.listFiles()) {
             try {
                 tryFile(file);
@@ -95,7 +95,7 @@ public class GlobalQuakeLab {
         cluster.calculateRoot(fakeStations);
         System.err.println(cluster);
 
-        System.err.println("process with %d stations and %d events".formatted(fakeStations.size(), pickedEvents.size()));
+        System.err.printf("process with %d stations and %d events%n", fakeStations.size(), pickedEvents.size());
 
         earthquakeAnalysis.processCluster(cluster, pickedEvents);
 

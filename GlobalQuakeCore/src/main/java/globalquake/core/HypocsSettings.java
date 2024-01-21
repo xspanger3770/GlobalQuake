@@ -54,7 +54,7 @@ public class HypocsSettings {
     }
 
     public static int getOrDefaultInt(String key, int def){
-        return (int)Math.round(get(key, def));
+        return Math.round(get(key, def));
     }
 
 }

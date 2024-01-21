@@ -129,6 +129,14 @@ public class MainFrame extends GQFrame {
             new ServerSelectionFrame().setVisible(true);
         });
 
+        JPanel buttons2 = createButtons();
+
+        panel.add(buttons2);
+
+        return panel;
+    }
+
+    private JPanel createButtons() {
         GridLayout grid2 = new GridLayout(1,2);
         grid2.setHgap(10);
         JPanel buttons2 = new JPanel(grid2);
@@ -141,10 +149,7 @@ public class MainFrame extends GQFrame {
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener(actionEvent -> System.exit(0));
         buttons2.add(exitButton);
-
-        panel.add(buttons2);
-
-        return panel;
+        return buttons2;
     }
 
     private static void startDatabaseManager() throws FatalIOException {

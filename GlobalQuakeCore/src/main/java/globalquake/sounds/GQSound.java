@@ -68,6 +68,7 @@ public class GQSound {
         }
     }
 
+    @SuppressWarnings("unused")
     public String getDescription() {
         return description;
     }
