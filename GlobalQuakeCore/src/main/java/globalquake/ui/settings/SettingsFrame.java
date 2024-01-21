@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
@@ -21,6 +22,7 @@ public class SettingsFrame extends GQFrame {
 
 	public static void main(String[] args) throws Exception{
 		TauPTravelTimeCalculator.init();
+		Sounds.load();
 		GlobalQuake.prepare(new File("./.GlobalQuakeData/"), null);
 		EventQueue.invokeLater(() -> {
             try {

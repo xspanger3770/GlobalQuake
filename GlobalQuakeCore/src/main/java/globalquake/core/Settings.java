@@ -138,7 +138,7 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
-	public static Double globalVolume;
+	public static Integer globalVolume;
 
     static {
 		load();

@@ -88,7 +88,11 @@ public class Sounds {
 			}
 		} catch(FatalIOException e){
 			soundsAvailable = false;
-			GlobalQuake.errorHandler.handleWarning(e);
+			if(GlobalQuake.errorHandler != null) {
+				GlobalQuake.errorHandler.handleWarning(e);
+			}else{
+				Logger.error(e);
+			}
 		}
 	}
 
@@ -113,6 +117,7 @@ public class Sounds {
 
 	public static void playSound(GQSound sound) {
 		if(!Settings.enableSound || !soundsAvailable || sound == null || sound.getClip() == null) {
+			System.err.println("Err!");
 			return;
 		}
 

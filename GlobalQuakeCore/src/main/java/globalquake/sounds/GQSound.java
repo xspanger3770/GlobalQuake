@@ -44,7 +44,7 @@ public class GQSound {
                     ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + filename);
 
             if (audioInStream == null) {
-                throw new IOException("Sound file not found: " + filename);
+                throw new IOException("Sound file not found: %s (from file = %s)".formatted(filename,  Files.exists(soundPath)));
             }
 
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(
