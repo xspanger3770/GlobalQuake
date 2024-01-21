@@ -147,14 +147,19 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         String str = original.getNetwork().getNetworkCode()+" "+original.getStationCode();
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
 
+        y += 20;
+
         str = original.getNetwork().getDescription();
-        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 20);
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y += 13);
 
         str = original.getStationSite();
-        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + 33);
+        g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y += 13);
 
         if(original.getSelectedChannel() != null && original.getSelectedChannel().isAvailable()) {
-            int _y = y + 46;
+            str = "Sensitivity: %6.3E".formatted(original.getSelectedChannel().getSensitivity());
+            g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y += 13);
+
+            int _y = y + 20;
             for(var availableSeedlinkNetwork : original.getSelectedChannel().getSeedlinkNetworks().entrySet()) {
                 drawDelay(g, x, _y, availableSeedlinkNetwork.getValue(), availableSeedlinkNetwork.getKey().getName());
                 _y += 13;
