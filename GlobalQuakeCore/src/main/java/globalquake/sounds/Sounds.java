@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 public class Sounds {
 
 	public static final File EXPORT_DIR = new File(GlobalQuake.mainFolder, "sounds/");
+
+	public static final File VOLUMES_FILE = new File(EXPORT_DIR, "soundVolumes.properties");
 	public static final GQSound level_0 = new GQSound("level_0.wav");
 	public static final GQSound level_1 = new GQSound("level_1.wav");
 	public static final GQSound level_2 = new GQSound("level_2.wav");
@@ -117,31 +119,8 @@ public class Sounds {
 		loadVolumes();
 	}
 
-	private static void loadVolumes() {
-		Properties properties = new Properties();
-
-		try (FileInputStream inputStream = new FileInputStream("volumes.properties")) {
-			// Load properties from the file
-			properties.load(inputStream);
-
-			for (GQSound sound : ALL_ACTUAL_SOUNDS) {
-				// Retrieve the volume from the properties file using the filename as the key
-				String volumeString = properties.getProperty(sound.getFilename());
-				if (volumeString != null) {
-					// Parse the volume as a double and set it in the GQSound instance
-                    sound.volume = Math.max(0.0, Math.min(1.0, Double.parseDouble(volumeString)));
-				}
-			}
-		} catch (IOException | NumberFormatException e) {
-			Logger.error(new RuntimeApplicationException("Unable to load sound volumes!", e));
-		}
-
-		countdown2.volume = countdown.volume; // workaround
-	}
-
 	public static void playSound(GQSound sound) {
 		if(!Settings.enableSound || !soundsAvailable || sound == null || sound.getClip() == null) {
-			System.err.println("Err!");
 			return;
 		}
 
@@ -154,6 +133,31 @@ public class Sounds {
 		});
 	}
 
+	private static void loadVolumes() {
+		if(!VOLUMES_FILE.exists()){
+			Logger.info("Sound volumes file doesn't exist, aborting!");
+			return;
+		}
+		Properties properties = new Properties();
+
+		try (FileInputStream inputStream = new FileInputStream(VOLUMES_FILE)) {
+			// Load properties from the file
+			properties.load(inputStream);
+
+			for (GQSound sound : ALL_ACTUAL_SOUNDS) {
+				// Retrieve the volume from the properties file using the filename as the key
+				String volumeString = properties.getProperty(sound.getFilename());
+				if (volumeString != null) {
+					// Parse the volume as a double and set it in the GQSound instance
+					sound.volume = Math.max(0.0, Math.min(1.0, Double.parseDouble(volumeString)));
+				}
+			}
+		} catch (IOException | NumberFormatException e) {
+			Logger.error(new RuntimeApplicationException("Unable to load sound volumes!", e));
+		}
+
+		countdown2.volume = countdown.volume; // workaround
+	}
 	public static void storeVolumes() {
 		Properties properties = new Properties();
 
@@ -162,7 +166,7 @@ public class Sounds {
 			properties.setProperty(sound.getFilename(), String.valueOf(sound.volume));
 		}
 
-		try (FileOutputStream outputStream = new FileOutputStream("soundVolumes.properties")) {
+		try (FileOutputStream outputStream = new FileOutputStream(VOLUMES_FILE)) {
 			// Store the properties in the file
 			properties.store(outputStream, "Sound Volumes");
 		} catch (IOException e) {

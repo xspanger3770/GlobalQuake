@@ -32,7 +32,7 @@ public class GQSound {
     public GQSound(String filename, String description) {
         this.filename = filename;
         this.description = description;
-        this.volume = 1.0; // TODO load/save
+        this.volume = 1.0;
     }
 
     public void load() throws FatalIOException {
