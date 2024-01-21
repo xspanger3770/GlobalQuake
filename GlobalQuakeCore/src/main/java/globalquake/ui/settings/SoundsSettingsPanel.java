@@ -39,13 +39,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
             JPanel volumePanel = new JPanel(new BorderLayout());
             volumePanel.add(new JLabel("Volume"), BorderLayout.NORTH);
 
-            JSlider volumeSlider = new JSlider(SwingConstants.HORIZONTAL,0,100, (int) (gqSound.volume * 100.0));
-            volumeSlider.setMajorTickSpacing(10);
-            volumeSlider.setMinorTickSpacing(2);
-            volumeSlider.setPaintTicks(true);
-            volumeSlider.setPaintLabels(true);
-
-            volumeSlider.addChangeListener(changeEvent -> gqSound.volume = volumeSlider.getValue() / 100.0);
+            JSlider volumeSlider = createSingleSoundVolumeSlider(gqSound);
 
             volumePanel.add(volumeSlider, BorderLayout.CENTER);
 
@@ -69,6 +63,22 @@ public class SoundsSettingsPanel extends SettingsPanel {
         return new JScrollPane(panel);
     }
 
+    private static JSlider createSingleSoundVolumeSlider(GQSound gqSound) {
+        JSlider volumeSlider = new JSlider(SwingConstants.HORIZONTAL,0,100, (int) (gqSound.volume * 100.0));
+        volumeSlider.setMajorTickSpacing(10);
+        volumeSlider.setMinorTickSpacing(2);
+        volumeSlider.setPaintTicks(true);
+        volumeSlider.setPaintLabels(true);
+
+        volumeSlider.addChangeListener(changeEvent -> {
+            gqSound.volume = volumeSlider.getValue() / 100.0;
+            if (gqSound.equals(Sounds.countdown)){
+                Sounds.countdown2.volume = Sounds.countdown.volume; // workaround
+            }
+        });
+        return volumeSlider;
+    }
+
     private Component createMasterVolumeSlider(){
         sliderMasterVolume = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, 100, 10, 2);
 
@@ -90,7 +100,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
     @Override
     public void save() throws NumberFormatException {
-        // TODO save volumes
+        Sounds.storeVolumes();
     }
 
     @Override

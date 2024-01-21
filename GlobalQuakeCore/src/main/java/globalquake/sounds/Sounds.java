@@ -9,6 +9,7 @@ import org.tinylog.Logger;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.nio.file.*;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -113,6 +114,29 @@ public class Sounds {
 	public static void load() throws Exception {
 		exportSounds();
 		loadSounds();
+		loadVolumes();
+	}
+
+	private static void loadVolumes() {
+		Properties properties = new Properties();
+
+		try (FileInputStream inputStream = new FileInputStream("volumes.properties")) {
+			// Load properties from the file
+			properties.load(inputStream);
+
+			for (GQSound sound : ALL_ACTUAL_SOUNDS) {
+				// Retrieve the volume from the properties file using the filename as the key
+				String volumeString = properties.getProperty(sound.getFilename());
+				if (volumeString != null) {
+					// Parse the volume as a double and set it in the GQSound instance
+                    sound.volume = Math.max(0.0, Math.min(1.0, Double.parseDouble(volumeString)));
+				}
+			}
+		} catch (IOException | NumberFormatException e) {
+			Logger.error(new RuntimeApplicationException("Unable to load sound volumes!", e));
+		}
+
+		countdown2.volume = countdown.volume; // workaround
 	}
 
 	public static void playSound(GQSound sound) {
@@ -128,6 +152,22 @@ public class Sounds {
 				Logger.error(e);
 			}
 		});
+	}
+
+	public static void storeVolumes() {
+		Properties properties = new Properties();
+
+		for (GQSound sound : ALL_ACTUAL_SOUNDS) {
+			// Use the filename as the key and the volume as the value
+			properties.setProperty(sound.getFilename(), String.valueOf(sound.volume));
+		}
+
+		try (FileOutputStream outputStream = new FileOutputStream("soundVolumes.properties")) {
+			// Store the properties in the file
+			properties.store(outputStream, "Sound Volumes");
+		} catch (IOException e) {
+			Logger.error(new RuntimeApplicationException("Unable to store sound volumes!", e));
+		}
 	}
 
 	private static void playClipRuntime(GQSound sound) {
