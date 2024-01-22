@@ -65,7 +65,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
             panel.add(soundPanel);
         }
 
-        return new JScrollPane(panel);
+        return panel;
     }
 
     private static JSlider createSingleSoundVolumeSlider(GQSound gqSound, JLabel label) {
