@@ -84,11 +84,12 @@ public class Sounds {
 	}
 
 
-	private static void loadSounds() {
+	public static void loadSounds() {
 		try {
 			for (GQSound gqSound : ALL_SOUNDS) {
 				gqSound.load();
 			}
+			soundsAvailable = true;
 		} catch(FatalIOException e){
 			soundsAvailable = false;
 			if(GlobalQuake.errorHandler != null) {

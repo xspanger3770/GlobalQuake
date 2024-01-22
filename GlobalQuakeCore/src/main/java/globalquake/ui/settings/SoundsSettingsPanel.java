@@ -105,6 +105,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 null);
 
         JPanel fill1 = new JPanel();
+
         JButton btnSoundsFolder=new JButton("Open Sounds Folder");
         btnSoundsFolder.addActionListener(new AbstractAction() {
             @Override
@@ -121,6 +122,23 @@ public class SoundsSettingsPanel extends SettingsPanel {
             }
         });
         fill1. add(btnSoundsFolder);
+
+        JButton btnReloadSounds=new JButton("Reload Sounds");
+        btnReloadSounds.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    Sounds.loadSounds();
+                } catch (Exception e) {
+                    if(GlobalQuake.getErrorHandler() != null){
+                        GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to reload sounds!", e));
+                    } else {
+                        Logger.error(e);
+                    }
+                }
+            }
+        });
+        fill1. add(btnReloadSounds);
         coolLayout.add(fill1);
 
         return coolLayout;
