@@ -76,11 +76,11 @@ public class GQSound {
         this.volume = 1.0;
     }
 
-    public void load() throws FatalIOException {
+    public void load(boolean externalOnly) throws FatalIOException {
         try {
             // try to load from export folder
             Path soundPath = Paths.get(EXPORT_DIR.getAbsolutePath(), filename);
-            InputStream audioInStream = Files.exists(soundPath) ?
+            InputStream audioInStream = Files.exists(soundPath) || externalOnly ?
                     new FileInputStream(soundPath.toFile()) :
                     ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + filename);
 

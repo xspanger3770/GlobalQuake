@@ -87,7 +87,7 @@ public class Sounds {
 	public static void loadSounds() {
 		try {
 			for (GQSound gqSound : ALL_SOUNDS) {
-				gqSound.load();
+				gqSound.load(false);
 			}
 			soundsAvailable = true;
 		} catch(FatalIOException e){

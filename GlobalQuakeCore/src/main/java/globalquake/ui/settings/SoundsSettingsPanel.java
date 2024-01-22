@@ -2,6 +2,7 @@ package globalquake.ui.settings;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
+import globalquake.core.exception.FatalIOException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.sounds.GQSound;
 import globalquake.sounds.Sounds;
@@ -62,8 +63,30 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 }
             });
 
-            JPanel p = new JPanel();
+            JButton reloadSoundButton = new JButton("Reload");
+            reloadSoundButton.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    try {
+                        gqSound.load(true);
+                    } catch (FatalIOException e) {
+                        if(GlobalQuake.getErrorHandler() != null){
+                            GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to load this sound!", e));
+                        } else {
+                            Logger.error(e);
+                        }
+                    }
+                }
+            });
+
+            var gl = new GridLayout(2,1);
+            gl.setHgap(2);
+            gl.setVgap(4);
+
+            JPanel p = new JPanel(gl);
             p.add(testSoundButton);
+            p.add(reloadSoundButton);
+
             soundPanel.add(p, BorderLayout.EAST);
 
             rootPanel.add(soundPanel, BorderLayout.CENTER);
@@ -73,7 +96,6 @@ public class SoundsSettingsPanel extends SettingsPanel {
             textAreaDescription.setEditable(false);
             textAreaDescription.setBackground(panel.getBackground());
             rootPanel.add(textAreaDescription, BorderLayout.SOUTH);
-
 
             panel.add(rootPanel);
         }
