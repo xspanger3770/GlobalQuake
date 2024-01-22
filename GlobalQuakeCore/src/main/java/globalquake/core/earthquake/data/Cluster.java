@@ -152,16 +152,16 @@ public class Cluster implements Warnable {
 		double dist_avg = _dist_sum / n;
 
 		int _level = 0;
-		if ((lvl_1 > 6 || lvl_2 > 3) && dist_avg > 10) {
+		if ((lvl_1 >= 7 || lvl_2 >= 4) && dist_avg > 10) {
 			_level = 1;
 		}
-		if ((lvl_2 > 6 || lvl_3 > 3) && dist_avg > 25) {
+		if ((lvl_2 >= 7 || lvl_3 >= 3) && dist_avg > 25) {
 			_level = 2;
 		}
-		if ((lvl_3 > 4 || lvl_4 >= 3) && dist_avg > 50) {
+		if ((lvl_3 >= 5 || lvl_4 >= 3) && dist_avg > 50) {
 			_level = 3;
 		}
-		if ((lvl_4 > 3) && dist_avg > 75) {
+		if ((lvl_4 >= 4) && dist_avg > 75) {
 			_level = 4;
 		}
 		level = _level;

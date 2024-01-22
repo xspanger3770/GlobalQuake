@@ -8,6 +8,7 @@ import globalquake.sounds.Sounds;
 import org.tinylog.Logger;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -30,9 +31,12 @@ public class SoundsSettingsPanel extends SettingsPanel {
             var borderLayout = new BorderLayout();
             borderLayout.setHgap(10);
             borderLayout.setVgap(4);
+
+            JPanel rootPanel = new JPanel(new BorderLayout());
+            rootPanel.setBorder(BorderFactory.createRaisedBevelBorder());
+
             JPanel soundPanel = new JPanel(borderLayout);
             //soundPanel.setLayout(new BoxLayout(soundPanel, BoxLayout.X_AXIS));
-            soundPanel.setBorder(BorderFactory.createRaisedBevelBorder());
             soundPanel.setSize(300,300);
 
             JLabel label = new JLabel(gqSound.getFilename());
@@ -48,7 +52,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
             volumePanel.add(volumeSlider, BorderLayout.CENTER);
 
-            soundPanel.add(volumePanel);
+            soundPanel.add(volumePanel, BorderLayout.CENTER);
 
             JButton testSoundButton = new JButton("Test");
             testSoundButton.addActionListener(new AbstractAction() {
@@ -62,7 +66,16 @@ public class SoundsSettingsPanel extends SettingsPanel {
             p.add(testSoundButton);
             soundPanel.add(p, BorderLayout.EAST);
 
-            panel.add(soundPanel);
+            rootPanel.add(soundPanel, BorderLayout.CENTER);
+
+            JTextArea textAreaDescription = new JTextArea(gqSound.getDescription());
+            textAreaDescription.setBorder(new EmptyBorder(5, 5, 5, 5));
+            textAreaDescription.setEditable(false);
+            textAreaDescription.setBackground(panel.getBackground());
+            rootPanel.add(textAreaDescription, BorderLayout.SOUTH);
+
+
+            panel.add(rootPanel);
         }
 
         return panel;

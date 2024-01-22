@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 
 import static globalquake.sounds.Sounds.EXPORT_DIR;
 
@@ -25,8 +27,47 @@ public class GQSound {
 
     public double volume;
 
+    public static final Map<String, String> descriptions = new HashMap<>();
+
+    static{
+        descriptions.put("level_0.wav",
+                "Triggered once so-called Cluster is created. " +
+                "\nThis happens if 4 or more stations detect shaking in close proximity.");
+
+        descriptions.put("level_1.wav",
+                "Triggered when cluster reaches level 1. " +
+                "\nThis happens when at least 7 stations reach 64 counts or at least 4 stations reach 1,000 counts.");
+
+        descriptions.put("level_2.wav",
+                "Triggered when cluster reaches level 2. " +
+                        "\nThis happens when at least 7 stations reach 1,000 counts or at least 3 stations reach 10,000 counts.");
+
+        descriptions.put("level_3.wav",
+                "Triggered when cluster reaches level 3. " +
+                        "\nThis happens when at least 5 stations reach 10,000 counts or at least 3 stations reach 50,000 counts.");
+
+        descriptions.put("level_4.wav",
+                "Triggered when cluster reaches level 3. " +
+                        "\nThis happens when at least 4 stations reach 50,000 counts.");
+
+        descriptions.put("intensify.wav", "Triggered if the conditions specified in the previous Alerts settings tab are met.");
+        descriptions.put("felt.wav", "Triggered if shaking is expected in your home location." +
+                "\nThe threshold intensity scale and level can be configured in the Alerts tab.");
+        descriptions.put("felt_strong.wav", "Triggered if STRONG shaking is expected in your home location." +
+                "\nThe threshold intensity scale and level can be configured in the Alerts tab.");
+
+        descriptions.put("eew_warning.wav", "Triggered if there is high certainty in the detected earthquake and \n" +
+                "it has at least MMI VI estimated intensity on land.");
+
+        descriptions.put("countdown.wav", "Countdown of the last 10 seconds before S waves arrives at your home location\n" +
+                "if shaking is expected there.");
+
+        descriptions.put("update.wav", "Earthquake parameters updated (revision).");
+        descriptions.put("found.wav", "Earthquake epicenter determined for the first time and it appears on the map.");
+    }
+
     public GQSound(String filename){
-        this(filename, "");
+        this(filename, descriptions.getOrDefault(filename, "[No description provided]"));
     }
 
     public GQSound(String filename, String description) {
