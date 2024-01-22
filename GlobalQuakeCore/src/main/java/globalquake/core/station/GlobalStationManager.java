@@ -91,6 +91,10 @@ public class GlobalStationManager {
                     if(result.add(stationDistanceInfo)){
                         count++;
                     }
+
+                    if(stationDistanceInfo.dist() > 1000){
+                        break; // only 1 station furher than 1000km allowed
+                    }
                 }
             }
 
