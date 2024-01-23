@@ -128,6 +128,10 @@ public final class Settings {
 	public static Boolean displayAlertBox;
 	public static Boolean displayTime;
 
+	public static Integer globalVolume;
+
+	public static String timezoneStr;
+
 	public static String lastServerIP;
 
 	public static Integer lastServerPORT;
@@ -138,9 +142,6 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
-	public static Integer globalVolume;
-
-	public static String timezoneStr;
 
     static {
 		load();
