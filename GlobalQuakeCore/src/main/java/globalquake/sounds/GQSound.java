@@ -47,7 +47,7 @@ public class GQSound {
                         "\nThis happens when at least 5 stations reach 10,000 counts or at least 3 stations reach 50,000 counts.");
 
         descriptions.put("level_4.wav",
-                "Triggered when cluster reaches level 3. " +
+                "Triggered when cluster reaches level 4. " +
                         "\nThis happens when at least 4 stations reach 50,000 counts.");
 
         descriptions.put("intensify.wav", "Triggered if the conditions specified in the previous Alerts settings tab are met.");
