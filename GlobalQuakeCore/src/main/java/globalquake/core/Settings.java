@@ -11,9 +11,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.time.zone.ZoneRulesException;
 import java.util.Properties;
 
 import java.lang.reflect.Field;
@@ -71,18 +73,16 @@ public final class Settings {
 
 	public static Integer maxArchivedQuakes;
 
-	public static final DateTimeFormatter[] DATE_FORMATS = {
-			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
+	public static DateTimeFormatter[] DATE_FORMATS = {DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
 			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
-			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()),
-	};
+			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault())};
 
 	public static Boolean use24HFormat;
 	public static Double stationIntensityVisibilityZoomLevel;
 	public static Boolean hideDeadStations;
 
-	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
-	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
 
 	public static Boolean alertLocal;
 	public static Double alertLocalDist;
@@ -128,6 +128,10 @@ public final class Settings {
 	public static Boolean displayAlertBox;
 	public static Boolean displayTime;
 
+	public static Integer globalVolume;
+
+	public static String timezoneStr;
+
 	public static String lastServerIP;
 
 	public static Integer lastServerPORT;
@@ -138,7 +142,7 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
-    public static String FDSNWSEventIP;
+   public static String FDSNWSEventIP;
     public static Integer FDSNWSEventPort;
     public static Boolean autoStartFDSNWSEventServer;
 
@@ -189,12 +193,31 @@ public final class Settings {
 		});
 	}
 
+	public static ZoneId getTimezone(){
+		ZoneId zoneId = ZoneId.systemDefault();
+		try {
+			zoneId = ZoneId.of(timezoneStr);
+		}catch(DateTimeException e){
+			Logger.warn("Failed to parse timezone %s, defaulting to %s".formatted(timezoneStr, ZoneId.systemDefault().getId()));
+			timezoneStr = ZoneId.systemDefault().getId();
+		}
+
+		return zoneId;
+	}
+
 	private static void load() {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("timezoneStr", ZoneId.systemDefault().getId());
+
+		loadProperty("globalVolume", "100",
+				o -> validateInt(0, 100, (Integer) o));
+
+
 		loadProperty("stationsShapeIndex", "0",
 				o -> validateInt(0, StationsShape.values().length, (Integer) o));
 
@@ -287,6 +310,15 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
+	}
+
+	public static void initTimezoneSettings() {
+		DATE_FORMATS = new DateTimeFormatter[]{DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(getTimezone())};
+
+		formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(getTimezone());
+		formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(getTimezone());
 	}
 
 
@@ -403,6 +435,12 @@ public final class Settings {
 		lastSave = System.currentTimeMillis();
 		changes++;
 
+		try{
+			HypocsSettings.save();
+		} catch (IOException e){
+			Logger.error(e);
+		}
+
 		try {
 			Field[] fields = Settings.class.getDeclaredFields();
 			for (Field field : fields) {
@@ -421,6 +459,8 @@ public final class Settings {
 		} catch (IOException e) {
 			GlobalQuake.getErrorHandler().handleException(e);
 		}
+
+		initTimezoneSettings();
 
 	}
 

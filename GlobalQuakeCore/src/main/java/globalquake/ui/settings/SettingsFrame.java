@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import org.tinylog.Logger;
 
@@ -16,26 +17,29 @@ import java.util.List;
 public class SettingsFrame extends GQFrame {
 
 	private final List<SettingsPanel> panels = new LinkedList<>();
+	private final boolean isClient;
 	private JTabbedPane tabbedPane;
 
 	public static void main(String[] args) throws Exception{
 		TauPTravelTimeCalculator.init();
+		Sounds.load();
 		GlobalQuake.prepare(new File("./.GlobalQuakeData/"), null);
 		EventQueue.invokeLater(() -> {
             try {
-                new SettingsFrame(null).setVisible(true);
+                new SettingsFrame(null, false).setVisible(true);
             } catch (Exception e) {
 				Logger.error(e);
             }
         });
 	}
 
-	public SettingsFrame(Component parent) {
+	public SettingsFrame(Component parent, boolean isClient) {
+		this.isClient = isClient;
 		initialize(parent);
 	}
 
 	private void initialize(Component parent) {
-		setTitle("GlobalQuake Settings");
+		setTitle(!isClient ? "GlobalQuake Settings" : "GlobalQuake Settings (Client)");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JPanel contentPanel = new JPanel(new BorderLayout());
@@ -87,8 +91,11 @@ public class SettingsFrame extends GQFrame {
 		panels.add(new GeneralSettingsPanel(this));
 		panels.add(new GraphicsSettingsPanel());
 		panels.add(new AlertSettingsPanel());
-		panels.add(new PerformanceSettingsPanel());
-		panels.add(new HypocenterAnalysisSettingsPanel());
+		panels.add(new SoundsSettingsPanel());
+		if(!isClient) {
+			panels.add(new PerformanceSettingsPanel());
+			panels.add(new HypocenterAnalysisSettingsPanel());
+		}
 		panels.add(new DebugSettingsPanel());
 
 		for (SettingsPanel panel : panels) {

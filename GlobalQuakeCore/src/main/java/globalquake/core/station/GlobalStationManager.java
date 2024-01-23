@@ -4,17 +4,16 @@ import globalquake.core.database.*;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalStationManager {
 
-    private final List<AbstractStation> stations = new ArrayList<>();
-
     private static final int RAYS = 9;
+    private static final int STATIONS_PER_RAY = 3;
+    private final Collection<AbstractStation> stations = new ConcurrentLinkedQueue<>();
+
 
     private final AtomicInteger nextID = new AtomicInteger(0);
     protected UUID indexing;
@@ -48,58 +47,59 @@ public class GlobalStationManager {
         Logger.info("Initialized " + stations.size() + " Stations.");
     }
 
-    public static void createListOfClosestStations(List<AbstractStation> stations) {
-        for (AbstractStation stat : stations) {
-            ArrayList<ArrayList<StationDistanceInfo>> rays = new ArrayList<>();
+    public static void createListOfClosestStations(Collection<AbstractStation> stations){
+        stations.parallelStream().forEach(station -> {
+            @SuppressWarnings("unchecked") Queue<NearbyStationDistanceInfo>[] rays = new Queue[RAYS];
             for (int i = 0; i < RAYS; i++) {
-                rays.add(new ArrayList<>());
+                rays[i] = new PriorityQueue<>(Comparator.comparing(NearbyStationDistanceInfo::dist));
             }
-            int num = 0;
-            for (int i = 0; i < 2; i++) {
-                for (AbstractStation stat2 : stations) {
-                    if (!(stat2.getId() == stat.getId())) {
-                        double dist = GeoUtils.greatCircleDistance(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
-                                stat2.getLongitude());
-                        if (dist > (i == 0 ? 1200 : 3600)) {
-                            continue;
-                        }
-                        double ang = GeoUtils.calculateAngle(stat.getLatitude(), stat.getLongitude(), stat2.getLatitude(),
-                                stat2.getLongitude());
-                        int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
-                        rays.get(ray).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
-                        int ray2 = ray + 1;
-                        if (ray2 == RAYS) {
-                            ray2 = 0;
-                        }
-                        int ray3 = ray - 1;
-                        if (ray3 == -1) {
-                            ray3 = RAYS - 1;
-                        }
-                        rays.get(ray2).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
-                        rays.get(ray3).add(new StationDistanceInfo(stat2.getId(), (float) dist, (float) ang));
-                        num++;
+
+            for (AbstractStation station2 : stations) {
+                if (!(station2.getId() == station.getId())) {
+                    double dist = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), station2.getLatitude(),
+                            station2.getLongitude());
+
+                    if(dist > 4000){
+                        continue;
+                    }
+
+                    double ang = GeoUtils.calculateAngle(station.getLatitude(), station.getLongitude(), station2.getLatitude(),
+                            station2.getLongitude());
+                    int ray = (int) ((ang / 360.0) * (RAYS - 1.0));
+
+                    NearbyStationDistanceInfo nearbyStationDistanceInfo = new NearbyStationDistanceInfo(station2, (float) dist, (float) ang);
+
+                    rays[ray].add(nearbyStationDistanceInfo);
+                    int ray2 = ray + 1;
+                    if (ray2 == RAYS) {
+                        ray2 = 0;
+                    }
+                    int ray3 = ray - 1;
+                    if (ray3 == -1) {
+                        ray3 = RAYS - 1;
+                    }
+                    rays[ray2].add(nearbyStationDistanceInfo);
+                    rays[ray3].add(nearbyStationDistanceInfo);
+                }
+            }
+
+            Set<NearbyStationDistanceInfo> result = new HashSet<>();
+            for(Queue<NearbyStationDistanceInfo> ray : rays){
+                int count = 0;
+                while(count < STATIONS_PER_RAY && !ray.isEmpty()) {
+                    NearbyStationDistanceInfo stationDistanceInfo = ray.remove();
+                    if(result.add(stationDistanceInfo)){
+                        count++;
+                    }
+
+                    if(stationDistanceInfo.dist() > 1000){
+                        break; // only 1 station furher than 1000km allowed
                     }
                 }
-                if (num > 4) {
-                    break;
-                }
             }
-            ArrayList<Integer> closestStations = new ArrayList<>();
-            ArrayList<NearbyStationDistanceInfo> nearbys = new ArrayList<>();
-            for (int i = 0; i < RAYS; i++) {
-                if (!rays.get(i).isEmpty()) {
-                    rays.get(i).sort(Comparator.comparing(StationDistanceInfo::dist));
-                    for (int j = 0; j <= Math.min(1, rays.get(i).size() - 1); j++) {
-                        if (!closestStations.contains(rays.get(i).get(j).id)) {
-                            closestStations.add(rays.get(i).get(j).id);
-                            nearbys.add(new NearbyStationDistanceInfo(getStationById(stations, rays.get(i).get(j).id),
-                                    rays.get(i).get(j).dist, rays.get(i).get(j).ang));
-                        }
-                    }
-                }
-            }
-            stat.setNearbyStations(nearbys);
-        }
+
+            station.setNearbyStations(result);
+        });
     }
 
     private GlobalStation createGlobalStation(Station station, Channel ch) {
@@ -109,12 +109,8 @@ public class GlobalStationManager {
                 nextID.getAndIncrement(), ch.selectedSeedlinkNetwork, ch.getSensitivity(), ch.getInputType());
     }
 
-    public List<AbstractStation> getStations() {
+    public Collection<AbstractStation> getStations() {
         return stations;
-    }
-
-    public static AbstractStation getStationById(List<AbstractStation> stations, int id) {
-        return stations.get(id);
     }
 
     public UUID getIndexing() {
@@ -125,9 +121,5 @@ public class GlobalStationManager {
         return stations.stream().filter(station -> station.getIdentifier().equals(identifier)).findFirst().orElse(null);
     }
 
-
-    record StationDistanceInfo(int id, float dist, float ang) {
-
-    }
 
 }

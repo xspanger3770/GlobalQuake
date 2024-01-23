@@ -84,19 +84,16 @@ public class EarthquakeArchive {
 				archiveQuake(earthquake);
 
 				saveArchive();
-				if (Settings.reportsEnabled) {
-					reportQuake(earthquake);
-				}
 			} catch(Exception e){
 				Logger.error(e);
 			}
         });
 	}
 
-	private void reportQuake(Earthquake earthquake) {
+	private void reportQuake(Earthquake earthquake, ArchivedQuake archivedQuake) {
 		executor.submit(() -> {
             try {
-                EarthquakeReporter.report(earthquake);
+                EarthquakeReporter.report(earthquake, archivedQuake);
             } catch (Exception e) {
                 Logger.error(e);
             }
@@ -104,8 +101,11 @@ public class EarthquakeArchive {
 	}
 
 	public void archiveQuake(Earthquake earthquake) {
-		archiveQuake(new ArchivedQuake(earthquake), earthquake);
-
+		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
+		archiveQuake(archivedQuake, earthquake);
+		if (Settings.reportsEnabled) {
+			reportQuake(earthquake, archivedQuake);
+		}
 	}
 
 	protected synchronized void archiveQuake(ArchivedQuake archivedQuake, Earthquake earthquake) {

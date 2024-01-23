@@ -131,14 +131,14 @@ public class DataService extends GlobalQuakeEventListener {
                 if (previous == null || !previous.equals(status)) {
                     data.add(new StationIntensityData(abstractStation.getId(), status.intensity(), status.eventMode()));
                     if (data.size() >= STATIONS_INFO_PACKET_MAX_SIZE) {
-                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), GlobalQuake.instance.currentTimeMillis(), data));
                         data = new ArrayList<>();
                     }
                 }
             }
 
             if (!data.isEmpty()) {
-                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), GlobalQuake.instance.currentTimeMillis(), data));
             }
         } catch(Exception e){
             Logger.tag("Server").error(e);
@@ -427,7 +427,7 @@ public class DataService extends GlobalQuakeEventListener {
                                 station.getStationCode(),
                                 station.getChannelName(),
                                 station.getLocationCode(),
-                                System.currentTimeMillis(),
+                                GlobalQuake.instance.currentTimeMillis(),
                                 (float) station.getMaxRatio60S(),
                                 station.isInEventMode(),
                                 station.getInputType()

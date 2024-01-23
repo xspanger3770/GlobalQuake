@@ -1,6 +1,7 @@
 package globalquake.core.report;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.data.Earthquake;
@@ -15,8 +16,7 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +35,7 @@ public class EarthquakeReporter {
 	private static final Color landC = new Color(15, 47, 68);
 	private static final Color borderC = new Color(153, 153, 153);
 
-	public static void report(Earthquake earthquake) {
+	public static void report(Earthquake earthquake, ArchivedQuake archivedQuake) {
 		File folder = new File(ANALYSIS_FOLDER, String.format("M%2.2f_%s_%s", earthquake.getMag(),
 				earthquake.getRegion().replace(' ', '_'), fileFormat.format(Instant.ofEpochMilli(earthquake.getOrigin())) + "/"));
 		if (!folder.exists()) {
@@ -52,9 +52,21 @@ public class EarthquakeReporter {
 					station.getAlt());
 		}
 
+		saveArchivedQuake(folder, archivedQuake);
 		drawMap(folder, earthquake);
 		drawIntensities(folder, earthquake);
 	}
+
+	private static void saveArchivedQuake(File folder, ArchivedQuake archivedQuake) {
+		File file = new File(folder, "archivedQuake.dat");
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(archivedQuake);
+			out.close();
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
 
 	private static void calculatePos(Earthquake earthquake) {
 		centerLat = earthquake.getLat();
@@ -94,7 +106,7 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        ArrayList<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
+        java.util.List<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
                 : scroll < 4.8 ? Regions.raw_polygonsHD : Regions.raw_polygonsMD;
         for (org.geojson.Polygon polygon : pols) {
             java.awt.Polygon awt = new java.awt.Polygon();

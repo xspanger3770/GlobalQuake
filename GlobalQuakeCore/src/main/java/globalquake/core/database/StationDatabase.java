@@ -71,7 +71,7 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("ETHZ", "http://eida.ethz.ch/fdsnws/station/1/"));
         stationSources.add(new StationSource("GEOFON, GFZ", "http://geofon.gfz-potsdam.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("ICGC", "http://ws.icgc.cat/fdsnws/station/1/"));
-        stationSources.add(new StationSource("IPGP", "http://eida.ipgp.fr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("IPGP", "http://ws.ipgp.fr/fdsnws/station/1/"));
         stationSources.add(new StationSource("INGV", "http://webservices.ingv.it/fdsnws/station/1/"));
         stationSources.add(new StationSource("LMU", "http://erde.geophysik.uni-muenchen.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("NIEP", "https://eida-sc3.infp.ro/fdsnws/station/1/"));

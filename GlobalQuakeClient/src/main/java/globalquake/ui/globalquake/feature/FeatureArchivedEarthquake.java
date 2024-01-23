@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -76,7 +77,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         }
 
         if(Settings.oldEventsTimeFilterEnabled) {
-            displayed &= (System.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
+            displayed &= (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
         }
 
         if(displayed) {
@@ -157,7 +158,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         Color col;
 
         if(Settings.selectedEventColorIndex == 0){
-            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            double ageInHRS = (GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
             col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
                     : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
         } else if(Settings.selectedEventColorIndex == 1){

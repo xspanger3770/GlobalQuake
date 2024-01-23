@@ -32,7 +32,7 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
     private void checkClusters() {
         List<Cluster> toRemove = new ArrayList<>();
         for(Cluster cluster : clusters){
-            if(System.currentTimeMillis() - cluster.getLastUpdate() > 30 * 60 * 1000){
+            if(GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 30 * 60 * 1000){
                 toRemove.add(cluster);
             }
         }

@@ -1,5 +1,6 @@
 package globalquake.core.earthquake.data;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.alert.Warnable;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.analysis.Event;
@@ -65,7 +66,7 @@ public class Cluster implements Warnable {
 		this.rootLon = rootLon;
 		this.anchorLon = NONE;
 		this.anchorLat = NONE;
-		this.lastUpdate = System.currentTimeMillis();
+		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		this.updateCount = 0;
 		this.earthquake = null;
 	}
@@ -87,7 +88,7 @@ public class Cluster implements Warnable {
 	}
 
 	public void addEvent() {
-		lastUpdate = System.currentTimeMillis();
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class Cluster implements Warnable {
 		if (checkForUpdates()) {
 			calculateRoot(anchorLat == NONE);
 			calculateLevel();
-			lastUpdate = System.currentTimeMillis();
+			lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		}
 	}
 
@@ -151,16 +152,16 @@ public class Cluster implements Warnable {
 		double dist_avg = _dist_sum / n;
 
 		int _level = 0;
-		if ((lvl_1 > 6 || lvl_2 > 3) && dist_avg > 10) {
+		if ((lvl_1 >= 7 || lvl_2 >= 4) && dist_avg > 10) {
 			_level = 1;
 		}
-		if ((lvl_2 > 6 || lvl_3 > 3) && dist_avg > 25) {
+		if ((lvl_2 >= 7 || lvl_3 >= 3) && dist_avg > 25) {
 			_level = 2;
 		}
-		if ((lvl_3 > 4 || lvl_4 >= 3) && dist_avg > 50) {
+		if ((lvl_3 >= 5 || lvl_4 >= 3) && dist_avg > 50) {
 			_level = 3;
 		}
-		if ((lvl_4 > 3) && dist_avg > 75) {
+		if ((lvl_4 >= 4) && dist_avg > 75) {
 			_level = 4;
 		}
 		level = _level;
@@ -218,6 +219,8 @@ public class Cluster implements Warnable {
 		if (n > 0) {
 			rootLat = sumLat / n;
 			rootLon = sumLon / n;
+			anchorLat = rootLat;
+			anchorLon = rootLon;
 		}
 	}
 
@@ -295,7 +298,7 @@ public class Cluster implements Warnable {
 	}
 
 	public void updateLevel(int level) {
-		lastUpdate = System.currentTimeMillis();
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 		this.level = level;
 	}
 

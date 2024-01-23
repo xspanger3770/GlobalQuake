@@ -311,7 +311,7 @@ public class StationMonitorPanel extends JPanel {
 	}
 
 	private long getTime() {
-		return System.currentTimeMillis();
+		return GlobalQuake.instance != null ? GlobalQuake.instance.currentTimeMillis() : System.currentTimeMillis();
 	}
 
 	private double getX(long time) {
