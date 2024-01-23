@@ -28,8 +28,8 @@ public class FDSNWSDownloader {
     private static final DateTimeFormatter format1 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(ZoneId.systemDefault());
     private static final int TIMEOUT_SECONDS = 120;
 
-    public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B', 'C');
-    public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N');
+    public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B', 'C', 'A');
+    public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N', 'C');
 
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
