@@ -7,4 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public record StationsIntensityPacket(UUID stationsIndexing, long time, List<StationIntensityData> intensities) implements Packet {
+    private static final long serialVersionUID = 0L;
 }

@@ -6,4 +6,5 @@ import java.io.Serializable;
 
 public record StationInfoData(int index, float lat, float lon, String network, String station, String channel, String location,
                               long time, float maxIntensity, boolean eventMode, InputType sensorType) implements Serializable {
+    public static final long serialVersionUID = 0L;
 }

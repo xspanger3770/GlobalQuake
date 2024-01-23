@@ -8,5 +8,5 @@ public record AdvancedHypocenterData(HypocenterQualityData qualityData,
                                      LocationConfidenceIntervalData locationConfidenceIntervalData,
                                      StationCountData stationCountData,
                                      List<Float> magsData) implements Serializable {
-
+    public static final long serialVersionUID = 0L;
 }

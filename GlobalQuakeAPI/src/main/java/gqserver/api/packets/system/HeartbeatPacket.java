@@ -7,6 +7,8 @@ import java.io.IOException;
 
 public record HeartbeatPacket() implements Packet {
 
+    private static final long serialVersionUID = 0L;
+
     @Override
     public void onServerReceive(ServerClient serverClient) throws IOException {
         serverClient.noteHeartbeat();
