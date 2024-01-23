@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:q="http://quakeml.org/xmlns/quakeml/1.2" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <resources base="fdsnws/event/1/">
+    <resource path="application.wadl">
+      <method id="application.wadl" name="GET">
+      <response status="200">
+        <representation mediaType="application/xml"/>
+      </response>
+      </method>
+    </resource>
+    <resource path="query">
+      <method id="query" name="GET">
+      <request>
+        <param name="starttime" style="query" type="xs:dateTime"/>
+        <param name="endtime" style="query" type="xs:dateTime"/>
+        <param name="minlatitude" style="query" type="xs:double" default="-90"/>
+        <param name="maxlatitude" style="query" type="xs:double" default="90"/>
+        <param name="minlongitude" style="query" type="xs:double" default="-180"/>
+        <param name="maxlongitude" style="query" type="xs:double" default="180"/>
+        <param name="mindepth" style="query" type="xs:double"/>
+        <param name="maxdepth" style="query" type="xs:double"/>
+        <param name="minmagnitude" style="query" type="xs:double"/>
+        <param name="maxmagnitude" style="query" type="xs:double"/>
+
+        <!-- extensions -->
+        <param name="format" style="query" default="quakeml">
+          <option value="xml" mediaType="application/xml"/>
+          <option value="text" mediaType="text/csv"/>
+          <option value="geojson" mediaType="application/json"/>
+        </param>
+
+        </request>
+      <response status="200">
+        <representation mediaType="application/xml" element="q:quakeml"/>
+        <representation mediaType="text/csv"/>
+        <representation mediaType="text/javascript"/>
+        <representation mediaType="application/json"/>
+      </response>
+      </method>
+    </resource>
+  </resources>
+</application>
