@@ -326,7 +326,7 @@ public class DataService extends GlobalQuakeEventListener {
     private static HypocenterData createHypocenterData(Earthquake earthquake) {
         return new HypocenterData(
                 earthquake.getUuid(), earthquake.getRevisionID(), (float) earthquake.getLat(), (float) earthquake.getLon(),
-                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag());
+                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag(), earthquake.getLastUpdate(), earthquake.getRegion());
     }
 
     private void broadcast(List<ServerClient> clients, Packet packet) {

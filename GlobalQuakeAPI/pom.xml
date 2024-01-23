@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>GlobalQuakeAPI</artifactId>
-    <version>0.8.0</version>
+    <version>0.9.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
