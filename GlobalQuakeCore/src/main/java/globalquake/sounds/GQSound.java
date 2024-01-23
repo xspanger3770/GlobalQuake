@@ -48,16 +48,19 @@ public class GQSound {
 
         descriptions.put("level_4.wav",
                 "Triggered when cluster reaches level 4. " +
-                        "\nThis happens when at least 4 stations reach 50,000 counts.");
+                        "\nThis happens when at least 4 stations reach 50,000 counts. " +
+                        "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
 
         descriptions.put("intensify.wav", "Triggered if the conditions specified in the previous Alerts settings tab are met.");
-        descriptions.put("felt.wav", "Triggered if shaking is expected in your home location." +
+        descriptions.put("felt.wav", "Triggered if shaking is expected at your home location." +
                 "\nThe threshold intensity scale and level can be configured in the Alerts tab.");
-        descriptions.put("felt_strong.wav", "Triggered if STRONG shaking is expected in your home location." +
-                "\nThe threshold intensity scale and level can be configured in the Alerts tab.");
+        descriptions.put("felt_strong.wav", "Triggered if STRONG shaking is expected at your home location." +
+                "\nThe threshold intensity scale and level can be configured in the Alerts tab."+
+                "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
 
         descriptions.put("eew_warning.wav", "Triggered if there is high certainty in the detected earthquake and \n" +
-                "it has at least MMI VI estimated intensity on land.");
+                "it has at least MMI VI estimated intensity on land."+
+                "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
 
         descriptions.put("countdown.wav", "Countdown of the last 10 seconds before S waves arrives at your home location\n" +
                 "if shaking is expected there.");
