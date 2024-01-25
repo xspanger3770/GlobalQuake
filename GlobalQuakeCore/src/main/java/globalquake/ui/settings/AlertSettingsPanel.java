@@ -42,6 +42,8 @@ public class AlertSettingsPanel extends SettingsPanel {
         chkBoxPossibleShaking = new JCheckBox("Alert possible shaking closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
         textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance) ,12);
         textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
+
+        // TODO TBD from here
         textFieldRegionDist =  new JTextField("1",12);
         textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
 
