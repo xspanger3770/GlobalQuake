@@ -130,9 +130,9 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
         // This is for the google earth coordinates
         JLabel glgECoords = new JLabel("Home Coordinates: ");
-        textFieldCoords = new JTextField(30);
+        textFieldCoords = new JTextField(20);
         textFieldCoords.setText(convertToGoogleEarthFormat(Settings.homeLat, Settings.homeLon));
-        textFieldCoords.setColumns(20);
+        textFieldCoords.setColumns(15);
 
         // Creates a panel for entering home coordinates
         JPanel allPanel = new JPanel();
@@ -158,7 +158,6 @@ public class GeneralSettingsPanel extends SettingsPanel {
         chkBoxHomeLoc = new JCheckBox("Display home location");
         chkBoxHomeLoc.setSelected(Settings.displayHomeLocation);
         // add all panels to outside panel
-        outsidePanel.add(chkBoxHomeLoc);
         outsidePanel.add(homeLocationPanel, BorderLayout.NORTH);
         outsidePanel.add(infoLocation, BorderLayout.CENTER);
         outsidePanel.add(chkBoxHomeLoc, BorderLayout.SOUTH);
