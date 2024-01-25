@@ -141,8 +141,10 @@ public final class Settings {
 	public static Integer globalVolume;
 
 	public static String timezoneStr;
+    public static Boolean alertPossibleShaking;
+	public static Double alertPossibleShakingDistance;
 
-    static {
+	static {
 		load();
 		save();
 		try {
@@ -207,6 +209,9 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("alertPossibleShakingDistance", "200",  o -> validateDouble(0, 30000, (Double) o));
+		loadProperty("alertPossibleShaking", "true");
 
 		loadProperty("timezoneStr", ZoneId.systemDefault().getId());
 

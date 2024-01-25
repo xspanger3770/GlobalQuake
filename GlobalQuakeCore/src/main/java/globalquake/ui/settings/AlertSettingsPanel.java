@@ -19,20 +19,63 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JCheckBox chkBoxJumpToAlert;
     private IntensityScaleSelector shakingThreshold;
     private IntensityScaleSelector strongShakingThreshold;
+    private JCheckBox chkBoxPossibleShaking;
+    private JTextField textFieldPossibleShakingDistance;
 
     public AlertSettingsPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        createAlertDialogSettings();
-        createAlertLevels();
+        setLayout(new BorderLayout());
 
-        for(int i = 0; i < 10; i++){
-            add(new JPanel()); // fillers
-        }
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        tabbedPane.addTab("Warnings", createWarningsTab());
+        tabbedPane.addTab("Pings", createPingsTab());
+
+        add(tabbedPane, BorderLayout.CENTER);
 
         refreshUI();
     }
 
-    private void createAlertLevels() {
+    private Component createPingsTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        chkBoxPossibleShaking = new JCheckBox("Alert possible shaking closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
+        textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance) ,12);
+        textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
+        textFieldRegionDist =  new JTextField("1",12);
+        textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
+
+        chkBoxRegion.addChangeListener(changeEvent -> {
+            textFieldRegionMag.setEnabled(chkBoxRegion.isSelected());
+            textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
+        });
+
+        JPanel regionPanel = new JPanel(new GridLayout(2,1));
+        regionPanel.setBorder(BorderFactory.createTitledBorder("Regional area"));
+
+        JPanel regionMagPanel = new JPanel();
+        regionMagPanel.setLayout(new BoxLayout(regionMagPanel, BoxLayout.X_AXIS));
+        regionMagPanel.add(chkBoxRegion);
+        regionMagPanel.add(textFieldRegionMag);
+
+        regionPanel.add(regionMagPanel);
+
+        return panel;
+    }
+
+    private Component createWarningsTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        panel.add(createAlertDialogSettings());
+        panel.add(createAlertLevels());
+
+        fill(panel, 10);
+
+        return panel;
+    }
+
+    private Component createAlertLevels() {
         JPanel panel = new JPanel();
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -43,10 +86,10 @@ public class AlertSettingsPanel extends SettingsPanel {
         panel.add(strongShakingThreshold = new IntensityScaleSelector("Strong shaking alert threshold: ",
                 Settings.strongShakingLevelScale, Settings.strongShakingLevelIndex));
 
-        add(panel);
+        return panel;
     }
 
-    private void createAlertDialogSettings() {
+    private Component createAlertDialogSettings() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createTitledBorder("Alert settings"));
@@ -123,7 +166,7 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         panel.add(panel2);
 
-        add(panel);
+        return panel;
     }
 
     @Override
