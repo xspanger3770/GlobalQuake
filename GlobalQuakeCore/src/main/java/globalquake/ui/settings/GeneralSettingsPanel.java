@@ -228,13 +228,20 @@ public class GeneralSettingsPanel extends SettingsPanel {
                 // Convert degrees, minutes, and seconds to decimal degrees
                 homeLat = latDegrees + (latMinutes / 60.0) + (latSeconds / 3600.0);
                 homeLon = lonDegrees + (lonMinutes / 60.0) + (lonSeconds / 3600.0);
-    
+
                 // Adjust for North/South and East/West directions
                 if (latDirection.equals("S")) {
                     homeLat = -homeLat;
                 }
                 if (lonDirection.equals("W")) {
                     homeLon = -homeLon;
+                }
+
+                // Validate coordinates
+                if (!isValidCoords(homeLat,homeLon)) {
+                    JOptionPane.showMessageDialog(this, "Invalid coordinates. Latitude must be between -90 and 90, and longitude must be between -180 and 180.  Defaulting Location to [ 0°00'00\"N 0°00'00\"E ]", "Error", JOptionPane.ERROR_MESSAGE);
+                    homeLat = 0.0;
+                    homeLon = 0.0;
                 }
     
                 // Update the text field with the formatted coordinates
@@ -245,6 +252,16 @@ public class GeneralSettingsPanel extends SettingsPanel {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Error parsing coordinates", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /*
+        * @author Chris Eberle
+        * @param longitude and latitude doubles
+        * @return boolean representing if coords are within correct degree range
+    */
+    private boolean isValidCoords(double latitude, double longitude) {
+
+        return (latitude >= -90 && latitude <= 90) && (longitude >= -180 && longitude <= 180);
     }
 
     /**
