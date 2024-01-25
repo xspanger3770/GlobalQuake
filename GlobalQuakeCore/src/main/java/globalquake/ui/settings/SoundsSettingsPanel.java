@@ -10,6 +10,7 @@ import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,6 +19,7 @@ import java.io.IOException;
 public class SoundsSettingsPanel extends SettingsPanel {
 
     private JSlider sliderMasterVolume;
+    private JCheckBox chkBoxEnableSounds;
 
     public SoundsSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -140,6 +142,17 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 null);
 
         JPanel fill1 = new JPanel();
+
+        chkBoxEnableSounds = new JCheckBox("Enable sounds");
+        chkBoxEnableSounds.setSelected(Settings.enableSound);
+        fill1.add(chkBoxEnableSounds);
+
+        chkBoxEnableSounds.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent changeEvent) {
+                Settings.enableSound = chkBoxEnableSounds.isSelected();
+            }
+        });
 
         JButton btnSoundsFolder=new JButton("Open Sounds Folder");
         btnSoundsFolder.addActionListener(new AbstractAction() {
