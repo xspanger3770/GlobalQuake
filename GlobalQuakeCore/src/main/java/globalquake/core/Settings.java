@@ -140,8 +140,8 @@ public final class Settings {
 	public static Boolean displayCapitalCities;
 
 	public static String FDSNWSEventIP;
-	public static Integer FDSNWSEventPort;
-	public static Boolean autoStartFDSNWSEventServer;
+	 public static Integer FDSNWSEventPort;
+	 public static Boolean autoStartFDSNWSEventServer;
 
 	static {
 		load();
