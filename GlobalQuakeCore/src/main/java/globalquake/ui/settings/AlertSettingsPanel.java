@@ -25,6 +25,7 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JTextField textFieldQuakeMinMag;
     private JTextField textFieldQuakeMaxDist;
     private JLabel label2;
+    private IntensityScaleSelector eewThreshold;
 
     public AlertSettingsPanel() {
         setLayout(new BorderLayout());
@@ -45,6 +46,15 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         createPossibleShakingPanel(panel);
         createEarthquakeSoundsPanel(panel);
+
+        JPanel eewThresholdPanel = new JPanel(new GridLayout(2,1));
+        eewThresholdPanel.setBorder(BorderFactory.createTitledBorder("EEW"));
+        eewThresholdPanel.add(new JLabel("Trigger eew_warning.wav sound effect if estimated intensity at land reaches: "));
+
+        eewThresholdPanel.add(eewThreshold = new IntensityScaleSelector("",
+                Settings.eewScale, Settings.eewLevelIndex));
+
+        panel.add(eewThresholdPanel);
 
         fill(panel, 20);
 
@@ -253,6 +263,9 @@ public class AlertSettingsPanel extends SettingsPanel {
         Settings.enableEarthquakeSounds = chkBoxEarthquakeSounds.isSelected();
         Settings.earthquakeSoundsMinMagnitude = parseDouble(textFieldQuakeMinMag.getText(), "Earthquake minimum magnitude to play sound", 0, 10);
         Settings.earthquakeSoundsMaxDist = parseDouble(textFieldQuakeMaxDist.getText(), "Earthquake maximum distance to play sound", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
+
+        Settings.eewScale = eewThreshold.getShakingScaleComboBox().getSelectedIndex();
+        Settings.eewLevelIndex = eewThreshold.getLevelComboBox().getSelectedIndex();
     }
 
     @Override

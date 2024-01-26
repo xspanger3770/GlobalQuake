@@ -106,7 +106,8 @@ public class SoundsService {
             double pga = GeoUtils.pgaFunction(quake.getMag(), quake.getDepth(), quake.getDepth());
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
-                if (info.maxPGA >= MMIIntensityScale.VI.getPga() && !info.warningPlayed && level >= 2) {
+                double threshold_eew = IntensityScales.INTENSITY_SCALES[Settings.eewScale].getLevels().get(Settings.eewLevelIndex).getPga();
+                if (info.maxPGA >= threshold_eew && !info.warningPlayed && level >= 2) {
                     Sounds.playSound(Sounds.eew_warning);
                     info.warningPlayed = true;
                 }

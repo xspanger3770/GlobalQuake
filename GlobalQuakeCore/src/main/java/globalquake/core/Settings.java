@@ -146,6 +146,8 @@ public final class Settings {
 	public static Boolean enableEarthquakeSounds;
 	public static Double earthquakeSoundsMinMagnitude;
 	public static Double earthquakeSoundsMaxDist;
+	public static Integer eewScale;
+	public static Integer eewLevelIndex;
 
 	static {
 		load();
@@ -163,6 +165,11 @@ public final class Settings {
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("eewScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("eewLevelIndex", "5",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[eewScale].getLevels().size() - 1, (Integer) o));
 
 		loadProperty("earthquakeSoundsMaxDist", "30000.0",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("earthquakeSoundsMinMagnitude", "0.0",  o -> validateDouble(0, 10, (Double) o));
