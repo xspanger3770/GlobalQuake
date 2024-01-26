@@ -16,6 +16,7 @@ import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,15 +33,20 @@ public class SoundsService {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
-                Sounds.playSound(Sounds.found);
+                if(SoundsService.this.canPing(event.earthquake())) {
+                    Sounds.playSound(Sounds.found);
+                }
             }
 
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
-                Sounds.playSound(Sounds.update);
+                if(SoundsService.this.canPing(event.earthquake())) {
+                    Sounds.playSound(Sounds.update);
+                }
             }
         });
     }
+
 
     private void checkSounds() {
         try {
@@ -139,6 +145,24 @@ public class SoundsService {
                 }
             }
         }
+    }
+
+
+    private boolean canPing(Earthquake earthquake) {
+        if(!Settings.enableEarthquakeSounds){
+            return false;
+        }
+
+        if(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude){
+            return false;
+        }
+
+        double distGCD = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
+        if(distGCD > Settings.earthquakeSoundsMaxDist){
+            return false;
+        }
+
+        return true;
     }
 
     private boolean canPing(Cluster cluster) {
