@@ -28,7 +28,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private Point dragStart;
     private Point lastMouse;
 
-    private Date dragStartTime;
+    private long dragStartTime;
 
     private final LinkedList<Double> recentSpeeds = new LinkedList<>();
     private final int maxRecentSpeeds = 20; // a smaller number will average more of the end of the drag
@@ -88,15 +88,14 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 if (!_interactionAllowed()) {
                     return;
                 }
-                if (dragStart == null) {
+                if (dragStart == null || dragStartTime == 0) {
                     return;
                 }
 
                 double deltaX = (lastMouse.getX() - dragStart.getX());
                 double deltaY = (lastMouse.getY() - dragStart.getY());
 
-                Date now = new Date();
-                long timeElapsed = now.getTime() - dragStartTime.getTime();
+                long timeElapsed = System.currentTimeMillis() - dragStartTime;
 
                 // to prevent Infinity/NaN glitch
                 if (timeElapsed > 5) {
@@ -121,7 +120,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             @Override
             public void mousePressed(MouseEvent e) {
                 mouseDown = true;
-                dragStartTime = new Date();
+                dragStartTime = System.currentTimeMillis();
                 spinSpeed = 0; //Prevent Jittering
 
                 dragStart = e.getPoint();
@@ -220,7 +219,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
             return;
         }
 
-        int steps = 250;
+        int fps = Settings.fpsIdle;
+
+        int steps = fps * 5;
         final int[] step = {0};
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -262,7 +263,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 step[0]++;
             }
-        }, 0, 20);
+        }, 0, 1000 / fps);
 
         try {
             // Block the main thread until the animation is finished to avoid multiple animations running at once
@@ -325,8 +326,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private double calculateSpin() {
-        Date now = new Date();
-        long timeElapsed = now.getTime() - dragStartTime.getTime();
+        long timeElapsed = System.currentTimeMillis() - dragStartTime;
 
         //If the user has been dragging for more than 300ms, don't spin
         if (timeElapsed > 300) {

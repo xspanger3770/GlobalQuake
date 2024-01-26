@@ -1,7 +1,7 @@
 package globalquake.utils;
 
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.intensity.MMIIntensityScale;
 import org.apache.commons.math3.util.FastMath;
 
 public interface GeoUtils {
@@ -92,7 +92,7 @@ public interface GeoUtils {
 	}
 
 	static void main(String[] args) {
-		System.err.println(TauPTravelTimeCalculator.toAngle(greatCircleDistance(0,0,10,10)));
+		System.err.println(new MMIIntensityScale().getLevel(pgaFunctionGen2(7.0, 10)));
 	}
 
 	@SuppressWarnings("unused")
@@ -160,8 +160,8 @@ public interface GeoUtils {
 
 	static double pgaFunction(double mag, double distKm, double depth) {
 		return pgaFunctionGen2(
-				mag + EarthquakeAnalysis.getDepthCorrection(depth),
-				distKm / (1.0 + 2.2 * EarthquakeAnalysis.getDepthCorrection(depth)));
+				mag + 0.6 * EarthquakeAnalysis.getDepthCorrection(depth),
+				distKm / (1.0 + 1.7 * EarthquakeAnalysis.getDepthCorrection(depth)));
 	}
 
 	static double pgaFunctionGen2(double mag, double distKm) {

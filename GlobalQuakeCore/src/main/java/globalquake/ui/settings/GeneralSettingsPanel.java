@@ -9,6 +9,11 @@ import globalquake.core.intensity.IntensityScales;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.Objects;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JComboBox<IntensityScale> comboBoxScale;
@@ -17,6 +22,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	private JTextField textFieldLat;
 	private JTextField textFieldLon;
 	private JComboBox<DistanceUnit> distanceUnitJComboBox;
+	private JComboBox<ZoneId> timezoneCombobox;
 
 	public GeneralSettingsPanel(SettingsFrame settingsFrame) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -26,16 +32,17 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		add(createIntensitySettingsPanel());
 		createOtherSettings(settingsFrame);
 
-		for(int i = 0; i < 20; i++){
-			add(new JPanel()); // fillers
-		}
+		fill(this, 12);
 	}
 
 	private void createOtherSettings(SettingsFrame settingsFrame) {
 		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.setBorder(BorderFactory.createTitledBorder("Other"));
 
-		panel.add(new JLabel("Distance units: "));
+		JPanel row1 = new JPanel();
+
+		row1.add(new JLabel("Distance units: "));
 
 		distanceUnitJComboBox = new JComboBox<>(DistanceUnit.values());
 		distanceUnitJComboBox.setSelectedIndex(Math.max(0, Math.min(distanceUnitJComboBox.getItemCount() - 1, Settings.distanceUnitsIndex)));
@@ -45,7 +52,61 @@ public class GeneralSettingsPanel extends SettingsPanel {
 			settingsFrame.refreshUI();
         });
 
-		panel.add(distanceUnitJComboBox);
+		row1.add(distanceUnitJComboBox);
+
+		JPanel row2 = new JPanel();
+
+		row2.add(new JLabel("Timezone: "));
+		Comparator<ZoneId> zoneIdComparator = Comparator.comparingInt(zone -> zone.getRules().getOffset(Instant.now()).getTotalSeconds());
+
+		// Use a DefaultComboBoxModel for better control and management
+		DefaultComboBoxModel<ZoneId> timezoneModel = new DefaultComboBoxModel<>();
+
+		// Populate the model with available timezones and sort them using the custom Comparator
+		ZoneId.getAvailableZoneIds().stream()
+				.map(ZoneId::of)
+				.sorted(zoneIdComparator)
+				.forEach(timezoneModel::addElement);
+
+		// Create the JComboBox with the populated and sorted model
+		timezoneCombobox = new JComboBox<>(timezoneModel);
+
+		// this assures that default timezone will always be selected
+		timezoneCombobox.setSelectedItem(ZoneId.systemDefault());
+
+		// if theres valid timezone in the settings then it will be selected
+		timezoneCombobox.setSelectedItem(ZoneId.of(Settings.timezoneStr));
+
+		// Add the JComboBox to your UI
+		row2.add(timezoneCombobox);
+
+		timezoneCombobox.setRenderer(new DefaultListCellRenderer(){
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+														  boolean isSelected, boolean cellHasFocus) {
+				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+				if (value instanceof ZoneId zoneId) {
+                    String offset = zoneId.getRules().getOffset(Instant.now()).toString();
+					label.setText(String.format("%s (%s)", zoneId, offset));
+				}
+
+				return label;
+			}
+		});
+
+		timezoneCombobox.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				Settings.timezoneStr = ((ZoneId) Objects.requireNonNull(timezoneCombobox.getSelectedItem())).getId();
+				Settings.initTimezoneSettings();
+			}
+		});
+
+		row2.add(timezoneCombobox);
+
+		panel.add(row1);
+		panel.add(row2);
 
 		add(panel);
 	}
@@ -128,6 +189,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 		Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
+		Settings.timezoneStr = ((ZoneId) Objects.requireNonNull(timezoneCombobox.getSelectedItem())).getId();
 	}
 
 	@Override

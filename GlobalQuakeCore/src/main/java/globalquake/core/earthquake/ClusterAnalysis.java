@@ -14,11 +14,9 @@ import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -31,16 +29,16 @@ public class ClusterAnalysis {
     private final Lock clustersReadLock = clustersLock.readLock();
     private final Lock clustersWriteLock = clustersLock.writeLock();
 
-    private final List<Cluster> clusters;
-    private final List<Earthquake> earthquakes;
-    private final List<AbstractStation> stations;
+    private final Collection<Cluster> clusters;
+    private final Collection<Earthquake> earthquakes;
+    private final Collection<AbstractStation> stations;
 
     private static final double MERGE_THRESHOLD = 0.45;
 
-    public ClusterAnalysis(List<Earthquake> earthquakes, List<AbstractStation> stations) {
+    public ClusterAnalysis(List<Earthquake> earthquakes, Collection<AbstractStation> stations) {
         this.earthquakes = earthquakes;
         this.stations = stations;
-        clusters = new ArrayList<>();
+        clusters = new ConcurrentLinkedQueue<>();
     }
 
     public ClusterAnalysis() {
@@ -490,7 +488,7 @@ public class ClusterAnalysis {
 
             boolean notEnoughEvents = cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE;
             boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake, 0);
-            boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && System.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
+            boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 
             if ( notEnoughEvents || eqRemoved || tooOld) {
                 Logger.tag("Hypocs").debug("Cluster #" + cluster.id + " marked for removal");
@@ -530,7 +528,7 @@ public class ClusterAnalysis {
         return cluster;
     }
 
-    public List<Cluster> getClusters() {
+    public Collection<Cluster> getClusters() {
         return clusters;
     }
 

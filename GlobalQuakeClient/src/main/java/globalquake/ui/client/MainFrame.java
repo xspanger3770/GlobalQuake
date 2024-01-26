@@ -1,5 +1,6 @@
 package globalquake.ui.client;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
@@ -103,7 +104,7 @@ public class MainFrame extends GQFrame {
         panel.setBorder(new EmptyBorder(5,5,5,5));
 
         JLabel titleLabel = new JLabel(Main.fullName, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
         panel.add(titleLabel);
 
         hostButton = new JButton("Run Locally");
@@ -128,22 +129,27 @@ public class MainFrame extends GQFrame {
             new ServerSelectionFrame().setVisible(true);
         });
 
+        JPanel buttons2 = createButtons();
+
+        panel.add(buttons2);
+
+        return panel;
+    }
+
+    private JPanel createButtons() {
         GridLayout grid2 = new GridLayout(1,2);
         grid2.setHgap(10);
         JPanel buttons2 = new JPanel(grid2);
 
         JButton settingsButton = new JButton("Settings");
-        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this).setVisible(true));
+        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null).setVisible(true));
 
         buttons2.add(settingsButton);
 
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener(actionEvent -> System.exit(0));
         buttons2.add(exitButton);
-
-        panel.add(buttons2);
-
-        return panel;
+        return buttons2;
     }
 
     private static void startDatabaseManager() throws FatalIOException {

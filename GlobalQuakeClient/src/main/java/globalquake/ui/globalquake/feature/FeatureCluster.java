@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.ui.globe.GlobeRenderer;
@@ -11,16 +12,15 @@ import globalquake.ui.globe.feature.RenderFeature;
 
 import java.awt.*;
 import java.util.Collection;
-import java.util.List;
 
 public class FeatureCluster extends RenderFeature<Cluster> {
 
-    private final List<Cluster> clusters;
+    private final Collection<Cluster> clusters;
 
     private static final long FLASH_TIME = 1000 * 90;
 
 
-    public FeatureCluster(List<Cluster> clusters) {
+    public FeatureCluster(Collection<Cluster> clusters) {
         super(1);
         this.clusters = clusters;
     }
@@ -74,7 +74,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
         Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
-        return System.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
+        return GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
     }
 
     @Override
@@ -90,6 +90,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         }
 
         graphics.setStroke(new BasicStroke(1f));
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         graphics.setColor(getColorLevel(entity.getOriginal().getLevel()));
         graphics.fill(elementRoot.getShape());
@@ -97,6 +98,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         graphics.setStroke(new BasicStroke(2f));
         graphics.setColor(Color.black);
         graphics.draw(elementRoot.getShape());
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     @Override
@@ -104,7 +106,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return null;
     }
 
-    private static final Color[] colors = {Color.WHITE, new Color(10, 100, 255), Color.GREEN, new Color(255,200,0), new Color(200,0,0)};
+    private static final Color[] colors = {Color.WHITE, new Color(10, 100, 255), new Color(0,255,0), new Color(255,200,0), new Color(200,0,0)};
 
     private Color getColorLevel(int level) {
         return level >= 0 && level < colors.length ? colors[level] : Color.GRAY;

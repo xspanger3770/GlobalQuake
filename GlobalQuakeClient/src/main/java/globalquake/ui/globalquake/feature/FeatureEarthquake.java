@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
@@ -28,11 +29,11 @@ import java.util.Locale;
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private static final int ELEMENT_COUNT = 5 + 4;
-    private final List<Earthquake> earthquakes;
+    private final Collection<Earthquake> earthquakes;
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public FeatureEarthquake(List<Earthquake> earthquakes) {
+    public FeatureEarthquake(Collection<Earthquake> earthquakes) {
         super(ELEMENT_COUNT);
         this.earthquakes = earthquakes;
     }
@@ -52,7 +53,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         Earthquake e = entity.getOriginal();
 
-        long age = System.currentTimeMillis() - e.getOrigin();
+        long age = GlobalQuake.instance.currentTimeMillis() - e.getOrigin();
         double pDist = TauPTravelTimeCalculator.getPWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
                 * GeoUtils.EARTH_CIRCUMFERENCE;
         double sDist = TauPTravelTimeCalculator.getSWaveTravelAngle(e.getDepth(), age / 1000.0) / 360.0
@@ -114,11 +115,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         renderElement.getPolygon().finish();
-    }
-
-    @Override
-    public boolean isEnabled(RenderProperties props) {
-        return true;
     }
 
     @Override
@@ -245,7 +241,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     private double getAlphaMul(Earthquake original) {
-        double ageMins = (System.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
+        double ageMins = (GlobalQuake.instance.currentTimeMillis() - original.getOrigin()) / (1000.0 * 60.0);
         double limit = waveDisplayTimeMinutes(original.getMag(), original.getDepth());
 
         return Math.max(0, Math.min(1.0, 2.0 - 2.0 * ageMins / limit));

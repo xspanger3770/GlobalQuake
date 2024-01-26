@@ -1,5 +1,7 @@
 package globalquake.core;
 
+import globalquake.core.earthquake.data.Cluster;
+import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
@@ -11,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -71,18 +74,16 @@ public final class Settings {
 
 	public static Integer maxArchivedQuakes;
 
-	public static final DateTimeFormatter[] DATE_FORMATS = {
-			DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
+	public static DateTimeFormatter[] DATE_FORMATS = {DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault()),
 			DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault()),
-			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault()),
-	};
+			DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneId.systemDefault())};
 
 	public static Boolean use24HFormat;
 	public static Double stationIntensityVisibilityZoomLevel;
 	public static Boolean hideDeadStations;
 
-	public static final DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
-	public static final DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+	public static DateTimeFormatter formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault());
 
 	public static Boolean alertLocal;
 	public static Double alertLocalDist;
@@ -138,7 +139,20 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
-    static {
+	public static Integer globalVolume;
+
+	public static String timezoneStr;
+    public static Boolean alertPossibleShaking;
+	public static Double alertPossibleShakingDistance;
+	public static Boolean enableEarthquakeSounds;
+	public static Double earthquakeSoundsMinMagnitude;
+	public static Double earthquakeSoundsMaxDist;
+	public static Integer eewScale;
+	public static Integer eewLevelIndex;
+	public static Integer qualityFilter;
+	public static Integer eewClusterLevel;
+
+	static {
 		load();
 		save();
 		try {
@@ -148,49 +162,35 @@ public final class Settings {
 		}
 	}
 
-	private static void runUpdateService() throws IOException{
-		WatchService watchService = FileSystems.getDefault().newWatchService();
-
-		// Register the directory for certain events
-		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		executorService.submit(new Runnable() {
-			@Override
-			public void run() {
-				WatchKey key;
-				try {
-					key = watchService.take(); // Wait for a key to be available
-				} catch (InterruptedException ex) {
-					return;
-				}
-
-				for (WatchEvent<?> event : key.pollEvents()) {
-					// Handle the event
-					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-						Path modifiedFile = (Path) event.context();
-						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
-							if(System.currentTimeMillis() - lastSave >= 2000){
-								Logger.info("Properties file changed, reloading!");
-								load();
-							}
-						}
-					}
-				}
-
-				if(key.reset()){
-					executorService.submit(this);
-				}
-			}
-		});
-	}
-
 	private static void load() {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("eewClusterLevel", "2",
+				o -> validateInt(0, Cluster.MAX_LEVEL, (Integer) o));
+		loadProperty("qualityFilter", String.valueOf(QualityClass.D.ordinal()),
+				o -> validateInt(0, QualityClass.values().length - 1, (Integer) o));
+		loadProperty("eewScale", "0",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
+		loadProperty("eewLevelIndex", "5",
+				o -> validateInt(0, IntensityScales.INTENSITY_SCALES[eewScale].getLevels().size() - 1, (Integer) o));
+
+		loadProperty("earthquakeSoundsMaxDist", "30000.0",  o -> validateDouble(0, 30000, (Double) o));
+		loadProperty("earthquakeSoundsMinMagnitude", "0.0",  o -> validateDouble(0, 10, (Double) o));
+		loadProperty("enableEarthquakeSounds", "true");
+
+		loadProperty("alertPossibleShakingDistance", "30000",  o -> validateDouble(0, 30000, (Double) o));
+		loadProperty("alertPossibleShaking", "true");
+
+		loadProperty("timezoneStr", ZoneId.systemDefault().getId());
+
+		loadProperty("globalVolume", "100",
+				o -> validateInt(0, 100, (Integer) o));
+
+
 		loadProperty("stationsShapeIndex", "0",
 				o -> validateInt(0, StationsShape.values().length, (Integer) o));
 
@@ -279,6 +279,64 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
+	}
+
+	private static void runUpdateService() throws IOException{
+		WatchService watchService = FileSystems.getDefault().newWatchService();
+
+		// Register the directory for certain events
+		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				WatchKey key;
+				try {
+					key = watchService.take(); // Wait for a key to be available
+				} catch (InterruptedException ex) {
+					return;
+				}
+
+				for (WatchEvent<?> event : key.pollEvents()) {
+					// Handle the event
+					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+						Path modifiedFile = (Path) event.context();
+						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
+							if(System.currentTimeMillis() - lastSave >= 2000){
+								Logger.info("Properties file changed, reloading!");
+								load();
+							}
+						}
+					}
+				}
+
+				if(key.reset()){
+					executorService.submit(this);
+				}
+			}
+		});
+	}
+
+	public static ZoneId getTimezone(){
+		ZoneId zoneId = ZoneId.systemDefault();
+		try {
+			zoneId = ZoneId.of(timezoneStr);
+		}catch(DateTimeException e){
+			Logger.warn("Failed to parse timezone %s, defaulting to %s".formatted(timezoneStr, ZoneId.systemDefault().getId()));
+			timezoneStr = ZoneId.systemDefault().getId();
+		}
+
+		return zoneId;
+	}
+
+	public static void initTimezoneSettings() {
+		DATE_FORMATS = new DateTimeFormatter[]{DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(getTimezone()),
+                DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(getTimezone())};
+
+		formatter24H = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(getTimezone());
+		formatter12H = DateTimeFormatter.ofPattern("hh:mm:ss").withZone(getTimezone());
 	}
 
 
@@ -395,6 +453,12 @@ public final class Settings {
 		lastSave = System.currentTimeMillis();
 		changes++;
 
+		try{
+			HypocsSettings.save();
+		} catch (IOException e){
+			Logger.error(e);
+		}
+
 		try {
 			Field[] fields = Settings.class.getDeclaredFields();
 			for (Field field : fields) {
@@ -413,6 +477,8 @@ public final class Settings {
 		} catch (IOException e) {
 			GlobalQuake.getErrorHandler().handleException(e);
 		}
+
+		initTimezoneSettings();
 
 	}
 

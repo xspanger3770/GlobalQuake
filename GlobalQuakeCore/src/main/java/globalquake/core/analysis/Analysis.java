@@ -1,5 +1,6 @@
 package globalquake.core.analysis;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.station.AbstractStation;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.tinylog.Logger;
@@ -47,7 +48,7 @@ public abstract class Analysis {
 
 
         long time = dr.getLastSampleBtime().toInstant().toEpochMilli();
-        if (time >= lastRecord && time <= System.currentTimeMillis() + 60 * 1000) {
+        if (time >= lastRecord && time <= GlobalQuake.instance.currentTimeMillis() + 60 * 1000) {
             decode(dr);
             lastRecord = time;
         }
@@ -62,17 +63,17 @@ public abstract class Analysis {
         int[] data;
         try {
             if (!dataRecord.isDecompressable()) {
-                Logger.warn("Not Decompressable!");
+                Logger.debug("Not Decompressable!");
                 return;
             }
             data = dataRecord.decompress().getAsInt();
             if (data == null) {
-                Logger.warn("Decompressed array is null!");
+                Logger.debug("Decompressed array is null!");
                 return;
             }
 
             for (int v : data) {
-                nextSample(v, time, System.currentTimeMillis());
+                nextSample(v, time, GlobalQuake.instance.currentTimeMillis());
                 time += (long) (1000 / getSampleRate());
             }
         } catch (Exception e) {

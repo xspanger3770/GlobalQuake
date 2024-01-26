@@ -82,13 +82,15 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
             topPanel.add(labelDefault, BorderLayout.SOUTH);
         }
 
-        JTextArea textAreaExplanation = new JTextArea(explanation);
-        textAreaExplanation.setBorder(new EmptyBorder(5,5,5,5));
-        textAreaExplanation.setEditable(false);
-        textAreaExplanation.setBackground(panel.getBackground());
+        if(explanation != null) {
+            JTextArea textAreaExplanation = new JTextArea(explanation);
+            textAreaExplanation.setBorder(new EmptyBorder(5, 5, 5, 5));
+            textAreaExplanation.setEditable(false);
+            textAreaExplanation.setBackground(panel.getBackground());
+            panel.add(textAreaExplanation, BorderLayout.CENTER);
+        }
 
         panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(textAreaExplanation, BorderLayout.CENTER);
 
         return panel;
     }

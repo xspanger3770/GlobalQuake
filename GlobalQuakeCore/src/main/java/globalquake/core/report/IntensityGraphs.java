@@ -49,8 +49,14 @@ public class IntensityGraphs {
 		recs.add(new DistanceIntensityRecord(2.2,10,1E2));
 		recs.add(new DistanceIntensityRecord(2.2,70,1E1));
 
+		recs.add(new DistanceIntensityRecord(5.1,1,1E6));
+		recs.add(new DistanceIntensityRecord(5.1,50,1E5));
+		recs.add(new DistanceIntensityRecord(5.1,180,1E4));
+		recs.add(new DistanceIntensityRecord(5.1,360,1E3));
+
+
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa18.png"));
+		ImageIO.write(img, "PNG", new File("aaa22.png"));
 
 		for(DistanceIntensityRecord dr: recs){
 			System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));

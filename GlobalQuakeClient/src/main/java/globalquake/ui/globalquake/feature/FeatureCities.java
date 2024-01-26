@@ -16,21 +16,21 @@ import org.tinylog.Logger;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.List;
 
 public class FeatureCities extends RenderFeature<CityLocation> {
 
     private static final int MIN_POPULATION = 200_000;
-    private final Collection<CityLocation> cityLocations = new ArrayList<>();
+    private final Collection<CityLocation> cityLocations;
 
     public FeatureCities() {
         super(1);
-        load();
+        cityLocations = Collections.unmodifiableList(load());
     }
 
-    private void load() {
+    private List<CityLocation> load() {
+        java.util.List<CityLocation> result = new ArrayList<>();
         try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("cities/country-capital-lat-long-population.csv")).openStream())).withSkipLines(1).build()) {
             String[] fields;
             while ((fields = reader.readNext()) != null) {
@@ -43,11 +43,13 @@ public class FeatureCities extends RenderFeature<CityLocation> {
                     continue;
                 }
 
-                cityLocations.add(new CityLocation(cityName, lat, lon, population));
+                result.add(new CityLocation(cityName, lat, lon, population));
             }
         } catch (IOException | CsvValidationException e) {
             Logger.error(e);
         }
+
+        return result;
     }
 
     @Override

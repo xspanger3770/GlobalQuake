@@ -6,7 +6,7 @@ import globalquake.core.analysis.Event;
 import globalquake.core.database.SeedlinkNetwork;
 import gqserver.api.packets.station.InputType;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -31,7 +31,7 @@ public abstract class AbstractStation {
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
 	private final double sensitivity;
 	public boolean disabled = false;
-	private ArrayList<NearbyStationDistanceInfo> nearbyStations;
+	private Collection<NearbyStationDistanceInfo> nearbyStations;
 
 	private final Deque<StationInterval> intervals = new ConcurrentLinkedDeque<>();
 
@@ -171,11 +171,11 @@ public abstract class AbstractStation {
 		return id;
 	}
 
-	public void setNearbyStations(ArrayList<NearbyStationDistanceInfo> nearbyStations) {
+	public void setNearbyStations(Collection<NearbyStationDistanceInfo> nearbyStations) {
 		this.nearbyStations = nearbyStations;
 	}
 
-	public ArrayList<NearbyStationDistanceInfo> getNearbyStations() {
+	public Collection<NearbyStationDistanceInfo> getNearbyStations() {
 		return nearbyStations;
 	}
 

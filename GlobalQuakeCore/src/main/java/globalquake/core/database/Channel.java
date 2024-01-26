@@ -1,6 +1,7 @@
 package globalquake.core.database;
 
 import gqserver.api.packets.station.InputType;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -112,7 +113,11 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
-        if(sensitivity2 <= 0 && newChannel.sensitivity2 > 0){
+        if(newChannel.sensitivity2 > 0) {
+            double diff = Math.abs(sensitivity2 - newChannel.sensitivity2);
+            if(diff > 10){
+                Logger.trace("Sensitivity changed at station %s from %6.3E to %6.3E!".formatted(code, sensitivity2, newChannel.sensitivity2));
+            }
             sensitivity2 = newChannel.sensitivity2;
         }
 

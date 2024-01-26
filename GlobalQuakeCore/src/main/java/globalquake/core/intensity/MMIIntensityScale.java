@@ -35,14 +35,14 @@ public class MMIIntensityScale implements IntensityScale{
 		levels.add(II = new Level("II", 1.0, new Color(200, 190, 240))); // 5
 		levels.add(III = new Level("III", 2.1, new Color(132, 162, 232))); // 10
 		levels.add(IV = new Level("IV", 5.0, new Color(130, 214, 255))); // 30
-		levels.add(V = new Level("V", 10.0, new Color(85, 242, 15))); // 70
-		levels.add(VI = new Level("VI", 21.0, new Color(255, 255, 0))); // 140
-		levels.add(VII = new Level("VII", 44.0, new Color(255, 200, 0))); // 250
-		levels.add(VIII = new Level("VIII", 94.0, new Color(255, 120, 0))); // 500
-		levels.add(IX = new Level("IX", 202.0, new Color(255, 0, 0))); // 800
-		levels.add(X = new Level("X", 432.0, new Color(190, 0, 0))); // 1000
-		levels.add(XI = new Level("XI", 923.0, new Color(130, 0, 0))); // 1300
-		levels.add(XII = new Level("XII", 1972.0, new Color(65, 0, 0))); // 2000
+		levels.add(V = new Level("V", 11.0, new Color(85, 242, 15))); // 70
+		levels.add(VI = new Level("VI", 26.0, new Color(255, 255, 0))); // 140
+		levels.add(VII = new Level("VII", 60.0, new Color(255, 200, 0))); // 250
+		levels.add(VIII = new Level("VIII", 140.0, new Color(255, 120, 0))); // 500
+		levels.add(IX = new Level("IX", 321.8, new Color(255, 0, 0))); // 800
+		levels.add(X = new Level("X", 740.0, new Color(190, 0, 0))); // 1000
+		levels.add(XI = new Level("XI", 1702.0, new Color(130, 0, 0))); // 1300
+		levels.add(XII = new Level("XII", 3000.0, new Color(65, 0, 0))); // 2000
 	}
 
 	@Override

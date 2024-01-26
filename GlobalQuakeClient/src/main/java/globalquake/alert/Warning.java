@@ -2,8 +2,8 @@ package globalquake.alert;
 
 public class Warning {
 
-    public Warning() {
-        createdAt = System.currentTimeMillis();
+    public Warning(long time) {
+        createdAt = time;
         metConditions = false;
     }
 

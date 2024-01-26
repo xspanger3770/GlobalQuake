@@ -37,13 +37,7 @@ public class EarthquakeListPanel extends JPanel {
         if(archivedQuakes == null){
             return null;
         }
-        return archivedQuakes.stream().filter( quake -> {
-            if (Settings.oldEventsMagnitudeFilterEnabled && quake.getMag() < Settings.oldEventsMagnitudeFilter) {
-                return false;
-            }
-
-            return !Settings.oldEventsTimeFilterEnabled || !((System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
-        }).collect(Collectors.toList());
+        return archivedQuakes.stream().filter(ArchivedQuake::shouldBeDisplayed).collect(Collectors.toList());
     }
 
     public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {

@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -17,7 +18,6 @@ import java.util.List;
 
 public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
-    private static final long HOURS = 1000 * 60 * 60L;
     private final List<ArchivedQuake> earthquakes;
 
     public FeatureArchivedEarthquake(List<ArchivedQuake> earthquakes) {
@@ -70,14 +70,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        boolean displayed = !entity.getOriginal().isWrong();
-        if(Settings.oldEventsMagnitudeFilterEnabled) {
-            displayed &= (entity.getOriginal().getMag() >= Settings.oldEventsMagnitudeFilter);
-        }
-
-        if(Settings.oldEventsTimeFilterEnabled) {
-            displayed &= (System.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
-        }
+        boolean displayed = !entity.getOriginal().isWrong() && entity.getOriginal().shouldBeDisplayed();
 
         if(displayed) {
             element.getShape().reset();
@@ -157,7 +150,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         Color col;
 
         if(Settings.selectedEventColorIndex == 0){
-            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            double ageInHRS = (GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
             col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
                     : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
         } else if(Settings.selectedEventColorIndex == 1){
