@@ -154,12 +154,8 @@ public class SoundsService {
             return false;
         }
 
-        if(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude){
-            return false;
-        }
-
         double distGCD = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
-        if(distGCD > Settings.earthquakeSoundsMaxDist){
+        if(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude && distGCD > Settings.earthquakeSoundsMaxDist){
             return false;
         }
 
