@@ -99,9 +99,7 @@ public class AlertSettingsPanel extends SettingsPanel {
         textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
 
 
-        chkBoxPossibleShaking.addChangeListener(changeEvent -> {
-            textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
-        });
+        chkBoxPossibleShaking.addChangeListener(changeEvent -> textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected()));
 
         JPanel possibleShakingPanel = new JPanel(new GridLayout(1,1));
         possibleShakingPanel.setBorder(BorderFactory.createTitledBorder("Possible shaking detection"));
@@ -228,7 +226,6 @@ public class AlertSettingsPanel extends SettingsPanel {
         label1.setText("and are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
         label2.setText("or is closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
         chkBoxPossibleShaking.setText("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
-        chkBoxEarthquakeSounds.setText("Play sound alerts if earthquake is bigger than (magnitude): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
 
         textFieldLocalDist.setText(String.format("%.1f", Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
         textFieldRegionDist.setText(String.format("%.1f", Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));

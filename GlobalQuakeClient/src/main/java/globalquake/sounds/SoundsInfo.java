@@ -2,7 +2,6 @@ package globalquake.sounds;
 
 public class SoundsInfo {
 
-	public boolean firstSound;
 	public int maxLevel = -1;
 	public double maxPGA;
 	public double maxPGAHome;

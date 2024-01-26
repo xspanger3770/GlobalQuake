@@ -10,13 +10,11 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
-import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -155,11 +153,7 @@ public class SoundsService {
         }
 
         double distGCD = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
-        if(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude && distGCD > Settings.earthquakeSoundsMaxDist){
-            return false;
-        }
-
-        return true;
+        return !(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude) || !(distGCD > Settings.earthquakeSoundsMaxDist);
     }
 
     private boolean canPing(Cluster cluster) {
@@ -167,11 +161,7 @@ public class SoundsService {
             return false;
         }
         double distGCD = GeoUtils.greatCircleDistance(cluster.getRootLat(), cluster.getRootLon(), Settings.homeLat, Settings.homeLon);
-        if(distGCD > Settings.alertPossibleShakingDistance){
-            return false;
-        }
-
-        return true;
+        return !(distGCD > Settings.alertPossibleShakingDistance);
     }
 
     public void destroy(){
