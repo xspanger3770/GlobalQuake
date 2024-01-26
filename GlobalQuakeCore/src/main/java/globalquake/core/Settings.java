@@ -210,7 +210,7 @@ public final class Settings {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
 
-		loadProperty("alertPossibleShakingDistance", "200",  o -> validateDouble(0, 30000, (Double) o));
+		loadProperty("alertPossibleShakingDistance", "30000",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertPossibleShaking", "true");
 
 		loadProperty("timezoneStr", ZoneId.systemDefault().getId());

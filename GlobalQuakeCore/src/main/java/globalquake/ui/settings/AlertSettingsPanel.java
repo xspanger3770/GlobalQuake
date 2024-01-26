@@ -39,28 +39,28 @@ public class AlertSettingsPanel extends SettingsPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        chkBoxPossibleShaking = new JCheckBox("Alert possible shaking closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
+        chkBoxPossibleShaking = new JCheckBox("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
         textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance) ,12);
         textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
 
-        // TODO TBD from here
-        textFieldRegionDist =  new JTextField("1",12);
-        textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
 
-        chkBoxRegion.addChangeListener(changeEvent -> {
-            textFieldRegionMag.setEnabled(chkBoxRegion.isSelected());
-            textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
+        chkBoxPossibleShaking.addChangeListener(changeEvent -> {
+            textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
         });
 
-        JPanel regionPanel = new JPanel(new GridLayout(2,1));
-        regionPanel.setBorder(BorderFactory.createTitledBorder("Regional area"));
+        JPanel possibleShakingPanel = new JPanel(new GridLayout(1,1));
+        possibleShakingPanel.setBorder(BorderFactory.createTitledBorder("Possible shaking detection"));
 
         JPanel regionMagPanel = new JPanel();
         regionMagPanel.setLayout(new BoxLayout(regionMagPanel, BoxLayout.X_AXIS));
-        regionMagPanel.add(chkBoxRegion);
-        regionMagPanel.add(textFieldRegionMag);
+        regionMagPanel.add(chkBoxPossibleShaking);
+        regionMagPanel.add(textFieldPossibleShakingDistance);
 
-        regionPanel.add(regionMagPanel);
+        possibleShakingPanel.add(regionMagPanel);
+
+        panel.add(possibleShakingPanel);
+
+        fill(panel, 20);
 
         return panel;
     }
@@ -175,9 +175,11 @@ public class AlertSettingsPanel extends SettingsPanel {
     public void refreshUI() {
         chkBoxLocal.setText("Alert when any earthquake occurs closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
         label1.setText("and are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        chkBoxPossibleShaking .setText("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
 
         textFieldLocalDist.setText(String.format("%.1f", Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
         textFieldRegionDist.setText(String.format("%.1f", Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldPossibleShakingDistance.setText(String.format("%.1f", Settings.alertPossibleShakingDistance * Settings.getSelectedDistanceUnit().getKmRatio()));
 
         revalidate();
         repaint();
@@ -201,6 +203,9 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         Settings.strongShakingLevelScale = strongShakingThreshold.getShakingScaleComboBox().getSelectedIndex();
         Settings.strongShakingLevelIndex = strongShakingThreshold.getLevelComboBox().getSelectedIndex();
+
+        Settings.alertPossibleShaking = chkBoxPossibleShaking.isSelected();
+        Settings.alertPossibleShakingDistance = parseDouble(textFieldLocalDist.getText(), "Possible shaking alert radius", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
     }
 
     @Override

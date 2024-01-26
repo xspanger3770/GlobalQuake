@@ -69,13 +69,11 @@ public class SoundsService {
             clusterSoundsInfo.put(cluster, info = new SoundsInfo());
         }
 
-        if (!info.firstSound) {
-            Sounds.playSound(Sounds.level_0);
-            info.firstSound = true;
-        }
-
         int level = cluster.getLevel();
-        if (level > info.maxLevel) {
+        if (level > info.maxLevel && canPing(cluster)) {
+            if(info.maxLevel < 0){
+                Sounds.playSound(Sounds.level_0);
+            }
             if (level >= 1 && info.maxLevel < 1) {
                 Sounds.playSound(Sounds.level_1);
             }
@@ -141,6 +139,18 @@ public class SoundsService {
                 }
             }
         }
+    }
+
+    private boolean canPing(Cluster cluster) {
+        if(!Settings.alertPossibleShaking){
+            return false;
+        }
+        double distGCD = GeoUtils.greatCircleDistance(cluster.getRootLat(), cluster.getRootLon(), Settings.homeLat, Settings.homeLon);
+        if(distGCD > Settings.alertPossibleShakingDistance){
+            return false;
+        }
+
+        return true;
     }
 
     public void destroy(){
