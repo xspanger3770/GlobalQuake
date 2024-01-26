@@ -178,7 +178,6 @@ public class GlobalQuakePanel extends GlobePanel {
             new StationMonitor(this, selectedStation, 500);
     }
 
-    @SuppressWarnings("ConstantValue")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);

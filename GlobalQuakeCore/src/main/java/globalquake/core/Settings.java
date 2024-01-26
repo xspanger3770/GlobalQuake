@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
@@ -147,6 +148,7 @@ public final class Settings {
 	public static Double earthquakeSoundsMaxDist;
 	public static Integer eewScale;
 	public static Integer eewLevelIndex;
+	public static Integer qualityFilter;
 
 	static {
 		load();
@@ -165,6 +167,8 @@ public final class Settings {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
 
+		loadProperty("qualityFilter", String.valueOf(QualityClass.D.ordinal()),
+				o -> validateInt(0, QualityClass.values().length - 1, (Integer) o));
 		loadProperty("eewScale", "0",
 				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
 		loadProperty("eewLevelIndex", "5",
