@@ -21,6 +21,10 @@ public class AlertSettingsPanel extends SettingsPanel {
     private IntensityScaleSelector strongShakingThreshold;
     private JCheckBox chkBoxPossibleShaking;
     private JTextField textFieldPossibleShakingDistance;
+    private JCheckBox chkBoxEarthquakeSounds;
+    private JTextField textFieldQuakeMinMag;
+    private JTextField textFieldQuakeMaxDist;
+    private JLabel label2;
 
     public AlertSettingsPanel() {
         setLayout(new BorderLayout());
@@ -39,6 +43,47 @@ public class AlertSettingsPanel extends SettingsPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        createPossibleShakingPanel(panel);
+        createEarthquakeSoundsPanel(panel);
+
+        fill(panel, 20);
+
+        return panel;
+    }
+
+    private void createEarthquakeSoundsPanel(JPanel panel) {
+        chkBoxEarthquakeSounds = new JCheckBox("Play sound alerts if earthquake is bigger than (magnitude): ", Settings.enableEarthquakeSounds);
+        textFieldQuakeMinMag = new JTextField(String.valueOf(Settings.earthquakeSoundsMinMagnitude) ,12);
+        textFieldQuakeMinMag.setEnabled(chkBoxEarthquakeSounds.isSelected());
+        textFieldQuakeMaxDist =  new JTextField("1",12);
+        textFieldQuakeMaxDist.setEnabled(chkBoxEarthquakeSounds.isSelected());
+
+        chkBoxEarthquakeSounds.addChangeListener(changeEvent -> {
+            textFieldQuakeMinMag.setEnabled(chkBoxEarthquakeSounds.isSelected());
+            textFieldQuakeMaxDist.setEnabled(chkBoxEarthquakeSounds.isSelected());
+        });
+
+        JPanel earthquakePanel = new JPanel(new GridLayout(2,1));
+        earthquakePanel.setBorder(BorderFactory.createTitledBorder("Earthquake alerts"));
+
+        JPanel quakeMagpanel = new JPanel();
+        quakeMagpanel.setLayout(new BoxLayout(quakeMagpanel, BoxLayout.X_AXIS));
+        quakeMagpanel.add(chkBoxEarthquakeSounds);
+        quakeMagpanel.add(textFieldQuakeMinMag);
+
+        earthquakePanel.add(quakeMagpanel);
+
+        JPanel quakeDistPanel = new JPanel();
+        quakeDistPanel.setLayout(new BoxLayout(quakeDistPanel, BoxLayout.X_AXIS));
+        quakeDistPanel.add(label2 = new JLabel(""));
+        quakeDistPanel.add(textFieldQuakeMaxDist);
+
+        earthquakePanel.add(quakeDistPanel);
+
+        panel.add(earthquakePanel);
+    }
+
+    private void createPossibleShakingPanel(JPanel panel) {
         chkBoxPossibleShaking = new JCheckBox("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
         textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance) ,12);
         textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
@@ -59,10 +104,6 @@ public class AlertSettingsPanel extends SettingsPanel {
         possibleShakingPanel.add(regionMagPanel);
 
         panel.add(possibleShakingPanel);
-
-        fill(panel, 20);
-
-        return panel;
     }
 
     private Component createWarningsTab() {
@@ -175,11 +216,14 @@ public class AlertSettingsPanel extends SettingsPanel {
     public void refreshUI() {
         chkBoxLocal.setText("Alert when any earthquake occurs closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
         label1.setText("and are closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
-        chkBoxPossibleShaking .setText("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        label2.setText("or is closer from home location than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        chkBoxPossibleShaking.setText("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
+        chkBoxEarthquakeSounds.setText("Play sound alerts if earthquake is bigger than (magnitude): ".formatted(Settings.getSelectedDistanceUnit().getShortName()));
 
         textFieldLocalDist.setText(String.format("%.1f", Settings.alertLocalDist * Settings.getSelectedDistanceUnit().getKmRatio()));
         textFieldRegionDist.setText(String.format("%.1f", Settings.alertRegionDist * Settings.getSelectedDistanceUnit().getKmRatio()));
         textFieldPossibleShakingDistance.setText(String.format("%.1f", Settings.alertPossibleShakingDistance * Settings.getSelectedDistanceUnit().getKmRatio()));
+        textFieldQuakeMaxDist.setText(String.format("%.1f", Settings.earthquakeSoundsMaxDist * Settings.getSelectedDistanceUnit().getKmRatio()));
 
         revalidate();
         repaint();
@@ -205,7 +249,10 @@ public class AlertSettingsPanel extends SettingsPanel {
         Settings.strongShakingLevelIndex = strongShakingThreshold.getLevelComboBox().getSelectedIndex();
 
         Settings.alertPossibleShaking = chkBoxPossibleShaking.isSelected();
-        Settings.alertPossibleShakingDistance = parseDouble(textFieldLocalDist.getText(), "Possible shaking alert radius", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.alertPossibleShakingDistance = parseDouble(textFieldPossibleShakingDistance.getText(), "Possible shaking alert radius", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
+        Settings.enableEarthquakeSounds = chkBoxEarthquakeSounds.isSelected();
+        Settings.earthquakeSoundsMinMagnitude = parseDouble(textFieldQuakeMinMag.getText(), "Earthquake minimum magnitude to play sound", 0, 10);
+        Settings.earthquakeSoundsMaxDist = parseDouble(textFieldQuakeMaxDist.getText(), "Earthquake maximum distance to play sound", 0, 30000) / Settings.getSelectedDistanceUnit().getKmRatio();
     }
 
     @Override

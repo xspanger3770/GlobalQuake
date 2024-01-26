@@ -143,6 +143,9 @@ public final class Settings {
 	public static String timezoneStr;
     public static Boolean alertPossibleShaking;
 	public static Double alertPossibleShakingDistance;
+	public static Boolean enableEarthquakeSounds;
+	public static Double earthquakeSoundsMinMagnitude;
+	public static Double earthquakeSoundsMaxDist;
 
 	static {
 		load();
@@ -154,61 +157,16 @@ public final class Settings {
 		}
 	}
 
-	private static void runUpdateService() throws IOException{
-		WatchService watchService = FileSystems.getDefault().newWatchService();
-
-		// Register the directory for certain events
-		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		executorService.submit(new Runnable() {
-			@Override
-			public void run() {
-				WatchKey key;
-				try {
-					key = watchService.take(); // Wait for a key to be available
-				} catch (InterruptedException ex) {
-					return;
-				}
-
-				for (WatchEvent<?> event : key.pollEvents()) {
-					// Handle the event
-					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-						Path modifiedFile = (Path) event.context();
-						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
-							if(System.currentTimeMillis() - lastSave >= 2000){
-								Logger.info("Properties file changed, reloading!");
-								load();
-							}
-						}
-					}
-				}
-
-				if(key.reset()){
-					executorService.submit(this);
-				}
-			}
-		});
-	}
-
-	public static ZoneId getTimezone(){
-		ZoneId zoneId = ZoneId.systemDefault();
-		try {
-			zoneId = ZoneId.of(timezoneStr);
-		}catch(DateTimeException e){
-			Logger.warn("Failed to parse timezone %s, defaulting to %s".formatted(timezoneStr, ZoneId.systemDefault().getId()));
-			timezoneStr = ZoneId.systemDefault().getId();
-		}
-
-		return zoneId;
-	}
-
 	private static void load() {
 		try {
 			properties.load(new FileInputStream(optionsFile));
 		} catch (IOException e) {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
+
+		loadProperty("earthquakeSoundsMaxDist", "30000.0",  o -> validateDouble(0, 30000, (Double) o));
+		loadProperty("earthquakeSoundsMinMagnitude", "0.0",  o -> validateDouble(0, 10, (Double) o));
+		loadProperty("enableEarthquakeSounds", "true");
 
 		loadProperty("alertPossibleShakingDistance", "30000",  o -> validateDouble(0, 30000, (Double) o));
 		loadProperty("alertPossibleShaking", "true");
@@ -307,6 +265,55 @@ public final class Settings {
 		loadProperty("oldEventsMagnitudeFilterEnabled", "false");
 		loadProperty("oldEventsMagnitudeFilter", "4.0", o -> validateDouble(0, 10, (Double) o));
 		loadProperty("oldEventsOpacity", "100.0", o -> validateDouble(0, 100, (Double) o));
+	}
+
+	private static void runUpdateService() throws IOException{
+		WatchService watchService = FileSystems.getDefault().newWatchService();
+
+		// Register the directory for certain events
+		optionsFile.getParentFile().toPath().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				WatchKey key;
+				try {
+					key = watchService.take(); // Wait for a key to be available
+				} catch (InterruptedException ex) {
+					return;
+				}
+
+				for (WatchEvent<?> event : key.pollEvents()) {
+					// Handle the event
+					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+						Path modifiedFile = (Path) event.context();
+						if(modifiedFile.toFile().getName().equals(optionsFile.getName())){
+							if(System.currentTimeMillis() - lastSave >= 2000){
+								Logger.info("Properties file changed, reloading!");
+								load();
+							}
+						}
+					}
+				}
+
+				if(key.reset()){
+					executorService.submit(this);
+				}
+			}
+		});
+	}
+
+	public static ZoneId getTimezone(){
+		ZoneId zoneId = ZoneId.systemDefault();
+		try {
+			zoneId = ZoneId.of(timezoneStr);
+		}catch(DateTimeException e){
+			Logger.warn("Failed to parse timezone %s, defaulting to %s".formatted(timezoneStr, ZoneId.systemDefault().getId()));
+			timezoneStr = ZoneId.systemDefault().getId();
+		}
+
+		return zoneId;
 	}
 
 	public static void initTimezoneSettings() {
