@@ -1,9 +1,11 @@
 package globalquake.ui.settings;
 
 import globalquake.core.Settings;
+import globalquake.core.earthquake.data.Cluster;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.IntStream;
 
 public class AlertSettingsPanel extends SettingsPanel {
 
@@ -26,6 +28,7 @@ public class AlertSettingsPanel extends SettingsPanel {
     private JTextField textFieldQuakeMaxDist;
     private JLabel label2;
     private IntensityScaleSelector eewThreshold;
+    private JComboBox<Integer> comboBoxEEWClusterLevel;
 
     public AlertSettingsPanel() {
         setLayout(new BorderLayout());
@@ -47,12 +50,27 @@ public class AlertSettingsPanel extends SettingsPanel {
         createPossibleShakingPanel(panel);
         createEarthquakeSoundsPanel(panel);
 
-        JPanel eewThresholdPanel = new JPanel(new GridLayout(2,1));
+        JPanel eewThresholdPanel = new JPanel(new GridLayout(3,1));
         eewThresholdPanel.setBorder(BorderFactory.createTitledBorder("EEW"));
         eewThresholdPanel.add(new JLabel("Trigger eew_warning.wav sound effect if estimated intensity at land reaches: "));
 
         eewThresholdPanel.add(eewThreshold = new IntensityScaleSelector("",
                 Settings.eewScale, Settings.eewLevelIndex));
+
+
+        JPanel maxClusterLevelPanel = new JPanel();
+        maxClusterLevelPanel.add(new JLabel("and the associated Cluster has level at least: "));
+
+        comboBoxEEWClusterLevel = new JComboBox<>();
+        for(int i : IntStream.rangeClosed(0, Cluster.MAX_LEVEL).toArray()){
+            comboBoxEEWClusterLevel.addItem(i);
+        }
+
+        comboBoxEEWClusterLevel.setSelectedIndex(Settings.eewClusterLevel);
+
+        maxClusterLevelPanel.add(comboBoxEEWClusterLevel);
+
+        eewThresholdPanel.add(maxClusterLevelPanel);
 
         panel.add(eewThresholdPanel);
 
@@ -263,6 +281,7 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         Settings.eewScale = eewThreshold.getShakingScaleComboBox().getSelectedIndex();
         Settings.eewLevelIndex = eewThreshold.getLevelComboBox().getSelectedIndex();
+        Settings.eewClusterLevel = (Integer) comboBoxEEWClusterLevel.getSelectedItem();
     }
 
     @Override

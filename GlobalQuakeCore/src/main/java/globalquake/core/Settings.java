@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
@@ -149,6 +150,7 @@ public final class Settings {
 	public static Integer eewScale;
 	public static Integer eewLevelIndex;
 	public static Integer qualityFilter;
+	public static Integer eewClusterLevel;
 
 	static {
 		load();
@@ -167,6 +169,8 @@ public final class Settings {
 			Logger.info("Created GlobalQuake properties file at "+optionsFile.getAbsolutePath());
 		}
 
+		loadProperty("eewClusterLevel", "2",
+				o -> validateInt(0, Cluster.MAX_LEVEL, (Integer) o));
 		loadProperty("qualityFilter", String.valueOf(QualityClass.D.ordinal()),
 				o -> validateInt(0, QualityClass.values().length - 1, (Integer) o));
 		loadProperty("eewScale", "0",

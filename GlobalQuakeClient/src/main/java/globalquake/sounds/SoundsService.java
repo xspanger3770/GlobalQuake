@@ -105,7 +105,7 @@ public class SoundsService {
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
                 double threshold_eew = IntensityScales.INTENSITY_SCALES[Settings.eewScale].getLevels().get(Settings.eewLevelIndex).getPga();
-                if (info.maxPGA >= threshold_eew && !info.warningPlayed && level >= 2) {
+                if (info.maxPGA >= threshold_eew && !info.warningPlayed && level >= Settings.eewClusterLevel) {
                     Sounds.playSound(Sounds.eew_warning);
                     info.warningPlayed = true;
                 }
