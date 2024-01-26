@@ -33,6 +33,8 @@ public class Sounds {
 	public static final GQSound found = new GQSound("found.wav");
 
 	public static final GQSound[] ALL_SOUNDS = {
+			found,
+			update,
 			level_0,
 			level_1,
 			level_2,
@@ -40,15 +42,15 @@ public class Sounds {
 			level_4,
 			intensify,
 			felt,
-			eew_warning,
 			felt_strong,
+			eew_warning,
 			countdown,
 			countdown2, // workaround
-			update,
-			found
 	};
 
 	public static final GQSound[] ALL_ACTUAL_SOUNDS = {
+			found,
+			update,
 			level_0,
 			level_1,
 			level_2,
@@ -56,11 +58,9 @@ public class Sounds {
 			level_4,
 			intensify,
 			felt,
-			eew_warning,
 			felt_strong,
+			eew_warning,
 			countdown,
-			update,
-			found
 	};
 
 	public static boolean soundsAvailable = true;
