@@ -139,9 +139,18 @@ public final class Settings {
 	public static Boolean displayCityIntensities;
 	public static Boolean displayCapitalCities;
 
-	 public static String FDSNWSEventIP;
-	  public static Integer FDSNWSEventPort;
-	  public static Boolean autoStartFDSNWSEventServer;
+	public static Integer globalVolume;
+
+	public static String timezoneStr;
+    public static Boolean alertPossibleShaking;
+	public static Double alertPossibleShakingDistance;
+	public static Boolean enableEarthquakeSounds;
+	public static Double earthquakeSoundsMinMagnitude;
+	public static Double earthquakeSoundsMaxDist;
+	public static Integer eewScale;
+	public static Integer eewLevelIndex;
+	public static Integer qualityFilter;
+	public static Integer eewClusterLevel;
 
 	static {
 		load();
@@ -152,19 +161,6 @@ public final class Settings {
 			Logger.error(new RuntimeApplicationException("Unable to launch settings file update service!", e));
 		}
 	}
-
-	public static Integer globalVolume;
-
-	public static String timezoneStr;
-	public static Boolean alertPossibleShaking;
-	public static Double alertPossibleShakingDistance;
-	public static Boolean enableEarthquakeSounds;
-	public static Double earthquakeSoundsMinMagnitude;
-	public static Double earthquakeSoundsMaxDist;
-	public static Integer eewScale;
-	public static Integer eewLevelIndex;
-	public static Integer qualityFilter;
-	public static Integer eewClusterLevel;
 
 	private static void load() {
 		try {
