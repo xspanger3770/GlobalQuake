@@ -129,6 +129,10 @@ public final class Settings {
 	public static Boolean displayAlertBox;
 	public static Boolean displayTime;
 
+	public static Integer globalVolume;
+
+	public static String timezoneStr;
+
 	public static String lastServerIP;
 
 	public static Integer lastServerPORT;
@@ -142,7 +146,7 @@ public final class Settings {
 	public static Integer globalVolume;
 
 	public static String timezoneStr;
-    public static Boolean alertPossibleShaking;
+  public static Boolean alertPossibleShaking;
 	public static Double alertPossibleShakingDistance;
 	public static Boolean enableEarthquakeSounds;
 	public static Double earthquakeSoundsMinMagnitude;
@@ -151,6 +155,9 @@ public final class Settings {
 	public static Integer eewLevelIndex;
 	public static Integer qualityFilter;
 	public static Integer eewClusterLevel;
+  public static String FDSNWSEventIP;
+  public static Integer FDSNWSEventPort;
+  public static Boolean autoStartFDSNWSEventServer;
 
 	static {
 		load();
@@ -199,6 +206,10 @@ public final class Settings {
 
 		loadProperty("lastServerIP", "0.0.0.0");
 		loadProperty("lastServerPORT", "38000");
+
+        loadProperty("FDSNWSEventIP", "localhost"); //As a default, localhost is used for security.
+        loadProperty("FDSNWSEventPort", "8080");
+        loadProperty("autoStartFDSNWSEventServer", "false");
 
 		loadProperty("shakingLevelScale", "0",
 				o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));

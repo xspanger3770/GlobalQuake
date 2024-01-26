@@ -172,7 +172,7 @@ public class GlobePanelDebug extends GQFrame {
 		Settings.oldEventsTimeFilterEnabled = false;
 		Settings.oldEventsMagnitudeFilterEnabled = false;
 		for(double mag = 0.5; mag <= 11; mag += 0.2) {
-			archivedQuakes.add(new ArchivedQuake(null, 0, 0, 0, mag, r.nextLong() % System.currentTimeMillis(), QualityClass.S));
+			archivedQuakes.add(new ArchivedQuake(null, 0, 0, 0, mag, r.nextLong() % System.currentTimeMillis(), QualityClass.S, System.currentTimeMillis()+100)); //100ms added to make finalUpdateMillis > origin
 		}
 		//archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}
