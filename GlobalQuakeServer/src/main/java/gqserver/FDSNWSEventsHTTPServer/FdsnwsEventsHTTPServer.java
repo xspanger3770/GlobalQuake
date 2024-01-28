@@ -40,19 +40,14 @@ public class FdsnwsEventsHTTPServer {
         return instance;
     }
 
-    public void startServer() {
+    public void startServer() throws Exception {
         if(serverRunning){
             Logger.warn("fdsnws_event Server was attempted to be started but was already running");
             return;
         }
 
         server = null;
-        try {
-            server = HttpServer.create(new InetSocketAddress(Settings.FDSNWSEventIP, Settings.FDSNWSEventPort), 0);
-        } catch (Exception e) {
-            Logger.error(e);
-            return;
-        }
+        server = HttpServer.create(new InetSocketAddress(Settings.FDSNWSEventIP, Settings.FDSNWSEventPort), 0);
 
         initRoutes();
         server.setExecutor(null); // creates a default executor
