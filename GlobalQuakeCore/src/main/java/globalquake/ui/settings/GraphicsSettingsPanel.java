@@ -1,6 +1,7 @@
 package globalquake.ui.settings;
 
 import globalquake.core.Settings;
+import globalquake.core.earthquake.quality.QualityClass;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -43,6 +44,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxShakemap;
     private JCheckBox chkBoxCityIntensities;
     private JCheckBox chkBoxCapitals;
+    private JComboBox<QualityClass> comboBoxQuality;
 
 
     public GraphicsSettingsPanel() {
@@ -263,6 +265,17 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         eventsPanel.add(colorsPanel);
 
+        JPanel qualityFilterPanel = new JPanel();
+        qualityFilterPanel.setBorder(BorderFactory.createTitledBorder("Quality"));
+
+        qualityFilterPanel.add(new JLabel("Only show old events with quality equal or better than: "));
+
+        comboBoxQuality = new JComboBox<>(QualityClass.values());
+        comboBoxQuality.setSelectedIndex(Math.max(0, Math.min(QualityClass.values().length-1, Settings.qualityFilter)));
+        qualityFilterPanel.add(comboBoxQuality);
+
+        eventsPanel.add(qualityFilterPanel);
+
         fill(eventsPanel, 20);
 
         return eventsPanel;
@@ -396,6 +409,8 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayTime = chkBoxTime.isSelected();
         Settings.displayCityIntensities = chkBoxCityIntensities.isSelected();
         Settings.displayCapitalCities = chkBoxCapitals.isSelected();
+
+        Settings.qualityFilter = comboBoxQuality.getSelectedIndex();
     }
 
     @Override

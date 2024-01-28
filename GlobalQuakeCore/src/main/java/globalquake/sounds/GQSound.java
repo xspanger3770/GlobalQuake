@@ -47,20 +47,23 @@ public class GQSound {
                         "\nThis happens when at least 5 stations reach 10,000 counts or at least 3 stations reach 50,000 counts.");
 
         descriptions.put("level_4.wav",
-                "Triggered when cluster reaches level 4. " +
-                        "\nThis happens when at least 4 stations reach 50,000 counts. " +
-                        "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
+                """
+                        Triggered when cluster reaches level 4.\s
+                        This happens when at least 4 stations reach 50,000 counts.\s
+                        This audio file is BLANK at default since this alarm sound has not yet been added!""");
 
         descriptions.put("intensify.wav", "Triggered if the conditions specified in the previous Alerts settings tab are met.");
         descriptions.put("felt.wav", "Triggered if shaking is expected at your home location." +
                 "\nThe threshold intensity scale and level can be configured in the Alerts tab.");
-        descriptions.put("felt_strong.wav", "Triggered if STRONG shaking is expected at your home location." +
-                "\nThe threshold intensity scale and level can be configured in the Alerts tab."+
-                "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
+        descriptions.put("felt_strong.wav", """
+                Triggered if STRONG shaking is expected at your home location.
+                The threshold intensity scale and level can be configured in the Alerts tab.
+                This audio file is BLANK at default since this alarm sound has not yet been added!""");
 
-        descriptions.put("eew_warning.wav", "Triggered if there is high certainty in the detected earthquake and \n" +
-                "it has at least MMI VI estimated intensity on land."+
-                "\nThis audio file is BLANK at default since this alarm sound has not yet been added!");
+        descriptions.put("eew_warning.wav", """
+                Triggered if there is high certainty in the detected earthquake and\s
+                it has at least MMI VI estimated intensity on land.
+                This audio file is BLANK at default since this alarm sound has not yet been added!""");
 
         descriptions.put("countdown.wav", "Countdown of the last 10 seconds before S waves arrives at your home location\n" +
                 "if shaking is expected there.");

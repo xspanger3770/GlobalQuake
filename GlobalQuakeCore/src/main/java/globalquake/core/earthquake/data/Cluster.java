@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Cluster implements Warnable {
 
+	public static final int MAX_LEVEL = 4;
 	private final UUID uuid;
 	private final Map<AbstractStation, Event> assignedEvents;
 	private double rootLat;

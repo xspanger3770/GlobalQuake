@@ -1,5 +1,7 @@
 package globalquake.core.archive;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;
@@ -41,7 +43,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private double maxRatio;
 	private double maxPGA;
 	private String region;
-    private long finalUpdateMillis;
+  private long finalUpdateMillis;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 
@@ -186,9 +188,22 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return maxPGA;
 	}
 
+	public boolean shouldBeDisplayed() {
+		if(qualityClass.ordinal() > Settings.qualityFilter){
+			return false;
+		}
+
+		if (Settings.oldEventsMagnitudeFilterEnabled && getMag() < Settings.oldEventsMagnitudeFilter) {
+			return false;
+		}
+
+		return !Settings.oldEventsTimeFilterEnabled || !((GlobalQuake.instance.currentTimeMillis() - getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
+	}
+  
   public long getFinalUpdateMillis() {
       return finalUpdateMillis;
   }
+  
   public String formattedUtcOrigin() {
       SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
       utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

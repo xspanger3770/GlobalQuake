@@ -1,6 +1,5 @@
 package globalquake.ui.globalquake;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.intensity.IntensityScales;
@@ -38,13 +37,7 @@ public class EarthquakeListPanel extends JPanel {
         if(archivedQuakes == null){
             return null;
         }
-        return archivedQuakes.stream().filter( quake -> {
-            if (Settings.oldEventsMagnitudeFilterEnabled && quake.getMag() < Settings.oldEventsMagnitudeFilter) {
-                return false;
-            }
-
-            return !Settings.oldEventsTimeFilterEnabled || !((GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
-        }).collect(Collectors.toList());
+        return archivedQuakes.stream().filter(ArchivedQuake::shouldBeDisplayed).collect(Collectors.toList());
     }
 
     public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {

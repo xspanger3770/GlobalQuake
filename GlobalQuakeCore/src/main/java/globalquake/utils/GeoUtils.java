@@ -1,8 +1,6 @@
 package globalquake.utils;
 
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.MMIIntensityScale;
 import org.apache.commons.math3.util.FastMath;
 
