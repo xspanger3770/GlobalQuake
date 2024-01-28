@@ -65,10 +65,14 @@ public class GlobalQuake {
 		earthquakeAnalysis = new EarthquakeAnalysis();
 		clusterAnalysis = new ClusterAnalysis();
 
-		archive = new EarthquakeArchive().loadArchive();
+		archive = createArchive();
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
+	}
+
+	public EarthquakeArchive createArchive(){
+		return new EarthquakeArchive().loadArchive();
 	}
 
 	public GlobalQuake initStations() {

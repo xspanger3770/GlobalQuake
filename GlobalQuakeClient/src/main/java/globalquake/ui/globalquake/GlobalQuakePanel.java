@@ -74,7 +74,7 @@ public class GlobalQuakePanel extends GlobePanel {
         super(Settings.homeLat, Settings.homeLon);
         getRenderer().addFeature(new FeatureShakemap());
         getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
-        getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+        if(GlobalQuake.instance.getArchive() != null) getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
         getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
         getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
         getRenderer().addFeature(new FeatureCities());
@@ -448,7 +448,7 @@ public class GlobalQuakePanel extends GlobePanel {
         Cluster clus = new Cluster();
         clus.updateLevel(4);
 
-        double t = (System.currentTimeMillis() % 10000) / 10000.0;
+        @SuppressWarnings("unused") double t = (System.currentTimeMillis() % 10000) / 10000.0;
 
         Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
@@ -551,7 +551,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
-        if(GlobalQuake.instance.getStationDatabaseManager() != null) {
+        if(GlobalQuake.instance.getStationDatabaseManager() != null && GlobalQuake.instance.getStationDatabaseManager().getStationDatabase() != null) {
             int totalStations = 0;
             int connectedStations = 0;
             int runningSeedlinks = 0;

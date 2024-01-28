@@ -12,6 +12,7 @@ import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.intensity.ShakeMap;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.main.Main;
+import globalquake.playground.GlobalQuakePlayground;
 import globalquake.sounds.Sounds;
 import globalquake.ui.GQFrame;
 import globalquake.ui.database.DatabaseMonitorFrame;
@@ -33,11 +34,12 @@ public class MainFrame extends GQFrame {
     private JButton hostButton;
 
     private static boolean loaded = false;
+    private JButton playgroundButton;
 
     public MainFrame(){
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(600,400));
+        setPreferredSize(new Dimension(600,500));
 
         JPanel contentPane = new JPanel();
         setContentPane(contentPane);
@@ -98,7 +100,7 @@ public class MainFrame extends GQFrame {
     }
 
     private JPanel createMainPanel() {
-        var grid = new GridLayout(4,1);
+        var grid = new GridLayout(5,1);
         grid.setVgap(10);
         JPanel panel = new JPanel(grid);
         panel.setBorder(new EmptyBorder(5,5,5,5));
@@ -127,6 +129,15 @@ public class MainFrame extends GQFrame {
         connectButton.addActionListener(actionEvent -> {
             this.dispose();
             new ServerSelectionFrame().setVisible(true);
+        });
+
+        playgroundButton = new JButton("Playground");
+        playgroundButton.setEnabled(loaded);
+        panel.add(playgroundButton);
+
+        playgroundButton.addActionListener(actionEvent -> {
+            this.dispose();
+            new GlobalQuakePlayground();
         });
 
         JPanel buttons2 = createButtons();
@@ -201,6 +212,7 @@ public class MainFrame extends GQFrame {
     public void onLoad(){
         hostButton.setEnabled(true);
         connectButton.setEnabled(true);
+        playgroundButton.setEnabled(true);
     }
 
     public JProgressBar getProgressBar() {
