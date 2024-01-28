@@ -451,7 +451,6 @@ public class EventsV1Handler implements HttpHandler{
             minlongitude = -180f;
             maxlongitude = 180f;
 
-
             //Anything outside of this is impossible
             float earth_radius = 6371f; //km
 
