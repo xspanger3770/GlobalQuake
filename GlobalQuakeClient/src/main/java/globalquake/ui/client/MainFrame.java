@@ -39,7 +39,8 @@ public class MainFrame extends GQFrame {
     public MainFrame(){
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(600,500));
+        setPreferredSize(new Dimension(600,460));
+        setMinimumSize(new Dimension(600, 460));
 
         JPanel contentPane = new JPanel();
         setContentPane(contentPane);
