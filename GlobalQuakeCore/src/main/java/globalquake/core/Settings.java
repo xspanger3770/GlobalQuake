@@ -157,6 +157,8 @@ public final class Settings {
     public static Integer FDSNWSEventPort;
     @SuppressWarnings("unused")
     public static Boolean autoStartFDSNWSEventServer;
+    @SuppressWarnings("unused")
+    public static Double shakemapQualityOffset;
 
     static {
         load();
@@ -175,6 +177,8 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
+        loadProperty("shakemapQualityOffset", "0.0",
+                o -> validateDouble(-4.0, 4.0, (Double) o));
         loadProperty("eewClusterLevel", "2",
                 o -> validateInt(0, Cluster.MAX_LEVEL, (Integer) o));
         loadProperty("qualityFilter", String.valueOf(QualityClass.D.ordinal()),
