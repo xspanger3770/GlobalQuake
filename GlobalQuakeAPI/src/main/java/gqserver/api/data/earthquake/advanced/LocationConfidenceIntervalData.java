@@ -4,5 +4,5 @@ import java.io.Serializable;
 import java.util.List;
 
 public record LocationConfidenceIntervalData(List<PolygonConfidenceIntervalData> polygonConfidenceIntervalDataList) implements Serializable {
-
+    public static final long serialVersionUID = 0L;
 }
