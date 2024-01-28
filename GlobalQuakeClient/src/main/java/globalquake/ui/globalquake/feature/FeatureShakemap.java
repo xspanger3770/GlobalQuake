@@ -72,7 +72,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     private void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
-                .sorted(Comparator.comparing(kv -> -kv.getValue().getMag())).toList()){
+                .sorted(Comparator.comparing(kv -> kv.getValue().getRes())).toList()){
             ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {
