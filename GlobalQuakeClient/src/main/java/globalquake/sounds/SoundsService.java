@@ -33,13 +33,19 @@ public class SoundsService {
             public void onQuakeCreate(QuakeCreateEvent event) {
                 if(SoundsService.this.canPing(event.earthquake())) {
                     Sounds.playSound(Sounds.found);
+                    event.earthquake().foundPlayed = true;
                 }
             }
 
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
                 if(SoundsService.this.canPing(event.earthquake())) {
-                    Sounds.playSound(Sounds.update);
+                    if(!event.earthquake().foundPlayed){
+                        Sounds.playSound(Sounds.found);
+                        event.earthquake().foundPlayed = true;
+                    } else {
+                        Sounds.playSound(Sounds.update);
+                    }
                 }
             }
         });

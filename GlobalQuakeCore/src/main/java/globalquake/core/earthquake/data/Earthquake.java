@@ -24,6 +24,7 @@ public class Earthquake implements Regional, Warnable {
 
 	private final UUID uuid;
 	public List<CityIntensity> cityIntensities = new ArrayList<>();
+	public boolean foundPlayed;
     private long lastUpdate;
 	private final Cluster cluster;
 	public int nextReportEventCount;
