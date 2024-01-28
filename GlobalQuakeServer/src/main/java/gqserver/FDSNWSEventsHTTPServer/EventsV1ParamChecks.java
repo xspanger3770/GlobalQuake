@@ -14,10 +14,12 @@ public class EventsV1ParamChecks {
         //Takes a string in the format of "YYYY-MM-DDTHH:MM:SS" UTC time and returns a Date object
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-        Date parsedDate = null;
+        Date parsedDate;
         try{
             parsedDate = dateFormat.parse(date);
-        }catch(Exception e){} 
+        }catch(Exception e){
+            return null;
+        }
         return parsedDate;
     }
 
@@ -25,13 +27,16 @@ public class EventsV1ParamChecks {
 
     static public Float parseLatitude(String latitude){
         //Takes a string in the format of "[-]DD.DD" and returns a Float object
-        Float parsedLatitude = null;
+        float parsedLatitude;
         try{
             parsedLatitude = Float.parseFloat(latitude);
-        }catch(Exception e){}
-        if(parsedLatitude > 90 || parsedLatitude < -90){
+            if(parsedLatitude > 90 || parsedLatitude < -90){
+                return null;
+            }
+        }catch(Exception e){
             return null;
         }
+
         return parsedLatitude;
     }
 
@@ -39,11 +44,13 @@ public class EventsV1ParamChecks {
 
     static public Float parseLongitude(String longitude){
         //Takes a string in the format of "[-]DDD.DD" and returns a Float object
-        Float parsedLongitude = null;
+        float parsedLongitude;
         try{
             parsedLongitude = Float.parseFloat(longitude);
-        }catch(Exception e){} 
-        if(parsedLongitude > 180 || parsedLongitude < -180){
+            if(parsedLongitude > 180 || parsedLongitude < -180){
+                return null;
+            }
+        }catch(Exception e){
             return null;
         }
         return parsedLongitude;
@@ -53,22 +60,27 @@ public class EventsV1ParamChecks {
         /*Takes a string and makes sure it is a valid depth
          *In the future, this will need an appropriate range check
         */
-        Float parsedDepth = null;
+        float parsedDepth;
         try{
             parsedDepth = Float.parseFloat(depth);
-        }catch(Exception e){} 
+        }catch(Exception e){
+            return null;
+        }
         return parsedDepth;
     }
 
     static public Float parseMagnitude(String magnitude){
         //Takes a string and makes sure it is a valid magnitude
-        Float parsedMagnitude = null;
+        float parsedMagnitude;
         try{
             parsedMagnitude = Float.parseFloat(magnitude);
-        }catch(Exception e){}
-        if(parsedMagnitude > 10 || parsedMagnitude < -10){
+            if(parsedMagnitude > 10 || parsedMagnitude < -10){
+                return null;
+            }
+        }catch(Exception e){
             return null;
         }
+
         return parsedMagnitude;
     }
 
@@ -94,11 +106,13 @@ public class EventsV1ParamChecks {
 
     static public int parseNoData(String noData){
         //Takes a string and makes sure it is a valid nodata
-        int parsedNoData = 0;
+        int parsedNoData;
         try{
             parsedNoData = Integer.parseInt(noData);
-        }catch(Exception e){}
-        if(parsedNoData > 999 || parsedNoData < 1){
+            if(parsedNoData > 999 || parsedNoData < 1){
+                return 0;
+            }
+        }catch(Exception e){
             return 0;
         }
         return parsedNoData;

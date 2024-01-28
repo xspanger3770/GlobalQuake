@@ -43,7 +43,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private double maxRatio;
 	private double maxPGA;
 	private String region;
-  private long finalUpdateMillis;
+    private final long finalUpdateMillis;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 

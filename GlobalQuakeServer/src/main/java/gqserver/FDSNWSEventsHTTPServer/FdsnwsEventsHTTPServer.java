@@ -14,7 +14,7 @@ public class FdsnwsEventsHTTPServer {
     private boolean serverRunning;
     private HttpServer server;
 
-    private Duration clientCleanExitTime = Duration.ofSeconds(3);
+    private final Duration clientCleanExitTime = Duration.ofSeconds(3);
 
     private FdsnwsEventsHTTPServer() {
         if(instance != null){
@@ -56,6 +56,7 @@ public class FdsnwsEventsHTTPServer {
         Logger.info("fdsnws_event Server started on " + Settings.FDSNWSEventIP + ":" + Settings.FDSNWSEventPort);
     }
 
+    @SuppressWarnings("unused")
     public void stopServer() {
         if (!serverRunning) {
             Logger.warn("fdsnws_event Server was attempted to be stopped but was not running");

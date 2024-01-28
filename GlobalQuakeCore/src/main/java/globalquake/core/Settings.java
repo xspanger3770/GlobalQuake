@@ -151,8 +151,11 @@ public final class Settings {
     public static Integer eewLevelIndex;
     public static Integer qualityFilter;
     public static Integer eewClusterLevel;
+    @SuppressWarnings("unused")
     public static String FDSNWSEventIP;
+    @SuppressWarnings("unused")
     public static Integer FDSNWSEventPort;
+    @SuppressWarnings("unused")
     public static Boolean autoStartFDSNWSEventServer;
 
     static {

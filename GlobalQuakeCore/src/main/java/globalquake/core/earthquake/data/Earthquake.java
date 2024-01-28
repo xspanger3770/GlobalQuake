@@ -5,8 +5,6 @@ import globalquake.core.alert.Warnable;
 
 import globalquake.core.intensity.CityIntensity;
 
-import globalquake.core.archive.ArchivedQuake;
-
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
 
@@ -16,9 +14,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Earthquake implements Regional, Warnable {
 

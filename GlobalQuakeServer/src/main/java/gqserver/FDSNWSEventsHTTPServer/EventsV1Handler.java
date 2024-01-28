@@ -1,6 +1,7 @@
 package gqserver.FDSNWSEventsHTTPServer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
@@ -30,10 +31,19 @@ public class EventsV1Handler implements HttpHandler{
         //check if application.wadl was requested
         if(exchange.getRequestURI().toString().endsWith("application.wadl")){
             URL wadlURL = getClass().getClassLoader().getResource("fdsnws_event_application.wadl");
-            String wadl = "";
-            try{
-                wadl = new String(wadlURL.openStream().readAllBytes());
-            }catch(Exception e){
+
+            if(wadlURL == null){
+                HttpRequestException ex = new HttpRequestException(500, "Internal Server Error");
+                ex.transmitToClient(exchange);
+                Logger.error(new RuntimeApplicationException("Wadl URL is null!"));
+                return;
+            }
+
+            String wadl;
+
+            try(InputStream in = wadlURL.openStream()){
+                wadl = new String(in.readAllBytes());
+            } catch(Exception e){
                 Logger.error(e);
                 HttpRequestException ex = new HttpRequestException(500, "Internal Server Error");
                 ex.transmitToClient(exchange);
@@ -46,7 +56,7 @@ public class EventsV1Handler implements HttpHandler{
         }
 
         //Parse the query string first to avoid extra work if there is an error
-        FdsnwsEventsRequest request = null;
+        FdsnwsEventsRequest request;
         try{
             request = new FdsnwsEventsRequest(exchange);
         }catch(HttpRequestException e){
@@ -61,34 +71,36 @@ public class EventsV1Handler implements HttpHandler{
 
         List<ArchivedQuake> filteredQuakes = filterEventDataWithRequest(earthquakes, request);
         
-        String formattedResult="";
-        String contentType = "";
+        String formattedResult;
+        String contentType;
 
-        if(request.format.equals("xml")){
-            formattedResult = EarthquakeDataExport.getQuakeMl(filteredQuakes);
-            contentType = "application/xml";
-        }
-        else if(request.format.equals("json") || request.format.equals("geojson")){
-            formattedResult = EarthquakeDataExport.getGeoJSON(filteredQuakes).toString();
-            contentType = "application/json";
-        }
-        else if(request.format.equals("text")){
-            formattedResult = EarthquakeDataExport.getText(filteredQuakes);
-            contentType = "text/plain";
-        }
-        else{
-            //This should never happen. This request should have been caught in the parameter checks
-            //Don't Panic
-            HttpRequestException e = new HttpRequestException(500, "Internal Server Error");
-            e.transmitToClient(exchange);
-            RuntimeApplicationException runtimeApplicationException = new RuntimeApplicationException("Somehow a point was reached that should have been unreachable. If code was just changed, that is the problem.");
-            //No need to pass this to the error handler, just log it.
-            Logger.error(runtimeApplicationException);
-            return;
+        switch (request.format) {
+            case "xml" -> {
+                formattedResult = EarthquakeDataExport.getQuakeMl(filteredQuakes);
+                contentType = "application/xml";
+            }
+            case "json", "geojson" -> {
+                formattedResult = EarthquakeDataExport.getGeoJSON(filteredQuakes).toString();
+                contentType = "application/json";
+            }
+            case "text" -> {
+                formattedResult = EarthquakeDataExport.getText(filteredQuakes);
+                contentType = "text/plain";
+            }
+            default -> {
+                //This should never happen. This request should have been caught in the parameter checks
+                //Don't Panic
+                HttpRequestException e = new HttpRequestException(500, "Internal Server Error");
+                e.transmitToClient(exchange);
+                RuntimeApplicationException runtimeApplicationException = new RuntimeApplicationException("Somehow a point was reached that should have been unreachable. If code was just changed, that is the problem.");
+                //No need to pass this to the error handler, just log it.
+                Logger.error(runtimeApplicationException);
+                return;
+            }
         }
 
         //If there are no earthquakes, then set the response code to the nodata code
-        int responseCode = filteredQuakes.size() > 0 ? 200 : request.nodata;
+        int responseCode = !filteredQuakes.isEmpty() ? 200 : request.nodata;
 
         HttpResponse response = new HttpResponse(responseCode, formattedResult, contentType);
         sendResponse(exchange, response);
@@ -166,40 +178,20 @@ public class EventsV1Handler implements HttpHandler{
     }
 
     private static void sendResponse(HttpExchange exchange, HttpResponse response) throws IOException{
-        exchange.getResponseHeaders().set("Content-Type", response.getResponseContentType());
+        exchange.getResponseHeaders().set("Content-Type", response.responseContentType());
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*"); //TODO: make this configurable
-        exchange.sendResponseHeaders(response.getResponseCode(), response.getResponseContent().length());
+        exchange.sendResponseHeaders(response.responseCode(), response.responseContent().length());
         OutputStream os = exchange.getResponseBody();
-        os.write(response.getResponseContent().getBytes());
+        os.write(response.responseContent().getBytes());
         os.close();
     }
 
 
-    private static class HttpResponse{
-        private int responseCode;
-        private String responseContent;
-        private String responseContentType;
-
-        public HttpResponse(int responseCode, String responseContent, String responseContentType){
-            this.responseCode = responseCode;
-            this.responseContent = responseContent;
-            this.responseContentType = responseContentType;
-        }
-
-        public int getResponseCode(){
-            return responseCode;
-        }
-
-        public String getResponseContent(){
-            return responseContent;
-        }
-
-        public String getResponseContentType(){
-            return responseContentType;
-        }
+    private record HttpResponse(int responseCode, String responseContent, String responseContentType) {
     }
 
-    private class FdsnwsEventsRequest {
+    @SuppressWarnings("unused")
+    private static class FdsnwsEventsRequest {
         //start
         private Date starttime;            //Limit to events on or after the specified start time.
         //end
@@ -359,7 +351,7 @@ public class EventsV1Handler implements HttpHandler{
                 latitude = EventsV1ParamChecks.parseLatitude(lat2);
             }
             //Either lat was null and the result is null
-            if( (lat1 != null || lat1 != null) && latitude == null){
+            if( (lat1 != null || lat2 != null) && latitude == null){
                 throw new HttpRequestException(400, "Issue parsing latitude. Make sure it is between -90 and 90");
             }
 
@@ -461,7 +453,7 @@ public class EventsV1Handler implements HttpHandler{
 
 
             //Anything outside of this is impossible
-            Float earth_radius = 6371f; //km
+            float earth_radius = 6371f; //km
 
             //any depth
             mindepth = -earth_radius;
@@ -495,9 +487,10 @@ public class EventsV1Handler implements HttpHandler{
         }
     }
 
+    @SuppressWarnings("unused")
     public static class HttpRequestException extends Exception{
-        private int errorCode;
-        private String errorMessage;
+        private final int errorCode;
+        private final String errorMessage;
         private boolean revealError = true;
 
         public HttpRequestException(int errorCode, String errorMessage){
@@ -522,7 +515,7 @@ public class EventsV1Handler implements HttpHandler{
         }
 
         public void transmitToClient(HttpExchange exchange) throws IOException{
-            HttpResponse response = null;
+            HttpResponse response;
             if(!revealError){
                 response = new HttpResponse(500, "Internal Server Error", "text/plain");
                 sendResponse(exchange, response);
