@@ -13,6 +13,7 @@ import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
+import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.MMIIntensityScale;
@@ -98,6 +99,9 @@ public class GlobalQuakePanel extends GlobePanel {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                         Earthquake earthquake = createDebugQuake();
                         GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
+                        GlobalQuake.instance.getClusterAnalysis().getClusters().add(earthquake.getCluster());
+
+                        GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(earthquake.getCluster()));
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
                     }
 
@@ -174,7 +178,6 @@ public class GlobalQuakePanel extends GlobePanel {
             new StationMonitor(this, selectedStation, 500);
     }
 
-    @SuppressWarnings("ConstantValue")
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
@@ -443,11 +446,14 @@ public class GlobalQuakePanel extends GlobePanel {
     private static Earthquake createDebugQuake() {
         Earthquake quake;
         Cluster clus = new Cluster();
+        clus.updateLevel(4);
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat + 5, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 List.of(new PolygonConfidenceInterval(16, 0, List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
+
+        clus.updateRoot(hyp.lat, hyp.lon);
 
         hyp.usedEvents = 20;
 
@@ -777,8 +783,8 @@ public class GlobalQuakePanel extends GlobePanel {
                 units.format(quality.getQualityNS().getValue(), 1), quality.getQualityNS().getQualityClass().getColor());
         drawAccuracyBox(g, true, "Err. E-W ", x + width, y + 80,
                 units.format(quality.getQualityEW().getValue(), 1), quality.getQualityEW().getQualityClass().getColor());
-        drawAccuracyBox(g, true, "Correct % ", x + width, y + 104,
-                "%.1f".formatted(quality.getQualityPercentage().getValue()), quality.getQualityPercentage().getQualityClass().getColor());
+        drawAccuracyBox(g, true, "Match ", x + width, y + 104,
+                "%.1f%%".formatted(quality.getQualityPercentage().getValue()), quality.getQualityPercentage().getQualityClass().getColor());
     }
 
     public static void drawAccuracyBox(Graphics2D g, boolean alignRight, String str, int x, int y, String v, Color color) {

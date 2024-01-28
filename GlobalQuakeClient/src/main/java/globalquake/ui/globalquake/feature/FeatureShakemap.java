@@ -160,7 +160,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
         graphics.fill(elementHex.getShape());
 
-        boolean mouseNearby = renderer.getLastMouse() != null && elementHex.getShape().contains(renderer.getLastMouse());
+        boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementHex.getShape().contains(renderer.getLastMouse());
 
         if(mouseNearby && renderProperties.scroll < 0.2) {
             graphics.setColor(col);

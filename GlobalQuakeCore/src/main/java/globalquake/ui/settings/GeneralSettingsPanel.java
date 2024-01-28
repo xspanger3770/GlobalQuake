@@ -12,11 +12,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.TextStyle;
 import java.util.Comparator;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.Objects;
 
 public class GeneralSettingsPanel extends SettingsPanel {
 	private JComboBox<IntensityScale> comboBoxScale;
@@ -89,11 +86,8 @@ public class GeneralSettingsPanel extends SettingsPanel {
 														  boolean isSelected, boolean cellHasFocus) {
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-				if (value instanceof ZoneId) {
-					ZoneId zoneId = (ZoneId) value;
-
-					String offset = zoneId.getRules().getOffset(Instant.now()).toString();
-
+				if (value instanceof ZoneId zoneId) {
+                    String offset = zoneId.getRules().getOffset(Instant.now()).toString();
 					label.setText(String.format("%s (%s)", zoneId, offset));
 				}
 
@@ -104,7 +98,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		timezoneCombobox.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				Settings.timezoneStr = ((ZoneId)timezoneCombobox.getSelectedItem()).getId();
+				Settings.timezoneStr = ((ZoneId) Objects.requireNonNull(timezoneCombobox.getSelectedItem())).getId();
 				Settings.initTimezoneSettings();
 			}
 		});
@@ -195,7 +189,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.intensityScaleIndex = comboBoxScale.getSelectedIndex();
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 		Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
-		Settings.timezoneStr = ((ZoneId)timezoneCombobox.getSelectedItem()).getId();
+		Settings.timezoneStr = ((ZoneId) Objects.requireNonNull(timezoneCombobox.getSelectedItem())).getId();
 	}
 
 	@Override

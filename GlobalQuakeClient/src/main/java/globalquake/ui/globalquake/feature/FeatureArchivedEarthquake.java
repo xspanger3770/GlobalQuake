@@ -18,7 +18,6 @@ import java.util.List;
 
 public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
-    private static final long HOURS = 1000 * 60 * 60L;
     private final List<ArchivedQuake> earthquakes;
 
     public FeatureArchivedEarthquake(List<ArchivedQuake> earthquakes) {
@@ -71,14 +70,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        boolean displayed = !entity.getOriginal().isWrong();
-        if(Settings.oldEventsMagnitudeFilterEnabled) {
-            displayed &= (entity.getOriginal().getMag() >= Settings.oldEventsMagnitudeFilter);
-        }
-
-        if(Settings.oldEventsTimeFilterEnabled) {
-            displayed &= (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
-        }
+        boolean displayed = !entity.getOriginal().isWrong() && entity.getOriginal().shouldBeDisplayed();
 
         if(displayed) {
             element.getShape().reset();
