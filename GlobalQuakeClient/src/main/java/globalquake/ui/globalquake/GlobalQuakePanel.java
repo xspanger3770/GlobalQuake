@@ -448,7 +448,7 @@ public class GlobalQuakePanel extends GlobePanel {
         Cluster clus = new Cluster();
         clus.updateLevel(4);
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat + 5, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 List.of(new PolygonConfidenceInterval(16, 0, List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
@@ -457,8 +457,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 6.4;
-        hyp.depth = 0;
+        hyp.magnitude = 5.0;
+        hyp.depth = (System.currentTimeMillis() % 20000) / 200.0;
 
         hyp.correctEvents = 6;
 
