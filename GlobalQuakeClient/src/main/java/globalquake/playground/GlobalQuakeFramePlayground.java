@@ -1,16 +1,11 @@
 package globalquake.playground;
 
-import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.main.Main;
-import globalquake.ui.globalquake.EarthquakeListPanel;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
-import globalquake.ui.globalquake.GlobalQuakePanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.Executors;
@@ -32,7 +27,8 @@ public class GlobalQuakeFramePlayground extends GlobalQuakeFrame {
                 Font font = new Font("Calibri", Font.BOLD, 48);
                 g.setFont(font);
 
-                g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, (int) (getHeight() * 0 + font.getSize()));
+                /// TODO location
+                g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2,  (font.getSize()));
             }
         };
 

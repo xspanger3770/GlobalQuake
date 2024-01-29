@@ -9,13 +9,8 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.MagnitudeReading;
-import globalquake.core.earthquake.interval.DepthConfidenceInterval;
-import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
-import globalquake.core.events.specific.ClusterCreateEvent;
-import globalquake.core.events.specific.QuakeCreateEvent;
-import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStation;
@@ -23,7 +18,6 @@ import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
-import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.intensity.CityIntensity;
 import globalquake.utils.GeoUtils;
@@ -63,7 +57,6 @@ public class GlobalQuakePanel extends GlobePanel {
     private static final Color BLUE_COLOR = new Color(20, 20, 160);
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private static final boolean DEBUG = false;
 
     private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;

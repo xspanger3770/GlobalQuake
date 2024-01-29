@@ -2,21 +2,14 @@ package globalquake.playground;
 
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.GlobalQuake;
-import globalquake.core.GlobalQuakeRuntime;
 import globalquake.core.archive.EarthquakeArchive;
-import globalquake.core.database.StationDatabaseManager;
-import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.regions.Regions;
-import globalquake.core.station.GlobalStationManager;
 import globalquake.main.Main;
-import globalquake.ui.globalquake.GlobalQuakeFrame;
 import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
