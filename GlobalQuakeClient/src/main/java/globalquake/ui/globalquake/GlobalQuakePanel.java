@@ -72,13 +72,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
-        getRenderer().addFeature(new FeatureShakemap());
-        getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
-        if(GlobalQuake.instance.getArchive() != null) getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
-        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
-        getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
-        getRenderer().addFeature(new FeatureCities());
-        getRenderer().addFeature(new FeatureHomeLoc());
+
+        addRenderFeatures();
 
         frame.addKeyListener(new KeyAdapter() {
             @Override
@@ -93,35 +88,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_C) {
                     setCinemaMode(!isCinemaMode());
-                }
-
-                if (DEBUG) {
-                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        Earthquake earthquake = createDebugQuake();
-                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuake.instance.getClusterAnalysis().getClusters().add(earthquake.getCluster());
-
-                        GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(earthquake.getCluster()));
-                        GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
-                    }
-
-                    if (e.getKeyCode() == KeyEvent.VK_U) {
-                        Earthquake ex = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findAny().orElse(null);
-
-                        if(ex != null) {
-                            Earthquake earthquake = createDebugQuake();
-                            ex.update(earthquake);
-                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
-                        }
-                    }
-
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
-                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
-                        }
-
-                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().clear();
-                    }
                 }
             }
         });
@@ -150,6 +116,16 @@ public class GlobalQuakePanel extends GlobePanel {
                 cinemaHandler.stop();
             }
         });
+    }
+
+    protected void addRenderFeatures() {
+        getRenderer().addFeature(new FeatureShakemap());
+        getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
+        getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
+        getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
+        getRenderer().addFeature(new FeatureCities());
+        getRenderer().addFeature(new FeatureHomeLoc());
     }
 
     @Override
@@ -364,7 +340,7 @@ public class GlobalQuakePanel extends GlobePanel {
             return;
         }
 
-        int width = 240;
+        int width = 400;
         int x = getWidth() / 2 - width / 2;
         int height;
 
@@ -378,7 +354,6 @@ public class GlobalQuakePanel extends GlobePanel {
         color = new Color(0, 90, 192);
         g.setFont(new Font("Calibri", Font.BOLD, 22));
         str = distGC <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
-        width = 400;
 
         if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()){
             color = new Color(255,200,0);
@@ -443,47 +418,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString("!", x + width - s / 2 - g.getFontMetrics().stringWidth("!") / 2 - 6, y + height - 16);
     }
 
-    private static Earthquake createDebugQuake() {
-        Earthquake quake;
-        Cluster clus = new Cluster();
-        clus.updateLevel(4);
 
-        @SuppressWarnings("unused") double t = (System.currentTimeMillis() % 10000) / 10000.0;
-
-        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
-                new DepthConfidenceInterval(10, 100),
-                List.of(new PolygonConfidenceInterval(16, 0, List.of(
-                        0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
-
-        clus.updateRoot(hyp.lat, hyp.lon);
-
-        hyp.usedEvents = 20;
-
-        hyp.magnitude = 7.2;
-        hyp.depth = 10.0;
-
-        hyp.correctEvents = 6;
-
-        hyp.calculateQuality();
-
-        clus.setPreviousHypocenter(hyp);
-
-        quake = new Earthquake(clus);
-
-        clus.setEarthquake(quake);
-        hyp.magnitude = quake.getMag();
-
-        List<MagnitudeReading> mags = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag, 0));
-        }
-
-        hyp.mags = mags;
-
-        quake.setRegion("asdasdasd");
-        return quake;
-    }
 
     private void drawTexts(Graphics2D g) {
         g.setFont(new Font("Calibri", Font.BOLD, 24));
@@ -633,10 +568,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 quake = quakes.get(displayedQuake);
             }
         } catch (Exception ignored) {
-        }
-
-        if (DEBUG) {
-            quake = createDebugQuake();
         }
 
         lastDisplayedQuake = quake;
