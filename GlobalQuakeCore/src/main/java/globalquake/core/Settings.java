@@ -159,10 +159,16 @@ public final class Settings {
     public static Boolean autoStartFDSNWSEventServer;
     @SuppressWarnings("unused")
     public static Double shakemapQualityOffset;
+    @SuppressWarnings("unused")
     public static Boolean discordBotEnabled;
+    @SuppressWarnings("unused")
     public static String discordBotToken;
+    @SuppressWarnings("unused")
     public static String discordBotGuildID;
+    @SuppressWarnings("unused")
     public static String discordBotChannelID;
+    @SuppressWarnings("unused")
+    public static Boolean discordBotSendRevisions;
 
     static {
         load();
@@ -181,6 +187,7 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
+        loadProperty("discordBotSendRevisions", "false");
         loadProperty("discordBotChannelID", "insert");
         loadProperty("discordBotGuildID", "insert");
         loadProperty("discordBotToken", "insert");

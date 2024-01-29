@@ -10,11 +10,11 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
-import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.utils.GeoUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -27,16 +27,16 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import org.tinylog.Logger;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 
 public class DiscordBot extends ListenerAdapter{
 
+    private static final String TAG = "Discord Bot";
     private static JDA jda;
 
-    public static void init() throws LoginException {
+    public static void init() {
         jda = JDABuilder.createDefault(Settings.discordBotToken).enableIntents(GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(new DiscordBot())
                 .build();
@@ -65,11 +65,8 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
-        if(jda == null){
-            return;
-        }
+        TextChannel channel = getChannel();
 
-        var channel = jda.getGuildById(Settings.discordBotGuildID).getTextChannelById(Settings.discordBotChannelID);
         if(channel == null){
             return;
         }
@@ -96,12 +93,28 @@ public class DiscordBot extends ListenerAdapter{
 
     }
 
-    private static void sendQuakeRemoveInfo(Earthquake earthquake) {
-        if(jda == null){
-            return;
+    private static TextChannel getChannel() {
+        if(jda == null) {
+            return null;
         }
 
-        var channel = jda.getGuildById(Settings.discordBotGuildID).getTextChannelById(Settings.discordBotChannelID);
+        var guild = jda.getGuildById(Settings.discordBotGuildID);
+
+        if(guild == null){
+            Logger.tag(TAG).error("Unable to find the guild!");
+            return null;
+        }
+
+        var channel = guild.getTextChannelById(Settings.discordBotChannelID);
+        if(channel == null){
+            Logger.tag(TAG).error("Unable to find the channel!");
+        }
+
+        return channel;
+    }
+
+    private static void sendQuakeRemoveInfo(Earthquake earthquake) {
+        TextChannel channel = getChannel();
 
         if(channel == null){
             return;
@@ -115,14 +128,12 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     private static void sendQuakeUpdateInfo(Earthquake earthquake) {
-        if(true){
-            return;
-        }
-        if(jda == null){
+        if(!Settings.discordBotSendRevisions){
             return;
         }
 
-        var channel = jda.getGuildById(Settings.discordBotGuildID).getTextChannelById(Settings.discordBotChannelID);
+        TextChannel channel = getChannel();
+
         if(channel == null){
             return;
         }
@@ -135,11 +146,8 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     private static void sendQuakeCreateInfo(Earthquake earthquake) {
-        if(jda == null){
-            return;
-        }
+        TextChannel channel = getChannel();
 
-        var channel = jda.getGuildById(Settings.discordBotGuildID).getTextChannelById(Settings.discordBotChannelID);
         if(channel == null){
             return;
         }
@@ -173,7 +181,8 @@ public class DiscordBot extends ListenerAdapter{
 
     @Override
     public void onReady(ReadyEvent event) {
-        var channel = jda.getGuildById(Settings.discordBotGuildID).getTextChannelById(Settings.discordBotChannelID);
+        TextChannel channel = getChannel();
+
         if(channel == null){
             return;
         }

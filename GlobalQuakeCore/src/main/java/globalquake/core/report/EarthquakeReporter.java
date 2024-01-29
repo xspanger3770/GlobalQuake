@@ -1,9 +1,7 @@
 package globalquake.core.report;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedQuake;
-import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeReportEvent;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
