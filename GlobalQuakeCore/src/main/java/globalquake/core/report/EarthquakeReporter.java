@@ -1,7 +1,10 @@
 package globalquake.core.report;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.events.specific.QuakeCreateEvent;
+import globalquake.core.events.specific.QuakeReportEvent;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.data.Earthquake;
@@ -53,8 +56,9 @@ public class EarthquakeReporter {
 		}
 
 		saveArchivedQuake(folder, archivedQuake);
-		drawMap(folder, earthquake);
-		drawIntensities(folder, earthquake);
+		BufferedImage map = drawMap(folder, earthquake);
+		BufferedImage intensities = drawIntensities(folder, earthquake);
+		GlobalQuake.instance.getEventHandler().fireEvent(new QuakeReportEvent(earthquake, archivedQuake, map, intensities));
 	}
 
 	private static void saveArchivedQuake(File folder, ArchivedQuake archivedQuake) {
@@ -74,7 +78,7 @@ public class EarthquakeReporter {
 		scroll = 2;
 	}
 
-	private static void drawIntensities(File folder, Earthquake earthquake) {
+	private static BufferedImage drawIntensities(File folder, Earthquake earthquake) {
 		int w = 800;
 		int h = 600;
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
@@ -97,9 +101,11 @@ public class EarthquakeReporter {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+
+		return img;
 	}
 
-	private static void drawMap(File folder, Earthquake earthquake) {
+	private static BufferedImage drawMap(File folder, Earthquake earthquake) {
 		calculatePos(earthquake);
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = img.createGraphics();
@@ -161,6 +167,8 @@ public class EarthquakeReporter {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+
+		return img;
 	}
 
 	private static boolean isOnScreen(double x, double y) {

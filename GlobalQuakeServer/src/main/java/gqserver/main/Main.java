@@ -11,6 +11,7 @@ import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.core.regions.Regions;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
+import gqserver.bot.DiscordBot;
 import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
 
 import globalquake.utils.Scale;
@@ -138,7 +139,7 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 8.0;
+    private static final double PHASES = 9.0;
     private static int phase = 0;
 
     public static void initAll() throws Exception{
@@ -164,6 +165,11 @@ public class Main {
             }catch (Exception e){
                 getErrorHandler().handleWarning(new RuntimeException("Unable to start FDSNWS EVENT server! Check logs for more info.", e));
             }
+        }
+
+        updateProgressBar("Starting Discord Bot...", (int) ((phase++ / PHASES) * 100.0));
+        if(Settings.discordBotEnabled){
+            DiscordBot.init();
         }
 
         updateProgressBar("Updating Station Sources...", (int) ((phase++ / PHASES) * 100.0));
