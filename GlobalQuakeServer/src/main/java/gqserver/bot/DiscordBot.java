@@ -159,7 +159,7 @@ public class DiscordBot extends ListenerAdapter{
         builder.setTitle("M%.1f %s".formatted(earthquake.getMag(), earthquake.getRegion()));
         builder.setAuthor("CANCELED");
 
-        channel.sendMessageEmbeds(builder.build()).queue();
+        updateMessage(earthquake, builder, channel);
     }
 
     private static void sendQuakeUpdateInfo(Earthquake earthquake) {
@@ -173,6 +173,10 @@ public class DiscordBot extends ListenerAdapter{
         builder.setAuthor("Revision #%d".formatted(earthquake.getRevisionID()));
         createDescription(builder, earthquake);
 
+        updateMessage(earthquake, builder, channel);
+    }
+
+    private static void updateMessage(Earthquake earthquake, EmbedBuilder builder, TextChannel channel) {
         Message lastMessage = lastMessages.getOrDefault(earthquake, null);
 
         if (lastMessage != null) {
@@ -193,7 +197,7 @@ public class DiscordBot extends ListenerAdapter{
         builder.setAuthor("New Event");
         createDescription(builder, earthquake);
 
-        channel.sendMessageEmbeds(builder.build()).queue(message -> lastMessages.put(earthquake, message));
+        updateMessage(earthquake, builder, channel);
     }
 
     private static void createDescription(EmbedBuilder builder, Earthquake earthquake) {
