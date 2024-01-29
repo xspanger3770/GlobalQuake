@@ -113,9 +113,18 @@ public class DiscordBot extends ListenerAdapter{
             throw new RuntimeException(e);
         }
 
-        channel.sendMessageEmbeds(builder.build())
-                .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"), FileUpload.fromData(baosInt.toByteArray(), "int.png"))
-                .queue();
+        Message lastMessage = lastMessages.getOrDefault(event.earthquake(), null);
+        if (lastMessage != null) {
+            lastMessage.editMessageEmbeds(builder.build())
+                    .setFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
+                              FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                    .queue();
+        } else {
+            channel.sendMessageEmbeds(builder.build())
+                    .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
+                              FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                    .queue(message -> lastMessages.put(event.earthquake(), message));
+        }
 
     }
 
