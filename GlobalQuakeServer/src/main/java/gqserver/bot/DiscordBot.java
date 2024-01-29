@@ -84,7 +84,7 @@ public class DiscordBot extends ListenerAdapter{
     private static void removeOld() {
         for (Iterator<Map.Entry<Earthquake, Message>> iterator = lastMessages.entrySet().iterator(); iterator.hasNext(); ) {
             var kv = iterator.next();
-            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), 60 * 2)) {
+            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10)) {
                 iterator.remove();
             }
         }
@@ -120,7 +120,6 @@ public class DiscordBot extends ListenerAdapter{
                               FileUpload.fromData(baosInt.toByteArray(), "int.png"))
                     .queue();
         } else {
-            System.err.println("REPORTING AND THE EVENT IS NULL!");
             channel.sendMessageEmbeds(builder.build())
                     .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
                               FileUpload.fromData(baosInt.toByteArray(), "int.png"))

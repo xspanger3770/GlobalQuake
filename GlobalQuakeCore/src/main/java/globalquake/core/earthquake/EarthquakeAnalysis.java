@@ -1055,6 +1055,12 @@ public class EarthquakeAnalysis {
             40, 40, // M7+
     };
 
+    /**
+     *
+     * @param earthquake
+     * @param marginSeconds POSITIVE NUMBERS CAUSE THIS FUNCTION TO RETURN TRUE SOONER
+     * @return if the quake is too old and should be removed
+     */
     public static boolean shouldRemove(Earthquake earthquake, int marginSeconds) {
         double store_minutes = STORE_TABLE[Math.max(0,
                 Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))]
