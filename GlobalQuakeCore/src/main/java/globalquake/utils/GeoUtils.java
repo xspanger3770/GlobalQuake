@@ -158,6 +158,11 @@ public interface GeoUtils {
 		return FastMath.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	}
 
+	static double getMaxPGA(double lat, double lon, double depth, double mag){
+		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
+		return GeoUtils.pgaFunction(mag, distGEO, depth);
+	}
+
 	static double pgaFunction(double mag, double distKm, double depth) {
 		return pgaFunctionGen2(
 				mag + 0.4 * EarthquakeAnalysis.getDepthCorrection(depth),

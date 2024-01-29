@@ -105,16 +105,11 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.maxPGA = 0.0;
 
 		pgaService.submit(this::calculatePGA);
-    this.finalUpdateMillis = finalUpdateMillis;
-
-
+    	this.finalUpdateMillis = finalUpdateMillis;
 	}
 
 	private void calculatePGA() {
-		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
-		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
-        
-
+		this.maxPGA = GeoUtils.getMaxPGA(getLat(), getLon(), getDepth(), getMag());
 	}
 
 	public double getDepth() {

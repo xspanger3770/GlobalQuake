@@ -84,7 +84,7 @@ public class DiscordBot extends ListenerAdapter{
     private static void removeOld() {
         for (Iterator<Map.Entry<Earthquake, Message>> iterator = lastMessages.entrySet().iterator(); iterator.hasNext(); ) {
             var kv = iterator.next();
-            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), 20)) {
+            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), 60 * 2)) {
                 iterator.remove();
             }
         }
@@ -98,7 +98,7 @@ public class DiscordBot extends ListenerAdapter{
         }
 
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setAuthor("Final Report");
+        builder.setAuthor("Final Report (#%d)".formatted(event.earthquake().getRevisionID()));
 
         builder.setImage("attachment://map.png");
         builder.setThumbnail("attachment://int.png");
@@ -120,6 +120,7 @@ public class DiscordBot extends ListenerAdapter{
                               FileUpload.fromData(baosInt.toByteArray(), "int.png"))
                     .queue();
         } else {
+            System.err.println("REPORTING AND THE EVENT IS NULL!");
             channel.sendMessageEmbeds(builder.build())
                     .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
                               FileUpload.fromData(baosInt.toByteArray(), "int.png"))
@@ -205,13 +206,14 @@ public class DiscordBot extends ListenerAdapter{
                 earthquake.getMag(),
                 earthquake.getRegion()));
 
+        double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
+
         builder.setDescription(
                 "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
+                "MMI: %s / Shindo: %s\n".formatted(IntensityScales.MMI.getLevel(pga), IntensityScales.SHINDO.getLevel(pga)) +
                 "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
                 "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
         );
-
-        double pga = GeoUtils.pgaFunction(earthquake.getMag(), earthquake.getDepth(), earthquake.getDepth());
 
         Level level = IntensityScales.getIntensityScale().getLevel(pga);
         Color levelColor = level == null ? Color.gray : level.getColor();
@@ -229,7 +231,7 @@ public class DiscordBot extends ListenerAdapter{
         }
 
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("GlobalQuake BOT");
+        builder.setTitle("GlobalQuake BOT v%s".formatted(VERSION));
         builder.setDescription("Who woke me up again...");
 
         channel.sendMessageEmbeds(builder.build()).queue();
