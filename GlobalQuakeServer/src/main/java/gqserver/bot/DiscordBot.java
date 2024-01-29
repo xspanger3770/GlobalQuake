@@ -209,7 +209,8 @@ public class DiscordBot extends ListenerAdapter{
 
         builder.setDescription(
                 "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
-                "MMI: %s / Shindo: %s\n".formatted(IntensityScales.MMI.getLevel(pga), IntensityScales.SHINDO.getLevel(pga)) +
+                "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
+                        formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
                 "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
                 "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
         );
@@ -219,6 +220,14 @@ public class DiscordBot extends ListenerAdapter{
 
         builder.setColor(levelColor);
         builder.setFooter("Created at %s with GQ Bot v%s".formatted(Settings.formatDateTime(Instant.now()), VERSION));
+    }
+
+    private static String formatLevel(Level level) {
+        if(level == null) {
+            return "-";
+        } else {
+            return level.toString();
+        }
     }
 
     @Override
