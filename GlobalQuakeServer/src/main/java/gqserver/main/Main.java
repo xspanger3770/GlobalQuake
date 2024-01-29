@@ -11,7 +11,7 @@ import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.core.regions.Regions;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
-import gqserver.FDSNWSEventsHTTPServer.FdsnwsEventsHTTPServer;
+import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
 
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
