@@ -170,7 +170,7 @@ public class DiscordBot extends ListenerAdapter{
                 "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
         );
 
-        double pga = GeoUtils.pgaFunction(earthquake.getMag(), 0, earthquake.getDepth());
+        double pga = GeoUtils.pgaFunction(earthquake.getMag(), earthquake.getDepth(), earthquake.getDepth());
 
         Level level = IntensityScales.getIntensityScale().getLevel(pga);
         Color levelColor = level == null ? Color.gray : level.getColor();
