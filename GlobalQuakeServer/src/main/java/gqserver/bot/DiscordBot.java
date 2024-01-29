@@ -20,7 +20,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import javax.imageio.ImageIO;
-import javax.security.auth.login.LoginException;
 
 import globalquake.core.Settings;
 import net.dv8tion.jda.api.utils.FileUpload;
