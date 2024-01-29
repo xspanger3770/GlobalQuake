@@ -1,7 +1,6 @@
 package gqserver.bot;
 
 import globalquake.core.GlobalQuake;
-import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventListener;
@@ -26,6 +25,7 @@ import javax.imageio.ImageIO;
 
 import globalquake.core.Settings;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.jetbrains.annotations.NotNull;
 import org.tinylog.Logger;
 
 import java.awt.*;
@@ -33,7 +33,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +43,7 @@ public class DiscordBot extends ListenerAdapter{
     private static final String VERSION = "0.2";
     private static JDA jda;
 
-    private static Map<Earthquake, Message> lastMessages = new HashMap<>();
+    private static final Map<Earthquake, Message> lastMessages = new HashMap<>();
 
     public static void init() {
         jda = JDABuilder.createDefault(Settings.discordBotToken).enableIntents(GatewayIntent.GUILD_MESSAGES)
@@ -73,21 +72,11 @@ public class DiscordBot extends ListenerAdapter{
             }
         });
 
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                removeOld();
-            }
-        },0,1, TimeUnit.MINUTES);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(DiscordBot::removeOld,0,1, TimeUnit.MINUTES);
     }
 
     private static void removeOld() {
-        for (Iterator<Map.Entry<Earthquake, Message>> iterator = lastMessages.entrySet().iterator(); iterator.hasNext(); ) {
-            var kv = iterator.next();
-            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10)) {
-                iterator.remove();
-            }
-        }
+        lastMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
@@ -219,7 +208,7 @@ public class DiscordBot extends ListenerAdapter{
         Color levelColor = level == null ? Color.gray : level.getColor();
 
         builder.setColor(levelColor);
-        builder.setFooter("Created at %s with GQ Bot v%s".formatted(Settings.formatDateTime(Instant.now()), VERSION));
+        builder.setFooter("Created at %s with GQ Bot v%s \n hello?".formatted(Settings.formatDateTime(Instant.now()), VERSION));
     }
 
     private static String formatLevel(Level level) {
@@ -231,7 +220,7 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     @Override
-    public void onReady(ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
         TextChannel channel = getChannel();
 
         if(channel == null){

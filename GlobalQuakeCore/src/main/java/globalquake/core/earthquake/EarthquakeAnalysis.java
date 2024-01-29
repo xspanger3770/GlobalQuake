@@ -1057,7 +1057,7 @@ public class EarthquakeAnalysis {
 
     /**
      *
-     * @param earthquake
+     * @param earthquake the earthquake
      * @param marginSeconds POSITIVE NUMBERS CAUSE THIS FUNCTION TO RETURN TRUE SOONER
      * @return if the quake is too old and should be removed
      */
