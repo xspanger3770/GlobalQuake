@@ -1,6 +1,8 @@
 package gqserver.bot;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.archive.EarthquakeArchive;
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventListener;
 import globalquake.core.events.specific.QuakeCreateEvent;
@@ -14,6 +16,7 @@ import globalquake.utils.GeoUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -29,11 +32,19 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DiscordBot extends ListenerAdapter{
 
     private static final String TAG = "Discord Bot";
+    private static final String VERSION = "0.2";
     private static JDA jda;
+
+    private static Map<Earthquake, Message> lastMessages = new HashMap<>();
 
     public static void init() {
         jda = JDABuilder.createDefault(Settings.discordBotToken).enableIntents(GatewayIntent.GUILD_MESSAGES)
@@ -61,6 +72,22 @@ public class DiscordBot extends ListenerAdapter{
                 sendQuakeReportInfo(event);
             }
         });
+
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                removeOld();
+            }
+        },0,1, TimeUnit.MINUTES);
+    }
+
+    private static void removeOld() {
+        for (Iterator<Map.Entry<Earthquake, Message>> iterator = lastMessages.entrySet().iterator(); iterator.hasNext(); ) {
+            var kv = iterator.next();
+            if (EarthquakeAnalysis.shouldRemove(kv.getKey(), 20)) {
+                iterator.remove();
+            }
+        }
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
@@ -127,13 +154,9 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     private static void sendQuakeUpdateInfo(Earthquake earthquake) {
-        if(!Settings.discordBotSendRevisions){
-            return;
-        }
-
         TextChannel channel = getChannel();
 
-        if(channel == null){
+        if (channel == null) {
             return;
         }
 
@@ -141,7 +164,13 @@ public class DiscordBot extends ListenerAdapter{
         builder.setAuthor("Revision #%d".formatted(earthquake.getRevisionID()));
         createDescription(builder, earthquake);
 
-        channel.sendMessageEmbeds(builder.build()).queue();
+        Message lastMessage = lastMessages.getOrDefault(earthquake, null);
+
+        if (lastMessage != null) {
+            lastMessage.editMessageEmbeds(builder.build()).queue();
+        } else {
+            channel.sendMessageEmbeds(builder.build()).queue(message -> lastMessages.put(earthquake, message));
+        }
     }
 
     private static void sendQuakeCreateInfo(Earthquake earthquake) {
@@ -155,7 +184,7 @@ public class DiscordBot extends ListenerAdapter{
         builder.setAuthor("New Event");
         createDescription(builder, earthquake);
 
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue(message -> lastMessages.put(earthquake, message));
     }
 
     private static void createDescription(EmbedBuilder builder, Earthquake earthquake) {
@@ -175,7 +204,7 @@ public class DiscordBot extends ListenerAdapter{
         Color levelColor = level == null ? Color.gray : level.getColor();
 
         builder.setColor(levelColor);
-        builder.setFooter("Created at: %s".formatted(Settings.formatDateTime(Instant.now())));
+        builder.setFooter("Created at %s with GQ Bot v%s".formatted(Settings.formatDateTime(Instant.now()), VERSION));
     }
 
     @Override
@@ -188,7 +217,7 @@ public class DiscordBot extends ListenerAdapter{
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("GlobalQuake BOT");
-        builder.setDescription("Initialising...");
+        builder.setDescription("Who woke me up again...");
 
         channel.sendMessageEmbeds(builder.build()).queue();
 
