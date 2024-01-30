@@ -115,7 +115,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     private boolean isOld(DataRecord dataRecord) {
         return dataRecord.getStartBtime().toInstant().isBefore(
-                Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
+                Instant.ofEpochMilli(GlobalQuake.instance.currentTimeMillis()).minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
     }
 
     public StationStatus createStatus(AbstractStation station){
