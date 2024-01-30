@@ -159,7 +159,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(mainWindowPanel);
 
-        JPanel clustersPanel = new JPanel(new GridLayout(2,2));
+        JPanel clustersPanel = new JPanel(new GridLayout(3,1));
         clustersPanel.setBorder(new TitledBorder("Cluster settings"));
 
         clustersPanel.add(chkBoxClusterRoots = new JCheckBox("Display Clusters (possible shaking locations)", Settings.displayClusterRoots));
