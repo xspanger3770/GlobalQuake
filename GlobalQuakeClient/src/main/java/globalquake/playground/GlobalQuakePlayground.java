@@ -19,6 +19,8 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     private final long playgroundStartMillis = LocalDate.of(2000,1,1)
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
+    private final WaveformGenerator waveformGenerator;
+
     public static void main(String[] args) throws Exception{
         GlobalQuake.prepare(Main.MAIN_FOLDER, new ApplicationErrorHandler(null));
         Regions.init();
@@ -35,6 +37,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     public GlobalQuakePlayground() {
         super(new StationDatabaseManagerPlayground());
         this.globalStationManager = new GlobalStationManagerPlayground();
+        this.waveformGenerator = new WaveformGenerator(this);
         createdAtMillis = System.currentTimeMillis();
         createFrame();
         startRuntime();

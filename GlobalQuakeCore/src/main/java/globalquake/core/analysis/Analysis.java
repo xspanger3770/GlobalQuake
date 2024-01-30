@@ -130,4 +130,7 @@ public abstract class Analysis {
         this.status = status;
     }
 
+    public void setSampleRate(double sampleRate) {
+        this.sampleRate = sampleRate;
+    }
 }
