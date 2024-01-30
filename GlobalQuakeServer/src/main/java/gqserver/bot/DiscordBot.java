@@ -27,6 +27,7 @@ import globalquake.core.Settings;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 import org.tinylog.Logger;
+import org.w3c.dom.Text;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -37,10 +38,14 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class DiscordBot extends ListenerAdapter{
+public class DiscordBot extends ListenerAdapter {
 
     private static final String TAG = "Discord Bot";
-    private static final String VERSION = "0.2";
+    private static final String VERSION = "0.3";
+    private static final String PING_M4 = "Ping 4.0+";
+    private static final String PING_M5 = "Ping 5.0+";
+    private static final String PING_M6 = "Ping 6.0+";
+    private static final String PING_M7 = "Ping 7.0+";
     private static JDA jda;
 
     private static final Map<Earthquake, Message> lastMessages = new HashMap<>();
@@ -72,7 +77,7 @@ public class DiscordBot extends ListenerAdapter{
             }
         });
 
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(DiscordBot::removeOld,0,1, TimeUnit.MINUTES);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(DiscordBot::removeOld, 0, 1, TimeUnit.MINUTES);
     }
 
     private static void removeOld() {
@@ -82,7 +87,7 @@ public class DiscordBot extends ListenerAdapter{
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
         TextChannel channel = getChannel();
 
-        if(channel == null){
+        if (channel == null) {
             return;
         }
 
@@ -91,7 +96,7 @@ public class DiscordBot extends ListenerAdapter{
 
         builder.setImage("attachment://map.png");
         builder.setThumbnail("attachment://int.png");
-        createDescription(builder, event.earthquake());
+        createDescription(builder, event.earthquake(), channel);
 
         ByteArrayOutputStream baosMap = new ByteArrayOutputStream();
         ByteArrayOutputStream baosInt = new ByteArrayOutputStream();
@@ -106,31 +111,31 @@ public class DiscordBot extends ListenerAdapter{
         if (lastMessage != null) {
             lastMessage.editMessageEmbeds(builder.build())
                     .setFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
-                              FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                            FileUpload.fromData(baosInt.toByteArray(), "int.png"))
                     .queue();
         } else {
             channel.sendMessageEmbeds(builder.build())
                     .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
-                              FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                            FileUpload.fromData(baosInt.toByteArray(), "int.png"))
                     .queue(message -> lastMessages.put(event.earthquake(), message));
         }
 
     }
 
     private static TextChannel getChannel() {
-        if(jda == null) {
+        if (jda == null) {
             return null;
         }
 
         var guild = jda.getGuildById(Settings.discordBotGuildID);
 
-        if(guild == null){
+        if (guild == null) {
             Logger.tag(TAG).error("Unable to find the guild!");
             return null;
         }
 
         var channel = guild.getTextChannelById(Settings.discordBotChannelID);
-        if(channel == null){
+        if (channel == null) {
             Logger.tag(TAG).error("Unable to find the channel!");
         }
 
@@ -140,7 +145,7 @@ public class DiscordBot extends ListenerAdapter{
     private static void sendQuakeRemoveInfo(Earthquake earthquake) {
         TextChannel channel = getChannel();
 
-        if(channel == null){
+        if (channel == null) {
             return;
         }
 
@@ -160,7 +165,7 @@ public class DiscordBot extends ListenerAdapter{
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setAuthor("Revision #%d".formatted(earthquake.getRevisionID()));
-        createDescription(builder, earthquake);
+        createDescription(builder, earthquake, channel);
 
         updateMessage(earthquake, builder, channel);
     }
@@ -178,18 +183,18 @@ public class DiscordBot extends ListenerAdapter{
     private static void sendQuakeCreateInfo(Earthquake earthquake) {
         TextChannel channel = getChannel();
 
-        if(channel == null){
+        if (channel == null) {
             return;
         }
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setAuthor("New Event");
-        createDescription(builder, earthquake);
+        createDescription(builder, earthquake, channel);
 
         updateMessage(earthquake, builder, channel);
     }
 
-    private static void createDescription(EmbedBuilder builder, Earthquake earthquake) {
+    private static void createDescription(EmbedBuilder builder, Earthquake earthquake, TextChannel channel) {
         builder.setTitle("M%.1f %s".formatted(
                 earthquake.getMag(),
                 earthquake.getRegion()));
@@ -197,11 +202,12 @@ public class DiscordBot extends ListenerAdapter{
         double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
 
         builder.setDescription(
-                "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
-                "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
-                        formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
-                "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
-                "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
+                tagRoles(channel, earthquake) +
+                        "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
+                        "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
+                                formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
+                        "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
+                        "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
         );
 
         Level level = IntensityScales.getIntensityScale().getLevel(pga);
@@ -212,8 +218,25 @@ public class DiscordBot extends ListenerAdapter{
         builder.setColor(levelColor);
     }
 
+    private static CharSequence tagRoles(TextChannel channel, Earthquake earthquake) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (earthquake.getMag() >= 4.0) {
+            stringBuilder.append(channel.getGuild().getRolesByName(PING_M4, true).get(0).getAsMention());
+        }
+        if (earthquake.getMag() >= 5.0) {
+            stringBuilder.append(channel.getGuild().getRolesByName(PING_M5, true).get(0).getAsMention());
+        }
+        if (earthquake.getMag() >= 6.0) {
+            stringBuilder.append(channel.getGuild().getRolesByName(PING_M6, true).get(0).getAsMention());
+        }
+        if (earthquake.getMag() >= 7.0) {
+            stringBuilder.append(channel.getGuild().getRolesByName(PING_M7, true).get(0).getAsMention());
+        }
+        return stringBuilder.toString();
+    }
+
     private static String formatLevel(Level level) {
-        if(level == null) {
+        if (level == null) {
             return "-";
         } else {
             return level.toString();
@@ -224,7 +247,7 @@ public class DiscordBot extends ListenerAdapter{
     public void onReady(@NotNull ReadyEvent event) {
         TextChannel channel = getChannel();
 
-        if(channel == null){
+        if (channel == null) {
             return;
         }
 
