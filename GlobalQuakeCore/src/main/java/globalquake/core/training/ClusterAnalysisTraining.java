@@ -25,7 +25,7 @@ public class ClusterAnalysisTraining {
     private static final boolean PKIKP = false;
     private static final boolean P =  true;
 
-    static class SimulatedStation extends AbstractStation {
+    public static class SimulatedStation extends AbstractStation {
 
         public static final AtomicInteger nextId = new AtomicInteger();
 

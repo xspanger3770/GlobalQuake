@@ -34,6 +34,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
     public GlobalQuakePlayground() {
         super(new StationDatabaseManagerPlayground());
+        this.globalStationManager = new GlobalStationManagerPlayground();
         createdAtMillis = System.currentTimeMillis();
         createFrame();
         startRuntime();

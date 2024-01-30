@@ -306,5 +306,6 @@ public class Cluster implements Warnable {
 	public void updateRoot(double rootLat, double rootLon) {
 		this.rootLat = rootLat;
 		this.rootLon = rootLon;
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 }

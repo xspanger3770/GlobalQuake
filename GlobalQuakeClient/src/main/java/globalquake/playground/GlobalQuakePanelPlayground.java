@@ -37,6 +37,10 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
                 }
 
+                if (e.getKeyCode() == KeyEvent.VK_R) {
+                    (((GlobalStationManagerPlayground)GlobalQuake.instance.getStationManager())).generateRandomStations(5000);
+                }
+
                 if (e.getKeyCode() == KeyEvent.VK_U) {
                     Earthquake ex = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findAny().orElse(null);
 

@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
 
-    private static final int MIN_CLUSTER_SIZE = 4;
+    public static final int CLUSTER_MIN_SIZE = 4;
     private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
 
     private final Lock clustersReadLock = clustersLock.readLock();
@@ -457,7 +457,7 @@ public class ClusterAnalysis {
                         }
                     }
                     // so no we have a list of all nearby events that could be earthquake
-                    if (validEvents.size() >= MIN_CLUSTER_SIZE) {
+                    if (validEvents.size() >= CLUSTER_MIN_SIZE) {
                         validEvents.add(event);
                         expandCluster(createCluster(validEvents));
                     }
@@ -486,12 +486,12 @@ public class ClusterAnalysis {
 
             Earthquake earthquake = cluster.getEarthquake();
 
-            boolean notEnoughEvents = cluster.getAssignedEvents().size() < MIN_CLUSTER_SIZE;
+            boolean notEnoughEvents = cluster.getAssignedEvents().size() < CLUSTER_MIN_SIZE;
             boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake, 0);
             boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 
             if ( notEnoughEvents || eqRemoved || tooOld) {
-                Logger.tag("Hypocs").debug("Cluster #" + cluster.id + " marked for removal");
+                Logger.tag("Hypocs").debug("Cluster #%d marked for removal (%s || %s || %s)".formatted(cluster.id, notEnoughEvents, eqRemoved, tooOld));
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();

@@ -130,6 +130,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
+
         if(!elementStationCircle.shouldDraw){
             return;
         }
