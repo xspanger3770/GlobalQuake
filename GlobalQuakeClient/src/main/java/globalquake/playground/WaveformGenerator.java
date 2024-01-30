@@ -2,6 +2,7 @@ package globalquake.playground;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
 import org.tritonus.share.GlobalInfo;
 
@@ -17,24 +18,26 @@ public class WaveformGenerator {
     }
 
     private void updateWaveforms() {
-        for(AbstractStation station : globalQuakePlayground.getStationManager().getStations()) {
-            PlaygroundStation playgroundStation = (PlaygroundStation) station;
-            long lastLog = playgroundStation.lastSampleTime;
-            long now = GlobalQuake.instance.currentTimeMillis();
+        globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(abstractStation -> generateWaveform(abstractStation));
+    }
 
-            if(lastLog < 0){
-                lastLog = now;
-            }
+    private static void generateWaveform(AbstractStation station) {
+        PlaygroundStation playgroundStation = (PlaygroundStation) station;
+        long lastLog = playgroundStation.lastSampleTime;
+        long now = GlobalQuake.instance.currentTimeMillis();
 
-
-            while(lastLog < now) {
-                station.getAnalysis().nextSample(
-                        playgroundStation.getNoise(lastLog),
-                        lastLog,
-                        GlobalQuake.instance.currentTimeMillis());
-                lastLog += 1000.0 / station.getAnalysis().getSampleRate();
-            }
-            playgroundStation.lastSampleTime = lastLog;
+        if(lastLog < 0){
+            lastLog = now - 2 * 60 * 1000;
         }
+
+
+        while(lastLog < now) {
+            station.getAnalysis().nextSample(
+                    playgroundStation.getNoise(lastLog),
+                    lastLog,
+                    GlobalQuake.instance.currentTimeMillis());
+            lastLog += 1000.0 / station.getAnalysis().getSampleRate();
+        }
+        playgroundStation.lastSampleTime = lastLog;
     }
 }

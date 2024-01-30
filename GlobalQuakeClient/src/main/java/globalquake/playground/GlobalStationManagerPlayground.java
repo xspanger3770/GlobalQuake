@@ -1,8 +1,10 @@
 package globalquake.playground;
 
+import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.GlobalStationManager;
+import globalquake.utils.GeoUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,11 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
             double lat = coords[0];
             double lon = coords[1];
             if(Regions.isOcean(lat, lon, true)){
+                continue;
+            }
+
+            double distGCD = GeoUtils.greatCircleDistance(lat, lon, Settings.homeLat, Settings.homeLon);
+            if(distGCD > 2000){
                 continue;
             }
 

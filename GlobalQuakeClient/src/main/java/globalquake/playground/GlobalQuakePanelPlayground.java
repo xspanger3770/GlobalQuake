@@ -13,6 +13,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.ui.globalquake.GlobalQuakePanel;
+import globalquake.ui.globalquake.feature.FeatureEarthquake;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,21 +31,17 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     Earthquake earthquake = createDebugQuake();
-                    GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                    GlobalQuake.instance.getClusterAnalysis().getClusters().add(earthquake.getCluster());
-
-                    GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(earthquake.getCluster()));
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
+                    ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes().add(earthquake);
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_R) {
-                    (((GlobalStationManagerPlayground)GlobalQuake.instance.getStationManager())).generateRandomStations(5000);
+                    (((GlobalStationManagerPlayground) GlobalQuake.instance.getStationManager())).generateRandomStations(2000);
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_U) {
                     Earthquake ex = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findAny().orElse(null);
 
-                    if(ex != null) {
+                    if (ex != null) {
                         Earthquake earthquake = createDebugQuake();
                         ex.update(earthquake);
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
@@ -52,14 +49,27 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes().clear();
                     for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                     }
 
                     GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().clear();
                 }
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                    ((GlobalQuakePlayground) GlobalQuake.instance).createdAtMillis += 5 * 1000;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    ((GlobalQuakePlayground) GlobalQuake.instance).createdAtMillis -= 5 * 1000;
+                }
             }
         });
+    }
+
+    @Override
+    protected void addRenderFeatures() {
+        super.addRenderFeatures();
+        getRenderer().addFeature(new FeaturePlaygroundEarthquake(((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()));
     }
 
     private static Earthquake createDebugQuake() {
@@ -78,7 +88,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
         hyp.usedEvents = 20;
 
-        hyp.magnitude = 7.2;
+        hyp.magnitude = 5.2;
         hyp.depth = 10.0;
 
         hyp.correctEvents = 6;
@@ -107,9 +117,9 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     @Override
     public void paint(Graphics gr) {
         super.paint(gr);
-        var g= ((Graphics2D) gr);
+        var g = ((Graphics2D) gr);
         String str = "Playground mode";
-        g.setColor(new Color(255,255,0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 15)));
+        g.setColor(new Color(255, 255, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 15)));
 
         Font font = new Font("Calibri", Font.BOLD, 48);
         g.setFont(font);

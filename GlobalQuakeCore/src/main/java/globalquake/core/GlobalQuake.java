@@ -54,13 +54,13 @@ public class GlobalQuake {
 		instance = this;
 	}
 
-	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
+	public GlobalQuake(StationDatabaseManager stationDatabaseManager, GlobalStationManager globalStationManager) {
 		this();
 		this.stationDatabaseManager = stationDatabaseManager;
 
 		eventHandler = new GlobalQuakeEventHandler().runHandler();
 
-		globalStationManager = new GlobalStationManager();
+		this.globalStationManager = globalStationManager;
 
 		earthquakeAnalysis = new EarthquakeAnalysis();
 		clusterAnalysis = new ClusterAnalysis();
@@ -69,6 +69,10 @@ public class GlobalQuake {
 
 		globalQuakeRuntime = new GlobalQuakeRuntime();
 		seedlinkNetworksReader = new SeedlinkNetworksReader();
+	}
+
+	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
+		this(stationDatabaseManager, new GlobalStationManager());
 	}
 
 	public EarthquakeArchive createArchive(){
@@ -161,4 +165,5 @@ public class GlobalQuake {
     public long currentTimeMillis() {
     	return System.currentTimeMillis();
 	}
+
 }

@@ -1,18 +1,21 @@
 package globalquake.playground;
 
 import com.flowpowered.noise.module.source.Perlin;
+import globalquake.core.GlobalQuake;
+import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
+import globalquake.core.station.GlobalStation;
 import gqserver.api.packets.station.InputType;
 
 public class PlaygroundStation extends AbstractStation {
 
     public static final double SAMPLE_RATE = 50;
     public long lastSampleTime = -1;
-    private Perlin perlinModule = new Perlin();
+    private final StationWaveformGenerator generator;
     public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id, double sensitivity) {
         super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null, sensitivity);
         getAnalysis().setSampleRate(SAMPLE_RATE);
-        perlinModule.setOctaveCount(1);
+        this.generator = new StationWaveformGenerator(this, id);
     }
 
     public PlaygroundStation(String stationCode, double lat, double lon, double alt, int id, double sensitivity) {
@@ -35,6 +38,12 @@ public class PlaygroundStation extends AbstractStation {
     }
 
     public int getNoise(long lastLog) {
-        return (int) (2000 * perlinModule.getValue(lastLog / 1000.0,0,0));
+        return generator.getValue(lastLog);
+    }
+
+    @Override
+    public boolean isInEventMode() {
+        Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
+        return event != null && event.isValid() && !event.hasEnded();
     }
 }

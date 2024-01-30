@@ -164,7 +164,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (elementPWave.shouldDraw) {
-            graphics.setColor(alphaColor(Color.BLUE, getAlphaMul(entity.getOriginal())));
+            graphics.setColor(alphaColor(getPwaveColor(), getAlphaMul(entity.getOriginal())));
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
             graphics.draw(elementPWave.getShape());
         }
@@ -232,6 +232,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
+
     private boolean isUncertain(Hypocenter hypocenter) {
         return hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
     }
@@ -264,9 +265,12 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         return Color.red;
     }
 
-    private Color getColorSWave(double mag) {
+    protected Color getColorSWave(double mag) {
         double weight = Math.max(0, Math.min(1, (mag - 2.0) / 4.0));
         return Scale.interpolateColors(Color.yellow, Color.red, weight);
+    }
+    protected Color getPwaveColor() {
+        return Color.BLUE;
     }
 
     public static Color getCrossColor(double mag) {

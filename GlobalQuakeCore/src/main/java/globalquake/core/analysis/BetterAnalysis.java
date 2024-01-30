@@ -278,6 +278,7 @@ public class BetterAnalysis extends Analysis {
                 }
             }
         }
+
         getDetectedEvents().removeAll(toBeRemoved);
 
         long oldestTime = (time - (Settings.logsStoreTimeMinutes * 60 * 1000));

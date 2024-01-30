@@ -5,6 +5,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventHandler;
+import globalquake.core.station.GlobalStationManager;
 import globalquake.events.GlobalQuakeLocalEventHandler;
 import globalquake.intensity.ShakemapService;
 import globalquake.main.Main;
@@ -41,6 +42,17 @@ public class GlobalQuakeLocal extends GlobalQuake {
 
     public GlobalQuakeLocal(StationDatabaseManager stationDatabaseManager) {
         super(stationDatabaseManager);
+        instance = this;
+
+        this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
+
+        this.alertManager = new AlertManager();
+        this.shakemapService = new ShakemapService();
+        this.soundsService = new SoundsService();
+    }
+
+    public GlobalQuakeLocal(StationDatabaseManager stationDatabaseManager, GlobalStationManager globalStationManager) {
+        super(stationDatabaseManager, globalStationManager);
         instance = this;
 
         this.localEventHandler = new GlobalQuakeLocalEventHandler().runHandler();
