@@ -1,9 +1,7 @@
 package globalquake.utils.monitorable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MonitorableConcurrentLinkedQueue<E> extends ConcurrentLinkedQueue<E> implements Monitorable {
 

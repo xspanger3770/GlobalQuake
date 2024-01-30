@@ -6,7 +6,6 @@ import globalquake.utils.monitorable.MonitorableConcurrentLinkedQueue;
 import org.tinylog.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalStationManager {

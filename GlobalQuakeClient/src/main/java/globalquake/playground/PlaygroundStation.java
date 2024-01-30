@@ -1,6 +1,5 @@
 package globalquake.playground;
 
-import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.station.AbstractStation;
 import gqserver.api.packets.station.InputType;
 

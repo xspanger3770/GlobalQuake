@@ -8,7 +8,6 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeReportEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
-import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
@@ -29,7 +28,6 @@ import globalquake.core.Settings;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 import org.tinylog.Logger;
-import org.w3c.dom.Text;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -223,7 +221,7 @@ public class DiscordBot extends ListenerAdapter {
 
     private static CharSequence tagRoles(TextChannel channel, Earthquake earthquake) {
         java.util.List<Role> rolesToPing = new ArrayList<>();
-        if (earthquake.getMag() >= 0.0) { // TODO !!!!
+        if (earthquake.getMag() >= 4.0) {
             rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M4, true));
         }
         if (earthquake.getMag() >= 5.0) {
