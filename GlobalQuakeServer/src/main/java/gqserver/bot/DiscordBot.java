@@ -171,7 +171,6 @@ public class DiscordBot extends ListenerAdapter{
         if (lastMessage != null) {
             lastMessage.editMessageEmbeds(builder.build()).queue();
         } else {
-            builder.setFooter("Created at %s with GQ Bot v%s".formatted(Settings.formatDateTime(Instant.now()), VERSION));
             channel.sendMessageEmbeds(builder.build()).queue(message -> lastMessages.put(earthquake, message));
         }
     }
@@ -207,6 +206,8 @@ public class DiscordBot extends ListenerAdapter{
 
         Level level = IntensityScales.getIntensityScale().getLevel(pga);
         Color levelColor = level == null ? Color.gray : level.getColor();
+
+        builder.setFooter("Created at %s with GQ Bot v%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getCreatedAt())), VERSION));
 
         builder.setColor(levelColor);
     }

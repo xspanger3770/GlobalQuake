@@ -21,6 +21,7 @@ public class Earthquake implements Regional, Warnable {
 	public List<CityIntensity> cityIntensities = new ArrayList<>();
 	public boolean foundPlayed;
     private long lastUpdate;
+	private final long createdAt;
 	private final Cluster cluster;
 	public int nextReportEventCount;
 	private String region;
@@ -46,6 +47,7 @@ public class Earthquake implements Regional, Warnable {
 		this.lastLon = getLon();
 
 		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
+		this.createdAt = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	public void updateRegion(){
@@ -150,5 +152,9 @@ public class Earthquake implements Regional, Warnable {
 
 	public UUID getUuid() {
 		return uuid;
+	}
+
+	public long getCreatedAt() {
+		return createdAt;
 	}
 }
