@@ -36,13 +36,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordBot extends ListenerAdapter {
 
     private static final String TAG = "Discord Bot";
-    private static final String VERSION = "0.3";
+    private static final String VERSION = "0.3.1";
     private static final String PING_M4 = "Ping 4.0+";
     private static final String PING_M5 = "Ping 5.0+";
     private static final String PING_M6 = "Ping 6.0+";
@@ -50,6 +51,9 @@ public class DiscordBot extends ListenerAdapter {
     private static JDA jda;
 
     private static final Map<Earthquake, Message> lastMessages = new HashMap<>();
+    private static final Map<Earthquake, Message> lastPingMessages = new HashMap<>();
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     public static void init() {
         jda = JDABuilder.createDefault(Settings.discordBotToken).enableIntents(GatewayIntent.GUILD_MESSAGES)
@@ -59,22 +63,22 @@ public class DiscordBot extends ListenerAdapter {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
-                sendQuakeCreateInfo(event.earthquake());
+                EXECUTOR_SERVICE.submit(() -> sendQuakeCreateInfo(event.earthquake()));
             }
 
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
-                sendQuakeUpdateInfo(event.earthquake());
+                EXECUTOR_SERVICE.submit(() -> sendQuakeUpdateInfo(event.earthquake()));
             }
 
             @Override
             public void onQuakeRemove(QuakeRemoveEvent event) {
-                sendQuakeRemoveInfo(event.earthquake());
+                EXECUTOR_SERVICE.submit(() -> sendQuakeRemoveInfo(event.earthquake()));
             }
 
             @Override
             public void onQuakeReport(QuakeReportEvent event) {
-                sendQuakeReportInfo(event);
+                EXECUTOR_SERVICE.submit(() -> sendQuakeReportInfo(event));
             }
         });
 
@@ -83,6 +87,7 @@ public class DiscordBot extends ListenerAdapter {
 
     private static void removeOld() {
         lastMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
+        lastPingMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
@@ -97,7 +102,7 @@ public class DiscordBot extends ListenerAdapter {
 
         builder.setImage("attachment://map.png");
         builder.setThumbnail("attachment://int.png");
-        createDescription(builder, event.earthquake(), channel);
+        createDescription(builder, event.earthquake());
 
         ByteArrayOutputStream baosMap = new ByteArrayOutputStream();
         ByteArrayOutputStream baosInt = new ByteArrayOutputStream();
@@ -108,19 +113,24 @@ public class DiscordBot extends ListenerAdapter {
             throw new RuntimeException(e);
         }
 
-        Message lastMessage = lastMessages.getOrDefault(event.earthquake(), null);
-        if (lastMessage != null) {
-            lastMessage.editMessageEmbeds(builder.build())
-                    .setFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
-                            FileUpload.fromData(baosInt.toByteArray(), "int.png"))
-                    .queue();
-        } else {
-            channel.sendMessageEmbeds(builder.build())
-                    .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
-                            FileUpload.fromData(baosInt.toByteArray(), "int.png"))
-                    .queue(message -> lastMessages.put(event.earthquake(), message));
-        }
+        ping(event.earthquake(), channel);
 
+        try {
+            Message lastMessage = lastMessages.getOrDefault(event.earthquake(), null);
+            if (lastMessage != null) {
+                lastMessage.editMessageEmbeds(builder.build())
+                        .setFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
+                                FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                        .submit().get();
+            } else {
+                channel.sendMessageEmbeds(builder.build())
+                        .addFiles(FileUpload.fromData(baosMap.toByteArray(), "map.png"),
+                                FileUpload.fromData(baosInt.toByteArray(), "int.png"))
+                        .submit().thenApply(message -> lastMessages.put(event.earthquake(), message)).get();
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 
     private static TextChannel getChannel() {
@@ -166,8 +176,9 @@ public class DiscordBot extends ListenerAdapter {
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setAuthor("Revision #%d".formatted(earthquake.getRevisionID()));
-        createDescription(builder, earthquake, channel);
+        createDescription(builder, earthquake);
 
+        ping(earthquake, channel);
         updateMessage(earthquake, builder, channel);
     }
 
@@ -175,9 +186,9 @@ public class DiscordBot extends ListenerAdapter {
         Message lastMessage = lastMessages.getOrDefault(earthquake, null);
 
         if (lastMessage != null) {
-            lastMessage.editMessageEmbeds(builder.build()).queue();
+            lastMessage.editMessageEmbeds(builder.build()).submit();
         } else {
-            channel.sendMessageEmbeds(builder.build()).queue(message -> lastMessages.put(earthquake, message));
+            channel.sendMessageEmbeds(builder.build()).submit().thenApply(message -> lastMessages.put(earthquake, message));
         }
     }
 
@@ -188,14 +199,33 @@ public class DiscordBot extends ListenerAdapter {
             return;
         }
 
+        ping(earthquake, channel);
+
         EmbedBuilder builder = new EmbedBuilder();
         builder.setAuthor("New Event");
-        createDescription(builder, earthquake, channel);
+        createDescription(builder, earthquake);
 
         updateMessage(earthquake, builder, channel);
     }
 
-    private static void createDescription(EmbedBuilder builder, Earthquake earthquake, TextChannel channel) {
+
+    private static void ping(Earthquake earthquake, TextChannel channel) {
+        Message pingMessage = lastPingMessages.get(earthquake);
+
+        CharSequence pingString = tagRoles(channel, earthquake);
+
+        try {
+            if (pingMessage != null) {
+                pingMessage.editMessage(pingString).submit().get();
+            } else {
+                channel.sendMessage(pingString).submit().thenApply(message -> lastPingMessages.put(earthquake, message)).get();
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
+
+    private static void createDescription(EmbedBuilder builder, Earthquake earthquake) {
         builder.setTitle("M%.1f %s".formatted(
                 earthquake.getMag(),
                 earthquake.getRegion()));
@@ -203,8 +233,7 @@ public class DiscordBot extends ListenerAdapter {
         double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
 
         builder.setDescription(
-                tagRoles(channel, earthquake) + "\n" +
-                        "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
+                "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
                         "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
                                 formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
                         "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
