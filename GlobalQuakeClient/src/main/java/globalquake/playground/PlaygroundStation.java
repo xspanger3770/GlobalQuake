@@ -1,10 +1,7 @@
 package globalquake.playground;
 
-import com.flowpowered.noise.module.source.Perlin;
-import globalquake.core.GlobalQuake;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import gqserver.api.packets.station.InputType;
 
 public class PlaygroundStation extends AbstractStation {

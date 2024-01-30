@@ -8,12 +8,9 @@ import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.MagnitudeReading;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
-import globalquake.core.events.specific.ClusterCreateEvent;
-import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.ui.globalquake.GlobalQuakePanel;
-import globalquake.ui.globalquake.feature.FeatureEarthquake;
 
 import javax.swing.*;
 import java.awt.*;

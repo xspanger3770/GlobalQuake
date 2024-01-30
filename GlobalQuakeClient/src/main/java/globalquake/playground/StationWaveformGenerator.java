@@ -2,27 +2,24 @@ package globalquake.playground;
 
 import com.flowpowered.noise.module.source.Perlin;
 import globalquake.core.GlobalQuake;
-import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.core.station.AbstractStation;
 import globalquake.utils.GeoUtils;
 
-import java.util.Arrays;
-
 public class StationWaveformGenerator {
 
-    public static double MIN_FREQ = 0.1;
-    public static int STEPS = 10;
+    public static final double MIN_FREQ = 0.1;
+    public static final int STEPS = 10;
 
-    private Perlin[] noises = new Perlin[STEPS];
+    private final Perlin[] noises = new Perlin[STEPS];
 
     private static final double[] FREQS = new double[STEPS];
 
     private static final double[] BACKGROUND_NOISES = new double[STEPS];
 
-    private AbstractStation station;
+    private final AbstractStation station;
 
     static{
         for(int i = 0; i < STEPS; i++){
@@ -41,7 +38,7 @@ public class StationWaveformGenerator {
         for(int i = 0; i < STEPS; i++){
             double freq = FREQS[i];
             noises[i] = new Perlin();
-            noises[i].setSeed(new Integer(seed).hashCode());
+            noises[i].setSeed(seed + i*23);
             noises[i].setOctaveCount(6);
             noises[i].setFrequency(freq);
         }
@@ -60,13 +57,13 @@ public class StationWaveformGenerator {
 
         double result = BACKGROUND_NOISES[i];
         for(Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()){
-            result += getPowerFromQuake(earthquake, i, freq);
+            result += getPowerFromQuake(earthquake, freq);
         }
 
         return result;
     }
 
-    private double getPowerFromQuake(Earthquake earthquake, int i, double freq) {
+    private double getPowerFromQuake(Earthquake earthquake, double freq) {
         double _distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), station.getLatitude(), station.getLongitude());
         double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 

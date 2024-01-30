@@ -1,10 +1,7 @@
 package globalquake.playground;
 
-import edu.sc.seis.seisFile.mseed.DataRecord;
 import globalquake.core.GlobalQuake;
-import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
-import org.tritonus.share.GlobalInfo;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +15,7 @@ public class WaveformGenerator {
     }
 
     private void updateWaveforms() {
-        globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(abstractStation -> generateWaveform(abstractStation));
+        globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(WaveformGenerator::generateWaveform);
     }
 
     private static void generateWaveform(AbstractStation station) {
@@ -36,7 +33,7 @@ public class WaveformGenerator {
                     playgroundStation.getNoise(lastLog),
                     lastLog,
                     GlobalQuake.instance.currentTimeMillis());
-            lastLog += 1000.0 / station.getAnalysis().getSampleRate();
+            lastLog += (long) (1000.0 / station.getAnalysis().getSampleRate());
         }
         playgroundStation.lastSampleTime = lastLog;
     }

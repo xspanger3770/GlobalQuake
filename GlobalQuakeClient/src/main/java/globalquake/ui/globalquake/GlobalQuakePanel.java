@@ -13,7 +13,6 @@ import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.events.GlobalQuakeLocalEventListener;
@@ -139,7 +138,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if (clickedStations.size() == 1) {
             selectedStation = clickedStations.get(0);
         } else {
-            selectedStation = (GlobalStation) JOptionPane.showInputDialog(this, "Select station to open:", "Station selection",
+            selectedStation = (AbstractStation) JOptionPane.showInputDialog(this, "Select station to open:", "Station selection",
                     JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
         }
 
