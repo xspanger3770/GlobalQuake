@@ -110,7 +110,6 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         Font font = new Font("Calibri", Font.BOLD, 48);
         g.setFont(font);
 
-        /// TODO location
         g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, (getHeight() / 2 + font.getSize() / 4));
     }
 }

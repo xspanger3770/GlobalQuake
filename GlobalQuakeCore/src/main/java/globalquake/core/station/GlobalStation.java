@@ -87,7 +87,6 @@ public class GlobalStation extends AbstractStation {
 
 		getAnalysis().analyse(record);
 		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
-		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 	}
 
 

@@ -10,10 +10,8 @@ import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
 import java.awt.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
 

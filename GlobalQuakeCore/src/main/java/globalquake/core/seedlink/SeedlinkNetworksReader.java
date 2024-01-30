@@ -24,8 +24,6 @@ public class SeedlinkNetworksReader {
 	protected static final int RECONNECT_DELAY = 10;
 	private Instant lastData;
 
-    private long lastReceivedRecord;
-
 	private ExecutorService seedlinkReaderService;
 
 	private final Queue<SeedlinkReader> activeReaders = new ConcurrentLinkedQueue<>();
@@ -171,16 +169,6 @@ public class SeedlinkNetworksReader {
 			globalStation.addRecord(dr);
 		}
 	}
-
-    public long getLastReceivedRecordTime() {
-        return lastReceivedRecord;
-    }
-
-    public void logRecord(long time) {
-        if (time > lastReceivedRecord && time <= GlobalQuake.instance.currentTimeMillis()) {
-            lastReceivedRecord = time;
-        }
-    }
 
 	public void stop() {
 		if(seedlinkReaderService != null) {
