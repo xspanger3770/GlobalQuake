@@ -74,7 +74,8 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
         Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
-        return GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
+        return (!Settings.hideClustersWithQuake && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME * 5) ||
+                GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
     }
 
     @Override

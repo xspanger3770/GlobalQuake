@@ -17,7 +17,7 @@ import java.time.ZoneOffset;
 
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
-    private long createdAtMillis;
+    private final long createdAtMillis;
     private final long playgroundStartMillis = LocalDate.of(2000,1,1)
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 

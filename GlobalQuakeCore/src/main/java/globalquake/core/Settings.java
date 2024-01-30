@@ -169,6 +169,7 @@ public final class Settings {
     public static String discordBotChannelID;
     @SuppressWarnings("unused")
     public static Boolean discordBotSendRevisions;
+    public static Boolean hideClustersWithQuake;
 
     static {
         load();
@@ -282,6 +283,7 @@ public final class Settings {
 
         loadProperty("reportsEnabled", "false");
         loadProperty("displayClusterRoots", "false");
+        loadProperty("hideClustersWithQuake", "false");
         loadProperty("displayClusters", "false");
         loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
         loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
