@@ -80,7 +80,7 @@ public class SoundsService {
         }
 
         int level = cluster.getLevel();
-        if (level > info.maxLevel && canPing(cluster)) {
+        if (level > info.maxLevel && (canPing(cluster) || canPing(cluster.getEarthquake()))) {
             if(info.maxLevel < 0){
                 Sounds.playSound(Sounds.level_0);
             }
@@ -154,7 +154,7 @@ public class SoundsService {
 
 
     private boolean canPing(Earthquake earthquake) {
-        if(!Settings.enableEarthquakeSounds){
+        if(earthquake == null || !Settings.enableEarthquakeSounds){
             return false;
         }
 
@@ -163,7 +163,7 @@ public class SoundsService {
     }
 
     private boolean canPing(Cluster cluster) {
-        if(!Settings.alertPossibleShaking){
+        if(cluster == null || !Settings.alertPossibleShaking){
             return false;
         }
         double distGCD = GeoUtils.greatCircleDistance(cluster.getRootLat(), cluster.getRootLon(), Settings.homeLat, Settings.homeLon);
