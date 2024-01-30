@@ -214,6 +214,10 @@ public class DiscordBot extends ListenerAdapter {
 
         CharSequence pingString = tagRoles(channel, earthquake);
 
+        if(pingString.isEmpty()){
+            return;
+        }
+
         try {
             if (pingMessage != null) {
                 pingMessage.editMessage(pingString).submit().get();
