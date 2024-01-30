@@ -420,7 +420,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if(Settings.displayTime) {
             String str = "----/--/-- --:--:--";
             if (GlobalQuake.instance.getSeedlinkReader() != null) {
-                long time = GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecordTime();
+                long time = GlobalQuake.instance.currentTimeMillis();
 
                 if(time != 0) {
                     str = Settings.formatDateTime(Instant.ofEpochMilli(time));

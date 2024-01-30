@@ -10,8 +10,16 @@ import globalquake.utils.Scale;
 import org.tinylog.Logger;
 
 import java.awt.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
+
+    private long createdAtMillis;
+    private final long playgroundStartMillis = LocalDate.of(2000,1,1)
+            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
     public static void main(String[] args) throws Exception{
         GlobalQuake.prepare(Main.MAIN_FOLDER, new ApplicationErrorHandler(null));
@@ -28,6 +36,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
     public GlobalQuakePlayground() {
         super(new StationDatabaseManagerPlayground());
+        createdAtMillis = System.currentTimeMillis();
         createFrame();
         startRuntime();
     }
@@ -45,6 +54,11 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
             }
         });
         return this;
+    }
+
+    @Override
+    public long currentTimeMillis() {
+        return playgroundStartMillis + (System.currentTimeMillis() - createdAtMillis);
     }
 
     @Override

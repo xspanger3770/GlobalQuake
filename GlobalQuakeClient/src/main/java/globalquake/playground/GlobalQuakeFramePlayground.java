@@ -16,21 +16,7 @@ public class GlobalQuakeFramePlayground extends GlobalQuakeFrame {
 
     public GlobalQuakeFramePlayground() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        panel = new GlobalQuakePanelPlayground(this){
-            @Override
-            public void paint(Graphics gr) {
-                super.paint(gr);
-                var g= ((Graphics2D) gr);
-                String str = "Playground mode";
-                g.setColor(new Color(255,255,0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 40.0)));
-
-                Font font = new Font("Calibri", Font.BOLD, 48);
-                g.setFont(font);
-
-                /// TODO location
-                g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2,  (font.getSize()));
-            }
-        };
+        panel = new GlobalQuakePanelPlayground(this);
 
         panel.setPreferredSize(new Dimension(1000, 760));
 

@@ -15,6 +15,7 @@ import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.ui.globalquake.GlobalQuakePanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
         @SuppressWarnings("unused") double t = (System.currentTimeMillis() % 10000) / 10000.0;
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
+        Hypocenter hyp = new Hypocenter(Settings.homeLat, Settings.homeLon, 0, GlobalQuake.instance.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),
                 java.util.List.of(new PolygonConfidenceInterval(16, 0, java.util.List.of(
                         0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
@@ -97,5 +98,19 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
         quake.setRegion("asdasdasd");
         return quake;
+    }
+
+    @Override
+    public void paint(Graphics gr) {
+        super.paint(gr);
+        var g= ((Graphics2D) gr);
+        String str = "Playground mode";
+        g.setColor(new Color(255,255,0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 15)));
+
+        Font font = new Font("Calibri", Font.BOLD, 48);
+        g.setFont(font);
+
+        /// TODO location
+        g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, (getHeight() / 2 + font.getSize() / 4));
     }
 }
