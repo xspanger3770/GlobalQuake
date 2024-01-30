@@ -8,6 +8,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeReportEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
+import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -33,6 +35,7 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -202,7 +205,7 @@ public class DiscordBot extends ListenerAdapter {
         double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
 
         builder.setDescription(
-                tagRoles(channel, earthquake) +
+                tagRoles(channel, earthquake) + "\n" +
                         "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
                         "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
                                 formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
@@ -219,19 +222,25 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     private static CharSequence tagRoles(TextChannel channel, Earthquake earthquake) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (earthquake.getMag() >= 4.0) {
-            stringBuilder.append(channel.getGuild().getRolesByName(PING_M4, true).get(0).getAsMention());
+        java.util.List<Role> rolesToPing = new ArrayList<>();
+        if (earthquake.getMag() >= 0.0) { // TODO !!!!
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M4, true));
         }
         if (earthquake.getMag() >= 5.0) {
-            stringBuilder.append(channel.getGuild().getRolesByName(PING_M5, true).get(0).getAsMention());
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M5, true));
         }
         if (earthquake.getMag() >= 6.0) {
-            stringBuilder.append(channel.getGuild().getRolesByName(PING_M6, true).get(0).getAsMention());
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M6, true));
         }
         if (earthquake.getMag() >= 7.0) {
-            stringBuilder.append(channel.getGuild().getRolesByName(PING_M7, true).get(0).getAsMention());
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M7, true));
         }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Role role : rolesToPing) {
+            stringBuilder.append(role.getAsMention());
+        }
+
         return stringBuilder.toString();
     }
 
@@ -253,7 +262,7 @@ public class DiscordBot extends ListenerAdapter {
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("GlobalQuake BOT v%s".formatted(VERSION));
-        builder.setDescription("Who woke me up again...");
+        builder.setDescription("Starting up...");
 
         channel.sendMessageEmbeds(builder.build()).queue();
 
