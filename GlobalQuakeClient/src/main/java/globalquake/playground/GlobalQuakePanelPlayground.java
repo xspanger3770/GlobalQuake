@@ -116,7 +116,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         super.paint(gr);
         var g = ((Graphics2D) gr);
         String str = "Playground mode";
-        g.setColor(new Color(255, 255, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 15)));
+        g.setColor(new Color(255, 255, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 40)));
 
         Font font = new Font("Calibri", Font.BOLD, 48);
         g.setFont(font);

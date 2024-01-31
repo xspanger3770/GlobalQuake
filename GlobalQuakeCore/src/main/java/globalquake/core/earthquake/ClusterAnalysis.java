@@ -12,6 +12,7 @@ import globalquake.core.earthquake.data.*;
 import globalquake.core.analysis.Event;
 import globalquake.core.station.NearbyStationDistanceInfo;
 import globalquake.utils.GeoUtils;
+import globalquake.utils.monitorable.MonitorableConcurrentLinkedQueue;
 import org.tinylog.Logger;
 
 import java.util.*;
@@ -38,7 +39,7 @@ public class ClusterAnalysis {
     public ClusterAnalysis(List<Earthquake> earthquakes, Collection<AbstractStation> stations) {
         this.earthquakes = earthquakes;
         this.stations = stations;
-        clusters = new ConcurrentLinkedQueue<>();
+        clusters = new MonitorableConcurrentLinkedQueue<>();
     }
 
     public ClusterAnalysis() {
