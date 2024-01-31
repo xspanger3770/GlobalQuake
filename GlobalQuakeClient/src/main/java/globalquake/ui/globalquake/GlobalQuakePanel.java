@@ -306,9 +306,9 @@ public class GlobalQuakePanel extends GlobePanel {
                 double _distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
                 double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
-                double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                double pTravel = (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(_distGC)));
-                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                double sTravel = (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(_distGC)));
 
                 int _secondsP = (int) Math.ceil(pTravel - age);
@@ -322,8 +322,8 @@ public class GlobalQuakePanel extends GlobePanel {
                         || AlertManager.meetsConditions(earthquake, false)) {
                     quake = earthquake;
                     distGC = _distGC;
-                    secondsS = Math.max(0, _secondsS);
-                    secondsP = Math.max(0, _secondsP);
+                    secondsS = sTravel >= 0 ? Math.max(0, _secondsS) : 0;
+                    secondsP = pTravel >= 0 ? Math.max(0, _secondsP) : 0;
                 }
             }
         }

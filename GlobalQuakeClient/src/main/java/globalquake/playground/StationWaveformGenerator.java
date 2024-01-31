@@ -94,10 +94,10 @@ public class StationWaveformGenerator {
 
         double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
-        double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(gcd)));
-        double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(gcd)));
+        double pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                TauPTravelTimeCalculator.toAngle(gcd));
+        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                TauPTravelTimeCalculator.toAngle(gcd));
 
         double _secondsP = pTravel - age;
         double _secondsS = sTravel - age;
@@ -108,13 +108,13 @@ public class StationWaveformGenerator {
         double m = earthquake.getMag() + gcd / 30.0;
         double m2 = (m * m);
 
-        if(_secondsP < 0){
+        if(_secondsP < 0 && pTravel >= 0){
             double decay = (m2) / (_secondsP * _secondsP + m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
             result += 1E5 * decay * increase;
         }
 
-        if(_secondsS < 0){
+        if(_secondsS < 0 && sTravel >= 0){
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
             result += 4E5 * decay * increase;

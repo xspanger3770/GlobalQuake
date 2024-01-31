@@ -346,7 +346,7 @@ public class EarthquakeAnalysis {
             double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(hypocenter.depth,
                     angle);
 
-            if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (expectedTravelPRaw >= 0) {
                 long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.elevation())) * 1000);
                 result.put(event, Math.abs(expectedTravel - actualTravel));
             }
@@ -610,7 +610,7 @@ public class EarthquakeAnalysis {
         for (PickedEvent event : events) {
             double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), bestHypocenter.lat, bestHypocenter.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(distGC));
-            if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (travelTime < 0) {
                 continue;
             }
 
@@ -666,7 +666,7 @@ public class EarthquakeAnalysis {
             double angle = TauPTravelTimeCalculator.toAngle(distGC);
 
             double rawTravelP = TauPTravelTimeCalculator.getPWaveTravelTime(bestHypocenter.depth, angle);
-            if (rawTravelP == TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (rawTravelP < 0) {
                 continue;
             }
 

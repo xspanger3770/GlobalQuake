@@ -128,6 +128,10 @@ public class EarthquakeAnalysisTraining {
                     absolutetyCorrect.lon, fakeStation.lat, fakeStation.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
 
+            if(travelTime < 0){
+                continue;
+            }
+
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);
             if(r.nextDouble() < MASSIVE_ERR_ODDS){

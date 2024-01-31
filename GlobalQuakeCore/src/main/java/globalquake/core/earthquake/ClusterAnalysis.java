@@ -303,7 +303,7 @@ public class ClusterAnalysis {
             }
         }
 
-        if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+        if (expectedTravelPRaw >= 0) {
             long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < (increasingPWindow ? Math.max(10000, 1000 + expectedTravel * 0.01) : Settings.pWaveInaccuracyThreshold)) {
                 return true;
@@ -317,7 +317,7 @@ public class ClusterAnalysis {
         double expectedTravelPKPRaw = TauPTravelTimeCalculator.getPKPWaveTravelTime(quakeDepth,
                 angle);
 
-        if (expectedTravelPKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+        if (expectedTravelPKPRaw >= 0) {
             long expectedTravel = (long) ((expectedTravelPKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < (Math.max(6000, expectedTravel * 0.005))) {
                 return true;
@@ -327,7 +327,7 @@ public class ClusterAnalysis {
         double expectedTravelPKIKPRaw = TauPTravelTimeCalculator.getPKIKPWaveTravelTime(quakeDepth,
                 angle);
 
-        if (expectedTravelPKIKPRaw != TauPTravelTimeCalculator.NO_ARRIVAL && angle > 100) {
+        if (expectedTravelPKIKPRaw >= 0 && angle > 100) {
             long expectedTravel = (long) ((expectedTravelPKIKPRaw + EarthquakeAnalysis.getElevationCorrection(eventAlt)) * 1000);
             if (Math.abs(expectedTravel - actualTravel) < Math.max(6000, expectedTravel * 0.005)) {
                 return true;
