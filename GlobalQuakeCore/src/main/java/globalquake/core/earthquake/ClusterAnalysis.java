@@ -235,10 +235,10 @@ public class ClusterAnalysis {
             return false;
         }
 
-        if (expectedTravelSRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+        if (expectedTravelSRaw >= 0) {
             // 985 because GQ has high tendency to detect S waves earlier
-            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 985);
-            if (Math.abs(expectedTravel - actualTravel) < 1000 + expectedTravel * 0.01) {
+            long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 1000);
+            if (Math.abs(expectedTravel - actualTravel) < 3000 + expectedTravel * 0.04) {
                 return true;
             }
         }
