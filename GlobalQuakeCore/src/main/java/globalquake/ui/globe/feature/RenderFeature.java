@@ -1,7 +1,6 @@
 package globalquake.ui.globe.feature;
 
 import globalquake.core.Settings;
-import globalquake.core.earthquake.data.Cluster;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
@@ -25,10 +24,11 @@ public abstract class RenderFeature<E> {
     private ConcurrentHashMap<E, RenderEntity<E>> entities = new ConcurrentHashMap<>();
     private ConcurrentHashMap<E, RenderEntity<E>> entities_temp = new ConcurrentHashMap<>();
 
-    private boolean warningTriggered = false;
-
     public RenderFeature(int renderElements){
         this.renderElements = renderElements;
+        if(!(getElements() instanceof Monitorable) && needsUpdateEntities()) {
+            Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
+        }
     }
 
     private void swapEntities(){
@@ -44,12 +44,6 @@ public abstract class RenderFeature<E> {
             hash = ((Monitorable) getElements()).getMonitorState();
         }else {
             hash = getElements().hashCode();
-            if(!warningTriggered) {
-                if(needsUpdateEntities()) {
-                    Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
-                }
-                warningTriggered = true;
-            }
         }
         if(hash != lastHash) {
             entities_temp.clear();

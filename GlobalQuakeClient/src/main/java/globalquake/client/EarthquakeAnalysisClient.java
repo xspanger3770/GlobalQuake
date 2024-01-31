@@ -52,12 +52,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
             getEarthquakes().removeAll(toRemove);
 
-            for (Iterator<Map.Entry<UUID, Earthquake>> iterator = clientEarthquakeMap.entrySet().iterator(); iterator.hasNext(); ) {
-                var kv = iterator.next();
-                if (shouldRemove(kv.getValue(), -30)) {
-                    iterator.remove();
-                }
-            }
+            clientEarthquakeMap.entrySet().removeIf(kv -> shouldRemove(kv.getValue(), -30));
         } catch(Exception e) {
             Logger.error(e);
         }

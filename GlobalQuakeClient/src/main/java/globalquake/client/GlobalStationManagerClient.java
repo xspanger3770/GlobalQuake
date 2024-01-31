@@ -35,11 +35,6 @@ public class GlobalStationManagerClient extends GlobalStationManager {
 
     }
 
-    @Override
-    public Collection<AbstractStation> getStations() {
-        return stations;
-    }
-
     public void processPacket(ClientSocket socket, Packet packet) {
         if(packet instanceof StationsInfoPacket stationsInfoPacket){
             processStationsInfoPacket(socket, stationsInfoPacket);
