@@ -29,7 +29,7 @@ public class ClusterAnalysis {
     private final Lock clustersReadLock = clustersLock.readLock();
     private final Lock clustersWriteLock = clustersLock.writeLock();
 
-    protected Collection<Cluster> clusters;
+    protected final Collection<Cluster> clusters;
     private final Collection<Earthquake> earthquakes;
     private final Collection<AbstractStation> stations;
 
@@ -495,6 +495,7 @@ public class ClusterAnalysis {
                 toBeRemoved.add(cluster);
             } else {
                 cluster.tick();
+                // if level changes or if it got updated (root location)
                 if(cluster.getLevel() != cluster.lastLevel || cluster.lastLastUpdate != cluster.getLastUpdate()){
                     GlobalQuake.instance.getEventHandler().fireEvent(new ClusterLevelUpEvent(cluster));
                     cluster.lastLevel = cluster.getLevel();

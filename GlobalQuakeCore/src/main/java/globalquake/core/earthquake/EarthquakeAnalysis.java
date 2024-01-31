@@ -307,7 +307,7 @@ public class EarthquakeAnalysis {
         int reduceLimit = HypocsSettings.getOrDefaultInt("reduceLimit", 12);
         double reduceAmount = HypocsSettings.getOrDefault("reduceAmount", 0.2f);
 
-        for (int it = 0; it < 0*reduceIterations; it++) { // TODO setting?
+        for (int it = 0; it < reduceIterations; it++) { // TODO setting?
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
                 int targetSize = residuals.size() - (int) Math.max(1, (residuals.size() - reduceLimit) * reduceAmount);

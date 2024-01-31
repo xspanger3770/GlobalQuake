@@ -1,6 +1,5 @@
 package globalquake.playground;
 
-import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.GlobalStationManager;

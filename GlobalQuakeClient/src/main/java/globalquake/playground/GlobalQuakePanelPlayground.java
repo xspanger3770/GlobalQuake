@@ -23,7 +23,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     private final JFrame parent;
 
     enum InsertType{
-        NONE, EARTHQUAKE, RANDOM_STATIONS;
+        NONE, EARTHQUAKE, RANDOM_STATIONS
     }
 
     private InsertType insertType = InsertType.NONE;
@@ -73,12 +73,8 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
     private void insertSmth() {
         switch (insertType){
-            case EARTHQUAKE -> {
-                createDebugQuake();
-            }
-            case RANDOM_STATIONS -> {
-                createRandomStations();
-           }
+            case EARTHQUAKE -> createDebugQuake();
+            case RANDOM_STATIONS -> createRandomStations();
         }
     }
 
@@ -89,13 +85,11 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         DecimalInput amount;
         inputs.add(amount = new DecimalInput("Amount", 10, 10000, 1000.0));
 
-        DecimalInputDialog dialog = new DecimalInputDialog(parent, "Choose parameters", inputs, () -> {
-            (((GlobalStationManagerPlayground) GlobalQuake.instance.getStationManager())).generateRandomStations(
-                    (int) amount.getValue(),
-                    radius.getValue(),
-                    getRenderer().getRenderProperties().centerLat,
-                    getRenderer().getRenderProperties().centerLon);
-        });
+        new DecimalInputDialog(parent, "Choose parameters", inputs, () -> (((GlobalStationManagerPlayground) GlobalQuake.instance.getStationManager())).generateRandomStations(
+                (int) amount.getValue(),
+                radius.getValue(),
+                getRenderer().getRenderProperties().centerLat,
+                getRenderer().getRenderProperties().centerLon));
 
    }
 
@@ -111,9 +105,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         inputs.add(magInput = new DecimalInput("Magnitude", 0, 10, 4.0));
         DecimalInput depthInput;
         inputs.add(depthInput = new DecimalInput("Depth", 0, 750, 10.0));
-        DecimalInputDialog dialog = new DecimalInputDialog(parent, "Choose parameters", inputs, () -> {
-            _createDebugEarthquake(magInput.getValue(), depthInput.getValue());
-        });
+        new DecimalInputDialog(parent, "Choose parameters", inputs, () -> _createDebugEarthquake(magInput.getValue(), depthInput.getValue()));
     }
 
     private void _createDebugEarthquake(double magnitude, double depth) {

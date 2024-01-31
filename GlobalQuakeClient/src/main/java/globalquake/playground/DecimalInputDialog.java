@@ -1,21 +1,15 @@
 package globalquake.playground;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public class DecimalInputDialog extends JDialog {
     private final List<DecimalInput> decimalInputs;
-    private JSlider[] sliders;
+    private final JSlider[] sliders;
 
     public DecimalInputDialog(JFrame parent, String title, java.util.List<DecimalInput> decimalInputs, Runnable action) {
         super(parent, title, true);
@@ -33,7 +27,6 @@ public class DecimalInputDialog extends JDialog {
             sliders[i].setMajorTickSpacing(1000);
             sliders[i].setMinorTickSpacing(200);
             sliders[i].setPreferredSize(new Dimension(500,40));
-            // todo
 
             JPanel panel = new JPanel(new BorderLayout());
             JLabel field = new JLabel("%s: %.1f".formatted(decimalInput.getName(), getValue(i)));
@@ -41,45 +34,39 @@ public class DecimalInputDialog extends JDialog {
             panel.add(sliders[i], BorderLayout.CENTER);
 
             int finalI = i;
-            sliders[i].addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent changeEvent) {
-                    decimalInputs.get(finalI).setValue(getValue(finalI));
-                    field.setText("%s: %.1f".formatted(decimalInputs.get(finalI).getName(), getValue(finalI)));
-                }
+            sliders[i].addChangeListener(changeEvent -> {
+                decimalInputs.get(finalI).setValue(getValue(finalI));
+                field.setText("%s: %.1f".formatted(decimalInputs.get(finalI).getName(), getValue(finalI)));
             });
 
             add(panel);
         }
 
-        JButton okButton = new JButton("OK");
-        JButton cancelButton = new JButton("Cancel");
-
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-                action.run();
-            }
-        });
-
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
-
-        JPanel buttonsPanel = new JPanel();
-
-        buttonsPanel.add(cancelButton);
-        buttonsPanel.add(okButton);
+        JPanel buttonsPanel = createButtonsPanel(action);
 
         add(buttonsPanel);
 
         pack();
         setLocationRelativeTo(parent);
         setVisible(true);
+    }
+
+    private JPanel createButtonsPanel(Runnable action) {
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("Cancel");
+
+        okButton.addActionListener(e -> {
+            dispose();
+            action.run();
+        });
+
+        cancelButton.addActionListener(e -> dispose());
+
+        JPanel buttonsPanel = new JPanel();
+
+        buttonsPanel.add(cancelButton);
+        buttonsPanel.add(okButton);
+        return buttonsPanel;
     }
 
     private double getValue(int i) {
@@ -90,23 +77,20 @@ public class DecimalInputDialog extends JDialog {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                java.util.List<DecimalInput> inputs = new ArrayList<>();
-                inputs.add(new DecimalInput("Magnitude", 0, 10, 4.0));
-                inputs.add(new DecimalInput("Depth", 0, 750, 10.0));
-                JFrame frame = new JFrame();
-                DecimalInputDialog dialog = new DecimalInputDialog(frame, "Choose parameters", inputs, () -> System.err.println("ok"));
-                dialog.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            List<DecimalInput> inputs = new ArrayList<>();
+            inputs.add(new DecimalInput("Magnitude", 0, 10, 4.0));
+            inputs.add(new DecimalInput("Depth", 0, 750, 10.0));
+            JFrame frame = new JFrame();
+            DecimalInputDialog dialog = new DecimalInputDialog(frame, "Choose parameters", inputs, () -> System.err.println("ok"));
+            dialog.setVisible(true);
 
-                dialog.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-            }
+            dialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    System.exit(0);
+                }
+            });
         });
     }
 }

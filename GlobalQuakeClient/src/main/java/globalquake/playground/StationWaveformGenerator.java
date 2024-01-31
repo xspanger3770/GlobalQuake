@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class StationWaveformGenerator {
 
-    class Distances{
-        public double gcd;
-        public double geo;
+    static class Distances{
+        public final double gcd;
+        public final double geo;
 
         public Distances(Earthquake earthquake, AbstractStation station) {
             gcd = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), station.getLatitude(), station.getLongitude());
