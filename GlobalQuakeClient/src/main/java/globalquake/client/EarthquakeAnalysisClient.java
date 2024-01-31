@@ -24,10 +24,7 @@ import gqserver.api.packets.earthquake.HypocenterDataPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -49,12 +46,18 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             for (Earthquake earthquake : getEarthquakes()) {
                 if (shouldRemove(earthquake, 0)) {
                     toRemove.add(earthquake);
-                    clientEarthquakeMap.remove(earthquake.getUuid());
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                 }
             }
 
             getEarthquakes().removeAll(toRemove);
+
+            for (Iterator<Map.Entry<UUID, Earthquake>> iterator = clientEarthquakeMap.entrySet().iterator(); iterator.hasNext(); ) {
+                var kv = iterator.next();
+                if (shouldRemove(kv.getValue(), -30)) {
+                    iterator.remove();
+                }
+            }
         } catch(Exception e) {
             Logger.error(e);
         }

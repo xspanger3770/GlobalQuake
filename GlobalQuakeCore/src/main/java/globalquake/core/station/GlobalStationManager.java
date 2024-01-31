@@ -12,7 +12,7 @@ public class GlobalStationManager {
 
     private static final int RAYS = 9;
     private static final int STATIONS_PER_RAY = 3;
-    protected final Collection<AbstractStation> stations = new MonitorableConcurrentLinkedQueue<>();
+    protected Collection<AbstractStation> stations = new MonitorableConcurrentLinkedQueue<>();
 
 
     protected final AtomicInteger nextID = new AtomicInteger(0);

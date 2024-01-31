@@ -29,7 +29,7 @@ public class ClusterAnalysis {
     private final Lock clustersReadLock = clustersLock.readLock();
     private final Lock clustersWriteLock = clustersLock.writeLock();
 
-    private final Collection<Cluster> clusters;
+    protected Collection<Cluster> clusters;
     private final Collection<Earthquake> earthquakes;
     private final Collection<AbstractStation> stations;
 
