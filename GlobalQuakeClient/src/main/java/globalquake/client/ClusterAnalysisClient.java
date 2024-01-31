@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ClusterAnalysisClient extends ClusterAnalysis {
 
+    private final List<Cluster> clusters;
 
     private final ScheduledExecutorService executorService;
 
@@ -37,6 +38,11 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
         }
 
         clusters.removeAll(toRemove);
+    }
+
+    @Override
+    public List<Cluster> getClusters() {
+        return clusters;
     }
 
     public void processPacket(ClientSocket ignoredSocket, Packet packet) {

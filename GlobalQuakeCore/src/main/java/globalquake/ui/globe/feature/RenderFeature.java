@@ -18,6 +18,7 @@ public abstract class RenderFeature<E> {
     private int lastHash = -651684313; // random
     private RenderProperties lastProperties;
     private int settingsChanges = 0;
+    private boolean warned = false;
 
     public abstract Collection<E> getElements();
 
@@ -26,9 +27,6 @@ public abstract class RenderFeature<E> {
 
     public RenderFeature(int renderElements){
         this.renderElements = renderElements;
-        if(!(getElements() instanceof Monitorable) && needsUpdateEntities()) {
-            Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
-        }
     }
 
     private void swapEntities(){
@@ -44,6 +42,10 @@ public abstract class RenderFeature<E> {
             hash = ((Monitorable) getElements()).getMonitorState();
         }else {
             hash = getElements().hashCode();
+            if(needsUpdateEntities() && !warned){
+                Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
+                warned = true;
+            }
         }
         if(hash != lastHash) {
             entities_temp.clear();

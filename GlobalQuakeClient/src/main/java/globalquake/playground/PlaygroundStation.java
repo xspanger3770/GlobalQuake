@@ -20,6 +20,12 @@ public class PlaygroundStation extends AbstractStation {
     }
 
     @Override
+    public void second(long time) {
+        super.second(time);
+        generator.second();
+    }
+
+    @Override
     public InputType getInputType() {
         return InputType.VELOCITY;
     }

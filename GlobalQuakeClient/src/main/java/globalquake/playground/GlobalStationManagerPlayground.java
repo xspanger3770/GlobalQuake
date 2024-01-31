@@ -18,21 +18,21 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
 
     }
 
-    public void generateRandomStations(int n){
+    public void generateRandomStations(int count, double radius, double fromLat, double fromLon){
         Random r = new Random();
         newStations();
         List<PlaygroundStation> list = new ArrayList<>();
         int created = 0;
-        while(created < n){
+        while(created < count){
             double[] coords = randomCoords(r);
             double lat = coords[0];
             double lon = coords[1];
-            if(Regions.isOcean(lat, lon, true)){
+            double distGCD = GeoUtils.greatCircleDistance(lat, lon, fromLat, fromLon);
+            if(distGCD > radius){
                 continue;
             }
 
-            double distGCD = GeoUtils.greatCircleDistance(lat, lon, Settings.homeLat, Settings.homeLon);
-            if(distGCD > 2000){
+            if(Regions.isOcean(lat, lon, true)){
                 continue;
             }
 
