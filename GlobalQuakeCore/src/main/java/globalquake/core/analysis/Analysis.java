@@ -1,6 +1,7 @@
 package globalquake.core.analysis;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.tinylog.Logger;
@@ -19,17 +20,16 @@ public abstract class Analysis {
     public double _maxRatio;
     public double _maxCounts;
     public boolean _maxRatioReset;
-    public final Object previousLogsLock;
-    private final ArrayList<Log> previousLogs;
     private byte status;
+
+    private WaveformBuffer waveformBuffer;
 
     public Analysis(AbstractStation station) {
         this.station = station;
         this.sampleRate = -1;
         detectedEvents = new CopyOnWriteArrayList<>();
-        previousLogsLock = new Object();
-        previousLogs = new ArrayList<>();
         status = AnalysisStatus.IDLE;
+        this.waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
     }
 
     public long getLastRecord() {
@@ -94,9 +94,6 @@ public abstract class Analysis {
     public void fullReset() {
         reset();
         lastRecord = 0;
-        synchronized (previousLogsLock) {
-            getPreviousLogs().clear();
-        }
     }
 
     public double getSampleRate() {
@@ -118,10 +115,6 @@ public abstract class Analysis {
         return numRecords;
     }
 
-    public ArrayList<Log> getPreviousLogs() {
-        return previousLogs;
-    }
-
     public byte getStatus() {
         return status;
     }
@@ -132,5 +125,9 @@ public abstract class Analysis {
 
     public void setSampleRate(double sampleRate) {
         this.sampleRate = sampleRate;
+    }
+
+    public WaveformBuffer getWaveformBuffer() {
+        return waveformBuffer;
     }
 }

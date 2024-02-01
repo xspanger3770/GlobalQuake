@@ -23,7 +23,6 @@ public class Event implements Serializable {
 	private long pWave;
 	private long firstLogTime;// first log time (now 90 seconds before event start)
 
-	private List<Log> logs;
 
 	public double maxRatio;
 
@@ -39,11 +38,13 @@ public class Event implements Serializable {
 	private boolean isSWave;
 	private double maxCounts;
 
-	public Event(Analysis analysis, long start, List<Log> logs, boolean usingRatio) {
+	private WaveformBuffer waveformBuffer;
+
+	public Event(Analysis analysis, long start, WaveformBuffer waveformBuffer, boolean usingRatio) {
 		this(analysis);
 		this.start = start;
-		this.logs = logs;
-		this.firstLogTime = logs.get(logs.size() - 1).time();
+		this.waveformBuffer = waveformBuffer;
+		this.firstLogTime = waveformBuffer.getTime(waveformBuffer.getOldestDataSlot());
 		this.valid = true;
 		this.usingRatio = usingRatio;
 	}
@@ -136,10 +137,11 @@ public class Event implements Serializable {
 		return getAnalysis().getStation().getAlt();
 	}
 
-	public void log(Log currentLog, double counts) {
-		logs.add(0, currentLog);
-		if (currentLog.getRatio() > this.maxRatio) {
-			this.maxRatio = currentLog.getRatio();
+	public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
+					float specialAverage, double ratio, double counts) {
+		waveformBuffer.log(time, rawValue, filteredV, shortAverage, mediumAverage, longAverage, specialAverage, true);
+		if (ratio > this.maxRatio) {
+			this.maxRatio = ratio;
 		}
 
 		if(counts > this.maxCounts){
@@ -163,11 +165,10 @@ public class Event implements Serializable {
 	private void findPWaveMethod1() {
 		// 0 - when first detected
 		// 1 - first upgrade etc...
-		int strenghtLevel = nextPWaveCalc;
-		Log logAtStart = getClosestLog(getStart() - 1);
-		if (logAtStart == null) {
+		if(waveformBuffer.isEmpty()){
 			return;
 		}
+		int strenghtLevel = nextPWaveCalc;
 		long lookBack = (getStart() - (long) ((60.0 / strenghtLevel) * 1000));
 
 		List<Double> slows = new ArrayList<>();
@@ -175,27 +176,30 @@ public class Event implements Serializable {
 		double maxSpecial = -Double.MAX_VALUE;
 		double minSpecial = Double.MAX_VALUE;
 
-		for (Log l : logs) {
-			long time = l.time();
-			if (time >= lookBack && time <= getStart()) {
-				slows.add(l.getMediumRatio());
-				double spec = l.getSpecialRatio();
-				if (spec > 0) {
-					if (spec > maxSpecial) {
-						maxSpecial = spec;
-					}
-					if (spec < minSpecial) {
-						minSpecial = spec;
-					}
+		int indexLookBack = getWaveformBuffer().getClosestIndex(lookBack);
+		long lookBackTime = getWaveformBuffer().getTime(indexLookBack);
+
+		while(indexLookBack != getWaveformBuffer().getNextSlot() && lookBackTime <= getStart()){
+			// todo ratios!
+			slows.add(waveformBuffer.getMediumRatio(indexLookBack));
+			double spec = waveformBuffer.getSpecialRatio(indexLookBack);
+			if (spec > 0) {
+				if (spec > maxSpecial) {
+					maxSpecial = spec;
+				}
+				if (spec < minSpecial) {
+					minSpecial = spec;
 				}
 			}
+
+			indexLookBack = (indexLookBack + 1) % getWaveformBuffer().getSize();
+			lookBackTime = getWaveformBuffer().getTime(indexLookBack);
 		}
 
 		maxSpecial = Math.max(minSpecial * 5.0, maxSpecial);
 
 		Collections.sort(slows);
 
-		// double slowRatioAtTheBeginning = logAtStart.getMediumRatio();
 		double slow15Pct = slows.get((int) ((slows.size() - 1) * 0.175));
 
 		double mul = SPECIAL_PERCENTILE[strenghtLevel] * 1.1;
@@ -203,67 +207,38 @@ public class Event implements Serializable {
 
 		double slowThresholdMultiplier = SLOW_THRESHOLD_MULTIPLIERS[strenghtLevel];
 
-		// double slowThreshold = (0.2 * slowRatioAtTheBeginning + 0.8 * slow15Pct) *
-		// slowThresholdMultiplier;
-
-		// DEPRECATED, again
 		long pWave = -1;
-		for (Log l : logs) {
-			long time = l.time();
-			// l.getMediumRatio() <= slowThreshold;
-			boolean ratioOK = l.getRatio() <= slow15Pct * (slowThresholdMultiplier * 1.25);
-			boolean specialOK = l.getSpecialRatio() <= specialThreshold;
+
+		// going backwards!
+		int index = waveformBuffer.getClosestIndex(getStart());
+		long time = waveformBuffer.getTime(index);
+		while(index != waveformBuffer.getOldestDataSlot() && time >= lookBack){
+
+			boolean ratioOK = waveformBuffer.getRatio(index) <= slow15Pct * (slowThresholdMultiplier * 1.25);
+			boolean specialOK = waveformBuffer.getSpecialRatio(index) <= specialThreshold;
 			if (time >= lookBack && time <= getStart()) {
-                if (ratioOK && specialOK) {
-                    pWave = time;
-                    break;
-                }
-            }
+				if (ratioOK && specialOK) {
+					pWave = time;
+					break;
+				}
+			}
+
+			index -= 1;
+			if(index < 0){
+				index = waveformBuffer.getSize() - 1;
+			}
+			time = waveformBuffer.getTime(index);
 		}
 
 		setpWave(pWave);
-	}
-
-	// halving method
-	// this was supposed to be binary search probably
-	private Log getClosestLog(long time) {
-		if (logs.isEmpty()) {
-			return null;
-		}
-		if (time > logs.get(0).time()) {
-			return null;
-		}
-		if (time < logs.get(logs.size() - 1).time()) {
-			return null;
-		}
-
-		int lowerBound = 0;
-		int upperBound = logs.size() - 1;
-		while (upperBound - lowerBound > 1) {
-			int mid = (upperBound + lowerBound) / 2;
-			if (logs.get(mid).time() > time) {
-				upperBound = mid;
-			} else {
-				lowerBound = mid;
-			}
-		}
-		Log up = logs.get(upperBound);
-		Log down = logs.get(lowerBound);
-		int diff1 = (int) Math.abs(up.time() - time);
-		int diff2 = (int) Math.abs(down.time() - time);
-		if (diff1 < diff2) {
-			return up;
-		} else {
-			return down;
-		}
 	}
 
 	public int getUpdatesCount() {
 		return updatesCount;
 	}
 
-	public List<Log> getLogs() {
-		return logs;
+	public WaveformBuffer getWaveformBuffer() {
+		return waveformBuffer;
 	}
 
 	public double getMaxCounts() {
@@ -272,5 +247,9 @@ public class Event implements Serializable {
 
 	public boolean isUsingRatio() {
 		return usingRatio;
+	}
+
+	public void removeBuffer() {
+		this.waveformBuffer = null;
 	}
 }

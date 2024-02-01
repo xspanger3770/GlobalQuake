@@ -61,9 +61,14 @@ public class StationMonitorPanel extends JPanel {
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
 		}
 
-		ArrayList<Log> logs;
-		synchronized (station.getAnalysis().previousLogsLock) {
-			logs = new ArrayList<>(station.getAnalysis().getPreviousLogs());
+		java.util.List<Log> logs = new ArrayList<>();
+
+		if(!station.getAnalysis().getWaveformBuffer().isEmpty()) {
+			int index = station.getAnalysis().getWaveformBuffer().getOldestDataSlot();
+			while(index != station.getAnalysis().getWaveformBuffer().getNewestDataSlot()){
+				logs.add(station.getAnalysis().getWaveformBuffer().toLog(index));
+				index = (index + 1) % station.getAnalysis().getWaveformBuffer().getSize();
+			}
 		}
 
 		if (logs.size() > 1) {

@@ -2,6 +2,9 @@ package globalquake.core.analysis;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class WaveformBuffer {
     public static final int COMPUTED_COUNT = 5;
@@ -11,6 +14,8 @@ public class WaveformBuffer {
     public static final int LONG_AVERAGE = 3;
     public static final int SPECIAL_AVERAGE = 4;
     private final double sps;
+    private final Lock readLock;
+    private final Lock writeLock;
 
 
     private int size;
@@ -21,6 +26,8 @@ public class WaveformBuffer {
 
     private int nextFreeSlot;
     private int oldestDataSlot = 0;
+
+    private ReadWriteLock readWriteLock;
 
     public WaveformBuffer(double sps, int seconds) {
         this.sps = sps;
@@ -36,6 +43,10 @@ public class WaveformBuffer {
         this.lastLog = Long.MIN_VALUE;
         this.nextFreeSlot = 0;
         this.oldestDataSlot = 0;
+
+        this.readWriteLock = new ReentrantReadWriteLock();
+        this.readLock = readWriteLock.readLock();
+        this.writeLock = readWriteLock.writeLock();
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
@@ -137,6 +148,20 @@ public class WaveformBuffer {
         return computed[type][index];
     }
 
+    public double getMediumRatio(int index){
+        return getComputed(MEDIUM_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+    }
+
+
+    public double getSpecialRatio(int index){
+        return getComputed(SPECIAL_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+    }
+
+
+    public double getRatio(int index){
+        return getComputed(SHORT_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+    }
+
     public Log toLog(int index){
         return new Log(
                 times[index],
@@ -146,6 +171,14 @@ public class WaveformBuffer {
                 computed[2][index],
                 computed[3][index],
                 computed[4][index]);
+    }
+
+    public Lock getReadLock() {
+        return readLock;
+    }
+
+    public Lock getWriteLock() {
+        return writeLock;
     }
 
     public static void main(String[] args) {
@@ -161,5 +194,62 @@ public class WaveformBuffer {
     public int getNewestDataSlot() {
         int res = nextFreeSlot - 1;
         return res >= 0 ? res : size - 1;
+    }
+
+    public WaveformBuffer extract(long start, long end) {
+        int seconds = (int) Math.ceil(end - start);
+        if(seconds <= 0){
+            throw new IllegalArgumentException("Cannot extract empty waveform buffer!");
+        }
+
+        // additional space
+        seconds *= 1.4;
+
+        WaveformBuffer result = new WaveformBuffer(sps, seconds);
+
+        if(isEmpty()){
+            return result;
+        }
+
+        int closest = getClosestIndex(start);
+        long time = getTime(closest);
+
+        while(closest != getNextSlot() && time <= end){
+            result.log(
+                    time,
+                    getRaw(closest),
+                    getComputed(0, closest),
+                    getComputed(1, closest),
+                    getComputed(2, closest),
+                    getComputed(3, closest),
+                    getComputed(4, closest),
+                    true);
+            closest++;
+            time = getTime(closest);
+        }
+
+        return result;
+    }
+
+    public int getClosestIndex(long time) {
+        if(isEmpty()){
+            throw new IllegalStateException("There is no closest log since the buffer is empty!");
+        }
+
+        int low = getOldestDataSlot();
+        int high = getNewestDataSlot();
+        if(low > high){
+            high += size;
+        }
+
+        while(high > low){
+            int mid = (low + high) / 2;
+            if(getTime(mid % size) > time){
+                high = mid;
+            } else{
+                low = mid;
+            }
+        }
+        return high;
     }
 }
