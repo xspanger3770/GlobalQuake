@@ -8,6 +8,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Event implements Serializable {
 
@@ -16,6 +19,8 @@ public class Event implements Serializable {
 	public static final double[] RECALCULATE_P_WAVE_THRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
 	public static final double[] SLOW_THRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
+	private final Lock readLock;
+	private final Lock writeLock;
 	private boolean usingRatio;
 
 	private long start;// time when first detected
@@ -41,7 +46,7 @@ public class Event implements Serializable {
 	private WaveformBuffer waveformBuffer;
 
 	public Event(Analysis analysis, long start, WaveformBuffer waveformBuffer, boolean usingRatio) {
-		this(analysis);
+		this(analysis, waveformBuffer.getReadLock(), waveformBuffer.getWriteLock());
 		this.start = start;
 		this.waveformBuffer = waveformBuffer;
 		this.firstLogTime = waveformBuffer.getTime(waveformBuffer.getOldestDataSlot());
@@ -49,8 +54,12 @@ public class Event implements Serializable {
 		this.usingRatio = usingRatio;
 	}
 
-	// used in emulator
-	public Event(Analysis analysis) {
+	public Event(Analysis analysis, Lock readLock, Lock writeLock) {
+		if(readLock == null || writeLock == null){
+			ReadWriteLock rw = new ReentrantReadWriteLock();
+			readLock = rw.readLock();
+			writeLock = rw.writeLock();
+		}
 		this.nextPWaveCalc = -1;
 		this.maxRatio = 0;
 		this.maxCounts = 0;
@@ -59,6 +68,13 @@ public class Event implements Serializable {
 		this.assignedCluster = null;
 		this.updatesCount = 1;
 		this.isSWave = false;
+		this.readLock = readLock;
+		this.writeLock = writeLock;
+	}
+
+		// used in emulator
+	public Event(Analysis analysis) {
+		this(analysis, null, null);
 	}
 
 	public void end(long end) {
@@ -139,7 +155,15 @@ public class Event implements Serializable {
 
 	public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
 					float specialAverage, double ratio, double counts) {
-		waveformBuffer.log(time, rawValue, filteredV, shortAverage, mediumAverage, longAverage, specialAverage, true);
+		try{
+			writeLock.lock();
+			if(waveformBuffer == null){
+				return;
+			}
+			waveformBuffer.log(time, rawValue, filteredV, shortAverage, mediumAverage, longAverage, specialAverage, true);
+		}finally {
+			writeLock.unlock();
+		}
 		if (ratio > this.maxRatio) {
 			this.maxRatio = ratio;
 		}
@@ -154,7 +178,14 @@ public class Event implements Serializable {
 				double threshold = nextPWaveCalc < 0 ? -1 : RECALCULATE_P_WAVE_THRESHOLDS[nextPWaveCalc];
 				if (maxRatio >= threshold) {
 					nextPWaveCalc++;
-					findPWaveMethod1();
+					try{
+						readLock.lock();
+						if(waveformBuffer != null){
+							findPWaveMethod1();
+						}
+					} finally {
+						readLock.unlock();
+					}
 				}
 			}
 		}
@@ -236,7 +267,7 @@ public class Event implements Serializable {
 		return updatesCount;
 	}
 
-	public WaveformBuffer getWaveformBuffer() {
+	private WaveformBuffer getWaveformBuffer() {
 		return waveformBuffer;
 	}
 
@@ -249,6 +280,11 @@ public class Event implements Serializable {
 	}
 
 	public void removeBuffer() {
-		this.waveformBuffer = null;
+		try{
+			writeLock.lock();
+			this.waveformBuffer = null;
+		} finally {
+			writeLock.unlock();
+		}
 	}
 }

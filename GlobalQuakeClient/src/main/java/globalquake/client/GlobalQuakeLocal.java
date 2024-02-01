@@ -108,4 +108,12 @@ public class GlobalQuakeLocal extends GlobalQuake {
     public ShakemapService getShakemapService() {
         return shakemapService;
     }
+
+    @Override
+    public void clear() {
+        super.clear();
+        shakemapService.clear();
+        alertManager.clear();
+        getGlobalQuakeFrame().clear();
+    }
 }

@@ -35,7 +35,9 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
                 continue;
             }
 
-            String name = "Dummy #%d".formatted(created);
+            int id = nextID.incrementAndGet();
+
+            String name = "Dummy #%d".formatted(id);
             list.add(new PlaygroundStation(name,lat,lon,0,nextID.getAndIncrement(),0));
             created++;
         }
@@ -47,7 +49,6 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
 
     private void newStations() {
         this.indexing = UUID.randomUUID();
-        this.nextID.set(0);
     }
 
     public static double[] randomCoords(Random random){

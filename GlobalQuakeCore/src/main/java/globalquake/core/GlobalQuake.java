@@ -166,4 +166,8 @@ public class GlobalQuake {
     	return System.currentTimeMillis();
 	}
 
+    public void clear() {
+		getClusterAnalysis().getClusters().clear();
+		getEarthquakeAnalysis().getEarthquakes().clear();
+	}
 }

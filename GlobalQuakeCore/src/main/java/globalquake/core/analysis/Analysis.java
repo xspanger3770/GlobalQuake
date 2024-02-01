@@ -41,8 +41,7 @@ public abstract class Analysis {
 
     public void analyse(DataRecord dr) {
         if (sampleRate <= 0) {
-            sampleRate = dr.getSampleRate();
-            waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
+            setSampleRate(dr.getSampleRate());
             reset();
         }
 
@@ -78,7 +77,7 @@ public abstract class Analysis {
             }
         } catch (Exception e) {
             Logger.warn("There was a problem with data processing on station %s".formatted(getStation().getStationCode()));
-            Logger.trace(e);
+            Logger.warn(e);
         }
     }
 
@@ -125,6 +124,7 @@ public abstract class Analysis {
 
     public void setSampleRate(double sampleRate) {
         this.sampleRate = sampleRate;
+        waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
     }
 
     public WaveformBuffer getWaveformBuffer() {

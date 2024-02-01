@@ -55,8 +55,8 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                     }
 
-                    GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().clear();
-                }
+                    GlobalQuake.instance.clear();
+     }
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     ((GlobalQuakePlayground) GlobalQuake.instance).createdAtMillis += 5 * 1000;
                 }

@@ -2,6 +2,7 @@ package globalquake.core.analysis;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -29,6 +30,8 @@ public class WaveformBuffer {
 
     private ReadWriteLock readWriteLock;
 
+    private static final AtomicInteger tot = new AtomicInteger();
+
     public WaveformBuffer(double sps, int seconds) {
         this.sps = sps;
         this.size = (int) Math.ceil(seconds * sps);
@@ -43,6 +46,10 @@ public class WaveformBuffer {
         this.lastLog = Long.MIN_VALUE;
         this.nextFreeSlot = 0;
         this.oldestDataSlot = 0;
+
+        tot.addAndGet(size);
+
+        System.err.println("Total size = "+tot.get()); // todo remm
 
         this.readWriteLock = new ReentrantReadWriteLock();
         this.readLock = readWriteLock.readLock();
@@ -197,7 +204,7 @@ public class WaveformBuffer {
     }
 
     public WaveformBuffer extract(long start, long end) {
-        int seconds = (int) Math.ceil(end - start);
+        int seconds = (int) Math.ceil((end - start) / 1000);
         if(seconds <= 0){
             throw new IllegalArgumentException("Cannot extract empty waveform buffer!");
         }
@@ -224,7 +231,9 @@ public class WaveformBuffer {
                     getComputed(3, closest),
                     getComputed(4, closest),
                     true);
-            closest++;
+
+            closest = (closest + 1) % size;
+
             time = getTime(closest);
         }
 
@@ -242,7 +251,7 @@ public class WaveformBuffer {
             high += size;
         }
 
-        while(high > low){
+        while(high - low > 1){
             int mid = (low + high) / 2;
             if(getTime(mid % size) > time){
                 high = mid;
@@ -250,6 +259,6 @@ public class WaveformBuffer {
                 low = mid;
             }
         }
-        return high;
+        return high % size;
     }
 }

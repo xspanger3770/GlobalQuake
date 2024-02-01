@@ -9,13 +9,11 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.analysis.*;
+import globalquake.core.analysis.Event;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.analysis.Event;
-import globalquake.core.analysis.Log;
-import globalquake.core.analysis.AnalysisStatus;
-import globalquake.core.analysis.BetterAnalysis;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.Settings;
@@ -61,15 +59,7 @@ public class StationMonitorPanel extends JPanel {
 			g.draw(new Line2D.Double(x, 0, x, getHeight()));
 		}
 
-		java.util.List<Log> logs = new ArrayList<>();
-
-		if(!station.getAnalysis().getWaveformBuffer().isEmpty()) {
-			int index = station.getAnalysis().getWaveformBuffer().getOldestDataSlot();
-			while(index != station.getAnalysis().getWaveformBuffer().getNewestDataSlot()){
-				logs.add(station.getAnalysis().getWaveformBuffer().toLog(index));
-				index = (index + 1) % station.getAnalysis().getWaveformBuffer().getSize();
-			}
-		}
+		java.util.List<Log> logs = getLogs();
 
 		if (logs.size() > 1) {
 			double maxValue = -Double.MAX_VALUE;
@@ -314,6 +304,28 @@ public class StationMonitorPanel extends JPanel {
 		g.dispose();
 
 		this.image = img;
+	}
+
+	private java.util.List<Log> getLogs() {
+		java.util.List<Log> logs = new ArrayList<>();
+
+		WaveformBuffer waveformBuffer = station.getAnalysis().getWaveformBuffer();
+
+		if(waveformBuffer != null) {
+			try{
+				waveformBuffer.getReadLock().lock();
+				if (!station.getAnalysis().getWaveformBuffer().isEmpty()) {
+					int index = station.getAnalysis().getWaveformBuffer().getOldestDataSlot();
+					while (index != station.getAnalysis().getWaveformBuffer().getNewestDataSlot()) {
+						logs.add(station.getAnalysis().getWaveformBuffer().toLog(index));
+						index = (index + 1) % station.getAnalysis().getWaveformBuffer().getSize();
+					}
+				}
+			} finally {
+				waveformBuffer.getReadLock().unlock();
+			}
+		}
+		return logs;
 	}
 
 	private long getTime() {

@@ -122,4 +122,5 @@ public class StationWaveformGenerator {
 
         return result * distMultiplier * Math.sqrt(freq);
     }
+
 }

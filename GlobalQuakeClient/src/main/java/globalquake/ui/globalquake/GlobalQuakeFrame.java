@@ -155,4 +155,8 @@ public class GlobalQuakeFrame extends GQFrame {
 	public GlobalQuakePanel getGQPanel() {
 		return panel;
 	}
+
+    public void clear() {
+    	getGQPanel().clear();
+	}
 }
