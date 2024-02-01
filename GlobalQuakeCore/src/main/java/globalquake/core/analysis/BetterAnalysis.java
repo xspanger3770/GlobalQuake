@@ -200,7 +200,7 @@ public class BetterAnalysis extends Analysis {
         if (time - currentTime < 1000 * 10
                 && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
             Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                    (float) longAverage, (float) specialAverage, getStatus());
+                    (float) longAverage, (float) specialAverage);
             synchronized (previousLogsLock) {
                 getPreviousLogs().add(0, currentLog);
             }

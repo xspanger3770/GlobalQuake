@@ -221,7 +221,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y9c, x2, y10c));
 
-				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setColor(Color.black);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y5, x2, y6));
 
@@ -237,7 +237,7 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13c, x2, y14c));
 
-				g.setColor(a.status() == AnalysisStatus.IDLE ? Color.black : Color.green);
+				g.setColor(Color.black);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y11, x2, y12));
 
