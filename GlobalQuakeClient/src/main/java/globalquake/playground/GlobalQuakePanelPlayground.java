@@ -22,7 +22,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
     private final JFrame parent;
 
-    enum InsertType{
+    enum InsertType {
         NONE, EARTHQUAKE, RANDOM_STATIONS
     }
 
@@ -42,7 +42,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
                 if (e.getKeyCode() == KeyEvent.VK_R) {
                     insertType = toggle(InsertType.RANDOM_STATIONS);
-                 }
+                }
 
                 if (e.getKeyCode() == KeyEvent.VK_E) {
                     insertType = toggle(InsertType.EARTHQUAKE);
@@ -56,7 +56,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                     }
 
                     GlobalQuake.instance.clear();
-     }
+                }
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     ((GlobalQuakePlayground) GlobalQuake.instance).createdAtMillis += 5 * 1000;
                 }
@@ -72,7 +72,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     }
 
     private void insertSmth() {
-        switch (insertType){
+        switch (insertType) {
             case EARTHQUAKE -> createDebugQuake();
             case RANDOM_STATIONS -> createRandomStations();
         }
@@ -91,7 +91,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                 getRenderer().getRenderProperties().centerLat,
                 getRenderer().getRenderProperties().centerLon));
 
-   }
+    }
 
     @Override
     protected void addRenderFeatures() {
@@ -183,9 +183,13 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     }
 
     private String getDescription(InsertType insertType) {
-        switch (insertType){
-            case EARTHQUAKE -> {return "Press <space> to create Earthquake";}
-            case RANDOM_STATIONS -> {return "Press <space> to add random stations";}
+        switch (insertType) {
+            case EARTHQUAKE -> {
+                return "Press <space> to create Earthquake";
+            }
+            case RANDOM_STATIONS -> {
+                return "Press <space> to add random stations";
+            }
         }
         return "";
     }

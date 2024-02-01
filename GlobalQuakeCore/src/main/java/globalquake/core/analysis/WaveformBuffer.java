@@ -28,6 +28,8 @@ public class WaveformBuffer {
 
     private static final AtomicInteger tot = new AtomicInteger();
 
+    // todo: could be S arrival causes P waves to turn into S waves in nearby quakes
+
     public WaveformBuffer(double sps, int seconds) {
         this.sps = sps;
         this.size = (int) Math.ceil(seconds * sps);
@@ -44,8 +46,6 @@ public class WaveformBuffer {
         this.oldestDataSlot = 0;
 
         tot.addAndGet(size);
-
-        System.err.println("Total size = "+tot.get()); // todo remm
 
         ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         this.readLock = readWriteLock.readLock();

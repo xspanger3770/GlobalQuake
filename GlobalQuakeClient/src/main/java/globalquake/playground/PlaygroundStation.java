@@ -12,7 +12,6 @@ public class PlaygroundStation extends AbstractStation {
     public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id, double sensitivity) {
         super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null, sensitivity);
         getAnalysis().setSampleRate(SAMPLE_RATE);
-        System.err.println(id);
         this.generator = new StationWaveformGenerator(this, id);
     }
 
