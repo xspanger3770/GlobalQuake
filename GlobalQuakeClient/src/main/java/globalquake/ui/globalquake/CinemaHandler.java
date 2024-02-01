@@ -255,6 +255,5 @@ public class CinemaHandler {
         lastTarget = null;
         lastEarthquake = null;
         lastCluster = null;
-        System.err.println(lastEarthquake);
     }
 }

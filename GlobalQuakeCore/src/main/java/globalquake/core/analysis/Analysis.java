@@ -6,7 +6,6 @@ import globalquake.core.station.AbstractStation;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.tinylog.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 

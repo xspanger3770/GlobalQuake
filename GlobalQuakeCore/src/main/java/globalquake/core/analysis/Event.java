@@ -246,7 +246,7 @@ public class Event implements Serializable {
 
 			boolean ratioOK = waveformBuffer.getRatio(index) <= slow15Pct * (slowThresholdMultiplier * 1.25);
 			boolean specialOK = waveformBuffer.getSpecialRatio(index) <= specialThreshold;
-			if (time >= lookBack && time <= getStart()) {
+			if (time <= getStart()) {
 				if (ratioOK && specialOK) {
 					pWave = time;
 					break;

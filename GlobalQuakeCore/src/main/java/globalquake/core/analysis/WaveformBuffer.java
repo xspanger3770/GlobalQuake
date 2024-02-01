@@ -1,7 +1,5 @@
 package globalquake.core.analysis;
 
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -26,9 +24,7 @@ public class WaveformBuffer {
     private long[] times;
 
     private int nextFreeSlot;
-    private int oldestDataSlot = 0;
-
-    private ReadWriteLock readWriteLock;
+    private int oldestDataSlot;
 
     private static final AtomicInteger tot = new AtomicInteger();
 
@@ -51,7 +47,7 @@ public class WaveformBuffer {
 
         System.err.println("Total size = "+tot.get()); // todo remm
 
-        this.readWriteLock = new ReentrantReadWriteLock();
+        ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         this.readLock = readWriteLock.readLock();
         this.writeLock = readWriteLock.writeLock();
     }
@@ -127,10 +123,6 @@ public class WaveformBuffer {
         return size;
     }
 
-    public long getLastLog() {
-        return lastLog;
-    }
-
     public boolean isEmpty() {
         return lastLog == Long.MIN_VALUE;
     }
@@ -188,29 +180,19 @@ public class WaveformBuffer {
         return writeLock;
     }
 
-    public static void main(String[] args) {
-        int sta = 5_000;
-        Collection<WaveformBuffer> bufferList = new LinkedList<>();
-        for(int i = 0; i < sta; i++){
-            bufferList.add(new WaveformBuffer(100, 5 * 60));
-        }
-
-        System.err.println("a");
-    }
-
     public int getNewestDataSlot() {
         int res = nextFreeSlot - 1;
         return res >= 0 ? res : size - 1;
     }
 
     public WaveformBuffer extract(long start, long end) {
-        int seconds = (int) Math.ceil((end - start) / 1000);
+        int seconds = (int) Math.ceil((end - start) / 1000.0);
         if(seconds <= 0){
             throw new IllegalArgumentException("Cannot extract empty waveform buffer!");
         }
 
         // additional space
-        seconds *= 1.4;
+        seconds  = (int)(seconds * 1.4);
 
         WaveformBuffer result = new WaveformBuffer(sps, seconds);
 
