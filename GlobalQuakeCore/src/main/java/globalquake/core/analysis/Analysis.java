@@ -21,7 +21,7 @@ public abstract class Analysis {
     public boolean _maxRatioReset;
     public final Object previousLogsLock;
     private final ArrayList<Log> previousLogs;
-    private AnalysisStatus status;
+    private byte status;
 
     public Analysis(AbstractStation station) {
         this.station = station;
@@ -122,11 +122,11 @@ public abstract class Analysis {
         return previousLogs;
     }
 
-    public AnalysisStatus getStatus() {
+    public byte getStatus() {
         return status;
     }
 
-    public void setStatus(AnalysisStatus status) {
+    public void setStatus(byte status) {
         this.status = status;
     }
 

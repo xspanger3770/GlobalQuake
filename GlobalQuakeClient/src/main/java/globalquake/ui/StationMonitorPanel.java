@@ -108,7 +108,7 @@ public class StationMonitorPanel extends JPanel {
 
 				double ratio = l.getRatio();
 				double medRatio = l.getMediumRatio();
-				double thirdRatio = l.getThirdRatio();
+				//double thirdRatio = l.getThirdRatio();
 				double specRatio = l.getSpecialRatio();
 				if (ratio > maxRatio) {
 					maxRatio = ratio;
@@ -116,9 +116,9 @@ public class StationMonitorPanel extends JPanel {
 				if (medRatio > maxRatio) {
 					maxRatio = medRatio;
 				}
-				if (thirdRatio > maxRatio) {
+				/*if (thirdRatio > maxRatio) {
 					maxRatio = thirdRatio;
-				}
+				}*/
 				if (specRatio > maxRatio) {
 					maxRatio = specRatio;
 				}
@@ -173,10 +173,10 @@ public class StationMonitorPanel extends JPanel {
 				double y10 = getHeight() * 0.40
 						+ (getHeight() * 0.30) * (maxAverage - b.mediumAverage()) / (maxAverage);
 
-				double y9b = getHeight() * 0.40
+				/*double y9b = getHeight() * 0.40
 						+ (getHeight() * 0.30) * (maxAverage - a.thirdAverage()) / (maxAverage);
 				double y10b = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.thirdAverage()) / (maxAverage);
+						+ (getHeight() * 0.30) * (maxAverage - b.thirdAverage()) / (maxAverage);*/
 
 				double y9c = getHeight() * 0.40
 						+ (getHeight() * 0.30) * (maxAverage - a.specialAverage()) / (maxAverage);
@@ -189,8 +189,8 @@ public class StationMonitorPanel extends JPanel {
 				double y13 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getMediumRatio()) / (maxRatio);
 				double y14 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getMediumRatio()) / (maxRatio);
 
-				double y13b = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getThirdRatio()) / (maxRatio);
-				double y14b = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getThirdRatio()) / (maxRatio);
+				/*double y13b = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getThirdRatio()) / (maxRatio);
+				double y14b = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getThirdRatio()) / (maxRatio);*/
 
 				double y13c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getSpecialRatio()) / (maxRatio);
 				double y14c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getSpecialRatio()) / (maxRatio);
@@ -213,9 +213,9 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y9, x2, y10));
 
-				g.setColor(Color.green);
+				/*g.setColor(Color.green);
 				g.setStroke(new BasicStroke(2f));
-				g.draw(new Line2D.Double(x1, y9b, x2, y10b));
+				g.draw(new Line2D.Double(x1, y9b, x2, y10b));*/
 
 				g.setColor(Color.red);
 				g.setStroke(new BasicStroke(2f));
@@ -229,9 +229,9 @@ public class StationMonitorPanel extends JPanel {
 				g.setStroke(new BasicStroke(2f));
 				g.draw(new Line2D.Double(x1, y13, x2, y14));
 
-				g.setColor(Color.green);
+				/*g.setColor(Color.green);
 				g.setStroke(new BasicStroke(2f));
-				g.draw(new Line2D.Double(x1, y13b, x2, y14b));
+				g.draw(new Line2D.Double(x1, y13b, x2, y14b));*/
 
 				g.setColor(Color.red);
 				g.setStroke(new BasicStroke(2f));
