@@ -39,9 +39,13 @@ public class WaveformBuffer {
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-                    float specialAverage){
+                    float specialAverage, boolean expand){
         if(time <= lastLog) {
             return;
+        }
+
+        if(expand && !isEmpty() && nextFreeSlot == oldestDataSlot){
+            _resize(size * 2);
         }
 
         times[nextFreeSlot] = time;
@@ -52,10 +56,11 @@ public class WaveformBuffer {
         computed[LONG_AVERAGE][nextFreeSlot] = longAverage;
         computed[SPECIAL_AVERAGE][nextFreeSlot] = specialAverage;
 
-        if(nextFreeSlot == oldestDataSlot && !isEmpty()) {
+        if (nextFreeSlot == oldestDataSlot && !isEmpty()) {
             oldestDataSlot = (oldestDataSlot + 1) % size;
         }
         nextFreeSlot = (nextFreeSlot + 1) % size;
+
 
         lastLog = time;
     }

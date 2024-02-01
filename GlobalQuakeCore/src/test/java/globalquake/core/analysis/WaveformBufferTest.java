@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 public class WaveformBufferTest {
 
     @Test
-    public void testSize(){
+    public void testSize() {
         double sps = 30.0;
         int seconds = 10;
         WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
@@ -15,7 +15,7 @@ public class WaveformBufferTest {
     }
 
     @Test
-    public void testRing(){
+    public void testRing() {
         double sps = 1.0;
         int seconds = 10;
         WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
@@ -24,26 +24,26 @@ public class WaveformBufferTest {
         assertEquals(0, waveformBuffer.getOldestDataSlot());
         assertTrue(waveformBuffer.isEmpty());
 
-        waveformBuffer.log(0,0,0,0,0,0,0);
+        waveformBuffer.log(0, 0, 0, 0, 0, 0, 0, false);
         assertEquals(1, waveformBuffer.getNextSlot());
         assertEquals(0, waveformBuffer.getOldestDataSlot());
 
-        for(int i = 0; i < 9; i++){
-            waveformBuffer.log(i + 1,0,0,0,0,0,0);
+        for (int i = 0; i < 9; i++) {
+            waveformBuffer.log(i + 1, 0, 0, 0, 0, 0, 0, false);
         }
         assertEquals(waveformBuffer.getNextSlot(), 0);
         assertEquals(waveformBuffer.getOldestDataSlot(), 0);
-        waveformBuffer.log(10,0,0,0,0,0,0);
+        waveformBuffer.log(10, 0, 0, 0, 0, 0, 0, false);
         assertEquals(waveformBuffer.getNextSlot(), 1);
         assertEquals(waveformBuffer.getOldestDataSlot(), 1);
     }
 
     @Test
-    public void testStorage(){
+    public void testStorage() {
         double sps = 1.0;
         int seconds = 10;
         WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
-        waveformBuffer.log(0,10,10,10,10,10,10);
+        waveformBuffer.log(0, 10, 10, 10, 10, 10, 10, false);
 
         Log log0 = waveformBuffer.toLog(0);
 
@@ -52,13 +52,13 @@ public class WaveformBufferTest {
     }
 
     @Test
-    public void testResize(){
+    public void testResize() {
         double sps = 1.0;
         int seconds = 10;
         WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
 
-        for(int i = 0; i < waveformBuffer.getSize(); i++) {
-            waveformBuffer.log(i, i*10, i*20, i*30, i*40, i*50, i*60);
+        for (int i = 0; i < waveformBuffer.getSize(); i++) {
+            waveformBuffer.log(i, i * 10, i * 20, i * 30, i * 40, i * 50, i * 60, false);
         }
 
         waveformBuffer.resize(3);
@@ -68,19 +68,35 @@ public class WaveformBufferTest {
         Log log0 = waveformBuffer.toLog(waveformBuffer.getOldestDataSlot());
 
         assertEquals(7, log0.time());
-        assertEquals(30*7, log0.shortAverage(), 1e-6);
+        assertEquals(30 * 7, log0.shortAverage(), 1e-6);
 
-        waveformBuffer.log(100,100,100,100,100,100,100);
+        waveformBuffer.log(100, 100, 100, 100, 100, 100, 100, false);
 
         log0 = waveformBuffer.toLog(waveformBuffer.getOldestDataSlot());
 
         assertEquals(8, log0.time());
-        assertEquals(30*8, log0.shortAverage(), 1e-6);
+        assertEquals(30 * 8, log0.shortAverage(), 1e-6);
 
         log0 = waveformBuffer.toLog(waveformBuffer.getNewestDataSlot());
 
         assertEquals(100, log0.time());
         assertEquals(100, log0.shortAverage(), 1e-6);
+    }
+
+    @Test
+    public void testExpand() {
+        WaveformBuffer waveformBuffer = new WaveformBuffer(1, 3);
+        assertEquals(3, waveformBuffer.getSize());
+        for (int i = 0; i < waveformBuffer.getSize(); i++) {
+            waveformBuffer.log(i, i, i, i, i, i, i, false);
+        }
+
+        assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot()));
+        waveformBuffer.log(3, 3, 3, 3, 3, 3, 3, true);
+        assertEquals(6, waveformBuffer.getSize());
+        assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot()));
+        assertEquals(3, waveformBuffer.getTime(waveformBuffer.getNewestDataSlot()));
+
     }
 
 }
