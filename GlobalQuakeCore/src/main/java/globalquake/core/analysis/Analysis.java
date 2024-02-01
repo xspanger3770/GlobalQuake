@@ -22,14 +22,13 @@ public abstract class Analysis {
     public boolean _maxRatioReset;
     private byte status;
 
-    private WaveformBuffer waveformBuffer;
+    private WaveformBuffer waveformBuffer = null;
 
     public Analysis(AbstractStation station) {
         this.station = station;
         this.sampleRate = -1;
         detectedEvents = new CopyOnWriteArrayList<>();
         status = AnalysisStatus.IDLE;
-        this.waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
     }
 
     public long getLastRecord() {
@@ -43,6 +42,7 @@ public abstract class Analysis {
     public void analyse(DataRecord dr) {
         if (sampleRate <= 0) {
             sampleRate = dr.getSampleRate();
+            waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
             reset();
         }
 

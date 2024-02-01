@@ -180,7 +180,6 @@ public class Event implements Serializable {
 		long lookBackTime = getWaveformBuffer().getTime(indexLookBack);
 
 		while(indexLookBack != getWaveformBuffer().getNextSlot() && lookBackTime <= getStart()){
-			// todo ratios!
 			slows.add(waveformBuffer.getMediumRatio(indexLookBack));
 			double spec = waveformBuffer.getSpecialRatio(indexLookBack);
 			if (spec > 0) {
