@@ -116,7 +116,8 @@ public class ClusterAnalysis {
 
             for (AbstractStation station : stations) {
                 for (Event event : station.getAnalysis().getDetectedEvents()) {
-                    if (event.isValid() && event.isSWave() && !couldBeSArrival(event, cluster.getEarthquake())) {
+                    if (event.isValid() && event.isSWave() && (!couldBeSArrival(event, cluster.getEarthquake())
+                            || couldBeArrival(event, cluster.getEarthquake(), true, false, true))) {
                         event.setAsSWave(false);
                     }
                 }
@@ -386,7 +387,8 @@ public class ClusterAnalysis {
     private void markPossibleSWaves(Cluster cluster) {
         for (AbstractStation station : stations) {
             for (Event event : station.getAnalysis().getDetectedEvents()) {
-                if (event.isValid() && couldBeSArrival(event, cluster.getEarthquake())) {
+                if (event.isValid() && (couldBeSArrival(event, cluster.getEarthquake())
+                        && !couldBeArrival(event,cluster.getEarthquake(), true, false, true))) {
                     event.setAsSWave(true);
                 }
             }
