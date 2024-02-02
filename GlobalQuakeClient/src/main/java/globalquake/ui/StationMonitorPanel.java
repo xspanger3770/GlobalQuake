@@ -66,7 +66,6 @@ public class StationMonitorPanel extends JPanel {
 			double minValue = Double.MAX_VALUE;
 			double maxFilteredValue = -Double.MAX_VALUE;
 			double minFilteredValue = Double.MAX_VALUE;
-			double maxAverage = 0;
 			double maxRatio = 0;
 			for (Log l : logs) {
 				int v = l.rawValue();
@@ -110,8 +109,6 @@ public class StationMonitorPanel extends JPanel {
 			maxFilteredValue += fix2;
 			minFilteredValue -= fix2;
 
-			maxAverage += 10.0;
-			maxAverage *= 1.25;
 
 			for (int i = 0; i < logs.size() - 1; i++) {
 				Log a = logs.get(i);

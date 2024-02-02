@@ -9,7 +9,6 @@ import globalquake.core.intensity.IntensityTable;
 import globalquake.core.station.AbstractStation;
 import globalquake.utils.GeoUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
