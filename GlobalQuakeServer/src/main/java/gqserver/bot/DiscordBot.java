@@ -12,6 +12,8 @@ import globalquake.core.geo.DistanceUnit;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.utils.GeoUtils;
+import gqserver.main.Main;
+import gqserver.server.GlobalQuakeServer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -294,6 +296,7 @@ public class DiscordBot extends ListenerAdapter {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("GlobalQuake BOT v%s".formatted(VERSION));
         builder.setDescription("Starting up...");
+        builder.setFooter(Main.fullName);
 
         channel.sendMessageEmbeds(builder.build()).queue();
 
