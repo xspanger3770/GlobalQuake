@@ -14,21 +14,20 @@ public class WaveformBuffer {
     public static final int SPECIAL_RATIO = 2;
     public static final int FILTERED_VALUE = 3;
     private static final double GAP_TOLERANCE = 0.05;
+    private static final int TIME_REF_LIMIT = 2_000_000_000;
     private final double sps;
     private final Lock readLock;
     private final Lock writeLock;
     private final boolean server;
-    private double actualSampleTime;
-    private final double expectedGap;
-
-
     private int size;
     private long lastLog;
     private int[] rawValues;
+    private int[] times;
     private float[][] computed;
 
     private int nextFreeSlot;
     private int oldestDataSlot;
+    private long timeReference = Long.MIN_VALUE;
 
     public WaveformBuffer(double sps, int seconds, boolean server) {
         this.server = server;
@@ -43,12 +42,11 @@ public class WaveformBuffer {
             rawValues = new int[size];
         }
 
+        times = new int[size];
         computed = new float[getComputedCount()][size];
         this.lastLog = Long.MIN_VALUE;
         this.nextFreeSlot = 0;
         this.oldestDataSlot = 0;
-        this.expectedGap = (1000.0 / sps);
-        this.actualSampleTime = expectedGap;
 
         ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         this.readLock = readWriteLock.readLock();
@@ -66,8 +64,20 @@ public class WaveformBuffer {
         if(!isServer()){
             rawValues[nextFreeSlot] = rawValue;
             computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
-
         }
+
+        if(timeReference == Long.MIN_VALUE){
+            timeReference = time;
+        }
+
+        int deltaT = (int)(time - timeReference);
+
+        if(deltaT > TIME_REF_LIMIT){
+            changeReference();
+            deltaT = (int) (time - timeReference);
+        }
+
+        times[nextFreeSlot] = deltaT;
 
         computed[RATIO][nextFreeSlot] = ratio;
         computed[MEDIUM_RATIO][nextFreeSlot] = mediumRatio;
@@ -77,15 +87,22 @@ public class WaveformBuffer {
             oldestDataSlot = (oldestDataSlot + 1) % size;
         }
         nextFreeSlot = (nextFreeSlot + 1) % size;
-
-        if(lastLog != Long.MIN_VALUE){
-            long gap = time - lastLog;
-            double diff = Math.abs(gap - expectedGap) / expectedGap;
-            if(diff < GAP_TOLERANCE) {
-                actualSampleTime -= (actualSampleTime - gap) / (sps * 200.0);
-            }
-        }
         lastLog = time;
+    }
+
+    private void changeReference() {
+        if(isEmpty()) {
+            return;
+        }
+        long oldestTime = getTime(getOldestDataSlot());
+
+        int index = getOldestDataSlot();
+        while(index != getNextSlot()) {
+            times[index] = (int) (getTime(index) - oldestTime);
+            index = (index + 1) % size;
+        }
+
+        timeReference = oldestTime;
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
@@ -99,6 +116,7 @@ public class WaveformBuffer {
     }
 
     private void _resize(int new_size) {
+        int[] new_times = new int[new_size];
         int[] new_rawValues = isServer() ? null : new int[new_size];
         float[][] new_computed = new float[getComputedCount()][new_size];
 
@@ -114,6 +132,8 @@ public class WaveformBuffer {
                 nextFreeSlot = size - 1;
             }
 
+            new_times[i2] = times[nextFreeSlot];
+
             if(!isServer()){
                 new_rawValues[i2] = rawValues[nextFreeSlot];
             }
@@ -125,6 +145,7 @@ public class WaveformBuffer {
 
         this.rawValues = new_rawValues;
         this.computed = new_computed;
+        this.times = new_times;
 
         this.oldestDataSlot = i2;
         this.nextFreeSlot = 0;
@@ -152,11 +173,7 @@ public class WaveformBuffer {
     }
 
     public long getTime(int index){
-        int newest=getNewestDataSlot();
-        if(index > newest){
-            index -= size;
-        }
-        return lastLog - (long)(actualSampleTime * (newest - index));
+        return timeReference + times[index];
     }
 
     public int getRaw(int index){
