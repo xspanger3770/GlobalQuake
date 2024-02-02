@@ -58,7 +58,7 @@ public class WaveformBufferTest {
         WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds, false);
 
         for (int i = 0; i < waveformBuffer.getSize(); i++) {
-            waveformBuffer.log(i, i * 10, i * 20, i * 30, i * 40, 1, i * 60, false);
+            waveformBuffer.log(i * 1000, i * 10, i * 20, i * 30, i * 40, 1, i * 60, false);
         }
 
         waveformBuffer.resize(3);
@@ -67,19 +67,19 @@ public class WaveformBufferTest {
 
         Log log0 = waveformBuffer.toLog(waveformBuffer.getOldestDataSlot());
 
-        // assertEquals(7, log0.time()); todo
+        assertEquals(7000, log0.time());
         assertEquals(30 * 7, log0.ratio(), 1e-6);
 
-        waveformBuffer.log(100, 100, 100, 100, 100, 1, 100, false);
+        waveformBuffer.log(10000, 100, 100, 100, 100, 1, 100, false);
 
         log0 = waveformBuffer.toLog(waveformBuffer.getOldestDataSlot());
 
-//        assertEquals(8, log0.time()); todo
+        assertEquals(8000, log0.time());
         assertEquals(30 * 8, log0.ratio(), 1e-6);
 
         log0 = waveformBuffer.toLog(waveformBuffer.getNewestDataSlot());
 
-        assertEquals(100, log0.time());
+        assertEquals(10000, log0.time());
         assertEquals(100, log0.ratio(), 1e-6);
     }
 
@@ -88,14 +88,14 @@ public class WaveformBufferTest {
         WaveformBuffer waveformBuffer = new WaveformBuffer(1, 3, false);
         assertEquals(3, waveformBuffer.getSize());
         for (int i = 0; i < waveformBuffer.getSize(); i++) {
-            waveformBuffer.log(i, i, i, i, i, i, i, false);
+            waveformBuffer.log(i * 1000, i, i, i, i, i, i, false);
         }
 
-        // assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot())); todo
-        waveformBuffer.log(3, 3, 3, 3, 3, 3, 3, true);
+        assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot()));
+        waveformBuffer.log(3000, 3, 3, 3, 3, 3, 3, true);
         assertEquals(6, waveformBuffer.getSize());
-//        assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot())); todo
-        assertEquals(3, waveformBuffer.getTime(waveformBuffer.getNewestDataSlot()));
+        assertEquals(0, waveformBuffer.getTime(waveformBuffer.getOldestDataSlot()));
+        assertEquals(3000, waveformBuffer.getTime(waveformBuffer.getNewestDataSlot()));
 
     }
 
