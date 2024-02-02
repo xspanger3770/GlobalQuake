@@ -91,7 +91,7 @@ public class SeedlinkNetworksReader {
 			boolean first = true;
 
 			for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
-				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork) && !seedlinkNetwork.getExcludedStations().contains(station)) {
+				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork)) {
 					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
 					try {
 						if (!first) {
@@ -103,8 +103,7 @@ public class SeedlinkNetworksReader {
 								station.getChannelName());
 						seedlinkNetwork.connectedStations++;
 					}catch(SeedlinkException seedlinkException){
-						Logger.warn("Unable to connect to %s %s %s %s [%s]! Excluding...".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
-						seedlinkNetwork.exclude(station);
+						Logger.warn("Unable to connect to %s %s %s %s [%s]!".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
 					}
 				}
 			}

@@ -29,7 +29,6 @@ public final class SeedlinkNetwork implements Serializable {
     public transient int connectedStations = 0;
 
     public transient SeedlinkStatus status = SeedlinkStatus.DISCONNECTED;
-    private transient final Set<AbstractStation> excludedStations = new ConcurrentSkipListSet<>();
 
     public SeedlinkNetwork(String name, String host, int port) {
         this(name, host, port, DEFAULT_TIMEOUT);
@@ -97,13 +96,5 @@ public final class SeedlinkNetwork implements Serializable {
             timeout = DEFAULT_TIMEOUT;
         }
         return timeout;
-    }
-
-    public void exclude(AbstractStation s) {
-        excludedStations.add(s);
-    }
-
-    public Set<AbstractStation> getExcludedStations() {
-        return excludedStations;
     }
 }
