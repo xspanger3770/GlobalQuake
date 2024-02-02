@@ -53,8 +53,8 @@ public abstract class Analysis {
     }
 
     private void decode(DataRecord dataRecord) {
-        long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
-        long gap = lastRecord != 0 ? (time - lastRecord) : -1;
+        long startTime = dataRecord.getStartBtime().toInstant().toEpochMilli();
+        long gap = lastRecord != 0 ? (startTime - lastRecord) : -1;
         if (gap > getGapThreshold()) {
             reset();
         }
@@ -70,9 +70,13 @@ public abstract class Analysis {
                 return;
             }
 
+
+            int i = 0;
+
             for (int v : data) {
+                long time = startTime + (long)(i * (1000.0 / dataRecord.getSampleRate()));
                 nextSample(v, time, GlobalQuake.instance.currentTimeMillis());
-                time += (long) (1000 / getSampleRate());
+                i++;
             }
         } catch (Exception e) {
             Logger.warn("There was a problem with data processing on station %s: %s".formatted(getStation().getStationCode(), e.getMessage()));
