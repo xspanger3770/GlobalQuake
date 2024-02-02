@@ -1,6 +1,7 @@
 package globalquake.ui.client;
 
 import globalquake.client.GlobalQuakeClient;
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
@@ -154,7 +155,7 @@ public class MainFrame extends GQFrame {
         JPanel buttons2 = new JPanel(grid2);
 
         JButton settingsButton = new JButton("Settings");
-        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null).setVisible(true));
+        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this, false).setVisible(true));
 
         buttons2.add(settingsButton);
 

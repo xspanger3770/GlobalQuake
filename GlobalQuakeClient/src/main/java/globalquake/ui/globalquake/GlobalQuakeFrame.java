@@ -119,7 +119,7 @@ public class GlobalQuakeFrame extends GQFrame {
 		settings.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				new SettingsFrame(GlobalQuakeFrame.this, GlobalQuakeClient.instance != null).setVisible(true);
+				new SettingsFrame(GlobalQuakeFrame.this, GlobalQuake.getInstance().limitedSettings()).setVisible(true);
 			}
 		});
 

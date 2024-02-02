@@ -123,7 +123,7 @@ public abstract class Analysis {
 
     public void setSampleRate(double sampleRate) {
         this.sampleRate = sampleRate;
-        waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60);
+        waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60, GlobalQuake.getInstance().limitedWaveformBuffers());
     }
 
     public WaveformBuffer getWaveformBuffer() {

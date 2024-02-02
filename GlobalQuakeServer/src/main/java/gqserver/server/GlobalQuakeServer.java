@@ -26,6 +26,20 @@ public class GlobalQuakeServer extends GlobalQuake {
         getServerEventHandler().stopHandler();
     }
 
+    @Override
+    public boolean limitedSettings() {
+        return false;
+    }
+
+    @Override
+    public boolean limitedWaveformBuffers() {
+        return true;
+    }
+
+    public static GlobalQuake getInstance() {
+        return instance;
+    }
+
     public GQServerSocket getServerSocket() {
         return serverSocket;
     }

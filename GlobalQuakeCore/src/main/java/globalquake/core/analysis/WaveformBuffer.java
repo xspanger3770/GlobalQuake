@@ -7,15 +7,17 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class WaveformBuffer {
-    public static final int COMPUTED_COUNT = 4;
-    public static final int FILTERED_VALUE = 0;
-    public static final int RATIO = 1;
-    public static final int MEDIUM_RATIO = 2;
-    public static final int SPECIAL_RATIO = 3;
+    public static final int COMPUTED_COUNT_CLIENT = 4;
+    public static final int COMPUTED_COUNT_SERVER = 3;
+    public static final int RATIO = 0;
+    public static final int MEDIUM_RATIO = 1;
+    public static final int SPECIAL_RATIO = 2;
+    public static final int FILTERED_VALUE = 3;
     private static final double GAP_TOLERANCE = 0.05;
     private final double sps;
     private final Lock readLock;
     private final Lock writeLock;
+    private final boolean server;
     private double actualSampleTime;
     private final double expectedGap;
 
@@ -28,7 +30,8 @@ public class WaveformBuffer {
     private int nextFreeSlot;
     private int oldestDataSlot;
 
-    public WaveformBuffer(double sps, int seconds) {
+    public WaveformBuffer(double sps, int seconds, boolean server) {
+        this.server = server;
         this.sps = sps;
         this.size = (int) Math.ceil(seconds * sps);
 
@@ -36,8 +39,11 @@ public class WaveformBuffer {
             throw new IllegalArgumentException("Wavefor buffer size must be positive!");
         }
 
-        rawValues = new int[size];
-        computed = new float[COMPUTED_COUNT][size];
+        if(!isServer()) {
+            rawValues = new int[size];
+        }
+
+        computed = new float[getComputedCount()][size];
         this.lastLog = Long.MIN_VALUE;
         this.nextFreeSlot = 0;
         this.oldestDataSlot = 0;
@@ -57,8 +63,12 @@ public class WaveformBuffer {
             _resize(size * 2);
         }
 
-        rawValues[nextFreeSlot] = rawValue;
-        computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
+        if(!isServer()){
+            rawValues[nextFreeSlot] = rawValue;
+            computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
+
+        }
+
         computed[RATIO][nextFreeSlot] = ratio;
         computed[MEDIUM_RATIO][nextFreeSlot] = mediumRatio;
         computed[SPECIAL_RATIO][nextFreeSlot] = specialRatio;
@@ -71,10 +81,8 @@ public class WaveformBuffer {
         if(lastLog != Long.MIN_VALUE){
             long gap = time - lastLog;
             double diff = Math.abs(gap - expectedGap) / expectedGap;
-            if(diff < GAP_TOLERANCE){
+            if(diff < GAP_TOLERANCE) {
                 actualSampleTime -= (actualSampleTime - gap) / (sps * 200.0);
-            } else {
-                Logger.warn("GAP TOO WIDE! %d vs %.1f".formatted(gap, expectedGap));
             }
         }
         lastLog = time;
@@ -91,8 +99,8 @@ public class WaveformBuffer {
     }
 
     private void _resize(int new_size) {
-        int[] new_rawValues = new int[new_size];
-        float[][] new_computed = new float[COMPUTED_COUNT][new_size];
+        int[] new_rawValues = isServer() ? null : new int[new_size];
+        float[][] new_computed = new float[getComputedCount()][new_size];
 
         int i2 = 0;
         for(int step = 0; step < Math.min(size, new_size); step++){
@@ -106,11 +114,13 @@ public class WaveformBuffer {
                 nextFreeSlot = size - 1;
             }
 
-            new_rawValues[i2] = rawValues[nextFreeSlot];
-            new_computed[0][i2] = computed[0][nextFreeSlot];
-            new_computed[1][i2] = computed[1][nextFreeSlot];
-            new_computed[2][i2] = computed[2][nextFreeSlot];
-            new_computed[3][i2] = computed[3][nextFreeSlot];
+            if(!isServer()){
+                new_rawValues[i2] = rawValues[nextFreeSlot];
+            }
+
+            for(int i = 0; i < getComputedCount(); i++) {
+                new_computed[i][i2] = computed[i][nextFreeSlot];
+            }
         }
 
         this.rawValues = new_rawValues;
@@ -119,6 +129,10 @@ public class WaveformBuffer {
         this.oldestDataSlot = i2;
         this.nextFreeSlot = 0;
         this.size = new_size;
+    }
+
+    private int getComputedCount() {
+        return isServer() ? COMPUTED_COUNT_SERVER : COMPUTED_COUNT_CLIENT;
     }
 
     public int getSize() {
@@ -168,10 +182,13 @@ public class WaveformBuffer {
     }
 
     public Log toLog(int index){
+        if(isServer()){
+            throw new UnsupportedOperationException("toLog() is not supported in server mode!");
+        }
         return new Log(
                 getTime(index),
-                rawValues[index],
-                computed[FILTERED_VALUE][index],
+                isServer() ? 0 : rawValues[index],
+                isServer() ? 0 : computed[FILTERED_VALUE][index],
                 computed[RATIO][index],
                 computed[MEDIUM_RATIO][index],
                 computed[SPECIAL_RATIO][index]);
@@ -199,7 +216,7 @@ public class WaveformBuffer {
         // additional space
         seconds  = (int)(seconds * 1.4);
 
-        WaveformBuffer result = new WaveformBuffer(sps, seconds);
+        WaveformBuffer result = new WaveformBuffer(sps, seconds, server);
 
         if(isEmpty()){
             return result;
@@ -246,5 +263,9 @@ public class WaveformBuffer {
             }
         }
         return high % size;
+    }
+
+    public boolean isServer() {
+        return server;
     }
 }

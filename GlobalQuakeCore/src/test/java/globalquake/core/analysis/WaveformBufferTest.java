@@ -10,7 +10,7 @@ public class WaveformBufferTest {
     public void testSize() {
         double sps = 30.0;
         int seconds = 10;
-        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
+        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds, false);
         assertEquals(300, waveformBuffer.getSize());
     }
 
@@ -18,7 +18,7 @@ public class WaveformBufferTest {
     public void testRing() {
         double sps = 1.0;
         int seconds = 10;
-        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
+        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds, false);
         assertEquals(10, waveformBuffer.getSize());
         assertEquals(0, waveformBuffer.getNextSlot());
         assertEquals(0, waveformBuffer.getOldestDataSlot());
@@ -42,7 +42,7 @@ public class WaveformBufferTest {
     public void testStorage() {
         double sps = 1.0;
         int seconds = 10;
-        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
+        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds, false);
         waveformBuffer.log(0, 10, 10, 10, 10, 1, 10, false);
 
         Log log0 = waveformBuffer.toLog(0);
@@ -55,7 +55,7 @@ public class WaveformBufferTest {
     public void testResize() {
         double sps = 1.0;
         int seconds = 10;
-        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds);
+        WaveformBuffer waveformBuffer = new WaveformBuffer(sps, seconds, false);
 
         for (int i = 0; i < waveformBuffer.getSize(); i++) {
             waveformBuffer.log(i, i * 10, i * 20, i * 30, i * 40, 1, i * 60, false);
@@ -85,7 +85,7 @@ public class WaveformBufferTest {
 
     @Test
     public void testExpand() {
-        WaveformBuffer waveformBuffer = new WaveformBuffer(1, 3);
+        WaveformBuffer waveformBuffer = new WaveformBuffer(1, 3, false);
         assertEquals(3, waveformBuffer.getSize());
         for (int i = 0; i < waveformBuffer.getSize(); i++) {
             waveformBuffer.log(i, i, i, i, i, i, i, false);

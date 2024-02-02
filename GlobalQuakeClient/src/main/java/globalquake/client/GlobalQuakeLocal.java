@@ -116,4 +116,18 @@ public class GlobalQuakeLocal extends GlobalQuake {
         alertManager.clear();
         getGlobalQuakeFrame().clear();
     }
+
+    @Override
+    public boolean limitedSettings() {
+        return false;
+    }
+
+    @Override
+    public boolean limitedWaveformBuffers() {
+        return false;
+    }
+
+    public static GlobalQuakeLocal getInstance() {
+        return instance;
+    }
 }

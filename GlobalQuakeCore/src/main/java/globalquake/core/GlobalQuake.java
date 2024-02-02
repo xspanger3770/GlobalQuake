@@ -1,5 +1,6 @@
 package globalquake.core;
 
+import globalquake.core.analysis.WaveformBuffer;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
@@ -17,7 +18,7 @@ import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class GlobalQuake {
+public abstract class GlobalQuake {
 
 	public static final String version = "v0.10.2_build-15";
 
@@ -75,7 +76,11 @@ public class GlobalQuake {
 		this(stationDatabaseManager, new GlobalStationManager());
 	}
 
-	public EarthquakeArchive createArchive(){
+    public static GlobalQuake getInstance() {
+    	return instance;
+	}
+
+    public EarthquakeArchive createArchive(){
 		return new EarthquakeArchive().loadArchive();
 	}
 
@@ -170,4 +175,7 @@ public class GlobalQuake {
 		getClusterAnalysis().getClusters().clear();
 		getEarthquakeAnalysis().getEarthquakes().clear();
 	}
+
+	public abstract boolean limitedSettings();
+	public abstract boolean limitedWaveformBuffers();
 }
