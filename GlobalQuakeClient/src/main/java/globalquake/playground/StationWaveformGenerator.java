@@ -11,6 +11,7 @@ import globalquake.utils.GeoUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StationWaveformGenerator {
 
@@ -35,7 +36,7 @@ public class StationWaveformGenerator {
 
     private final AbstractStation station;
 
-    private final Map<Earthquake, Distances> earthquakeDistancesMap = new HashMap<>();
+    private final Map<Earthquake, Distances> earthquakeDistancesMap = new ConcurrentHashMap<>();
 
     static{
         for(int i = 0; i < STEPS; i++){

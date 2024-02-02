@@ -84,27 +84,10 @@ public class StationMonitorPanel extends JPanel {
 				if (fv < minFilteredValue) {
 					minFilteredValue = fv;
 				}
-				double shortAvg = l.shortAverage();
-				double longAvg = l.longAverage();
-				double medAvg = l.mediumAverage();
-				double specAvg = l.specialAverage();
-				if (shortAvg > maxAverage) {
-					maxAverage = shortAvg;
-				}
-				if (longAvg > maxAverage) {
-					maxAverage = longAvg;
-				}
-				if (medAvg > maxAverage) {
-					maxAverage = medAvg;
-				}
-				if (specAvg > maxAverage) {
-					maxAverage = specAvg;
-				}
 
-				double ratio = l.getRatio();
-				double medRatio = l.getMediumRatio();
-				//double thirdRatio = l.getThirdRatio();
-				double specRatio = l.getSpecialRatio();
+				double ratio = l.ratio();
+				double medRatio = l.mediumRatio();
+				double specRatio = l.specialRatio();
 				if (ratio > maxRatio) {
 					maxRatio = ratio;
 				}
@@ -150,34 +133,14 @@ public class StationMonitorPanel extends JPanel {
 				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
 
-				double y5 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.shortAverage()) / (maxAverage);
-				double y6 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.shortAverage()) / (maxAverage);
+				double y11 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.ratio()) / (maxRatio);
+				double y12 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.ratio()) / (maxRatio);
 
-				double y7 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.longAverage()) / (maxAverage);
-				double y8 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.longAverage()) / (maxAverage);
+				double y13 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.mediumRatio()) / (maxRatio);
+				double y14 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.mediumRatio()) / (maxRatio);
 
-				double y9 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.mediumAverage()) / (maxAverage);
-				double y10 = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.mediumAverage()) / (maxAverage);
-
-				double y9c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - a.specialAverage()) / (maxAverage);
-				double y10c = getHeight() * 0.40
-						+ (getHeight() * 0.30) * (maxAverage - b.specialAverage()) / (maxAverage);
-
-				double y11 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getRatio()) / (maxRatio);
-				double y12 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getRatio()) / (maxRatio);
-
-				double y13 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getMediumRatio()) / (maxRatio);
-				double y14 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getMediumRatio()) / (maxRatio);
-
-				double y13c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.getSpecialRatio()) / (maxRatio);
-				double y14c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.getSpecialRatio()) / (maxRatio);
+				double y13c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.specialRatio()) / (maxRatio);
+				double y14c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.specialRatio()) / (maxRatio);
 
 				double yA = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - 1.0) / (maxRatio);
 
@@ -188,22 +151,6 @@ public class StationMonitorPanel extends JPanel {
 				g.setColor(Color.orange);
 				g.setStroke(new BasicStroke(1f));
 				g.draw(new Line2D.Double(x1, y3, x2, y4));
-
-				g.setColor(Color.orange);
-				g.setStroke(new BasicStroke(3f));
-				g.draw(new Line2D.Double(x1, y7, x2, y8));
-
-				g.setColor(Color.blue);
-				g.setStroke(new BasicStroke(2f));
-				g.draw(new Line2D.Double(x1, y9, x2, y10));
-
-				g.setColor(Color.red);
-				g.setStroke(new BasicStroke(2f));
-				g.draw(new Line2D.Double(x1, y9c, x2, y10c));
-
-				g.setColor(Color.black);
-				g.setStroke(new BasicStroke(1f));
-				g.draw(new Line2D.Double(x1, y5, x2, y6));
 
 				g.setColor(Color.blue);
 				g.setStroke(new BasicStroke(2f));

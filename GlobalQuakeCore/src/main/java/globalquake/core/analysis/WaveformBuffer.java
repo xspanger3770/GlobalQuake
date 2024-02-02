@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class WaveformBuffer {
-    public static final int COMPUTED_COUNT = 5;
+    public static final int COMPUTED_COUNT = 4;
     public static final int FILTERED_VALUE = 0;
     public static final int RATIO = 1;
     public static final int MEDIUM_RATIO = 2;
@@ -51,12 +51,10 @@ public class WaveformBuffer {
         this.writeLock = readWriteLock.writeLock();
     }
 
-    public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-                    float specialAverage, boolean expand){
+    private void log(long time, int rawValue, float filteredV, float ratio, float mediumRatio, float specialRatio, boolean expand) {
         if(time <= lastLog) {
             return;
         }
-
         if(expand && !isEmpty() && nextFreeSlot == oldestDataSlot){
             _resize(size * 2);
         }
@@ -64,9 +62,9 @@ public class WaveformBuffer {
         times[nextFreeSlot] = time;
         rawValues[nextFreeSlot] = rawValue;
         computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
-        computed[RATIO][nextFreeSlot] = shortAverage / longAverage;
-        computed[MEDIUM_RATIO][nextFreeSlot] = mediumAverage / longAverage;
-        computed[SPECIAL_RATIO][nextFreeSlot] = specialAverage / longAverage;
+        computed[RATIO][nextFreeSlot] = ratio;
+        computed[MEDIUM_RATIO][nextFreeSlot] = mediumRatio;
+        computed[SPECIAL_RATIO][nextFreeSlot] = specialRatio;
 
         if (nextFreeSlot == oldestDataSlot && !isEmpty()) {
             oldestDataSlot = (oldestDataSlot + 1) % size;
@@ -75,6 +73,11 @@ public class WaveformBuffer {
 
 
         lastLog = time;
+    }
+
+    public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
+                    float specialAverage, boolean expand){
+        log(time, rawValue, filteredV, shortAverage / longAverage, mediumAverage / longAverage, specialAverage / longAverage, expand);
     }
 
     public void resize(int seconds) {
@@ -105,7 +108,6 @@ public class WaveformBuffer {
             new_computed[1][i2] = computed[1][nextFreeSlot];
             new_computed[2][i2] = computed[2][nextFreeSlot];
             new_computed[3][i2] = computed[3][nextFreeSlot];
-            new_computed[4][i2] = computed[4][nextFreeSlot];
         }
 
         this.times = new_times;
@@ -163,11 +165,10 @@ public class WaveformBuffer {
         return new Log(
                 times[index],
                 rawValues[index],
-                computed[0][index],
-                computed[1][index],
-                computed[2][index],
-                computed[3][index],
-                computed[4][index]);
+                computed[FILTERED_VALUE][index],
+                computed[RATIO][index],
+                computed[MEDIUM_RATIO][index],
+                computed[SPECIAL_RATIO][index]);
     }
 
     public Lock getReadLock() {
@@ -209,7 +210,6 @@ public class WaveformBuffer {
                     getComputed(1, closest),
                     getComputed(2, closest),
                     getComputed(3, closest),
-                    getComputed(4, closest),
                     true);
 
             closest = (closest + 1) % size;
