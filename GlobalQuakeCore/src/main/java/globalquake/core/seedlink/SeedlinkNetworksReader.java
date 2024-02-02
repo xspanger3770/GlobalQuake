@@ -90,6 +90,8 @@ public class SeedlinkNetworksReader {
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
 			boolean first = true;
 
+			int errors = 0;
+
 			for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
 				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork)) {
 					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
@@ -104,6 +106,11 @@ public class SeedlinkNetworksReader {
 						seedlinkNetwork.connectedStations++;
 					}catch(SeedlinkException seedlinkException){
 						Logger.warn("Unable to connect to %s %s %s %s [%s]!".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
+						errors++;
+						if(errors > seedlinkNetwork.selectedStations * 0.1){
+							Logger.warn("Too many errors in seedlink network %s, resetting!".formatted(seedlinkNetwork.getName()));
+							throw seedlinkException;
+						}
 					}
 				}
 			}
