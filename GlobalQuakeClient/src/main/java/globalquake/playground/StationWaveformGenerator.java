@@ -104,12 +104,12 @@ public class StationWaveformGenerator {
 
         double result = 0;
 
-        double distMultiplier = IntensityTable.getIntensity(earthquake.getMag(), geo) / 100.0;
+        double distMultiplier = IntensityTable.getIntensity(earthquake.getMag(), geo) / (20.0);
         double m = earthquake.getMag() + gcd / 30.0;
         double m2 = (m * m);
 
         if(_secondsP < 0 && pTravel >= 0){
-            double decay = (m2) / (_secondsP * _secondsP + m2);
+            double decay = (m2) / (_secondsP * _secondsP+ m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
             result += 1E5 * decay * increase;
         }
@@ -117,10 +117,29 @@ public class StationWaveformGenerator {
         if(_secondsS < 0 && sTravel >= 0){
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
-            result += 4E5 * decay * increase;
+            result += 1E5 * decay * increase * psRatio(gcd);
         }
 
-        return result * distMultiplier * Math.sqrt(freq);
+        return result * distMultiplier * getMagnitudeFrequencyRange(earthquake.getMag() + gcd / 1400.0, freq) * Math.sqrt(freq);
+    }
+
+    private static double getMagnitudeFrequencyRange(double mag, double freq) {
+        double centerFreq = 1000.0 / Math.pow(2.5, mag);
+        double lnd = Math.abs(Math.log(freq) - Math.log(centerFreq));
+        return 1.0 / Math.pow(lnd + 1.0, 3);
+    }
+
+    public static void main(String[] args) {
+        double mag = 2;
+        System.err.println(getMagnitudeFrequencyRange(mag, .01));
+        System.err.println(getMagnitudeFrequencyRange(mag, .10));
+        System.err.println(getMagnitudeFrequencyRange(mag, 1));
+        System.err.println(getMagnitudeFrequencyRange(mag, 10));
+        System.err.println(getMagnitudeFrequencyRange(mag, 100));
+    }
+
+    private double psRatio(double gcd) {
+        return 6.0 / (0.000015 * gcd * gcd + 1);
     }
 
 }
