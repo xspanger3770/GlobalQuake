@@ -202,6 +202,7 @@ public class BetterAnalysis extends Analysis {
 
             try{
                 getWaveformBuffer().getWriteLock().lock();
+                getWaveformBuffer().checkSize(Settings.logsStoreTimeMinutes * 60);
                 getWaveformBuffer().log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
                         (float) longAverage, (float) specialAverage, false);
             } finally {

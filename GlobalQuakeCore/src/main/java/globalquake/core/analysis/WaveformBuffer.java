@@ -285,4 +285,11 @@ public class WaveformBuffer {
     public boolean isServer() {
         return server;
     }
+
+    public void checkSize(int seconds) {
+        int _size = (int) Math.ceil(seconds * sps);
+        if(_size != size){
+            _resize(_size);
+        }
+    }
 }
