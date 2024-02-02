@@ -107,7 +107,7 @@ public class SoundsService {
                 Sounds.playSound(Sounds.intensify);
                 info.meets = true;
             }
-            double pga = GeoUtils.pgaFunction(quake.getMag(), quake.getDepth(), quake.getDepth());
+            double pga = GeoUtils.getMaxPGA(quake.getLat(), quake.getLon(), quake.getDepth(), quake.getMag());
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
                 double threshold_eew = IntensityScales.INTENSITY_SCALES[Settings.eewScale].getLevels().get(Settings.eewLevelIndex).getPga();
