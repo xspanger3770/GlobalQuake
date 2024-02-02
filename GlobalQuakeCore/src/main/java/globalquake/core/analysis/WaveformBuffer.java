@@ -228,11 +228,11 @@ public class WaveformBuffer {
         while(closest != getNextSlot() && time <= end){
             result.log(
                     time,
-                    getRaw(closest),
-                    getComputed(0, closest),
-                    getComputed(1, closest),
-                    getComputed(2, closest),
-                    getComputed(3, closest),
+                    isServer() ? 0 : getRaw(closest),
+                    isServer() ? 0 : getComputed(FILTERED_VALUE, closest),
+                    getComputed(RATIO, closest),
+                    getComputed(MEDIUM_RATIO, closest),
+                    getComputed(SPECIAL_RATIO, closest),
                     true);
 
             closest = (closest + 1) % size;
