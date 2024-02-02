@@ -1,5 +1,7 @@
 package globalquake.core.analysis;
 
+import org.tinylog.Logger;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -11,23 +13,21 @@ public class WaveformBuffer {
     public static final int RATIO = 1;
     public static final int MEDIUM_RATIO = 2;
     public static final int SPECIAL_RATIO = 3;
+    private static final double GAP_TOLERANCE = 0.02; // todo better
     private final double sps;
     private final Lock readLock;
     private final Lock writeLock;
+    private double actualSampleTime;
+    private final double expectedGap;
 
 
     private int size;
     private long lastLog;
     private int[] rawValues;
     private float[][] computed;
-    private long[] times;
 
     private int nextFreeSlot;
     private int oldestDataSlot;
-
-    private static final AtomicInteger tot = new AtomicInteger();
-
-    // todo: could be S arrival causes P waves to turn into S waves in nearby quakes
 
     public WaveformBuffer(double sps, int seconds) {
         this.sps = sps;
@@ -39,12 +39,11 @@ public class WaveformBuffer {
 
         rawValues = new int[size];
         computed = new float[COMPUTED_COUNT][size];
-        times = new long[size];
         this.lastLog = Long.MIN_VALUE;
         this.nextFreeSlot = 0;
         this.oldestDataSlot = 0;
-
-        tot.addAndGet(size);
+        this.expectedGap = (1000.0 / sps);
+        this.actualSampleTime = expectedGap;
 
         ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         this.readLock = readWriteLock.readLock();
@@ -59,7 +58,6 @@ public class WaveformBuffer {
             _resize(size * 2);
         }
 
-        times[nextFreeSlot] = time;
         rawValues[nextFreeSlot] = rawValue;
         computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
         computed[RATIO][nextFreeSlot] = ratio;
@@ -71,7 +69,15 @@ public class WaveformBuffer {
         }
         nextFreeSlot = (nextFreeSlot + 1) % size;
 
-
+        if(lastLog != Long.MIN_VALUE){
+            long gap = time - lastLog;
+            double diff = Math.abs(gap - expectedGap) / expectedGap;
+            if(diff < GAP_TOLERANCE){
+                actualSampleTime -= (actualSampleTime - gap) / (sps * 200.0);
+            } else {
+                Logger.debug("GAP TOO WIDE! %d vs %.1f".formatted(gap, expectedGap));
+            }
+        }
         lastLog = time;
     }
 
@@ -102,7 +108,6 @@ public class WaveformBuffer {
                 nextFreeSlot = size - 1;
             }
 
-            new_times[i2] = times[nextFreeSlot];
             new_rawValues[i2] = rawValues[nextFreeSlot];
             new_computed[0][i2] = computed[0][nextFreeSlot];
             new_computed[1][i2] = computed[1][nextFreeSlot];
@@ -110,7 +115,6 @@ public class WaveformBuffer {
             new_computed[3][i2] = computed[3][nextFreeSlot];
         }
 
-        this.times = new_times;
         this.rawValues = new_rawValues;
         this.computed = new_computed;
 
@@ -136,7 +140,11 @@ public class WaveformBuffer {
     }
 
     public long getTime(int index){
-        return times[index];
+        int newest=getNewestDataSlot();
+        if(index > newest){
+            index -= size;
+        }
+        return lastLog - (long)(actualSampleTime * (newest - index));
     }
 
     public int getRaw(int index){
@@ -163,7 +171,7 @@ public class WaveformBuffer {
 
     public Log toLog(int index){
         return new Log(
-                times[index],
+                getTime(index),
                 rawValues[index],
                 computed[FILTERED_VALUE][index],
                 computed[RATIO][index],
