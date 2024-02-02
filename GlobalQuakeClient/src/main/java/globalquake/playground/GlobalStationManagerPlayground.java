@@ -2,6 +2,7 @@ package globalquake.playground;
 
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.regions.Regions;
+import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.utils.GeoUtils;
 
@@ -42,7 +43,7 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
             created++;
         }
 
-        this.stations.forEach(station -> station.clear());
+        this.stations.forEach(AbstractStation::clear);
         this.stations.clear();
         this.stations.addAll(list);
         createListOfClosestStations(this.stations);

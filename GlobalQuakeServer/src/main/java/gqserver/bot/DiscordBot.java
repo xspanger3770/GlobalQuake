@@ -13,7 +13,6 @@ import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
 import globalquake.utils.GeoUtils;
 import gqserver.main.Main;
-import gqserver.server.GlobalQuakeServer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
