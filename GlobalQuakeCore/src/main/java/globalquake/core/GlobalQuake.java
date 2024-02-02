@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GlobalQuake {
 
-	public static final String version = "v0.10.2_build-14";
+	public static final String version = "v0.10.2_wb-3";
 
 	protected GlobalQuakeRuntime globalQuakeRuntime;
 	protected SeedlinkNetworksReader seedlinkNetworksReader;
@@ -166,4 +166,8 @@ public class GlobalQuake {
     	return System.currentTimeMillis();
 	}
 
+    public void clear() {
+		getClusterAnalysis().getClusters().clear();
+		getEarthquakeAnalysis().getEarthquakes().clear();
+	}
 }

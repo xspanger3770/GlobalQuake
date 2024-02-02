@@ -862,4 +862,10 @@ public class GlobalQuakePanel extends GlobePanel {
 
         return ww;
     }
+
+    public void clear(){
+        lastDisplayedQuake = null;
+        lastCinemaModeEarthquake = null;
+        cinemaHandler.clear();
+    }
 }

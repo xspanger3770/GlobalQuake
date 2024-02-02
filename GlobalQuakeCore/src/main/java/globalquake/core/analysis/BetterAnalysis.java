@@ -124,15 +124,15 @@ public class BetterAnalysis extends Analysis {
             longAverage -= (longAverage - absFilteredV) / (getSampleRate() * 200.0);
         }
         double ratio = shortAverage / longAverage;
-        if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
+        if (getStatus() == AnalysisStatus.IDLE && !getWaveformBuffer().isEmpty() && !getStation().disabled) {
             boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
             boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
             boolean condMain = shortAverage / thirdAverage > 3.0;
             if (condMain && (cond1 || cond2)) {
-                ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
-                if (!_logs.isEmpty()) {
+                WaveformBuffer buffer = getWaveformBuffer().extract(time - EVENT_EXTENSION_TIME * 1000, time);
+                if (!buffer.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs, !getStation().isSensitivityValid());
+                    Event event = new Event(this, time, buffer, !getStation().isSensitivityValid());
                     getDetectedEvents().add(0, event);
                 }
             }
@@ -199,32 +199,24 @@ public class BetterAnalysis extends Analysis {
 
         if (time - currentTime < 1000 * 10
                 && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
-            Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                    (float) longAverage, (float) specialAverage);
-            synchronized (previousLogsLock) {
-                getPreviousLogs().add(0, currentLog);
+
+            try{
+                getWaveformBuffer().getWriteLock().lock();
+                getWaveformBuffer().log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
+                        (float) longAverage, (float) specialAverage, false);
+            } finally {
+                getWaveformBuffer().getWriteLock().unlock();
             }
+
             // from latest event to the oldest event
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                    e.log(currentLog, countsResult);
+                    e.log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
+                            (float) longAverage, (float) specialAverage, ratio, countsResult);
                 }
             }
         }
         getStation().reportState(StationState.ACTIVE, time);
-    }
-
-    private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {
-        ArrayList<Log> logs = new ArrayList<>();
-        synchronized (previousLogsLock) {
-            for (Log l : getPreviousLogs()) {
-                long time = l.time();
-                if (time >= oldestLog && time <= newestLog) {
-                    logs.add(l);
-                }
-            }
-        }
-        return logs;
     }
 
     @Override
@@ -269,9 +261,7 @@ public class BetterAnalysis extends Analysis {
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded() || !event.isValid()) {
-                if (!event.getLogs().isEmpty()) {
-                    event.getLogs().clear();
-                }
+                event.removeBuffer();
                 long age = time - event.getEnd();
                 if (!event.isValid() || age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
@@ -280,13 +270,6 @@ public class BetterAnalysis extends Analysis {
         }
 
         getDetectedEvents().removeAll(toBeRemoved);
-
-        long oldestTime = (time - (Settings.logsStoreTimeMinutes * 60 * 1000));
-        synchronized (previousLogsLock) {
-            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).time() < oldestTime) {
-                getPreviousLogs().remove(getPreviousLogs().size() - 1);
-            }
-        }
     }
 
 

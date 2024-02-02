@@ -169,4 +169,7 @@ public class ShakemapService {
         return shakeMaps;
     }
 
+    public void clear() {
+        shakeMaps.clear();
+    }
 }

@@ -2,6 +2,7 @@ package globalquake.core.seedlink;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.GlobalQuake;
@@ -89,17 +90,21 @@ public class SeedlinkNetworksReader {
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
 			boolean first = true;
 
-			for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
-				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
-					if(!first) {
-						reader.sendCmd("DATA");
-					} else{
-						first = false;
+			for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
+				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork)) {
+					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
+					try {
+						if (!first) {
+							reader.sendCmd("DATA");
+						} else {
+							first = false;
+						}
+						reader.select(station.getNetworkCode(), station.getStationCode(), station.getLocationCode(),
+								station.getChannelName());
+						seedlinkNetwork.connectedStations++;
+					}catch(SeedlinkException seedlinkException){
+						Logger.warn("Unable to connect to %s %s %s %s [%s]!".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
 					}
-					reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
-							s.getChannelName());
-					seedlinkNetwork.connectedStations++;
 				}
 			}
 

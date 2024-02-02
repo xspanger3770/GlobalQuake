@@ -2,6 +2,7 @@ package globalquake.playground;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.station.AbstractStation;
+import org.tinylog.Logger;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,8 +16,12 @@ public class WaveformGenerator {
     }
 
     private void updateWaveforms() {
-        globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(WaveformGenerator::generateWaveform);
-    }
+        try {
+            globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(WaveformGenerator::generateWaveform);
+        }catch(Exception e){
+            Logger.error(e);
+        }
+        }
 
     private static void generateWaveform(AbstractStation station) {
         PlaygroundStation playgroundStation = (PlaygroundStation) station;

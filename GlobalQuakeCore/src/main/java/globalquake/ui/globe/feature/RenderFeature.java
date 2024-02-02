@@ -51,6 +51,7 @@ public abstract class RenderFeature<E> {
             entities_temp.clear();
             getElements().parallelStream().forEach(element -> entities_temp.put(element, entities.getOrDefault(element, new RenderEntity<>(element, renderElements))));
             swapEntities();
+            entities_temp.clear();
 
             lastHash = hash;
             return true;
