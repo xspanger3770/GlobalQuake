@@ -127,7 +127,4 @@ public class GlobalQuakeLocal extends GlobalQuake {
         return false;
     }
 
-    public static GlobalQuakeLocal getInstance() {
-        return instance;
-    }
 }

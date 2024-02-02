@@ -36,10 +36,6 @@ public class GlobalQuakeServer extends GlobalQuake {
         return true;
     }
 
-    public static GlobalQuake getInstance() {
-        return instance;
-    }
-
     public GQServerSocket getServerSocket() {
         return serverSocket;
     }

@@ -1,7 +1,5 @@
 package globalquake.core.analysis;
 
-import org.tinylog.Logger;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -13,7 +11,6 @@ public class WaveformBuffer {
     public static final int MEDIUM_RATIO = 1;
     public static final int SPECIAL_RATIO = 2;
     public static final int FILTERED_VALUE = 3;
-    private static final double GAP_TOLERANCE = 0.05;
     private static final int TIME_REF_LIMIT = 2_000_000_000;
     private final double sps;
     private final Lock readLock;
@@ -116,8 +113,9 @@ public class WaveformBuffer {
     }
 
     private void _resize(int new_size) {
+        boolean server = isServer();
         int[] new_times = new int[new_size];
-        int[] new_rawValues = isServer() ? null : new int[new_size];
+        int[] new_rawValues = server ? null : new int[new_size];
         float[][] new_computed = new float[getComputedCount()][new_size];
 
         int i2 = 0;
@@ -134,7 +132,7 @@ public class WaveformBuffer {
 
             new_times[i2] = times[nextFreeSlot];
 
-            if(!isServer()){
+            if(!server){
                 new_rawValues[i2] = rawValues[nextFreeSlot];
             }
 

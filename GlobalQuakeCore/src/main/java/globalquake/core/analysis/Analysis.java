@@ -70,11 +70,10 @@ public abstract class Analysis {
                 return;
             }
 
-
             int i = 0;
 
             for (int v : data) {
-                long time = startTime + (long)(i * (1000.0 / dataRecord.getSampleRate()));
+                long time = startTime + (long) (i * (1000.0 / dataRecord.getSampleRate()));
                 nextSample(v, time, GlobalQuake.instance.currentTimeMillis());
                 i++;
             }

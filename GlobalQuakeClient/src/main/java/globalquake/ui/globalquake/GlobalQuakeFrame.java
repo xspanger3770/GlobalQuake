@@ -1,6 +1,5 @@
 package globalquake.ui.globalquake;
 
-import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;

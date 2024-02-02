@@ -1,6 +1,5 @@
 package globalquake.core;
 
-import globalquake.core.analysis.WaveformBuffer;
 import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;

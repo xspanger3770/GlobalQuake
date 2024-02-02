@@ -1,7 +1,5 @@
 package globalquake.ui.client;
 
-import globalquake.client.GlobalQuakeClient;
-import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
