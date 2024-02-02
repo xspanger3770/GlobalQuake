@@ -8,6 +8,7 @@ import globalquake.core.earthquake.data.MagnitudeReading;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.events.specific.QuakeRemoveEvent;
+import globalquake.core.station.AbstractStation;
 import globalquake.ui.globalquake.GlobalQuakePanel;
 
 import javax.swing.*;
@@ -54,6 +55,12 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                     for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                     }
+
+                    for(AbstractStation station :  GlobalQuake.instance.getStationManager().getStations()){
+                        station.clear();
+                    }
+
+                    GlobalQuake.instance.getStationManager().getStations().clear();
 
                     GlobalQuake.instance.clear();
                 }

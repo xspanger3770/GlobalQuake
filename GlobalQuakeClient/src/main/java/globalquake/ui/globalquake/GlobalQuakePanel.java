@@ -157,6 +157,8 @@ public class GlobalQuakePanel extends GlobePanel {
             Logger.error(e);
         }
 
+        System.gc();
+
         drawTexts(g);
 
         if(Settings.displayAlertBox) {

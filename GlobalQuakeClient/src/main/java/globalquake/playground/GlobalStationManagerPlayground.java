@@ -42,6 +42,7 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
             created++;
         }
 
+        this.stations.forEach(station -> station.clear());
         this.stations.clear();
         this.stations.addAll(list);
         createListOfClosestStations(this.stations);

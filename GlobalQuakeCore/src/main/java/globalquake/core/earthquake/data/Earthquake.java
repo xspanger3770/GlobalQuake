@@ -157,4 +157,5 @@ public class Earthquake implements Regional, Warnable {
 	public long getCreatedAt() {
 		return createdAt;
 	}
+
 }
