@@ -104,7 +104,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         DecimalInput magInput;
         inputs.add(magInput = new DecimalInput("Magnitude", 0, 10, 4.0));
         DecimalInput depthInput;
-        inputs.add(depthInput = new DecimalInput("Depth", 0, 750, 10.0));
+        inputs.add(depthInput = new DecimalInput("Depth", 0, 700, 10.0));
         new DecimalInputDialog(parent, "Choose parameters", inputs, () -> _createDebugEarthquake(magInput.getValue(), depthInput.getValue()));
     }
 
