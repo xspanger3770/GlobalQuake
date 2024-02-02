@@ -74,7 +74,7 @@ public class WaveformBuffer {
             if(diff < GAP_TOLERANCE){
                 actualSampleTime -= (actualSampleTime - gap) / (sps * 200.0);
             } else {
-                Logger.debug("GAP TOO WIDE! %d vs %.1f".formatted(gap, expectedGap));
+                Logger.warn("GAP TOO WIDE! %d vs %.1f".formatted(gap, expectedGap));
             }
         }
         lastLog = time;
