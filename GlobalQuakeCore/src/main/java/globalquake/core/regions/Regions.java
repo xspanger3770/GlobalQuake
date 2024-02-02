@@ -76,6 +76,11 @@ public class Regions {
             regionSearchHD.addAll(list);
         }
 
+        //loadLookupTable();
+    }
+
+    @SuppressWarnings("unused")
+    private static void loadLookupTable() throws IOException {
         shorelineLookup = LookupTableIO.importLookupTableFromFile();
 
         if(shorelineLookup == null){
@@ -91,7 +96,6 @@ public class Regions {
                 System.err.println("Failed to export lookup table!");
             }
         }
-
     }
 
 
@@ -126,7 +130,7 @@ public class Regions {
         double closestDistance = Double.MAX_VALUE;
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regionsUHD) {
-            for(Path2D.Double path : reg.paths()){
+            for(Path2D.Float path : reg.paths()){
                 if(path.contains(point)){
                     return depth;
                 }
@@ -154,7 +158,7 @@ public class Regions {
         Point2D.Double point = new Point2D.Double(lng, lat);
         for (Region reg : regions) {
             int i = 0;
-            for (Path2D.Double path : reg.paths()) {
+            for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
                     if(path.contains(point)) {
                         return false;
@@ -171,7 +175,7 @@ public class Regions {
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regions) {
             int i = 0;
-            for (Path2D.Double path : reg.paths()) {
+            for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
                     if(path.contains(point)) {
                         return reg.name();
@@ -421,7 +425,7 @@ public class Regions {
 
             GeoJsonObject o = f.getGeometry();
             if (o instanceof Polygon pol) {
-                ArrayList<Path2D.Double> paths = new ArrayList<>();
+                ArrayList<Path2D.Float> paths = new ArrayList<>();
                 ArrayList<Polygon> raws = new ArrayList<>();
 
                 raws.add(pol);
@@ -430,7 +434,7 @@ public class Regions {
                 if (raw != null) {
                     raw.add(pol);
                 }
-                regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+                regions.add(new Region(name, paths, paths.stream().map(Path2D.Float::getBounds2D).collect(Collectors.toList()), raws));
             } else if (o instanceof MultiPolygon mp) {
                 createRegion(regions, mp, name);
 
@@ -459,7 +463,7 @@ public class Regions {
     }
 
     private static void createRegion(List<Region> regions, MultiPolygon mp, String name) {
-        List<Path2D.Double> paths = new ArrayList<>();
+        List<Path2D.Float> paths = new ArrayList<>();
         List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
         List<Polygon> raws = new ArrayList<>();
         for (List<List<LngLatAlt>> polygon : polygons) {
@@ -467,11 +471,11 @@ public class Regions {
             paths.add(toPath(pol));
             raws.add(pol);
         }
-        regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+        regions.add(new Region(name, paths, paths.stream().map(Path2D.Float::getBounds2D).collect(Collectors.toList()), raws));
     }
 
-    private static java.awt.geom.Path2D.Double toPath(Polygon polygon) {
-        Path2D.Double path = new Path2D.Double();
+    private static Path2D.Float toPath(Polygon polygon) {
+        Path2D.Float path = new Path2D.Float();
 
         int i = 0;
         for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
