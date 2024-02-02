@@ -8,10 +8,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class WaveformBuffer {
     public static final int COMPUTED_COUNT = 5;
     public static final int FILTERED_VALUE = 0;
-    public static final int SHORT_AVERAGE = 1;
-    public static final int MEDIUM_AVERAGE = 2;
-    public static final int LONG_AVERAGE = 3;
-    public static final int SPECIAL_AVERAGE = 4;
+    public static final int RATIO = 1;
+    public static final int MEDIUM_RATIO = 2;
+    public static final int SPECIAL_RATIO = 3;
     private final double sps;
     private final Lock readLock;
     private final Lock writeLock;
@@ -65,10 +64,9 @@ public class WaveformBuffer {
         times[nextFreeSlot] = time;
         rawValues[nextFreeSlot] = rawValue;
         computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
-        computed[SHORT_AVERAGE][nextFreeSlot] = shortAverage;
-        computed[MEDIUM_AVERAGE][nextFreeSlot] = mediumAverage;
-        computed[LONG_AVERAGE][nextFreeSlot] = longAverage;
-        computed[SPECIAL_AVERAGE][nextFreeSlot] = specialAverage;
+        computed[RATIO][nextFreeSlot] = shortAverage / longAverage;
+        computed[MEDIUM_RATIO][nextFreeSlot] = mediumAverage / longAverage;
+        computed[SPECIAL_RATIO][nextFreeSlot] = specialAverage / longAverage;
 
         if (nextFreeSlot == oldestDataSlot && !isEmpty()) {
             oldestDataSlot = (oldestDataSlot + 1) % size;
@@ -148,17 +146,17 @@ public class WaveformBuffer {
     }
 
     public double getMediumRatio(int index){
-        return getComputed(MEDIUM_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+        return getComputed(MEDIUM_RATIO, index);
     }
 
 
     public double getSpecialRatio(int index){
-        return getComputed(SPECIAL_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+        return getComputed(SPECIAL_RATIO, index);
     }
 
 
     public double getRatio(int index){
-        return getComputed(SHORT_AVERAGE, index) / getComputed(LONG_AVERAGE, index);
+        return getComputed(RATIO, index);
     }
 
     public Log toLog(int index){
