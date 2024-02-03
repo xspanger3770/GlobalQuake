@@ -23,7 +23,11 @@ public class SeedlinkCommunicator {
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase, int attempt) throws Exception {
-        seedlinkNetwork.setStatus(0, attempt == 1 ? "Connecting..." : "Connecting (attempt %d / 3)".formatted(attempt));
+        if(attempt > 1){
+            Logger.warn("Attempt %d / 3 to obtain available stations from %s".formatted(attempt, seedlinkNetwork.getName()));
+        }
+
+        seedlinkNetwork.setStatus(0, attempt == 1 ? "Connecting..." : "Connecting... (attempt %d / 3)".formatted(attempt));
         SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), seedlinkNetwork.getTimeout(), false, seedlinkNetwork.getTimeout());
 
         seedlinkNetwork.setStatus(33, "Downloading...");
