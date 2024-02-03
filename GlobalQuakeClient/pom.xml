@@ -46,6 +46,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>data-local</id>
+            <name>data</name>
+            <url>file://${project.basedir}/../libs</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>edu.sc.seis</groupId>
