@@ -201,7 +201,7 @@ public class StationDatabaseManager {
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync)){
+                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync, attempt + 1)){
                                 break;
                             }
                         }
@@ -215,13 +215,13 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync) {
+    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync, int attempt) {
         synchronized (statusSync) {
             seedlinkNetwork.setStatus(0, "Updating...");
         }
 
         try {
-            SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
+            SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase, attempt);
         } catch (Exception ce) {
             Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
             synchronized (statusSync) {

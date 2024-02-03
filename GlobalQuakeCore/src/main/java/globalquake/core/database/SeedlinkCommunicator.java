@@ -22,8 +22,8 @@ public class SeedlinkCommunicator {
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG = new ThreadLocal<>();
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
 
-    public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
-        seedlinkNetwork.setStatus(0, "Connecting...");
+    public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase, int attempt) throws Exception {
+        seedlinkNetwork.setStatus(0, attempt == 1 ? "Connecting..." : "Connecting (attempt %d / 3)".formatted(attempt));
         SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), seedlinkNetwork.getTimeout(), false, seedlinkNetwork.getTimeout());
 
         seedlinkNetwork.setStatus(33, "Downloading...");
