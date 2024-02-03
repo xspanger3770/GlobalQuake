@@ -193,5 +193,28 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        // variable for getting the active button
+        Object source = e.getSource();
+
+        // ensure select and deselect region is set to none when other buttons activated
+        if (source == selectAll || source == deselectAll) {
+            // If the Select All or Deselect All button is clicked, set dragMode to NONE
+            setDragMode(DragMode.NONE);
+        } else if (source == selectButton) {
+            // Handle the logic for the Select Region button
+            if (selectButton.isSelected()) {
+                setDragMode(DragMode.SELECT);
+            } else {
+                setDragMode(DragMode.NONE);
+            }
+        } else if (source == deselectButton) {
+            // Handle the logic for the Deselect Region button
+            if (deselectButton.isSelected()) {
+                setDragMode(DragMode.DESELECT);
+            } else {
+                setDragMode(DragMode.NONE);
+            }
+        }
     }
 }
