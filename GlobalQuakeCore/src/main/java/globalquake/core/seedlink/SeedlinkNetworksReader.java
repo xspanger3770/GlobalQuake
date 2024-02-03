@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class SeedlinkNetworksReader {
 
 	protected static final int RECONNECT_DELAY = 10;
+	private static final int SEEDLINK_TIMEOUT = 90;
 	private Instant lastData;
 
 	private ExecutorService seedlinkReaderService;
@@ -31,8 +32,8 @@ public class SeedlinkNetworksReader {
 
 	public static void main(String[] args) throws Exception{
 		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
-		reader.select("AK", "D25K", "", "BHZ");
-		reader.startData();
+		reader.selectData("AK", "D25K", List.of("BHZ"));
+		reader.endHandshake();
 
 		SortedSet<DataRecord> set = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
 
@@ -82,13 +83,12 @@ public class SeedlinkNetworksReader {
 		SeedlinkReader reader = null;
 		try {
 			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getName() + "\"");
-			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT, false, SEEDLINK_TIMEOUT);
 			activeReaders.add(reader);
 
 			reader.sendHello();
 
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
-			boolean first = true;
 
 			int errors = 0;
 
@@ -96,13 +96,8 @@ public class SeedlinkNetworksReader {
 				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork)) {
 					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
 					try {
-						if (!first) {
-							reader.sendCmd("DATA");
-						} else {
-							first = false;
-						}
-						reader.select(station.getNetworkCode(), station.getStationCode(), station.getLocationCode(),
-								station.getChannelName());
+						reader.selectData(station.getNetworkCode(), station.getStationCode(), List.of("%s%s".formatted(station.getLocationCode(),
+								station.getChannelName())));
 						seedlinkNetwork.connectedStations++;
 					}catch(SeedlinkException seedlinkException){
 						Logger.warn("Unable to connect to %s %s %s %s [%s]!".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
@@ -121,7 +116,7 @@ public class SeedlinkNetworksReader {
 				return;
 			}
 
-			reader.startData();
+			reader.endHandshake();
 			seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
 			while (reader.hasNext()) {

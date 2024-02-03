@@ -24,7 +24,7 @@ public class SeedlinkCommunicator {
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase) throws Exception {
         seedlinkNetwork.setStatus(0, "Connecting...");
-        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), seedlinkNetwork.getTimeout(), false);
+        SeedlinkReader reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), seedlinkNetwork.getTimeout(), false, seedlinkNetwork.getTimeout());
 
         seedlinkNetwork.setStatus(33, "Downloading...");
         String infoString = reader.getInfoString(SeedlinkReader.INFO_STREAMS).trim().replaceAll("[^\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]", " ");
