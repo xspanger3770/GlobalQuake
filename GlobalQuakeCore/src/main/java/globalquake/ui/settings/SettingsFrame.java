@@ -33,10 +33,19 @@ public class SettingsFrame extends GQFrame {
         });
 	}
 
-	public SettingsFrame(Component parent, boolean isClient) {
-		this.isClient = isClient;
-		initialize(parent);
-	}
+	// settings panel instance tracker
+    private static SettingsFrame openInstance = null;
+
+    public SettingsFrame(Component parent, boolean isClient) {
+        this.isClient = isClient;
+        // Check if an instance is already open, if so, return before creating a new instance
+        if (openInstance != null && openInstance.isVisible()) {
+            openInstance.toFront();
+            return;
+        }
+        openInstance = this;
+        initialize(parent);
+    }
 
 	private void initialize(Component parent) {
 		setTitle(!isClient ? "GlobalQuake Settings" : "GlobalQuake Settings (Client)");
