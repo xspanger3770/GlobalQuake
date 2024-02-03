@@ -172,7 +172,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
             graphics.setColor(Color.white);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
-            graphics.drawString(level.getName(),
+            graphics.drawString(level.getFullName(),
                     (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
                     (int)centerPonint.y + graphics.getFont().getSize() / 2);
         }
