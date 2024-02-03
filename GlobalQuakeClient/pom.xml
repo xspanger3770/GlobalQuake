@@ -59,8 +59,6 @@
             <groupId>edu.sc.seis</groupId>
             <artifactId>seisFile</artifactId>
             <version>2.1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/seisFile-2.1.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.uber</groupId>
