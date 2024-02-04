@@ -117,13 +117,12 @@ public class EarthquakeListPanel extends JPanel {
                         archivedQuakeUI.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosed(WindowEvent windowEvent) {
-                                // Perform actions when the window is closed
-                                System.out.println("ArchivedQuakeUI panel closed.");
+                                isOpen = false;
                             }
                 
                             @Override
                             public void windowClosing(WindowEvent windowEvent) {
-                                // Handle the window closing event if needed
+                                isOpen = false;
                             }
                         });
                 
