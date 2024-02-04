@@ -15,13 +15,11 @@ import java.awt.event.WindowEvent;
 
 public class ArchivedQuakeUI extends JDialog {
 
-    private boolean isOpen = false;
-    
-     private final ArchivedQuake quakeInstance;
+    // boolean for keeping track of animation windows open
+    private boolean animOpen = false;
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
-        this.quakeInstance = quake;
         setLayout(new BorderLayout());
 
         JLabel latLabel = new JLabel("Latitude: %.4f".formatted(quake.getLat()));
@@ -50,32 +48,24 @@ public class ArchivedQuakeUI extends JDialog {
         animButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (!isOpen){
-                    isOpen = true;
+                if (!animOpen) {
                     ArchivedQuakeAnimation animation = new ArchivedQuakeAnimation(parent, quake);
+                    animation.setVisible(true);
         
-                    // Add window listener to detect when the animation window is closed
+                    // Add a window listener to handle the closing event
                     animation.addWindowListener(new WindowAdapter() {
                         @Override
-                        public void windowClosed(WindowEvent e) {
-                            // Perform actions when the window is closed
-                            System.out.println("Animation window closed.");
-                            isOpen = false;
-                        }
-        
-                        @Override
                         public void windowClosing(WindowEvent e) {
-                            // Handle the window closing event (e.g., when "X" button is clicked)
-                            isOpen = false;
+                            // Set the boolean to false when the window is closing
+                            animOpen = false;
                         }
                     });
         
-                    animation.setVisible(true);
+                    // Set the boolean to true since the animation window is open
+                    animOpen = true;
                 }
             }
         });
-
-         
 
         getContentPane().add(panel, BorderLayout.CENTER);
 
@@ -103,9 +93,5 @@ public class ArchivedQuakeUI extends JDialog {
         setLocationRelativeTo(parent);
         setResizable(false);
     }
-
-    // getter for the quake event info
-    public ArchivedQuake getQuake() {
-        return quakeInstance;
-    }
 }
+
