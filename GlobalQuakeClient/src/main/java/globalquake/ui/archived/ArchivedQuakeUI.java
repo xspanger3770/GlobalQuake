@@ -12,6 +12,9 @@ import java.time.Instant;
 
 public class ArchivedQuakeUI extends JDialog {
 
+    //keeps track of animation instance per event instance
+    private boolean animationPanelOpen = false;
+
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
         setLayout(new BorderLayout());
@@ -42,7 +45,10 @@ public class ArchivedQuakeUI extends JDialog {
         animButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new ArchivedQuakeAnimation(parent, quake).setVisible(true);
+                if (!animationPanelOpen) {
+                    animationPanelOpen = true;
+                    new ArchivedQuakeAnimation(parent, quake).setVisible(true);
+                }
             }
         });
 
