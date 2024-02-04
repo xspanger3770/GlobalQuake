@@ -10,10 +10,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 public class ArchivedQuakeUI extends JDialog {
 
-    //keeps track of animation instance per event instance
-    private boolean animationPanelOpen = false;
+    private boolean isOpen = false;
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
@@ -45,12 +47,32 @@ public class ArchivedQuakeUI extends JDialog {
         animButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (!animationPanelOpen) {
-                    animationPanelOpen = true;
-                    new ArchivedQuakeAnimation(parent, quake).setVisible(true);
+                if (!isOpen){
+                    isOpen = true;
+                    ArchivedQuakeAnimation animation = new ArchivedQuakeAnimation(parent, quake);
+        
+                    // Add window listener to detect when the animation window is closed
+                    animation.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            // Perform actions when the window is closed
+                            System.out.println("Animation window closed.");
+                            isOpen = false;
+                        }
+        
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                            // Handle the window closing event (e.g., when "X" button is clicked)
+                            isOpen = false;
+                        }
+                    });
+        
+                    animation.setVisible(true);
                 }
             }
         });
+
+         
 
         getContentPane().add(panel, BorderLayout.CENTER);
 
