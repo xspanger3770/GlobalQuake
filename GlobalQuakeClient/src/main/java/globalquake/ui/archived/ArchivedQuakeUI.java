@@ -16,9 +16,12 @@ import java.awt.event.WindowEvent;
 public class ArchivedQuakeUI extends JDialog {
 
     private boolean isOpen = false;
+    
+     private final ArchivedQuake quakeInstance;
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
+        this.quakeInstance = quake;
         setLayout(new BorderLayout());
 
         JLabel latLabel = new JLabel("Latitude: %.4f".formatted(quake.getLat()));
@@ -99,5 +102,10 @@ public class ArchivedQuakeUI extends JDialog {
         pack();
         setLocationRelativeTo(parent);
         setResizable(false);
+    }
+
+    // getter for the quake event info
+    public ArchivedQuake getQuake() {
+        return quakeInstance;
     }
 }

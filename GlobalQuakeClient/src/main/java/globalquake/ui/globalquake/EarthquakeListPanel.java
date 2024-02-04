@@ -8,6 +8,9 @@ import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.core.Settings;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -65,6 +68,8 @@ public class EarthquakeListPanel extends JPanel {
             }
         });
 
+        
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -84,14 +89,48 @@ public class EarthquakeListPanel extends JPanel {
                 if(e.getButton() == MouseEvent.BUTTON1) {
                     if(isMouseInGoUpRect) {
                         scroll = 0;
-                    }else if (quake != null ) {
-                        new ArchivedQuakeUI(parent, quake).setVisible(true);
                     }
                 }
 
                 if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
                     new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
+
+                if (quake != null && e.getButton() == MouseEvent.BUTTON1) {
+                    // Check if a panel with the same data is already open
+                    boolean isPanelAlreadyOpen = false;
+                    for (Window window : parent.getOwnedWindows()) {
+                        if (window instanceof ArchivedQuakeUI) {
+                            ArchivedQuakeUI existingPanel = (ArchivedQuakeUI) window;
+                            if (Double.compare(existingPanel.getQuake().getLat(), quake.getLat()) == 0) {
+                                isPanelAlreadyOpen = true;
+                                break;
+                            }
+                        }
+                    }
+                
+                    // If no panel with the same data is open, create a new one
+                    if (!isPanelAlreadyOpen) {
+                        ArchivedQuakeUI archivedQuakeUI = new ArchivedQuakeUI(parent, quake);
+                
+                        // Add window listener to detect when the UI panel is closed
+                        archivedQuakeUI.addWindowListener(new WindowAdapter() {
+                            @Override
+                            public void windowClosed(WindowEvent windowEvent) {
+                                // Perform actions when the window is closed
+                                System.out.println("ArchivedQuakeUI panel closed.");
+                            }
+                
+                            @Override
+                            public void windowClosing(WindowEvent windowEvent) {
+                                // Handle the window closing event if needed
+                            }
+                        });
+                
+                        archivedQuakeUI.setVisible(true);
+                    }
+                }
+
             }
 
             @Override
