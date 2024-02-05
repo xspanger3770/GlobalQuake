@@ -273,7 +273,9 @@ public class DiscordBot extends ListenerAdapter {
             stringBuilder.append(role.getAsMention());
         }
 
-        return stringBuilder.toString();
+        String result = stringBuilder.toString();
+
+        return result.isEmpty() ? "no ping" : result;
     }
 
     private static String formatLevel(Level level) {
