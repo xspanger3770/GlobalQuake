@@ -215,14 +215,16 @@ public class DiscordBot extends ListenerAdapter {
 
         CharSequence pingString = tagRoles(channel, earthquake);
 
-        if(pingString.isEmpty()){
-            return;
-        }
-
         try {
             if (pingMessage != null) {
+                if(pingString.isEmpty()){
+                    pingString = "Nevermind, no ping";
+                }
                 pingMessage.editMessage(pingString).submit().get();
             } else {
+                if(pingString.isEmpty()){
+                    return;
+                }
                 channel.sendMessage(pingString).submit().thenApply(message -> lastPingMessages.put(earthquake, message)).get();
             }
         } catch (Exception e) {
@@ -273,9 +275,7 @@ public class DiscordBot extends ListenerAdapter {
             stringBuilder.append(role.getAsMention());
         }
 
-        String result = stringBuilder.toString();
-
-        return result.isEmpty() ? "no ping" : result;
+        return stringBuilder.toString();
     }
 
     private static String formatLevel(Level level) {
