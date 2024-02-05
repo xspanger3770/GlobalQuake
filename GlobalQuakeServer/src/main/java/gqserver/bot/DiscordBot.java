@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class DiscordBot extends ListenerAdapter {
 
     private static final String TAG = "Discord Bot";
-    private static final String VERSION = "0.3.1";
+    private static final String VERSION = "0.3.2";
     private static final String PING_M4 = "Ping 4.0+";
     private static final String PING_M5 = "Ping 5.0+";
     private static final String PING_M6 = "Ping 6.0+";
