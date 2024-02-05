@@ -14,6 +14,9 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 public class SettingsFrame extends GQFrame {
 
 	private final List<SettingsPanel> panels = new LinkedList<>();
@@ -45,7 +48,21 @@ public class SettingsFrame extends GQFrame {
         }
         openInstance = this;
         initialize(parent);
+
+		 // Add a window listener to set openInstance to null when the frame is closed
+		 addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                openInstance = null;
+            }
+        });
     }
+
+	// gets the instance of SettingsFrame
+	public static SettingsFrame getInstance() {
+        return openInstance;
+    }
+
 
 	private void initialize(Component parent) {
 		setTitle(!isClient ? "GlobalQuake Settings" : "GlobalQuake Settings (Client)");
@@ -95,6 +112,7 @@ public class SettingsFrame extends GQFrame {
 		setResizable(false);
 		setLocationRelativeTo(parent);
 	}
+
 
 	private void addPanels() {
 		panels.add(new GeneralSettingsPanel(this));
