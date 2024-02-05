@@ -149,6 +149,8 @@ public class MainFrame extends GQFrame {
                 // If not, create a new instance and make it visible
                 SettingsFrame settingsFrame = new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null);
                 settingsFrame.setVisible(true);
+                // Ensure that the SettingsFrame is always on top
+				settingsFrame.setAlwaysOnTop(true);
             }
     });
     
