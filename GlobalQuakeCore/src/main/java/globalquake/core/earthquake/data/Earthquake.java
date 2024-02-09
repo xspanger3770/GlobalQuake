@@ -55,12 +55,12 @@ public class Earthquake implements Regional, Warnable {
 	}
 
 	public double getMag() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.magnitude;
 	}
 
 	public int getRevisionID() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0 : cluster.revisionID;
 	}
 
@@ -69,22 +69,22 @@ public class Earthquake implements Regional, Warnable {
 	}
 
 	public double getDepth() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.depth;
 	}
 
 	public double getLat() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.lat;
 	}
 
 	public double getLon() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.lon;
 	}
 
 	public long getOrigin() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0L : hyp.origin;
 	}
 
@@ -110,6 +110,10 @@ public class Earthquake implements Regional, Warnable {
 
 	public Hypocenter getHypocenter(){
 		return getCluster().getPreviousHypocenter();
+	}
+
+	public Hypocenter getLastValidHypocenter() {
+		return getCluster().getLastValidHypocenter();
 	}
 
 	@Override
