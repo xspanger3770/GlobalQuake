@@ -88,9 +88,11 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 entity.getOriginal().getLon(), renderer
                         .pxToDeg(16, renderProperties), 45.0);
 
+        Hypocenter hypocenter = e.getCluster().getPreviousHypocenter();
+        List<PolygonConfidenceInterval> polygonConfidenceIntervals = hypocenter == null ? null :
+                hypocenter.polygonConfidenceIntervals;
 
-        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals != null) {
-            List<PolygonConfidenceInterval> polygonConfidenceIntervals = e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+        if(polygonConfidenceIntervals != null) {
             for (int i = 0; i < polygonConfidenceIntervals.size(); i++) {
                 PolygonConfidenceInterval polygonConfidenceInterval = polygonConfidenceIntervals.get(i);
                 createConfidencePolygon(entity.getRenderElement(5 + i), polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
