@@ -3,6 +3,7 @@ package globalquake.core.report;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.events.specific.QuakeReportEvent;
+import globalquake.core.regions.GQPolygon;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.data.Earthquake;
@@ -110,20 +111,22 @@ public class EarthquakeReporter {
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        java.util.List<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
+        java.util.List<GQPolygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
                 : scroll < 4.8 ? Regions.raw_polygonsHD : Regions.raw_polygonsMD;
-        for (org.geojson.Polygon polygon : pols) {
+        for (GQPolygon polygon : pols) {
             java.awt.Polygon awt = new java.awt.Polygon();
             boolean add = false;
-            for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                double x = getX(pos.getLongitude());
-                double y = getY(pos.getLatitude());
+            for(int i = 0; i < polygon.getSize(); i++){
+				double lat = polygon.getLats()[i];
+				double lon = polygon.getLons()[i];
+				double x = getX(lon);
+				double y = getY(lat);
 
-                if (!add && isOnScreen(x, y)) {
-                    add = true;
-                }
-                awt.addPoint((int) x, (int) y);
-            }
+				if (!add && isOnScreen(x, y)) {
+					add = true;
+				}
+				awt.addPoint((int) x, (int) y);
+			}
             if (add) {
                 g.setColor(landC);
                 g.fill(awt);

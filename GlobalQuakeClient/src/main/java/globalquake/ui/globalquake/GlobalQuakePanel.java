@@ -151,6 +151,8 @@ public class GlobalQuakePanel extends GlobePanel {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
+        System.gc();
+
         try {
             drawEarthquakesBox(g, 0, 0);
         } catch (Exception e) {
@@ -511,7 +513,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         double pctUsed = usedMem / (double) maxMem;
 
-        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
+        settingsStrings.add(new SettingInfo("RAM: ", "%.4f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
         settingsStrings.add(new SettingInfo("FPS: ", "%d".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
     }
