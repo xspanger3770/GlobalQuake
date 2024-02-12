@@ -151,8 +151,6 @@ public class GlobalQuakePanel extends GlobePanel {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
 
-        System.gc();
-
         try {
             drawEarthquakesBox(g, 0, 0);
         } catch (Exception e) {
