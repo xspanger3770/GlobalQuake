@@ -33,7 +33,7 @@ public class ClusterAnalysis {
     private final Collection<Earthquake> earthquakes;
     private final Collection<AbstractStation> stations;
 
-    private static final double MERGE_THRESHOLD = 0.45;
+    private static final double MERGE_THRESHOLD = 0.54;
 
     public ClusterAnalysis(List<Earthquake> earthquakes, Collection<AbstractStation> stations) {
         this.earthquakes = earthquakes;
@@ -53,6 +53,7 @@ public class ClusterAnalysis {
         clustersWriteLock.lock();
         try {
             clearSWaves();
+            markSWaves();
             //assignEventsToExistingEarthquakeClusters(); VERY CONTROVERSIAL
             expandExistingClusters();
             createNewClusters();
@@ -61,6 +62,12 @@ public class ClusterAnalysis {
             updateClusters();
         } finally {
             clustersWriteLock.unlock();
+        }
+    }
+
+    private void markSWaves() {
+        for(Cluster cluster: getClusters()){
+            markPossibleSWaves(cluster);
         }
     }
 
@@ -125,6 +132,18 @@ public class ClusterAnalysis {
         }
     }
 
+    private void markPossibleSWaves(Cluster cluster) {
+        for (AbstractStation station : stations) {
+            for (Event event : station.getAnalysis().getDetectedEvents()) {
+                if (event.isValid() && !event.isSWave() && (couldBeSArrival(event, cluster.getEarthquake())
+                        && !couldBeArrival(event,cluster.getEarthquake(), true, false, true))) {
+                    event.setAsSWave(true);
+                }
+            }
+        }
+    }
+
+
     private void mergeClusters() {
         for (Earthquake earthquake : earthquakes) {
             List<Cluster> toMerge = null;
@@ -179,7 +198,7 @@ public class ClusterAnalysis {
         }
         int correct = 0;
         for (Event event : cluster.getAssignedEvents().values()) {
-            if (couldBeArrival(event, earthquake, true, true, false)) {
+            if (couldBeArrival(event, earthquake, true, true, true)) {
                 correct++;
             }
         }
@@ -347,9 +366,6 @@ public class ClusterAnalysis {
 
     private void expandCluster(Cluster cluster) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
-            if(cluster.getPreviousHypocenter().correctEvents > 6) {
-                markPossibleSWaves(cluster);
-            }
             if(cluster.getPreviousHypocenter().correctEvents > 7) {
                 expandPWaves(cluster);
             }
@@ -384,17 +400,6 @@ public class ClusterAnalysis {
         }
     }
 
-    private void markPossibleSWaves(Cluster cluster) {
-        for (AbstractStation station : stations) {
-            for (Event event : station.getAnalysis().getDetectedEvents()) {
-                if (event.isValid() && (couldBeSArrival(event, cluster.getEarthquake())
-                        && !couldBeArrival(event,cluster.getEarthquake(), true, false, true))) {
-                    event.setAsSWave(true);
-                }
-            }
-        }
-    }
-
     private void expandPWaves(Cluster cluster) {
         mainLoop:
         for (AbstractStation station : stations) {
@@ -413,7 +418,7 @@ public class ClusterAnalysis {
 
     @SuppressWarnings("RedundantIfStatement")
     private boolean potentialArrival(Event ev, Event e, double dist) {
-        if (e.isValid() && ev.isValid() && ev.getpWave() > 0 && ev.assignedCluster == null) {
+        if (e.isValid() && ev.isValid() && !ev.isSWave() && !e.isSWave() && ev.getpWave() > 0 && ev.assignedCluster == null) {
             long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
                     - 2500;
             long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
@@ -464,7 +469,6 @@ public class ClusterAnalysis {
 
                     // so no we have a list of all nearby events that could be earthquake
                     if (validEvents.size() >= CLUSTER_MIN_SIZE) {
-                        validEvents.add(event);
                         expandCluster(createCluster(validEvents));
                     }
                 }
@@ -507,6 +511,13 @@ public class ClusterAnalysis {
                     cluster.lastLevel = cluster.getLevel();
                     cluster.lastLastUpdate = cluster.getLastUpdate();
                 }
+            }
+        }
+
+        for(Cluster cluster : toBeRemoved){
+            if(cluster.getEarthquake() != null){
+                earthquakes.remove(cluster.getEarthquake());
+                GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
             }
         }
 
