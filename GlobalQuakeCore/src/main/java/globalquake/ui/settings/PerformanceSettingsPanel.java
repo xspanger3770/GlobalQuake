@@ -13,36 +13,17 @@ import java.awt.event.ActionEvent;
 public class PerformanceSettingsPanel extends SettingsPanel {
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
-    private JSlider sliderStoreTime;
     private JCheckBox chkBoxRecalibrateOnLauch;
 
     public PerformanceSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(createSettingAccuracy());
-        add(createSettingStoreTime());
         add(createSettingParalell());
+        fill(this, 16);
     }
 
-    private Component createSettingStoreTime() {
-        sliderStoreTime = HypocenterAnalysisSettingsPanel.createSettingsSlider(2, 20, 2, 1);
 
-        JLabel label = new JLabel();
-        ChangeListener changeListener = changeEvent -> label.setText("Waveform data storage time (minutes): %d".formatted(
-                sliderStoreTime.getValue()));
-
-        sliderStoreTime.addChangeListener(changeListener);
-
-        sliderStoreTime.setValue(Settings.logsStoreTimeMinutes);
-        changeListener.stateChanged(null);
-
-        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderStoreTime, label, "5",
-                """
-                        In GlobalQuake, waveform data poses the highest demand on your system's RAM.
-                        If you're encountering memory constraints, you have two options:
-                        either reduce the number of selected stations or lower this specific value.
-                        """);
-    }
 
     @SuppressWarnings("ExtractMethodRecommender")
     private JPanel createSettingParalell() {
@@ -72,7 +53,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public void save() {
         Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
         Settings.parallelHypocenterLocations = chkBoxParalell.isSelected();
-        Settings.logsStoreTimeMinutes = sliderStoreTime.getValue();
         Settings.recalibrateOnLaunch = chkBoxRecalibrateOnLauch.isSelected();
     }
 
