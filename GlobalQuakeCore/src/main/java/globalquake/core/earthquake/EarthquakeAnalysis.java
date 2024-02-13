@@ -635,7 +635,7 @@ public class EarthquakeAnalysis {
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<PolygonConfidenceInterval> result = new ArrayList<>();
 
-        double mul = 25.0 / (2 * selectedEvents.size() + 8.0) + 1.0;
+        double mul = 80.0 / (selectedEvents.size() * selectedEvents.size() + 8.0) + 0.9;
 
         result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0 * mul));
         result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0 * mul));
