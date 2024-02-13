@@ -32,7 +32,7 @@ public class Main {
     public static final String fullName = "GlobalQuakeServer " + GlobalQuake.version;
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
-    private static boolean headless;
+    private static boolean headless = true;
 
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();
@@ -208,7 +208,7 @@ public class Main {
 
     public static ApplicationErrorHandler getErrorHandler() {
         if(errorHandler == null) {
-            errorHandler = new ApplicationErrorHandler(null);
+            errorHandler = new ApplicationErrorHandler(null, headless);
         }
         return errorHandler;
     }

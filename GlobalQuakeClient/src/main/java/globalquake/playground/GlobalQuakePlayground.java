@@ -25,7 +25,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     private final Collection<Earthquake> playgroundEarthquakes = new MonitorableCopyOnWriteArrayList<>();
 
     public static void main(String[] args) throws Exception{
-        GlobalQuake.prepare(Main.MAIN_FOLDER, new ApplicationErrorHandler(null));
+        GlobalQuake.prepare(Main.MAIN_FOLDER, new ApplicationErrorHandler(null, false));
         Regions.init();
         Scale.load();
 

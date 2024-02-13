@@ -12,13 +12,15 @@ import java.io.StringWriter;
 
 public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler {
 
+	private final boolean headless;
 	private Window parent;
 
 	private int errorCount = 0;
 
 
-	public ApplicationErrorHandler(Window parent) {
+	public ApplicationErrorHandler(Window parent, boolean headless) {
 		this.parent = parent;
+		this.headless = headless;
 	}
 
 	public void setParent(Window parent) {
@@ -34,6 +36,11 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 
 	public synchronized void handleException(Throwable e) {
 		Logger.error(e);
+
+		if(headless){
+			return;
+		}
+
 		if (!(e instanceof RuntimeApplicationException)) {
 			showDetailedError(e);
 			return;
@@ -49,6 +56,11 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 
 	public synchronized void handleWarning(Throwable e) {
 		Logger.warn(e);
+
+		if(headless){
+			return;
+		}
+
 		showWarning(e.getMessage());
 	}
 
@@ -58,7 +70,11 @@ public class ApplicationErrorHandler implements Thread.UncaughtExceptionHandler 
 
 
 	public void info(String s) {
-		JOptionPane.showMessageDialog(parent, s, "Info", JOptionPane.INFORMATION_MESSAGE);
+		if (headless) {
+			Logger.info(s);
+		} else {
+			JOptionPane.showMessageDialog(parent, s, "Info", JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 
 	private void showDetailedError(Throwable e) {
