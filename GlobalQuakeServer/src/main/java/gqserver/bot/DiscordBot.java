@@ -252,7 +252,7 @@ public class DiscordBot extends ListenerAdapter {
 
         if(!measuredQuakes.contains(earthquake)) {
             detections++;
-            detectionTimeSum = detectionTime / 1000.0;
+            detectionTimeSum += detectionTime / 1000.0;
             measuredQuakes.add(earthquake);
         }
 
