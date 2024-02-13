@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -232,6 +233,10 @@ public class DiscordBot extends ListenerAdapter {
         }
     }
 
+    private static long bestDetectionTime = Long.MAX_VALUE;
+    private static double detectionTimeSum = 0.0;
+    private static int detections = 0;
+
     private static void createDescription(EmbedBuilder builder, Earthquake earthquake) {
         builder.setTitle("M%.1f %s".formatted(
                 earthquake.getMag(),
@@ -239,11 +244,20 @@ public class DiscordBot extends ListenerAdapter {
 
         double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
 
+        long detectionTime = earthquake.getCreatedAt() - earthquake.getOrigin();
+        if(detectionTime < bestDetectionTime){
+            bestDetectionTime = detectionTime;
+        }
+
+        detections++;
+        detectionTimeSum = detectionTime / 1000.0;
+
         builder.setDescription(
                 "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
                         "MMI: %s / Shindo: %s\n".formatted(formatLevel(IntensityScales.MMI.getLevel(pga)),
                                 formatLevel(IntensityScales.SHINDO.getLevel(pga))) +
                         "Time: %s\n".formatted(Settings.formatDateTime(Instant.ofEpochMilli(earthquake.getOrigin()))) +
+                        "Detection Time: %.1fs (best %.1fs avg %.1fs)".formatted(detectionTime / 1000.0, bestDetectionTime / 1000.0, detectionTimeSum / detections) +
                         "Quality: %s (%d stations)".formatted(earthquake.getCluster().getPreviousHypocenter().quality.getSummary(), earthquake.getCluster().getAssignedEvents().size())
         );
 
