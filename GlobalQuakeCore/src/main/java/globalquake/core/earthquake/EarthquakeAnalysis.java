@@ -308,7 +308,7 @@ public class EarthquakeAnalysis {
         int reduceLimit = HypocsSettings.getOrDefaultInt("reduceLimit", 12);
         double reduceAmount = HypocsSettings.getOrDefault("reduceAmount", 0.2f);
 
-        for (int it = 0; it < reduceIterations; it++) { // TODO setting?
+        for (int it = 0; it < 0*reduceIterations; it++) { // TODO setting?
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
                 int targetSize = residuals.size() - (int) Math.max(1, (residuals.size() - reduceLimit) * reduceAmount);
@@ -634,10 +634,12 @@ public class EarthquakeAnalysis {
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<PolygonConfidenceInterval> result = new ArrayList<>();
 
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.25));
+        double mul = 25.0 / (2 * selectedEvents.size() + 8.0) + 1.0;
+
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.25 * mul));
 
         return result;
     }

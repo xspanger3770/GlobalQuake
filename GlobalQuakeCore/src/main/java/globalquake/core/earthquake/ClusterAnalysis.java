@@ -442,6 +442,7 @@ public class ClusterAnalysis {
                 if (event.isValid() && !event.isSWave() && event.getpWave() > 0 && event.assignedCluster == null) {
                     // so we have eligible event
                     ArrayList<Event> validEvents = new ArrayList<>();
+                    validEvents.add(event);
                     closestLoop:
                     for (NearbyStationDistanceInfo info : station.getNearbyStations()) {
                         AbstractStation close = info.station();
@@ -460,6 +461,7 @@ public class ClusterAnalysis {
                             }
                         }
                     }
+
                     // so no we have a list of all nearby events that could be earthquake
                     if (validEvents.size() >= CLUSTER_MIN_SIZE) {
                         validEvents.add(event);
