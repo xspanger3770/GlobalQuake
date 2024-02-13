@@ -40,8 +40,8 @@ public class PlaygroundStation extends AbstractStation {
         return hasData();
     }
 
-    public int getNoise(long lastLog) {
-        return generator.getValue(lastLog);
+    public int getNoise(long time) {
+        return generator.getValue(time);
     }
 
     @Override

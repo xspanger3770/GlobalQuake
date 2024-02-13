@@ -60,20 +60,20 @@ public class StationWaveformGenerator {
         }
     }
 
-    public int getValue(long lastLog) {
+    public int getValue(long time) {
         double sum = 0.0;
         for(int i = 0; i < STEPS; i++) {
-            sum += noises[i].getValue(lastLog / 1000.0,0,0) * getPower(i);
+            sum += noises[i].getValue(time / 1000.0,0,0) * getPower(i, time);
         }
         return (int) sum;
     }
 
-    private double getPower(int i) {
+    private double getPower(int i, long time) {
         double freq = FREQS[i];
 
         double result = BACKGROUND_NOISES[i];
         for(Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()){
-            result += getPowerFromQuake(earthquake, freq);
+            result += getPowerFromQuake(earthquake, freq, time);
         }
 
         return result;
@@ -83,7 +83,7 @@ public class StationWaveformGenerator {
         earthquakeDistancesMap.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), 0));
     }
 
-    private double getPowerFromQuake(Earthquake earthquake, double freq) {
+    private double getPowerFromQuake(Earthquake earthquake, double freq, long time) {
         Distances distances = earthquakeDistancesMap.get(earthquake);
         if(distances == null){
             earthquakeDistancesMap.put(earthquake, distances = new Distances(earthquake, station));
@@ -92,7 +92,7 @@ public class StationWaveformGenerator {
         double gcd = distances.gcd;
         double geo = distances.geo;
 
-        double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
+        double age = (time - earthquake.getOrigin()) / 1000.0;
 
         double pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                 TauPTravelTimeCalculator.toAngle(gcd));
