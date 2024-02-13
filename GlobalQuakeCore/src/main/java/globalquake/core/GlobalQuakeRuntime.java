@@ -64,7 +64,7 @@ public class GlobalQuakeRuntime {
                 Logger.error("Exception occurred in hypocenter location loop");
                 GlobalQuake.getErrorHandler().handleException(e);
             }
-        }, 0, 300, TimeUnit.MILLISECONDS);
+        }, 0, HypocsSettings.getOrDefaultInt("hypocsLoopTime", 300), TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
