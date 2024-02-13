@@ -3,6 +3,7 @@ package globalquake.playground;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.EarthquakeArchive;
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.regions.Regions;
@@ -15,6 +16,8 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
@@ -35,6 +38,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     @Override
     public void startRuntime() {
         getGlobalQuakeRuntime().runThreads();
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> playgroundEarthquakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, -30)), 0, 1, TimeUnit.SECONDS);
     }
 
     public GlobalQuakePlayground() {

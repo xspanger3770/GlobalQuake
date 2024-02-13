@@ -112,17 +112,17 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         inputs.add(magInput = new DecimalInput("Magnitude", 0, 10, 4.0));
         DecimalInput depthInput;
         inputs.add(depthInput = new DecimalInput("Depth", 0, 700, 10.0));
-        new DecimalInputDialog(parent, "Choose parameters", inputs, () -> _createDebugEarthquake(magInput.getValue(), depthInput.getValue()));
+        new DecimalInputDialog(parent, "Choose parameters", inputs, () -> _createDebugEarthquake(
+                magInput.getValue(), depthInput.getValue(), getRenderer().getRenderProperties().centerLat, getRenderer().getRenderProperties().centerLon));
     }
 
-    private void _createDebugEarthquake(double magnitude, double depth) {
+    public void _createDebugEarthquake(double magnitude, double depth, double lat, double lon) {
         Earthquake quake;
         Cluster clus = new Cluster();
         clus.updateLevel(4);
 
         Hypocenter hyp = new Hypocenter(
-                getRenderer().getRenderProperties().centerLat,
-                getRenderer().getRenderProperties().centerLon,
+                lat, lon,
                 depth,
                 GlobalQuake.instance.currentTimeMillis(), 0, 10,
                 new DepthConfidenceInterval(10, 100),

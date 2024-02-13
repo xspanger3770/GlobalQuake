@@ -35,7 +35,6 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
             double lon = coords[1];
             double distGCD = GeoUtils.greatCircleDistance(lat, lon, fromLat, fromLon);
             if (distGCD > radius) {
-                fails++;
                 continue;
             }
 

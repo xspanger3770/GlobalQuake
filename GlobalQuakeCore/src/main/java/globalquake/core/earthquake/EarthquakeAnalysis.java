@@ -456,13 +456,13 @@ public class EarthquakeAnalysis {
     private void postProcess(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
-        calculateDistances(pickedEvents,  bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
+        calculateDistances(pickedEvents, bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
         getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
                 bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData);
 
         bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
         bestHypocenterPrelim.err = threadData.bestHypocenter.err;
-   }
+    }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
@@ -531,7 +531,7 @@ public class EarthquakeAnalysis {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
-            } else if (result != HypocenterCondition.NULL){
+            } else if (result != HypocenterCondition.NULL) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").trace("Performed magnitude-only revision because: %s".formatted(result));
             } else {
@@ -940,7 +940,7 @@ public class EarthquakeAnalysis {
         }
 
         if (CHECK_QUADRANTS) {
-            if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
+            if (checkQuadrants(bestHypocenter, events) <= 2.5) {
                 return HypocenterCondition.TOO_SHALLOW_ANGLE;
             }
         }
@@ -969,14 +969,17 @@ public class EarthquakeAnalysis {
         return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctEvents);
     }
 
-    private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
+    private double checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
         int[] qua = new int[QUADRANTS];
-        int good = 0;
+        double good = 0;
         for (PickedEvent event : events) {
             double angle = GeoUtils.calculateAngle(hyp.lat, hyp.lon, event.lat(), event.lon());
             int q = (int) ((angle * QUADRANTS) / 360.0);
+            if (qua[q] == 0) {
+                good += 0.5;
+            }
             if (qua[q] == 1) {
-                good++;
+                good += 0.5;
             }
             qua[q]++;
         }
@@ -1016,7 +1019,7 @@ public class EarthquakeAnalysis {
                     IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
-            long eventAge = lastRecord  - event.getpWave();
+            long eventAge = lastRecord - event.getpWave();
 
             mags.add(new MagnitudeReading(magnitude, distGC, eventAge));
         }
@@ -1024,7 +1027,7 @@ public class EarthquakeAnalysis {
         mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
 
         int minSize = (int) Math.max(4, mags.size() * 0.2);
-        while(mags.size() > minSize && mags.get(0).eventAge() < 5000) {
+        while (mags.size() > minSize && mags.get(0).eventAge() < 5000) {
             mags.remove(0);
         }
         hypocenter.mags = mags;
@@ -1068,8 +1071,7 @@ public class EarthquakeAnalysis {
     };
 
     /**
-     *
-     * @param earthquake the earthquake
+     * @param earthquake    the earthquake
      * @param marginSeconds POSITIVE NUMBERS CAUSE THIS FUNCTION TO RETURN TRUE SOONER
      * @return if the quake is too old and should be removed
      */
