@@ -38,6 +38,7 @@ public class EarthquakeAnalysis {
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
+    private static final boolean CHECK_DELTA_P = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -481,7 +482,7 @@ public class EarthquakeAnalysis {
         }
 
         // There has to be at least some difference in the picked pWave times
-        if (!checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
+        if (CHECK_DELTA_P && !checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Not Enough Delta-P");
             return;
         }
@@ -951,7 +952,7 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
-        if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
+        if (false && selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }
 
