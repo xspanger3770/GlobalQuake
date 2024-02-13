@@ -239,7 +239,8 @@ public class ClusterAnalysis {
         if (expectedTravelSRaw >= 0) {
             // 985 because GQ has high tendency to detect S waves earlier
             long expectedTravel = (long) ((expectedTravelSRaw + EarthquakeAnalysis.getElevationCorrection(event.getElevationFromStation()) * 1.5) * 1000);
-            if (Math.abs(expectedTravel - actualTravel) < 3000 + expectedTravel * 0.04) {
+            long diff = actualTravel - expectedTravel;
+            if (diff > -2000 - expectedTravel * 0.03 && diff < 6000 + expectedTravel * 0.05) {
                 return true;
             }
         }
