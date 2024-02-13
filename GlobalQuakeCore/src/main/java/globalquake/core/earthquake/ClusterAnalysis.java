@@ -480,6 +480,7 @@ public class ClusterAnalysis {
     private void updateClusters() {
         Iterator<Cluster> it = clusters.iterator();
         List<Cluster> toBeRemoved = new ArrayList<>();
+        List<Cluster> toBeRemovedBadly = new ArrayList<>();
         while (it.hasNext()) {
             Cluster cluster = it.next();
             int numberOfActiveEvents = 0;
@@ -503,6 +504,9 @@ public class ClusterAnalysis {
             if ( notEnoughEvents || eqRemoved || tooOld) {
                 Logger.tag("Hypocs").debug("Cluster #%d marked for removal (%s || %s || %s)".formatted(cluster.id, notEnoughEvents, eqRemoved, tooOld));
                 toBeRemoved.add(cluster);
+                if(notEnoughEvents){
+                    toBeRemovedBadly.add(cluster);
+                }
             } else {
                 cluster.tick();
                 // if level changes or if it got updated (root location)
@@ -514,7 +518,7 @@ public class ClusterAnalysis {
             }
         }
 
-        for(Cluster cluster : toBeRemoved){
+        for(Cluster cluster : toBeRemovedBadly){
             if(cluster.getEarthquake() != null){
                 earthquakes.remove(cluster.getEarthquake());
                 GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(cluster.getEarthquake()));
