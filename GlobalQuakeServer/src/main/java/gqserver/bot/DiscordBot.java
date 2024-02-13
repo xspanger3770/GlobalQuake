@@ -34,9 +34,7 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,6 +52,8 @@ public class DiscordBot extends ListenerAdapter {
 
     private static final Map<Earthquake, Message> lastMessages = new HashMap<>();
     private static final Map<Earthquake, Message> lastPingMessages = new HashMap<>();
+
+    private static final Set<Earthquake> measuredQuakes = new HashSet<>();
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
@@ -90,6 +90,7 @@ public class DiscordBot extends ListenerAdapter {
     private static void removeOld() {
         lastMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
         lastPingMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
+        measuredQuakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, - 60 * 10));
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
@@ -249,8 +250,11 @@ public class DiscordBot extends ListenerAdapter {
             bestDetectionTime = detectionTime;
         }
 
-        detections++;
-        detectionTimeSum = detectionTime / 1000.0;
+        if(!measuredQuakes.contains(earthquake)) {
+            detections++;
+            detectionTimeSum = detectionTime / 1000.0;
+            measuredQuakes.add(earthquake);
+        }
 
         builder.setDescription(
                 "Depth: %.1fkm / %.1fmi\n".formatted(earthquake.getDepth(), earthquake.getDepth() * DistanceUnit.MI.getKmRatio()) +
