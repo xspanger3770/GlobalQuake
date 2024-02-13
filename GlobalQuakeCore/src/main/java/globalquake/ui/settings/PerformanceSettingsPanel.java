@@ -1,6 +1,5 @@
 package globalquake.ui.settings;
 
-
 import globalquake.core.Settings;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 
@@ -23,8 +22,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
         fill(this, 16);
     }
 
-
-
     @SuppressWarnings("ExtractMethodRecommender")
     private JPanel createSettingParalell() {
         JPanel panel = new JPanel();
@@ -38,7 +35,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                         Using all CPU cores will make the Hypocenter Finding much faster,\s
                         but it will be using 100% of your CPU, which can increase lags.
                         Make sure you select the optimal resolution above for your system.""");
-        textAreaExplanation.setBorder(new EmptyBorder(5,5,5,5));
+        textAreaExplanation.setBorder(new EmptyBorder(5, 5, 5, 5));
         textAreaExplanation.setEditable(false);
         textAreaExplanation.setBackground(panel.getBackground());
 
@@ -94,7 +91,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                     btnRecalibrate.setEnabled(true);
                     sliderResolution.setEnabled(true);
                 }).start();
-             }
+            }
         });
 
         panel2.add(btnRecalibrate);
@@ -114,7 +111,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
 
         chkBoxRecalibrateOnLauch = new JCheckBox("Recalibrate on startup", Settings.recalibrateOnLaunch);
         panel2.add(chkBoxRecalibrateOnLauch);
-
 
         panel.add(panel2, BorderLayout.SOUTH);
 
