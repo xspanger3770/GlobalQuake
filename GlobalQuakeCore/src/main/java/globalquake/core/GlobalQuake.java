@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class GlobalQuake {
 
-    public static final String version = "v0.10.2_build-24";
+    public static final String version = "v0.10.2_build-25";
 
     protected GlobalQuakeRuntime globalQuakeRuntime;
     protected SeedlinkNetworksReader seedlinkNetworksReader;
