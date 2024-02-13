@@ -20,6 +20,7 @@ import globalquake.utils.Scale;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collection;
@@ -30,8 +31,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private static final int ELEMENT_COUNT = 5 + 4;
     private final Collection<Earthquake> earthquakes;
-
-    public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(Collection<Earthquake> earthquakes) {
         super(ELEMENT_COUNT);
@@ -192,6 +191,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         RenderElement elementCross = entity.getRenderElement(4);
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D, renderProperties);
+
         if (elementCross.shouldDraw) {
             boolean isUncertain = isUncertain(entity.getOriginal().getHypocenter());
 
@@ -201,8 +203,6 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 graphics.draw(elementCross.getShape());
             }
 
-            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
             if(isUncertain && (System.currentTimeMillis() / 500) % 2 == 0){
                 graphics.setColor(Color.WHITE);
@@ -211,24 +211,34 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 10));
             }
 
-            String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
+            String str = "M%.1f".formatted(entity.getOriginal().getMag());
 
             graphics.setColor(Color.WHITE);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
 
-            Cluster cluster = entity.getOriginal().getCluster();
-            if (cluster != null) {
-                Hypocenter hypocenter = cluster.getPreviousHypocenter();
+            str = "%s".formatted(
+                    Settings.getSelectedDistanceUnit().format(entity.getOriginal().getDepth(), 1)
+            );
 
-                if (hypocenter != null) {
-                    str = "%s".formatted(
-                            Settings.getSelectedDistanceUnit().format(hypocenter.depth, 1)
-                    );
+            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+        }
 
-                    graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
-                }
-            }
+        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
+        double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
+        double pct = age / sTravel;
+
+        if(pct >= 0 && pct <= 1.0) {
+            int w = 60;
+            int h = 12;
+            Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w /2, centerPonint.y + 36, w, h);
+            Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w /2, centerPonint.y + 36, w * pct, h);
+
+            graphics.setStroke(new BasicStroke(1f));
+            graphics.setColor(Color.red);
+            graphics.fill(rect2);
+            graphics.setColor(Color.white);
+            graphics.draw(rect1);
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);

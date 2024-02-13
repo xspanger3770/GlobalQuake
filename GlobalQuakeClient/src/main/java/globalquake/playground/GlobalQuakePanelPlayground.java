@@ -21,6 +21,7 @@ import java.util.List;
 
 public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
+    public static boolean displayPlaygroundQuakes = true;
     private final JFrame parent;
 
     enum InsertType {
@@ -44,6 +45,11 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                 if (e.getKeyCode() == KeyEvent.VK_R) {
                     insertType = toggle(InsertType.RANDOM_STATIONS);
                 }
+
+                if (e.getKeyCode() == KeyEvent.VK_F) {
+                    displayPlaygroundQuakes = !displayPlaygroundQuakes;
+                }
+
 
                 if (e.getKeyCode() == KeyEvent.VK_E) {
                     insertType = toggle(InsertType.EARTHQUAKE);
