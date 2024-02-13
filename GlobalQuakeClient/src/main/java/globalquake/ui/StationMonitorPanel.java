@@ -20,6 +20,9 @@ import globalquake.core.Settings;
 
 public class StationMonitorPanel extends JPanel {
 
+	private static final double HEIGHT_1 = 0.33;
+
+	private static final double HEIGHT_2 = 0.66;
 	private BufferedImage image;
 	private AbstractStation station;
 
@@ -45,9 +48,8 @@ public class StationMonitorPanel extends JPanel {
 		g.setColor(Color.black);
 		g.setFont(new Font("Calibri", Font.BOLD, 14));
 		g.drawString("Raw Data", 4, 14);
-		g.drawString("Band Pass %sHz - %sHz".formatted(BetterAnalysis.min_frequency, BetterAnalysis.max_frequency), 4, (int) (h * 0.2 + 14));
-		g.drawString("Running Averages", 4, (int) (h * 0.4 + 14));
-		g.drawString("Averages Ratio", 4, (int) (h * 0.7 + 14));
+		g.drawString("Band Pass %sHz - %sHz".formatted(BetterAnalysis.min_frequency, BetterAnalysis.max_frequency), 4, (int) (h * HEIGHT_1 + 14));
+		g.drawString("Averages Ratio", 4, (int) (h * HEIGHT_2 + 14));
 
 		long upperMinute = (long) (Math.ceil(getTime()/ (1000 * 60.0) + 1) * (1000L * 60L));
 		for (int deltaSec = 0; deltaSec <= 60 * Settings.logsStoreTimeMinutes + 80; deltaSec += 10) {
@@ -122,24 +124,24 @@ public class StationMonitorPanel extends JPanel {
 				double x1 = getX(a.time());
 				double x2 = getX(b.time());
 
-				double y1 = 0 + (getHeight() * 0.20) * (maxValue - a.rawValue()) / (maxValue - minValue);
-				double y2 = 0 + (getHeight() * 0.20) * (maxValue - b.rawValue()) / (maxValue - minValue);
+				double y1 = 0 + (getHeight() * HEIGHT_1) * (maxValue - a.rawValue()) / (maxValue - minValue);
+				double y2 = 0 + (getHeight() * HEIGHT_1) * (maxValue - b.rawValue()) / (maxValue - minValue);
 
-				double y3 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - a.filteredV())
+				double y3 = getHeight() * HEIGHT_1 + (getHeight() * HEIGHT_1) * (maxFilteredValue - a.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
-				double y4 = getHeight() * 0.20 + (getHeight() * 0.20) * (maxFilteredValue - b.filteredV())
+				double y4 = getHeight() * HEIGHT_1 + (getHeight() * HEIGHT_1) * (maxFilteredValue - b.filteredV())
 						/ (maxFilteredValue - minFilteredValue);
 
-				double y11 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.ratio()) / (maxRatio);
-				double y12 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.ratio()) / (maxRatio);
+				double y11 = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - a.ratio()) / (maxRatio);
+				double y12 = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - b.ratio()) / (maxRatio);
 
-				double y13 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.mediumRatio()) / (maxRatio);
-				double y14 = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.mediumRatio()) / (maxRatio);
+				double y13 = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - a.mediumRatio()) / (maxRatio);
+				double y14 = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - b.mediumRatio()) / (maxRatio);
 
-				double y13c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - a.specialRatio()) / (maxRatio);
-				double y14c = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - b.specialRatio()) / (maxRatio);
+				double y13c = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - a.specialRatio()) / (maxRatio);
+				double y14c = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - b.specialRatio()) / (maxRatio);
 
-				double yA = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - 1.0) / (maxRatio);
+				double yA = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - 1.0) / (maxRatio);
 
 				g.setColor(Color.blue);
 				g.setStroke(new BasicStroke(1f));
@@ -166,8 +168,8 @@ public class StationMonitorPanel extends JPanel {
 				g.draw(new Line2D.Double(x1, yA, x2, yA));
 
 				for (double d : Event.RECALCULATE_P_WAVE_THRESHOLDS) {
-					double _y = getHeight() * 0.70 + (getHeight() * 0.30) * (maxRatio - d) / (maxRatio);
-					if (_y > getHeight() * 0.70) {
+					double _y = getHeight() * HEIGHT_2 + (getHeight() * (1 - HEIGHT_2)) * (maxRatio - d) / (maxRatio);
+					if (_y > getHeight() * HEIGHT_2) {
 						g.setColor(Color.magenta);
 						g.setStroke(new BasicStroke(1f));
 						g.draw(new Line2D.Double(x1, _y, x2, _y));
@@ -221,10 +223,9 @@ public class StationMonitorPanel extends JPanel {
 		g.setColor(Color.black);
 		g.setStroke(new BasicStroke(2f));
 		g.draw(new Rectangle2D.Double(0, 0, w - 1, h - 1));
-		g.draw(new Rectangle2D.Double(0, 0, w - 1, (h - 1) * 0.20));
-		g.draw(new Rectangle2D.Double(0, h * 0.20, w - 1, (h - 1) * 0.20));
-		g.draw(new Rectangle2D.Double(0, h * 0.40, w - 1, (h - 1) * 0.30));
-		g.draw(new Rectangle2D.Double(0, h * 0.70, w - 1, (h - 1) * 0.30));
+		g.draw(new Rectangle2D.Double(0, 0, w - 1, (h - 1) * HEIGHT_1));
+		g.draw(new Rectangle2D.Double(0, h * HEIGHT_1, w - 1, (h - 1) * HEIGHT_1));
+		g.draw(new Rectangle2D.Double(0, h * HEIGHT_2, w - 1, (h - 1) * (1 - HEIGHT_2)));
 
 		g.dispose();
 
