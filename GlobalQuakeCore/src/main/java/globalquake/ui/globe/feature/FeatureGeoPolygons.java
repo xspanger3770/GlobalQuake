@@ -7,8 +7,6 @@ import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.geojson.LngLatAlt;
-import org.geojson.Polygon;
 
 import java.awt.*;
 import java.util.Collection;

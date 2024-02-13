@@ -7,8 +7,8 @@ import java.util.List;
 public class GQPolygon {
 
     private final int size;
-    private float[] lats;
-    private float[] lons;
+    private final float[] lats;
+    private final float[] lons;
 
     public GQPolygon(org.geojson.Polygon polygon){
         List<LngLatAlt> list = polygon.getCoordinates().get(0);

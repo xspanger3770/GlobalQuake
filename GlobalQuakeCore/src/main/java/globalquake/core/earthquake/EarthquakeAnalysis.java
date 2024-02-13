@@ -952,6 +952,7 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
+        //noinspection PointlessBooleanExpression TODO
         if (false && selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }

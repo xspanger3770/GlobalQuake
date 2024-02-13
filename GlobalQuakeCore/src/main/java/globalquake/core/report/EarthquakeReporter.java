@@ -10,7 +10,6 @@ import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.analysis.Event;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Scale;
-import org.geojson.LngLatAlt;
 import org.tinylog.Logger;
 
 import javax.imageio.ImageIO;

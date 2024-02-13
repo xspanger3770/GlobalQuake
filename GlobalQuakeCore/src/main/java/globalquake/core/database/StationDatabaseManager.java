@@ -6,9 +6,7 @@ import globalquake.core.exception.FdnwsDownloadException;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
