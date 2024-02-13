@@ -5,6 +5,7 @@ import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.utils.GeoUtils;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,29 +19,37 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
 
     }
 
-    public void generateRandomStations(int count, double radius, double fromLat, double fromLon){
+    public void generateRandomStations(int count, double radius, double fromLat, double fromLon) {
         Random r = new Random();
         newStations();
         List<PlaygroundStation> list = new ArrayList<>();
         int created = 0;
-        while(created < count){
+        int fails = 0;
+        while (created < count) {
+            if (fails > 500) {
+                Logger.warn("Station generation aborted!");
+                break;
+            }
             double[] coords = randomCoords(r);
             double lat = coords[0];
             double lon = coords[1];
             double distGCD = GeoUtils.greatCircleDistance(lat, lon, fromLat, fromLon);
-            if(distGCD > radius){
+            if (distGCD > radius) {
+                fails++;
                 continue;
             }
 
-            if(Regions.isOcean(lat, lon, true)){
+            if (Regions.isOcean(lat, lon, true)) {
+                fails++;
                 continue;
             }
 
             int id = nextID.incrementAndGet();
 
             String name = "Dummy #%d".formatted(id);
-            list.add(new PlaygroundStation(name,lat,lon,0,nextID.getAndIncrement(),0));
+            list.add(new PlaygroundStation(name, lat, lon, 0, nextID.getAndIncrement(), 0));
             created++;
+            fails = 0;
         }
 
         this.stations.forEach(AbstractStation::clear);
@@ -53,7 +62,7 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
         this.indexing = UUID.randomUUID();
     }
 
-    public static double[] randomCoords(Random random){
+    public static double[] randomCoords(Random random) {
         double theta = 2 * Math.PI * random.nextDouble(); // Azimuth angle (0 to 2pi)
         double phi = Math.acos(2 * random.nextDouble() - 1); // Zenith angle (0 to pi)
 

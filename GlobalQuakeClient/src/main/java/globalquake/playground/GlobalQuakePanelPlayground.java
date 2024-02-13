@@ -88,7 +88,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     private void createRandomStations() {
         java.util.List<DecimalInput> inputs = new ArrayList<>();
         DecimalInput radius;
-        inputs.add(radius = new DecimalInput("Radius", 0, 30000, 1000.0));
+        inputs.add(radius = new DecimalInput("Radius", 50, 30000, 1000.0));
         DecimalInput amount;
         inputs.add(amount = new DecimalInput("Amount", 10, 10000, 1000.0));
 
