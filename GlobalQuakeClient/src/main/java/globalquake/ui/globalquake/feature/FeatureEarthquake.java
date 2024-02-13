@@ -153,7 +153,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        if(Settings.confidencePolygons) {
+        if(Settings.confidencePolygons && shouldDrawConfidencePolygons()) {
             for (int i = 5; i < 9; i++) {
                 RenderElement elementConfidencePolygon = entity.getRenderElement(i);
                 if (elementConfidencePolygon.shouldDraw) {
@@ -232,6 +232,10 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    protected boolean shouldDrawConfidencePolygons() {
+        return true;
     }
 
 

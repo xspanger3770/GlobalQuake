@@ -16,8 +16,8 @@ public class FeaturePlaygroundEarthquake extends FeatureEarthquake {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Earthquake> entity, RenderProperties renderProperties) {
-        super.render(renderer, graphics, entity, renderProperties);
+    protected boolean shouldDrawConfidencePolygons() {
+        return false;
     }
 
     @Override
