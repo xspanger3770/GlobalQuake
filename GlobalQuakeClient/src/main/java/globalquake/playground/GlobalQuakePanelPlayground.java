@@ -149,7 +149,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         List<MagnitudeReading> mags = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag, 0));
+            mags.add(new MagnitudeReading(mag, 0,55555));
         }
 
         hyp.mags = mags;

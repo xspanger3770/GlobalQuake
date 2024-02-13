@@ -189,17 +189,17 @@ public class StationDatabaseManager {
         return stationDatabase;
     }
 
+    private final Object statusSync = new Object();
+
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
         toBeUpdated.forEach(seedlinkNetwork -> seedlinkNetwork.setStatus(0, "Queued..."));
         fireStatusChangeEvent();
 
-        final Object statusSync = new Object();
-
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync, attempt + 1)){
+                            if(runSeedlinkUpdate(seedlinkNetwork, attempt + 1)){
                                 break;
                             }
                         }
@@ -213,7 +213,7 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync, int attempt) {
+    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, int attempt) {
         synchronized (statusSync) {
             seedlinkNetwork.setStatus(0, "Updating...");
         }

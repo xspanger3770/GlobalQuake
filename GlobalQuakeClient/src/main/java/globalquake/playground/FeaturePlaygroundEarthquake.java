@@ -2,9 +2,6 @@ package globalquake.playground;
 
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.ui.globalquake.feature.FeatureEarthquake;
-import globalquake.ui.globe.GlobeRenderer;
-import globalquake.ui.globe.RenderProperties;
-import globalquake.ui.globe.feature.RenderEntity;
 
 import java.awt.*;
 import java.util.Collection;

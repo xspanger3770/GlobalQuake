@@ -142,7 +142,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             hypocenter.mags = new ArrayList<>();
 
             for(Float mag : advancedHypocenterData.magsData()){
-                hypocenter.mags.add(new MagnitudeReading(mag, 0));
+                hypocenter.mags.add(new MagnitudeReading(mag, 0,55555));
             }
         }
 

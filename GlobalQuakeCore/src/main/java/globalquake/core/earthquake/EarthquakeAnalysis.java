@@ -39,6 +39,7 @@ public class EarthquakeAnalysis {
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
+    private static final boolean ONLY_SELECT_BETTER = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -308,7 +309,7 @@ public class EarthquakeAnalysis {
         int reduceLimit = HypocsSettings.getOrDefaultInt("reduceLimit", 12);
         double reduceAmount = HypocsSettings.getOrDefault("reduceAmount", 0.2f);
 
-        for (int it = 0; it < 0*reduceIterations; it++) { // TODO setting?
+        for (int it = 0; it < reduceIterations; it++) { // TODO setting?
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
                 int targetSize = residuals.size() - (int) Math.max(1, (residuals.size() - reduceLimit) * reduceAmount);
@@ -954,8 +955,7 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
-        //noinspection PointlessBooleanExpression TODO
-        if (false && selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
+        if (ONLY_SELECT_BETTER && selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }
 
@@ -1016,9 +1016,17 @@ public class EarthquakeAnalysis {
                     IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
-            mags.add(new MagnitudeReading(magnitude, distGC));
+            long eventAge = lastRecord  - event.getpWave();
+
+            mags.add(new MagnitudeReading(magnitude, distGC, eventAge));
         }
 
+        mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
+
+        int minSize = (int) Math.max(4, mags.size() * 0.2);
+        while(mags.size() > minSize && mags.get(0).eventAge() < 5000) {
+            mags.remove(0);
+        }
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
     }
