@@ -35,29 +35,6 @@ public class GlobalQuakeFramePlayground extends GlobalQuakeFrame {
         setMinimumSize(new Dimension(320, 300));
         setResizable(true);
         setTitle(Main.fullName);
-
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        // Schedule the task
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                mainPanel.repaint();
-                scheduler.schedule(this, 1000 / Settings.fpsIdle, TimeUnit.MILLISECONDS);
-            }
-        }, 1, TimeUnit.SECONDS);
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                scheduler.shutdown();
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-                scheduler.shutdown();
-            }
-        });
     }
 
     protected GlobalQuakePanel createGQPanel() {
