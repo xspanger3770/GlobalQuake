@@ -6,9 +6,7 @@ import globalquake.core.exception.FdnwsDownloadException;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -179,7 +177,7 @@ public class StationDatabaseManager {
         }
     }
 
-    private static File getDatabaseFile() {
+    public static File getDatabaseFile() {
         return new File(getStationsFolder(), "database.dat");
     }
 
@@ -191,17 +189,17 @@ public class StationDatabaseManager {
         return stationDatabase;
     }
 
+    private final Object statusSync = new Object();
+
     public void runAvailabilityCheck(List<SeedlinkNetwork> toBeUpdated, Runnable onFinish) {
         this.updating = true;
         toBeUpdated.forEach(seedlinkNetwork -> seedlinkNetwork.setStatus(0, "Queued..."));
         fireStatusChangeEvent();
 
-        final Object statusSync = new Object();
-
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                            if(runSeedlinkUpdate(seedlinkNetwork, statusSync)){
+                            if(runSeedlinkUpdate(seedlinkNetwork, attempt + 1)){
                                 break;
                             }
                         }
@@ -215,63 +213,27 @@ public class StationDatabaseManager {
         }).start();
     }
 
-    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, Object statusSync) {
+    private boolean runSeedlinkUpdate(SeedlinkNetwork seedlinkNetwork, int attempt) {
         synchronized (statusSync) {
             seedlinkNetwork.setStatus(0, "Updating...");
         }
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        Callable<Boolean> task = () -> {
-            try {
-                SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase);
-            } catch (SocketException | SocketTimeoutException | UnknownHostException ce) {
-                Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
-                synchronized (statusSync) {
-                    seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
-                }
-
-                return false;
-            } catch (Exception e) {
-                Logger.error(e);
-                synchronized (statusSync) {
-                    seedlinkNetwork.setStatus(0, "Unknown error occurred");
-                }
-                return false;
-            }
-
-            return true;
-        };
-
-        Future<Boolean> future = executor.submit(task);
-
-        boolean success = false;
-
         try {
-            success = future.get(seedlinkNetwork.getTimeout(), TimeUnit.SECONDS);
+            SeedlinkCommunicator.runAvailabilityCheck(seedlinkNetwork, stationDatabase, attempt);
+        } catch (Exception ce) {
+            Logger.warn("Unable to fetch station data from seedlink server `%s`: %s".formatted(seedlinkNetwork.getName(), ce.getMessage()));
+            synchronized (statusSync) {
+                seedlinkNetwork.setStatus(0, "Network error: " + ce.getMessage());
+            }
+            return false;
+        }
 
-            if (success) {
-                synchronized (statusSync) {
-                    seedlinkNetwork.setStatus(100, "Done");
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            Logger.error("Error executing task for: %s".formatted(seedlinkNetwork.getName()), e);
-            synchronized (statusSync) {
-                seedlinkNetwork.setStatus(0, "Error during execution: " + e.getMessage());
-            }
-        } catch (TimeoutException e) {
-            Logger.warn("Task timed out for: %s".formatted(seedlinkNetwork.getName()));
-            synchronized (statusSync) {
-                future.cancel(true);
-                seedlinkNetwork.setStatus(0, "Timeout occurred");
-            }
-        } finally {
-            executor.shutdown();
+        synchronized (statusSync) {
+            seedlinkNetwork.setStatus(100, "Done");
         }
 
         fireUpdateEvent();
-        return success;
+        return true;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

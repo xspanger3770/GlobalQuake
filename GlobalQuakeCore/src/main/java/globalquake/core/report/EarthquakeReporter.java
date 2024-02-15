@@ -2,13 +2,14 @@ package globalquake.core.report;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.events.specific.QuakeReportEvent;
+import globalquake.core.regions.GQPolygon;
 import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.analysis.Event;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Scale;
-import org.geojson.LngLatAlt;
 import org.tinylog.Logger;
 
 import javax.imageio.ImageIO;
@@ -53,8 +54,9 @@ public class EarthquakeReporter {
 		}
 
 		saveArchivedQuake(folder, archivedQuake);
-		drawMap(folder, earthquake);
-		drawIntensities(folder, earthquake);
+		BufferedImage map = drawMap(folder, earthquake);
+		BufferedImage intensities = drawIntensities(folder, earthquake);
+		GlobalQuake.instance.getEventHandler().fireEvent(new QuakeReportEvent(earthquake, archivedQuake, map, intensities));
 	}
 
 	private static void saveArchivedQuake(File folder, ArchivedQuake archivedQuake) {
@@ -74,7 +76,7 @@ public class EarthquakeReporter {
 		scroll = 2;
 	}
 
-	private static void drawIntensities(File folder, Earthquake earthquake) {
+	private static BufferedImage drawIntensities(File folder, Earthquake earthquake) {
 		int w = 800;
 		int h = 600;
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
@@ -97,29 +99,33 @@ public class EarthquakeReporter {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+
+		return img;
 	}
 
-	private static void drawMap(File folder, Earthquake earthquake) {
+	private static BufferedImage drawMap(File folder, Earthquake earthquake) {
 		calculatePos(earthquake);
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = img.createGraphics();
 		g.setColor(oceanC);
 		g.fillRect(0, 0, width, height);
 
-        java.util.List<org.geojson.Polygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
+        java.util.List<GQPolygon> pols = scroll < 0.6 ? Regions.raw_polygonsUHD
                 : scroll < 4.8 ? Regions.raw_polygonsHD : Regions.raw_polygonsMD;
-        for (org.geojson.Polygon polygon : pols) {
+        for (GQPolygon polygon : pols) {
             java.awt.Polygon awt = new java.awt.Polygon();
             boolean add = false;
-            for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                double x = getX(pos.getLongitude());
-                double y = getY(pos.getLatitude());
+            for(int i = 0; i < polygon.getSize(); i++){
+				double lat = polygon.getLats()[i];
+				double lon = polygon.getLons()[i];
+				double x = getX(lon);
+				double y = getY(lat);
 
-                if (!add && isOnScreen(x, y)) {
-                    add = true;
-                }
-                awt.addPoint((int) x, (int) y);
-            }
+				if (!add && isOnScreen(x, y)) {
+					add = true;
+				}
+				awt.addPoint((int) x, (int) y);
+			}
             if (add) {
                 g.setColor(landC);
                 g.fill(awt);
@@ -161,6 +167,8 @@ public class EarthquakeReporter {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+
+		return img;
 	}
 
 	private static boolean isOnScreen(double x, double y) {

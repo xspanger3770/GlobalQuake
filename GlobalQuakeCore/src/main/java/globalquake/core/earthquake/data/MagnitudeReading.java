@@ -1,4 +1,4 @@
 package globalquake.core.earthquake.data;
 
-public record MagnitudeReading(double magnitude, double distance) {
+public record MagnitudeReading(double magnitude, double distance, long eventAge) {
 }

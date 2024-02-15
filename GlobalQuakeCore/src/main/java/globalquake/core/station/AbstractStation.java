@@ -204,4 +204,8 @@ public abstract class AbstractStation {
 	public boolean isSensitivityValid(){
 		return getInputType() != InputType.UNKNOWN && sensitivity > 0;
 	}
+
+    public void clear() {
+    	getNearbyStations().clear();
+	}
 }

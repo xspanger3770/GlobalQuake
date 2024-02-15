@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ServerClient {
 
     private static final AtomicInteger nextID = new AtomicInteger(0);
+    private static final long RESET_COUNT = 100;
     private final Socket socket;
     private final int id;
 
@@ -124,6 +125,10 @@ public class ServerClient {
 
     public synchronized void sendPacket(Packet packet) throws IOException{
         getOutputStream().writeObject(packet);
+        if(sentPackets % RESET_COUNT == 0) {
+            // to avoid memory leaks in clients!
+            getOutputStream().reset();
+        }
         sentPackets++;
     }
 

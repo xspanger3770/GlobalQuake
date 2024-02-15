@@ -6,7 +6,7 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.2_build-1</version>
+        <version>0.10.2_build-31</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -18,7 +18,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>data-local</id>
+            <name>data</name>
+            <url>file://${project.basedir}/../libs</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>edu.sc.seis</groupId>
+            <artifactId>seisFile</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>tinylog-api</artifactId>
@@ -29,18 +42,13 @@
             <artifactId>tinylog-impl</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>seisFile</artifactId>
-            <version>2.0.6</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.geotools/gt-geojson -->
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
             <version>1.14</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
+         <!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
         <dependency>
             <groupId>edu.sc.seis</groupId>
             <artifactId>seedCodec</artifactId>
@@ -78,6 +86,11 @@
             <artifactId>GlobalQuakeAPI</artifactId>
             <version>0.9.0</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
         </dependency>
     </dependencies>
 

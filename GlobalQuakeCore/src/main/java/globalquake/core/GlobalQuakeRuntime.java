@@ -42,7 +42,8 @@ public class GlobalQuakeRuntime {
         exec1Sec.scheduleAtFixedRate(() -> {
             try {
                 long a = System.currentTimeMillis();
-                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(station -> station.second(a));
+                GlobalQuake.instance.getStationManager().getStations().parallelStream().forEach(
+                        station -> station.second(GlobalQuake.instance.currentTimeMillis()));
                 if (GlobalQuake.instance.getEarthquakeAnalysis() != null) {
                     GlobalQuake.instance.getEarthquakeAnalysis().second();
                 }
@@ -63,7 +64,7 @@ public class GlobalQuakeRuntime {
                 Logger.error("Exception occurred in hypocenter location loop");
                 GlobalQuake.getErrorHandler().handleException(e);
             }
-        }, 0, 300, TimeUnit.MILLISECONDS);
+        }, 0, HypocsSettings.getOrDefaultInt("hypocsLoopTime", 300), TimeUnit.MILLISECONDS);
     }
 
     public void stop() {

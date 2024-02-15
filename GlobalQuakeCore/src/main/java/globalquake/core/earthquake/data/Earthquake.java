@@ -5,8 +5,6 @@ import globalquake.core.alert.Warnable;
 
 import globalquake.core.intensity.CityIntensity;
 
-import globalquake.core.archive.ArchivedQuake;
-
 import globalquake.core.regions.RegionUpdater;
 import globalquake.core.regions.Regional;
 
@@ -17,14 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class Earthquake implements Regional, Warnable {
 
 	private final UUID uuid;
 	public List<CityIntensity> cityIntensities = new ArrayList<>();
+	public boolean foundPlayed;
     private long lastUpdate;
+	private final long createdAt;
 	private final Cluster cluster;
 	public int nextReportEventCount;
 	private String region;
@@ -50,6 +47,7 @@ public class Earthquake implements Regional, Warnable {
 		this.lastLon = getLon();
 
 		this.lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
+		this.createdAt = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 
 	public void updateRegion(){
@@ -57,12 +55,12 @@ public class Earthquake implements Regional, Warnable {
 	}
 
 	public double getMag() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.magnitude;
 	}
 
 	public int getRevisionID() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0 : cluster.revisionID;
 	}
 
@@ -71,22 +69,22 @@ public class Earthquake implements Regional, Warnable {
 	}
 
 	public double getDepth() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.depth;
 	}
 
 	public double getLat() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.lat;
 	}
 
 	public double getLon() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0.0 : hyp.lon;
 	}
 
 	public long getOrigin() {
-		Hypocenter hyp = getHypocenter();
+		Hypocenter hyp = getLastValidHypocenter();
 		return hyp == null ? 0L : hyp.origin;
 	}
 
@@ -112,6 +110,10 @@ public class Earthquake implements Regional, Warnable {
 
 	public Hypocenter getHypocenter(){
 		return getCluster().getPreviousHypocenter();
+	}
+
+	public Hypocenter getLastValidHypocenter() {
+		return getCluster().getLastValidHypocenter();
 	}
 
 	@Override
@@ -155,4 +157,9 @@ public class Earthquake implements Regional, Warnable {
 	public UUID getUuid() {
 		return uuid;
 	}
+
+	public long getCreatedAt() {
+		return createdAt;
+	}
+
 }

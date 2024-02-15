@@ -1,11 +1,11 @@
 package globalquake.core.analysis;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.tinylog.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -19,16 +19,14 @@ public abstract class Analysis {
     public double _maxRatio;
     public double _maxCounts;
     public boolean _maxRatioReset;
-    public final Object previousLogsLock;
-    private final ArrayList<Log> previousLogs;
-    private AnalysisStatus status;
+    private byte status;
+
+    private WaveformBuffer waveformBuffer = null;
 
     public Analysis(AbstractStation station) {
         this.station = station;
         this.sampleRate = -1;
         detectedEvents = new CopyOnWriteArrayList<>();
-        previousLogsLock = new Object();
-        previousLogs = new ArrayList<>();
         status = AnalysisStatus.IDLE;
     }
 
@@ -42,7 +40,7 @@ public abstract class Analysis {
 
     public void analyse(DataRecord dr) {
         if (sampleRate <= 0) {
-            sampleRate = dr.getSampleRate();
+            setSampleRate(dr.getSampleRate());
             reset();
         }
 
@@ -55,8 +53,8 @@ public abstract class Analysis {
     }
 
     private void decode(DataRecord dataRecord) {
-        long time = dataRecord.getStartBtime().toInstant().toEpochMilli();
-        long gap = lastRecord != 0 ? (time - lastRecord) : -1;
+        long startTime = dataRecord.getStartBtime().toInstant().toEpochMilli();
+        long gap = lastRecord != 0 ? (startTime - lastRecord) : -1;
         if (gap > getGapThreshold()) {
             reset();
         }
@@ -72,13 +70,15 @@ public abstract class Analysis {
                 return;
             }
 
+            int i = 0;
+
             for (int v : data) {
+                long time = startTime + (long) (i * (1000.0 / dataRecord.getSampleRate()));
                 nextSample(v, time, GlobalQuake.instance.currentTimeMillis());
-                time += (long) (1000 / getSampleRate());
+                i++;
             }
         } catch (Exception e) {
-            Logger.warn("There was a problem with data processing on station %s".formatted(getStation().getStationCode()));
-            Logger.trace(e);
+            Logger.warn("There was a problem with data processing on station %s: %s".formatted(getStation().getStationCode(), e.getMessage()));
         }
     }
 
@@ -94,9 +94,6 @@ public abstract class Analysis {
     public void fullReset() {
         reset();
         lastRecord = 0;
-        synchronized (previousLogsLock) {
-            getPreviousLogs().clear();
-        }
     }
 
     public double getSampleRate() {
@@ -118,16 +115,20 @@ public abstract class Analysis {
         return numRecords;
     }
 
-    public ArrayList<Log> getPreviousLogs() {
-        return previousLogs;
-    }
-
-    public AnalysisStatus getStatus() {
+    public byte getStatus() {
         return status;
     }
 
-    public void setStatus(AnalysisStatus status) {
+    public void setStatus(byte status) {
         this.status = status;
     }
 
+    public void setSampleRate(double sampleRate) {
+        this.sampleRate = sampleRate;
+        waveformBuffer = new WaveformBuffer(getSampleRate(), Settings.logsStoreTimeMinutes * 60, GlobalQuake.getInstance().limitedWaveformBuffers());
+    }
+
+    public WaveformBuffer getWaveformBuffer() {
+        return waveformBuffer;
+    }
 }

@@ -22,7 +22,7 @@ public class EarthquakeAnalysisTest {
     public void testMagnitudeSelectionSingleVal(){
         List<MagnitudeReading> mags = new ArrayList<>();
 
-        mags.add(new MagnitudeReading(4,1));
+        mags.add(new MagnitudeReading(4,1, 55555));
 
         assertEquals(EarthquakeAnalysis.selectMagnitude(mags), 4.0, 0.1);
     }
@@ -31,9 +31,9 @@ public class EarthquakeAnalysisTest {
     public void testMagnitudeSelectionSimple(){
         List<MagnitudeReading> mags = new ArrayList<>();
 
-        mags.add(new MagnitudeReading(4,1));
-        mags.add(new MagnitudeReading(4,10));
-        mags.add(new MagnitudeReading(4,100));
+        mags.add(new MagnitudeReading(4,1, 55555));
+        mags.add(new MagnitudeReading(4,10, 55555));
+        mags.add(new MagnitudeReading(4,100, 55555));
 
         assertEquals(EarthquakeAnalysis.selectMagnitude(mags), 4.0, 0.1);
     }
@@ -42,11 +42,11 @@ public class EarthquakeAnalysisTest {
     public void testMagnitudeSelectionSort(){
         List<MagnitudeReading> mags = new ArrayList<>();
 
-        mags.add(new MagnitudeReading(1,1));
-        mags.add(new MagnitudeReading(2,10));
-        mags.add(new MagnitudeReading(3,100));
-        mags.add(new MagnitudeReading(4,100));
-        mags.add(new MagnitudeReading(5,100));
+        mags.add(new MagnitudeReading(1,1, 55555));
+        mags.add(new MagnitudeReading(2,10, 55555));
+        mags.add(new MagnitudeReading(3,100, 55555));
+        mags.add(new MagnitudeReading(4,100, 55555));
+        mags.add(new MagnitudeReading(5,100, 55555));
 
         Collections.shuffle(mags);
 
@@ -57,15 +57,15 @@ public class EarthquakeAnalysisTest {
     public void testMagnitudeSelectionDistant(){
         List<MagnitudeReading> mags = new ArrayList<>();
 
-        mags.add(new MagnitudeReading(4,1));
-        mags.add(new MagnitudeReading(4,10));
-        mags.add(new MagnitudeReading(4,100));
-        mags.add(new MagnitudeReading(9,10_000));
-        mags.add(new MagnitudeReading(9,10_000));
-        mags.add(new MagnitudeReading(9,10_000));
-        mags.add(new MagnitudeReading(9,10_000));
-        mags.add(new MagnitudeReading(9,10_000));
-        mags.add(new MagnitudeReading(9,10_000));
+        mags.add(new MagnitudeReading(4,1, 55555));
+        mags.add(new MagnitudeReading(4,10, 55555));
+        mags.add(new MagnitudeReading(4,100, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
+        mags.add(new MagnitudeReading(9,10_000, 55555));
 
         Collections.shuffle(mags);
 
@@ -77,15 +77,15 @@ public class EarthquakeAnalysisTest {
         List<MagnitudeReading> mags = new ArrayList<>();
 
         for(int i = 0; i < 100; i++) {
-            mags.add(new MagnitudeReading(4, 1));
+            mags.add(new MagnitudeReading(4, 1, 55555));
         }
 
         for(int i = 0; i < 100; i++) {
-            mags.add(new MagnitudeReading(6, 3000));
+            mags.add(new MagnitudeReading(6, 3000, 55555));
         }
 
         for(int i = 0; i < 100; i++) {
-            mags.add(new MagnitudeReading(8, 10000));
+            mags.add(new MagnitudeReading(8, 10000, 55555));
         }
 
 

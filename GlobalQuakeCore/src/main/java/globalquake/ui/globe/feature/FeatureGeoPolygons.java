@@ -1,29 +1,28 @@
 package globalquake.ui.globe.feature;
 
+import globalquake.core.regions.GQPolygon;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.geojson.LngLatAlt;
-import org.geojson.Polygon;
 
 import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 
-public class FeatureGeoPolygons extends RenderFeature<Polygon> {
+public class FeatureGeoPolygons extends RenderFeature<GQPolygon> {
 
     public static final Color oceanColor = new Color(5, 20, 30);
     public static final Color landColor = new Color(15, 47, 68);
     public static final Color borderColor = new Color(153, 153, 153);
 
-    private final List<Polygon> polygonList;
+    private final List<GQPolygon> polygonList;
     private final double minScroll;
     private final double maxScroll;
 
-    public FeatureGeoPolygons(List<Polygon> polygonList, double minScroll, double maxScroll){
+    public FeatureGeoPolygons(List<GQPolygon> polygonList, double minScroll, double maxScroll){
         super(1);
         this.polygonList = polygonList;
         this.minScroll = minScroll;
@@ -31,7 +30,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public Collection<Polygon> getElements() {
+    public Collection<GQPolygon> getElements() {
         return polygonList;
     }
 
@@ -46,29 +45,31 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public boolean needsProject(RenderEntity<Polygon> entity, boolean propertiesChanged) {
+    public boolean needsProject(RenderEntity<GQPolygon> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
 
     @Override
-    public boolean needsCreatePolygon(RenderEntity<Polygon> entity, boolean propertiesChanged) {
+    public boolean needsCreatePolygon(RenderEntity<GQPolygon> entity, boolean propertiesChanged) {
         return false;
     }
 
     @Override
-    public void createPolygon(GlobeRenderer renderer, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
+    public void createPolygon(GlobeRenderer renderer, RenderEntity<GQPolygon> entity, RenderProperties renderProperties) {
         Polygon3D result_pol = new Polygon3D();
-        for (LngLatAlt pos : entity.getOriginal().getCoordinates().get(0)) {
-            Vector3D vec = GlobeRenderer.createVec3D(new Vector2D(pos.getLatitude(), pos.getLongitude()), 0);
+        for(int i = 0; i < entity.getOriginal().getSize(); i++){
+            float lat = entity.getOriginal().getLats()[i];
+            float lon = entity.getOriginal().getLons()[i];
+            Vector3D vec = GlobeRenderer.createVec3D(new Vector2D(lat, lon), 0);
             result_pol.addPoint(vec);
-        }
 
+        }
         result_pol.finish();
         entity.getRenderElement(0).setPolygon(result_pol);
     }
 
     @Override
-    public void project(GlobeRenderer renderer, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
+    public void project(GlobeRenderer renderer, RenderEntity<GQPolygon> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
         element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
@@ -80,7 +81,7 @@ public class FeatureGeoPolygons extends RenderFeature<Polygon> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Polygon> entity, RenderProperties renderProperties) {
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<GQPolygon> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         if(!element.shouldDraw){
             return;

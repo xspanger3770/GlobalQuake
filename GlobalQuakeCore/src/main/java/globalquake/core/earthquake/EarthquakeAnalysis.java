@@ -28,16 +28,18 @@ public class EarthquakeAnalysis {
 
     public static final double MIN_RATIO = 16.0;
 
-    public static final int QUADRANTS = 16;
+    public static final int QUADRANTS = 32;
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
-    private static final boolean CHECK_QUADRANTS = false;
+    private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
+    private static final boolean CHECK_DELTA_P = false;
+    private static final boolean ONLY_SELECT_BETTER = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -307,7 +309,7 @@ public class EarthquakeAnalysis {
         int reduceLimit = HypocsSettings.getOrDefaultInt("reduceLimit", 12);
         double reduceAmount = HypocsSettings.getOrDefault("reduceAmount", 0.2f);
 
-        for (int it = 0; it < reduceIterations; it++) {
+        for (int it = 0; it < reduceIterations; it++) { // TODO setting?
             if (correctSelectedEvents.size() > reduceLimit) {
                 Map<PickedEvent, Long> residuals = calculateResiduals(bestHypocenter, correctSelectedEvents);
                 int targetSize = residuals.size() - (int) Math.max(1, (residuals.size() - reduceLimit) * reduceAmount);
@@ -346,7 +348,7 @@ public class EarthquakeAnalysis {
             double expectedTravelPRaw = TauPTravelTimeCalculator.getPWaveTravelTime(hypocenter.depth,
                     angle);
 
-            if (expectedTravelPRaw != TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (expectedTravelPRaw >= 0) {
                 long expectedTravel = (long) ((expectedTravelPRaw + EarthquakeAnalysis.getElevationCorrection(event.elevation())) * 1000);
                 result.put(event, Math.abs(expectedTravel - actualTravel));
             }
@@ -454,13 +456,13 @@ public class EarthquakeAnalysis {
     private void postProcess(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
-        calculateDistances(pickedEvents,  bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
+        calculateDistances(pickedEvents, bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
         getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
                 bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData);
 
         bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
         bestHypocenterPrelim.err = threadData.bestHypocenter.err;
-   }
+    }
 
     private void postProcess(List<PickedEvent> selectedEvents, List<PickedEvent> correctSelectedEvents, Cluster cluster, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings, long startTime) {
         postProcess(correctSelectedEvents, bestHypocenterPrelim, finderSettings);
@@ -481,7 +483,7 @@ public class EarthquakeAnalysis {
         }
 
         // There has to be at least some difference in the picked pWave times
-        if (!checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
+        if (CHECK_DELTA_P && !checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Not Enough Delta-P");
             return;
         }
@@ -529,7 +531,7 @@ public class EarthquakeAnalysis {
             HypocenterCondition result;
             if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
-            } else if (result != HypocenterCondition.NULL){
+            } else if (result != HypocenterCondition.NULL) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").trace("Performed magnitude-only revision because: %s".formatted(result));
             } else {
@@ -610,7 +612,7 @@ public class EarthquakeAnalysis {
         for (PickedEvent event : events) {
             double distGC = GeoUtils.greatCircleDistance(event.lat(), event.lon(), bestHypocenter.lat, bestHypocenter.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(depth, TauPTravelTimeCalculator.toAngle(distGC));
-            if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (travelTime < 0) {
                 continue;
             }
 
@@ -633,10 +635,12 @@ public class EarthquakeAnalysis {
     private List<PolygonConfidenceInterval> calculatePolygonConfidenceIntervals(List<PickedEvent> selectedEvents, PreliminaryHypocenter bestHypocenterPrelim, HypocenterFinderSettings finderSettings) {
         List<PolygonConfidenceInterval> result = new ArrayList<>();
 
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5));
-        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.25));
+        double mul = 80.0 / (selectedEvents.size() * selectedEvents.size() + 8.0) + 0.9;
+
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 3.0 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 2.0 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.5 * mul));
+        result.add(calculatePolygonConfidenceInterval(selectedEvents, bestHypocenterPrelim, finderSettings, 1.25 * mul));
 
         return result;
     }
@@ -666,7 +670,7 @@ public class EarthquakeAnalysis {
             double angle = TauPTravelTimeCalculator.toAngle(distGC);
 
             double rawTravelP = TauPTravelTimeCalculator.getPWaveTravelTime(bestHypocenter.depth, angle);
-            if (rawTravelP == TauPTravelTimeCalculator.NO_ARRIVAL) {
+            if (rawTravelP < 0) {
                 continue;
             }
 
@@ -936,7 +940,7 @@ public class EarthquakeAnalysis {
         }
 
         if (CHECK_QUADRANTS) {
-            if (checkQuadrants(bestHypocenter, events) < (distFromRoot > 4000 ? 1 : distFromRoot > 1000 ? 2 : 3)) {
+            if (checkQuadrants(bestHypocenter, events) <= 2.5) {
                 return HypocenterCondition.TOO_SHALLOW_ANGLE;
             }
         }
@@ -951,7 +955,7 @@ public class EarthquakeAnalysis {
 
         PreliminaryHypocenter bestPrelim = toPreliminary(bestHypocenter);
 
-        if (selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
+        if (ONLY_SELECT_BETTER && selectBetterHypocenter(toPreliminary(previousHypocenter), bestPrelim) != bestPrelim) {
             return HypocenterCondition.PREVIOUS_WAS_BETTER;
         }
 
@@ -965,14 +969,17 @@ public class EarthquakeAnalysis {
         return new PreliminaryHypocenter(previousHypocenter.lat, previousHypocenter.lon, previousHypocenter.depth, previousHypocenter.origin, previousHypocenter.totalErr, previousHypocenter.correctEvents);
     }
 
-    private int checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
+    private double checkQuadrants(Hypocenter hyp, List<PickedEvent> events) {
         int[] qua = new int[QUADRANTS];
-        int good = 0;
+        double good = 0;
         for (PickedEvent event : events) {
             double angle = GeoUtils.calculateAngle(hyp.lat, hyp.lon, event.lat(), event.lon());
             int q = (int) ((angle * QUADRANTS) / 360.0);
             if (qua[q] == 0) {
-                good++;
+                good += 0.5;
+            }
+            if (qua[q] == 1) {
+                good += 0.5;
             }
             qua[q]++;
         }
@@ -1012,9 +1019,17 @@ public class EarthquakeAnalysis {
                     IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
-            mags.add(new MagnitudeReading(magnitude, distGC));
+            long eventAge = lastRecord - event.getpWave();
+
+            mags.add(new MagnitudeReading(magnitude, distGC, eventAge));
         }
 
+        mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
+
+        int minSize = (int) Math.max(4, mags.size() * 0.2);
+        while (mags.size() > minSize && mags.get(0).eventAge() < 5000) {
+            mags.remove(0);
+        }
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
     }
@@ -1055,6 +1070,11 @@ public class EarthquakeAnalysis {
             40, 40, // M7+
     };
 
+    /**
+     * @param earthquake    the earthquake
+     * @param marginSeconds POSITIVE NUMBERS CAUSE THIS FUNCTION TO RETURN TRUE SOONER
+     * @return if the quake is too old and should be removed
+     */
     public static boolean shouldRemove(Earthquake earthquake, int marginSeconds) {
         double store_minutes = STORE_TABLE[Math.max(0,
                 Math.min(STORE_TABLE.length - 1, (int) ((earthquake.getMag() + getDepthCorrection(earthquake.getDepth())) * 2.0)))]

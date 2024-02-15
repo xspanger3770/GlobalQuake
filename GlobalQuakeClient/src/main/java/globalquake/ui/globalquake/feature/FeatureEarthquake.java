@@ -2,7 +2,6 @@ package globalquake.ui.globalquake.feature;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
@@ -20,18 +19,14 @@ import globalquake.utils.Scale;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
     private static final int ELEMENT_COUNT = 5 + 4;
     private final Collection<Earthquake> earthquakes;
-
-    public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public FeatureEarthquake(Collection<Earthquake> earthquakes) {
         super(ELEMENT_COUNT);
@@ -88,9 +83,11 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 entity.getOriginal().getLon(), renderer
                         .pxToDeg(16, renderProperties), 45.0);
 
+        Hypocenter hypocenter = e.getCluster().getPreviousHypocenter();
+        List<PolygonConfidenceInterval> polygonConfidenceIntervals = hypocenter == null ? null :
+                hypocenter.polygonConfidenceIntervals;
 
-        if(e.getCluster() != null && e.getCluster().getPreviousHypocenter() != null && e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals != null) {
-            List<PolygonConfidenceInterval> polygonConfidenceIntervals = e.getCluster().getPreviousHypocenter().polygonConfidenceIntervals;
+        if (polygonConfidenceIntervals != null) {
             for (int i = 0; i < polygonConfidenceIntervals.size(); i++) {
                 PolygonConfidenceInterval polygonConfidenceInterval = polygonConfidenceIntervals.get(i);
                 createConfidencePolygon(entity.getRenderElement(5 + i), polygonConfidenceInterval, entity.getOriginal().getLat(), entity.getOriginal().getLon());
@@ -151,7 +148,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        if(Settings.confidencePolygons) {
+        if (Settings.confidencePolygons && shouldDrawConfidencePolygons()) {
             for (int i = 5; i < 9; i++) {
                 RenderElement elementConfidencePolygon = entity.getRenderElement(i);
                 if (elementConfidencePolygon.shouldDraw) {
@@ -164,7 +161,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (elementPWave.shouldDraw) {
-            graphics.setColor(alphaColor(Color.BLUE, getAlphaMul(entity.getOriginal())));
+            graphics.setColor(alphaColor(getPwaveColor(), getAlphaMul(entity.getOriginal())));
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
             graphics.draw(elementPWave.getShape());
         }
@@ -190,50 +187,66 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
         }
 
         RenderElement elementCross = entity.getRenderElement(4);
+        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+        var centerPonint = renderer.projectPoint(point3D, renderProperties);
+
         if (elementCross.shouldDraw) {
             boolean isUncertain = isUncertain(entity.getOriginal().getHypocenter());
 
-            if((System.currentTimeMillis() / 500) % 2 == 0 && !isUncertain) {
+            if ((System.currentTimeMillis() / 500) % 2 == 0 && !isUncertain) {
                 graphics.setStroke(new BasicStroke(4f));
                 graphics.setColor(getCrossColor(entity.getOriginal().getMag()));
                 graphics.draw(elementCross.getShape());
             }
 
-            var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-            var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
-            if(isUncertain && (System.currentTimeMillis() / 500) % 2 == 0){
+            if (isUncertain && (System.currentTimeMillis() / 500) % 2 == 0) {
                 graphics.setColor(Color.WHITE);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 32));
                 String str = "?";
                 graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 10));
             }
 
-            String str = "M%s".formatted(f1d.format(entity.getOriginal().getMag()));
+            String str = "M%.1f".formatted(entity.getOriginal().getMag());
 
             graphics.setColor(Color.WHITE);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y - 18));
 
-            Cluster cluster = entity.getOriginal().getCluster();
-            if (cluster != null) {
-                Hypocenter hypocenter = cluster.getPreviousHypocenter();
+            str = "%s".formatted(
+                    Settings.getSelectedDistanceUnit().format(entity.getOriginal().getDepth(), 1)
+            );
 
-                if (hypocenter != null) {
-                    str = "%s".formatted(
-                            Settings.getSelectedDistanceUnit().format(hypocenter.depth, 1)
-                    );
+            graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
+        }
 
-                    graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
-                }
-            }
+        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
+        double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
+        double pct = age / sTravel;
+
+        if (pct >= 0 && pct <= 1.0) {
+            int w = 60;
+            int h = 12;
+            Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w, h);
+            Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w * pct, h);
+
+            graphics.setStroke(new BasicStroke(1f));
+            graphics.setColor(Color.red);
+            graphics.fill(rect2);
+            graphics.setColor(Color.white);
+            graphics.draw(rect1);
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
+    protected boolean shouldDrawConfidencePolygons() {
+        return true;
+    }
+
+
     private boolean isUncertain(Hypocenter hypocenter) {
-        return hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
+        return hypocenter != null && hypocenter.quality != null && hypocenter.quality.getSummary() == QualityClass.D;
     }
 
     private Color alphaColor(Color color, double mul) {
@@ -252,21 +265,25 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
     }
 
     private Color polygonColor(int i) {
-        if(i == 0){
+        if (i == 0) {
             return Color.blue;
         }
-        if(i == 1){
+        if (i == 1) {
             return Color.green;
         }
-        if(i == 2){
+        if (i == 2) {
             return Color.yellow;
         }
         return Color.red;
     }
 
-    private Color getColorSWave(double mag) {
+    protected Color getColorSWave(double mag) {
         double weight = Math.max(0, Math.min(1, (mag - 2.0) / 4.0));
         return Scale.interpolateColors(Color.yellow, Color.red, weight);
+    }
+
+    protected Color getPwaveColor() {
+        return Color.BLUE;
     }
 
     public static Color getCrossColor(double mag) {

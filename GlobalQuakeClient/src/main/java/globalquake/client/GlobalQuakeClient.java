@@ -99,6 +99,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
 
     }
 
+    @Override
+    public boolean limitedSettings() {
+        return true;
+    }
+
     public ClientSocket getClientSocket() {
         return clientSocket;
     }

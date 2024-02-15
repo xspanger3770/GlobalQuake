@@ -9,21 +9,14 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.earthquake.data.MagnitudeReading;
-import globalquake.core.earthquake.interval.DepthConfidenceInterval;
-import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
 import globalquake.core.earthquake.quality.QualityClass;
-import globalquake.core.events.specific.ClusterCreateEvent;
-import globalquake.core.events.specific.QuakeCreateEvent;
-import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.core.station.AbstractStation;
-import globalquake.core.station.GlobalStation;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.SeedlinkStatus;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.CinemaEvent;
-import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.intensity.CityIntensity;
 import globalquake.utils.GeoUtils;
@@ -63,7 +56,6 @@ public class GlobalQuakePanel extends GlobePanel {
     private static final Color BLUE_COLOR = new Color(20, 20, 160);
 
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
-    private static final boolean DEBUG = false;
 
     private final CinemaHandler cinemaHandler;
     private volatile Earthquake lastCinemaModeEarthquake;
@@ -72,13 +64,8 @@ public class GlobalQuakePanel extends GlobePanel {
 
     public GlobalQuakePanel(JFrame frame) {
         super(Settings.homeLat, Settings.homeLon);
-        getRenderer().addFeature(new FeatureShakemap());
-        getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
-        getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
-        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
-        getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
-        getRenderer().addFeature(new FeatureCities());
-        getRenderer().addFeature(new FeatureHomeLoc());
+
+        addRenderFeatures();
 
         frame.addKeyListener(new KeyAdapter() {
             @Override
@@ -93,35 +80,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_C) {
                     setCinemaMode(!isCinemaMode());
-                }
-
-                if (DEBUG) {
-                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        Earthquake earthquake = createDebugQuake();
-                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().add(earthquake);
-                        GlobalQuake.instance.getClusterAnalysis().getClusters().add(earthquake.getCluster());
-
-                        GlobalQuake.instance.getEventHandler().fireEvent(new ClusterCreateEvent(earthquake.getCluster()));
-                        GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(earthquake));
-                    }
-
-                    if (e.getKeyCode() == KeyEvent.VK_U) {
-                        Earthquake ex = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().findAny().orElse(null);
-
-                        if(ex != null) {
-                            Earthquake earthquake = createDebugQuake();
-                            ex.update(earthquake);
-                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(earthquake, earthquake.getHypocenter()));
-                        }
-                    }
-
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        for (Earthquake earthquake : GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()) {
-                            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
-                        }
-
-                        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().clear();
-                    }
                 }
             }
         });
@@ -152,6 +110,16 @@ public class GlobalQuakePanel extends GlobePanel {
         });
     }
 
+    protected void addRenderFeatures() {
+        getRenderer().addFeature(new FeatureShakemap());
+        getRenderer().addFeature(new FeatureGlobalStation(GlobalQuake.instance.getStationManager().getStations()));
+        getRenderer().addFeature(new FeatureArchivedEarthquake(GlobalQuake.instance.getArchive().getArchivedQuakes()));
+        getRenderer().addFeature(new FeatureEarthquake(GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes()));
+        getRenderer().addFeature(new FeatureCluster(GlobalQuake.instance.getClusterAnalysis().getClusters()));
+        getRenderer().addFeature(new FeatureCities());
+        getRenderer().addFeature(new FeatureHomeLoc());
+    }
+
     @Override
     public void featuresClicked(ArrayList<RenderEntity<?>> clicked) {
         List<AbstractStation> clickedStations = new ArrayList<>();
@@ -170,7 +138,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if (clickedStations.size() == 1) {
             selectedStation = clickedStations.get(0);
         } else {
-            selectedStation = (GlobalStation) JOptionPane.showInputDialog(this, "Select station to open:", "Station selection",
+            selectedStation = (AbstractStation) JOptionPane.showInputDialog(this, "Select station to open:", "Station selection",
                     JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
         }
 
@@ -211,8 +179,10 @@ public class GlobalQuakePanel extends GlobePanel {
     public static String formatNumber(double number) {
         if (number < 1_000_000) {
             return String.format("%.1fk", number / 1_000);
-        } else {
+        } else if (number < 1_000_000_000){
             return String.format("%.1fM", number / 1_000_000);
+        } else {
+            return String.format("%.1fB", number / 1_000_000_000);
         }
     }
 
@@ -338,9 +308,9 @@ public class GlobalQuakePanel extends GlobePanel {
                 double _distGC = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
                 double age = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / 1000.0;
 
-                double pTravel = (long) (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                double pTravel = (TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(_distGC)));
-                double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                double sTravel = (TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(_distGC)));
 
                 int _secondsP = (int) Math.ceil(pTravel - age);
@@ -354,8 +324,8 @@ public class GlobalQuakePanel extends GlobePanel {
                         || AlertManager.meetsConditions(earthquake, false)) {
                     quake = earthquake;
                     distGC = _distGC;
-                    secondsS = Math.max(0, _secondsS);
-                    secondsP = Math.max(0, _secondsP);
+                    secondsS = sTravel >= 0 ? Math.max(0, _secondsS) : 0;
+                    secondsP = pTravel >= 0 ? Math.max(0, _secondsP) : 0;
                 }
             }
         }
@@ -364,7 +334,7 @@ public class GlobalQuakePanel extends GlobePanel {
             return;
         }
 
-        int width = 240;
+        int width = 400;
         int x = getWidth() / 2 - width / 2;
         int height;
 
@@ -378,7 +348,6 @@ public class GlobalQuakePanel extends GlobePanel {
         color = new Color(0, 90, 192);
         g.setFont(new Font("Calibri", Font.BOLD, 22));
         str = distGC <= 200 ? "Earthquake detected nearby!" : "Earthquake detected!";
-        width = 400;
 
         if(maxPGA >= IntensityScales.INTENSITY_SCALES[Settings.shakingLevelScale].getLevels().get(Settings.shakingLevelIndex).getPga()){
             color = new Color(255,200,0);
@@ -443,45 +412,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString("!", x + width - s / 2 - g.getFontMetrics().stringWidth("!") / 2 - 6, y + height - 16);
     }
 
-    private static Earthquake createDebugQuake() {
-        Earthquake quake;
-        Cluster clus = new Cluster();
-        clus.updateLevel(4);
 
-        Hypocenter hyp = new Hypocenter(Settings.homeLat + 5, Settings.homeLon, 0, System.currentTimeMillis(), 0, 10,
-                new DepthConfidenceInterval(10, 100),
-                List.of(new PolygonConfidenceInterval(16, 0, List.of(
-                        0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0), 1000, 10000)));
-
-        clus.updateRoot(hyp.lat, hyp.lon);
-
-        hyp.usedEvents = 20;
-
-        hyp.magnitude = 6.4;
-        hyp.depth = 0;
-
-        hyp.correctEvents = 6;
-
-        hyp.calculateQuality();
-
-        clus.setPreviousHypocenter(hyp);
-
-        quake = new Earthquake(clus);
-
-        clus.setEarthquake(quake);
-        hyp.magnitude = quake.getMag();
-
-        List<MagnitudeReading> mags = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag, 0));
-        }
-
-        hyp.mags = mags;
-
-        quake.setRegion("asdasdasd");
-        return quake;
-    }
 
     private void drawTexts(Graphics2D g) {
         g.setFont(new Font("Calibri", Font.BOLD, 24));
@@ -490,7 +421,7 @@ public class GlobalQuakePanel extends GlobePanel {
         if(Settings.displayTime) {
             String str = "----/--/-- --:--:--";
             if (GlobalQuake.instance.getSeedlinkReader() != null) {
-                long time = GlobalQuake.instance.getSeedlinkReader().getLastReceivedRecordTime();
+                long time = GlobalQuake.instance.currentTimeMillis();
 
                 if(time != 0) {
                     str = Settings.formatDateTime(Instant.ofEpochMilli(time));
@@ -549,7 +480,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         settingsStrings.add(new SettingInfo("Cinema Mode (C): ", isCinemaMode() ? "Enabled" : "Disabled", isCinemaMode() ? Color.green : Color.red));
 
-        if(GlobalQuake.instance.getStationDatabaseManager() != null) {
+        if(GlobalQuake.instance.getStationDatabaseManager() != null && GlobalQuake.instance.getStationDatabaseManager().getStationDatabase() != null) {
             int totalStations = 0;
             int connectedStations = 0;
             int runningSeedlinks = 0;
@@ -582,7 +513,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         double pctUsed = usedMem / (double) maxMem;
 
-        settingsStrings.add(new SettingInfo("RAM: ", "%.2f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
+        settingsStrings.add(new SettingInfo("RAM: ", "%.4f / %.2fGB".formatted(usedMem / GB, maxMem / GB), getColorPCT(pctUsed)));
         settingsStrings.add(new SettingInfo("FPS: ", "%d".formatted(getLastFPS()), getColorFPS(getLastFPS())));
         return settingsStrings;
     }
@@ -631,10 +562,6 @@ public class GlobalQuakePanel extends GlobePanel {
                 quake = quakes.get(displayedQuake);
             }
         } catch (Exception ignored) {
-        }
-
-        if (DEBUG) {
-            quake = createDebugQuake();
         }
 
         lastDisplayedQuake = quake;
@@ -936,5 +863,11 @@ public class GlobalQuakePanel extends GlobePanel {
         }
 
         return ww;
+    }
+
+    public void clear(){
+        lastDisplayedQuake = null;
+        lastCinemaModeEarthquake = null;
+        cinemaHandler.clear();
     }
 }

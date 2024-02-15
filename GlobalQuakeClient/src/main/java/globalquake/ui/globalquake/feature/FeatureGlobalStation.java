@@ -3,6 +3,7 @@ package globalquake.ui.globalquake.feature;
 import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -130,6 +131,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
 
+
         if(!elementStationCircle.shouldDraw){
             return;
         }
@@ -159,14 +161,15 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         if(Settings.displayClusters){
             int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
-                if(event2.assignedCluster != null){
-                    Color c = !event2.isValid() ? Color.gray : event2.assignedCluster.color;
+                Cluster cluster = event2.assignedCluster;
+                if(cluster != null){
+                    Color c = !event2.isValid() ? Color.gray : cluster.color;
 
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
                     graphics.setColor(c);
                     graphics.draw(elementStationSquare.getShape());
-                    graphics.drawString("Cluster #"+event2.assignedCluster.id, (int) centerPonint.x + 12, _y);
+                    graphics.drawString("Cluster #"+cluster.id, (int) centerPonint.x + 12, _y);
                     _y += 16;
                 }
             }

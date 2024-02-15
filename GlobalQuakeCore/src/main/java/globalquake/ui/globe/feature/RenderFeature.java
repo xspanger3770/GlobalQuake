@@ -5,6 +5,7 @@ import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
 import globalquake.ui.globe.RenderProperties;
 import globalquake.utils.monitorable.Monitorable;
+import org.tinylog.Logger;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ public abstract class RenderFeature<E> {
     private int lastHash = -651684313; // random
     private RenderProperties lastProperties;
     private int settingsChanges = 0;
+    private boolean warned = false;
 
     public abstract Collection<E> getElements();
 
@@ -35,15 +37,21 @@ public abstract class RenderFeature<E> {
 
     public final boolean updateEntities(){
         int hash;
+
         if(getElements() instanceof Monitorable){
             hash = ((Monitorable) getElements()).getMonitorState();
         }else {
             hash = getElements().hashCode();
+            if(needsUpdateEntities() && !warned){
+                Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
+                warned = true;
+            }
         }
         if(hash != lastHash) {
             entities_temp.clear();
             getElements().parallelStream().forEach(element -> entities_temp.put(element, entities.getOrDefault(element, new RenderEntity<>(element, renderElements))));
             swapEntities();
+            entities_temp.clear();
 
             lastHash = hash;
             return true;

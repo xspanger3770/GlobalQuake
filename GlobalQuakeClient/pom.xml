@@ -6,7 +6,7 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.2_build-1</version>
+        <version>0.10.2_build-31</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -46,7 +46,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>data-local</id>
+            <name>data</name>
+            <url>file://${project.basedir}/../libs</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>edu.sc.seis</groupId>
+            <artifactId>seisFile</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.uber</groupId>
             <artifactId>h3</artifactId>
@@ -61,7 +74,7 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
-            <version>0.10.2_build-1</version>
+            <version>0.10.2_build-31</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -91,7 +104,12 @@
             <artifactId>opencsv</artifactId>
             <version>5.6</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.flowpowered/flow-noise -->
+        <dependency>
+            <groupId>com.flowpowered</groupId>
+            <artifactId>flow-noise</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
 </project>

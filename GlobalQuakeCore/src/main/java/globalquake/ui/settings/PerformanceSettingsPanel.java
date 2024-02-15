@@ -1,6 +1,5 @@
 package globalquake.ui.settings;
 
-
 import globalquake.core.Settings;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 
@@ -13,35 +12,14 @@ import java.awt.event.ActionEvent;
 public class PerformanceSettingsPanel extends SettingsPanel {
     private JSlider sliderResolution;
     private JCheckBox chkBoxParalell;
-    private JSlider sliderStoreTime;
     private JCheckBox chkBoxRecalibrateOnLauch;
 
     public PerformanceSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(createSettingAccuracy());
-        add(createSettingStoreTime());
         add(createSettingParalell());
-    }
-
-    private Component createSettingStoreTime() {
-        sliderStoreTime = HypocenterAnalysisSettingsPanel.createSettingsSlider(2, 20, 2, 1);
-
-        JLabel label = new JLabel();
-        ChangeListener changeListener = changeEvent -> label.setText("Waveform data storage time (minutes): %d".formatted(
-                sliderStoreTime.getValue()));
-
-        sliderStoreTime.addChangeListener(changeListener);
-
-        sliderStoreTime.setValue(Settings.logsStoreTimeMinutes);
-        changeListener.stateChanged(null);
-
-        return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderStoreTime, label, "5",
-                """
-                        In GlobalQuake, waveform data poses the highest demand on your system's RAM.
-                        If you're encountering memory constraints, you have two options:
-                        either reduce the number of selected stations or lower this specific value.
-                        """);
+        fill(this, 16);
     }
 
     @SuppressWarnings("ExtractMethodRecommender")
@@ -57,7 +35,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                         Using all CPU cores will make the Hypocenter Finding much faster,\s
                         but it will be using 100% of your CPU, which can increase lags.
                         Make sure you select the optimal resolution above for your system.""");
-        textAreaExplanation.setBorder(new EmptyBorder(5,5,5,5));
+        textAreaExplanation.setBorder(new EmptyBorder(5, 5, 5, 5));
         textAreaExplanation.setEditable(false);
         textAreaExplanation.setBackground(panel.getBackground());
 
@@ -72,7 +50,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public void save() {
         Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
         Settings.parallelHypocenterLocations = chkBoxParalell.isSelected();
-        Settings.logsStoreTimeMinutes = sliderStoreTime.getValue();
         Settings.recalibrateOnLaunch = chkBoxRecalibrateOnLauch.isSelected();
     }
 
@@ -114,7 +91,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                     btnRecalibrate.setEnabled(true);
                     sliderResolution.setEnabled(true);
                 }).start();
-             }
+            }
         });
 
         panel2.add(btnRecalibrate);
@@ -134,7 +111,6 @@ public class PerformanceSettingsPanel extends SettingsPanel {
 
         chkBoxRecalibrateOnLauch = new JCheckBox("Recalibrate on startup", Settings.recalibrateOnLaunch);
         panel2.add(chkBoxRecalibrateOnLauch);
-
 
         panel.add(panel2, BorderLayout.SOUTH);
 

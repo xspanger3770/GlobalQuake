@@ -1,7 +1,7 @@
 package globalquake.core.analysis;
 
-public enum AnalysisStatus {
+public class AnalysisStatus {
 	
-	INIT, IDLE, EVENT
+	public static final byte INIT = 0, IDLE = 1, EVENT = 2;
 
 }

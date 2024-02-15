@@ -1,6 +1,5 @@
 package globalquake.ui.globalquake;
 
-import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
@@ -19,8 +18,8 @@ public class GlobalQuakeFrame extends GQFrame {
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
-	private final GlobalQuakePanel panel;
-	private final JPanel mainPanel;
+	protected GlobalQuakePanel panel;
+	protected JPanel mainPanel;
 	private boolean _containsListToggle;
 
 	public GlobalQuakeFrame() {
@@ -109,7 +108,7 @@ public class GlobalQuakeFrame extends GQFrame {
 		});
 	}
 
-	private JMenuBar createJMenuBar() {
+	protected JMenuBar createJMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBackground(Color.lightGray);
 
@@ -161,5 +160,9 @@ public class GlobalQuakeFrame extends GQFrame {
 
 	public GlobalQuakePanel getGQPanel() {
 		return panel;
+	}
+
+    public void clear() {
+    	getGQPanel().clear();
 	}
 }

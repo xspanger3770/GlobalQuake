@@ -11,7 +11,8 @@ import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.core.regions.Regions;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
-import gqserver.FDSNWSEventsHTTPServer.FdsnwsEventsHTTPServer;
+import gqserver.bot.DiscordBot;
+import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
 
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
@@ -31,7 +32,7 @@ public class Main {
     public static final String fullName = "GlobalQuakeServer " + GlobalQuake.version;
     private static DatabaseMonitorFrame databaseMonitorFrame;
     private static StationDatabaseManager databaseManager;
-    private static boolean headless;
+    private static boolean headless = true;
 
     private static void startDatabaseManager() throws FatalIOException {
         databaseManager = new StationDatabaseManager();
@@ -80,9 +81,7 @@ public class Main {
             System.exit(1);
         }
 
-        if(cmd.hasOption(headlessOption.getOpt())){
-            headless = true;
-        }
+        headless = cmd.hasOption(headlessOption.getOpt());
 
         if(cmd.hasOption(maxClientsOption.getOpt())) {
             try {
@@ -138,7 +137,7 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 7.0;
+    private static final double PHASES = 9.0;
     private static int phase = 0;
 
     public static void initAll() throws Exception{
@@ -154,6 +153,21 @@ public class Main {
         updateProgressBar("Calibrating...", (int) ((phase++ / PHASES) * 100.0));
         if(Settings.recalibrateOnLaunch) {
             EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null);
+        }
+
+        //start up the FDSNWS_Event Server, if enabled
+        updateProgressBar("Starting FDSNWS_Event Server...", (int) ((phase++ / PHASES) * 100.0));
+        if(Settings.autoStartFDSNWSEventServer){
+            try {
+                FdsnwsEventsHTTPServer.getInstance().startServer();
+            }catch (Exception e){
+                getErrorHandler().handleWarning(new RuntimeException("Unable to start FDSNWS EVENT server! Check logs for more info.", e));
+            }
+        }
+
+        updateProgressBar("Starting Discord Bot...", (int) ((phase++ / PHASES) * 100.0));
+        if(Settings.discordBotEnabled){
+            DiscordBot.init();
         }
 
         updateProgressBar("Updating Station Sources...", (int) ((phase++ / PHASES) * 100.0));
@@ -182,12 +196,6 @@ public class Main {
                         }
                     });
                 });
-
-        //start up the FDSNWS_Event Server, if enabled
-        updateProgressBar("Starting FDSNWS_Event Server...", (int) ((phase++ / PHASES) * 100.0));
-        if(Settings.autoStartFDSNWSEventServer){
-            FdsnwsEventsHTTPServer.getInstance().startServer();
-        }
     }
 
     private static void autoStartServer() {
@@ -198,7 +206,7 @@ public class Main {
 
     public static ApplicationErrorHandler getErrorHandler() {
         if(errorHandler == null) {
-            errorHandler = new ApplicationErrorHandler(null);
+            errorHandler = new ApplicationErrorHandler(null, headless);
         }
         return errorHandler;
     }

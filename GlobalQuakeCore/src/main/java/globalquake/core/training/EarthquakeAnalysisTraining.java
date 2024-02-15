@@ -1,6 +1,7 @@
 package globalquake.core.training;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.GQHypocs;
@@ -65,23 +66,27 @@ public class EarthquakeAnalysisTraining {
         System.exit(0);
     }
 
-    private static final long TARGET_TIME = 400;
 
     public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider){
         Settings.hypocenterDetectionResolution = 0.0;
         long lastTime;
         int seed = 6543;
         int failed = 0;
+
+        long targetTime = HypocsSettings.getOrDefaultInt("calibrateTargetTime", 400);
+
         while(failed < 5 && Settings.hypocenterDetectionResolution <= hypocenterDetectionResolutionMax){
             lastTime = measureTest(seed++, 60);
-            if(lastTime > TARGET_TIME){
+            if(lastTime > targetTime){
                 failed++;
             } else {
                 failed = 0;
                 Settings.hypocenterDetectionResolution += 4.0;
             }
             if(progressUpdateFunction !=null){
-                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime, TARGET_TIME), (int) Math.max(0, Math.min(100, ((double)lastTime / TARGET_TIME) * 100.0)));
+                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(
+                        Settings.hypocenterDetectionResolution / 100.0, lastTime, targetTime),
+                        (int) Math.max(0, Math.min(100, ((double)lastTime / targetTime) * 100.0)));
             }
             if(slider != null){
                 slider.setValue(Settings.hypocenterDetectionResolution.intValue());
@@ -127,6 +132,10 @@ public class EarthquakeAnalysisTraining {
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
                     absolutetyCorrect.lon, fakeStation.lat, fakeStation.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
+
+            if(travelTime < 0){
+                continue;
+            }
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);

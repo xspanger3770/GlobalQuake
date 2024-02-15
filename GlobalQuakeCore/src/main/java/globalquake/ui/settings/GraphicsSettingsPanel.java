@@ -46,6 +46,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxCapitals;
     private JComboBox<QualityClass> comboBoxQuality;
 
+    private JCheckBox chkBoxClusters;
+    private JCheckBox chkBoxClusterRoots;
+    private JCheckBox chkBoxHideClusters;
+
 
     public GraphicsSettingsPanel() {
         setLayout(new BorderLayout());
@@ -154,6 +158,15 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         mainWindowPanel.add(chkBoxCapitals = new JCheckBox("Display capital cities", Settings.displayCapitalCities));
 
         panel.add(mainWindowPanel);
+
+        JPanel clustersPanel = new JPanel(new GridLayout(3,1));
+        clustersPanel.setBorder(new TitledBorder("Cluster settings"));
+
+        clustersPanel.add(chkBoxClusterRoots = new JCheckBox("Display Clusters (possible shaking locations)", Settings.displayClusterRoots));
+        clustersPanel.add(chkBoxClusters = new JCheckBox("Display Stations assigned to Clusters (local mode only)", Settings.displayClusters));
+        clustersPanel.add(chkBoxHideClusters = new JCheckBox("Hide Cluster after the Earthquake is actually found", Settings.hideClustersWithQuake));
+
+        panel.add(clustersPanel);
 
         fill(panel, 16);
 
@@ -411,6 +424,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayCapitalCities = chkBoxCapitals.isSelected();
 
         Settings.qualityFilter = comboBoxQuality.getSelectedIndex();
+
+        Settings.displayClusters = chkBoxClusters.isSelected();
+        Settings.displayClusterRoots = chkBoxClusterRoots.isSelected();
+        Settings.hideClustersWithQuake = chkBoxHideClusters.isSelected();
     }
 
     @Override
