@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
 import globalquake.main.Main;
 import globalquake.ui.GQFrame;
@@ -118,7 +119,14 @@ public class GlobalQuakeFrame extends GQFrame {
 		settings.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				new SettingsFrame(GlobalQuakeFrame.this, GlobalQuake.getInstance().limitedSettings()).setVisible(true);
+				 // Check if an instance of SettingsFrame already exists
+				 if (SettingsFrame.getInstance() == null) {
+					// If not, create a new instance and make it visible
+					SettingsFrame settingsFrame = new SettingsFrame(GlobalQuakeFrame.this, GlobalQuakeClient.instance != null);
+					settingsFrame.setVisible(true);
+					// Ensure that the SettingsFrame is always on top
+					settingsFrame.setAlwaysOnTop(true);
+				}
 			}
 		});
 
