@@ -31,7 +31,8 @@ public abstract class AbstractStation {
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
 	private final double sensitivity;
 	public boolean disabled = false;
-	private Collection<NearbyStationDistanceInfo> nearbyStations;
+	public double _lastRenderSize;
+    private Collection<NearbyStationDistanceInfo> nearbyStations;
 
 	private final Deque<StationInterval> intervals = new ConcurrentLinkedDeque<>();
 
