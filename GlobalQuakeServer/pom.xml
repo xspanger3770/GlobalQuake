@@ -6,7 +6,7 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.2_build-32</version>
+        <version>0.10.2_build-33</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -113,7 +113,7 @@
         <dependency>
             <groupId>xspanger.GlobalQuake</groupId>
             <artifactId>GlobalQuakeCore</artifactId>
-            <version>0.10.2_build-32</version>
+            <version>0.10.2_build-33</version>
             <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/net.dv8tion/JDA -->
