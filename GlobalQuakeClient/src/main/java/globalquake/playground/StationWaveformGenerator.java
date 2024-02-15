@@ -17,10 +17,19 @@ public class StationWaveformGenerator {
     static class Distances{
         public final double gcd;
         public final double geo;
+        private final double distMultiplier;
+        private final double pTravel;
+        private final double sTravel;
 
         public Distances(Earthquake earthquake, AbstractStation station) {
             gcd = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), station.getLatitude(), station.getLongitude());
             geo = GeoUtils.gcdToGeo(gcd);
+            distMultiplier = IntensityTable.getIntensity(earthquake.getMag() * 0.9, geo) / (20.0);
+
+            pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
+                    TauPTravelTimeCalculator.toAngle(gcd));
+            sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
+                    TauPTravelTimeCalculator.toAngle(gcd));
         }
     }
 
@@ -32,6 +41,7 @@ public class StationWaveformGenerator {
     private static final double[] FREQS = new double[STEPS];
 
     private static final double[] BACKGROUND_NOISES = new double[STEPS];
+    private static final double[] MFR = new double[STEPS];
 
     private final AbstractStation station;
 
@@ -42,6 +52,7 @@ public class StationWaveformGenerator {
             double freq = MIN_FREQ * Math.pow(2, i);
             FREQS[i] = freq;
             BACKGROUND_NOISES[i] = backgroundNoise(freq);
+            MFR[i] = getMagnitudeFrequencyRange(5.0, freq);
         }
     }
 
@@ -73,7 +84,7 @@ public class StationWaveformGenerator {
 
         double result = BACKGROUND_NOISES[i];
         for(Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()){
-            result += getPowerFromQuake(earthquake, freq, time);
+            result += getPowerFromQuake(earthquake, freq, time, i);
         }
 
         return result;
@@ -83,7 +94,7 @@ public class StationWaveformGenerator {
         earthquakeDistancesMap.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), 0));
     }
 
-    private double getPowerFromQuake(Earthquake earthquake, double freq, long time) {
+    private double getPowerFromQuake(Earthquake earthquake, double freq, long time, int i) {
         Distances distances = earthquakeDistancesMap.get(earthquake);
         if(distances == null){
             earthquakeDistancesMap.put(earthquake, distances = new Distances(earthquake, station));
@@ -94,33 +105,27 @@ public class StationWaveformGenerator {
 
         double age = (time - earthquake.getOrigin()) / 1000.0;
 
-        double pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(gcd));
-        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(earthquake.getDepth(),
-                TauPTravelTimeCalculator.toAngle(gcd));
-
-        double _secondsP = pTravel - age;
-        double _secondsS = sTravel - age;
+        double _secondsP = distances.pTravel - age;
+        double _secondsS = distances.sTravel - age;
 
         double result = 0;
 
-        double distMultiplier = IntensityTable.getIntensity(earthquake.getMag() * 0.9, geo) / (20.0);
         double m = earthquake.getMag() + gcd / 30.0;
         double m2 = (m * m);
 
-        if(_secondsP < 0 && pTravel >= 0){
+        if(_secondsP < 0 && distances.pTravel >= 0){
             double decay = (m2) / (_secondsP * _secondsP+ m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
             result += 1E5 * decay * increase;
         }
 
-        if(_secondsS < 0 && sTravel >= 0){
+        if(_secondsS < 0 && distances.sTravel >= 0){
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
             result += 1E5 * decay * increase * psRatio(gcd);
         }
 
-        return result * distMultiplier * getMagnitudeFrequencyRange(5.0, freq) * Math.sqrt(freq);
+        return result * distances.distMultiplier * MFR[i] * Math.sqrt(freq);
     }
 
     private static double getMagnitudeFrequencyRange(double mag, double freq) {
