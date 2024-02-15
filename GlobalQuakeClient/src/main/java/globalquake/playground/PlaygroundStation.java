@@ -10,7 +10,8 @@ public class PlaygroundStation extends AbstractStation {
     public long lastSampleTime = -1;
     private final StationWaveformGenerator generator;
     public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id) {
-        super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null, 1E10);
+        super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null,
+                2E10);
         getAnalysis().setSampleRate(SAMPLE_RATE);
         this.generator = new StationWaveformGenerator(this, id);
     }
