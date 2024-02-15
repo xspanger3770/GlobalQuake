@@ -3,6 +3,7 @@ package globalquake.playground;
 import globalquake.core.Settings;
 import globalquake.main.Main;
 import globalquake.ui.globalquake.GlobalQuakeFrame;
+import globalquake.ui.globalquake.GlobalQuakePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +17,7 @@ public class GlobalQuakeFramePlayground extends GlobalQuakeFrame {
 
     public GlobalQuakeFramePlayground() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        panel = new GlobalQuakePanelPlayground(this);
+        panel = createGQPanel();
 
         panel.setPreferredSize(new Dimension(1000, 760));
 
@@ -57,6 +58,10 @@ public class GlobalQuakeFramePlayground extends GlobalQuakeFrame {
                 scheduler.shutdown();
             }
         });
+    }
+
+    protected GlobalQuakePanel createGQPanel() {
+        return new GlobalQuakePanelPlayground(this);
     }
 
 }
