@@ -177,7 +177,7 @@ public class StationDatabaseManager {
         }
     }
 
-    private static File getDatabaseFile() {
+    public static File getDatabaseFile() {
         return new File(getStationsFolder(), "database.dat");
     }
 

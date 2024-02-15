@@ -46,7 +46,7 @@ public class StationWaveformGenerator {
     }
 
     private static double backgroundNoise(double freq) {
-        return (freq * 1200000.0) / (160 * (freq - 0.15) * (freq - 0.15) + 1);
+        return (freq * 120000.0) / (160 * (freq - 0.15) * (freq - 0.15) + 1);
     }
 
     public StationWaveformGenerator(AbstractStation station, int seed) {
@@ -104,7 +104,7 @@ public class StationWaveformGenerator {
 
         double result = 0;
 
-        double distMultiplier = IntensityTable.getIntensity(earthquake.getMag(), geo) / (20.0);
+        double distMultiplier = IntensityTable.getIntensity(earthquake.getMag() * 0.9, geo) / (20.0);
         double m = earthquake.getMag() + gcd / 30.0;
         double m2 = (m * m);
 
@@ -120,7 +120,7 @@ public class StationWaveformGenerator {
             result += 1E5 * decay * increase * psRatio(gcd);
         }
 
-        return result * distMultiplier * getMagnitudeFrequencyRange(earthquake.getMag() + gcd / 1400.0, freq) * Math.sqrt(freq);
+        return result * distMultiplier * getMagnitudeFrequencyRange(5.0, freq) * Math.sqrt(freq);
     }
 
     private static double getMagnitudeFrequencyRange(double mag, double freq) {
@@ -139,7 +139,7 @@ public class StationWaveformGenerator {
     }
 
     private double psRatio(double gcd) {
-        return 6.0 / (0.000015 * gcd * gcd + 1);
+        return 2.0 / (0.000015 * gcd * gcd + 1);
     }
 
 }

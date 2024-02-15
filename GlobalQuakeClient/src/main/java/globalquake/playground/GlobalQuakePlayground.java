@@ -3,10 +3,12 @@ package globalquake.playground;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.GlobalQuake;
 import globalquake.core.archive.EarthquakeArchive;
+import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.regions.Regions;
+import globalquake.core.station.GlobalStationManager;
 import globalquake.main.Main;
 import globalquake.utils.Scale;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
@@ -39,6 +41,10 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     public void startRuntime() {
         getGlobalQuakeRuntime().runThreads();
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> playgroundEarthquakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, -30)), 0, 1, TimeUnit.SECONDS);
+    }
+
+    public GlobalQuakePlayground(StationDatabaseManager stationDatabaseManager, GlobalStationManager globalStationManager) {
+        super(stationDatabaseManager, globalStationManager);
     }
 
     public GlobalQuakePlayground() {
