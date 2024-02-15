@@ -46,7 +46,7 @@ public class GlobalStationManagerPlayground extends GlobalStationManager {
             int id = nextID.incrementAndGet();
 
             String name = "Dummy #%d".formatted(id);
-            list.add(new PlaygroundStation(name, lat, lon, 0, nextID.getAndIncrement(), 1E11));
+            list.add(new PlaygroundStation(name, lat, lon, 0, nextID.getAndIncrement()));
             created++;
             fails = 0;
         }

@@ -66,7 +66,7 @@ public class StationWaveformGenerator {
 
     public StationWaveformGenerator(AbstractStation station, int seed) {
         this.station = station;
-        sensMul = Math.pow(100, r.nextGaussian() * 0.12 + 0.5) / 10.0;
+        sensMul = Math.pow(100, r.nextGaussian() * 0.12 + 0.5) / 10.0; // todo setting maybe for the 0.12
         for(int i = 0; i < STEPS; i++){
             double freq = FREQS[i];
             noises[i] = new Perlin();
@@ -121,13 +121,13 @@ public class StationWaveformGenerator {
         if(_secondsP < 0 && distances.pTravel >= 0){
             double decay = (m2) / (_secondsP * _secondsP+ m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
-            result += 1E5 * decay * increase;
+            result += 1E4 * decay * increase;
         }
 
         if(_secondsS < 0 && distances.sTravel >= 0){
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
-            result += 1E5 * decay * increase * psRatio(gcd);
+            result += 1E4 * decay * increase * psRatio(gcd);
         }
 
         return result * distances.distMultiplier * MFR[i] * Math.sqrt(freq) * sensMul;
