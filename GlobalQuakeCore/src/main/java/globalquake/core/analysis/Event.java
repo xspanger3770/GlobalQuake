@@ -19,6 +19,7 @@ public class Event implements Serializable {
 	public static final double[] RECALCULATE_P_WAVE_THRESHOLDS = new double[] { 16.0, 32.0, 64.0, 128.0, 512.0, 2048.0 };
 	public static final double[] SPECIAL_PERCENTILE = new double[] { 0.08, 0.12, 0.18, 0.24, 0.32, 0.40, 0.48 };
 	public static final double[] SLOW_THRESHOLD_MULTIPLIERS = new double[] { 1.12, 1.5, 1.9, 2.2, 2.4, 2.5, 2.6 };
+	private static final long MIN_EVENT_DIFF = 3000;
 	private final Lock readLock;
 	private final Lock writeLock;
 	private boolean usingRatio;
@@ -90,6 +91,19 @@ public class Event implements Serializable {
 			this.updatesCount++;
 		}
 		this.pWave = pWave;
+		checkValidity();
+	}
+
+	private void checkValidity() {
+		for(Event ev2 : getAnalysis().getDetectedEvents()){
+			if(ev2 != this){
+				long diff = Math.abs(pWave - ev2.pWave);
+				if(diff < MIN_EVENT_DIFF){
+					Event bad = getStart() > ev2.start ? this : ev2;
+					bad.valid = false;
+				}
+			}
+		}
 	}
 
 	public long getpWave() {
