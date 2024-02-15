@@ -170,6 +170,9 @@ public final class Settings {
     @SuppressWarnings("unused")
     public static Boolean discordBotSendRevisions;
     public static Boolean hideClustersWithQuake;
+    public static Boolean antialiasingQuakes;
+    public static Boolean antialiasingOldQuakes;
+    public static Boolean antialiasingClusters;
 
     static {
         load();
@@ -187,6 +190,10 @@ public final class Settings {
         } catch (IOException e) {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
+
+        loadProperty("antialiasingOldQuakes", "true");
+        loadProperty("antialiasingClusters", "true");
+        loadProperty("antialiasingQuakes", "true");
 
         loadProperty("discordBotSendRevisions", "false");
         loadProperty("discordBotChannelID", "insert");
@@ -304,7 +311,7 @@ public final class Settings {
         loadProperty("parallelHypocenterLocations", "true");
         loadProperty("displayHomeLocation", "true");
         loadProperty("antialiasing", "false");
-        loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
+        loadProperty("fpsIdle", "60", o -> validateInt(1, 300, (Integer) o));
         loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
         loadProperty("oldEventsTimeFilterEnabled", "false");
         loadProperty("oldEventsTimeFilter", "24.0", o -> validateDouble(0, 24 * 365, (Double) o));

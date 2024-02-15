@@ -199,7 +199,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             }
 
             graphics.setColor(c);
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, Settings.antialiasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
             graphics.draw(elementStationSquare.getShape());
         }
 
