@@ -10,9 +10,12 @@ import globalquake.core.station.AbstractStation;
 import globalquake.utils.GeoUtils;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StationWaveformGenerator {
+
+    private final double sensMul;
 
     static class Distances{
         public final double gcd;
@@ -59,9 +62,11 @@ public class StationWaveformGenerator {
     private static double backgroundNoise(double freq) {
         return (freq * 120000.0) / (160 * (freq - 0.15) * (freq - 0.15) + 1);
     }
+    private static final Random r = new Random();
 
     public StationWaveformGenerator(AbstractStation station, int seed) {
         this.station = station;
+        sensMul = Math.pow(100, r.nextGaussian() * 0.12 + 0.5) / 10.0;
         for(int i = 0; i < STEPS; i++){
             double freq = FREQS[i];
             noises[i] = new Perlin();
@@ -125,7 +130,7 @@ public class StationWaveformGenerator {
             result += 1E5 * decay * increase * psRatio(gcd);
         }
 
-        return result * distances.distMultiplier * MFR[i] * Math.sqrt(freq);
+        return result * distances.distMultiplier * MFR[i] * Math.sqrt(freq) * sensMul;
     }
 
     private static double getMagnitudeFrequencyRange(double mag, double freq) {
