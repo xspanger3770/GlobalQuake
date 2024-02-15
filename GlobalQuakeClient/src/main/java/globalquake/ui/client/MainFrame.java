@@ -142,8 +142,18 @@ public class MainFrame extends GQFrame {
         JPanel buttons2 = new JPanel(grid2);
 
         JButton settingsButton = new JButton("Settings");
-        settingsButton.addActionListener(actionEvent -> new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null).setVisible(true));
-
+        // Listener for settings panel button
+        settingsButton.addActionListener(actionEvent -> {
+            // Check if an instance of SettingsFrame already exists
+            if (SettingsFrame.getInstance() == null) {
+                // If not, create a new instance and make it visible
+                SettingsFrame settingsFrame = new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null);
+                settingsFrame.setVisible(true);
+                // Ensure that the SettingsFrame is always on top
+				settingsFrame.setAlwaysOnTop(true);
+            }
+    });
+    
         buttons2.add(settingsButton);
 
         JButton exitButton = new JButton("Exit");
