@@ -43,6 +43,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> playgroundEarthquakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, -30)), 0, 1, TimeUnit.SECONDS);
     }
 
+    @SuppressWarnings("unused")
     public GlobalQuakePlayground(StationDatabaseManager stationDatabaseManager, GlobalStationManager globalStationManager) {
         super(stationDatabaseManager, globalStationManager);
     }
