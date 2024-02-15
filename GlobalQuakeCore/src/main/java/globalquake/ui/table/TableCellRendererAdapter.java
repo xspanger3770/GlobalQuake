@@ -33,7 +33,8 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
                 if (bck != null) {
                     setBackground(bck);
                 }
-                setForeground(getForeground(entity, t));
+                //sets the background color if selected or not
+                setForeground(isSelected ? Color.BLACK : Color.BLACK);
                 setText(getText(entity, t));
             }
 
