@@ -122,7 +122,7 @@ public class GlobalQuakeFrame extends GQFrame {
 				 // Check if an instance of SettingsFrame already exists
 				 if (SettingsFrame.getInstance() == null) {
 					// If not, create a new instance and make it visible
-					SettingsFrame settingsFrame = new SettingsFrame(GlobalQuakeFrame.this, GlobalQuakeClient.instance != null);
+					SettingsFrame settingsFrame = new SettingsFrame(GlobalQuakeFrame.this, GlobalQuake.getInstance().limitedSettings());
 					settingsFrame.setVisible(true);
 					// Ensure that the SettingsFrame is always on top
 					settingsFrame.setAlwaysOnTop(true);

@@ -1,6 +1,7 @@
 package globalquake.ui.client;
 
 import globalquake.client.GlobalQuakeClient;
+import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
@@ -159,7 +160,7 @@ public class MainFrame extends GQFrame {
             // Check if an instance of SettingsFrame already exists
             if (SettingsFrame.getInstance() == null) {
                 // If not, create a new instance and make it visible
-                SettingsFrame settingsFrame = new SettingsFrame(MainFrame.this, GlobalQuakeClient.instance != null);
+                SettingsFrame settingsFrame = new SettingsFrame(MainFrame.this, false);
                 settingsFrame.setVisible(true);
                 // Ensure that the SettingsFrame is always on top
 				settingsFrame.setAlwaysOnTop(true);
