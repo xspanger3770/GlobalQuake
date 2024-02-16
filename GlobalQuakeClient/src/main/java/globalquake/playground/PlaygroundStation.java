@@ -50,4 +50,8 @@ public class PlaygroundStation extends AbstractStation {
         Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
         return event != null && event.isValid() && !event.hasEnded();
     }
+
+    public long getDelay() {
+        return generator.getDelay();
+    }
 }

@@ -15,7 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class StationWaveformGenerator {
 
+    private static final double TIME_BIAS = 2000;
+    private static final double DELAY_BIAS = 8000;
     private final double sensMul;
+    private final long bias;
+    private final long delay;
 
     static class Distances{
         public final double gcd;
@@ -67,6 +71,8 @@ public class StationWaveformGenerator {
     public StationWaveformGenerator(AbstractStation station, int seed) {
         this.station = station;
         sensMul = Math.pow(100, r.nextGaussian() * 0.12 + 0.5) / 10.0; // todo setting maybe for the 0.12
+        bias = (long) Math.abs(r.nextGaussian() * TIME_BIAS);
+        delay = (long) Math.abs(r.nextGaussian() * DELAY_BIAS);
         for(int i = 0; i < STEPS; i++){
             double freq = FREQS[i];
             noises[i] = new Perlin();
@@ -74,6 +80,10 @@ public class StationWaveformGenerator {
             noises[i].setOctaveCount(1);
             noises[i].setFrequency(freq);
         }
+    }
+
+    public long getDelay() {
+        return delay;
     }
 
     public int getValue(long time) {
@@ -89,7 +99,7 @@ public class StationWaveformGenerator {
 
         double result = BACKGROUND_NOISES[i];
         for(Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()){
-            result += getPowerFromQuake(earthquake, freq, time, i);
+            result += getPowerFromQuake(earthquake, freq, time - bias, i);
         }
 
         return result;

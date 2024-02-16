@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
 
-    public static final int CLUSTER_MIN_SIZE = 4;
+    public static final int CLUSTER_MIN_SIZE = 3;
     private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
 
     private final Lock clustersReadLock = clustersLock.readLock();
