@@ -174,6 +174,10 @@ __device__ inline float* h_depth(float* hypoc, int grid_size){
     return &hypoc[4 * grid_size];
 }
 
+__device__ inline float heuristic(float correct, float err){
+    return (correct * correct) / (err * err);
+}
+
 __device__ void reduce(float *a, float *b, int grid_size){
     float err_a = *h_err(a, grid_size);
     float err_b = *h_err(b, grid_size);
@@ -181,11 +185,7 @@ __device__ void reduce(float *a, float *b, int grid_size){
     int correct_a = *h_correct(a, grid_size);
     int correct_b = *h_correct(b, grid_size);
 
-    /*bool swap = correct_b > correct_a * MUL || (correct_b >= correct_a / MUL && 
-        (correct_b / (err_b + ADD) > correct_a / (err_a + ADD))
-    );*/
-
-    bool swap = (correct_b / (err_b + ADD) > correct_a / (err_a + ADD));
+    bool swap = heuristic(correct_b, err_b) > heuristic(correct_a, err_a);
 
     if(swap){
         *h_err(a,grid_size) = *h_err(b, grid_size);
