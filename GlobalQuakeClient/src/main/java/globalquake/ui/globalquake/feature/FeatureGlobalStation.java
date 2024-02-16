@@ -208,7 +208,8 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         drawDetails(mouseNearby, renderProperties.scroll, centerPoint, graphics, entity.getOriginal(), renderer, entity, renderProperties);
     }
 
-    private void drawDetails(boolean mouseNearby, double scroll, Point2D centerPoint, Graphics2D g, AbstractStation station, GlobeRenderer renderer, RenderEntity entity, RenderProperties renderProperties) {
+    private void drawDetails(boolean mouseNearby, double scroll, Point2D centerPoint, Graphics2D g, AbstractStation station, GlobeRenderer renderer,
+                             RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         int _y = (int) (7 + 6 * Settings.stationsSizeMul);
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);

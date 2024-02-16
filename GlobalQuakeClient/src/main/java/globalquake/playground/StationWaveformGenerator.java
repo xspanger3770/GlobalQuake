@@ -116,7 +116,6 @@ public class StationWaveformGenerator {
         }
 
         double gcd = distances.gcd;
-        double geo = distances.geo;
 
         double age = (time - earthquake.getOrigin()) / 1000.0;
 

@@ -425,7 +425,7 @@ public class EarthquakeAnalysis {
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
-                double h1  = calculateHeuristic(threadData.bestHypocenter);
+                double h1 = calculateHeuristic(threadData.bestHypocenter);
                 double h2 = calculateHeuristic(bestHypocenter);
                 boolean stillValid = h1 > h2 / confidenceThreshold;
                 if (stillValid) {
@@ -495,7 +495,7 @@ public class EarthquakeAnalysis {
         if (certainty != 0) {
             Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             Earthquake earthquake1 = cluster.getEarthquake();
-            if(certainty == 2 && earthquake1 != null){
+            if (certainty == 2 && earthquake1 != null) {
                 Logger.tag("Hypocs").debug("Uncertainty is so high that quake has to be removed.");
                 removeQuake(cluster, earthquake1);
             }
@@ -602,7 +602,7 @@ public class EarthquakeAnalysis {
 
         if (bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyLimit", 90.0f)) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
-            return bestHypocenter.locationUncertainty >  HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 200.0f) ? 2 : 1;
+            return bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 200.0f) ? 2 : 1;
         }
 
         if (DEPTH_FIX_ALLOWED) {
