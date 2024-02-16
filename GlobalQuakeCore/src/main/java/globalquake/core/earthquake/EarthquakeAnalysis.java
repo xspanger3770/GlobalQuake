@@ -427,7 +427,7 @@ public class EarthquakeAnalysis {
                 getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
                 double h1  = calculateHeuristic(threadData.bestHypocenter);
                 double h2 = calculateHeuristic(bestHypocenter);
-                boolean stillValid = h1 > h2 / confidenceThreshold && h1 + 5_000 * confidenceThreshold > h2;
+                boolean stillValid = h1 > h2 / confidenceThreshold;
                 if (stillValid) {
                     dist += step;
                     if (threadData.bestHypocenter.origin > maxOrigin) {
