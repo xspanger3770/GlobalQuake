@@ -600,9 +600,9 @@ public class EarthquakeAnalysis {
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
-        if (bestHypocenter.locationUncertainty > 90) {
+        if (bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyLimit", 90.0f)) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
-            return bestHypocenter.locationUncertainty > 140 ? 2 : 1;
+            return bestHypocenter.locationUncertainty >  HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 200.0f) ? 2 : 1;
         }
 
         if (DEPTH_FIX_ALLOWED) {
