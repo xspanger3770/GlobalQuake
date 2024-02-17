@@ -37,7 +37,7 @@ public class BetterAnalysis extends Analysis {
     public static final double max_frequency = 5.0;
 
 
-    public static final double min_frequency_mag = 0.5;
+    public static final double min_frequency_mag = 0.2;
     public static final double max_frequency_mag = 5.0;
 
     // in seconds

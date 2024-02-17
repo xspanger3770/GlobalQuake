@@ -56,7 +56,7 @@ public class IntensityGraphs {
 
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa22.png"));
+		ImageIO.write(img, "PNG", new File("aaa25.png"));
 
 		for(DistanceIntensityRecord dr: recs){
 			System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));
