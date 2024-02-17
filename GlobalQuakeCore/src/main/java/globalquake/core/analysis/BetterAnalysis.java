@@ -36,6 +36,10 @@ public class BetterAnalysis extends Analysis {
     public static final double min_frequency = 2.0;
     public static final double max_frequency = 5.0;
 
+
+    public static final double min_frequency_mag = 0.5;
+    public static final double max_frequency_mag = 5.0;
+
     // in seconds
     public static final double EVENT_END_DURATION = 7.0;
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
@@ -51,6 +55,7 @@ public class BetterAnalysis extends Analysis {
     private double lastCounts;
 
     private boolean lastCountsInitialised = false;
+    private Butterworth filterMag;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -63,6 +68,8 @@ public class BetterAnalysis extends Analysis {
         if (filter == null) {
             filter = new Butterworth();
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
+            filterMag = new Butterworth();
+            filterMag.bandPass(3, getSampleRate(), (min_frequency_mag + max_frequency_mag) * 0.5, (max_frequency_mag - min_frequency_mag));
             reset();// initial reset;
             getStation().reportState(StationState.INACTIVE, time);
             return;
@@ -85,6 +92,7 @@ public class BetterAnalysis extends Analysis {
                 if (initProgress >= INIT_OFFSET_CALCULATION * 0.001 * getSampleRate() * 0.25) {
                     double _initialOffset = initialOffsetSum / initialOffsetCnt;
                     double filteredV = filter.filter(v - _initialOffset);
+                    filterMag.filter(v - _initialOffset);
                     initialRatioSum += Math.abs(filteredV);
                     initialRatioCnt++;
                     longAverage = initialRatioSum / initialRatioCnt;
@@ -92,6 +100,7 @@ public class BetterAnalysis extends Analysis {
             } else if (initProgress <= (INIT_AVERAGE_RATIO + INIT_OFFSET_CALCULATION) * 0.001 * getSampleRate()) {
                 double _initialOffset = initialOffsetSum / initialOffsetCnt;
                 double filteredV = filter.filter(v - _initialOffset);
+                filterMag.filter(v - _initialOffset);
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
@@ -109,6 +118,7 @@ public class BetterAnalysis extends Analysis {
             return;
         }
         double filteredV = filter.filter(v - initialOffset);
+        double filteredVMag = filterMag.filter(v - initialOffset);
         double absFilteredV = Math.abs(filteredV);
         shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
         mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
@@ -168,7 +178,7 @@ public class BetterAnalysis extends Analysis {
             sensitivity = -1.0;
         }
 
-        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity);
+        double counts = filteredVMag * (DEFAULT_SENSITIVITY / sensitivity);
 
         double derived = lastCountsInitialised ? (counts - lastCounts) * getSampleRate() : 0;
 
