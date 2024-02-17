@@ -168,7 +168,7 @@ public class BetterAnalysis extends Analysis {
             sensitivity = -1.0;
         }
 
-        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.07;
+        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity);
 
         double derived = lastCountsInitialised ? (counts - lastCounts) * getSampleRate() : 0;
 

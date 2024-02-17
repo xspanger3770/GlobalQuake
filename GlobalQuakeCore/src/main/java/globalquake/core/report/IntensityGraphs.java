@@ -29,30 +29,30 @@ public class IntensityGraphs {
 		Graphics2D g = img.createGraphics();
 		
 		List<DistanceIntensityRecord> recs = new ArrayList<>();
-		recs.add(new DistanceIntensityRecord(6.1,100,2E5));
-		recs.add(new DistanceIntensityRecord(6.1,300,1E4));
-		recs.add(new DistanceIntensityRecord(6.1,1000,3E2));
-		recs.add(new DistanceIntensityRecord(6.1,3000,2E1));
-		recs.add(new DistanceIntensityRecord(6.1,10000,8E0));
+		recs.add(new DistanceIntensityRecord(6.1,100,2E5 / 0.07));
+		recs.add(new DistanceIntensityRecord(6.1,300,1E4  / 0.07));
+		recs.add(new DistanceIntensityRecord(6.1,1000,3E2  / 0.07));
+		recs.add(new DistanceIntensityRecord(6.1,3000,2E1  / 0.07));
+		recs.add(new DistanceIntensityRecord(6.1,10000,8E0  / 0.07));
 
-		recs.add(new DistanceIntensityRecord(4.8,30,1E5));
-		recs.add(new DistanceIntensityRecord(4.8,80,1E4));
-		recs.add(new DistanceIntensityRecord(4.8,250,1E3));
-		recs.add(new DistanceIntensityRecord(4.8,500,1E2));
+		recs.add(new DistanceIntensityRecord(4.8,30,1E5  / 0.07));
+		recs.add(new DistanceIntensityRecord(4.8,80,1E4  / 0.07));
+		recs.add(new DistanceIntensityRecord(4.8,250,1E3  / 0.07));
+		recs.add(new DistanceIntensityRecord(4.8,500,1E2  / 0.07));
 
-		recs.add(new DistanceIntensityRecord(3.6,1,1E5));
-		recs.add(new DistanceIntensityRecord(3.6,30,1E4));
-		recs.add(new DistanceIntensityRecord(3.6,90,1E3));
-		recs.add(new DistanceIntensityRecord(3.6,250,1E2));
-		recs.add(new DistanceIntensityRecord(3.6,600,1E1));
+		recs.add(new DistanceIntensityRecord(3.6,1,1E5  / 0.07));
+		recs.add(new DistanceIntensityRecord(3.6,30,1E4  / 0.07));
+		recs.add(new DistanceIntensityRecord(3.6,90,1E3  / 0.07));
+		recs.add(new DistanceIntensityRecord(3.6,250,1E2 / 0.07 ));
+		recs.add(new DistanceIntensityRecord(3.6,600,1E1  / 0.07));
 
-		recs.add(new DistanceIntensityRecord(2.2,10,1E2));
-		recs.add(new DistanceIntensityRecord(2.2,70,1E1));
+		recs.add(new DistanceIntensityRecord(2.2,10,1E2  / 0.07));
+		recs.add(new DistanceIntensityRecord(2.2,70,1E1 / 0.07));
 
-		recs.add(new DistanceIntensityRecord(5.1,1,1E6));
-		recs.add(new DistanceIntensityRecord(5.1,50,1E5));
-		recs.add(new DistanceIntensityRecord(5.1,180,1E4));
-		recs.add(new DistanceIntensityRecord(5.1,360,1E3));
+		recs.add(new DistanceIntensityRecord(5.1,1,1E6  / 0.07));
+		recs.add(new DistanceIntensityRecord(5.1,50,1E5  / 0.07));
+		recs.add(new DistanceIntensityRecord(5.1,180,1E4 / 0.07));
+		recs.add(new DistanceIntensityRecord(5.1,360,1E3 / 0.07));
 
 
 		drawGraph(g, w, h, recs);
@@ -96,8 +96,8 @@ public class IntensityGraphs {
 			}
 		}
 
-		double maxMag = Math.pow(10, 8);
-		int minP = -2;
+		double maxMag = Math.pow(10, 9);
+		int minP = -1;
 
 		int maxP = (int) Math.ceil(Math.log10(maxMag));
 		for (int p = minP; p <= maxP; p++) {
