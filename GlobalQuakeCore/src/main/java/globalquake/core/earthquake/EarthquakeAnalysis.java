@@ -604,7 +604,7 @@ public class EarthquakeAnalysis {
 
         if (bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyLimit", 90.0f)) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
-            return bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 200.0f) ? 2 : 1;
+            return bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 99999.0f) ? 2 : 1;
         }
 
         if (DEPTH_FIX_ALLOWED) {
