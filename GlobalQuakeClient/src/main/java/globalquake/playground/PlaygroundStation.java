@@ -9,15 +9,16 @@ public class PlaygroundStation extends AbstractStation {
     public static final double SAMPLE_RATE = 50;
     public long lastSampleTime = -1;
     private final StationWaveformGenerator generator;
-    public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id) {
+    public static final double DEFAULT_SENSITIVITY = 2E10;
+    public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id, double sensitivity) {
         super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null,
-                2E10);
+                sensitivity);
         getAnalysis().setSampleRate(SAMPLE_RATE);
         this.generator = new StationWaveformGenerator(this, id);
     }
 
-    public PlaygroundStation(String stationCode, double lat, double lon, double alt, int id) {
-        this("", stationCode, "", "", lat, lon, alt, id);
+    public PlaygroundStation(String stationCode, double lat, double lon, double alt, int id, double sensitivity) {
+        this("", stationCode, "", "", lat, lon, alt, id, sensitivity);
     }
 
     @Override
