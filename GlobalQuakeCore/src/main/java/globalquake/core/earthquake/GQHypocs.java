@@ -95,7 +95,7 @@ public class GQHypocs {
     }
 
     private static double getPointMultiplier() {
-        double point_multiplier = Settings.hypocenterDetectionResolution;
+        double point_multiplier = Settings.hypocenterDetectionResolutionGPU;
         point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
         return point_multiplier;
     }
@@ -109,7 +109,6 @@ public class GQHypocs {
             System.loadLibrary("gq_hypocs");
             initCuda();
             if(cudaLoaded) {
-                EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
                 Logger.tag("Hypocs").info("CUDA library loaded successfully!");
                 printResolution();
             } else {

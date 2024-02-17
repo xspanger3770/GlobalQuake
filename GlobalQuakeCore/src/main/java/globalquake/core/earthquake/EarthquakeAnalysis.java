@@ -72,13 +72,13 @@ public class EarthquakeAnalysis {
         }
         clusterAnalysis.getClustersReadLock().lock();
         try {
-            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
+            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster), true));
         } finally {
             clusterAnalysis.getClustersReadLock().unlock();
         }
     }
 
-    public void processCluster(Cluster cluster, List<PickedEvent> pickedEvents) {
+    public void processCluster(Cluster cluster, List<PickedEvent> pickedEvents, boolean useCUDA) {
         if (pickedEvents.isEmpty()) {
             return;
         }
@@ -101,10 +101,10 @@ public class EarthquakeAnalysis {
 
         cluster.lastEpicenterUpdate = cluster.updateCount;
 
-        preprocess(cluster, pickedEvents);
+        preprocess(cluster, pickedEvents, useCUDA);
     }
 
-    private void preprocess(Cluster cluster, List<PickedEvent> pickedEvents) {
+    private void preprocess(Cluster cluster, List<PickedEvent> pickedEvents, boolean useCUDA) {
         pickedEvents.sort(Comparator.comparing(PickedEvent::maxRatio));
 
         // if there is no event stronger than MIN_RATIO, abort
@@ -121,7 +121,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        HypocenterFinderSettings finderSettings = createSettings();
+        HypocenterFinderSettings finderSettings = createSettings(useCUDA);
 
         // if in the end there is less than N events, abort
         if (pickedEvents.size() < finderSettings.minStations()) {
@@ -137,9 +137,9 @@ public class EarthquakeAnalysis {
         findHypocenter(selectedEvents, cluster, finderSettings);
     }
 
-    public static HypocenterFinderSettings createSettings() {
+    public static HypocenterFinderSettings createSettings(boolean useCUDA) {
         return new HypocenterFinderSettings(Settings.pWaveInaccuracyThreshold, Settings.hypocenterCorrectThreshold,
-                Settings.hypocenterDetectionResolution, Settings.minimumStationsForEEW);
+                Settings.hypocenterDetectionResolution, Settings.hypocenterDetectionResolutionGPU, Settings.minimumStationsForEEW, useCUDA);
     }
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
@@ -212,14 +212,16 @@ public class EarthquakeAnalysis {
             return null;
         }
 
-        if (GQHypocs.isCudaLoaded()) {
+        if (GQHypocs.isCudaLoaded() && finderSettings.useCUDA()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0, finderSettings);
-            if (result == null) {
-                Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
-                        "because too many stations were involved in the event, but it might be also different error");
+
+            if(result != null){
+                return result;
             }
 
-            return result;
+            Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
+                        "because too many stations were involved in the event, but it might be also different error");
+            Logger.tag("Hypocs").warn("Fallback to CPU!");
         }
 
         Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getUuid() + " ====");

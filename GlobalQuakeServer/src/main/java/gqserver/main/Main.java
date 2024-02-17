@@ -155,7 +155,10 @@ public class Main {
 
         updateProgressBar("Calibrating...", (int) ((phase++ / PHASES) * 100.0));
         if(Settings.recalibrateOnLaunch) {
-            EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null);
+            EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null, true);
+            if(GQHypocs.isCudaLoaded()) {
+                EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null, false);
+            }
         }
 
         //start up the FDSNWS_Event Server, if enabled

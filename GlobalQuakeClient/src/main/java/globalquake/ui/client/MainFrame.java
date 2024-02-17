@@ -198,7 +198,10 @@ public class MainFrame extends GQFrame {
         updateProgressBar("Calibrating...", (int) ((phase++ / (PHASES + 4)) * 100.0));
 
         if (Settings.recalibrateOnLaunch) {
-            EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null);
+            EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null, true);
+            if(GQHypocs.isCudaLoaded()){
+                EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null, false);
+            }
         }
 
         updateProgressBar("Updating Station Sources...", (int) ((phase++ / (PHASES + 4)) * 100.0));

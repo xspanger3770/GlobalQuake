@@ -39,6 +39,8 @@ public final class Settings {
 
     public static final double hypocenterDetectionResolutionDefault = 40;
     public static Double hypocenterDetectionResolution;
+    public static final double hypocenterDetectionResolutionGPUDefault = 100;
+    public static Double hypocenterDetectionResolutionGPU;
 
     public static Boolean parallelHypocenterLocations;
     public static final int minimumStationsForEEWDefault = 5;
@@ -306,6 +308,7 @@ public final class Settings {
         loadProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault));
         loadProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault));
         loadProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault));
+        loadProperty("hypocenterDetectionResolutionGPU", String.valueOf(hypocenterDetectionResolutionGPUDefault));
         loadProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault));
         loadProperty("useOldColorScheme", "false");
         loadProperty("parallelHypocenterLocations", "true");

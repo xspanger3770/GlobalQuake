@@ -97,7 +97,7 @@ public class GlobalQuakeLab {
 
         System.err.printf("process with %d stations and %d events%n", fakeStations.size(), pickedEvents.size());
 
-        earthquakeAnalysis.processCluster(cluster, pickedEvents);
+        earthquakeAnalysis.processCluster(cluster, pickedEvents, true);
 
         Logger.debug("Previous " + absolutetyCorrect);
         Logger.debug("Got           " + cluster.getPreviousHypocenter());
