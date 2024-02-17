@@ -56,9 +56,9 @@ public class FDSNWSDownloader {
         return paramNames;
     }
 
-    public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
+    public static List<Network> downloadFDSNWS(StationSource stationSource, String addons) throws Exception {
         List<Network> result = new ArrayList<>();
-        downloadFDSNWS(stationSource, result, -180, 180, "");
+        downloadFDSNWS(stationSource, result, -180, 180, addons);
         Logger.info("%d Networks downloaded".formatted(result.size()));
         return result;
     }
