@@ -178,7 +178,6 @@ public class BetterAnalysis extends Analysis {
         countsSum += counts / getSampleRate();
         countsSum *= 0.999;
 
-
         double countsResult = !getStation().isSensitivityValid() ? -1 : Math.abs(
                 getStation().getInputType() == InputType.ACCELERATION ? countsSum :
                 getStation().getInputType() == InputType.VELOCITY ? counts : derived);
@@ -237,6 +236,7 @@ public class BetterAnalysis extends Analysis {
     public void reset() {
         _maxRatio = 0;
         _maxCounts = 0;
+        countsSum = 0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
