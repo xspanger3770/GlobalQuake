@@ -28,23 +28,6 @@ public class GQHypocs {
     private static boolean stationLimitCalculated = false;
     private static int stationLimit = 0;
 
-    static {
-        try {
-            System.loadLibrary("gq_hypocs");
-            initCuda();
-            if(cudaLoaded) {
-                EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
-                Logger.tag("Hypocs").info("CUDA library loaded successfully!");
-                printResolution();
-            } else {
-                Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
-            }
-        } catch(Exception | UnsatisfiedLinkError e) {
-            Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
-        }
-
-    }
-
     private static void printResolution() {
         for(int i = 0; i < depth_profiles.length; i++){
             Logger.tag("Hypocs").debug("Iteration #%d difficulty: %.2fK".formatted( i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
@@ -121,4 +104,19 @@ public class GQHypocs {
         return cudaLoaded;
     }
 
- }
+    public static void load() {
+        try {
+            System.loadLibrary("gq_hypocs");
+            initCuda();
+            if(cudaLoaded) {
+                EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
+                Logger.tag("Hypocs").info("CUDA library loaded successfully!");
+                printResolution();
+            } else {
+                Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
+            }
+        } catch(Exception | UnsatisfiedLinkError e) {
+            Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
+        }
+    }
+}

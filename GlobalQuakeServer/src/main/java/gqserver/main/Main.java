@@ -137,7 +137,7 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 9.0;
+    private static final double PHASES = 10.0;
     private static int phase = 0;
 
     public static void initAll() throws Exception{
@@ -149,6 +149,9 @@ public class Main {
 
         updateProgressBar("Loading travel table...", (int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();
+
+        updateProgressBar("Trying to load CUDA library...", (int) ((phase++ / PHASES) * 100.0));
+        GQHypocs.load();
 
         updateProgressBar("Calibrating...", (int) ((phase++ / PHASES) * 100.0));
         if(Settings.recalibrateOnLaunch) {

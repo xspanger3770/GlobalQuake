@@ -3,6 +3,7 @@ package globalquake.ui.client;
 import globalquake.core.Settings;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
+import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.exception.FatalIOException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
@@ -69,7 +70,7 @@ public class MainFrame extends GQFrame {
         }
     }
 
-    private static final double PHASES = 5.0;
+    private static final double PHASES = 6.0;
     private static int phase = 0;
 
     private void initAll() throws Exception {
@@ -94,6 +95,10 @@ public class MainFrame extends GQFrame {
         getProgressBar().setString("Loading travel table...");
         getProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
         TauPTravelTimeCalculator.init();
+
+        getProgressBar().setString("Trying to load CUDA library...");
+        getProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
+        GQHypocs.load();
 
         getProgressBar().setString("Done");
         getProgressBar().setValue((int) ((phase++ / PHASES) * 100.0));
