@@ -243,7 +243,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         }
         if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
-            String str = !station.hasDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
+            String str = !station.hasDisplayableData() ? "-.-" : "%.1f".formatted(station.getMaxRatio60S());
             g.setFont(new Font("Calibri", Font.PLAIN, 13));
             g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
             if(centerPoint == null) {
