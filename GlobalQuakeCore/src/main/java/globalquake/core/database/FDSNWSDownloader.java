@@ -58,18 +58,18 @@ public class FDSNWSDownloader {
 
     public static List<Network> downloadFDSNWS(StationSource stationSource) throws Exception {
         List<Network> result = new ArrayList<>();
-        downloadFDSNWS(stationSource, result, -180, 180);
+        downloadFDSNWS(stationSource, result, -180, 180, "");
         Logger.info("%d Networks downloaded".formatted(result.size()));
         return result;
     }
 
-    public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon) throws Exception {
+    public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon, String addons) throws Exception {
         List<String> supportedAttributes = downloadWadl(stationSource);
         URL url;
         if(supportedAttributes.contains("endafter")){
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now())));
         } else {
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z".formatted(stationSource.getUrl(), minLon, maxLon));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon));
         }
 
 
@@ -88,8 +88,8 @@ public class FDSNWSDownloader {
                 return;
             }
 
-            downloadFDSNWS(stationSource, result, minLon, (minLon + maxLon) / 2.0);
-            downloadFDSNWS(stationSource, result, (minLon + maxLon) / 2.0, maxLon);
+            downloadFDSNWS(stationSource, result, minLon, (minLon + maxLon) / 2.0, addons);
+            downloadFDSNWS(stationSource, result, (minLon + maxLon) / 2.0, maxLon, addons);
         } else if(response / 100 == 2) {
             InputStream inp = con.getInputStream();
             downloadFDSNWS(stationSource, result, inp);
