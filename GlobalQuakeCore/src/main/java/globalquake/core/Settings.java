@@ -175,6 +175,7 @@ public final class Settings {
     public static Boolean antialiasingQuakes;
     public static Boolean antialiasingOldQuakes;
     public static Boolean antialiasingClusters;
+    public static Boolean debugSendPGV;
 
     static {
         load();
@@ -193,6 +194,7 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
+        loadProperty("debugSendPGV", "false");
         loadProperty("antialiasingOldQuakes", "true");
         loadProperty("antialiasingClusters", "true");
         loadProperty("antialiasingQuakes", "true");
