@@ -41,7 +41,7 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(6.4, 1100, 1E4));
 
 
-        drawGraph(g, w, h, recs);
+        drawGraph(g, w, h, recs, false);
         ImageIO.write(img, "PNG", new File("aaa26.png"));
 
         for (DistanceIntensityRecord dr : recs) {
@@ -55,7 +55,7 @@ public class IntensityGraphs {
             new float[]{3}, 0);
     private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);
 
-    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs) {
+    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, boolean ultraLow) {
         int wry = 20;
         int wrx;
         g.setFont(new Font("Calibri", Font.BOLD, 14));
@@ -63,6 +63,11 @@ public class IntensityGraphs {
         g.setColor(Color.white);
         g.fillRect(0, 0, w, h);
         g.setColor(Color.black);
+
+        String str1 = "ultraLow=%s".formatted(ultraLow);
+
+        g.drawString(str1, w - 6 - g.getFontMetrics().stringWidth(str1), 14);
+
         g.drawRect(0, 0, w - 1, h - 1);
         g.drawRect(wrx, 0, w - wrx, -wry);
         for (int p = 0; p <= 4; p++) {

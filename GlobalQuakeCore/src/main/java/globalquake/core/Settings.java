@@ -175,6 +175,7 @@ public final class Settings {
     public static Boolean antialiasingQuakes;
     public static Boolean antialiasingOldQuakes;
     public static Boolean antialiasingClusters;
+    @SuppressWarnings("unused")
     public static Boolean debugSendPGV;
 
     static {

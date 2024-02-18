@@ -64,7 +64,6 @@ public class BetterAnalysis extends Analysis {
     private boolean lastCountsULInitialised;
     private double lastCountsUL;
     private double countsSumUL;
-    private boolean lastCountsInitialisedUL;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -216,7 +215,7 @@ public class BetterAnalysis extends Analysis {
         double derivedUL = lastCountsULInitialised ? (countsUL - lastCountsUL) * getSampleRate() : 0;
 
         lastCountsUL = countsUL;
-        lastCountsInitialisedUL = true;
+        lastCountsULInitialised = true;
 
         countsSumUL += countsUL / getSampleRate();
         countsSumUL *= 0.999;
@@ -290,7 +289,7 @@ public class BetterAnalysis extends Analysis {
         numRecords = 0;
         latestLogTime = 0;
         lastCountsInitialised = false;
-        lastCountsInitialisedUL=false;
+        lastCountsULInitialised = false;
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {

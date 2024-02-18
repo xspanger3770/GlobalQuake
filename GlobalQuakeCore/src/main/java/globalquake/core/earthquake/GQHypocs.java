@@ -6,7 +6,6 @@ import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;

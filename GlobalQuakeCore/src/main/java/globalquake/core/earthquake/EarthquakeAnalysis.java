@@ -1015,13 +1015,13 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        assignMagnitude(cluster, hypocenter, goodEvents, false);
+        assignMagnitude(hypocenter, goodEvents, false);
         if(hypocenter.magnitude > 6.8){
-            assignMagnitude(cluster, hypocenter, goodEvents, true);
+            assignMagnitude(hypocenter, goodEvents, true);
         }
     }
 
-    private static void assignMagnitude(Cluster cluster, Hypocenter hypocenter, Collection<Event> goodEvents, boolean useUL) {
+    private static void assignMagnitude(Hypocenter hypocenter, Collection<Event> goodEvents, boolean useUL) {
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
             double maxCounts = useUL ? event.getMaxCountsUL() : event.getMaxCounts();
