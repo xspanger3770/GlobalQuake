@@ -46,6 +46,7 @@ public class Event implements Serializable {
     private double maxCountsBuffer;
 
     private WaveformBuffer waveformBuffer;
+    public double maxCountsUL;
 
     public Event(Analysis analysis, long start, WaveformBuffer waveformBuffer, boolean usingRatio) {
         this(analysis, waveformBuffer.getReadLock(), waveformBuffer.getWriteLock());
@@ -169,7 +170,7 @@ public class Event implements Serializable {
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-                    float specialAverage, double ratio, double counts) {
+                    float specialAverage, double ratio, double counts, double countsUL) {
         try {
             writeLock.lock();
             if (waveformBuffer == null) {
@@ -192,6 +193,10 @@ public class Event implements Serializable {
                 this.maxCountsBuffer = this.maxCounts;
                 this.updatesCount++;
             }
+        }
+
+        if(countsUL > this.maxCountsUL){
+            this.maxCountsUL = countsUL;
         }
 
         boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
@@ -295,6 +300,10 @@ public class Event implements Serializable {
 
     public double getMaxCounts() {
         return maxCounts;
+    }
+
+    public double getMaxCountsUL() {
+        return maxCountsUL;
     }
 
     public boolean isUsingRatio() {

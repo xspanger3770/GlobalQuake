@@ -1014,9 +1014,18 @@ public class EarthquakeAnalysis {
         if (goodEvents.isEmpty()) {
             return;
         }
+
+        assignMagnitude(cluster, hypocenter, goodEvents, false);
+        if(hypocenter.magnitude > 6.8){
+            assignMagnitude(cluster, hypocenter, goodEvents, true);
+        }
+    }
+
+    private static void assignMagnitude(Cluster cluster, Hypocenter hypocenter, Collection<Event> goodEvents, boolean useUL) {
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
-            if (!event.isValid() || event.getMaxCounts() < 0) {
+            double maxCounts = useUL ? event.getMaxCountsUL() : event.getMaxCounts();
+            if (!event.isValid() || maxCounts < 0) {
                 continue;
             }
             double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
@@ -1029,10 +1038,10 @@ public class EarthquakeAnalysis {
                     * 1000);
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
-            double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
+            double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 0.95 : Math.max(1, 3 - distGC / 400.0);
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
-                    IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
+                    IntensityTable.getMagnitude(distGE, maxCounts * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
             long eventAge = lastRecord - event.getpWave();
@@ -1050,6 +1059,7 @@ public class EarthquakeAnalysis {
 
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
+        hypocenter.ultraLowUsed = useUL;
     }
 
     public static double getDepthCorrection(double depth) {
@@ -1059,13 +1069,25 @@ public class EarthquakeAnalysis {
     protected static double selectMagnitude(List<MagnitudeReading> mags) {
         mags.sort(Comparator.comparing(MagnitudeReading::distance));
 
-        int targetSize = (int) Math.max(25, mags.size() * 0.40);
-        List<MagnitudeReading> list = new ArrayList<>();
+        List<MagnitudeReading> magnitudeReadings = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 6400.0) {
-                list.add(magnitudeReading);
+            if(magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000){
+                magnitudeReadings.add(magnitudeReading);
+            }
+        }
+
+        int targetSize = 42;
+        for (MagnitudeReading magnitudeReading : mags) {
+            if(magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000){
+                continue;
+            }
+
+            if (magnitudeReadings.size() < targetSize) {
+                magnitudeReadings.add(magnitudeReading);
             } else break;
         }
+
+        List<MagnitudeReading> list = new ArrayList<>(magnitudeReadings);
 
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
 

@@ -18,6 +18,8 @@ public abstract class Analysis {
     public long latestLogTime;
     public double _maxRatio;
     public double _maxCounts;
+    public double _maxCountsUL;
+
     public boolean _maxRatioReset;
     private byte status;
 

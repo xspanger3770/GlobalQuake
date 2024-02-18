@@ -31,8 +31,9 @@ public class Hypocenter {
 	public Quality quality;
 	public int reducedEvents;
 	public int totalEvents;
+	public boolean ultraLowUsed;
 
-	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
+    public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,
 					  List<PolygonConfidenceInterval> polygonConfidenceIntervals) {
 		this.lat = lat;

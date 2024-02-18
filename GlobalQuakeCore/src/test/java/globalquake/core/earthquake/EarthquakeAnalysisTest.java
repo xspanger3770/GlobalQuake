@@ -69,7 +69,7 @@ public class EarthquakeAnalysisTest {
 
         Collections.shuffle(mags);
 
-        assertEquals(EarthquakeAnalysis.selectMagnitude(mags), 4.0, 0.1);
+        assertEquals(EarthquakeAnalysis.selectMagnitude(mags), 9.0, 0.1);
     }
 
     @Test

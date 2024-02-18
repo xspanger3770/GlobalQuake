@@ -82,13 +82,15 @@ public class EarthquakeReporter {
 		BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = img.createGraphics();
 
+		boolean ultraLow = earthquake.getHypocenter().ultraLowUsed;
+
 		ArrayList<DistanceIntensityRecord> recs = new ArrayList<>();
 		for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
 			double lat = event.report.lat();
 			double lon = event.report.lon();
 			double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
 					-earthquake.getDepth(), lat, lon, event.report.alt() / 1000.0);
-			recs.add(new DistanceIntensityRecord(0, distGE, event.getMaxCounts()));
+			recs.add(new DistanceIntensityRecord(ultraLow ? 5 : 0 /*only for colors*/, distGE, ultraLow ? event.getMaxCountsUL() : event.getMaxCounts()));
 		}
 
 		IntensityGraphs.drawGraph(g, w, h, recs);

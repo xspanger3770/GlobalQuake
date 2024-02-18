@@ -40,6 +40,10 @@ public class BetterAnalysis extends Analysis {
     public static final double min_frequency_mag = 0.2;
     public static final double max_frequency_mag = 5.0;
 
+    public static final double min_frequency_mag_ultralow = 0.01;
+    public static final double max_frequency_mag_ultralow = 0.5;
+
+
     // in seconds
     public static final double EVENT_END_DURATION = 7.0;
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
@@ -56,6 +60,11 @@ public class BetterAnalysis extends Analysis {
 
     private boolean lastCountsInitialised = false;
     private Butterworth filterMag;
+    private Butterworth filterUltraLow;
+    private boolean lastCountsULInitialised;
+    private double lastCountsUL;
+    private double countsSumUL;
+    private boolean lastCountsInitialisedUL;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -70,6 +79,9 @@ public class BetterAnalysis extends Analysis {
             filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
             filterMag = new Butterworth();
             filterMag.bandPass(3, getSampleRate(), (min_frequency_mag + max_frequency_mag) * 0.5, (max_frequency_mag - min_frequency_mag));
+            filterUltraLow = new Butterworth();
+            filterUltraLow.bandPass(3, getSampleRate(), (min_frequency_mag_ultralow + max_frequency_mag_ultralow) * 0.5,
+                    (max_frequency_mag_ultralow - min_frequency_mag_ultralow));
             reset();// initial reset;
             getStation().reportState(StationState.INACTIVE, time);
             return;
@@ -93,6 +105,7 @@ public class BetterAnalysis extends Analysis {
                     double _initialOffset = initialOffsetSum / initialOffsetCnt;
                     double filteredV = filter.filter(v - _initialOffset);
                     filterMag.filter(v - _initialOffset);
+                    filterUltraLow.filter(v - _initialOffset);
                     initialRatioSum += Math.abs(filteredV);
                     initialRatioCnt++;
                     longAverage = initialRatioSum / initialRatioCnt;
@@ -101,6 +114,7 @@ public class BetterAnalysis extends Analysis {
                 double _initialOffset = initialOffsetSum / initialOffsetCnt;
                 double filteredV = filter.filter(v - _initialOffset);
                 filterMag.filter(v - _initialOffset);
+                filterUltraLow.filter(v - _initialOffset);
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
@@ -119,6 +133,7 @@ public class BetterAnalysis extends Analysis {
         }
         double filteredV = filter.filter(v - initialOffset);
         double filteredVMag = filterMag.filter(v - initialOffset);
+        double filteredVUltraLow = filterUltraLow.filter(v - initialOffset);
         double absFilteredV = Math.abs(filteredV);
         shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
         mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
@@ -196,6 +211,24 @@ public class BetterAnalysis extends Analysis {
             _maxCounts = countsResult;
         }
 
+        double countsUL = filteredVUltraLow * (DEFAULT_SENSITIVITY / sensitivity);
+
+        double derivedUL = lastCountsULInitialised ? (countsUL - lastCountsUL) * getSampleRate() : 0;
+
+        lastCountsUL = countsUL;
+        lastCountsInitialisedUL = true;
+
+        countsSumUL += countsUL / getSampleRate();
+        countsSumUL *= 0.999;
+
+        double countsResultUL = !getStation().isSensitivityValid() ? -1 : Math.abs(
+                getStation().getInputType() == InputType.ACCELERATION ? countsSumUL :
+                        getStation().getInputType() == InputType.VELOCITY ? countsUL : derivedUL);
+
+        if(countsResultUL > _maxCountsUL){
+            _maxCountsUL = countsResultUL;
+        }
+
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
 
@@ -222,7 +255,7 @@ public class BetterAnalysis extends Analysis {
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
                     e.log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                            (float) longAverage, (float) specialAverage, ratio, countsResult);
+                            (float) longAverage, (float) specialAverage, ratio, countsResult, countsResultUL);
                 }
             }
         }
@@ -246,6 +279,7 @@ public class BetterAnalysis extends Analysis {
     public void reset() {
         _maxRatio = 0;
         _maxCounts = 0;
+        _maxCountsUL = 0;
         countsSum = 0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
@@ -256,6 +290,7 @@ public class BetterAnalysis extends Analysis {
         numRecords = 0;
         latestLogTime = 0;
         lastCountsInitialised = false;
+        lastCountsInitialisedUL=false;
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {
