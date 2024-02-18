@@ -93,7 +93,7 @@ public class EarthquakeReporter {
             double lon = event.report.lon();
             double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
                     -earthquake.getDepth(), lat, lon, event.report.alt() / 1000.0);
-            double color = (inputType == null || inputType == InputType.UNKNOWN) ? 0 : inputType == InputType.ACCELERATION ? 2.5 : inputType == InputType.VELOCITY ? 5.0 : 7.5;
+            double color = (inputType == null || inputType == InputType.UNKNOWN) ? 7.5 : inputType == InputType.ACCELERATION ? 2.0 : inputType == InputType.VELOCITY ? 0.0 : 6.0;
             recs.add(new DistanceIntensityRecord(color, distGE, ultraLow ? event.getMaxCountsUL() : event.getMaxCounts()));
         }
 
