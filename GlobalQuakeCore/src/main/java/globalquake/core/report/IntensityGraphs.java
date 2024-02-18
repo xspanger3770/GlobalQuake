@@ -29,34 +29,20 @@ public class IntensityGraphs {
 		Graphics2D g = img.createGraphics();
 		
 		List<DistanceIntensityRecord> recs = new ArrayList<>();
-		recs.add(new DistanceIntensityRecord(6.1,100,2E5 / 0.07));
-		recs.add(new DistanceIntensityRecord(6.1,300,1E4  / 0.07));
-		recs.add(new DistanceIntensityRecord(6.1,1000,3E2  / 0.07));
-		recs.add(new DistanceIntensityRecord(6.1,3000,2E1  / 0.07));
-		recs.add(new DistanceIntensityRecord(6.1,10000,8E0  / 0.07));
 
-		recs.add(new DistanceIntensityRecord(4.8,30,1E5  / 0.07));
-		recs.add(new DistanceIntensityRecord(4.8,80,1E4  / 0.07));
-		recs.add(new DistanceIntensityRecord(4.8,250,1E3  / 0.07));
-		recs.add(new DistanceIntensityRecord(4.8,500,1E2  / 0.07));
+		recs.add(new DistanceIntensityRecord(8.1,100,6E7));
+		recs.add(new DistanceIntensityRecord(8.1,350,1E7));
+		recs.add(new DistanceIntensityRecord(8.1,800,1E6));
+		recs.add(new DistanceIntensityRecord(8.1,2000,1E5));
 
-		recs.add(new DistanceIntensityRecord(3.6,1,1E5  / 0.07));
-		recs.add(new DistanceIntensityRecord(3.6,30,1E4  / 0.07));
-		recs.add(new DistanceIntensityRecord(3.6,90,1E3  / 0.07));
-		recs.add(new DistanceIntensityRecord(3.6,250,1E2 / 0.07 ));
-		recs.add(new DistanceIntensityRecord(3.6,600,1E1  / 0.07));
-
-		recs.add(new DistanceIntensityRecord(2.2,10,1E2  / 0.07));
-		recs.add(new DistanceIntensityRecord(2.2,70,1E1 / 0.07));
-
-		recs.add(new DistanceIntensityRecord(5.1,1,1E6  / 0.07));
-		recs.add(new DistanceIntensityRecord(5.1,50,1E5  / 0.07));
-		recs.add(new DistanceIntensityRecord(5.1,180,1E4 / 0.07));
-		recs.add(new DistanceIntensityRecord(5.1,360,1E3 / 0.07));
+		recs.add(new DistanceIntensityRecord(6.4,100,1E7));
+		recs.add(new DistanceIntensityRecord(6.4,250,1E6));
+		recs.add(new DistanceIntensityRecord(6.4,600,1E5));
+		recs.add(new DistanceIntensityRecord(6.4,1100,1E4));
 
 
 		drawGraph(g, w, h, recs);
-		ImageIO.write(img, "PNG", new File("aaa25.png"));
+		ImageIO.write(img, "PNG", new File("aaa26.png"));
 
 		for(DistanceIntensityRecord dr: recs){
 			System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));

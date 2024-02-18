@@ -66,10 +66,25 @@ public class FDSNWSDownloader {
     public static void downloadFDSNWS(StationSource stationSource, List<Network> result, double minLon, double maxLon, String addons) throws Exception {
         List<String> supportedAttributes = downloadWadl(stationSource);
         URL url;
-        if(supportedAttributes.contains("endafter")){
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now()), addons));
+
+        StringBuilder addonsResult = new StringBuilder();
+        List<String> addonsSplit = List.of(addons.split("&"));
+        for(String str : addonsSplit){
+            if(str.isEmpty()){
+                continue;
+            }
+            if(supportedAttributes.contains(str.split("=")[0])){
+                addonsResult.append("&");
+                addonsResult.append(str);
+            } else {
+                Logger.warn("Addon not supported: %s".formatted(str.split("=")[0]));
+            }
+        }
+
+        if(supportedAttributes.contains("endafter") && addons.isEmpty()){
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now()), addonsResult));
         } else {
-            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon));
+            url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, addonsResult));
         }
 
 

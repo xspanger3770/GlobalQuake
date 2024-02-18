@@ -1042,10 +1042,12 @@ public class EarthquakeAnalysis {
 
         mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
 
-        int minSize = (int) Math.max(4, mags.size() * 0.2);
-        while (mags.size() > minSize && mags.get(0).eventAge() < 5000) {
+        int targetSize = (int) Math.max(4, mags.size() * 0.7);
+
+        while (mags.size() > targetSize) {
             mags.remove(0);
         }
+
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
     }
