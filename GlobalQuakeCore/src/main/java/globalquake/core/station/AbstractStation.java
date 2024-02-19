@@ -149,7 +149,7 @@ public abstract class AbstractStation {
 
     public void second(long time) {
 		if (getAnalysis()._maxRatio > 0) {
-			ratioHistory.add(Settings.debugSendPGV && isSensitivityValid() ? getAnalysis()._maxCounts : getAnalysis()._maxRatio);
+			ratioHistory.add(Settings.debugSendPGV && isSensitivityValid() ? getAnalysis()._maxVelocity : getAnalysis()._maxRatio);
 			getAnalysis()._maxRatioReset = true;
 
 			if (ratioHistory.size() >= RATIO_HISTORY_SECONDS) {

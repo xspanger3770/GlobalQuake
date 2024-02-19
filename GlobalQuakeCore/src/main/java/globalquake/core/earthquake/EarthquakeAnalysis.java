@@ -1017,17 +1017,19 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        assignMagnitude(hypocenter, goodEvents, false);
+        assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
+        if(hypocenter.magnitude > 4.2){
+            assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
+        }
         if(hypocenter.magnitude > 6.8){
-            assignMagnitude(hypocenter, goodEvents, true);
+            assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
         }
     }
 
-    private static void assignMagnitude(Hypocenter hypocenter, Collection<Event> goodEvents, boolean useUL) {
+    private static void assignMagnitude(Hypocenter hypocenter, Collection<Event> goodEvents, MagnitudeType magnitudeType) {
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
-            double maxCounts = useUL ? event.getMaxCountsUL() : event.getMaxCounts();
-            if (!event.isValid() || maxCounts < 0) {
+            if (!event.isValid() || event.getMaxVelocity() < 0 || event.getMaxRatio() < 0) {
                 continue;
             }
             double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
@@ -1042,8 +1044,10 @@ public class EarthquakeAnalysis {
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 0.95 : Math.max(1, 3 - distGC / 400.0);
 
+            double maxVelocity = event.getMaxVelocity(magnitudeType)   ;
+
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
-                    IntensityTable.getMagnitude(distGE, maxCounts * mul);
+                    IntensityTable.getMagnitude(distGE, maxVelocity * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
             long eventAge = lastRecord - event.getpWave();
@@ -1061,7 +1065,7 @@ public class EarthquakeAnalysis {
 
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
-        hypocenter.ultraLowUsed = useUL;
+        hypocenter.magnitudeType = magnitudeType;
     }
 
     public static double getDepthCorrection(double depth) {

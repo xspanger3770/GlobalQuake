@@ -83,8 +83,6 @@ public class EarthquakeReporter {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = img.createGraphics();
 
-        boolean ultraLow = earthquake.getHypocenter().ultraLowUsed;
-
         ArrayList<DistanceIntensityRecord> recs = new ArrayList<>();
         for (Event event : earthquake.getCluster().getAssignedEvents().values()) {
             InputType inputType =
@@ -94,10 +92,10 @@ public class EarthquakeReporter {
             double distGE = GeoUtils.geologicalDistance(earthquake.getLat(), earthquake.getLon(),
                     -earthquake.getDepth(), lat, lon, event.report.alt() / 1000.0);
             double color = (inputType == null || inputType == InputType.UNKNOWN) ? 7.5 : inputType == InputType.ACCELERATION ? 2.0 : inputType == InputType.VELOCITY ? 0.0 : 6.0;
-            recs.add(new DistanceIntensityRecord(color, distGE, ultraLow ? event.getMaxCountsUL() : event.getMaxCounts()));
+            recs.add(new DistanceIntensityRecord(color, distGE, event.getMaxVelocity(earthquake.getHypocenter().magnitudeType)));
         }
 
-        IntensityGraphs.drawGraph(g, w, h, recs, ultraLow);
+        IntensityGraphs.drawGraph(g, w, h, recs, earthquake.getHypocenter().magnitudeType);
 
         g.dispose();
         try {
@@ -161,7 +159,7 @@ public class EarthquakeReporter {
             double x = getX(event.report.lon());
             double y = getY(event.report.lat());
             double r = 12;
-            g.setColor(Scale.getColorRatio(event.getMaxCounts()));
+            g.setColor(Scale.getColorRatio(event.getMaxVelocity(earthquake.getHypocenter().magnitudeType)));
             Ellipse2D.Double ell1 = new Ellipse2D.Double(x - r / 2, y - r / 2, r, r);
             g.fill(ell1);
         }

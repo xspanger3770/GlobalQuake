@@ -1,5 +1,6 @@
 package globalquake.core.analysis;
 
+import globalquake.core.earthquake.MagnitudeType;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.report.StationReport;
 
@@ -42,11 +43,13 @@ public class Event implements Serializable {
     private final transient Analysis analysis;
 
     private boolean isSWave;
-    private double maxCounts;
     private double maxCountsBuffer;
 
     private WaveformBuffer waveformBuffer;
-    public double maxCountsUL;
+
+    private double maxVelocity;
+    private double maxVelocityLowFreq;
+    private double maxVelocityUltraLowFreq;
 
     public Event(Analysis analysis, long start, WaveformBuffer waveformBuffer, boolean usingRatio) {
         this(analysis, waveformBuffer.getReadLock(), waveformBuffer.getWriteLock());
@@ -65,7 +68,6 @@ public class Event implements Serializable {
         }
         this.nextPWaveCalc = -1;
         this.maxRatio = 0;
-        this.maxCounts = 0;
         this.maxCountsBuffer = 0.0;
         this.valid = true;
         this.analysis = analysis;
@@ -170,7 +172,7 @@ public class Event implements Serializable {
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-                    float specialAverage, double ratio, double counts, double countsUL) {
+                    float specialAverage, double ratio, double velocity, double velocityLowFreq, double velocityUltraLowFreq) {
         try {
             writeLock.lock();
             if (waveformBuffer == null) {
@@ -184,19 +186,15 @@ public class Event implements Serializable {
             this.maxRatio = ratio;
         }
 
-        if (counts > this.maxCounts) {
-            this.maxCounts = counts;
-
-            if (this.maxCountsBuffer == 0) {
-                this.maxCountsBuffer = maxCounts;
-            } else if (this.maxCounts > this.maxCountsBuffer * 2.0) {
-                this.maxCountsBuffer = this.maxCounts;
-                this.updatesCount++;
-            }
+        if (velocity > this.maxVelocity) {
+            this.maxVelocity = velocity;
         }
 
-        if(countsUL > this.maxCountsUL){
-            this.maxCountsUL = countsUL;
+        if (velocityLowFreq > this.maxVelocityLowFreq) {
+            this.maxVelocityLowFreq = velocityLowFreq;
+        }
+        if (velocityUltraLowFreq > this.maxVelocity) {
+            this.maxVelocityUltraLowFreq = velocityUltraLowFreq;
         }
 
         boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
@@ -298,12 +296,16 @@ public class Event implements Serializable {
         return waveformBuffer;
     }
 
-    public double getMaxCounts() {
-        return maxCounts;
+    public double getMaxVelocity() {
+        return maxVelocity;
     }
 
-    public double getMaxCountsUL() {
-        return maxCountsUL;
+    public double getMaxVelocityLowFreq() {
+        return maxVelocityLowFreq;
+    }
+
+    public double getMaxVelocityUltraLowFreq() {
+        return maxVelocityUltraLowFreq;
     }
 
     public boolean isUsingRatio() {
@@ -317,5 +319,11 @@ public class Event implements Serializable {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    public double getMaxVelocity(MagnitudeType magnitudeType) {
+        return magnitudeType == MagnitudeType.DEFAULT ? getMaxVelocity() :
+                magnitudeType == MagnitudeType.LOW_FREQ ? getMaxVelocityLowFreq() :
+                        getMaxVelocityUltraLowFreq();
     }
 }

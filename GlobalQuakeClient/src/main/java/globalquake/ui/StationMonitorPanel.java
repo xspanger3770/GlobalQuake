@@ -48,7 +48,7 @@ public class StationMonitorPanel extends JPanel {
 		g.setColor(Color.black);
 		g.setFont(new Font("Calibri", Font.BOLD, 14));
 		g.drawString("Raw Data", 4, 14);
-		g.drawString("Band Pass %sHz - %sHz".formatted(BetterAnalysis.min_frequency, BetterAnalysis.max_frequency), 4, (int) (h * HEIGHT_1 + 14));
+		g.drawString("Band Pass %sHz - %sHz".formatted(BetterAnalysis.minFreqDefault, BetterAnalysis.maxFreqDefault), 4, (int) (h * HEIGHT_1 + 14));
 		g.drawString("Averages Ratio", 4, (int) (h * HEIGHT_2 + 14));
 
 		long upperMinute = (long) (Math.ceil(getTime()/ (1000 * 60.0) + 1) * (1000L * 60L));

@@ -2,6 +2,7 @@ package globalquake.core.report;
 
 import globalquake.core.GlobalQuake;
 import globalquake.core.Settings;
+import globalquake.core.earthquake.MagnitudeType;
 import globalquake.core.intensity.IntensityTable;
 import globalquake.utils.Scale;
 
@@ -41,7 +42,7 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(6.4, 1100, 1E4));
 
 
-        drawGraph(g, w, h, recs, false);
+        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT);
         ImageIO.write(img, "PNG", new File("aaa26.png"));
 
         for (DistanceIntensityRecord dr : recs) {
@@ -55,7 +56,7 @@ public class IntensityGraphs {
             new float[]{3}, 0);
     private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);
 
-    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, boolean ultraLow) {
+    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, MagnitudeType magnitudeType) {
         int wry = 20;
         int wrx;
         g.setFont(new Font("Calibri", Font.BOLD, 14));
@@ -64,7 +65,7 @@ public class IntensityGraphs {
         g.fillRect(0, 0, w, h);
         g.setColor(Color.black);
 
-        String str1 = "ultraLow=%s".formatted(ultraLow);
+        String str1 = "magType=%s".formatted(magnitudeType);
 
         g.drawString(str1, w - 6 - g.getFontMetrics().stringWidth(str1), 14);
 

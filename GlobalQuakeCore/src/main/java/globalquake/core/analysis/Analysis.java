@@ -17,9 +17,7 @@ public abstract class Analysis {
     public long numRecords;
     public long latestLogTime;
     public double _maxRatio;
-    public double _maxCounts;
-    public double _maxCountsUL;
-
+    public double _maxVelocity;
     public boolean _maxRatioReset;
     private byte status;
 
