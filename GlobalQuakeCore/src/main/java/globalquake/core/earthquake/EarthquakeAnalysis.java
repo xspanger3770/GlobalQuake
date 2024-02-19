@@ -1034,14 +1034,14 @@ public class EarthquakeAnalysis {
         }
 
         assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
-        System.err.printf("M%.1f%n", hypocenter.magnitude);
+        Logger.tag("Hypocs").trace("Mg%.1f".formatted(hypocenter.magnitude));
         if (hypocenter.magnitude > 4.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
-            System.err.printf("Mgl%.1f%n", hypocenter.magnitude);
+            Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenter.magnitude));
         }
         if (hypocenter.magnitude > 7.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
-            System.err.printf("Mgu%.1f%n", hypocenter.magnitude);
+            Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenter.magnitude));
         }
     }
 
