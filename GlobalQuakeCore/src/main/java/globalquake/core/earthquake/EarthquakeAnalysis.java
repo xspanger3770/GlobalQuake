@@ -1096,14 +1096,14 @@ public class EarthquakeAnalysis {
 
         List<MagnitudeReading> magnitudeReadings = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
+            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000) {
                 magnitudeReadings.add(magnitudeReading);
             }
         }
 
         int targetSize = 42;
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
+            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000) {
                 continue;
             }
 
