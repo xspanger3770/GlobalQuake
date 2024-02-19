@@ -164,9 +164,10 @@ public class Earthquake implements Regional, Warnable {
     }
 
     public String magnitudeFormatted() {
-        return "%s%.1f".formatted(getMagTypeName(), getMag());
+        return "M%.1f".formatted(getMag());
     }
 
+    @SuppressWarnings("unused")
     private String getMagTypeName() {
         Hypocenter hypocenter = getHypocenter();
         return (hypocenter == null || hypocenter.magnitudeType == MagnitudeType.DEFAULT) ? "M" : hypocenter.magnitudeType == MagnitudeType.LOW_FREQ ? "Mgl" : "Mgu";

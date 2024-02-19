@@ -510,7 +510,7 @@ public class EarthquakeAnalysis {
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             Earthquake earthquake1 = cluster.getEarthquake();
-            if(cluster.getEarthquake() != null) {
+            if(earthquake1 != null) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
@@ -1039,7 +1039,7 @@ public class EarthquakeAnalysis {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
             System.err.printf("Mgl%.1f%n", hypocenter.magnitude);
         }
-        if (hypocenter.magnitude > 6.5) {
+        if (hypocenter.magnitude > 7.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
             System.err.printf("Mgu%.1f%n", hypocenter.magnitude);
         }
