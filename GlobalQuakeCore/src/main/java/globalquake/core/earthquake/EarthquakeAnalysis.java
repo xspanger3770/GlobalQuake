@@ -39,6 +39,8 @@ public class EarthquakeAnalysis {
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
+
+    private static final boolean OBVIOUS_CORRECT_CHECK = false;
     private static final boolean ONLY_SELECT_BETTER = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
@@ -519,7 +521,7 @@ public class EarthquakeAnalysis {
         Logger.tag("Hypocs").debug(bestHypocenter);
 
         double obviousCorrectPct = 1.0;
-        if (bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
+        if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
             obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
         }
 

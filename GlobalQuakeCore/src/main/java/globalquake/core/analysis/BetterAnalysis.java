@@ -33,7 +33,7 @@ public class BetterAnalysis extends Analysis {
     private long eventTimer;
 
 
-    public static final double min_frequency = 1.0;
+    public static final double min_frequency = 2.0;
     public static final double max_frequency = 5.0;
 
 
