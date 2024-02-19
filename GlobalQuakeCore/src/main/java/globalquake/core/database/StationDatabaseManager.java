@@ -118,7 +118,7 @@ public class StationDatabaseManager {
                     synchronized (statusSync) {
                         stationSource.getStatus().setString("Updating...");
                     }
-                    List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource);
+                    List<Network> networkList = FDSNWSDownloader.downloadFDSNWS(stationSource, "");
 
                     synchronized (statusSync) {
                         stationSource.getStatus().setString("Updating database...");

@@ -54,12 +54,12 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingAccuracy() {
-        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, (int) EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax, 10, 5);
+        sliderResolution = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, 160, 10, 5);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent ->
         {
-            label.setText("Hypocenter Finding Resolution: %.2f ~ %s".formatted(
+            label.setText("Hypocenter Finding Resolution (CPU): %.2f ~ %s".formatted(
                     sliderResolution.getValue() / 100.0,
                     getNameForResolution(sliderResolution.getValue())));
             Settings.hypocenterDetectionResolution = (double) sliderResolution.getValue();
@@ -87,7 +87,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
                 btnRecalibrate.setEnabled(false);
                 sliderResolution.setEnabled(false);
                 new Thread(() -> {
-                    EarthquakeAnalysisTraining.calibrateResolution(null, sliderResolution);
+                    EarthquakeAnalysisTraining.calibrateResolution(null, sliderResolution, true);
                     btnRecalibrate.setEnabled(true);
                     sliderResolution.setEnabled(true);
                 }).start();
@@ -102,7 +102,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
             public void actionPerformed(ActionEvent actionEvent) {
                 testSpeed.setEnabled(false);
                 new Thread(() -> {
-                    testSpeed.setText("Test took %d ms".formatted(EarthquakeAnalysisTraining.measureTest(System.currentTimeMillis(), 60)));
+                    testSpeed.setText("Test took %d ms".formatted(EarthquakeAnalysisTraining.measureTest(System.currentTimeMillis(), 60, true)));
                     testSpeed.setEnabled(true);
                 }).start();
             }
@@ -120,7 +120,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
     public static final String[] RESOLUTION_NAMES = {"Very Low", "Low", "Default", "Increased", "High", "Very High", "Extremely High", "Insane"};
 
     private String getNameForResolution(int value) {
-        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax) * (RESOLUTION_NAMES.length))))];
+        return RESOLUTION_NAMES[(int) Math.max(0, Math.min(RESOLUTION_NAMES.length - 1, ((value / 160.0) * (RESOLUTION_NAMES.length))))];
     }
 
     @Override

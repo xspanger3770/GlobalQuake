@@ -17,7 +17,7 @@ public abstract class Analysis {
     public long numRecords;
     public long latestLogTime;
     public double _maxRatio;
-    public double _maxCounts;
+    public double _maxVelocity;
     public boolean _maxRatioReset;
     private byte status;
 
@@ -78,6 +78,7 @@ public abstract class Analysis {
                 i++;
             }
         } catch (Exception e) {
+            Logger.trace(e);
             Logger.warn("There was a problem with data processing on station %s: %s".formatted(getStation().getStationCode(), e.getMessage()));
         }
     }

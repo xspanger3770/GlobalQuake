@@ -28,7 +28,7 @@ public class EarthquakeAnalysis {
 
     public static final double MIN_RATIO = 16.0;
 
-    public static final int QUADRANTS = 32;
+    public static final int QUADRANTS = 26;
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
@@ -39,6 +39,8 @@ public class EarthquakeAnalysis {
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
+
+    private static final boolean OBVIOUS_CORRECT_CHECK = false;
     private static final boolean ONLY_SELECT_BETTER = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
@@ -72,13 +74,13 @@ public class EarthquakeAnalysis {
         }
         clusterAnalysis.getClustersReadLock().lock();
         try {
-            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster)));
+            clusterAnalysis.getClusters().parallelStream().forEach(cluster -> processCluster(cluster, createListOfPickedEvents(cluster), true));
         } finally {
             clusterAnalysis.getClustersReadLock().unlock();
         }
     }
 
-    public void processCluster(Cluster cluster, List<PickedEvent> pickedEvents) {
+    public void processCluster(Cluster cluster, List<PickedEvent> pickedEvents, boolean useCUDA) {
         if (pickedEvents.isEmpty()) {
             return;
         }
@@ -101,10 +103,10 @@ public class EarthquakeAnalysis {
 
         cluster.lastEpicenterUpdate = cluster.updateCount;
 
-        preprocess(cluster, pickedEvents);
+        preprocess(cluster, pickedEvents, useCUDA);
     }
 
-    private void preprocess(Cluster cluster, List<PickedEvent> pickedEvents) {
+    private void preprocess(Cluster cluster, List<PickedEvent> pickedEvents, boolean useCUDA) {
         pickedEvents.sort(Comparator.comparing(PickedEvent::maxRatio));
 
         // if there is no event stronger than MIN_RATIO, abort
@@ -121,7 +123,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        HypocenterFinderSettings finderSettings = createSettings();
+        HypocenterFinderSettings finderSettings = createSettings(useCUDA);
 
         // if in the end there is less than N events, abort
         if (pickedEvents.size() < finderSettings.minStations()) {
@@ -137,9 +139,9 @@ public class EarthquakeAnalysis {
         findHypocenter(selectedEvents, cluster, finderSettings);
     }
 
-    public static HypocenterFinderSettings createSettings() {
+    public static HypocenterFinderSettings createSettings(boolean useCUDA) {
         return new HypocenterFinderSettings(Settings.pWaveInaccuracyThreshold, Settings.hypocenterCorrectThreshold,
-                Settings.hypocenterDetectionResolution, Settings.minimumStationsForEEW);
+                Settings.hypocenterDetectionResolution, Settings.hypocenterDetectionResolutionGPU, Settings.minimumStationsForEEW, useCUDA);
     }
 
     private List<PickedEvent> createListOfPickedEvents(Cluster cluster) {
@@ -212,14 +214,16 @@ public class EarthquakeAnalysis {
             return null;
         }
 
-        if (GQHypocs.isCudaLoaded()) {
+        if (GQHypocs.isCudaLoaded() && finderSettings.useCUDA()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0, finderSettings);
-            if (result == null) {
-                Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
-                        "because too many stations were involved in the event, but it might be also different error");
+
+            if (result != null) {
+                return result;
             }
 
-            return result;
+            Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
+                    "because too many stations were involved in the event, but it might be also different error");
+            Logger.tag("Hypocs").warn("Fallback to CPU!");
         }
 
         Logger.tag("Hypocs").debug("==== Searching hypocenter of cluster #" + cluster.getUuid() + " ====");
@@ -425,7 +429,9 @@ public class EarthquakeAnalysis {
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
-                boolean stillValid = calculateHeuristic(threadData.bestHypocenter) > calculateHeuristic(bestHypocenter) / confidenceThreshold;
+                double h1 = calculateHeuristic(threadData.bestHypocenter);
+                double h2 = calculateHeuristic(bestHypocenter);
+                boolean stillValid = h1 > h2 / confidenceThreshold;
                 if (stillValid) {
                     dist += step;
                     if (threadData.bestHypocenter.origin > maxOrigin) {
@@ -479,17 +485,36 @@ public class EarthquakeAnalysis {
 
         if (bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0) {
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
+
+            if(cluster.getEarthquake() != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
+            }
+
             return;
         }
 
         // There has to be at least some difference in the picked pWave times
         if (CHECK_DELTA_P && !checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Not Enough Delta-P");
+
+            if(cluster.getEarthquake() != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
+            }
+
             return;
         }
 
+
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
+            Earthquake earthquake1 = cluster.getEarthquake();
+            if(earthquake1 != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
+            }
+
             return;
         }
 
@@ -507,7 +532,7 @@ public class EarthquakeAnalysis {
         Logger.tag("Hypocs").debug(bestHypocenter);
 
         double obviousCorrectPct = 1.0;
-        if (bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
+        if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
             obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
         }
 
@@ -517,14 +542,7 @@ public class EarthquakeAnalysis {
             boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
             Earthquake earthquake1 = cluster.getEarthquake();
             if (remove && earthquake1 != null) {
-                getEarthquakes().remove(earthquake1);
-                if (GlobalQuake.instance != null) {
-                    GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
-                }
-                cluster.setEarthquake(null);
-                cluster.setPreviousHypocenter(null);
-                cluster.resetAnchor();
-                Logger.tag("Hypocs").info("Quake removed!");
+                removeQuake(cluster, earthquake1);
             }
             Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, obvious_correct_pct=%.2f/%.2f was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), obviousCorrectPct, OBVIOUS_CORRECT_THRESHOLD, bestHypocenter));
         } else {
@@ -542,10 +560,26 @@ public class EarthquakeAnalysis {
         Logger.tag("Hypocs").trace("Hypocenter finding finished in: %d ms".formatted(System.currentTimeMillis() - startTime));
     }
 
+    private void removeQuake(Cluster cluster, Earthquake earthquake1) {
+        getEarthquakes().remove(earthquake1);
+        if (GlobalQuake.instance != null) {
+            GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake1));
+        }
+        cluster.setEarthquake(null);
+        cluster.setPreviousHypocenter(null);
+        cluster.resetAnchor();
+        Logger.tag("Hypocs").info("Quake removed!");
+    }
+
     private void updateMagnitudeOnly(Cluster cluster, Hypocenter bestHypocenter) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
             // calculate magnitudes, but using the previous hypocenter, that is believed to be more accurate
             calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+
+            if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
+                Logger.tag("Hypocs").debug("No magnitude!");
+                return;
+            }
 
             cluster.revisionID += 1;
 
@@ -586,7 +620,7 @@ public class EarthquakeAnalysis {
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
-        if (bestHypocenter.locationUncertainty > 80) {
+        if (bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyLimit", 90.0f)) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
             return false;
         }
@@ -755,7 +789,7 @@ public class EarthquakeAnalysis {
     }
 
     private static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
-        return (hypocenter.correctStations) / (hypocenter.err);
+        return (hypocenter.correctStations * hypocenter.correctStations) / (hypocenter.err * hypocenter.err);
     }
 
     private static PreliminaryHypocenter selectBetterHypocenter(PreliminaryHypocenter hypocenter1, PreliminaryHypocenter hypocenter2) {
@@ -940,7 +974,7 @@ public class EarthquakeAnalysis {
         }
 
         if (CHECK_QUADRANTS) {
-            if (checkQuadrants(bestHypocenter, events) <= 2.5) {
+            if (checkQuadrants(bestHypocenter, events) < 2.0) {
                 return HypocenterCondition.TOO_SHALLOW_ANGLE;
             }
         }
@@ -998,9 +1032,23 @@ public class EarthquakeAnalysis {
         if (goodEvents.isEmpty()) {
             return;
         }
+
+        assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
+        Logger.tag("Hypocs").trace("Mg%.1f".formatted(hypocenter.magnitude));
+        if (hypocenter.magnitude > 4.0) {
+            assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
+            Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenter.magnitude));
+        }
+        if (hypocenter.magnitude > 7.0) {
+            assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
+            Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenter.magnitude));
+        }
+    }
+
+    private static void assignMagnitude(Hypocenter hypocenter, Collection<Event> goodEvents, MagnitudeType magnitudeType) {
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
-            if (!event.isValid() || event.getMaxCounts() < 0) {
+            if (!event.isValid() || event.getMaxVelocity() < 0 || event.getMaxRatio() < 0) {
                 continue;
             }
             double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
@@ -1013,10 +1061,12 @@ public class EarthquakeAnalysis {
                     * 1000);
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
             // *0.5 because s wave is stronger
-            double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 1 : Math.max(1, 2.0 - distGC / 400.0);
+            double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 0.95 : Math.max(1, 3 - distGC / 400.0);
+
+            double maxVelocity = event.getMaxVelocity(magnitudeType);
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
-                    IntensityTable.getMagnitude(distGE, event.getMaxCounts() * mul);
+                    IntensityTable.getMagnitude(distGE, maxVelocity * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
             long eventAge = lastRecord - event.getpWave();
@@ -1026,12 +1076,15 @@ public class EarthquakeAnalysis {
 
         mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
 
-        int minSize = (int) Math.max(4, mags.size() * 0.2);
-        while (mags.size() > minSize && mags.get(0).eventAge() < 5000) {
+        int targetSize = (int) Math.max(4, mags.size() * 0.7);
+
+        while (mags.size() > targetSize) {
             mags.remove(0);
         }
+
         hypocenter.mags = mags;
         hypocenter.magnitude = selectMagnitude(mags);
+        hypocenter.magnitudeType = magnitudeType;
     }
 
     public static double getDepthCorrection(double depth) {
@@ -1041,13 +1094,25 @@ public class EarthquakeAnalysis {
     protected static double selectMagnitude(List<MagnitudeReading> mags) {
         mags.sort(Comparator.comparing(MagnitudeReading::distance));
 
-        int targetSize = (int) Math.max(25, mags.size() * 0.40);
-        List<MagnitudeReading> list = new ArrayList<>();
+        List<MagnitudeReading> magnitudeReadings = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if ((magnitudeReading.distance() < 2000 || list.size() < targetSize) && magnitudeReading.distance() < 6400.0) {
-                list.add(magnitudeReading);
+            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
+                magnitudeReadings.add(magnitudeReading);
+            }
+        }
+
+        int targetSize = 42;
+        for (MagnitudeReading magnitudeReading : mags) {
+            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
+                continue;
+            }
+
+            if (magnitudeReadings.size() < targetSize) {
+                magnitudeReadings.add(magnitudeReading);
             } else break;
         }
+
+        List<MagnitudeReading> list = new ArrayList<>(magnitudeReadings);
 
         list.sort(Comparator.comparing(MagnitudeReading::magnitude));
 

@@ -26,7 +26,7 @@ public class WaveformGenerator {
     private static void generateWaveform(AbstractStation station) {
         PlaygroundStation playgroundStation = (PlaygroundStation) station;
         long lastLog = playgroundStation.lastSampleTime;
-        long now = GlobalQuake.instance.currentTimeMillis();
+        long now = GlobalQuake.instance.currentTimeMillis() - playgroundStation.getDelay();
 
         if(lastLog < 0){
             lastLog = now - 2 * 60 * 1000;

@@ -1,5 +1,6 @@
 package globalquake.core.station;
 
+import globalquake.core.Settings;
 import globalquake.core.analysis.Analysis;
 import globalquake.core.analysis.BetterAnalysis;
 import globalquake.core.analysis.Event;
@@ -31,7 +32,8 @@ public abstract class AbstractStation {
 	private final Deque<Double> ratioHistory = new LinkedBlockingDeque<>();
 	private final double sensitivity;
 	public boolean disabled = false;
-	private Collection<NearbyStationDistanceInfo> nearbyStations;
+	public double _lastRenderSize;
+    private Collection<NearbyStationDistanceInfo> nearbyStations;
 
 	private final Deque<StationInterval> intervals = new ConcurrentLinkedDeque<>();
 
@@ -147,7 +149,7 @@ public abstract class AbstractStation {
 
     public void second(long time) {
 		if (getAnalysis()._maxRatio > 0) {
-			ratioHistory.add(getAnalysis()._maxRatio);
+			ratioHistory.add(Settings.debugSendPGV && isSensitivityValid() ? getAnalysis()._maxVelocity : getAnalysis()._maxRatio);
 			getAnalysis()._maxRatioReset = true;
 
 			if (ratioHistory.size() >= RATIO_HISTORY_SECONDS) {

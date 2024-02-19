@@ -34,6 +34,7 @@ public class TableCellRendererAdapter<E, T> extends DefaultTableCellRenderer {
                     setBackground(bck);
                 }
                 //sets the background color if selected or not
+                //noinspection ConditionalExpressionWithIdenticalBranches
                 setForeground(isSelected ? Color.BLACK : Color.BLACK);
                 setText(getText(entity, t));
             }

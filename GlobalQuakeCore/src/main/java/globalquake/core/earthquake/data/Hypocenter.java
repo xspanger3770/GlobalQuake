@@ -1,5 +1,6 @@
 package globalquake.core.earthquake.data;
 
+import globalquake.core.earthquake.MagnitudeType;
 import globalquake.core.earthquake.interval.DepthConfidenceInterval;
 import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.earthquake.quality.Quality;
@@ -31,6 +32,7 @@ public class Hypocenter {
 	public Quality quality;
 	public int reducedEvents;
 	public int totalEvents;
+	public MagnitudeType magnitudeType;
 
 	public Hypocenter(double lat, double lon, double depth, long origin, double err, int correctEvents,
 					  DepthConfidenceInterval depthConfidenceInterval,

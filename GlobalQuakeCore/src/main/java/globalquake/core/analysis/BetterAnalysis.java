@@ -4,9 +4,7 @@ import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
-import uk.me.berndporr.iirj.Butterworth;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,25 +30,27 @@ public class BetterAnalysis extends Analysis {
     private double thirdAverage;
     private long eventTimer;
 
-
-    public static final double min_frequency = 2.0;
-    public static final double max_frequency = 5.0;
-
     // in seconds
     public static final double EVENT_END_DURATION = 7.0;
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
     public static final double EVENT_TOO_LONG_DURATION = 5 * 60.0;
     public static final double EVENT_STORE_TIME = 20 * 60.0;
 
-    private Butterworth filter;
     private double initialOffset;
 
-    public static final double DEFAULT_SENSITIVITY = 1E9;
+    private WaveformTransformator waveformDefault;
 
-    double countsSum = 0.0;
-    private double lastCounts;
+    private WaveformTransformator waveformLowFreq;
 
-    private boolean lastCountsInitialised = false;
+    private WaveformTransformator waveformUltraLowFreq;
+    public static final double minFreqDefault = 2.0;
+    public static final double maxFreqDefault = 5.0;
+
+    public static final double minFreqLow = 0.4;
+    public static final double maxFreqLow = 5.0;
+
+    public static final double minFreqUltraLow = 0.01;
+    public static final double maxFreqUltraLow = 5.0;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -60,9 +60,10 @@ public class BetterAnalysis extends Analysis {
 
     @Override
     public synchronized void nextSample(int v, long time, long currentTime) {
-        if (filter == null) {
-            filter = new Butterworth();
-            filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
+        if (waveformDefault == null) {
+            waveformDefault = new WaveformTransformator(minFreqDefault, maxFreqDefault, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformLowFreq = new WaveformTransformator(minFreqLow, maxFreqLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformUltraLowFreq = new WaveformTransformator(minFreqUltraLow, maxFreqUltraLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
             reset();// initial reset;
             getStation().reportState(StationState.INACTIVE, time);
             return;
@@ -84,14 +85,23 @@ public class BetterAnalysis extends Analysis {
                 initialOffsetCnt++;
                 if (initProgress >= INIT_OFFSET_CALCULATION * 0.001 * getSampleRate() * 0.25) {
                     double _initialOffset = initialOffsetSum / initialOffsetCnt;
-                    double filteredV = filter.filter(v - _initialOffset);
+
+                    waveformDefault.accept(v - _initialOffset);
+                    waveformLowFreq.accept(v - _initialOffset);
+                    waveformUltraLowFreq.accept(v - _initialOffset);
+
+                    double filteredV = waveformDefault.getCurrentValue();
                     initialRatioSum += Math.abs(filteredV);
                     initialRatioCnt++;
                     longAverage = initialRatioSum / initialRatioCnt;
                 }
             } else if (initProgress <= (INIT_AVERAGE_RATIO + INIT_OFFSET_CALCULATION) * 0.001 * getSampleRate()) {
                 double _initialOffset = initialOffsetSum / initialOffsetCnt;
-                double filteredV = filter.filter(v - _initialOffset);
+                waveformDefault.accept(v - _initialOffset);
+                waveformLowFreq.accept(v - _initialOffset);
+                waveformUltraLowFreq.accept(v - _initialOffset);
+
+                double filteredV = waveformDefault.getCurrentValue();
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
@@ -108,7 +118,13 @@ public class BetterAnalysis extends Analysis {
             getStation().reportState(StationState.INACTIVE, time);
             return;
         }
-        double filteredV = filter.filter(v - initialOffset);
+
+        waveformDefault.accept(v - initialOffset);
+        waveformLowFreq.accept(v - initialOffset);
+        waveformUltraLowFreq.accept(v - initialOffset);
+
+        double filteredV = waveformDefault.getCurrentValue();
+
         double absFilteredV = Math.abs(filteredV);
         shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
         mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
@@ -162,36 +178,20 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
-        double sensitivity = getStation().getSensitivity();
 
-        if(sensitivity <= 0){
-            sensitivity = -1.0;
-        }
+        double velocity = Math.abs(waveformDefault.getVelocity());
+        double velocityLowFreq = Math.abs(waveformLowFreq.getVelocity());
+        double velocityUltraLowFreq = Math.abs(waveformUltraLowFreq.getVelocity());
 
-        double counts = filteredV * (DEFAULT_SENSITIVITY / sensitivity) * 0.07;
-
-        double derived = lastCountsInitialised ? (counts - lastCounts) * getSampleRate() : 0;
-
-        lastCounts = counts;
-        lastCountsInitialised = true;
-
-        countsSum += counts / getSampleRate();
-        countsSum *= 0.999;
-
-
-        double countsResult = !getStation().isSensitivityValid() ? -1 : Math.abs(
-                getStation().getInputType() == InputType.ACCELERATION ? countsSum :
-                getStation().getInputType() == InputType.VELOCITY ? counts : derived);
-
-        if(countsResult > _maxCounts){
-            _maxCounts = countsResult;
+        if (velocity > _maxVelocity) {
+            _maxVelocity = velocity;
         }
 
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
 
-            if(_maxRatioReset){
-                _maxCounts = countsResult;
+            if (_maxRatioReset) {
+                _maxVelocity = velocity;
             }
 
             _maxRatioReset = false;
@@ -200,7 +200,7 @@ public class BetterAnalysis extends Analysis {
         if (time - currentTime < 1000 * 10
                 && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
 
-            try{
+            try {
                 getWaveformBuffer().getWriteLock().lock();
                 getWaveformBuffer().checkSize(Settings.logsStoreTimeMinutes * 60);
                 getWaveformBuffer().log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
@@ -213,7 +213,7 @@ public class BetterAnalysis extends Analysis {
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
                     e.log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                            (float) longAverage, (float) specialAverage, ratio, countsResult);
+                            (float) longAverage, (float) specialAverage, ratio, velocity, velocityLowFreq, velocityUltraLowFreq);
                 }
             }
         }
@@ -236,7 +236,7 @@ public class BetterAnalysis extends Analysis {
     @Override
     public void reset() {
         _maxRatio = 0;
-        _maxCounts = 0;
+        _maxVelocity = 0.0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
@@ -245,7 +245,11 @@ public class BetterAnalysis extends Analysis {
         initialRatioCnt = 0;
         numRecords = 0;
         latestLogTime = 0;
-        lastCountsInitialised = false;
+
+        waveformDefault.reset();
+        waveformLowFreq.reset();
+        waveformUltraLowFreq.reset();
+
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {

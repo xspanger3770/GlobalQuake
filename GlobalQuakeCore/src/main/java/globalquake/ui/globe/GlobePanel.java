@@ -112,7 +112,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 centerLat = Math.max(-90, Math.min(90, dragStartLat + deltaY * 0.10 * scroll / (createRenderProperties().height / 1000.0)));
 
                 renderer.updateCamera(createRenderProperties());
-                repaint();
             }
         });
         addMouseListener(new MouseAdapter() {
@@ -172,7 +171,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
 
             renderer.updateCamera(createRenderProperties());
-            repaint();
         });
 
         addComponentListener(new ComponentAdapter() {
@@ -426,6 +424,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     public void spinThread() {
         java.util.Timer timer = new Timer();
+
         timer.schedule(new TimerTask() {
             public void run() {
                 try {
@@ -453,7 +452,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 centerLon += Math.abs(spinSpeed) * spinDirection;
                 renderer.updateCamera(createRenderProperties());
-                repaint();
             }
         }, 0, 10);
     }

@@ -1,6 +1,7 @@
 package globalquake.core.earthquake;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.events.specific.ClusterCreateEvent;
 import globalquake.core.events.specific.ClusterLevelUpEvent;
@@ -23,7 +24,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ClusterAnalysis {
 
-    public static final int CLUSTER_MIN_SIZE = 4;
     private final ReadWriteLock clustersLock = new ReentrantReadWriteLock();
 
     private final Lock clustersReadLock = clustersLock.readLock();
@@ -468,7 +468,7 @@ public class ClusterAnalysis {
                     }
 
                     // so no we have a list of all nearby events that could be earthquake
-                    if (validEvents.size() >= CLUSTER_MIN_SIZE) {
+                    if (validEvents.size() >= HypocsSettings.getOrDefaultInt("clusterMinSize", 4)) {
                         expandCluster(createCluster(validEvents));
                     }
                 }
@@ -497,7 +497,7 @@ public class ClusterAnalysis {
 
             Earthquake earthquake = cluster.getEarthquake();
 
-            boolean notEnoughEvents = cluster.getAssignedEvents().size() < CLUSTER_MIN_SIZE;
+            boolean notEnoughEvents = cluster.getAssignedEvents().size() < HypocsSettings.getOrDefaultInt("clusterMinSize", 4);
             boolean eqRemoved = earthquake != null && EarthquakeAnalysis.shouldRemove(earthquake, 0);
             boolean tooOld = earthquake == null && numberOfActiveEvents < minimum && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 2 * 60 * 1000;
 

@@ -9,8 +9,10 @@ public class PlaygroundStation extends AbstractStation {
     public static final double SAMPLE_RATE = 50;
     public long lastSampleTime = -1;
     private final StationWaveformGenerator generator;
+    public static final double DEFAULT_SENSITIVITY = 2E10;
     public PlaygroundStation(String networkCode, String stationCode, String channelName, String locationCode, double lat, double lon, double alt, int id, double sensitivity) {
-        super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null, sensitivity);
+        super(networkCode, stationCode, channelName, locationCode, lat, lon, alt, id, null,
+                sensitivity);
         getAnalysis().setSampleRate(SAMPLE_RATE);
         this.generator = new StationWaveformGenerator(this, id);
     }
@@ -48,5 +50,9 @@ public class PlaygroundStation extends AbstractStation {
     public boolean isInEventMode() {
         Event event = getAnalysis() == null ? null : getAnalysis().getLatestEvent();
         return event != null && event.isValid() && !event.hasEnded();
+    }
+
+    public long getDelay() {
+        return generator.getDelay();
     }
 }

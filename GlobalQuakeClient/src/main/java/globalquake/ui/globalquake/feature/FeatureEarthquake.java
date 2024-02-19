@@ -159,7 +159,10 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             }
         }
 
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if(Settings.antialiasingQuakes) {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
         if (elementPWave.shouldDraw) {
             graphics.setColor(alphaColor(getPwaveColor(), getAlphaMul(entity.getOriginal())));
             graphics.setStroke(new BasicStroke(4.0f * thicknessMultiplier));
