@@ -506,15 +506,11 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        int certainty = checkUncertainty(bestHypocenter, correctSelectedEvents);
 
-        if (certainty != 0) {
+        if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             Earthquake earthquake1 = cluster.getEarthquake();
-            if (certainty == 2 && earthquake1 != null) {
-                Logger.tag("Hypocs").debug("Uncertainty is so high that quake has to be removed.");
-                removeQuake(cluster, earthquake1);
-            } else if(cluster.getEarthquake() != null) {
+            if(cluster.getEarthquake() != null) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
@@ -619,14 +615,14 @@ public class EarthquakeAnalysis {
         }
     }
 
-    private int checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
+    private boolean checkUncertainty(Hypocenter bestHypocenter, List<PickedEvent> events) {
         bestHypocenter.depthUncertainty = bestHypocenter.depthConfidenceInterval.maxDepth() - bestHypocenter.depthConfidenceInterval.minDepth();
         bestHypocenter.locationUncertainty = bestHypocenter.polygonConfidenceIntervals.get(bestHypocenter.polygonConfidenceIntervals.size() - 1)
                 .lengths().stream().max(Double::compareTo).orElse(0.0);
 
         if (bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyLimit", 90.0f)) {
             Logger.tag("Hypocs").debug("Location uncertainty of %.1f is too high!".formatted(bestHypocenter.locationUncertainty));
-            return bestHypocenter.locationUncertainty > HypocsSettings.getOrDefault("locationUncertaintyDeleteLimit", 99999.0f) ? 2 : 1;
+            return false;
         }
 
         if (DEPTH_FIX_ALLOWED) {
@@ -637,7 +633,7 @@ public class EarthquakeAnalysis {
             }
         }
 
-        return 0;
+        return true;
     }
 
     @SuppressWarnings("SameParameterValue")
