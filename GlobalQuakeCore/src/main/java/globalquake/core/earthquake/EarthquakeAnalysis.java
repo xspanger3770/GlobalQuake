@@ -217,12 +217,12 @@ public class EarthquakeAnalysis {
         if (GQHypocs.isCudaLoaded() && finderSettings.useCUDA()) {
             var result = GQHypocs.findHypocenter(selectedEvents, cluster, 0, finderSettings);
 
-            if(result != null){
+            if (result != null) {
                 return result;
             }
 
             Logger.tag("Hypocs").error("CUDA hypocenter search has failed! This is likely caused by GPU running out of memory " +
-                        "because too many stations were involved in the event, but it might be also different error");
+                    "because too many stations were involved in the event, but it might be also different error");
             Logger.tag("Hypocs").warn("Fallback to CPU!");
         }
 
@@ -1018,10 +1018,10 @@ public class EarthquakeAnalysis {
         }
 
         assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
-        if(hypocenter.magnitude > 4.2){
+        if (hypocenter.magnitude > 4.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
         }
-        if(hypocenter.magnitude > 6.8){
+        if (hypocenter.magnitude > 6.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
         }
     }
@@ -1044,7 +1044,7 @@ public class EarthquakeAnalysis {
             // *0.5 because s wave is stronger
             double mul = sTravelRaw == TauPTravelTimeCalculator.NO_ARRIVAL || lastRecord > expectedSArrival + 8 * 1000 ? 0.95 : Math.max(1, 3 - distGC / 400.0);
 
-            double maxVelocity = event.getMaxVelocity(magnitudeType)   ;
+            double maxVelocity = event.getMaxVelocity(magnitudeType);
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
                     IntensityTable.getMagnitude(distGE, maxVelocity * mul);
@@ -1077,14 +1077,14 @@ public class EarthquakeAnalysis {
 
         List<MagnitudeReading> magnitudeReadings = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if(magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000){
+            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
                 magnitudeReadings.add(magnitudeReading);
             }
         }
 
         int targetSize = 42;
         for (MagnitudeReading magnitudeReading : mags) {
-            if(magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000){
+            if (magnitudeReading.distance() > 200 && magnitudeReading.distance() < 2000) {
                 continue;
             }
 

@@ -78,6 +78,7 @@ public abstract class Analysis {
                 i++;
             }
         } catch (Exception e) {
+            Logger.trace(e);
             Logger.warn("There was a problem with data processing on station %s: %s".formatted(getStation().getStationCode(), e.getMessage()));
         }
     }

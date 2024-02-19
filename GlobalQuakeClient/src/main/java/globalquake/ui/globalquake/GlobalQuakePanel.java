@@ -376,7 +376,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         drawIntensityBox(g, level, x + 4,y + 30,height - 34);
         g.setFont(new Font("Calibri", Font.BOLD, 16));
-        drawAccuracyBox(g, true, "",x + width + 4,y + 46, "M%.1f".formatted(quake.getMag()), Scale.getColorEasily(quake.getMag() / 8.0));
+        drawAccuracyBox(g, true, "",x + width + 4,y + 46, "%s".formatted(quake.magnitudeFormatted()), Scale.getColorEasily(quake.getMag() / 8.0));
 
         int intW = getIntensityBoxWidth(g);
         int _x = x + intW + 8;
@@ -580,7 +580,7 @@ public class GlobalQuakePanel extends GlobePanel {
         String quakeString = null;
 
         if (quake != null) {
-            quakeString = "M%.1f Earthquake detected".formatted(quake.getMag());
+            quakeString = "%s Earthquake detected".formatted(quake.magnitudeFormatted());
             xOffset = getIntensityBoxWidth(g) + 4;
             g.setFont(regionFont);
             baseWidth = Math.max(baseWidth + xOffset, g.getFontMetrics().stringWidth(quake.getRegion()) + xOffset + 10);
