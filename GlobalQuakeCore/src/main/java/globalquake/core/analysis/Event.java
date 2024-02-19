@@ -43,7 +43,6 @@ public class Event implements Serializable {
     private final transient Analysis analysis;
 
     private boolean isSWave;
-    private double maxCountsBuffer;
 
     private WaveformBuffer waveformBuffer;
 
@@ -68,7 +67,6 @@ public class Event implements Serializable {
         }
         this.nextPWaveCalc = -1;
         this.maxRatio = 0;
-        this.maxCountsBuffer = 0.0;
         this.valid = true;
         this.analysis = analysis;
         this.assignedCluster = null;
@@ -193,7 +191,7 @@ public class Event implements Serializable {
         if (velocityLowFreq > this.maxVelocityLowFreq) {
             this.maxVelocityLowFreq = velocityLowFreq;
         }
-        if (velocityUltraLowFreq > this.maxVelocity) {
+        if (velocityUltraLowFreq > this.maxVelocityUltraLowFreq) {
             this.maxVelocityUltraLowFreq = velocityUltraLowFreq;
         }
 

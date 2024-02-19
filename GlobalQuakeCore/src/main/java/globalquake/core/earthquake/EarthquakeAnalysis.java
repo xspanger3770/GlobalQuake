@@ -485,12 +485,24 @@ public class EarthquakeAnalysis {
 
         if (bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0) {
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
+
+            if(cluster.getEarthquake() != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
+            }
+
             return;
         }
 
         // There has to be at least some difference in the picked pWave times
         if (CHECK_DELTA_P && !checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Not Enough Delta-P");
+
+            if(cluster.getEarthquake() != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
+            }
+
             return;
         }
 
@@ -502,6 +514,9 @@ public class EarthquakeAnalysis {
             if (certainty == 2 && earthquake1 != null) {
                 Logger.tag("Hypocs").debug("Uncertainty is so high that quake has to be removed.");
                 removeQuake(cluster, earthquake1);
+            } else if(cluster.getEarthquake() != null) {
+                updateMagnitudeOnly(cluster, bestHypocenter);
+                Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
 
             return;
@@ -564,6 +579,11 @@ public class EarthquakeAnalysis {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
             // calculate magnitudes, but using the previous hypocenter, that is believed to be more accurate
             calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+
+            if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
+                Logger.tag("Hypocs").debug("No magnitude!");
+                return;
+            }
 
             cluster.revisionID += 1;
 
@@ -1018,11 +1038,14 @@ public class EarthquakeAnalysis {
         }
 
         assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
+        System.err.printf("M%.1f%n", hypocenter.magnitude);
         if (hypocenter.magnitude > 4.0) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
+            System.err.printf("Mgl%.1f%n", hypocenter.magnitude);
         }
-        if (hypocenter.magnitude > 6.0) {
+        if (hypocenter.magnitude > 6.5) {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
+            System.err.printf("Mgu%.1f%n", hypocenter.magnitude);
         }
     }
 

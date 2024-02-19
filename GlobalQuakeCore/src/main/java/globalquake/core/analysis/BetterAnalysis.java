@@ -4,9 +4,7 @@ import globalquake.core.Settings;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
-import uk.me.berndporr.iirj.Butterworth;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,11 +46,11 @@ public class BetterAnalysis extends Analysis {
     public static final double minFreqDefault = 2.0;
     public static final double maxFreqDefault = 5.0;
 
-    public static final double minFreqLow = 0.2;
+    public static final double minFreqLow = 0.4;
     public static final double maxFreqLow = 5.0;
 
     public static final double minFreqUltraLow = 0.01;
-    public static final double maxFreqUltraLow = 5;
+    public static final double maxFreqUltraLow = 5.0;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -126,8 +124,6 @@ public class BetterAnalysis extends Analysis {
         waveformUltraLowFreq.accept(v - initialOffset);
 
         double filteredV = waveformDefault.getCurrentValue();
-        double filteredVMag = waveformLowFreq.getCurrentValue();
-        double filteredVUltraLow = waveformUltraLowFreq.getCurrentValue();
 
         double absFilteredV = Math.abs(filteredV);
         shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
@@ -183,9 +179,9 @@ public class BetterAnalysis extends Analysis {
         }
 
 
-        double velocity = waveformDefault.getVelocity();
-        double velocityLowFreq = waveformLowFreq.getVelocity();
-        double velocityUltraLowFreq = waveformUltraLowFreq.getVelocity();
+        double velocity = Math.abs(waveformDefault.getVelocity());
+        double velocityLowFreq = Math.abs(waveformLowFreq.getVelocity());
+        double velocityUltraLowFreq = Math.abs(waveformUltraLowFreq.getVelocity());
 
         if (velocity > _maxVelocity) {
             _maxVelocity = velocity;
