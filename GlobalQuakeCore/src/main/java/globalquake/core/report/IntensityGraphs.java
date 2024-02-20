@@ -47,9 +47,24 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(7.0, 900, 1e5));
         recs.add(new DistanceIntensityRecord(7.0, 10000, 1e4));
 
+        recs.add(new DistanceIntensityRecord(5.6, 25, 1e7));
+        recs.add(new DistanceIntensityRecord(5.6, 150, 1e6));
+        recs.add(new DistanceIntensityRecord(5.6, 350, 1e5));
+        recs.add(new DistanceIntensityRecord(5.6, 750, 1e4));
+
+        recs.add(new DistanceIntensityRecord(5.0, 80, 1e6));
+        recs.add(new DistanceIntensityRecord(5.0, 250, 1e5));
+        recs.add(new DistanceIntensityRecord(5.0, 600, 1e4));
+        recs.add(new DistanceIntensityRecord(5.0, 1750, 1e3));
+
+        recs.add(new DistanceIntensityRecord(4.1, 60, 1e5));
+        recs.add(new DistanceIntensityRecord(4.1, 220, 1e4));
+        recs.add(new DistanceIntensityRecord(4.1, 550, 1e3));
+        recs.add(new DistanceIntensityRecord(4.1, 8000, 1e2));
+
 
         drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);
-        ImageIO.write(img, "PNG", new File("aaa26.png"));
+        ImageIO.write(img, "PNG", new File("aaa28.png"));
 
         recs.clear();
         recs.add(new DistanceIntensityRecord(7.0, 100, 2E8));
@@ -68,8 +83,13 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(7.8, 700, 1E6));
         recs.add(new DistanceIntensityRecord(7.8, 1500, 1E5));
 
+        recs.add(new DistanceIntensityRecord(5.6, 25, 1e7));
+        recs.add(new DistanceIntensityRecord(5.6, 150, 1e6));
+        recs.add(new DistanceIntensityRecord(5.6, 350, 1e5));
+        recs.add(new DistanceIntensityRecord(5.6, 750, 1e4));
+
         drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, true);
-        ImageIO.write(img, "PNG", new File("aaa26A.png"));
+        //ImageIO.write(img, "PNG", new File("aaa27A.png"));
 
         for (DistanceIntensityRecord dr : recs) {
             System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));

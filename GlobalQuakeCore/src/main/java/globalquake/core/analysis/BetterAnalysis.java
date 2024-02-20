@@ -61,9 +61,6 @@ public class BetterAnalysis extends Analysis {
     @Override
     public synchronized void nextSample(int v, long time, long currentTime) {
         if (waveformDefault == null) {
-            waveformDefault = new WaveformTransformator(minFreqDefault, maxFreqDefault, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
-            waveformLowFreq = new WaveformTransformator(minFreqLow, maxFreqLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
-            waveformUltraLowFreq = new WaveformTransformator(minFreqUltraLow, maxFreqUltraLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
             reset();// initial reset;
             getStation().reportState(StationState.INACTIVE, time);
             return;
@@ -246,6 +243,11 @@ public class BetterAnalysis extends Analysis {
         numRecords = 0;
         latestLogTime = 0;
 
+        if(waveformDefault == null) {
+            waveformDefault = new WaveformTransformator(minFreqDefault, maxFreqDefault, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformLowFreq = new WaveformTransformator(minFreqLow, maxFreqLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformUltraLowFreq = new WaveformTransformator(minFreqUltraLow, maxFreqUltraLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+        }
         waveformDefault.reset();
         waveformLowFreq.reset();
         waveformUltraLowFreq.reset();
