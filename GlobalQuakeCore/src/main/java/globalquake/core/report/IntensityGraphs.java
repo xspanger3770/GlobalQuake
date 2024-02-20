@@ -42,8 +42,23 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(6.4, 1100, 1E4));
 
 
-        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT);
+        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);
         ImageIO.write(img, "PNG", new File("aaa26.png"));
+
+        recs.clear();
+        recs.add(new DistanceIntensityRecord(7.0, 100, 2E8));
+        recs.add(new DistanceIntensityRecord(7.0, 400, 1E7));
+        recs.add(new DistanceIntensityRecord(7.0, 800, 1E6));
+        recs.add(new DistanceIntensityRecord(7.0, 6000, 1E5));
+
+        recs.add(new DistanceIntensityRecord(6.4, 20, 1E8));
+        recs.add(new DistanceIntensityRecord(6.4, 150, 1E7));
+        recs.add(new DistanceIntensityRecord(6.4, 250, 1E6));
+        recs.add(new DistanceIntensityRecord(6.4, 800, 1E5));
+
+
+        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, true);
+        ImageIO.write(img, "PNG", new File("aaa26A.png"));
 
         for (DistanceIntensityRecord dr : recs) {
             System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));
@@ -56,7 +71,7 @@ public class IntensityGraphs {
             new float[]{3}, 0);
     private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);
 
-    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, MagnitudeType magnitudeType) {
+    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, MagnitudeType magnitudeType, boolean accelerometers) {
         int wry = 20;
         int wrx;
         g.setFont(new Font("Calibri", Font.BOLD, 14));
@@ -114,12 +129,12 @@ public class IntensityGraphs {
                 double dist2 = dist1 * 2;
                 double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);
                 double x2 = wrx + (Math.log10(dist2) / 5) * (w - wrx);
-                double v1 = IntensityTable.getIntensity(mag / 10.0, dist1);
-                double v2 = IntensityTable.getIntensity(mag / 10.0, dist2);
+                double v1 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist1) : IntensityTable.getIntensity(mag / 10.0, dist1);
+                double v2 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist2) :IntensityTable.getIntensity(mag / 10.0, dist2);
                 double y1 = (h - wry) - (h - wry) * ((Math.log10(v1) - minP) / (maxP - minP + 1));
                 double y2 = (h - wry) - (h - wry) * ((Math.log10(v2) - minP) / (maxP - minP + 1));
                 if (y2 < h - wry) {
-                    double fakeMag = IntensityTable.getMagnitude(dist1, v1);
+                    double fakeMag = accelerometers ? IntensityTable.getMagnitudeByAccelerometer(dist1, v1) : IntensityTable.getMagnitude(dist1, v1);
                     g.setColor(Scale.getColorEasily((fakeMag + 1) / 10.0));
                     g.setStroke(new BasicStroke(mag % 10 == 0 ? 4f : 1f));
                     g.draw(new Line2D.Double(x1, y1, x2, y2));

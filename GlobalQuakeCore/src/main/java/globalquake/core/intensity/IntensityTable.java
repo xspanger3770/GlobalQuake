@@ -1,5 +1,7 @@
 package globalquake.core.intensity;
 
+import java.util.function.Function;
+
 public class IntensityTable {
 
     // old, only for unknown sensors
@@ -13,8 +15,8 @@ public class IntensityTable {
     }
 
     public static double getIntensity(double mag, double dist) {
-        if(mag > 9){
-            mag *= 1 + 0.2*Math.pow(mag - 9, 2.5);
+        if (mag > 9) {
+            mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
         }
         mag = 1.25 * mag - 0.9;
         if (dist > 1500) {
@@ -23,7 +25,18 @@ public class IntensityTable {
         return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(6.0, mag))) / 0.07;
     }
 
-    public static double getMagnitude(double dist, double intensity) {
+    public static double getIntensityAccelerometers(double mag, double dist) {
+        if (mag > 9) {
+            mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
+        }
+        mag = 1.18 * mag - 0.9 + 0.004 * mag * mag * mag;
+        if (dist > 900) {
+            dist = 900 + Math.pow(dist - 900, 0.4) * 22;
+        }
+        return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(5.0, mag))) / 0.07;
+    }
+
+    public static double findMagnitude(double dist, double intensity, Function<Double, Double> intensityFunction) {
         double epsilon = 1e-6; // Tolerance for floating-point comparison
         double low = -2.0;
         double high = 10.0;
@@ -31,7 +44,7 @@ public class IntensityTable {
         // Perform binary search
         while (low <= high) {
             double mid = low + (high - low) / 2;
-            double currentIntensity = getIntensity(mid, dist);
+            double currentIntensity = intensityFunction.apply(mid);
 
             if (Math.abs(currentIntensity - intensity) < epsilon) {
                 // Found a close enough match
@@ -48,29 +61,16 @@ public class IntensityTable {
         return low;
     }
 
+    public static double getMagnitude(double dist, double intensity) {
+        return findMagnitude(dist, intensity, value -> getIntensity(value, dist));
+    }
+
     public static double getMagnitudeByRatio(double dist, double intensity) {
-        double epsilon = 1e-6; // Tolerance for floating-point comparison
-        double low = -2.0;
-        double high = 10.0;
+        return findMagnitude(dist, intensity, value -> getIntensityFromRatio(value, dist));
+    }
 
-        // Perform binary search
-        while (low <= high) {
-            double mid = low + (high - low) / 2;
-            double currentIntensity = getIntensityFromRatio(mid, dist);
-
-            if (Math.abs(currentIntensity - intensity) < epsilon) {
-                // Found a close enough match
-                return mid;
-            } else if (currentIntensity < intensity) {
-                // Adjust the search range
-                low = mid + epsilon;
-            } else {
-                high = mid - epsilon;
-            }
-        }
-
-        // If no exact match is found, return an approximation
-        return low;
+    public static double getMagnitudeByAccelerometer(double dist, double intensity) {
+        return findMagnitude(dist, intensity, value -> getIntensityAccelerometers(value, dist));
     }
 
 }

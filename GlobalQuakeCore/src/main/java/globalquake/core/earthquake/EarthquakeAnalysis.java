@@ -18,6 +18,7 @@ import globalquake.core.station.StationState;
 import globalquake.utils.GeoUtils;
 import globalquake.utils.Point2DGQ;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 
 import java.util.*;
@@ -1065,8 +1066,10 @@ public class EarthquakeAnalysis {
 
             double maxVelocity = event.getMaxVelocity(magnitudeType);
 
+            boolean accelerometer =  event.getAnalysis().getStation().getInputType() == InputType.ACCELERATION;
+
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
-                    IntensityTable.getMagnitude(distGE, maxVelocity * mul);
+                    accelerometer ? IntensityTable.getMagnitudeByAccelerometer(distGE, maxVelocity * mul) : IntensityTable.getMagnitude(distGE, maxVelocity * mul);
             magnitude -= getDepthCorrection(hypocenter.depth);
 
             long eventAge = lastRecord - event.getpWave();

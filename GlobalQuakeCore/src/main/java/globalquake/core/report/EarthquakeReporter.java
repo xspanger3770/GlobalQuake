@@ -95,7 +95,7 @@ public class EarthquakeReporter {
             recs.add(new DistanceIntensityRecord(color, distGE, event.getMaxVelocity(earthquake.getHypocenter().magnitudeType)));
         }
 
-        IntensityGraphs.drawGraph(g, w, h, recs, earthquake.getHypocenter().magnitudeType);
+        IntensityGraphs.drawGraph(g, w, h, recs, earthquake.getHypocenter().magnitudeType, false);
 
         g.dispose();
         try {
