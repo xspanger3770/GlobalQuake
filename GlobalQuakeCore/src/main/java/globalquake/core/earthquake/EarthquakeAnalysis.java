@@ -1084,9 +1084,10 @@ public class EarthquakeAnalysis {
 
         mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
 
-        int targetSize = (int) Math.max(4, mags.size() * 0.7);
+        int minSize = 4;
+        long ageLimit = Math.max(2000, Math.min(16000, mags.get((int) (mags.size() * 0.25 - 1)).eventAge()));
 
-        while (mags.size() > targetSize) {
+        while (mags.size() > minSize && mags.get(0).eventAge() < ageLimit) {
             mags.remove(0);
         }
 
