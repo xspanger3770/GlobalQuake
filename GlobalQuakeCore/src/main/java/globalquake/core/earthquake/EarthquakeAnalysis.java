@@ -1040,12 +1040,12 @@ public class EarthquakeAnalysis {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
             Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenter.magnitude));
         }
-        if (hypocenter.magnitude > 6.0) {
+        if (hypocenter.magnitude > 6.5) {
             double mgl = hypocenter.magnitude;
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
             Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenter.magnitude));
 
-            double pct = Math.min(1.0, hypocenter.magnitude - 6.0);
+            double pct = Math.min(1.0, (hypocenter.magnitude - 6.0) * 1.25);
             hypocenter.magnitude = mgl * (1 - pct) + hypocenter.magnitude * pct;
         }
     }
