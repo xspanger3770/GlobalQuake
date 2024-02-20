@@ -487,7 +487,7 @@ public class EarthquakeAnalysis {
         if (bestHypocenter.depth > TauPTravelTimeCalculator.MAX_DEPTH - 5.0) {
             Logger.tag("Hypocs").debug("Ignoring too deep quake, it's probably a core wave! %.1fkm".formatted(bestHypocenter.depth));
 
-            if(cluster.getEarthquake() != null) {
+            if (cluster.getEarthquake() != null) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
@@ -499,7 +499,7 @@ public class EarthquakeAnalysis {
         if (CHECK_DELTA_P && !checkDeltaP(cluster, bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Not Enough Delta-P");
 
-            if(cluster.getEarthquake() != null) {
+            if (cluster.getEarthquake() != null) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
@@ -511,7 +511,7 @@ public class EarthquakeAnalysis {
         if (!checkUncertainty(bestHypocenter, correctSelectedEvents)) {
             Logger.tag("Hypocs").debug("Search canceled for cluster %d".formatted(cluster.id));
             Earthquake earthquake1 = cluster.getEarthquake();
-            if(earthquake1 != null) {
+            if (earthquake1 != null) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
                 Logger.tag("Hypocs").debug("Performed magnitude-only revision anyway");
             }
@@ -1040,9 +1040,13 @@ public class EarthquakeAnalysis {
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
             Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenter.magnitude));
         }
-        if (hypocenter.magnitude > 7.0) {
+        if (hypocenter.magnitude > 6.0) {
+            double mgl = hypocenter.magnitude;
             assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
             Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenter.magnitude));
+
+            double pct = Math.min(1.0, hypocenter.magnitude - 6.0);
+            hypocenter.magnitude = mgl * (1 - pct) + hypocenter.magnitude * pct;
         }
     }
 
@@ -1067,7 +1071,7 @@ public class EarthquakeAnalysis {
             double maxVelocity = event.getMaxVelocity(magnitudeType);
 
             InputType inputType = event.getAnalysis().getStation().getInputType();
-            boolean accelerometer =  inputType == InputType.ACCELERATION;
+            boolean accelerometer = inputType == InputType.ACCELERATION;
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
                     accelerometer ? IntensityTable.getMagnitudeByAccelerometer(distGE, maxVelocity * mul) : IntensityTable.getMagnitude(distGE, maxVelocity * mul);

@@ -31,15 +31,21 @@ public class IntensityGraphs {
 
         List<DistanceIntensityRecord> recs = new ArrayList<>();
 
-        recs.add(new DistanceIntensityRecord(8.1, 100, 6E7));
-        recs.add(new DistanceIntensityRecord(8.1, 350, 1E7));
-        recs.add(new DistanceIntensityRecord(8.1, 800, 1E6));
-        recs.add(new DistanceIntensityRecord(8.1, 2000, 1E5));
+        recs.add(new DistanceIntensityRecord(6.9, 3000, 4E4));
 
-        recs.add(new DistanceIntensityRecord(6.4, 100, 1E7));
-        recs.add(new DistanceIntensityRecord(6.4, 250, 1E6));
-        recs.add(new DistanceIntensityRecord(6.4, 600, 1E5));
-        recs.add(new DistanceIntensityRecord(6.4, 1100, 1E4));
+        recs.add(new DistanceIntensityRecord(9.1, 600, 3e7));
+        recs.add(new DistanceIntensityRecord(9.1, 2000, 1e6));
+        recs.add(new DistanceIntensityRecord(9.1, 11000, 2e5));
+
+        recs.add(new DistanceIntensityRecord(8.1, 250, 3e7));
+        recs.add(new DistanceIntensityRecord(8.1, 480, 1e7));
+        recs.add(new DistanceIntensityRecord(8.1, 900, 1e6));
+        recs.add(new DistanceIntensityRecord(8.1, 5000, 1e5));
+
+        recs.add(new DistanceIntensityRecord(7.0, 200, 1e7));
+        recs.add(new DistanceIntensityRecord(7.0, 400, 1e6));
+        recs.add(new DistanceIntensityRecord(7.0, 900, 1e5));
+        recs.add(new DistanceIntensityRecord(7.0, 10000, 1e4));
 
 
         drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);

@@ -15,12 +15,16 @@ public class IntensityTable {
     }
 
     public static double getIntensity(double mag, double dist) {
+        double limit = 1200;
+        if(mag > 8){
+            limit += (mag - 8.0) * 500;
+        }
         if (mag > 9) {
             mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
         }
-        mag = 1.25 * mag - 0.9;
-        if (dist > 1500) {
-            dist = 1500 + Math.pow(dist - 1500, 0.4) * 22;
+        mag = 1.25 * mag - 0.9 + 0.0002 * mag * mag * mag;
+        if (dist > limit) {
+            dist = limit + Math.pow(dist - limit, 0.4) * 24;
         }
         return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(6.0, mag))) / 0.07;
     }
