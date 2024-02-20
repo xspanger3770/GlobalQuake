@@ -477,7 +477,7 @@ public class EarthquakeAnalysis {
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
 
-        calculateMagnitude(cluster, bestHypocenter);
+        calculateMagnitude(cluster, bestHypocenter, bestHypocenter);
 
         if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
             Logger.tag("Hypocs").debug("No magnitude!");
@@ -575,7 +575,7 @@ public class EarthquakeAnalysis {
     private void updateMagnitudeOnly(Cluster cluster, Hypocenter bestHypocenter) {
         if (cluster.getEarthquake() != null && cluster.getPreviousHypocenter() != null) {
             // calculate magnitudes, but using the previous hypocenter, that is believed to be more accurate
-            calculateMagnitude(cluster, cluster.getPreviousHypocenter());
+            calculateMagnitude(cluster, cluster.getPreviousHypocenter(), bestHypocenter);
 
             if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
                 Logger.tag("Hypocs").debug("No magnitude!");
@@ -1021,9 +1021,9 @@ public class EarthquakeAnalysis {
         return good;
     }
 
-    private void calculateMagnitude(Cluster cluster, Hypocenter hypocenter) {
-        hypocenter.magnitude = NO_MAGNITUDE;
-        hypocenter.mags = null;
+    private void calculateMagnitude(Cluster cluster, Hypocenter hypocenterLocation, Hypocenter hypocenterAssign) {
+        hypocenterAssign.magnitude = NO_MAGNITUDE;
+        hypocenterAssign.mags = null;
 
         if (cluster == null) {
             Logger.tag("Hypocs").error("Fatal error: cluster or hypocenter is null!");
@@ -1034,34 +1034,34 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        assignMagnitude(hypocenter, goodEvents, MagnitudeType.DEFAULT);
-        Logger.tag("Hypocs").trace("Mg%.1f".formatted(hypocenter.magnitude));
-        if (hypocenter.magnitude > 4.0) {
-            assignMagnitude(hypocenter, goodEvents, MagnitudeType.LOW_FREQ);
-            Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenter.magnitude));
+        assignMagnitude(hypocenterLocation, hypocenterAssign, goodEvents, MagnitudeType.DEFAULT);
+        Logger.tag("Hypocs").trace("Mg%.1f".formatted(hypocenterAssign.magnitude));
+        if (hypocenterAssign.magnitude > 4.0) {
+            assignMagnitude(hypocenterLocation, hypocenterAssign, goodEvents, MagnitudeType.LOW_FREQ);
+            Logger.tag("Hypocs").trace("Mgl%.1f".formatted(hypocenterAssign.magnitude));
         }
-        if (hypocenter.magnitude > 6.5) {
-            double mgl = hypocenter.magnitude;
-            assignMagnitude(hypocenter, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
-            Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenter.magnitude));
+        if (hypocenterAssign.magnitude > 6.5) {
+            double mgl = hypocenterAssign.magnitude;
+            assignMagnitude(hypocenterLocation, hypocenterAssign, goodEvents, MagnitudeType.ULTRA_LOW_FREQ);
+            Logger.tag("Hypocs").trace("Mgu%.1f".formatted(hypocenterAssign.magnitude));
 
-            double pct = Math.min(1.0, (hypocenter.magnitude - 6.0) * 1.25);
-            hypocenter.magnitude = mgl * (1 - pct) + hypocenter.magnitude * pct;
+            double pct = Math.min(1.0, (hypocenterAssign.magnitude - 6.0) * 1.25);
+            hypocenterAssign.magnitude = mgl * (1 - pct) + hypocenterAssign.magnitude * pct;
         }
     }
 
-    private static void assignMagnitude(Hypocenter hypocenter, Collection<Event> goodEvents, MagnitudeType magnitudeType) {
+    private static void assignMagnitude(Hypocenter hypocenterLocation, Hypocenter hypocenterAssign, Collection<Event> goodEvents, MagnitudeType magnitudeType) {
         ArrayList<MagnitudeReading> mags = new ArrayList<>();
         for (Event event : goodEvents) {
             if (!event.isValid() || event.getMaxVelocity() < 0 || event.getMaxRatio() < 0) {
                 continue;
             }
-            double distGC = GeoUtils.greatCircleDistance(hypocenter.lat, hypocenter.lon,
+            double distGC = GeoUtils.greatCircleDistance(hypocenterLocation.lat, hypocenterLocation.lon,
                     event.getLatFromStation(), event.getLonFromStation());
-            double distGE = GeoUtils.geologicalDistance(hypocenter.lat, hypocenter.lon,
-                    -hypocenter.depth, event.getLatFromStation(), event.getLonFromStation(), event.getAnalysis().getStation().getAlt() / 1000.0);
-            double sTravelRaw = TauPTravelTimeCalculator.getSWaveTravelTime(hypocenter.depth, TauPTravelTimeCalculator.toAngle(distGC));
-            long expectedSArrival = (long) (hypocenter.origin
+            double distGE = GeoUtils.geologicalDistance(hypocenterLocation.lat, hypocenterLocation.lon,
+                    -hypocenterLocation.depth, event.getLatFromStation(), event.getLonFromStation(), event.getAnalysis().getStation().getAlt() / 1000.0);
+            double sTravelRaw = TauPTravelTimeCalculator.getSWaveTravelTime(hypocenterLocation.depth, TauPTravelTimeCalculator.toAngle(distGC));
+            long expectedSArrival = (long) (hypocenterLocation.origin
                     + sTravelRaw
                     * 1000);
             long lastRecord = ((BetterAnalysis) event.getAnalysis()).getLatestLogTime();
@@ -1075,7 +1075,7 @@ public class EarthquakeAnalysis {
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
                     accelerometer ? IntensityTable.getMagnitudeByAccelerometer(distGE, maxVelocity * mul) : IntensityTable.getMagnitude(distGE, maxVelocity * mul);
-            magnitude -= getDepthCorrection(hypocenter.depth);
+            magnitude -= getDepthCorrection(hypocenterLocation.depth);
 
             long eventAge = lastRecord - event.getpWave();
 
@@ -1091,9 +1091,9 @@ public class EarthquakeAnalysis {
             mags.remove(0);
         }
 
-        hypocenter.mags = mags;
-        hypocenter.magnitude = selectMagnitude(mags);
-        hypocenter.magnitudeType = magnitudeType;
+        hypocenterAssign.mags = mags;
+        hypocenterAssign.magnitude = selectMagnitude(mags);
+        hypocenterAssign.magnitudeType = magnitudeType;
     }
 
     public static double getDepthCorrection(double depth) {
