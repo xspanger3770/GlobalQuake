@@ -49,6 +49,7 @@ public class Event implements Serializable {
     private double maxVelocity;
     private double maxVelocityLowFreq;
     private double maxVelocityUltraLowFreq;
+    private double velocityUltraLowFreqStepped;
 
     public Event(Analysis analysis, long start, WaveformBuffer waveformBuffer, boolean usingRatio) {
         this(analysis, waveformBuffer.getReadLock(), waveformBuffer.getWriteLock());
@@ -193,6 +194,13 @@ public class Event implements Serializable {
         }
         if (velocityUltraLowFreq > this.maxVelocityUltraLowFreq) {
             this.maxVelocityUltraLowFreq = velocityUltraLowFreq;
+        }
+
+        if (velocityUltraLowFreq > this.velocityUltraLowFreqStepped) {
+            if (velocityUltraLowFreqStepped != 0) {
+                this.updatesCount++;
+            }
+            this.velocityUltraLowFreqStepped = velocityUltraLowFreq * 1.75;
         }
 
         boolean eligible = getStart() - getFirstLogTime() >= 65 * 1000;// enough data available
