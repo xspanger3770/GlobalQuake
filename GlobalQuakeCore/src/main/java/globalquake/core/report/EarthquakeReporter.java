@@ -107,7 +107,7 @@ public class EarthquakeReporter {
         return img;
     }
 
-    private static BufferedImage drawMap(File folder, Earthquake earthquake) {
+    public static BufferedImage drawMap(File folder, Earthquake earthquake) {
         calculatePos(earthquake);
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = img.createGraphics();

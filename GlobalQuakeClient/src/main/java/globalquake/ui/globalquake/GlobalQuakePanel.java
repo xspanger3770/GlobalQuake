@@ -376,7 +376,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
         drawIntensityBox(g, level, x + 4, y + 30, height - 34);
         g.setFont(new Font("Calibri", Font.BOLD, 16));
-        drawAccuracyBox(g, true, "", x + width + 4, y + 46, "%s".formatted(quake.magnitudeFormatted()), Scale.getColorEasily(quake.getMag() / 8.0));
+        drawAccuracyBox(g, true, "", x + width + 2, y + 46, "%s".formatted(quake.magnitudeFormatted()), Scale.getColorEasily(quake.getMag() / 8.0));
 
         int intW = getIntensityBoxWidth(g);
         int _x = x + intW + 8;
@@ -727,7 +727,7 @@ public class GlobalQuakePanel extends GlobePanel {
         g.drawString(str, _x, y);
 
         RoundRectangle2D.Double rect = new RoundRectangle2D.Double(
-                _x + space + size1 - pad / 2,
+                _x + space + size1 - pad / 2.0,
                 y - g.getFont().getSize() + 1,
                 size2 + pad,
                 g.getFont().getSize() + 4, 10, 10);

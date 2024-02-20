@@ -40,7 +40,7 @@ public class IntensityTable {
         return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(4.5, mag))) / 0.07;
     }
 
-    public static double findMagnitude(double dist, double intensity, Function<Double, Double> intensityFunction) {
+    public static double findMagnitude(double intensity, Function<Double, Double> intensityFunction) {
         double epsilon = 1e-6; // Tolerance for floating-point comparison
         double low = -2.0;
         double high = 10.0;
@@ -66,15 +66,15 @@ public class IntensityTable {
     }
 
     public static double getMagnitude(double dist, double intensity) {
-        return findMagnitude(dist, intensity, value -> getIntensity(value, dist));
+        return findMagnitude(intensity, value -> getIntensity(value, dist));
     }
 
     public static double getMagnitudeByRatio(double dist, double intensity) {
-        return findMagnitude(dist, intensity, value -> getIntensityFromRatio(value, dist));
+        return findMagnitude(intensity, value -> getIntensityFromRatio(value, dist));
     }
 
     public static double getMagnitudeByAccelerometer(double dist, double intensity) {
-        return findMagnitude(dist, intensity, value -> getIntensityAccelerometers(value, dist));
+        return findMagnitude(intensity, value -> getIntensityAccelerometers(value, dist));
     }
 
 }
