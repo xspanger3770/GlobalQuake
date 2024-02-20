@@ -21,6 +21,7 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -142,7 +143,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             hypocenter.mags = new ArrayList<>();
 
             for(Float mag : advancedHypocenterData.magsData()){
-                hypocenter.mags.add(new MagnitudeReading(mag, 0,55555));
+                hypocenter.mags.add(new MagnitudeReading(mag, 0,55555, InputType.VELOCITY));
             }
         }
 

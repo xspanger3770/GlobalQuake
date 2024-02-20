@@ -10,6 +10,7 @@ import globalquake.core.earthquake.interval.PolygonConfidenceInterval;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globalquake.GlobalQuakePanel;
+import gqserver.api.packets.station.InputType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -155,7 +156,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         List<MagnitudeReading> mags = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag, 0,55555));
+            mags.add(new MagnitudeReading(mag, 0,55555, InputType.VELOCITY));
         }
 
         hyp.mags = mags;

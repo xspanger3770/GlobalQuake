@@ -1066,7 +1066,8 @@ public class EarthquakeAnalysis {
 
             double maxVelocity = event.getMaxVelocity(magnitudeType);
 
-            boolean accelerometer =  event.getAnalysis().getStation().getInputType() == InputType.ACCELERATION;
+            InputType inputType = event.getAnalysis().getStation().getInputType();
+            boolean accelerometer =  inputType == InputType.ACCELERATION;
 
             double magnitude = event.isUsingRatio() ? IntensityTable.getMagnitudeByRatio(distGE, event.getMaxRatio() * mul) :
                     accelerometer ? IntensityTable.getMagnitudeByAccelerometer(distGE, maxVelocity * mul) : IntensityTable.getMagnitude(distGE, maxVelocity * mul);
@@ -1074,7 +1075,7 @@ public class EarthquakeAnalysis {
 
             long eventAge = lastRecord - event.getpWave();
 
-            mags.add(new MagnitudeReading(magnitude, distGC, eventAge));
+            mags.add(new MagnitudeReading(magnitude, distGC, eventAge, inputType));
         }
 
         mags.sort(Comparator.comparing(MagnitudeReading::eventAge));
@@ -1099,14 +1100,14 @@ public class EarthquakeAnalysis {
 
         List<MagnitudeReading> magnitudeReadings = new ArrayList<>();
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000) {
+            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000 && magnitudeReading.inputType() == InputType.VELOCITY) {
                 magnitudeReadings.add(magnitudeReading);
             }
         }
 
         int targetSize = 42;
         for (MagnitudeReading magnitudeReading : mags) {
-            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000) {
+            if (magnitudeReading.distance() > 90 && magnitudeReading.distance() < 2000 && magnitudeReading.inputType() == InputType.VELOCITY) {
                 continue;
             }
 

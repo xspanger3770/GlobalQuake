@@ -29,11 +29,11 @@ public class IntensityTable {
         if (mag > 9) {
             mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
         }
-        mag = 1.18 * mag - 0.9 + 0.004 * mag * mag * mag;
-        if (dist > 900) {
-            dist = 900 + Math.pow(dist - 900, 0.4) * 22;
+        mag = 1.25 * mag - 0.9;
+        if (dist > 3000) {
+            dist = 3000 + Math.pow(dist - 3000, 0.4) * 22;
         }
-        return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(5.0, mag))) / 0.07;
+        return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(4.5, mag))) / 0.07;
     }
 
     public static double findMagnitude(double dist, double intensity, Function<Double, Double> intensityFunction) {
