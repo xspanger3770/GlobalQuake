@@ -52,6 +52,9 @@ public class Hypocenter {
 		this.correctEvents = bestHypocenter.correctEvents;
 		this.reducedEvents = bestHypocenter.reducedEvents;
 		this.totalEvents = bestHypocenter.totalEvents;
+		this.magnitude = bestHypocenter.magnitude;
+		this.mags = bestHypocenter.mags;
+		this.magnitudeType = bestHypocenter.magnitudeType;
 	}
 
 	public double getCorrectness(){
