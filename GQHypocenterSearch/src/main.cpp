@@ -2,16 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "geo_utils.hpp"
 #include "globalquake.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
 #include "travel_table.hpp"
 
 int main() {
-    max_depth = 750.0;
+    table_max_depth = 750.0;
     float depth_resolution = 1.0;
 
-    int len1 = max_depth / depth_resolution + 1;
+    int len1 = table_max_depth / depth_resolution + 1;
     int len2 = 1501;
 
     int points = 50 * 1000;
@@ -19,8 +18,8 @@ int main() {
     table_rows = len1;
     table_columns = len2;
 
-    p_wave_table = static_cast<float *>(malloc(sizeof(float) * len1 * len2));
-    if (!p_wave_table) {
+    p_wave_travel_table = static_cast<float *>(malloc(sizeof(float) * len1 * len2));
+    if (!p_wave_travel_table) {
         perror("malloc");
         return 1;
     }
@@ -38,7 +37,7 @@ int main() {
 
     float a = 999.0;
 
-    static const float RADIANS = PI / 180.0;
+    static const float RADIANS = 3.14159 / 180.0;
 
     for (int station = 0; station < st_c; station++) {
         stations[station + 0 * st_c] = (float) rand() / (float) (RAND_MAX / 360.0) * RADIANS;
@@ -53,8 +52,8 @@ int main() {
         printf("FINAL RESULT %f %f %f %f\n", final_result[0], final_result[1], final_result[2], final_result[3]);
     }
 
-    if (p_wave_table) {
-        free(p_wave_table);
+    if (p_wave_travel_table) {
+        free(p_wave_travel_table);
     }
 
     return 0;

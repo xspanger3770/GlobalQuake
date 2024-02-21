@@ -1,5 +1,5 @@
-#ifndef _GQ_H
-#define _GQ_H
+#ifndef _GLOBALQUAKE_H
+#define _GLOBALQUAKE_H
 
 #include "cstddef"
 
@@ -14,4 +14,4 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
 
 bool initDepthProfiles(float *resols, int count);
 
-#endif
+#endif // _GLOBALQUAKE_H

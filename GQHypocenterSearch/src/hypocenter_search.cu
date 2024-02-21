@@ -3,10 +3,16 @@
 #include <jni.h>
 #include <stdio.h>
 
-#include "geo_utils.hpp"
 #include "globalquake.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
 #include "travel_table.hpp"
+
+#define BLOCK_HYPOCS 512
+#define BLOCK_REDUCE 256
+#define BLOCK_DISTANCES 64
+
+#define STATION_FILEDS 4
+#define HYPOCENTER_FILEDS 5
 
 /**
  * STATION:
@@ -19,18 +25,10 @@
  * lat, lon, depth, origin
 */
 
-#define BLOCK_HYPOCS 512
-#define BLOCK_REDUCE 256
-#define BLOCK_DISTANCES 64
-
-#define STATION_FILEDS 4
-#define HYPOCENTER_FILEDS 5
 #define SHARED_TRAVEL_TABLE_SIZE 2048
 
 #define PHI2 2.618033989f
-
-#define MUL 1.30f
-#define ADD 2.0f
+#define PI 3.14159256f
 
 struct depth_profile_t
 {
@@ -136,7 +134,7 @@ __device__ void calculateParamsDevice(int points, int index, float maxDist, floa
     moveOnGlobeDevice(fromLat, fromLon, ang, *dist, lat, lon);
 }
 
-__device__ float table_interpolate(float *s_travel_table, float index) {
+__device__ float travel_table_interpolate(float *s_travel_table, float index) {
     if (index >= SHARED_TRAVEL_TABLE_SIZE - 1.0f) {
         return s_travel_table[SHARED_TRAVEL_TABLE_SIZE - 1]; // some
     }
@@ -227,7 +225,7 @@ __global__ void evaluateHypocenter(float *results, float *travel_table, float *s
     {
         float ang_dist = station_distances[point_index + j * points];
         float s_pwave = s_stations[j];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float expected_travel_time = travel_table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
         final_origin = predicted_origin;
@@ -239,7 +237,7 @@ __global__ void evaluateHypocenter(float *results, float *travel_table, float *s
     for (int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
         float s_pwave = s_stations[i];
-        float expected_travel_time = table_interpolate(s_travel_table, ang_dist);
+        float expected_travel_time = travel_table_interpolate(s_travel_table, ang_dist);
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
@@ -336,9 +334,9 @@ void prepare_travel_table(float *fitted_travel_table, int rows) {
     for (int row = 0; row < rows; row++) {
         for (int column = 0; column < SHARED_TRAVEL_TABLE_SIZE; column++) {
             fitted_travel_table[row * SHARED_TRAVEL_TABLE_SIZE + column] =
-                    p_interpolate(
+                    p_wave_interpolate(
                             column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG,
-                            (row / (rows - 1.0)) * max_depth);
+                            (row / (rows - 1.0)) * table_max_depth);
         }
     }
 }
@@ -347,7 +345,7 @@ void prepare_travel_table(float *fitted_travel_table, int rows) {
 size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution) {
     size_t result = total_table_size;
 
-    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(max_depth / depth_resolution) + 1, 1 };
+    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_resolution) + 1, 1 };
 
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
@@ -392,7 +390,7 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
 
     bool success = true;
 
-    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(max_depth / depth_profile->depth_resolution) + 1, 1 };
+    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_profile->depth_resolution) + 1, 1 };
     dim3 threads = { BLOCK_HYPOCS, 1, 1 };
 
     if (blocks.y < 2) {
@@ -441,7 +439,7 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     }
 
     if (success) {
-        evaluateHypocenter<<<blocks, threads, sizeof(float) * station_count>>>(f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, max_depth, p_wave_threshold);
+        evaluateHypocenter<<<blocks, threads, sizeof(float) * station_count>>>(f_results_device, depth_profile->device_travel_table, d_stations, d_stations_distances, station_count, points, maxDist, table_max_depth, p_wave_threshold);
     }
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -543,7 +541,7 @@ JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocen
 }
 
 bool initDepthProfiles(float *resols, int count) {
-    max_depth_resolution = max_depth;
+    max_depth_resolution = table_max_depth;
     depth_profile_count = count;
 
     depth_profiles = static_cast<depth_profile_t *>(malloc(count * sizeof(depth_profile_t)));
@@ -562,7 +560,7 @@ bool initDepthProfiles(float *resols, int count) {
 
         depth_profiles[i].depth_resolution = depthRes;
 
-        int rows = (unsigned int) ceil(max_depth / depthRes) + 1;
+        int rows = (unsigned int) ceil(table_max_depth / depthRes) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
         total_table_size += table_size;
 
