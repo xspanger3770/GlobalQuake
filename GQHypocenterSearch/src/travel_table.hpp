@@ -5,7 +5,7 @@
 
 #define MAX_ANG 150.0f
 
-extern float* p_wave_table;
+extern float *p_wave_table;
 extern int32_t table_columns;
 extern int32_t table_rows;
 extern float max_depth;
