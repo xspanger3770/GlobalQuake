@@ -31,6 +31,7 @@ public class EarthquakeAnalysisTraining {
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+        GQHypocs.load();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
