@@ -234,11 +234,13 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 int h = 12;
                 Rectangle2D.Double rectWhole = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w, h);
                 Rectangle2D.Double rectS = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * pct, h);
-                Rectangle2D.Double rectP = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * Math.min(1.0, pctP), h);
+                Rectangle2D.Double rectP = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * pctP, h);
 
                 graphics.setStroke(new BasicStroke(1f));
-                graphics.setColor(new Color(0,140,255));
-                graphics.fill(rectP);
+                if (pctP <= 1.0) {
+                    graphics.setColor(new Color(0, 140, 255));
+                    graphics.fill(rectP);
+                }
                 graphics.setColor(Color.red);
                 graphics.fill(rectS);
                 graphics.setColor(Color.white);
