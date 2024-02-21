@@ -224,20 +224,25 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
 
 
             double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
+            double pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(entity.getOriginal().getDepth(), 0);
             double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
             double pct = age / sTravel;
+            double pctP = age / pTravel;
 
-            if (pct >= 0 && pct <= 1.0) {
+            if (pct >= 0 && pct <= 1.0 && pTravel != TauPTravelTimeCalculator.NO_ARRIVAL && sTravel != TauPTravelTimeCalculator.NO_ARRIVAL) {
                 int w = 60;
                 int h = 12;
-                Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w, h);
-                Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w * pct, h);
+                Rectangle2D.Double rectWhole = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w, h);
+                Rectangle2D.Double rectS = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * pct, h);
+                Rectangle2D.Double rectP = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * Math.min(1.0, pctP), h);
 
                 graphics.setStroke(new BasicStroke(1f));
+                graphics.setColor(new Color(0,140,255));
+                graphics.fill(rectP);
                 graphics.setColor(Color.red);
-                graphics.fill(rect2);
+                graphics.fill(rectS);
                 graphics.setColor(Color.white);
-                graphics.draw(rect1);
+                graphics.draw(rectWhole);
             }
         }
 
