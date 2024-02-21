@@ -60,11 +60,16 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(4.1, 60, 1e5));
         recs.add(new DistanceIntensityRecord(4.1, 220, 1e4));
         recs.add(new DistanceIntensityRecord(4.1, 550, 1e3));
-        recs.add(new DistanceIntensityRecord(4.1, 8000, 1e2));
+
+        recs.add(new DistanceIntensityRecord(3.0, 90, 1e4));
+        recs.add(new DistanceIntensityRecord(3.0, 240, 1e3));
+        recs.add(new DistanceIntensityRecord(3.0, 400, 1e2));
+        recs.add(new DistanceIntensityRecord(3.0, 700, 1e1));
+
 
 
         drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);
-        ImageIO.write(img, "PNG", new File("aaa28.png"));
+        ImageIO.write(img, "PNG", new File("aaa29.png"));
 
         recs.clear();
         recs.add(new DistanceIntensityRecord(7.0, 100, 2E8));
