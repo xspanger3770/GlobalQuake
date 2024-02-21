@@ -20,6 +20,8 @@ IndentWidth:     4
 TabWidth:        4
 IndentCaseLabels: false
 
+ColumnLimit: 160
+
 PointerAlignment: Right
 DerivePointerAlignment: false
 

@@ -43,7 +43,7 @@ int depth_profile_count;
 depth_profile_t *depth_profiles = nullptr;
 float *f_results_device = nullptr;
 
-size_t total_table_size;
+size_t total_travel_table_size;
 
 void print_err(const char *msg) {
     cudaError err = cudaGetLastError();
@@ -189,7 +189,15 @@ __device__ void reduce(float *hypocenter_a, float *hypocenter_b, int grid_size) 
     }
 }
 
-__global__ void evaluate_hypocenter(float *results, float *travel_table, float *stations, float *station_distances, int station_count, int points, float max_dist, float max_depth, float p_wave_threshold) {
+__global__ void evaluate_hypocenter(float *results,
+        float *travel_table,
+        float *stations,
+        float *station_distances,
+        int station_count,
+        int points,
+        float max_dist,
+        float max_depth,
+        float p_wave_threshold) {
     extern __shared__ float s_stations[];
     __shared__ float s_travel_table[SHARED_TRAVEL_TABLE_SIZE];
     __shared__ float s_results[BLOCK_HYPOCS * HYPOCENTER_FILEDS];
@@ -335,16 +343,14 @@ void prepare_travel_table(float *fitted_travel_table, int rows) {
     for (int row = 0; row < rows; row++) {
         for (int column = 0; column < SHARED_TRAVEL_TABLE_SIZE; column++) {
             fitted_travel_table[row * SHARED_TRAVEL_TABLE_SIZE + column] =
-                    p_wave_interpolate(
-                            column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG,
-                            (row / (rows - 1.0)) * table_max_depth);
+                    p_wave_interpolate(column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG, (row / (rows - 1.0)) * table_max_depth);
         }
     }
 }
 
 // returns (accurately) estimated total GPU memory allocation size given the parameters
 size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution) {
-    size_t result = total_table_size;
+    size_t result = total_travel_table_size;
 
     dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_resolution) + 1, 1 };
 
@@ -367,7 +373,15 @@ JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize
     return get_total_allocation_size(points, stations, depth_resolution);
 }
 
-bool run_hypocenter_search(float *stations, size_t station_count, size_t points, int depth_profile_index, float max_dist, float from_lat, float from_lon, float *final_result, float p_wave_threshold) {
+bool run_hypocenter_search(float *stations,
+        size_t station_count,
+        size_t points,
+        int depth_profile_index,
+        float max_dist,
+        float from_lat,
+        float from_lon,
+        float *final_result,
+        float p_wave_threshold) {
     if (depth_profile_index < 0 || depth_profile_index >= depth_profile_count) {
         TRACE(2, "Error! Invalid depth profile index: %d!\n", depth_profile_index);
         return false;
@@ -391,7 +405,9 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
 
     bool success = true;
 
-    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_profile->depth_resolution) + 1, 1 };
+    dim3 blocks = {
+        (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_profile->depth_resolution) + 1, 1
+    };
     dim3 threads = { BLOCK_HYPOCS, 1, 1 };
 
     if (blocks.y < 2) {
@@ -420,16 +436,17 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
 
     if (!success) {
-        print_err("Hypocs initialisation");
+        print_err("Hypocenter search initialisation");
         goto cleanup;
     }
 
     TRACE(1, "Grid size: %d %d %d\n", blocks.x, blocks.y, blocks.z);
     TRACE(1, "Block size: %d %d %d\n", threads.x, threads.y, threads.z);
-    TRACE(1, "total points: %lld\n", (((long long) (blocks.x * blocks.y * blocks.z)) * (long long) (threads.x * threads.y * threads.z)));
+    TRACE(1, "Total points: %lld\n", (((long long) (blocks.x * blocks.y * blocks.z)) * (long long) (threads.x * threads.y * threads.z)));
 
     if (success) {
-        precompute_station_distances<<<block_count, BLOCK_DISTANCES>>>(device_stations_distances, device_stations, station_count, points, max_dist, from_lat, from_lon);
+        precompute_station_distances<<<block_count, BLOCK_DISTANCES>>>(
+                device_stations_distances, device_stations, station_count, points, max_dist, from_lat, from_lon);
     }
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -440,7 +457,15 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     }
 
     if (success) {
-        evaluate_hypocenter<<<blocks, threads, sizeof(float) * station_count>>>(f_results_device, depth_profile->device_travel_table, device_stations, device_stations_distances, station_count, points, max_dist, table_max_depth, p_wave_threshold);
+        evaluate_hypocenter<<<blocks, threads, sizeof(float) * station_count>>>(f_results_device,
+                depth_profile->device_travel_table,
+                device_stations,
+                device_stations_distances,
+                station_count,
+                points,
+                max_dist,
+                table_max_depth,
+                p_wave_threshold);
     }
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -477,7 +502,8 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
             final_result[2] = local_result[4];
             final_result[3] = local_result[3];
         } else {
-            success &= cudaMemcpy(f_results_device, device_temp_results, current_result_count * HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToDevice) == cudaSuccess;
+            success &= cudaMemcpy(f_results_device, device_temp_results, current_result_count * HYPOCENTER_FILEDS * sizeof(float), cudaMemcpyDeviceToDevice) ==
+                    cudaSuccess;
         }
 
         if (!success) {
@@ -504,29 +530,36 @@ cleanup:
     return success;
 }
 
-JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter(JNIEnv *env, jclass, jfloatArray stations, jfloat from_lat, jfloat from_lon, jlong points, int depth_resolution_profile_id, jfloat max_dist, jfloat p_wave_threshold) {
+JNIEXPORT jfloatArray JNICALL Java_globalquake_jni_GQNativeFunctions_findHypocenter(JNIEnv *env,
+        jclass,
+        jfloatArray stations,
+        jfloat from_lat,
+        jfloat from_lon,
+        jlong points,
+        int depth_resolution_profile_id,
+        jfloat max_dist,
+        jfloat p_wave_threshold) {
     size_t station_count = env->GetArrayLength(stations) / STATION_FILEDS;
 
-    bool success = false;
-
-    float *stationsArray = static_cast<float *>(malloc(sizeof(float) * station_count * STATION_FILEDS));
-    if (!stationsArray) {
+    float *stations_array = static_cast<float *>(malloc(sizeof(float) * station_count * STATION_FILEDS));
+    if (!stations_array) {
         perror("malloc");
         return nullptr;
     }
 
     jfloat *elements = env->GetFloatArrayElements(stations, 0);
     for (int i = 0; i < station_count * STATION_FILEDS; i++) {
-        stationsArray[i] = elements[i];
+        stations_array[i] = elements[i];
     }
 
     env->ReleaseFloatArrayElements(stations, elements, 0);
 
     float final_result[HYPOCENTER_FILEDS];
 
-    success = run_hypocenter_search(stationsArray, station_count, points, depth_resolution_profile_id, max_dist, from_lat, from_lon, final_result, p_wave_threshold);
+    bool success = run_hypocenter_search(
+            stations_array, station_count, points, depth_resolution_profile_id, max_dist, from_lat, from_lon, final_result, p_wave_threshold);
 
-    free(stationsArray);
+    free(stations_array);
 
     jfloatArray result = nullptr;
 
@@ -551,7 +584,7 @@ bool init_depth_profiles(float *resols, int count) {
         return false;
     }
 
-    total_table_size = 0;
+    total_travel_table_size = 0;
 
     for (int i = 0; i < depth_profile_count; i++) {
         float depth_resolution = resols[i];
@@ -563,7 +596,7 @@ bool init_depth_profiles(float *resols, int count) {
 
         int rows = (unsigned int) ceil(table_max_depth / depth_resolution) + 1;
         size_t table_size = sizeof(float) * rows * SHARED_TRAVEL_TABLE_SIZE;
-        total_table_size += table_size;
+        total_travel_table_size += table_size;
 
         TRACE(1, "Creating depth profile with resolution %.2fkm (%.2fkB)\n", depth_resolution, table_size / 1024.0);
 
@@ -606,14 +639,14 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_initCUDA(JNIEn
         int depth_profile_count = env->GetArrayLength(depth_profiles_array);
         jfloat *depth_resolutions_array = env->GetFloatArrayElements(depth_profiles_array, 0);
 
-        float depthResols[depth_profile_count];
+        float depth_resolutions[depth_profile_count];
         for (int i = 0; i < depth_profile_count; i++) {
-            depthResols[i] = depth_resolutions_array[i];
+            depth_resolutions[i] = depth_resolutions_array[i];
         }
 
         env->ReleaseFloatArrayElements(depth_profiles_array, depth_resolutions_array, 0);
 
-        success &= init_depth_profiles(depthResols, depth_profile_count);
+        success &= init_depth_profiles(depth_resolutions, depth_profile_count);
     }
 
     cuda_initialised = success;

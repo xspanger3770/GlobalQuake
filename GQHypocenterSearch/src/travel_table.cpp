@@ -28,8 +28,7 @@ float p_wave_interpolate(float ang, float depth) {
     float q21 = p_wave_travel_table[row_ceil * table_columns + col_floor];
     float q22 = p_wave_travel_table[row_ceil * table_columns + col_ceil];
 
-    float interpolated_value = (1 - row_frac) * ((1 - col_frac) * q11 + col_frac * q12) +
-            row_frac * ((1 - col_frac) * q21 + col_frac * q22);
+    float interpolated_value = (1 - row_frac) * ((1 - col_frac) * q11 + col_frac * q12) + row_frac * ((1 - col_frac) * q21 + col_frac * q22);
 
     return interpolated_value;
 }
@@ -59,8 +58,7 @@ static void release_matrix(JNIEnv *env, jobjectArray matrix) {
  * Method:    initPTravelTable
  * Signature: ([[FF)V
  */
-JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable(
-        JNIEnv *env, jclass cls, jobjectArray table, jfloat max_depth) {
+JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTable(JNIEnv *env, jclass cls, jobjectArray table, jfloat max_depth) {
     table_max_depth = max_depth;
 
     table_rows = env->GetArrayLength(table);
