@@ -63,7 +63,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
                         GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                     }
 
-                    for(AbstractStation station :  GlobalQuake.instance.getStationManager().getStations()){
+                    for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
                         station.clear();
                     }
 
@@ -156,7 +156,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         List<MagnitudeReading> mags = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             double mag = 5 + Math.tan(i / 100.0 * 3.14159);
-            mags.add(new MagnitudeReading(mag, 0,55555, InputType.VELOCITY));
+            mags.add(new MagnitudeReading(mag, 0, 55555, InputType.VELOCITY));
         }
 
         hyp.mags = mags;
@@ -169,7 +169,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
     public void paint(Graphics gr) {
         super.paint(gr);
         var g = ((Graphics2D) gr);
-        String str = "Playground mode";
+        String str = ((GlobalQuakePlayground) GlobalQuake.getInstance()).getWatermark();
         g.setColor(new Color(255, 255, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 40)));
 
         Font font = new Font("Calibri", Font.BOLD, 48);
