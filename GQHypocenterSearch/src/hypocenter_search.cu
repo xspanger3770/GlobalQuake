@@ -311,7 +311,7 @@ __global__ void results_reduce(float *out, float *in, int total_size) {
 
 const float ANGLE_TO_INDEX = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG;
 
-__global__ void calculate_station_distances(
+__global__ void precompute_station_distances(
         float *station_distances, float *stations, int station_count, int points, float max_dist, float from_lat, float from_lon) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -369,7 +369,7 @@ JNIEXPORT jlong JNICALL Java_globalquake_jni_GQNativeFunctions_getAllocationSize
 
 bool run_hypocenter_search(float *stations, size_t station_count, size_t points, int depth_profile_index, float max_dist, float from_lat, float from_lon, float *final_result, float p_wave_threshold) {
     if (depth_profile_index < 0 || depth_profile_index >= depth_profile_count) {
-        TRACE(2, "Error! Invalid depth profile: %d!\n", depth_profile_index);
+        TRACE(2, "Error! Invalid depth profile index: %d!\n", depth_profile_index);
         return false;
     }
 
@@ -406,11 +406,11 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     size_t temp_results_array_elements = ceil((blocks.x * blocks.y * blocks.z) / static_cast<float>(BLOCK_REDUCE));
     size_t current_result_count = blocks.x * blocks.y * blocks.z;
 
-    const int block_count2 = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
+    const int block_count = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
-    TRACE(1, "station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
-    TRACE(1, "station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
-    TRACE(1, "temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
+    TRACE(1, "Station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
+    TRACE(1, "Station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
+    TRACE(1, "Temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
     TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0 * 1024.0)));
 
     success &= cudaMalloc(&device_stations, station_array_size) == cudaSuccess;
@@ -429,7 +429,7 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     TRACE(1, "total points: %lld\n", (((long long) (blocks.x * blocks.y * blocks.z)) * (long long) (threads.x * threads.y * threads.z)));
 
     if (success) {
-        calculate_station_distances<<<block_count2, BLOCK_DISTANCES>>>(device_stations_distances, device_stations, station_count, points, max_dist, from_lat, from_lon);
+        precompute_station_distances<<<block_count, BLOCK_DISTANCES>>>(device_stations_distances, device_stations, station_count, points, max_dist, from_lat, from_lon);
     }
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -451,10 +451,10 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
     }
 
     while (success && current_result_count > 1) {
-        dim3 blcks = { (unsigned int) ceil(current_result_count / static_cast<double>(BLOCK_REDUCE)), 1, 1 };
-        TRACE(1, "Reducing... from %ld to %d\n", current_result_count, blcks.x);
+        dim3 blocks_reduce = { (unsigned int) ceil(current_result_count / static_cast<double>(BLOCK_REDUCE)), 1, 1 };
+        TRACE(1, "Reducing... from %ld to %d\n", current_result_count, blocks_reduce.x);
 
-        results_reduce<<<blcks, BLOCK_REDUCE>>>(device_temp_results, f_results_device, current_result_count);
+        results_reduce<<<blocks_reduce, BLOCK_REDUCE>>>(device_temp_results, f_results_device, current_result_count);
         success &= cudaDeviceSynchronize() == cudaSuccess;
 
         if (!success) {
@@ -462,7 +462,7 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
             goto cleanup;
         }
 
-        current_result_count = blcks.x;
+        current_result_count = blocks_reduce.x;
 
         float local_result[HYPOCENTER_FILEDS];
 
@@ -489,16 +489,16 @@ bool run_hypocenter_search(float *stations, size_t station_count, size_t points,
 cleanup:
 
     if (device_stations) {
-        cudaFree(device_stations);
+        success &= cudaFree(device_stations) == cudaSuccess;
     }
     if (device_stations_distances) {
-        cudaFree(device_stations_distances);
+        success &= cudaFree(device_stations_distances) == cudaSuccess;
     }
     if (device_temp_results) {
-        cudaFree(device_temp_results);
+        success &= cudaFree(device_temp_results) == cudaSuccess;
     }
     if (f_results_device) {
-        cudaFree(f_results_device);
+        success &= cudaFree(f_results_device) == cudaSuccess;
     }
 
     return success;
