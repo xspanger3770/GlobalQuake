@@ -11,10 +11,6 @@ int32_t table_columns;
 float table_max_depth;
 bool travel_table_initialised = false;
 
-bool is_initialised(void) {
-    return travel_table_initialised;
-}
-
 float p_wave_interpolate(float ang, float depth) {
     float row = (depth / table_max_depth) * (table_rows - 1.0);
     float column = (ang / MAX_ANG) * (table_columns - 1.0);
@@ -44,7 +40,7 @@ float p_wave_interpolate(float ang, float depth) {
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_isTravelTableReady(JNIEnv *, jclass) {
-    return is_initialised();
+    return travel_table_initialised;
 }
 
 static void release_matrix(JNIEnv *env, jobjectArray matrix) {
@@ -71,7 +67,7 @@ JNIEXPORT jboolean JNICALL Java_globalquake_jni_GQNativeFunctions_copyPTravelTab
     jfloatArray dim = (jfloatArray) env->GetObjectArrayElement(table, 0);
     table_columns = env->GetArrayLength(dim);
 
-    if (is_initialised()) {
+    if (travel_table_initialised) {
         free(p_wave_travel_table);
     }
 

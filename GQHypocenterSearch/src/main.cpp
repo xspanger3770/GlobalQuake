@@ -25,7 +25,7 @@ int main() {
     }
 
     float resols[] = { 1.0 };
-    if (!initDepthProfiles(resols, 1)) {
+    if (!init_depth_profiles(resols, 1)) {
         printf("Failure!\n");
         return 1;
     }
