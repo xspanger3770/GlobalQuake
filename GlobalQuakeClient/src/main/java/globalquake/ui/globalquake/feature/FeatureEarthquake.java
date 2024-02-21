@@ -159,7 +159,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             }
         }
 
-        if(Settings.antialiasingQuakes) {
+        if (Settings.antialiasingQuakes) {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
@@ -221,23 +221,24 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             );
 
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
-        }
 
-        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
-        double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
-        double pct = age / sTravel;
 
-        if (pct >= 0 && pct <= 1.0) {
-            int w = 60;
-            int h = 12;
-            Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w, h);
-            Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w * pct, h);
+            double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
+            double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
+            double pct = age / sTravel;
 
-            graphics.setStroke(new BasicStroke(1f));
-            graphics.setColor(Color.red);
-            graphics.fill(rect2);
-            graphics.setColor(Color.white);
-            graphics.draw(rect1);
+            if (pct >= 0 && pct <= 1.0) {
+                int w = 60;
+                int h = 12;
+                Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w, h);
+                Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w * pct, h);
+
+                graphics.setStroke(new BasicStroke(1f));
+                graphics.setColor(Color.red);
+                graphics.fill(rect2);
+                graphics.setColor(Color.white);
+                graphics.draw(rect1);
+            }
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
