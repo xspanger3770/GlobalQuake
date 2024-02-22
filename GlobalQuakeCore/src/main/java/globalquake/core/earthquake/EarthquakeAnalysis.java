@@ -483,7 +483,17 @@ public class EarthquakeAnalysis {
             return;
         }
 
+        bestHypocenter.usedEvents = selectedEvents.size();
+        bestHypocenter.reducedEvents = correctSelectedEvents.size();
+        bestHypocenter.totalEvents = cluster.getAssignedEvents().size();
+
+        calculateActualCorrectEvents(selectedEvents, bestHypocenter);
+        calculateObviousArrivals(bestHypocenter);
+
+        bestHypocenter.calculateQuality();
         calculateMagnitude(cluster, bestHypocenter, bestHypocenter);
+
+        Logger.tag("Hypocs").debug(bestHypocenter);
 
         if (!testing && bestHypocenter.magnitude == NO_MAGNITUDE) {
             Logger.tag("Hypocs").debug("No magnitude!");
@@ -525,19 +535,6 @@ public class EarthquakeAnalysis {
             return;
         }
 
-        Hypocenter previousHypocenter = cluster.getPreviousHypocenter();
-
-        bestHypocenter.usedEvents = selectedEvents.size();
-        bestHypocenter.reducedEvents = correctSelectedEvents.size();
-        bestHypocenter.totalEvents = cluster.getAssignedEvents().size();
-
-        calculateActualCorrectEvents(selectedEvents, bestHypocenter);
-        calculateObviousArrivals(bestHypocenter);
-
-        bestHypocenter.calculateQuality();
-
-        Logger.tag("Hypocs").debug(bestHypocenter);
-
         double obviousCorrectPct = 1.0;
         if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
             obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
@@ -554,7 +551,7 @@ public class EarthquakeAnalysis {
             Logger.tag("Hypocs").debug("Hypocenter not valid, remove = %s, pct=%.2f/%.2f, obvious_correct_pct=%.2f/%.2f was %s".formatted(remove, pct, finderSettings.correctnessThreshold(), obviousCorrectPct, OBVIOUS_CORRECT_THRESHOLD, bestHypocenter));
         } else {
             HypocenterCondition result;
-            if ((result = checkConditions(selectedEvents, bestHypocenter, previousHypocenter, cluster, finderSettings)) == HypocenterCondition.OK) {
+            if ((result = checkConditions(selectedEvents, bestHypocenter, cluster.getPreviousHypocenter(), cluster, finderSettings)) == HypocenterCondition.OK) {
                 updateHypocenter(cluster, bestHypocenter);
             } else if (result != HypocenterCondition.NULL) {
                 updateMagnitudeOnly(cluster, bestHypocenter);
