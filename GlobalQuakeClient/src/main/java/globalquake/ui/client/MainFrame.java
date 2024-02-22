@@ -137,7 +137,7 @@ public class MainFrame extends GQFrame {
             new ServerSelectionFrame().setVisible(true);
         });
 
-        playgroundButton = new JButton("Playground");
+        playgroundButton = new JButton("Playground Mode (beta)");
         playgroundButton.setEnabled(loaded);
         panel.add(playgroundButton);
 
