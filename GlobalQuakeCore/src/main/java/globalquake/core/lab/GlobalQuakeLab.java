@@ -67,6 +67,11 @@ public class GlobalQuakeLab {
     private static void inspectArchivedQuake(ArchivedQuake archivedQuake) {
         System.out.println(archivedQuake);
 
+        /** HOW:
+         * [2024-02-22 16:11:49] DEBUG: Hypocenter{totalErr=1.7976931348623157E308, correctEvents=6, lat=-15.049294471740723, lon=-104.17449188232422, depth=716.5, origin=1708617187426, selectedEvents=11, magnitude=5.947031779428777, mags=[MagnitudeReading[magnitude=6.022983368320283, distance=14087.3446279849, eventAge=246800], MagnitudeReading[magnitude=4.798863024224573, distance=14109.64226820795, eventAge=244325], MagnitudeReading[magnitude=5.321131406557377, distance=14110.037034335299, eventAge=244900], MagnitudeReading[magnitude=5.947031779428777, distance=14162.969490055464, eventAge=318400], MagnitudeReading[magnitude=7.033905968753155, distance=15279.572844378148, eventAge=274920], MagnitudeReading[magnitude=8.42564223128777, distance=15989.629923569568, eventAge=263090], MagnitudeReading[magnitude=5.946263594638879, distance=17316.639339086327, eventAge=221420]], obviousArrivalsInfo=ObviousArrivalsInfo{total=6361, wrong=6289}, depthConfidenceInterval=HypocenterConfidenceInterval{minDepth=716.5, maxDepth=716.5}}
+         * [2024-02-22 16:11:49] TRACE: Hypocenter finding finished in: 53 ms
+         */
+
         runTest(archivedQuake);
     }
 

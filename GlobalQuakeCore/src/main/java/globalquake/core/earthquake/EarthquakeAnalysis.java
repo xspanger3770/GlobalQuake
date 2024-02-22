@@ -430,6 +430,7 @@ public class EarthquakeAnalysis {
 
                 calculateDistances(pickedEvents, lat, lon);
                 getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
+
                 double h1 = calculateHeuristic(threadData.bestHypocenter);
                 double h2 = calculateHeuristic(bestHypocenter);
                 boolean stillValid = h1 > h2 / confidenceThreshold;
@@ -476,6 +477,11 @@ public class EarthquakeAnalysis {
         Hypocenter bestHypocenter = bestHypocenterPrelim.finish(
                 calculateDepthConfidenceInterval(correctSelectedEvents, bestHypocenterPrelim, finderSettings),
                 calculatePolygonConfidenceIntervals(correctSelectedEvents, bestHypocenterPrelim, finderSettings));
+
+        if (bestHypocenter.correctEvents == 0 || bestHypocenter.totalErr == Double.MAX_VALUE) {
+            Logger.tag("Hypocs").debug("Absurd!");
+            return;
+        }
 
         calculateMagnitude(cluster, bestHypocenter, bestHypocenter);
 
@@ -876,15 +882,17 @@ public class EarthquakeAnalysis {
         threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
     }
 
+    private static final long UNKNOWN_ORIGIN = Long.MIN_VALUE;
+
     public static void analyseHypocenter(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> events, HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
         int c = 0;
 
         for (ExactPickedEvent event : events) {
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, event.angle);
             if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
-                hypocenter.correctStations = 0;
-                hypocenter.err = Double.MAX_VALUE;
-                return;
+                threadData.origins[c] = UNKNOWN_ORIGIN;
+                c++;
+                continue;
             }
 
             travelTime += getElevationCorrection(event.elevation());
@@ -900,6 +908,12 @@ public class EarthquakeAnalysis {
             bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
         } else {
             bestOrigin = threadData.origins[0];
+        }
+
+        if(bestOrigin == UNKNOWN_ORIGIN){
+            hypocenter.err = Double.MAX_VALUE;
+            hypocenter.correctStations = 0;
+            return;
         }
 
         double err = 0;
