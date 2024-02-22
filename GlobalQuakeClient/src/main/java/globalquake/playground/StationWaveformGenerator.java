@@ -31,7 +31,7 @@ public class StationWaveformGenerator {
         public Distances(Earthquake earthquake, AbstractStation station) {
             gcd = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), station.getLatitude(), station.getLongitude());
             geo = GeoUtils.gcdToGeo(gcd);
-            distMultiplier = IntensityTable.getIntensity(earthquake.getMag() * 0.9, geo) / (20.0);
+            distMultiplier = IntensityTable.getIntensity(earthquake.getMag(), geo) / (20.0);
 
             pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                     TauPTravelTimeCalculator.toAngle(gcd));
