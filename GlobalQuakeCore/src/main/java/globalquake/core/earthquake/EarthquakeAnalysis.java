@@ -43,7 +43,7 @@ public class EarthquakeAnalysis {
 
     private static final boolean OBVIOUS_CORRECT_CHECK = true;
     private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 2600;
-    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.40;
+    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.30;
     private static final double OBVIOUS_CORRECT_DELETE_THRESHOLD = 0.20;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 128.0;
 
