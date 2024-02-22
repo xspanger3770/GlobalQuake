@@ -648,8 +648,10 @@ public class GlobalQuakePanel extends GlobePanel {
                     str = "Revision no. " + quake.getRevisionID();
                     g.drawString(str, x + xOffset + 3, y + 123);
 
-                    if(Settings.displayAdditionalQuakeInfo) {
-                        str = "Obv: %.1f%%".formatted(quake.getHypocenter().obviousArrivalsInfo.getPCT() * 100.0);
+                    var obv = quake.getHypocenter().obviousArrivalsInfo;
+
+                    if(Settings.displayAdditionalQuakeInfo && obv != null && obv.total() > 0) {
+                        str = "Obv: %.1f%%".formatted(obv.getPCT() * 100.0);
                         g.drawString(str, x + baseWidth - g.getFontMetrics().stringWidth(str) - 5, y + 104);
                     }
 
