@@ -42,9 +42,10 @@ public class EarthquakeAnalysis {
     private static final boolean ONLY_SELECT_BETTER = false;
 
     private static final boolean OBVIOUS_CORRECT_CHECK = true;
-    private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 2000;
-    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
-    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 200.0;
+    private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 2600;
+    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.40;
+    private static final double OBVIOUS_CORRECT_DELETE_THRESHOLD = 0.20;
+    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 128.0;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -546,7 +547,7 @@ public class EarthquakeAnalysis {
         double pct = 100 * bestHypocenter.getCorrectness();
         boolean valid = pct >= finderSettings.correctnessThreshold() && bestHypocenter.correctEvents >= finderSettings.minStations() && obviousCorrectPct >= OBVIOUS_CORRECT_THRESHOLD;
         if (!valid) {
-            boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_THRESHOLD * 0.75;
+            boolean remove = pct < finderSettings.correctnessThreshold() * 0.75 || bestHypocenter.correctEvents < finderSettings.minStations() * 0.75 || obviousCorrectPct < OBVIOUS_CORRECT_DELETE_THRESHOLD;
             Earthquake earthquake1 = cluster.getEarthquake();
             if (remove && earthquake1 != null) {
                 removeQuake(cluster, earthquake1);
