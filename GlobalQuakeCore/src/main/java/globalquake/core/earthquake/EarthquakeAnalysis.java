@@ -541,7 +541,7 @@ public class EarthquakeAnalysis {
 
         double obviousCorrectPct = 1.0;
         if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
-            obviousCorrectPct = (bestHypocenter.obviousArrivalsInfo.total() - bestHypocenter.obviousArrivalsInfo.wrong()) / (double) bestHypocenter.obviousArrivalsInfo.total();
+            obviousCorrectPct = bestHypocenter.obviousArrivalsInfo.getPCT();
         }
 
         double pct = 100 * bestHypocenter.getCorrectness();
