@@ -5,6 +5,7 @@ import globalquake.client.ClientSocket;
 import globalquake.client.ClientSocketStatus;
 import globalquake.client.GlobalQuakeClient;
 import globalquake.core.GlobalQuake;
+import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
@@ -650,7 +651,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
                     var obv = quake.getHypocenter().obviousArrivalsInfo;
 
-                    if(Settings.displayAdditionalQuakeInfo && obv != null && obv.total() > 0) {
+                    if(Settings.displayAdditionalQuakeInfo && obv != null && obv.total() >= EarthquakeAnalysis.OBVIOUS_CORRECT_MIN_TOTAL) {
                         str = "Obv: %.1f%%".formatted(obv.getPCT() * 100.0);
                         g.drawString(str, x + baseWidth - g.getFontMetrics().stringWidth(str) - 5, y + 104);
                     }

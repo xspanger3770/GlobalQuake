@@ -45,7 +45,8 @@ public class EarthquakeAnalysis {
     private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 2600;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.30;
     private static final double OBVIOUS_CORRECT_DELETE_THRESHOLD = 0.20;
-    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 128.0;
+    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
+    public static final int OBVIOUS_CORRECT_MIN_TOTAL = 8;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -540,7 +541,7 @@ public class EarthquakeAnalysis {
         }
 
         double obviousCorrectPct = 1.0;
-        if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > 8) {
+        if (OBVIOUS_CORRECT_CHECK && bestHypocenter.obviousArrivalsInfo != null && bestHypocenter.obviousArrivalsInfo.total() > OBVIOUS_CORRECT_MIN_TOTAL) {
             obviousCorrectPct = bestHypocenter.obviousArrivalsInfo.getPCT();
         }
 
