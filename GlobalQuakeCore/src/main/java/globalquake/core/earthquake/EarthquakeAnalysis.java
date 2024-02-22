@@ -33,7 +33,7 @@ public class EarthquakeAnalysis {
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
-    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
+    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.20;
     private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
     private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
@@ -41,7 +41,7 @@ public class EarthquakeAnalysis {
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
 
-    private static final boolean OBVIOUS_CORRECT_CHECK = false;
+    private static final boolean OBVIOUS_CORRECT_CHECK = true;
     private static final boolean ONLY_SELECT_BETTER = false;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
@@ -724,7 +724,7 @@ public class EarthquakeAnalysis {
             }
 
             total++;
-            if (station.getEventAt(expectedPArrival, 10 * 1000) == null) {
+            if (station.getEventAt(expectedPArrival, 20 * 1000) == null) {
                 wrong++;
             }
         }

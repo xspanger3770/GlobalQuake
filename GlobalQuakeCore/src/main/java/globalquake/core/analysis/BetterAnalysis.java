@@ -34,7 +34,7 @@ public class BetterAnalysis extends Analysis {
     public static final double EVENT_END_DURATION = 7.0;
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
     public static final double EVENT_TOO_LONG_DURATION = 5 * 60.0;
-    public static final double EVENT_STORE_TIME = 20 * 60.0;
+    public static final double EVENT_STORE_TIME = 40 * 60.0;
 
     private double initialOffset;
 
