@@ -33,16 +33,18 @@ public class EarthquakeAnalysis {
 
     public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
-    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.20;
-    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
     private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
     private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
 
-    private static final boolean OBVIOUS_CORRECT_CHECK = true;
     private static final boolean ONLY_SELECT_BETTER = false;
+
+    private static final boolean OBVIOUS_CORRECT_CHECK = true;
+    private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 2000;
+    private static final double OBVIOUS_CORRECT_THRESHOLD = 0.25;
+    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 200.0;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
 
@@ -488,10 +490,11 @@ public class EarthquakeAnalysis {
         bestHypocenter.totalEvents = cluster.getAssignedEvents().size();
 
         calculateActualCorrectEvents(selectedEvents, bestHypocenter);
-        calculateObviousArrivals(bestHypocenter);
 
         bestHypocenter.calculateQuality();
         calculateMagnitude(cluster, bestHypocenter, bestHypocenter);
+
+        calculateObviousArrivals(bestHypocenter);
 
         Logger.tag("Hypocs").debug(bestHypocenter);
 
@@ -705,6 +708,11 @@ public class EarthquakeAnalysis {
 
         for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
             double distGC = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, station.getLatitude(), station.getLongitude());
+
+            if(distGC > OBVIOUS_CORRECT_MAX_DISTANCE){
+                continue;
+            }
+
             double angle = TauPTravelTimeCalculator.toAngle(distGC);
 
             double rawTravelP = TauPTravelTimeCalculator.getPWaveTravelTime(bestHypocenter.depth, angle);
