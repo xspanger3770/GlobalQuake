@@ -31,10 +31,11 @@ public class EarthquakeAnalysisTraining {
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+        GQHypocs.load();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
-        Settings.hypocenterDetectionResolution = 40.0;
+        Settings.hypocenterDetectionResolution = 0.0;
         Settings.pWaveInaccuracyThreshold = 4000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
@@ -131,7 +132,7 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster();
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, 200, 0, 0,0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(140 + r.nextDouble() * 10, r.nextDouble() * 10, 200, 0, 0,0, null, null);
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,

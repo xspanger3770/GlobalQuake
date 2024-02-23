@@ -24,12 +24,12 @@ import java.util.concurrent.TimeUnit;
 public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
     public long createdAtMillis;
-    private final long playgroundStartMillis = LocalDate.of(2000,1,1)
+    private final long playgroundStartMillis = LocalDate.of(2000, 1, 1)
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
     private final Collection<Earthquake> playgroundEarthquakes = new MonitorableCopyOnWriteArrayList<>();
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         GlobalQuake.prepare(Main.MAIN_FOLDER, new ApplicationErrorHandler(null, false));
         Regions.init();
         Scale.load();
@@ -63,7 +63,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
                 globalQuakeFrame.setVisible(true);
 
                 Main.getErrorHandler().setParent(globalQuakeFrame);
-            }catch (Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
                 System.exit(0);
             }
@@ -83,5 +83,14 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
 
     public Collection<Earthquake> getPlaygroundEarthquakes() {
         return playgroundEarthquakes;
+    }
+
+    public String getWatermark() {
+        return "Playground Mode";
+    }
+
+    @Override
+    public boolean isSimulation() {
+        return true;
     }
 }

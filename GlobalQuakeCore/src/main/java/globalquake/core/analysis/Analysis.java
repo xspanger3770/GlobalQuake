@@ -39,7 +39,8 @@ public abstract class Analysis {
     }
 
     public void analyse(DataRecord dr) {
-        if (sampleRate <= 0) {
+        double drSampleRate = dr.getSampleRate();
+        if (Math.abs(sampleRate - drSampleRate) > 0.2) {
             setSampleRate(dr.getSampleRate());
             reset();
         }

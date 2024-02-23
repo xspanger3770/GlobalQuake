@@ -31,19 +31,70 @@ public class IntensityGraphs {
 
         List<DistanceIntensityRecord> recs = new ArrayList<>();
 
-        recs.add(new DistanceIntensityRecord(8.1, 100, 6E7));
-        recs.add(new DistanceIntensityRecord(8.1, 350, 1E7));
-        recs.add(new DistanceIntensityRecord(8.1, 800, 1E6));
-        recs.add(new DistanceIntensityRecord(8.1, 2000, 1E5));
+        recs.add(new DistanceIntensityRecord(6.9, 3000, 4E4));
 
-        recs.add(new DistanceIntensityRecord(6.4, 100, 1E7));
+        recs.add(new DistanceIntensityRecord(9.1, 600, 3e7));
+        recs.add(new DistanceIntensityRecord(9.1, 2000, 1e6));
+        recs.add(new DistanceIntensityRecord(9.1, 11000, 2e5));
+
+        recs.add(new DistanceIntensityRecord(8.1, 250, 3e7));
+        recs.add(new DistanceIntensityRecord(8.1, 480, 1e7));
+        recs.add(new DistanceIntensityRecord(8.1, 900, 1e6));
+        recs.add(new DistanceIntensityRecord(8.1, 5000, 1e5));
+
+        recs.add(new DistanceIntensityRecord(7.0, 200, 1e7));
+        recs.add(new DistanceIntensityRecord(7.0, 400, 1e6));
+        recs.add(new DistanceIntensityRecord(7.0, 900, 1e5));
+        recs.add(new DistanceIntensityRecord(7.0, 10000, 1e4));
+
+        recs.add(new DistanceIntensityRecord(5.6, 25, 1e7));
+        recs.add(new DistanceIntensityRecord(5.6, 150, 1e6));
+        recs.add(new DistanceIntensityRecord(5.6, 350, 1e5));
+        recs.add(new DistanceIntensityRecord(5.6, 750, 1e4));
+
+        recs.add(new DistanceIntensityRecord(5.0, 80, 1e6));
+        recs.add(new DistanceIntensityRecord(5.0, 250, 1e5));
+        recs.add(new DistanceIntensityRecord(5.0, 600, 1e4));
+        recs.add(new DistanceIntensityRecord(5.0, 1750, 1e3));
+
+        recs.add(new DistanceIntensityRecord(4.1, 60, 1e5));
+        recs.add(new DistanceIntensityRecord(4.1, 220, 1e4));
+        recs.add(new DistanceIntensityRecord(4.1, 550, 1e3));
+
+        recs.add(new DistanceIntensityRecord(3.0, 90, 1e4));
+        recs.add(new DistanceIntensityRecord(3.0, 240, 1e3));
+        recs.add(new DistanceIntensityRecord(3.0, 400, 1e2));
+        recs.add(new DistanceIntensityRecord(3.0, 700, 1e1));
+
+
+
+        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);
+        ImageIO.write(img, "PNG", new File("aaa29.png"));
+
+        recs.clear();
+        recs.add(new DistanceIntensityRecord(7.0, 100, 2E8));
+        recs.add(new DistanceIntensityRecord(7.0, 400, 1E7));
+        recs.add(new DistanceIntensityRecord(7.0, 800, 1E6));
+        recs.add(new DistanceIntensityRecord(7.0, 6000, 1E5));
+
+        recs.add(new DistanceIntensityRecord(6.4, 20, 1E8));
+        recs.add(new DistanceIntensityRecord(6.4, 150, 1E7));
         recs.add(new DistanceIntensityRecord(6.4, 250, 1E6));
-        recs.add(new DistanceIntensityRecord(6.4, 600, 1E5));
-        recs.add(new DistanceIntensityRecord(6.4, 1100, 1E4));
+        recs.add(new DistanceIntensityRecord(6.4, 800, 1E5));
 
+        recs.add(new DistanceIntensityRecord(7.8, 20, 1E9));
+        recs.add(new DistanceIntensityRecord(7.8, 150, 1E8));
+        recs.add(new DistanceIntensityRecord(7.8, 400, 1E7));
+        recs.add(new DistanceIntensityRecord(7.8, 700, 1E6));
+        recs.add(new DistanceIntensityRecord(7.8, 1500, 1E5));
 
-        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT);
-        ImageIO.write(img, "PNG", new File("aaa26.png"));
+        recs.add(new DistanceIntensityRecord(5.6, 25, 1e7));
+        recs.add(new DistanceIntensityRecord(5.6, 150, 1e6));
+        recs.add(new DistanceIntensityRecord(5.6, 350, 1e5));
+        recs.add(new DistanceIntensityRecord(5.6, 750, 1e4));
+
+        drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, true);
+        //ImageIO.write(img, "PNG", new File("aaa27A.png"));
 
         for (DistanceIntensityRecord dr : recs) {
             System.out.printf("M%.1f %.1fkm: %.1f / %.1f\n", dr.mag, dr.dist, dr.intensity, IntensityTable.getIntensity(dr.mag, dr.dist));
@@ -56,7 +107,7 @@ public class IntensityGraphs {
             new float[]{3}, 0);
     private static final Font calibri14 = new Font("Calibri", Font.BOLD, 14);
 
-    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, MagnitudeType magnitudeType) {
+    public static void drawGraph(Graphics2D g, int w, int h, List<DistanceIntensityRecord> recs, MagnitudeType magnitudeType, boolean accelerometers) {
         int wry = 20;
         int wrx;
         g.setFont(new Font("Calibri", Font.BOLD, 14));
@@ -114,12 +165,12 @@ public class IntensityGraphs {
                 double dist2 = dist1 * 2;
                 double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);
                 double x2 = wrx + (Math.log10(dist2) / 5) * (w - wrx);
-                double v1 = IntensityTable.getIntensity(mag / 10.0, dist1);
-                double v2 = IntensityTable.getIntensity(mag / 10.0, dist2);
+                double v1 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist1) : IntensityTable.getIntensity(mag / 10.0, dist1);
+                double v2 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist2) :IntensityTable.getIntensity(mag / 10.0, dist2);
                 double y1 = (h - wry) - (h - wry) * ((Math.log10(v1) - minP) / (maxP - minP + 1));
                 double y2 = (h - wry) - (h - wry) * ((Math.log10(v2) - minP) / (maxP - minP + 1));
                 if (y2 < h - wry) {
-                    double fakeMag = IntensityTable.getMagnitude(dist1, v1);
+                    double fakeMag = accelerometers ? IntensityTable.getMagnitudeByAccelerometer(dist1, v1) : IntensityTable.getMagnitude(dist1, v1);
                     g.setColor(Scale.getColorEasily((fakeMag + 1) / 10.0));
                     g.setStroke(new BasicStroke(mag % 10 == 0 ? 4f : 1f));
                     g.draw(new Line2D.Double(x1, y1, x2, y2));

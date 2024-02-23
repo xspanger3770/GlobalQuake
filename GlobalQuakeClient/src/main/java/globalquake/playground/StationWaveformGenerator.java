@@ -31,7 +31,7 @@ public class StationWaveformGenerator {
         public Distances(Earthquake earthquake, AbstractStation station) {
             gcd = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), station.getLatitude(), station.getLongitude());
             geo = GeoUtils.gcdToGeo(gcd);
-            distMultiplier = IntensityTable.getIntensity(earthquake.getMag() * 0.9, geo) / (20.0);
+            distMultiplier = IntensityTable.getIntensity(earthquake.getMag(), geo) / (20.0);
 
             pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(),
                     TauPTravelTimeCalculator.toAngle(gcd));
@@ -130,13 +130,13 @@ public class StationWaveformGenerator {
         if(_secondsP < 0 && distances.pTravel >= 0){
             double decay = (m2) / (_secondsP * _secondsP+ m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
-            result += 2E4 * decay * increase;
+            result += 2E3 * decay * increase;
         }
 
         if(_secondsS < 0 && distances.sTravel >= 0){
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
-            result += 2E4 * decay * increase * psRatio(gcd);
+            result += 2E3 * decay * increase * psRatio(gcd);
         }
 
         return result * distances.distMultiplier * MFR[i] * Math.sqrt(freq) * sensMul;

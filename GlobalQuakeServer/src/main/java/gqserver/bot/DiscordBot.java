@@ -89,7 +89,7 @@ public class DiscordBot extends ListenerAdapter {
     private static void removeOld() {
         lastMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
         lastPingMessages.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), -60 * 10));
-        measuredQuakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, - 60 * 10));
+        measuredQuakes.removeIf(earthquake -> EarthquakeAnalysis.shouldRemove(earthquake, -60 * 10));
     }
 
     private static void sendQuakeReportInfo(QuakeReportEvent event) {
@@ -218,12 +218,12 @@ public class DiscordBot extends ListenerAdapter {
 
         try {
             if (pingMessage != null) {
-                if(pingString.isEmpty()){
+                if (pingString.isEmpty()) {
                     pingString = "Nevermind, no ping";
                 }
                 pingMessage.editMessage(pingString).submit().get();
             } else {
-                if(pingString.isEmpty()){
+                if (pingString.isEmpty()) {
                     return;
                 }
                 channel.sendMessage(pingString).submit().thenApply(message -> lastPingMessages.put(earthquake, message)).get();
@@ -245,11 +245,11 @@ public class DiscordBot extends ListenerAdapter {
         double pga = GeoUtils.getMaxPGA(earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag());
 
         long detectionTime = earthquake.getCreatedAt() - earthquake.getOrigin();
-        if(detectionTime < bestDetectionTime){
+        if (detectionTime < bestDetectionTime) {
             bestDetectionTime = detectionTime;
         }
 
-        if(!measuredQuakes.contains(earthquake)) {
+        if (!measuredQuakes.contains(earthquake)) {
             detections++;
             detectionTimeSum += detectionTime / 1000.0;
             measuredQuakes.add(earthquake);
@@ -274,17 +274,17 @@ public class DiscordBot extends ListenerAdapter {
 
     private static CharSequence tagRoles(TextChannel channel, Earthquake earthquake) {
         java.util.List<Role> rolesToPing = new ArrayList<>();
-        if (earthquake.getMag() >= 4.0) {
-            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M4, true));
-        }
-        if (earthquake.getMag() >= 5.0) {
-            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M5, true));
+        if (earthquake.getMag() >= 7.0) {
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M7, true));
         }
         if (earthquake.getMag() >= 6.0) {
             rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M6, true));
         }
-        if (earthquake.getMag() >= 7.0) {
-            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M7, true));
+        if (earthquake.getMag() >= 5.0) {
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M5, true));
+        }
+        if (earthquake.getMag() >= 4.0) {
+            rolesToPing.addAll(channel.getGuild().getRolesByName(PING_M4, true));
         }
 
         StringBuilder stringBuilder = new StringBuilder();

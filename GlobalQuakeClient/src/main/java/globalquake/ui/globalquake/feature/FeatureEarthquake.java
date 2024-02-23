@@ -159,7 +159,7 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             }
         }
 
-        if(Settings.antialiasingQuakes) {
+        if (Settings.antialiasingQuakes) {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
@@ -210,7 +210,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 10));
             }
 
-            String str = "M%.1f".formatted(entity.getOriginal().getMag());
+            String sim = GlobalQuake.instance.isSimulation() ? " (Simulated)" : "";
+
+            String str = "M%.1f%s".formatted(entity.getOriginal().getMag(), sim);
 
             graphics.setColor(Color.WHITE);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
@@ -221,23 +223,31 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
             );
 
             graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 29));
-        }
 
-        double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
-        double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
-        double pct = age / sTravel;
 
-        if (pct >= 0 && pct <= 1.0) {
-            int w = 60;
-            int h = 12;
-            Rectangle2D.Double rect1 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w, h);
-            Rectangle2D.Double rect2 = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 36, w * pct, h);
+            double sTravel = TauPTravelTimeCalculator.getSWaveTravelTime(entity.getOriginal().getDepth(), 0);
+            double pTravel = TauPTravelTimeCalculator.getPWaveTravelTime(entity.getOriginal().getDepth(), 0);
+            double age = (GlobalQuake.instance.currentTimeMillis() - entity.getOriginal().getOrigin()) / 1000.0;
+            double pct = age / sTravel;
+            double pctP = age / pTravel;
 
-            graphics.setStroke(new BasicStroke(1f));
-            graphics.setColor(Color.red);
-            graphics.fill(rect2);
-            graphics.setColor(Color.white);
-            graphics.draw(rect1);
+            if (pct >= 0 && pct <= 1.0 && pTravel != TauPTravelTimeCalculator.NO_ARRIVAL && sTravel != TauPTravelTimeCalculator.NO_ARRIVAL) {
+                int w = 60;
+                int h = 12;
+                Rectangle2D.Double rectWhole = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w, h);
+                Rectangle2D.Double rectS = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * pct, h);
+                Rectangle2D.Double rectP = new Rectangle2D.Double(centerPonint.x - w / 2.0, centerPonint.y + 38, w * pctP, h);
+
+                graphics.setStroke(new BasicStroke(1f));
+                if (pctP <= 1.0) {
+                    graphics.setColor(new Color(0, 140, 255));
+                    graphics.fill(rectP);
+                }
+                graphics.setColor(Color.red);
+                graphics.fill(rectS);
+                graphics.setColor(Color.white);
+                graphics.draw(rectWhole);
+            }
         }
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
