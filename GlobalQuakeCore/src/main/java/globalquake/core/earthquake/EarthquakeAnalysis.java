@@ -45,7 +45,7 @@ public class EarthquakeAnalysis {
     private static final double OBVIOUS_CORRECT_MAX_DISTANCE = 1000;
     private static final double OBVIOUS_CORRECT_THRESHOLD = 0.30;
     private static final double OBVIOUS_CORRECT_DELETE_THRESHOLD = 0.20;
-    private static final double OBVIOUS_CORRECT_INTENSITY_THRESHOLD = 256.0;
+    private static final double OBVIOUS_CORRECT_RATIO_THRESHOLD = 256.0;
     public static final int OBVIOUS_CORRECT_MIN_TOTAL = 8;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
@@ -722,8 +722,8 @@ public class EarthquakeAnalysis {
                 continue;
             }
 
-            double expectedIntensity = IntensityTable.getIntensity(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
-            if (expectedIntensity < OBVIOUS_CORRECT_INTENSITY_THRESHOLD) {
+            double expectedRatio = IntensityTable.getRatio(bestHypocenter.magnitude, GeoUtils.gcdToGeo(distGC));
+            if (expectedRatio < OBVIOUS_CORRECT_RATIO_THRESHOLD) {
                 continue;
             }
 
