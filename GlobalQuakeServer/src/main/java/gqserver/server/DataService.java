@@ -115,7 +115,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     private boolean isOld(DataRecord dataRecord) {
         return dataRecord.getStartBtime().toInstant().isBefore(
-                Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
+                Instant.ofEpochMilli(GlobalQuake.instance.currentTimeMillis()).minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
     }
 
     public StationStatus createStatus(AbstractStation station){
@@ -238,7 +238,8 @@ public class DataService extends GlobalQuakeEventListener {
                 (float) archivedQuake.getDepth(),
                 (float) archivedQuake.getMag(),
                 archivedQuake.getOrigin(),
-                (byte) archivedQuake.getQualityClass().ordinal()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
+                (byte) archivedQuake.getQualityClass().ordinal(),
+                archivedQuake.getFinalUpdateMillis()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
     }
 
     private List<ArchivedEventData> createArchivedEventsData(ArrayList<ArchivedEvent> archivedEvents) {
@@ -325,7 +326,7 @@ public class DataService extends GlobalQuakeEventListener {
     private static HypocenterData createHypocenterData(Earthquake earthquake) {
         return new HypocenterData(
                 earthquake.getUuid(), earthquake.getRevisionID(), (float) earthquake.getLat(), (float) earthquake.getLon(),
-                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag());
+                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag(), earthquake.getLastUpdate(), earthquake.getRegion());
     }
 
     private void broadcast(List<ServerClient> clients, Packet packet) {

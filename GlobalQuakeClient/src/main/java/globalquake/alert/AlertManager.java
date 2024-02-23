@@ -90,5 +90,9 @@ public class AlertManager {
 
         return considerGlobal && Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
     }
+
+    public void clear() {
+        warnings.clear();
+    }
 }
 

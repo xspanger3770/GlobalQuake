@@ -17,16 +17,12 @@ import gqserver.api.packets.station.StationsRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GlobalStationManagerClient extends GlobalStationManager {
 
-    private final List<AbstractStation> stations;
 
     private final Map<Integer, ClientStation> stationsIdMap = new ConcurrentHashMap<>();
 
@@ -37,11 +33,6 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     @Override
     public void initStations(StationDatabaseManager databaseManager) {
 
-    }
-
-    @Override
-    public List<AbstractStation> getStations() {
-        return stations;
     }
 
     public void processPacket(ClientSocket socket, Packet packet) {

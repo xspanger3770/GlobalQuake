@@ -9,6 +9,8 @@
       <excludeFolder url="file://$MODULE_DIR$/latest" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/tutorials" />
+      <excludeFolder url="file://$MODULE_DIR$/Container" />
+      <excludeFolder url="file://$MODULE_DIR$/TrainingData" />
     </content>
   </component>
 </module>

@@ -158,18 +158,23 @@ public interface GeoUtils {
 		return FastMath.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	}
 
-	static double pgaFunction(double mag, double distKm, double depth) {
-		return pgaFunctionGen2(
-				mag + 0.6 * EarthquakeAnalysis.getDepthCorrection(depth),
-				distKm / (1.0 + 1.7 * EarthquakeAnalysis.getDepthCorrection(depth)));
+	static double getMaxPGA(double lat, double lon, double depth, double mag){
+		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
+		return GeoUtils.pgaFunction(mag, distGEO, depth);
 	}
 
-	static double pgaFunctionGen2(double mag, double distKm) {
+	static double pgaFunction(double mag, double distKm, double depth) {
+		return pgaFunctionGen2(
+				mag + 0.4 * EarthquakeAnalysis.getDepthCorrection(depth),
+				distKm / (1.0 + 0.75 * EarthquakeAnalysis.getDepthCorrection(depth)));
+	}
+
+	private static double pgaFunctionGen2(double mag, double distKm) {
 		return Math.pow(10, mag * 0.575) / (0.36 * Math.pow(distKm, 1.25 + mag / 22.0) + 10);
 	}
 
 	@Deprecated
-	static double pgaFunctionGen1(double mag, double distKm){
+	private static double pgaFunctionGen1(double mag, double distKm){
 		distKm = FastMath.abs(distKm);
 		double a = mag + 1.5;
 		double b = FastMath.pow((a + 0.9) / 5.5, 7.0);

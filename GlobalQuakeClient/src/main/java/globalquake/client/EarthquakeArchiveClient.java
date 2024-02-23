@@ -26,7 +26,7 @@ public class EarthquakeArchiveClient extends EarthquakeArchive {
     private ArchivedQuake createArchivedQuake(ArchivedQuakePacket quakePacket) {
         ArchivedQuakeData data = quakePacket.archivedQuakeData();
         ArchivedQuake archivedQuake = new ArchivedQuake(
-                data.uuid(), data.lat(), data.lon(), data.depth(), data.magnitude(), data.origin(), QualityClass.values()[data.qualityID()]
+                data.uuid(), data.lat(), data.lon(), data.depth(), data.magnitude(), data.origin(), QualityClass.values()[data.qualityID()], data.finalUpdateMillis()
         );
 
         quakePacket.archivedEventDataList().forEach(archivedEventData -> archivedQuake.getArchivedEvents().add(new ArchivedEvent(

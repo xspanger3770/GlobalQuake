@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.events.GlobalQuakeEventListener;
@@ -12,6 +13,7 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.intensity.CityIntensity;
+import globalquake.core.intensity.IntensityScales;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.client.GlobalQuakeLocal;
 import globalquake.core.intensity.CityLocation;
@@ -50,9 +52,9 @@ public class ShakemapService {
 
                 int population;
 
-                try{
+                try {
                     population = Integer.parseInt(fields[9]);
-                } catch(Exception e){
+                } catch (Exception e) {
                     population = -1;
                     errors++;
                 }
@@ -67,7 +69,7 @@ public class ShakemapService {
     }
 
     public ShakemapService() {
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 updateShakemap(event.earthquake());
@@ -101,7 +103,7 @@ public class ShakemapService {
                     iterator.remove();
                 }
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             Logger.error(e);
         }
     }
@@ -111,7 +113,7 @@ public class ShakemapService {
             try {
                 shakeMaps.remove(uuid);
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
-            }catch(Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
             }
         });
@@ -123,7 +125,7 @@ public class ShakemapService {
                 shakeMaps.put(earthquake.getUuid(), createShakemap(earthquake));
                 GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new ShakeMapsUpdatedEvent());
                 updateCities(earthquake);
-            }catch(Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
             }
         });
@@ -131,7 +133,14 @@ public class ShakemapService {
 
     private void updateCities(Earthquake earthquake) {
         List<CityIntensity> result = new ArrayList<>();
-        cities.forEach(cityLocation -> result.add(new CityIntensity(cityLocation, calculatePGA(cityLocation, earthquake))));
+        double threshold = IntensityScales.getIntensityScale().getLevels().get(0).getPga();
+
+        cities.forEach(cityLocation -> {
+            double pga = calculatePGA(cityLocation, earthquake);
+            if (pga >= threshold) {
+                result.add(new CityIntensity(cityLocation, pga));
+            }
+        });
 
         result.sort(Comparator.comparing(cityIntensity -> -cityIntensity.pga()));
 
@@ -147,10 +156,11 @@ public class ShakemapService {
     private ShakeMap createShakemap(Earthquake earthquake) {
         Hypocenter hyp = earthquake.getCluster().getPreviousHypocenter();
         double mag = hyp.magnitude + hyp.depth / 200.0;
-        return new ShakeMap(hyp, mag < 5.2 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
+        mag += Settings.shakemapQualityOffset;
+        return new ShakeMap(hyp, mag <= 4.9 ? 6 : mag < 6.4 ? 5 : mag < 8.5 ? 4 : 3);
     }
 
-    public void stop(){
+    public void stop() {
         GlobalQuake.instance.stopService(shakemapService);
         GlobalQuake.instance.stopService(checkService);
     }
@@ -159,4 +169,7 @@ public class ShakemapService {
         return shakeMaps;
     }
 
+    public void clear() {
+        shakeMaps.clear();
+    }
 }

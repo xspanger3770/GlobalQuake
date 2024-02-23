@@ -2,6 +2,7 @@ package globalquake.core.seedlink;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkPacket;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 import globalquake.core.GlobalQuake;
@@ -22,9 +23,8 @@ import java.util.concurrent.TimeUnit;
 public class SeedlinkNetworksReader {
 
 	protected static final int RECONNECT_DELAY = 10;
+	private static final int SEEDLINK_TIMEOUT = 90;
 	private Instant lastData;
-
-    private long lastReceivedRecord;
 
 	private ExecutorService seedlinkReaderService;
 
@@ -32,8 +32,8 @@ public class SeedlinkNetworksReader {
 
 	public static void main(String[] args) throws Exception{
 		SeedlinkReader reader = new SeedlinkReader("rtserve.iris.washington.edu", 18000);
-		reader.select("AK", "D25K", "", "BHZ");
-		reader.startData();
+		reader.selectData("AK", "D25K", List.of("BHZ"));
+		reader.endHandshake();
 
 		SortedSet<DataRecord> set = new TreeSet<>(Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli()));
 
@@ -83,25 +83,30 @@ public class SeedlinkNetworksReader {
 		SeedlinkReader reader = null;
 		try {
 			Logger.info("Connecting to seedlink server \"" + seedlinkNetwork.getName() + "\"");
-			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), 90, false);
+			reader = new SeedlinkReader(seedlinkNetwork.getHost(), seedlinkNetwork.getPort(), SEEDLINK_TIMEOUT, false, SEEDLINK_TIMEOUT);
 			activeReaders.add(reader);
 
 			reader.sendHello();
 
 			reconnectDelay = RECONNECT_DELAY; // if connect succeeded then reset the delay
-			boolean first = true;
 
-			for (AbstractStation s : GlobalQuake.instance.getStationManager().getStations()) {
-				if (s.getSeedlinkNetwork() != null && s.getSeedlinkNetwork().equals(seedlinkNetwork)) {
-					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(s.getStationCode(), s.getNetworkCode(), s.getChannelName(), s.getLocationCode(), seedlinkNetwork.getName()));
-					if(!first) {
-						reader.sendCmd("DATA");
-					} else{
-						first = false;
+			int errors = 0;
+
+			for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
+				if (station.getSeedlinkNetwork() != null && station.getSeedlinkNetwork().equals(seedlinkNetwork)) {
+					Logger.trace("Connecting to %s %s %s %s [%s]".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
+					try {
+						reader.selectData(station.getNetworkCode(), station.getStationCode(), List.of("%s%s".formatted(station.getLocationCode(),
+								station.getChannelName())));
+						seedlinkNetwork.connectedStations++;
+					}catch(SeedlinkException seedlinkException){
+						Logger.warn("Unable to connect to %s %s %s %s [%s]!".formatted(station.getStationCode(), station.getNetworkCode(), station.getChannelName(), station.getLocationCode(), seedlinkNetwork.getName()));
+						errors++;
+						if(errors > seedlinkNetwork.selectedStations * 0.1){
+							Logger.warn("Too many errors in seedlink network %s, resetting!".formatted(seedlinkNetwork.getName()));
+							throw seedlinkException;
+						}
 					}
-					reader.select(s.getNetworkCode(), s.getStationCode(), s.getLocationCode(),
-							s.getChannelName());
-					seedlinkNetwork.connectedStations++;
 				}
 			}
 
@@ -111,7 +116,7 @@ public class SeedlinkNetworksReader {
 				return;
 			}
 
-			reader.startData();
+			reader.endHandshake();
 			seedlinkNetwork.status = SeedlinkStatus.RUNNING;
 
 			while (reader.hasNext()) {
@@ -171,16 +176,6 @@ public class SeedlinkNetworksReader {
 			globalStation.addRecord(dr);
 		}
 	}
-
-    public long getLastReceivedRecordTime() {
-        return lastReceivedRecord;
-    }
-
-    public void logRecord(long time) {
-        if (time > lastReceivedRecord && time <= GlobalQuake.instance.currentTimeMillis()) {
-            lastReceivedRecord = time;
-        }
-    }
 
 	public void stop() {
 		if(seedlinkReaderService != null) {

@@ -2,20 +2,20 @@ package globalquake.core.station;
 
 import globalquake.core.database.*;
 import globalquake.utils.GeoUtils;
+import globalquake.utils.monitorable.MonitorableConcurrentLinkedQueue;
 import org.tinylog.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalStationManager {
 
     private static final int RAYS = 9;
     private static final int STATIONS_PER_RAY = 3;
-    private final Collection<AbstractStation> stations = new ConcurrentLinkedQueue<>();
+    protected Collection<AbstractStation> stations = new MonitorableConcurrentLinkedQueue<>();
 
 
-    private final AtomicInteger nextID = new AtomicInteger(0);
+    protected final AtomicInteger nextID = new AtomicInteger(0);
     protected UUID indexing;
 
     public void initStations(StationDatabaseManager databaseManager) {
