@@ -438,6 +438,10 @@ public class GlobalQuakePanel extends GlobePanel {
                 }
 
             }
+
+            if(GlobalQuake.instance.isSimulation()){
+                g.setColor(Color.orange);
+            }
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
         }
 
@@ -634,12 +638,16 @@ public class GlobalQuakePanel extends GlobePanel {
                     g.setColor(isDark(levelColor) ? Color.white : Color.black);
                     g.drawString(quakeString, x + 3, y + 21);
 
+                    String sim = GlobalQuake.instance.isSimulation() ? " (Simulated)":"";
+
                     g.setColor(Color.white);
                     g.setFont(regionFont);
                     g.drawString(quake.getRegion(), x + xOffset + 3, y + 44);
 
-                    g.drawString(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), x + xOffset + 3, y + 66);
+                    g.setColor(GlobalQuake.instance.isSimulation() ? Color.orange : Color.white);
+                    g.drawString("%s%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin())), sim), x + xOffset + 3, y + 66);
 
+                    g.setColor(Color.white);
                     g.setFont(new Font("Calibri", Font.BOLD, 16));
                     g.drawString("lat: " + f4d.format(quake.getLat()) + " lon: " + f4d.format(quake.getLon()), x + xOffset + 3, y + 85);
                     g.drawString("Depth: %s %s".formatted(

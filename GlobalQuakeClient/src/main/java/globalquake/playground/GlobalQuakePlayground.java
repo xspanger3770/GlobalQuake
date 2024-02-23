@@ -88,4 +88,9 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
     public String getWatermark() {
         return "Playground Mode";
     }
+
+    @Override
+    public boolean isSimulation() {
+        return true;
+    }
 }

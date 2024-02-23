@@ -210,7 +210,9 @@ public class FeatureEarthquake extends RenderFeature<Earthquake> {
                 graphics.drawString(str, (int) (centerPonint.x - graphics.getFontMetrics().stringWidth(str) / 2), (int) (centerPonint.y + 10));
             }
 
-            String str = "M%.1f".formatted(entity.getOriginal().getMag());
+            String sim = GlobalQuake.instance.isSimulation() ? " (Simulated)" : "";
+
+            String str = "M%.1f%s".formatted(entity.getOriginal().getMag(), sim);
 
             graphics.setColor(Color.WHITE);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));

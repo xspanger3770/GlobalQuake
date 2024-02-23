@@ -178,4 +178,8 @@ public abstract class GlobalQuake {
     public abstract boolean limitedSettings();
 
     public abstract boolean limitedWaveformBuffers();
+
+    public boolean isSimulation(){
+        return false;
+    }
 }

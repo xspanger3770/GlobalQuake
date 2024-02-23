@@ -170,12 +170,12 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
         super.paint(gr);
         var g = ((Graphics2D) gr);
         String str = ((GlobalQuakePlayground) GlobalQuake.getInstance()).getWatermark();
-        g.setColor(new Color(255, 255, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 15.0 + 40)));
+        g.setColor(new Color(255, 100, 0, (int) ((1.0 + Math.sin(System.currentTimeMillis() / 300.0)) * 40.0 + 80)));
 
         Font font = new Font("Calibri", Font.BOLD, 48);
         g.setFont(font);
 
-        g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, (getHeight() / 4 + font.getSize() / 4));
+        g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, (getHeight() / 2 - 48 + font.getSize() / 4));
 
         if (insertType != InsertType.NONE) {
             double x = getWidth() / 2.0;
