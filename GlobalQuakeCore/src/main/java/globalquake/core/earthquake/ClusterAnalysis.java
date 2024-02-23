@@ -318,8 +318,8 @@ public class ClusterAnalysis {
                 angle);
 
         if(considerIntensity) {
-            double expectedIntensity = IntensityTable.getIntensity(quakeMag, GeoUtils.gcdToGeo(distGC));
-            if (expectedIntensity < 3.0) {
+            double expectedRatio = IntensityTable.getRatio(quakeMag, GeoUtils.gcdToGeo(distGC));
+            if (expectedRatio < 3.0) {
                 return false;
             }
         }

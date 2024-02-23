@@ -4,8 +4,7 @@ import java.util.function.Function;
 
 public class IntensityTable {
 
-    // old, only for unknown sensors
-    private static double getIntensityFromRatio(double mag, double dist) {
+    public static double getRatio(double mag, double dist) {
         mag = 1.2 * mag - 0.022 * mag * mag - 1;
         if (dist > 1200) {
             dist = 1200 + Math.pow(dist - 1200, 0.4) * 22.0;
@@ -70,7 +69,7 @@ public class IntensityTable {
     }
 
     public static double getMagnitudeByRatio(double dist, double intensity) {
-        return findMagnitude(intensity, value -> getIntensityFromRatio(value, dist));
+        return findMagnitude(intensity, value -> getRatio(value, dist));
     }
 
     public static double getMagnitudeByAccelerometer(double dist, double intensity) {
