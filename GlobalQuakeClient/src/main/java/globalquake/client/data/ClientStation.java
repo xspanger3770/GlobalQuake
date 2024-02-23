@@ -1,16 +1,18 @@
 package globalquake.client.data;
 
-import globalquake.core.station.AbstractStation;
+import globalquake.core.GlobalQuake;
+import gqserver.api.packets.station.InputType;
+import globalquake.core.station.GlobalStation;
 
-public class ClientStation extends AbstractStation {
+public class ClientStation extends GlobalStation {
     private double intensity = -1;
     private long lastDataTime;
 
     private boolean eventMode = false;
 
     public ClientStation(String networkCode, String stationCode, String channelName,
-                         String locationCode, double lat, double lon, int id) {
-        super(networkCode, stationCode, channelName, locationCode, lat, lon, 0, id, null);
+                         String locationCode, double lat, double lon, int id, InputType inputType) {
+        super(networkCode, stationCode, channelName, locationCode, lat, lon, 0, id, null, -1, inputType);
     }
 
     public void setIntensity(double intensity, long time, boolean eventMode) {
@@ -26,7 +28,7 @@ public class ClientStation extends AbstractStation {
 
     @Override
     public long getDelayMS() {
-        return System.currentTimeMillis() - lastDataTime;
+        return GlobalQuake.instance.currentTimeMillis() - lastDataTime;
     }
 
     @Override

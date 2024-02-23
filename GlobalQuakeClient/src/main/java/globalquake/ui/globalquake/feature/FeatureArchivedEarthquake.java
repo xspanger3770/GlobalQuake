@@ -1,5 +1,6 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -17,7 +18,6 @@ import java.util.List;
 
 public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
-    private static final long HOURS = 1000 * 60 * 60L;
     private final List<ArchivedQuake> earthquakes;
 
     public FeatureArchivedEarthquake(List<ArchivedQuake> earthquakes) {
@@ -39,7 +39,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         renderer.createCircle(element.getPolygon(),
                 entity.getOriginal().getLat(),
                 entity.getOriginal().getLon(),
-                getSize(archivedQuake, renderer, renderProperties), 0, 4);
+                getSize(archivedQuake, renderer, renderProperties), 0, 12);
     }
 
     private double getSize(ArchivedQuake quake, GlobeRenderer renderer, RenderProperties renderProperties) {
@@ -48,8 +48,8 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     @Override
-    public boolean needsCreatePolygon(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
-        return propertiesChanged;
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayArchivedQuakes;
     }
 
     @Override
@@ -58,16 +58,19 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
     }
 
     @Override
+    public boolean needsCreatePolygon(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<ArchivedQuake> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
     public void project(GlobeRenderer renderer, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
-        if(Settings.oldEventsMagnitudeFilterEnabled) {
-            displayed &= (entity.getOriginal().getMag() >= Settings.oldEventsMagnitudeFilter);
-        }
-
-        if(Settings.oldEventsTimeFilterEnabled) {
-            displayed &= (System.currentTimeMillis() - entity.getOriginal().getOrigin() <= HOURS * Settings.oldEventsTimeFilter);
-        }
+        boolean displayed = !entity.getOriginal().isWrong() && entity.getOriginal().shouldBeDisplayed();
 
         if(displayed) {
             element.getShape().reset();
@@ -79,13 +82,17 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<ArchivedQuake> entity, RenderProperties renderProperties) {
-        boolean displayed = !entity.getOriginal().isWrong() && Settings.displayArchivedQuakes;
+        boolean displayed = !entity.getOriginal().isWrong();
         if (!entity.getRenderElement(0).shouldDraw || !displayed) {
             return;
         }
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if(Settings.antialiasingOldQuakes) {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
         graphics.setColor(getColor(entity.getOriginal()));
-        graphics.setStroke(new BasicStroke((float) (0.9 + entity.getOriginal().getMag() * 0.5)));
+        graphics.setStroke(new BasicStroke((float) Math.max(0.1, 1.4 + entity.getOriginal().getMag() * 0.4)));
         graphics.draw(entity.getRenderElement(0).getShape());
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
@@ -147,7 +154,7 @@ public class FeatureArchivedEarthquake extends RenderFeature<ArchivedQuake> {
         Color col;
 
         if(Settings.selectedEventColorIndex == 0){
-            double ageInHRS = (System.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
+            double ageInHRS = (GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) / (1000 * 60 * 60.0);
             col = ageInHRS < 3 ? (quake.getMag() > 4 ? new Color(200, 0, 0) : new Color(255, 0, 0))
                     : ageInHRS < 24 ? new Color(255, 140, 0) : new Color(255,255,0);
         } else if(Settings.selectedEventColorIndex == 1){

@@ -9,4 +9,11 @@ public record QuakeCreateEvent(Earthquake earthquake) implements GlobalQuakeEven
     public void run(GlobalQuakeEventListener eventListener) {
         eventListener.onQuakeCreate(this);
     }
+
+    @Override
+    public String toString() {
+        return "QuakeCreateEvent{" +
+                "earthquake=" + earthquake +
+                '}';
+    }
 }

@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 
 public class EarthquakeArchive {
 
-	public static final File ARCHIVE_FILE = new File(GlobalQuake.mainFolder,  "archive.dat");
-	public static final File TEMP_ARCHIVE_FILE = new File(GlobalQuake.mainFolder, "temp_archive.dat");
+	public static final File ARCHIVE_FILE = new File(GlobalQuake.mainFolder,  "volume/archive.dat");
+	public static final File TEMP_ARCHIVE_FILE = new File(GlobalQuake.mainFolder, "volume/temp_archive.dat");
 	private final ExecutorService executor;
 
 	private List<ArchivedQuake> archivedQuakes = new MonitorableCopyOnWriteArrayList<>();
@@ -80,19 +80,20 @@ public class EarthquakeArchive {
 
 	public void archiveQuakeAndSave(Earthquake earthquake) {
 		executor.submit(() -> {
-            archiveQuake(earthquake);
+			try {
+				archiveQuake(earthquake);
 
-            saveArchive();
-            if(Settings.reportsEnabled) {
-                reportQuake(earthquake);
-            }
+				saveArchive();
+			} catch(Exception e){
+				Logger.error(e);
+			}
         });
 	}
 
-	private void reportQuake(Earthquake earthquake) {
+	private void reportQuake(Earthquake earthquake, ArchivedQuake archivedQuake) {
 		executor.submit(() -> {
             try {
-                EarthquakeReporter.report(earthquake);
+                EarthquakeReporter.report(earthquake, archivedQuake);
             } catch (Exception e) {
                 Logger.error(e);
             }
@@ -100,8 +101,11 @@ public class EarthquakeArchive {
 	}
 
 	public void archiveQuake(Earthquake earthquake) {
-		archiveQuake(new ArchivedQuake(earthquake), earthquake);
-
+		ArchivedQuake archivedQuake = new ArchivedQuake(earthquake);
+		archiveQuake(archivedQuake, earthquake);
+		if (Settings.reportsEnabled) {
+			reportQuake(earthquake, archivedQuake);
+		}
 	}
 
 	protected synchronized void archiveQuake(ArchivedQuake archivedQuake, Earthquake earthquake) {
@@ -122,6 +126,10 @@ public class EarthquakeArchive {
 			ArchivedQuake toRemove = archivedQuakes.get(archivedQuakes.size() - 1);
 			archivedQuakes.remove(toRemove);
 			uuidArchivedQuakeMap.remove(toRemove.getUuid());
+		}
+
+		if(archivedQuakes.size() != uuidArchivedQuakeMap.size()){
+			Logger.error("Possible memory leak: %d archived quake, but %d in map".formatted(archivedQuakes.size(), uuidArchivedQuakeMap.size()));
 		}
 	}
 

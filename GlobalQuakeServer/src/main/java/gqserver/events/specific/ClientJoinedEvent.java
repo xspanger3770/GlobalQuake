@@ -10,4 +10,11 @@ public record ClientJoinedEvent(ServerClient client) implements GlobalQuakeServe
     public void run(GlobalQuakeServerEventListener eventListener) {
         eventListener.onClientJoin(this);
     }
+
+    @Override
+    public String toString() {
+        return "ClientJoinedEvent{" +
+                "client=" + client +
+                '}';
+    }
 }

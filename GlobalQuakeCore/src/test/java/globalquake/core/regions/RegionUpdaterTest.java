@@ -28,13 +28,13 @@ public class RegionUpdaterTest {
 
     @Test
     public void testEarthquakeRegion(){
-        Earthquake earthquake = new Earthquake(new Cluster(0));
+        Earthquake earthquake = new Earthquake(new Cluster());
         assertNotNull(earthquake.getRegion());
     }
 
     @Test
     public void testArchivedEarthquakeRegion(){
-        ArchivedQuake archivedQuake = new ArchivedQuake(null, 50,17,0,0,0, QualityClass.S);
+        ArchivedQuake archivedQuake = new ArchivedQuake(null, 50,17,0,0,0, QualityClass.S, 100);
         assertNotNull(archivedQuake.getRegion());
     }
 

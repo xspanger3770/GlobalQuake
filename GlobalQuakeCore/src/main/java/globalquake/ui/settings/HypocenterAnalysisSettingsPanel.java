@@ -82,13 +82,15 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
             topPanel.add(labelDefault, BorderLayout.SOUTH);
         }
 
-        JTextArea textAreaExplanation = new JTextArea(explanation);
-        textAreaExplanation.setBorder(new EmptyBorder(5,5,5,5));
-        textAreaExplanation.setEditable(false);
-        textAreaExplanation.setBackground(panel.getBackground());
+        if(explanation != null) {
+            JTextArea textAreaExplanation = new JTextArea(explanation);
+            textAreaExplanation.setBorder(new EmptyBorder(5, 5, 5, 5));
+            textAreaExplanation.setEditable(false);
+            textAreaExplanation.setBackground(panel.getBackground());
+            panel.add(textAreaExplanation, BorderLayout.CENTER);
+        }
 
         panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(textAreaExplanation, BorderLayout.CENTER);
 
         return panel;
     }
@@ -132,7 +134,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
     }
 
     private Component createSettingPWave() {
-        sliderPWaveInaccuracy = createSettingsSlider(400, 2500, 200, 100);
+        sliderPWaveInaccuracy = createSettingsSlider(400, 5200, 400, 200);
 
         JLabel label = new JLabel();
         ChangeListener changeListener = changeEvent -> label.setText("P Wave Arrival Inaccuracy Threshold: %d ms".formatted(sliderPWaveInaccuracy.getValue()));

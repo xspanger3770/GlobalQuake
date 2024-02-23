@@ -14,6 +14,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
     private final JTextField nameField;
     private final JTextField hostField;
     private final SeedlinkNetwork seedlinkNetwork;
+    private final JTextField timeoutField;
 
     public EditSeedlinkNetworkDialog(Window parent, StationDatabaseManager databaseManager, SeedlinkNetwork seedlinkNetwork) {
         super(parent);
@@ -36,6 +37,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         nameField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getName(), 40);
         hostField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getHost(), 40);
         portField = new JTextField(seedlinkNetwork==null ? "18000" : String.valueOf(seedlinkNetwork.getPort()), 40);
+        timeoutField = new JTextField(seedlinkNetwork==null ? String.valueOf(SeedlinkNetwork.DEFAULT_TIMEOUT) : String.valueOf(seedlinkNetwork.getTimeout()), 40);
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");
@@ -49,6 +51,8 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         fieldsPanel.add(hostField);
         fieldsPanel.add(new JLabel("Port:"));
         fieldsPanel.add(portField);
+        fieldsPanel.add(new JLabel("Timeout (seconds):"));
+        fieldsPanel.add(timeoutField);
         buttonsPanel.add(cancelButton);
         buttonsPanel.add(saveButton);
 
@@ -62,13 +66,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
     }
 
     private void saveChanges() {
-        int port;
-        try {
-            port = Integer.parseInt(portField.getText());
-        }catch(NumberFormatException e){
-            throw new RuntimeApplicationException("Cannot parse port!", e);
-        }
-        SeedlinkNetwork newSeedlinkNetwork = new SeedlinkNetwork(nameField.getText(), hostField.getText(), port);
+        SeedlinkNetwork newSeedlinkNetwork = getSeedlinkNetwork();
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try{
             databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);
@@ -80,5 +78,28 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         databaseManager.fireUpdateEvent();
 
         this.dispose();
+    }
+
+    private SeedlinkNetwork getSeedlinkNetwork() {
+        int port;
+        try {
+            port = Integer.parseInt(portField.getText());
+        }catch(NumberFormatException e){
+            throw new RuntimeApplicationException("Invalid port!", e);
+        }
+
+        int timeout;
+
+        try {
+            timeout = Integer.parseInt(timeoutField.getText());
+        }catch(NumberFormatException e){
+            throw new RuntimeApplicationException("Invalid timeout!", e);
+        }
+
+        if(timeout < 5 || timeout > 300){
+            throw new RuntimeApplicationException("Timeout must be between 5s and 300s!");
+        }
+
+        return new SeedlinkNetwork(nameField.getText(), hostField.getText(), port, timeout);
     }
 }

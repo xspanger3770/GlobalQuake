@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$" dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/src/main/resources/polygons" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/resources/polygons_converted" />
+      <excludeFolder url="file://$MODULE_DIR$/target_old" />
+    </content>
+  </component>
+</module>

@@ -11,6 +11,7 @@ import globalquake.core.regions.Regions;
 import globalquake.core.station.AbstractStation;
 import globalquake.core.station.GlobalStationManager;
 import globalquake.utils.GeoUtils;
+import gqserver.api.packets.station.InputType;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,7 +25,7 @@ public class ClusterAnalysisTraining {
     private static final boolean PKIKP = false;
     private static final boolean P =  true;
 
-    static class SimulatedStation extends AbstractStation {
+    public static class SimulatedStation extends AbstractStation {
 
         public static final AtomicInteger nextId = new AtomicInteger();
 
@@ -34,76 +35,12 @@ public class ClusterAnalysisTraining {
         public final List<SimulatedEarthquake> passedPKIKPWaves = new ArrayList<>();
 
         public SimulatedStation(double lat, double lon, double alt) {
-            super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null);
-        }
-
-    }
-
-    @SuppressWarnings("unused")
-    static final class SimulatedEarthquake {
-        private final double lat;
-        private final double lon;
-        private final double depth;
-        private final long origin;
-        private final double mag;
-
-        public long maxError = Long.MAX_VALUE;
-
-        SimulatedEarthquake(double lat, double lon, double depth, long origin, double mag) {
-            this.lat = lat;
-            this.lon = lon;
-            this.depth = depth;
-            this.origin = origin;
-            this.mag = mag;
-        }
-
-        public double lat() {
-            return lat;
-        }
-
-        public double lon() {
-            return lon;
-        }
-
-        public double depth() {
-            return depth;
-        }
-
-        public long origin() {
-            return origin;
-        }
-
-        public double mag() {
-            return mag;
+            super("", "", "", "", lat, lon, alt, nextId.getAndIncrement(), null, -1);
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (SimulatedEarthquake) obj;
-            return Double.doubleToLongBits(this.lat) == Double.doubleToLongBits(that.lat) &&
-                    Double.doubleToLongBits(this.lon) == Double.doubleToLongBits(that.lon) &&
-                    Double.doubleToLongBits(this.depth) == Double.doubleToLongBits(that.depth) &&
-                    this.origin == that.origin &&
-                    Double.doubleToLongBits(this.mag) == Double.doubleToLongBits(that.mag);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(lat, lon, depth, origin, mag);
-        }
-
-        @Override
-        public String toString() {
-            return "SimulatedEarthquake{" +
-                    "lat=" + lat +
-                    ", lon=" + lon +
-                    ", depth=" + depth +
-                    ", origin=" + origin +
-                    ", mag=" + mag +
-                    ", maxError=" + maxError +
-                    '}';
+        public InputType getInputType() {
+            return InputType.UNKNOWN;
         }
     }
 
@@ -191,13 +128,13 @@ public class ClusterAnalysisTraining {
             for(SimulatedEarthquake simulatedEarthquake : simulatedEarthquakes){
                 for(Earthquake earthquake : earthquakes){
                     double rawP = TauPTravelTimeCalculator.getPWaveTravelTime(simulatedEarthquake.depth, 0);
-                    if(rawP == TauPTravelTimeCalculator.NO_ARRIVAL){
+                    if(rawP < 0){
                         continue;
                     }
                     long expectedArrival = (long) (simulatedEarthquake.origin + 1000 * rawP);
 
                     double rawPA = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(), 0);
-                    if(rawPA == TauPTravelTimeCalculator.NO_ARRIVAL){
+                    if(rawPA < 0){
                         continue;
                     }
 
@@ -279,10 +216,10 @@ public class ClusterAnalysisTraining {
 
                 long actualTravel = time - earthquake.origin;
 
-                if (P && rawTravelP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelP && !station.passedPWaves.contains(earthquake)) {
+                if (P && rawTravelP >= 0 && actualTravel >= expectedTravelP && !station.passedPWaves.contains(earthquake)) {
                     station.passedPWaves.add(earthquake);
 
-                    double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC);
+                    double expectedRatio = IntensityTable.getIntensity(earthquake.mag, distGC);
                     expectedRatio *= station.sensitivityMultiplier;
 
                     if (expectedRatio > 8.0) {
@@ -295,10 +232,10 @@ public class ClusterAnalysisTraining {
                     }
                 }
 
-                if (PKIKP && rawTravelPKIKP != TauPTravelTimeCalculator.NO_ARRIVAL && actualTravel >= expectedTravelPKIKP && !station.passedPKIKPWaves.contains(earthquake)) {
+                if (PKIKP && rawTravelPKIKP >= 0 && actualTravel >= expectedTravelPKIKP && !station.passedPKIKPWaves.contains(earthquake)) {
                     station.passedPKIKPWaves.add(earthquake);
 
-                    double expectedRatio = IntensityTable.getMaxIntensity(earthquake.mag, distGC) * 1.5;
+                    double expectedRatio = IntensityTable.getIntensity(earthquake.mag, distGC) * 1.5;
                     expectedRatio *= station.sensitivityMultiplier;
 
                     if (expectedRatio > 8.0) {

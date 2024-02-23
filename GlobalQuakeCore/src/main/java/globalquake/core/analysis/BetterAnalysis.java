@@ -5,7 +5,6 @@ import globalquake.core.station.AbstractStation;
 import globalquake.core.station.StationState;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.tinylog.Logger;
-import uk.me.berndporr.iirj.Butterworth;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,18 +30,27 @@ public class BetterAnalysis extends Analysis {
     private double thirdAverage;
     private long eventTimer;
 
-
-    public static final double min_frequency = 2.0;
-    public static final double max_frequency = 5.0;
-
     // in seconds
     public static final double EVENT_END_DURATION = 7.0;
     public static final long EVENT_EXTENSION_TIME = 90;// 90 seconds + and -
     public static final double EVENT_TOO_LONG_DURATION = 5 * 60.0;
-    public static final double EVENT_STORE_TIME = 20 * 60.0;
+    public static final double EVENT_STORE_TIME = 40 * 60.0;
 
-    private Butterworth filter;
     private double initialOffset;
+
+    private WaveformTransformator waveformDefault;
+
+    private WaveformTransformator waveformLowFreq;
+
+    private WaveformTransformator waveformUltraLowFreq;
+    public static final double minFreqDefault = 2.0;
+    public static final double maxFreqDefault = 5.0;
+
+    public static final double minFreqLow = 0.4;
+    public static final double maxFreqLow = 5.0;
+
+    public static final double minFreqUltraLow = 0.01;
+    public static final double maxFreqUltraLow = 5.0;
 
 
     public BetterAnalysis(AbstractStation station) {
@@ -51,14 +59,13 @@ public class BetterAnalysis extends Analysis {
 
 
     @Override
-    public void nextSample(int v, long time, long currentTime) {
-        if (filter == null) {
-            filter = new Butterworth();
-            filter.bandPass(3, getSampleRate(), (min_frequency + max_frequency) * 0.5, (max_frequency - min_frequency));
+    public synchronized void nextSample(int v, long time, long currentTime) {
+        if (waveformDefault == null) {
             reset();// initial reset;
             getStation().reportState(StationState.INACTIVE, time);
             return;
         }
+
 
         if (time < latestLogTime) {
             //System.err.println("BACKWARDS TIME IN ANALYSIS (" + getStation().getStationCode() + ")");
@@ -75,14 +82,23 @@ public class BetterAnalysis extends Analysis {
                 initialOffsetCnt++;
                 if (initProgress >= INIT_OFFSET_CALCULATION * 0.001 * getSampleRate() * 0.25) {
                     double _initialOffset = initialOffsetSum / initialOffsetCnt;
-                    double filteredV = filter.filter(v - _initialOffset);
+
+                    waveformDefault.accept(v - _initialOffset);
+                    waveformLowFreq.accept(v - _initialOffset);
+                    waveformUltraLowFreq.accept(v - _initialOffset);
+
+                    double filteredV = waveformDefault.getCurrentValue();
                     initialRatioSum += Math.abs(filteredV);
                     initialRatioCnt++;
                     longAverage = initialRatioSum / initialRatioCnt;
                 }
             } else if (initProgress <= (INIT_AVERAGE_RATIO + INIT_OFFSET_CALCULATION) * 0.001 * getSampleRate()) {
                 double _initialOffset = initialOffsetSum / initialOffsetCnt;
-                double filteredV = filter.filter(v - _initialOffset);
+                waveformDefault.accept(v - _initialOffset);
+                waveformLowFreq.accept(v - _initialOffset);
+                waveformUltraLowFreq.accept(v - _initialOffset);
+
+                double filteredV = waveformDefault.getCurrentValue();
                 longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
             } else {
                 initialOffset = initialOffsetSum / initialOffsetCnt;
@@ -99,30 +115,37 @@ public class BetterAnalysis extends Analysis {
             getStation().reportState(StationState.INACTIVE, time);
             return;
         }
-        double filteredV = filter.filter(v - initialOffset);
-        shortAverage -= (shortAverage - Math.abs(filteredV)) / (getSampleRate() * 0.5);
-        mediumAverage -= (mediumAverage - Math.abs(filteredV)) / (getSampleRate() * 6.0);
-        thirdAverage -= (thirdAverage - Math.abs(filteredV)) / (getSampleRate() * 30.0);
 
-        if (Math.abs(filteredV) > specialAverage) {
-            specialAverage = Math.abs(filteredV);
+        waveformDefault.accept(v - initialOffset);
+        waveformLowFreq.accept(v - initialOffset);
+        waveformUltraLowFreq.accept(v - initialOffset);
+
+        double filteredV = waveformDefault.getCurrentValue();
+
+        double absFilteredV = Math.abs(filteredV);
+        shortAverage -= (shortAverage - absFilteredV) / (getSampleRate() * 0.5);
+        mediumAverage -= (mediumAverage - absFilteredV) / (getSampleRate() * 6.0);
+        thirdAverage -= (thirdAverage - absFilteredV) / (getSampleRate() * 30.0);
+
+        if (absFilteredV > specialAverage) {
+            specialAverage = absFilteredV;
         } else {
-            specialAverage -= (specialAverage - Math.abs(filteredV)) / (getSampleRate() * 40.0);
+            specialAverage -= (specialAverage - absFilteredV) / (getSampleRate() * 40.0);
         }
 
         if (shortAverage / longAverage < 4.0) {
-            longAverage -= (longAverage - Math.abs(filteredV)) / (getSampleRate() * 200.0);
+            longAverage -= (longAverage - absFilteredV) / (getSampleRate() * 200.0);
         }
         double ratio = shortAverage / longAverage;
-        if (getStatus() == AnalysisStatus.IDLE && !getPreviousLogs().isEmpty() && !getStation().disabled) {
+        if (getStatus() == AnalysisStatus.IDLE && !getWaveformBuffer().isEmpty() && !getStation().disabled) {
             boolean cond1 = shortAverage / longAverage >= EVENT_THRESHOLD * 1.3 && time - eventTimer > 200;
             boolean cond2 = shortAverage / longAverage >= EVENT_THRESHOLD * 2.05 && time - eventTimer > 100;
             boolean condMain = shortAverage / thirdAverage > 3.0;
             if (condMain && (cond1 || cond2)) {
-                ArrayList<Log> _logs = createListOfLastLogs(time - EVENT_EXTENSION_TIME * 1000, time);
-                if (!_logs.isEmpty()) {
+                WaveformBuffer buffer = getWaveformBuffer().extract(time - EVENT_EXTENSION_TIME * 1000, time);
+                if (!buffer.isEmpty()) {
                     setStatus(AnalysisStatus.EVENT);
-                    Event event = new Event(this, time, _logs);
+                    Event event = new Event(this, time, buffer, !getStation().isSensitivityValid());
                     getDetectedEvents().add(0, event);
                 }
             }
@@ -152,39 +175,46 @@ public class BetterAnalysis extends Analysis {
             }
         }
 
+
+        double velocity = Math.abs(waveformDefault.getVelocity());
+        double velocityLowFreq = Math.abs(waveformLowFreq.getVelocity());
+        double velocityUltraLowFreq = Math.abs(waveformUltraLowFreq.getVelocity());
+
+        if (velocity > _maxVelocity) {
+            _maxVelocity = velocity;
+        }
+
         if (ratio > _maxRatio || _maxRatioReset) {
             _maxRatio = ratio * 1.25;
+
+            if (_maxRatioReset) {
+                _maxVelocity = velocity;
+            }
+
             _maxRatioReset = false;
         }
 
         if (time - currentTime < 1000 * 10
                 && currentTime - time < 1000L * 60 * Settings.logsStoreTimeMinutes) {
-            Log currentLog = new Log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
-                    (float) longAverage, (float) thirdAverage, (float) specialAverage, getStatus());
-            synchronized (previousLogsLock) {
-                getPreviousLogs().add(0, currentLog);
+
+            try {
+                getWaveformBuffer().getWriteLock().lock();
+                getWaveformBuffer().checkSize(Settings.logsStoreTimeMinutes * 60);
+                getWaveformBuffer().log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
+                        (float) longAverage, (float) specialAverage, false);
+            } finally {
+                getWaveformBuffer().getWriteLock().unlock();
             }
+
             // from latest event to the oldest event
             for (Event e : getDetectedEvents()) {
                 if (e.isValid() && (!e.hasEnded() || time - e.getEnd() < EVENT_EXTENSION_TIME * 1000)) {
-                    e.log(currentLog);
+                    e.log(time, v, (float) filteredV, (float) shortAverage, (float) mediumAverage,
+                            (float) longAverage, (float) specialAverage, ratio, velocity, velocityLowFreq, velocityUltraLowFreq);
                 }
             }
         }
         getStation().reportState(StationState.ACTIVE, time);
-    }
-
-    private ArrayList<Log> createListOfLastLogs(long oldestLog, long newestLog) {
-        ArrayList<Log> logs = new ArrayList<>();
-        synchronized (previousLogsLock) {
-            for (Log l : getPreviousLogs()) {
-                long time = l.time();
-                if (time >= oldestLog && time <= newestLog) {
-                    logs.add(l);
-                }
-            }
-        }
-        return logs;
     }
 
     @Override
@@ -203,6 +233,7 @@ public class BetterAnalysis extends Analysis {
     @Override
     public void reset() {
         _maxRatio = 0;
+        _maxVelocity = 0.0;
         setStatus(AnalysisStatus.INIT);
         initProgress = 0;
         initialOffsetSum = 0;
@@ -211,6 +242,16 @@ public class BetterAnalysis extends Analysis {
         initialRatioCnt = 0;
         numRecords = 0;
         latestLogTime = 0;
+
+        if(waveformDefault == null) {
+            waveformDefault = new WaveformTransformator(minFreqDefault, maxFreqDefault, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformLowFreq = new WaveformTransformator(minFreqLow, maxFreqLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+            waveformUltraLowFreq = new WaveformTransformator(minFreqUltraLow, maxFreqUltraLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
+        }
+        waveformDefault.reset();
+        waveformLowFreq.reset();
+        waveformUltraLowFreq.reset();
+
         // from latest event to the oldest event
         // it has to be synced because there is the 1-second thread
         for (Event e : getDetectedEvents()) {
@@ -218,34 +259,24 @@ public class BetterAnalysis extends Analysis {
                 e.endBadly();
             }
         }
-
     }
 
-
     @Override
-    public void second(long time) {
+    public synchronized void second(long time) {
         Iterator<Event> it = getDetectedEvents().iterator();
         List<Event> toBeRemoved = new ArrayList<>();
         while (it.hasNext()) {
             Event event = it.next();
             if (event.hasEnded() || !event.isValid()) {
-                if (!event.getLogs().isEmpty()) {
-                    event.getLogs().clear();
-                }
+                event.removeBuffer();
                 long age = time - event.getEnd();
                 if (!event.isValid() || age >= EVENT_STORE_TIME * 1000) {
                     toBeRemoved.add(event);
                 }
             }
         }
-        getDetectedEvents().removeAll(toBeRemoved);
 
-        long oldestTime = (time - (Settings.logsStoreTimeMinutes * 60 * 1000));
-        synchronized (previousLogsLock) {
-            while (!getPreviousLogs().isEmpty() && getPreviousLogs().get(getPreviousLogs().size() - 1).time() < oldestTime) {
-                getPreviousLogs().remove(getPreviousLogs().size() - 1);
-            }
-        }
+        getDetectedEvents().removeAll(toBeRemoved);
     }
 
 

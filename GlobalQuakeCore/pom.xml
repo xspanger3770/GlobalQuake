@@ -6,12 +6,11 @@
     <parent>
         <groupId>xspanger.GlobalQuake</groupId>
         <artifactId>GlobalQuake</artifactId>
-        <version>0.10.0_pre1</version>
+        <version>0.11.0_pre-2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>GlobalQuakeCore</artifactId>
-    <version>0.10.0_pre1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -19,7 +18,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>data-local</id>
+            <name>data</name>
+            <url>file://${project.basedir}/../libs</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>edu.sc.seis</groupId>
+            <artifactId>seisFile</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>tinylog-api</artifactId>
@@ -30,18 +42,13 @@
             <artifactId>tinylog-impl</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>seisFile</artifactId>
-            <version>2.0.6</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.geotools/gt-geojson -->
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
             <version>1.14</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
+         <!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
         <dependency>
             <groupId>edu.sc.seis</groupId>
             <artifactId>seedCodec</artifactId>
@@ -68,6 +75,22 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20231013</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>xspanger.GlobalQuake</groupId>
+            <artifactId>GlobalQuakeAPI</artifactId>
+            <version>0.9.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
         </dependency>
     </dependencies>
 

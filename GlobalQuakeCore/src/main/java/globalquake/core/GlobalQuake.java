@@ -4,12 +4,12 @@ import globalquake.core.archive.EarthquakeArchive;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.GQHypocs;
 import globalquake.core.events.GlobalQuakeEventHandler;
 import globalquake.core.exception.ApplicationErrorHandler;
 import globalquake.core.exception.FatalApplicationException;
 import globalquake.core.exception.RuntimeApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
+import globalquake.core.seedlink.SeedlinkNetworksReader;
 import globalquake.core.station.GlobalStationManager;
 import org.tinylog.Logger;
 
@@ -17,136 +17,169 @@ import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class GlobalQuake {
-	public static final String version = "v0.10.0_pre4";
+public abstract class GlobalQuake {
 
-	protected GlobalQuakeRuntime globalQuakeRuntime;
-	protected SeedlinkNetworksReader seedlinkNetworksReader;
-	protected StationDatabaseManager stationDatabaseManager;
-	protected ClusterAnalysis clusterAnalysis;
-	protected EarthquakeAnalysis earthquakeAnalysis;
-	protected EarthquakeArchive archive;
+    public static final String version = "v0.11.0_pre-2";
 
-	protected GlobalQuakeEventHandler eventHandler;
+    protected GlobalQuakeRuntime globalQuakeRuntime;
+    protected SeedlinkNetworksReader seedlinkNetworksReader;
+    protected StationDatabaseManager stationDatabaseManager;
+    protected ClusterAnalysis clusterAnalysis;
+    protected EarthquakeAnalysis earthquakeAnalysis;
+    protected EarthquakeArchive archive;
 
-	public static GlobalQuake instance;
+    protected GlobalQuakeEventHandler eventHandler;
 
-	protected GlobalStationManager globalStationManager;
+    public static GlobalQuake instance;
 
-	public static ApplicationErrorHandler errorHandler;
-	public static File mainFolder;
+    protected GlobalStationManager globalStationManager;
 
-	static {
-		try {
-			TauPTravelTimeCalculator.init();
-		} catch (FatalApplicationException e) {
-			throw new RuntimeException(e);
-		}
-		System.out.println("Cuda loaded: "+GQHypocs.isCudaLoaded());
-	}
+    public static ApplicationErrorHandler errorHandler;
+    public static File mainFolder;
 
-	public static void prepare(File mainFolder, ApplicationErrorHandler errorHandler) {
-		GlobalQuake.mainFolder = mainFolder;
-		GlobalQuake.errorHandler = errorHandler;
-	}
+    static {
+        try {
+            TauPTravelTimeCalculator.init();
+        } catch (FatalApplicationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public GlobalQuake() {
-		instance = this;
-	}
+    public static void prepare(File mainFolder, ApplicationErrorHandler errorHandler) {
+        GlobalQuake.mainFolder = mainFolder;
+        GlobalQuake.errorHandler = errorHandler;
+    }
 
-	public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
-		this();
-		this.stationDatabaseManager = stationDatabaseManager;
+    public GlobalQuake() {
+        instance = this;
+    }
 
-		eventHandler = new GlobalQuakeEventHandler().runHandler();
+    public GlobalQuake(StationDatabaseManager stationDatabaseManager, GlobalStationManager globalStationManager) {
+        this();
+        this.stationDatabaseManager = stationDatabaseManager;
 
-		globalStationManager = new GlobalStationManager();
+        eventHandler = new GlobalQuakeEventHandler().runHandler();
 
-		earthquakeAnalysis = new EarthquakeAnalysis();
-		clusterAnalysis = new ClusterAnalysis();
+        this.globalStationManager = globalStationManager;
 
-		archive = new EarthquakeArchive().loadArchive();
+        earthquakeAnalysis = new EarthquakeAnalysis();
+        clusterAnalysis = new ClusterAnalysis();
 
-		globalQuakeRuntime = new GlobalQuakeRuntime();
-		seedlinkNetworksReader = new SeedlinkNetworksReader();
-	}
+        archive = createArchive();
 
-	public void startRuntime(){
-		globalStationManager.initStations(stationDatabaseManager);
-		getGlobalQuakeRuntime().runThreads();
-		seedlinkNetworksReader.run();
-	}
+        globalQuakeRuntime = new GlobalQuakeRuntime();
+        seedlinkNetworksReader = new SeedlinkNetworksReader();
+    }
 
-	public void stopRuntime(){
-		getGlobalQuakeRuntime().stop();
-		getSeedlinkReader().stop();
-	}
+    public GlobalQuake(StationDatabaseManager stationDatabaseManager) {
+        this(stationDatabaseManager, new GlobalStationManager());
+    }
 
-	public void reset(){
-		getEarthquakeAnalysis().getEarthquakes().clear();
-		getClusterAnalysis().getClusters().clear();
-		getStationManager().getStations().clear();
-	}
+    public static GlobalQuake getInstance() {
+        return instance;
+    }
 
-	@SuppressWarnings("unused")
-	public void destroy() {
-		getArchive().destroy();
-		getEarthquakeAnalysis().destroy();
-		getEventHandler().stopHandler();
-	}
+    public EarthquakeArchive createArchive() {
+        return new EarthquakeArchive().loadArchive();
+    }
 
-	public void stopService(ExecutorService service) {
-		if(service == null){
-			return;
-		}
+    public GlobalQuake initStations() {
+        globalStationManager.initStations(stationDatabaseManager);
+        return this;
+    }
 
-		service.shutdown();
-		try {
-			if(!service.awaitTermination(1, TimeUnit.SECONDS)){
-				service.shutdownNow();
-				if(!service.awaitTermination(10, TimeUnit.SECONDS)) {
-					GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to terminate one or more services!"));
-				}
-			}
-		} catch (InterruptedException e) {
-			Logger.error("Thread interrupted while shutting down service!");
-		}
-	}
+    public void startRuntime() {
+        getGlobalQuakeRuntime().runThreads();
+        seedlinkNetworksReader.run();
+    }
 
-	public ClusterAnalysis getClusterAnalysis() {
-		return clusterAnalysis;
-	}
+    public void stopRuntime() {
+        getGlobalQuakeRuntime().stop();
+        getSeedlinkReader().stop();
+    }
 
-	public EarthquakeAnalysis getEarthquakeAnalysis() {
-		return earthquakeAnalysis;
-	}
+    public void reset() {
+        getEarthquakeAnalysis().getEarthquakes().clear();
+        getClusterAnalysis().getClusters().clear();
+        getStationManager().getStations().clear();
+    }
 
-	public EarthquakeArchive getArchive() {
-		return archive;
-	}
+    @SuppressWarnings("unused")
+    public void destroy() {
+        getArchive().destroy();
+        getEarthquakeAnalysis().destroy();
+        getEventHandler().stopHandler();
+        getClusterAnalysis().destroy();
+    }
 
-	public GlobalStationManager getStationManager() {
-		return globalStationManager;
-	}
+    public void stopService(ExecutorService service) {
+        if (service == null) {
+            return;
+        }
 
-	public GlobalQuakeRuntime getGlobalQuakeRuntime() {
-		return globalQuakeRuntime;
-	}
+        service.shutdown();
+        try {
+            if (!service.awaitTermination(1, TimeUnit.SECONDS)) {
+                service.shutdownNow();
+                if (!service.awaitTermination(10, TimeUnit.SECONDS)) {
+                    GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to terminate one or more services!"));
+                }
+            }
+        } catch (InterruptedException e) {
+            Logger.error("Thread interrupted while shutting down service!");
+        }
+    }
 
-	public SeedlinkNetworksReader getSeedlinkReader() {
-		return seedlinkNetworksReader;
-	}
+    public ClusterAnalysis getClusterAnalysis() {
+        return clusterAnalysis;
+    }
 
-	public StationDatabaseManager getStationDatabaseManager() {
-		return stationDatabaseManager;
-	}
+    public EarthquakeAnalysis getEarthquakeAnalysis() {
+        return earthquakeAnalysis;
+    }
 
-	public GlobalQuakeEventHandler getEventHandler() {
-		return eventHandler;
-	}
+    public EarthquakeArchive getArchive() {
+        return archive;
+    }
 
-	public static ApplicationErrorHandler getErrorHandler() {
-		return errorHandler;
-	}
+    public GlobalStationManager getStationManager() {
+        return globalStationManager;
+    }
 
+    public GlobalQuakeRuntime getGlobalQuakeRuntime() {
+        return globalQuakeRuntime;
+    }
+
+    public SeedlinkNetworksReader getSeedlinkReader() {
+        return seedlinkNetworksReader;
+    }
+
+    public StationDatabaseManager getStationDatabaseManager() {
+        return stationDatabaseManager;
+    }
+
+    public GlobalQuakeEventHandler getEventHandler() {
+        return eventHandler;
+    }
+
+    public static ApplicationErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
+
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    public void clear() {
+        getClusterAnalysis().getClusters().clear();
+        getEarthquakeAnalysis().getEarthquakes().clear();
+    }
+
+    public abstract boolean limitedSettings();
+
+    public abstract boolean limitedWaveformBuffers();
+
+    public boolean isSimulation(){
+        return false;
+    }
 }

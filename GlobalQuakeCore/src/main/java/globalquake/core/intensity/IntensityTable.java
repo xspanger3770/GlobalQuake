@@ -1,115 +1,79 @@
 package globalquake.core.intensity;
 
+import java.util.function.Function;
+
 public class IntensityTable {
 
-    private static final int ROWS = 100; // UP TO 100,000km
-    private static final int COLS = 120; // M-2 - M10
-    private static final double[][] TABLE;
-    private static final double[][] TABLE2;
-
-    static {
-        TABLE = new double[ROWS][COLS];
-        TABLE2 = new double[ROWS][COLS];
-        fillTables();
-    }
-
-    private static double getDist(double row) {
-        return 10.0 * (Math.pow(11.0 / 10.0, row) - 1);
-    }
-
-    private static double getRow(double dist) {
-        return Math.log10(dist / 10.0 + 1) / Math.log10(11.0 / 10.0);
-    }
-
-    private static double getMag(double col) {
-        return -2.0 + col / 10.0;
-    }
-
-    private static double getCol(double mag) {
-        return (mag + 2.0) * 10;
-    }
-
-    private static double getIntensity(double col) {
-        return 10.0 * (Math.pow(11.5 / 10.0, col) - 1);
-    }
-
-    private static double getColByIntensity(double intensity) {
-        return Math.log10(intensity / 10.0 + 1) / Math.log10(11.5 / 10.0);
-    }
-
-    private static void fillTables() {
-        long a = System.currentTimeMillis();
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                double dist = getDist(row);
-                double mag = getMag(col);
-                TABLE[row][col] = maxIntensity(mag, dist);
-            }
-        }
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                double intensity = getIntensity(col);
-                double mag = searchMag(row, intensity);
-                TABLE2[row][col] = mag;
-            }
-        }
-        System.out.printf("Intensity tables filled in %s ms.\n", (System.currentTimeMillis() - a));
-    }
-
-    private static double searchMag(int row, double intensity) {
-        // TOO LAZY FOR BINARY SEARCH, WILL BE USED ONLY AT INIT
-        for (int col = 0; col < COLS; col++) {
-            double mag = getMag(col);
-            double _intensity = TABLE[row][col];
-            if (_intensity >= intensity) {
-                return mag;
-            }
-        }
-        return -2;
-    }
-
-    /**
-     * @param mag  Magnitude
-     * @param dist 'Geological' distance in KM
-     * @return Expected intensity
-     */
-
-    public static double getMaxIntensity(double mag, double dist) {
-        double _row = getRow(dist);
-        double _col = getCol(mag);
-        return extrapolateVal(_row, _col, TABLE);
-    }
-
-    private static double extrapolateVal(double _row, double _col, double[][] table) {
-        int row0 = (int) (Math.max(0, Math.min(ROWS - 2, _row)));
-        int col0 = (int) (Math.max(0, Math.min(COLS - 2, _col)));
-        double valAB = table[row0][col0] * (1 - _col % 1.0) + table[row0][col0 + 1] * (_col % 1.0);
-        double valCD = table[row0 + 1][col0] * (1 - _col % 1.0) + table[row0 + 1][col0 + 1] * (_col % 1.0);
-        return valAB * (1 - _row % 1.0) + valCD * (_row % 1.0);
-    }
-
-    /**
-     * @param dist      'Geological' distance in KM
-     * @param intensity maxRatio
-     * @return Magnitude
-     */
-
-    public static double getMagnitude(double dist, double intensity) {
-        double _row = getRow(dist);
-        double _col = getColByIntensity(intensity);
-        return extrapolateVal(_row, _col, TABLE2);
-    }
-
-    private static double maxIntensity(double mag, double dist) {
+    public static double getRatio(double mag, double dist) {
         mag = 1.2 * mag - 0.022 * mag * mag - 1;
         if (dist > 1200) {
             dist = 1200 + Math.pow(dist - 1200, 0.4) * 22.0;
         }
-        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1 * Math.pow(5, mag));
+        return (Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist, 2.1 + 0.07 * mag) + 1000 + 1 * Math.pow(5, mag));
 
     }
 
-    public static void init() {
-        getMaxIntensity(0,0);
+    public static double getIntensity(double mag, double dist) {
+        double limit = 1200;
+        if(mag > 7.5){
+            limit += (mag - 7.5) * 500;
+        }
+        if (mag > 9) {
+            mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
+        }
+        mag = 1.25 * mag - 0.9 - 0.0004 * mag * mag * mag;
+        if (dist > limit) {
+            dist = limit + Math.pow(dist - limit, 0.4) * 22;
+        }
+        return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.110 * mag) + 2000 + 5 * Math.pow(6.0, mag))) / 0.07;
     }
+
+    public static double getIntensityAccelerometers(double mag, double dist) {
+        if (mag > 9) {
+            mag *= 1 + 0.2 * Math.pow(mag - 9, 2.5);
+        }
+        mag = 1.25 * mag - 0.9;
+        if (dist > 3000) {
+            dist = 3000 + Math.pow(dist - 3000, 0.4) * 22;
+        }
+        return ((Math.pow(15, mag * 0.92 + 4.0)) / (5 * Math.pow(dist + 1000 / Math.pow(mag + 3.0, 3), 2.0 + 0.122 * mag) + 2000 + 5 * Math.pow(4.5, mag))) / 0.07;
+    }
+
+    public static double findMagnitude(double intensity, Function<Double, Double> intensityFunction) {
+        double epsilon = 1e-6; // Tolerance for floating-point comparison
+        double low = -2.0;
+        double high = 10.0;
+
+        // Perform binary search
+        while (low <= high) {
+            double mid = low + (high - low) / 2;
+            double currentIntensity = intensityFunction.apply(mid);
+
+            if (Math.abs(currentIntensity - intensity) < epsilon) {
+                // Found a close enough match
+                return mid;
+            } else if (currentIntensity < intensity) {
+                // Adjust the search range
+                low = mid + epsilon;
+            } else {
+                high = mid - epsilon;
+            }
+        }
+
+        // If no exact match is found, return an approximation
+        return low;
+    }
+
+    public static double getMagnitude(double dist, double intensity) {
+        return findMagnitude(intensity, value -> getIntensity(value, dist));
+    }
+
+    public static double getMagnitudeByRatio(double dist, double intensity) {
+        return findMagnitude(intensity, value -> getRatio(value, dist));
+    }
+
+    public static double getMagnitudeByAccelerometer(double dist, double intensity) {
+        return findMagnitude(intensity, value -> getIntensityAccelerometers(value, dist));
+    }
+
 }

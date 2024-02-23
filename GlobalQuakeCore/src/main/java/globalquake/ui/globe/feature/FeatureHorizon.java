@@ -7,17 +7,16 @@ import globalquake.ui.globe.Polygon3D;
 import globalquake.ui.globe.RenderProperties;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class FeatureHorizon extends RenderFeature<Point2D>{
 
-    private final ArrayList<Point2D> points = new ArrayList<>();
+    private final java.util.List<Point2D> points;
     private final double quality;
 
     public FeatureHorizon(Point2D center, double quality){
         super(1);
-        points.add(center);
+        points = java.util.List.of(center);
         this.quality = quality;
     }
 
@@ -39,8 +38,18 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     }
 
     @Override
+    public boolean needsUpdateEntities() {
+        return false;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<Point2D> entity, boolean propertiesChanged) {
-        return super.needsCreatePolygon(entity, propertiesChanged) || propertiesChanged;
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<Point2D> entity, boolean propertiesChanged) {
+        return propertiesChanged;
     }
 
     @Override

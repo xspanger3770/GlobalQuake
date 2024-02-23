@@ -7,7 +7,6 @@ import globalquake.core.intensity.Level;
 import globalquake.ui.archived.ArchivedQuakeAnimation;
 import globalquake.ui.archived.ArchivedQuakeUI;
 import globalquake.core.Settings;
-import globalquake.utils.GeoUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,13 +37,7 @@ public class EarthquakeListPanel extends JPanel {
         if(archivedQuakes == null){
             return null;
         }
-        return archivedQuakes.stream().filter( quake -> {
-            if (Settings.oldEventsMagnitudeFilterEnabled && quake.getMag() < Settings.oldEventsMagnitudeFilter) {
-                return false;
-            }
-
-            return !Settings.oldEventsTimeFilterEnabled || !((System.currentTimeMillis() - quake.getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
-        }).collect(Collectors.toList());
+        return archivedQuakes.stream().filter(ArchivedQuake::shouldBeDisplayed).collect(Collectors.toList());
     }
 
     public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {
@@ -139,7 +132,7 @@ public class EarthquakeListPanel extends JPanel {
                     continue;
                 }
                 Color col;
-                Level level = IntensityScales.getIntensityScale().getLevel(GeoUtils.pgaFunction(quake.getMag(), quake.getDepth()));
+                Level level = IntensityScales.getIntensityScale().getLevel(quake.getMaxPGA());
                 if (level != null) {
                     col = level.getColor();
 

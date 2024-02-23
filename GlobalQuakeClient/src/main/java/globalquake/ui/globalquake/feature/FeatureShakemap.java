@@ -2,6 +2,7 @@ package globalquake.ui.globalquake.feature;
 
 import com.uber.h3core.H3Core;
 import com.uber.h3core.util.LatLng;
+import globalquake.core.Settings;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.ShakeMapsUpdatedEvent;
 import globalquake.intensity.IntensityHex;
@@ -23,11 +24,14 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private final H3Core h3;
     private final MonitorableCopyOnWriteArrayList<IntensityHex> hexes = new MonitorableCopyOnWriteArrayList<>();
+    private final ExecutorService hexService = Executors.newSingleThreadExecutor();
 
     public FeatureShakemap() {
         super(1);
@@ -38,12 +42,21 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         }
 
         GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
-            @SuppressWarnings("unused")
             @Override
             public void onShakemapCreated(ShakeMapsUpdatedEvent event) {
-                updateHexes();
+                hexService.submit(() -> updateHexes());
             }
         });
+    }
+
+    @Override
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayShakemaps;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
     }
 
     @Override
@@ -56,15 +69,10 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         return propertiesChanged;
     }
 
-    @Override
-    public boolean needsUpdateEntities() {
-        return true;
-    }
-
-    private synchronized void updateHexes() {
+    private void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
-                .sorted(Comparator.comparing(kv -> -kv.getValue().getMag())).toList()){
+                .sorted(Comparator.comparing(kv -> kv.getValue().getRes())).toList()){
             ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {
@@ -152,7 +160,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
         graphics.fill(elementHex.getShape());
 
-        boolean mouseNearby = renderer.getLastMouse() != null && elementHex.getShape().contains(renderer.getLastMouse());
+        boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementHex.getShape().contains(renderer.getLastMouse());
 
         if(mouseNearby && renderProperties.scroll < 0.2) {
             graphics.setColor(col);
@@ -164,7 +172,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
             graphics.setColor(Color.white);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
-            graphics.drawString(level.getName(),
+            graphics.drawString(level.getFullName(),
                     (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
                     (int)centerPonint.y + graphics.getFont().getSize() / 2);
         }

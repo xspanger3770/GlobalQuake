@@ -2,6 +2,7 @@ package globalquake.ui.table;
 
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -10,10 +11,10 @@ public abstract class FilterableTableModel<E> extends AbstractTableModel {
 
 	@Serial
 	private static final long serialVersionUID = 1727941556193013022L;
-	private final List<E> data;
+	private final Collection<E> data;
 	private final List<E> filteredData;
 
-	public FilterableTableModel(List<E> data) {
+	public FilterableTableModel(Collection<E> data) {
 		this.data = data;
 		this.filteredData = new ArrayList<>(data);
 		applyFilter();

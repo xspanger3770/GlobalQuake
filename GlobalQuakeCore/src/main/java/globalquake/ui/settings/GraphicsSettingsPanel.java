@@ -1,6 +1,7 @@
 package globalquake.ui.settings;
 
 import globalquake.core.Settings;
+import globalquake.core.earthquake.quality.QualityClass;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,7 +14,6 @@ import java.time.format.DateTimeFormatter;
 public class GraphicsSettingsPanel extends SettingsPanel{
 
     private JCheckBox chkBoxScheme;
-    private JCheckBox chkBoxAntialiasing;
     private JSlider sliderFpsIdle;
     private JCheckBox chkBoxEnableTimeFilter;
     private JTextField textFieldTimeFilter;
@@ -26,7 +26,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDeadStations;
     private JSlider sliderIntensityZoom;
     private JTextField textFieldMaxArchived;
-    private JCheckBox chkBoxTriangles;
     private JSlider sliderStationsSize;
     private JRadioButton[] colorButtons;
 
@@ -41,6 +40,20 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     private JCheckBox chkBoxDisplayQuakeAdditionalInfo;
     private JCheckBox chkBoxAlertBox;
     private JCheckBox chkBoxTime;
+    private JCheckBox chkBoxShakemap;
+    private JCheckBox chkBoxCityIntensities;
+    private JCheckBox chkBoxCapitals;
+    private JComboBox<QualityClass> comboBoxQuality;
+
+    private JCheckBox chkBoxClusters;
+    private JCheckBox chkBoxClusterRoots;
+    private JCheckBox chkBoxHideClusters;
+    private JCheckBox chkBoxAntialiasStations;
+    private JCheckBox chkBoxAntialiasClusters;
+
+    private JCheckBox chkBoxAntialiasOldQuakes;
+
+    private JCheckBox chkBoxAntialiasQuakes;
 
 
     public GraphicsSettingsPanel() {
@@ -75,9 +88,9 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
         zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
 
-        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,180, Settings.cinemaModeZoomMultiplier);
-        sliderZoomMul.setMinorTickSpacing(5);
-        sliderZoomMul.setMajorTickSpacing(20);
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,500, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul.setMinorTickSpacing(10);
+        sliderZoomMul.setMajorTickSpacing(50);
         sliderZoomMul.setPaintTicks(true);
 
         zoomPanel.add(sliderZoomMul);
@@ -89,9 +102,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         checkboxPanel.add(chkBoxReEnable = new JCheckBox("Re-enable Cinema Mode automatically", Settings.cinemaModeReenable));
         panel.add(checkboxPanel);
 
-        for(int i = 0; i < 39; i++){
-            panel.add(new JPanel()); // fillers
-        }
+        fill(panel, 32);
 
         return panel;
     }
@@ -104,16 +115,16 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         performancePanel.setLayout(new BoxLayout(performancePanel, BoxLayout.Y_AXIS));
         performancePanel.setBorder(BorderFactory.createTitledBorder("Performance"));
 
-        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 120, Settings.fpsIdle);
+        sliderFpsIdle = new JSlider(JSlider.HORIZONTAL, 10, 200, Settings.fpsIdle);
         sliderFpsIdle.setPaintLabels(true);
         sliderFpsIdle.setPaintTicks(true);
         sliderFpsIdle.setMajorTickSpacing(10);
         sliderFpsIdle.setMinorTickSpacing(5);
         sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
 
-        JLabel label = new JLabel("FPS at idle: "+sliderFpsIdle.getValue());
+        JLabel label = new JLabel("FPS limit: "+sliderFpsIdle.getValue());
 
-        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS at idle: "+sliderFpsIdle.getValue()));
+        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS limit: "+sliderFpsIdle.getValue()));
 
         performancePanel.add(label);
         performancePanel.add(sliderFpsIdle);
@@ -137,18 +148,37 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(dateFormatPanel);
 
-        JPanel mainWindowPanel = new JPanel(new GridLayout(5,1));
+        JPanel mainWindowPanel = new JPanel(new GridLayout(4,2));
         mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
 
         mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
         mainWindowPanel.add(chkBoxDisplayMagnitudeHistogram = new JCheckBox("Display magnitude histogram", Settings.displayMagnitudeHistogram));
         mainWindowPanel.add(chkBoxDisplayQuakeAdditionalInfo = new JCheckBox("Display technical earthquake data", Settings.displayAdditionalQuakeInfo));
         mainWindowPanel.add(chkBoxAlertBox = new JCheckBox("Display alert box for nearby earthquakes", Settings.displayAlertBox));
-        mainWindowPanel.add(chkBoxTime = new JCheckBox("Display latest data time", Settings.displayTime));
+        mainWindowPanel.add(chkBoxShakemap = new JCheckBox("Display shakemap hexagons", Settings.displayShakemaps));
+        mainWindowPanel.add(chkBoxTime = new JCheckBox("Display time", Settings.displayTime));
+        mainWindowPanel.add(chkBoxCityIntensities = new JCheckBox("Display estimated intensities in cities", Settings.displayCityIntensities));
+        mainWindowPanel.add(chkBoxCapitals = new JCheckBox("Display capital cities", Settings.displayCapitalCities));
 
         panel.add(mainWindowPanel);
 
-        fill(panel, 16);
+        JPanel clustersPanel = new JPanel(new GridLayout(3,1));
+        clustersPanel.setBorder(new TitledBorder("Cluster settings"));
+
+        clustersPanel.add(chkBoxClusterRoots = new JCheckBox("Display Clusters (possible shaking locations)", Settings.displayClusterRoots));
+        clustersPanel.add(chkBoxClusters = new JCheckBox("Display Stations assigned to Clusters (local mode only)", Settings.displayClusters));
+        clustersPanel.add(chkBoxHideClusters = new JCheckBox("Hide Cluster after the Earthquake is actually found", Settings.hideClustersWithQuake));
+
+        panel.add(clustersPanel);
+
+        JPanel antialiasPanel = new JPanel(new GridLayout(3,1));
+        antialiasPanel.setBorder(new TitledBorder("Antialiasing"));
+        antialiasPanel.add(chkBoxAntialiasStations = new JCheckBox("Stations", Settings.antialiasing));
+        antialiasPanel.add(chkBoxAntialiasClusters = new JCheckBox("Clusters", Settings.antialiasingClusters));
+        antialiasPanel.add(chkBoxAntialiasQuakes = new JCheckBox("Earthquakes", Settings.antialiasingQuakes));
+        antialiasPanel.add(chkBoxAntialiasOldQuakes = new JCheckBox("Archived Earthquakes", Settings.antialiasingOldQuakes));
+
+        panel.add(antialiasPanel);
 
         return panel;
     }
@@ -258,7 +288,18 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         eventsPanel.add(colorsPanel);
 
-        fill(eventsPanel, 20);
+        JPanel qualityFilterPanel = new JPanel();
+        qualityFilterPanel.setBorder(BorderFactory.createTitledBorder("Quality"));
+
+        qualityFilterPanel.add(new JLabel("Only show old events with quality equal or better than: "));
+
+        comboBoxQuality = new JComboBox<>(QualityClass.values());
+        comboBoxQuality.setSelectedIndex(Math.max(0, Math.min(QualityClass.values().length-1, Settings.qualityFilter)));
+        qualityFilterPanel.add(comboBoxQuality);
+
+        eventsPanel.add(qualityFilterPanel);
+
+        fill(eventsPanel, 12);
 
         return eventsPanel;
     }
@@ -268,20 +309,50 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         stationsPanel.setLayout(new BoxLayout(stationsPanel, BoxLayout.Y_AXIS));
         stationsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
-        JPanel checkBoxes = new JPanel(new GridLayout(2,2));
+        JPanel checkBoxes = new JPanel(new GridLayout(1,2));
+        checkBoxes.setBorder(BorderFactory.createTitledBorder("Appearance"));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
         chkBoxScheme.setSelected(Settings.useOldColorScheme);
         checkBoxes.add(chkBoxScheme);
 
-        chkBoxAntialiasing = new JCheckBox("Enable antialiasing for stations");
-        chkBoxAntialiasing.setSelected(Settings.antialiasing);
-        checkBoxes.add(chkBoxAntialiasing);
-
         checkBoxes.add(chkBoxDeadStations = new JCheckBox("Hide stations with no data", Settings.hideDeadStations));
-        checkBoxes.add(chkBoxTriangles = new JCheckBox("Display stations as triangles (faster)", Settings.stationsTriangles));
 
         stationsPanel.add(checkBoxes);
+
+        JPanel stationsShapePanel = new JPanel();
+        stationsShapePanel.setBorder(BorderFactory.createTitledBorder("Shape"));
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+
+        JRadioButton buttonCircles = new JRadioButton("Circles");
+        JRadioButton buttonTriangles = new JRadioButton("Triangles");
+        JRadioButton buttonDepends = new JRadioButton("Based on sensor type");
+
+        JRadioButton[] buttons = new JRadioButton[]{buttonCircles, buttonTriangles, buttonDepends};
+
+        var shapeActionListener = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                for (int i = 0; i < buttons.length; i++) {
+                    JRadioButton button = buttons[i];
+                    if(button.isSelected()){
+                        Settings.stationsShapeIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
+        for(JRadioButton button : buttons){
+            buttonGroup.add(button);
+            stationsShapePanel.add(button);
+            button.addActionListener(shapeActionListener);
+        }
+
+        buttons[Settings.stationsShapeIndex].setSelected(true);
+
+        stationsPanel.add(stationsShapePanel);
 
         JPanel intensityPanel = new JPanel(new GridLayout(2,1));
         intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
@@ -317,7 +388,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         stationSizePanel.add(sliderStationsSize);
         stationsPanel.add(stationSizePanel);
 
-        fill(stationsPanel, 20);
+        fill(stationsPanel, 6);
 
         return stationsPanel;
     }
@@ -325,8 +396,12 @@ public class GraphicsSettingsPanel extends SettingsPanel{
     @Override
     public void save() {
         Settings.useOldColorScheme = chkBoxScheme.isSelected();
-        Settings.antialiasing = chkBoxAntialiasing.isSelected();
         Settings.fpsIdle = sliderFpsIdle.getValue();
+
+        Settings.antialiasing = chkBoxAntialiasStations.isSelected();
+        Settings.antialiasingClusters = chkBoxAntialiasClusters.isSelected();
+        Settings.antialiasingQuakes = chkBoxAntialiasQuakes.isSelected();
+        Settings.antialiasingOldQuakes = chkBoxAntialiasOldQuakes.isSelected();
 
         Settings.oldEventsTimeFilterEnabled = chkBoxEnableTimeFilter.isSelected();
         Settings.oldEventsTimeFilter = parseDouble(textFieldTimeFilter.getText(), "Old events max age", 0, 24 * 365);
@@ -339,7 +414,6 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.use24HFormat = chkBox24H.isSelected();
 
         Settings.hideDeadStations = chkBoxDeadStations.isSelected();
-        Settings.stationsTriangles = chkBoxTriangles.isSelected();
         Settings.stationIntensityVisibilityZoomLevel = sliderIntensityZoom.getValue() / 100.0;
         Settings.stationsSizeMul = sliderStationsSize.getValue() / 100.0;
 
@@ -354,7 +428,16 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         Settings.displayMagnitudeHistogram = chkBoxDisplayMagnitudeHistogram.isSelected();
         Settings.displayAdditionalQuakeInfo = chkBoxDisplayQuakeAdditionalInfo.isSelected();
         Settings.displayAlertBox = chkBoxAlertBox.isSelected();
+        Settings.displayShakemaps = chkBoxShakemap.isSelected();
         Settings.displayTime = chkBoxTime.isSelected();
+        Settings.displayCityIntensities = chkBoxCityIntensities.isSelected();
+        Settings.displayCapitalCities = chkBoxCapitals.isSelected();
+
+        Settings.qualityFilter = comboBoxQuality.getSelectedIndex();
+
+        Settings.displayClusters = chkBoxClusters.isSelected();
+        Settings.displayClusterRoots = chkBoxClusterRoots.isSelected();
+        Settings.hideClustersWithQuake = chkBoxHideClusters.isSelected();
     }
 
     @Override

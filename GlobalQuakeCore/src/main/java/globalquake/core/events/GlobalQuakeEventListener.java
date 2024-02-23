@@ -2,15 +2,21 @@ package globalquake.core.events;
 
 import globalquake.core.events.specific.*;
 
-public interface GlobalQuakeEventListener {
+public class GlobalQuakeEventListener {
 
-    void onClusterCreate(ClusterCreateEvent event);
+    public void onClusterCreate(ClusterCreateEvent event) {}
 
-    void onQuakeCreate(QuakeCreateEvent event);
+    public void onQuakeCreate(QuakeCreateEvent event) {}
 
-    void onQuakeUpdate(QuakeUpdateEvent event);
+    public void onQuakeUpdate(QuakeUpdateEvent event) {}
 
-    void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent);
+    public void onQuakeRemove(QuakeRemoveEvent event) {}
 
-    void onQuakeArchive(QuakeArchiveEvent quakeArchiveEvent);
+    public void onQuakeArchive(QuakeArchiveEvent event) {}
+
+    public void onNewData(SeedlinkDataEvent event) {}
+
+    public void onClusterLevelup(ClusterLevelUpEvent event) {}
+
+    public void onQuakeReport(QuakeReportEvent event) {}
 }

@@ -1,7 +1,9 @@
 package globalquake.ui.globalquake.feature;
 
+import globalquake.client.GlobalQuakeClient;
 import globalquake.core.analysis.AnalysisStatus;
 import globalquake.core.analysis.Event;
+import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.station.AbstractStation;
 import globalquake.ui.globe.GlobeRenderer;
 import globalquake.ui.globe.Point2D;
@@ -11,21 +13,23 @@ import globalquake.ui.globe.feature.RenderElement;
 import globalquake.ui.globe.feature.RenderEntity;
 import globalquake.ui.globe.feature.RenderFeature;
 import globalquake.core.Settings;
+import globalquake.ui.settings.StationsShape;
 import globalquake.ui.stationselect.FeatureSelectableStation;
 import globalquake.utils.Scale;
+import gqserver.api.packets.station.InputType;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.awt.*;
 import java.util.Collection;
-import java.util.List;
 
 public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
-    private final List<AbstractStation> globalStations;
+    private final Collection<AbstractStation> globalStations;
 
     public static final double RATIO_YELLOW = 2000.0;
     public static final double RATIO_RED = 20000.0;
 
-    public FeatureGlobalStation(List<AbstractStation> globalStations) {
+    public FeatureGlobalStation(Collection<AbstractStation> globalStations) {
         super(2);
         this.globalStations = globalStations;
     }
@@ -48,22 +52,49 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         double size = Math.min(36, renderer.pxToDeg(7.0, renderProperties)) * Settings.stationsSizeMul;
 
-        if(!Settings.stationsTriangles) {
-            renderer.createCircle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size, 0, 30);
-        }else{
-            renderer.createTriangle(elementStationCircle.getPolygon(),
-                    entity.getOriginal().getLatitude(),
-                    entity.getOriginal().getLongitude(),
-                    size * 1.41, 0);
+        if(Math.abs(size - entity.getOriginal()._lastRenderSize) < 0.1){
+            return;
+        }
+
+        entity.getOriginal()._lastRenderSize = size;
+
+        InputType inputType = entity.getOriginal().getInputType();
+
+        StationsShape shape = StationsShape.values()[Settings.stationsShapeIndex];
+
+        if(shape == StationsShape.CIRCLE){
+            inputType = InputType.UNKNOWN;
+        } else if(shape == StationsShape.TRIANGLE){
+            inputType = InputType.VELOCITY;
+        }
+
+        switch (inputType){
+            case UNKNOWN ->
+                    renderer.createCircle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size, 0, 30);
+            case VELOCITY ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 0);
+            case ACCELERATION ->
+                    renderer.createTriangle(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0, 180);
+            case DISPLACEMENT ->
+                    renderer.createSquare(elementStationCircle.getPolygon(),
+                            entity.getOriginal().getLatitude(),
+                            entity.getOriginal().getLongitude(),
+                            size * 1.41, 0);
         }
 
         renderer.createSquare(elementStationSquare.getPolygon(),
                 entity.getOriginal().getLatitude(),
                 entity.getOriginal().getLongitude(),
-                size * (Settings.stationsTriangles ? 2.0 : 1.75), 0);
+                size * 2.0, 0);
     }
 
     @Override
@@ -73,6 +104,11 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
     @Override
     public boolean needsCreatePolygon(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
+        return propertiesChanged;
+    }
+
+    @Override
+    public boolean needsProject(RenderEntity<AbstractStation> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
 
@@ -88,12 +124,20 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
     }
 
     @Override
-    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
-        if(Settings.hideDeadStations && !entity.getOriginal().hasDisplayableData()){
-            return;
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        AbstractStation station = (AbstractStation) entity.getOriginal();
+
+        if(Settings.hideDeadStations && !station.hasDisplayableData()){
+            return false;
         }
 
+        return !station.disabled;
+    }
+
+    @Override
+    public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         RenderElement elementStationCircle = entity.getRenderElement(0);
+
 
         if(!elementStationCircle.shouldDraw){
             return;
@@ -106,7 +150,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         graphics.setColor(getDisplayColor(entity.getOriginal()));
         graphics.fill(elementStationCircle.getShape());
 
-        boolean mouseNearby = renderer.isMouseNearby(getCenterCoords(entity), 10.0, true, renderProperties);
+        boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementStationCircle.getShape().contains(renderer.getLastMouse());
 
         if (mouseNearby && renderProperties.scroll < 1) {
             graphics.setColor(Color.yellow);
@@ -116,28 +160,29 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
 
         graphics.setStroke(new BasicStroke(1f));
 
-        if(entity.getOriginal().disabled){
-            return;
-        }
-
-
-        var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
-        var centerPonint = renderer.projectPoint(point3D, renderProperties);
-
         graphics.setFont(new Font("Calibri", Font.PLAIN, 13));
 
+        Vector3D point3D = null;
+        Point2D centerPoint = null;
         if(Settings.displayClusters){
-            int _y = (int) centerPonint.y + 4;
             for(Event event2 : entity.getOriginal().getAnalysis().getDetectedEvents()){
-                if(event2.assignedCluster != null){
-                    Color c = !event2.isValid() ? Color.gray : event2.assignedCluster.color;
+                Cluster cluster = event2.assignedCluster;
+                if(cluster != null){
+                    Color c = !event2.isValid() ? Color.gray : cluster.color;
+
+                    if(point3D == null) {
+                        point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+                        centerPoint = renderer.projectPoint(point3D, renderProperties);
+                    }
+
+                    int _y = (int) centerPoint.y + 4;
+                    _y += 16;
 
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
                     graphics.setColor(c);
                     graphics.draw(elementStationSquare.getShape());
-                    graphics.drawString("Cluster #"+event2.assignedCluster.getId(), (int) centerPonint.x + 12, _y);
-                    _y += 16;
+                    graphics.drawString("Cluster #"+cluster.id, (int) centerPoint.x + 12, _y);
                 }
             }
         } else if (entity.getOriginal().isInEventMode() && ((System.currentTimeMillis() / 500) % 2 == 0)) {
@@ -154,20 +199,30 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             }
 
             graphics.setColor(c);
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, Settings.antialiasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
             graphics.draw(elementStationSquare.getShape());
         }
 
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        drawDetails(mouseNearby, renderProperties.scroll, (int) centerPonint.x, (int) centerPonint.y, graphics, entity.getOriginal());
+        drawDetails(mouseNearby, renderProperties.scroll, centerPoint, graphics, entity.getOriginal(), renderer, entity, renderProperties);
     }
 
-    private void drawDetails(boolean mouseNearby, double scroll, int x, int y, Graphics2D g, AbstractStation station) {
+    private void drawDetails(boolean mouseNearby, double scroll, Point2D centerPoint, Graphics2D g, AbstractStation station, GlobeRenderer renderer,
+                             RenderEntity<AbstractStation> entity, RenderProperties renderProperties) {
         int _y = (int) (7 + 6 * Settings.stationsSizeMul);
         if (mouseNearby && scroll < 1) {
             g.setColor(Color.white);
             String str = station.toString();
+
+            if(centerPoint == null) {
+                var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+                centerPoint = renderer.projectPoint(point3D, renderProperties);
+            }
+
+            int x = (int) centerPoint.x;
+            int y = (int) centerPoint.y;
+
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y);
             str = station.getSeedlinkNetwork() == null ? "" : station.getSeedlinkNetwork().getName();
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - _y - 15);
@@ -188,9 +243,16 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
         }
         if (scroll < Settings.stationIntensityVisibilityZoomLevel || (mouseNearby && scroll < 1)) {
             g.setColor(Color.white);
-            String str = !station.hasDisplayableData() ? "-.-" : "%s".formatted((int) (station.getMaxRatio60S() * 10) / 10.0);
+            String str = !station.hasDisplayableData() ? "-.-" : "%.1f".formatted(station.getMaxRatio60S());
             g.setFont(new Font("Calibri", Font.PLAIN, 13));
             g.setColor(station.getAnalysis().getStatus() == AnalysisStatus.EVENT ? Color.green : Color.LIGHT_GRAY);
+            if(centerPoint == null) {
+                var point3D = GlobeRenderer.createVec3D(getCenterCoords(entity));
+                centerPoint = renderer.projectPoint(point3D, renderProperties);
+            }
+
+            int x = (int) centerPoint.x;
+            int y = (int) centerPoint.y;
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y + _y + 9);
         }
     }
@@ -203,7 +265,7 @@ public class FeatureGlobalStation extends RenderFeature<AbstractStation> {
             return Color.gray;
         }
 
-        if (station.getAnalysis().getStatus() == AnalysisStatus.INIT || !station.hasDisplayableData()) {
+        if ((GlobalQuakeClient.instance == null && station.getAnalysis().getStatus() == AnalysisStatus.INIT) || !station.hasDisplayableData()) {
             return Color.lightGray;
         } else {
             return Scale.getColorRatio(station.getMaxRatio60S());

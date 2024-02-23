@@ -5,18 +5,20 @@ import globalquake.ui.table.Column;
 import globalquake.ui.table.FilterableTableModel;
 import globalquake.ui.table.TableCellRendererAdapter;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class ClusterTableModel extends FilterableTableModel<Cluster> {
     private final List<Column<Cluster, ?>> columns = List.of(
-            Column.readonly("ID", Integer.class, Cluster::getId, new TableCellRendererAdapter<>()),
+            Column.readonly("ID", UUID.class, Cluster::getUuid, new TableCellRendererAdapter<>()),
             Column.readonly("Assigned Events", Integer.class, cluster -> cluster.getAssignedEvents().size(), new TableCellRendererAdapter<>()),
-            Column.readonly("level", Integer.class, Cluster::getActualLevel, new TableCellRendererAdapter<>()),
+            Column.readonly("level", Integer.class, Cluster::getLevel, new TableCellRendererAdapter<>()),
             Column.readonly("rootLat", Double.class, Cluster::getRootLat, new TableCellRendererAdapter<>()),
             Column.readonly("rootLon", Double.class, Cluster::getRootLon, new TableCellRendererAdapter<>()));
 
 
-    public ClusterTableModel(List<Cluster> data) {
+    public ClusterTableModel(Collection<Cluster> data) {
         super(data);
     }
 

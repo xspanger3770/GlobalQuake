@@ -28,7 +28,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private Point dragStart;
     private Point lastMouse;
 
-    private Date dragStartTime;
+    private long dragStartTime;
 
     private final LinkedList<Double> recentSpeeds = new LinkedList<>();
     private final int maxRecentSpeeds = 20; // a smaller number will average more of the end of the drag
@@ -88,15 +88,14 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 if (!_interactionAllowed()) {
                     return;
                 }
-                if (dragStart == null) {
+                if (dragStart == null || dragStartTime == 0) {
                     return;
                 }
 
                 double deltaX = (lastMouse.getX() - dragStart.getX());
                 double deltaY = (lastMouse.getY() - dragStart.getY());
 
-                Date now = new Date();
-                long timeElapsed = now.getTime() - dragStartTime.getTime();
+                long timeElapsed = System.currentTimeMillis() - dragStartTime;
 
                 // to prevent Infinity/NaN glitch
                 if (timeElapsed > 5) {
@@ -113,7 +112,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 centerLat = Math.max(-90, Math.min(90, dragStartLat + deltaY * 0.10 * scroll / (createRenderProperties().height / 1000.0)));
 
                 renderer.updateCamera(createRenderProperties());
-                repaint();
             }
         });
         addMouseListener(new MouseAdapter() {
@@ -121,7 +119,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             @Override
             public void mousePressed(MouseEvent e) {
                 mouseDown = true;
-                dragStartTime = new Date();
+                dragStartTime = System.currentTimeMillis();
                 spinSpeed = 0; //Prevent Jittering
 
                 dragStart = e.getPoint();
@@ -173,7 +171,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
 
             renderer.updateCamera(createRenderProperties());
-            repaint();
         });
 
         addComponentListener(new ComponentAdapter() {
@@ -194,7 +191,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsJP, 0, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsNZ, 0, 0.5));
         renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsHW, 0, 0.5));
-        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsIT, 0, 0.25));
+        renderer.addFeature(new FeatureGeoPolygons(Regions.raw_polygonsIT, 0, 0.20));
     }
 
     private void animationThread() {
@@ -220,7 +217,9 @@ public class GlobePanel extends JPanel implements GeoUtils {
             return;
         }
 
-        int steps = 250;
+        int fps = Settings.fpsIdle;
+
+        int steps = fps * 5;
         final int[] step = {0};
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -262,7 +261,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 step[0]++;
             }
-        }, 0, 20);
+        }, 0, 1000 / fps);
 
         try {
             // Block the main thread until the animation is finished to avoid multiple animations running at once
@@ -325,8 +324,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private double calculateSpin() {
-        Date now = new Date();
-        long timeElapsed = now.getTime() - dragStartTime.getTime();
+        long timeElapsed = System.currentTimeMillis() - dragStartTime;
 
         //If the user has been dragging for more than 300ms, don't spin
         if (timeElapsed > 300) {
@@ -386,8 +384,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
     private void handleClick(int x, int y) {
         ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
-            for (RenderEntity<?> e : feature.getEntities()) {
-                Point2D centerCoords = feature.getCenterCoords(e);
+            for (RenderEntity<?> entity : feature.getEntities()) {
+                if(!feature.isEntityVisible(entity)){
+                    continue;
+                }
+                Point2D centerCoords = feature.getCenterCoords(entity);
                 if (centerCoords != null) {
                     Vector3D pos = new Vector3D(GlobeRenderer.getX_3D(centerCoords.x, centerCoords.y, 0),
                             GlobeRenderer.getY_3D(centerCoords.x, centerCoords.y, 0), GlobeRenderer.getZ_3D(centerCoords.x, centerCoords.y, 0));
@@ -400,7 +401,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                     double distOnScreen = Math.sqrt(Math.pow(centerProjected.x - x, 2) + Math.pow(centerProjected.y - y, 2));
                     if (distOnScreen <= 10) {
                         synchronized (clicked) {
-                            clicked.add(e);
+                            clicked.add(entity);
                         }
                     }
                 }
@@ -423,6 +424,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
     public void spinThread() {
         java.util.Timer timer = new Timer();
+
         timer.schedule(new TimerTask() {
             public void run() {
                 try {
@@ -450,7 +452,6 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 centerLon += Math.abs(spinSpeed) * spinDirection;
                 renderer.updateCamera(createRenderProperties());
-                repaint();
             }
         }, 0, 10);
     }

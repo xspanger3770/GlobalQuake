@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 
 public class DebugSettingsPanel extends SettingsPanel {
 
-    private final JCheckBox chkBoxClusters;
     private final JCheckBox chkBoxReports;
     private final JCheckBox chkBoxCoreWaves;
     private final JCheckBox chkBoxConfidencePolygons;
@@ -17,7 +16,6 @@ public class DebugSettingsPanel extends SettingsPanel {
     public DebugSettingsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(5,5,5,5));
-        add(chkBoxClusters = new JCheckBox("Display Clusters", Settings.displayClusters));
 
         add(chkBoxReports = new JCheckBox("Enable Earthquake Reports", Settings.reportsEnabled));
         add(new JLabel("     Reports will be stored in %s".formatted(EarthquakeReporter.ANALYSIS_FOLDER.getPath())));
@@ -28,7 +26,6 @@ public class DebugSettingsPanel extends SettingsPanel {
 
     @Override
     public void save() {
-        Settings.displayClusters = chkBoxClusters.isSelected();
         Settings.reportsEnabled = chkBoxReports.isSelected();
         Settings.displayCoreWaves = chkBoxCoreWaves.isSelected();
         Settings.confidencePolygons = chkBoxConfidencePolygons.isSelected();

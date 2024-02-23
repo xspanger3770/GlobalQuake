@@ -121,7 +121,7 @@ public class DatabaseMonitorFrame extends GQFrame {
 
         JButton btnSettings = new JButton("Settings");
         buttonsPanel.add(btnSettings);
-        btnSettings.addActionListener(actionEvent -> new SettingsFrame(DatabaseMonitorFrame.this).setVisible(true));
+        btnSettings.addActionListener(actionEvent -> new SettingsFrame(DatabaseMonitorFrame.this, false).setVisible(true));
 
         btnSelectStations = new JButton("Select Stations");
         btnSelectStations.setEnabled(false);
