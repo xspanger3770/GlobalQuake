@@ -22,8 +22,7 @@ GlobalQuake is an experimental Java application that can be used to monitor eart
 
 It enables selection of seismic stations downloaded from publicly available seismic networks via `fdsnws services` supllied by real time data from publicly available `seedlink servers`.\
 The program uses this data to detect earthquakes and visualize them on an interactive 3D globe.\
-It can also, estimate the earthquake magnitude using various numerical estimation methods, ~~but at the moment it can only work for small and medium size earthquakes, up to magnitude 5 or 6.~~
-that are capable of estimating the magnitude reasonably accurately for nearly any earthquake size (most accurate up to M8 though)
+It can also, estimate the earthquake magnitude using some empirical methods, but at the moment it can only work for small and medium size earthquakes, up to magnitude 5 or 6.
 
 > [!IMPORTANT]<br>
 > Please keep in mind that GlobalQuake is still very experimental and should only be used for entertainment purposes, as the displayed information can be inaccurate or completly wrong.\
@@ -49,8 +48,7 @@ that are capable of estimating the magnitude reasonably accurately for nearly an
 
 - The system requirements will scale by the number of stations you select. This includes RAM, CPU and network usage.
 - You can run GlobalQuake on slower system only to monitor earthquakes in your local area, or if your system can handle it, select hundreds or even thousands of stations around the world.
-- Roughly speaking, ~~4GB of RAM~~, 6 CPU cores and 5Mbit network connection should be enough to handle about 1000 stations.
-- Update: beginning from version 0.11.0, only around 2GB of RAM is required for running 5000 stations.
+- Roughly speaking, 4GB of RAM, 6 CPU cores and 5Mbit network connection should be enough to handle about 1000 stations.
 - If GlobalQuake starts lagging heavily or even crashes after a few minutes, it is probably due to insufficient RAM in your system, and you need to select fewer stations.
 
 ## Installing
