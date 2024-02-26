@@ -17,20 +17,13 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 public class EarthquakeListPanel extends JPanel {
     private double scroll = 0;
     protected int mouseY = -999;
-
-    // Array to track opened event panels
-    private boolean[] quakePanelsOpened; 
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
@@ -47,16 +40,12 @@ public class EarthquakeListPanel extends JPanel {
         return archivedQuakes.stream().filter(ArchivedQuake::shouldBeDisplayed).collect(Collectors.toList());
     }
 
-
-
     public EarthquakeListPanel(Frame parent, List<ArchivedQuake> archivedQuakes) {
         this.archivedQuakes = archivedQuakes;
         setBackground(Color.gray);
         setForeground(Color.gray);
 
         goUpRectangle = new Rectangle2D.Double(getWidth() / 2.0 - 30, 0, 60, 26);
-
-
 
         addMouseWheelListener(e -> {
             List<ArchivedQuake> filtered = getFiltered();
@@ -76,44 +65,31 @@ public class EarthquakeListPanel extends JPanel {
             }
         });
 
-         // Initialize the array with all values set to false
-        quakePanelsOpened = new boolean[archivedQuakes.size()];
-        Arrays.fill(quakePanelsOpened, false);
-
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 int y = e.getY();
                 int i = (int) ((y + scroll) / cell_height);
                 List<ArchivedQuake> filtered = getFiltered();
-                if (filtered == null || i < 0 || i >= filtered.size()) {
+                if (filtered == null || i < 0 || i >=filtered.size()) {
                     return;
                 }
 
                 ArchivedQuake quake = filtered.get(i);
+
                 if (quake != null && e.getButton() == MouseEvent.BUTTON3 && !isMouseInGoUpRect) {
                     quake.setWrong(!quake.isWrong());
-                } 
+                }
 
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (isMouseInGoUpRect) {
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    if(isMouseInGoUpRect) {
                         scroll = 0;
-                    } else if (quake != null && !quakePanelsOpened[i]) {
-                        // Set the corresponding element in the array to true
-                        quakePanelsOpened[i] = true;
-                        ArchivedQuakeUI quakeUI = new ArchivedQuakeUI(parent, quake);
-                        quakeUI.addWindowListener(new WindowAdapter() {
-                            @Override
-                            public void windowClosing(WindowEvent e) {
-                                // Set the corresponding element in the array to false when the window is closed
-                                quakePanelsOpened[i] = false;
-                            }
-                        });
-                        quakeUI.setVisible(true);
+                    }else if (quake != null ) {
+                        new ArchivedQuakeUI(parent, quake).setVisible(true);
                     }
                 }
 
-                if (e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
+                if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
                     new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
             }
@@ -131,9 +107,6 @@ public class EarthquakeListPanel extends JPanel {
                 isMouseInGoUpRect = goUpRectangle.contains(e.getPoint());
             }
         });
-
-        
-
     }
 
     @Override
@@ -265,4 +238,3 @@ public class EarthquakeListPanel extends JPanel {
     }
 
 }
-

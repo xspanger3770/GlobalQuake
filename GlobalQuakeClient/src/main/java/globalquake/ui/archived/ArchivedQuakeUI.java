@@ -10,13 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 public class ArchivedQuakeUI extends JDialog {
-
-    // boolean for keeping track of animation windows open
-    private boolean animOpen = false;
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
@@ -48,22 +42,7 @@ public class ArchivedQuakeUI extends JDialog {
         animButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (!animOpen) {
-                    ArchivedQuakeAnimation animation = new ArchivedQuakeAnimation(parent, quake);
-                    animation.setVisible(true);
-        
-                    // Add a window listener to handle the closing event
-                    animation.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowClosing(WindowEvent e) {
-                            // Set the boolean to false when the window is closing
-                            animOpen = false;
-                        }
-                    });
-        
-                    // Set the boolean to true since the animation window is open
-                    animOpen = true;
-                }
+                new ArchivedQuakeAnimation(parent, quake).setVisible(true);
             }
         });
 
@@ -94,4 +73,3 @@ public class ArchivedQuakeUI extends JDialog {
         setResizable(false);
     }
 }
-
