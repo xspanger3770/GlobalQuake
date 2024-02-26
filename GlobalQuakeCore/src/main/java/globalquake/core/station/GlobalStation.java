@@ -87,13 +87,12 @@ public class GlobalStation extends AbstractStation {
 
 		getAnalysis().analyse(record);
 		GlobalQuake.instance.getEventHandler().fireEvent(new SeedlinkDataEvent(this, record));
-		GlobalQuake.instance.getSeedlinkReader().logRecord(record.getLastSampleBtime().toInstant().toEpochMilli());
 	}
 
 
 	private boolean isTimeValid(DataRecord record) {
-		Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
-		Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
+		Instant latest = Instant.ofEpochMilli(GlobalQuake.instance.currentTimeMillis()).plus(16, ChronoUnit.SECONDS);
+		Instant earliest = Instant.ofEpochMilli(GlobalQuake.instance.currentTimeMillis()).minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
 		return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
 	}
 

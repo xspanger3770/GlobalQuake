@@ -10,11 +10,13 @@ public class GlobalQuakeEventListener {
 
     public void onQuakeUpdate(QuakeUpdateEvent event) {}
 
-    public void onQuakeRemove(QuakeRemoveEvent quakeRemoveEvent) {}
+    public void onQuakeRemove(QuakeRemoveEvent event) {}
 
-    public void onQuakeArchive(QuakeArchiveEvent quakeArchiveEvent) {}
+    public void onQuakeArchive(QuakeArchiveEvent event) {}
 
-    public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {}
+    public void onNewData(SeedlinkDataEvent event) {}
 
-    public void onClusterLevelup(ClusterLevelUpEvent clusterLevelUpEvent) {}
+    public void onClusterLevelup(ClusterLevelUpEvent event) {}
+
+    public void onQuakeReport(QuakeReportEvent event) {}
 }

@@ -21,13 +21,11 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
 import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
 import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -49,12 +47,13 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             for (Earthquake earthquake : getEarthquakes()) {
                 if (shouldRemove(earthquake, 0)) {
                     toRemove.add(earthquake);
-                    clientEarthquakeMap.remove(earthquake.getUuid());
                     GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake));
                 }
             }
 
             getEarthquakes().removeAll(toRemove);
+
+            clientEarthquakeMap.entrySet().removeIf(kv -> shouldRemove(kv.getValue(), -30));
         } catch(Exception e) {
             Logger.error(e);
         }
@@ -144,7 +143,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             hypocenter.mags = new ArrayList<>();
 
             for(Float mag : advancedHypocenterData.magsData()){
-                hypocenter.mags.add(new MagnitudeReading(mag, 0));
+                hypocenter.mags.add(new MagnitudeReading(mag, 0,55555, InputType.VELOCITY));
             }
         }
 

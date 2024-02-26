@@ -28,6 +28,7 @@ public class Cluster implements Warnable {
 	private Earthquake earthquake;
 	private Hypocenter previousHypocenter;
 
+	private Hypocenter lastValidHypocenter;
 	private int level;
 
 	public int lastEpicenterUpdate;
@@ -80,8 +81,15 @@ public class Cluster implements Warnable {
 		return previousHypocenter;
 	}
 
-	public void setPreviousHypocenter(Hypocenter previousHypocenter) {
-		this.previousHypocenter = previousHypocenter;
+	public void setPreviousHypocenter(Hypocenter hypocenter) {
+		this.previousHypocenter = hypocenter;
+		if(hypocenter != null){
+			lastValidHypocenter = hypocenter;
+		}
+	}
+
+	public Hypocenter getLastValidHypocenter() {
+		return lastValidHypocenter;
 	}
 
 	public UUID getUuid() {
@@ -306,5 +314,6 @@ public class Cluster implements Warnable {
 	public void updateRoot(double rootLat, double rootLon) {
 		this.rootLat = rootLat;
 		this.rootLon = rootLon;
+		lastUpdate = GlobalQuake.instance == null ? System.currentTimeMillis() : GlobalQuake.instance.currentTimeMillis();
 	}
 }

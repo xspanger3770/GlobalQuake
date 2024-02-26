@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 
 public class Regions {
     public static final String UNKNOWN_REGION = "Unknown Region";
-    public static final List<org.geojson.Polygon> raw_polygonsUHD = new ArrayList<>();
-    public static final List<org.geojson.Polygon> raw_polygonsHD = new ArrayList<>();
-    public static final List<org.geojson.Polygon> raw_polygonsMD = new ArrayList<>();
-    public static final List<org.geojson.Polygon> raw_polygonsHDFiltered = new ArrayList<>();
-    public static final List<org.geojson.Polygon> raw_polygonsUHDFiltered = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsUHD = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsHD = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsMD = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsHDFiltered = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsUHDFiltered = new ArrayList<>();
 
     public static final List<Region> regionsMD = new ArrayList<>();
     public static final List<Region> regionsHD = new ArrayList<>();
@@ -38,20 +38,20 @@ public class Regions {
 
     public static boolean enabled = true;
     public static final List<Region> regionsUS = new ArrayList<>();
-    public static final List<Polygon> raw_polygonsUS = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsUS = new ArrayList<>();
 
     public static final List<String> NONE = List.of();
-    public static final List<Polygon> raw_polygonsAK = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsAK = new ArrayList<>();
     public static final List<Region> regionsAK = new ArrayList<>();
-    public static final List<Polygon> raw_polygonsJP = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsJP = new ArrayList<>();
     public static final List<Region> regionsJP = new ArrayList<>();
 
-    public static final List<Polygon> raw_polygonsNZ = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsNZ = new ArrayList<>();
     public static final List<Region> regionsNZ = new ArrayList<>();
-    public static final List<Polygon> raw_polygonsHW = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsHW = new ArrayList<>();
     public static final List<Region> regionsHW = new ArrayList<>();
 
-    public static final List<Polygon> raw_polygonsIT = new ArrayList<>();
+    public static final List<GQPolygon> raw_polygonsIT = new ArrayList<>();
     public static final List<Region> regionsIT = new ArrayList<>();
 
     private static final List<Region> regionSearchHD = new ArrayList<>();
@@ -76,6 +76,11 @@ public class Regions {
             regionSearchHD.addAll(list);
         }
 
+        //loadLookupTable();
+    }
+
+    @SuppressWarnings("unused")
+    private static void loadLookupTable() throws IOException {
         shorelineLookup = LookupTableIO.importLookupTableFromFile();
 
         if(shorelineLookup == null){
@@ -91,7 +96,6 @@ public class Regions {
                 System.err.println("Failed to export lookup table!");
             }
         }
-
     }
 
 
@@ -126,15 +130,17 @@ public class Regions {
         double closestDistance = Double.MAX_VALUE;
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regionsUHD) {
-            for(Path2D.Double path : reg.paths()){
+            for(Path2D.Float path : reg.paths()){
                 if(path.contains(point)){
                     return depth;
                 }
             }
-            for (Polygon polygon : reg.raws()) {
-                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                    double dist = gcd ? GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon) :
-                            GeoUtils.geologicalDistance(lat, lon, -depth, pos.getLatitude(), pos.getLongitude(), 0);
+            for (GQPolygon polygon : reg.raws()) {
+                for(int i = 0; i < polygon.getSize(); i++) {
+                    double pLat = polygon.getLats()[i];
+                    double pLon = polygon.getLons()[i];
+                    double dist = gcd ? GeoUtils.greatCircleDistance(pLat, pLon, lat, lon) :
+                            GeoUtils.geologicalDistance(lat, lon, -depth, pLat, pLon, 0);
                     if (dist < closestDistance) {
                         closestDistance = dist;
                     }
@@ -154,7 +160,7 @@ public class Regions {
         Point2D.Double point = new Point2D.Double(lng, lat);
         for (Region reg : regions) {
             int i = 0;
-            for (Path2D.Double path : reg.paths()) {
+            for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
                     if(path.contains(point)) {
                         return false;
@@ -171,7 +177,7 @@ public class Regions {
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regions) {
             int i = 0;
-            for (Path2D.Double path : reg.paths()) {
+            for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
                     if(path.contains(point)) {
                         return reg.name();
@@ -200,17 +206,21 @@ public class Regions {
             return extendedName;
         }
 
-        LngLatAlt closestPoint = null;
+        float closestLat = 0;
+        float closestLon = 0;
         String closest = "Unknown";
         double closestDistance = Double.MAX_VALUE;
         for (Region reg : regionsMD) {
-            for (Polygon polygon : reg.raws()) {
-                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+            for (GQPolygon polygon : reg.raws()) {
+                for(int i = 0; i < polygon.getSize(); i++) {
+                    float pLat = polygon.getLats()[i];
+                    float pLon = polygon.getLons()[i];
+                    double dist = GeoUtils.greatCircleDistance(pLat, pLon, lat, lon);
                     if (dist < closestDistance) {
                         closestDistance = dist;
                         closest = reg.name();
-                        closestPoint = pos;
+                        closestLat = pLat;
+                        closestLon = pLon;
                     }
                 }
             }
@@ -218,8 +228,8 @@ public class Regions {
 
         String closestNameExtended = closest;
 
-        if(closestPoint != null) {
-            String closestExtended = getExtendedName(closestPoint.getLatitude(), closestPoint.getLongitude());
+        if(closestDistance != Double.MAX_VALUE) {
+            String closestExtended = getExtendedName(closestLat, closestLon);
             if(closestExtended != null){
                 closestNameExtended = closestExtended;
             }
@@ -245,9 +255,11 @@ public class Regions {
 
         double closestDistance = Double.MAX_VALUE;
         for (Region reg : regionsMD) {
-            for (Polygon polygon : reg.raws()) {
-                for (LngLatAlt pos : polygon.getCoordinates().get(0)) {
-                    double dist = GeoUtils.greatCircleDistance(pos.getLatitude(), pos.getLongitude(), lat, lon);
+            for (GQPolygon polygon : reg.raws()) {
+                for(int i = 0; i < polygon.getSize(); i++) {
+                    float pLat = polygon.getLats()[i];
+                    float pLon = polygon.getLons()[i];
+                    double dist = GeoUtils.greatCircleDistance(pLat, pLon, lat, lon);
                     if (dist < closestDistance) {
                         closestDistance = dist;
                     }
@@ -400,7 +412,7 @@ public class Regions {
         }
     }
 
-    public static void parseGeoJson(String path, List<Polygon> raw, List<Region> regions, List<String> remove) throws IOException {
+    public static void parseGeoJson(String path, List<GQPolygon> raw, List<Region> regions, List<String> remove) throws IOException {
         URL resource = ClassLoader.getSystemClassLoader().getResource(path);
         if (resource == null) {
             throw new IOException("Unable to load polygons: %s".formatted(path));
@@ -421,16 +433,16 @@ public class Regions {
 
             GeoJsonObject o = f.getGeometry();
             if (o instanceof Polygon pol) {
-                ArrayList<Path2D.Double> paths = new ArrayList<>();
-                ArrayList<Polygon> raws = new ArrayList<>();
+                ArrayList<Path2D.Float> paths = new ArrayList<>();
+                ArrayList<GQPolygon> raws = new ArrayList<>();
 
-                raws.add(pol);
+                raws.add(new GQPolygon(pol));
                 paths.add(toPath(pol));
 
                 if (raw != null) {
-                    raw.add(pol);
+                    raw.add(new GQPolygon(pol));
                 }
-                regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+                regions.add(new Region(name, paths, paths.stream().map(Path2D.Float::getBounds2D).collect(Collectors.toList()), raws));
             } else if (o instanceof MultiPolygon mp) {
                 createRegion(regions, mp, name);
 
@@ -438,7 +450,7 @@ public class Regions {
                 for (List<List<LngLatAlt>> polygon : polygons) {
                     org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
                     if (raw != null) {
-                        raw.add(pol);
+                        raw.add(new GQPolygon(pol));
                     }
                 }
             }
@@ -459,19 +471,19 @@ public class Regions {
     }
 
     private static void createRegion(List<Region> regions, MultiPolygon mp, String name) {
-        List<Path2D.Double> paths = new ArrayList<>();
+        List<Path2D.Float> paths = new ArrayList<>();
         List<List<List<LngLatAlt>>> polygons = mp.getCoordinates();
-        List<Polygon> raws = new ArrayList<>();
+        List<GQPolygon> raws = new ArrayList<>();
         for (List<List<LngLatAlt>> polygon : polygons) {
             org.geojson.Polygon pol = new org.geojson.Polygon(polygon.get(0));
             paths.add(toPath(pol));
-            raws.add(pol);
+            raws.add(new GQPolygon(pol));
         }
-        regions.add(new Region(name, paths, paths.stream().map(Path2D.Double::getBounds2D).collect(Collectors.toList()), raws));
+        regions.add(new Region(name, paths, paths.stream().map(Path2D.Float::getBounds2D).collect(Collectors.toList()), raws));
     }
 
-    private static java.awt.geom.Path2D.Double toPath(Polygon polygon) {
-        Path2D.Double path = new Path2D.Double();
+    private static Path2D.Float toPath(Polygon polygon) {
+        Path2D.Float path = new Path2D.Float();
 
         int i = 0;
         for (LngLatAlt pos : polygon.getCoordinates().get(0)) {

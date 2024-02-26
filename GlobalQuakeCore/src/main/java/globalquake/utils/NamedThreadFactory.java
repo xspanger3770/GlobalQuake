@@ -1,5 +1,6 @@
 package globalquake.utils;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadFactory;
 
 public class NamedThreadFactory implements ThreadFactory {
@@ -11,7 +12,7 @@ public class NamedThreadFactory implements ThreadFactory {
 	}
 
 	@Override
-	public Thread newThread(Runnable r) {
+	public Thread newThread(@Nonnull Runnable r) {
 		Thread t = new Thread(r);
 		t.setName(name);
 		return t;

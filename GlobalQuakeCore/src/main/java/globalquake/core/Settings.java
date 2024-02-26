@@ -39,6 +39,8 @@ public final class Settings {
 
     public static final double hypocenterDetectionResolutionDefault = 40;
     public static Double hypocenterDetectionResolution;
+    public static final double hypocenterDetectionResolutionGPUDefault = 100;
+    public static Double hypocenterDetectionResolutionGPU;
 
     public static Boolean parallelHypocenterLocations;
     public static final int minimumStationsForEEWDefault = 5;
@@ -151,9 +153,30 @@ public final class Settings {
     public static Integer eewLevelIndex;
     public static Integer qualityFilter;
     public static Integer eewClusterLevel;
+    @SuppressWarnings("unused")
     public static String FDSNWSEventIP;
+    @SuppressWarnings("unused")
     public static Integer FDSNWSEventPort;
+    @SuppressWarnings("unused")
     public static Boolean autoStartFDSNWSEventServer;
+    @SuppressWarnings("unused")
+    public static Double shakemapQualityOffset;
+    @SuppressWarnings("unused")
+    public static Boolean discordBotEnabled;
+    @SuppressWarnings("unused")
+    public static String discordBotToken;
+    @SuppressWarnings("unused")
+    public static String discordBotGuildID;
+    @SuppressWarnings("unused")
+    public static String discordBotChannelID;
+    @SuppressWarnings("unused")
+    public static Boolean discordBotSendRevisions;
+    public static Boolean hideClustersWithQuake;
+    public static Boolean antialiasingQuakes;
+    public static Boolean antialiasingOldQuakes;
+    public static Boolean antialiasingClusters;
+    @SuppressWarnings("unused")
+    public static Boolean debugSendPGV;
 
     static {
         load();
@@ -172,6 +195,19 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
+        loadProperty("debugSendPGV", "false");
+        loadProperty("antialiasingOldQuakes", "true");
+        loadProperty("antialiasingClusters", "true");
+        loadProperty("antialiasingQuakes", "true");
+
+        loadProperty("discordBotSendRevisions", "false");
+        loadProperty("discordBotChannelID", "insert");
+        loadProperty("discordBotGuildID", "insert");
+        loadProperty("discordBotToken", "insert");
+        loadProperty("discordBotEnabled", "false");
+
+        loadProperty("shakemapQualityOffset", "0.0",
+                o -> validateDouble(-4.0, 4.0, (Double) o));
         loadProperty("eewClusterLevel", "2",
                 o -> validateInt(0, Cluster.MAX_LEVEL, (Integer) o));
         loadProperty("qualityFilter", String.valueOf(QualityClass.D.ordinal()),
@@ -259,6 +295,7 @@ public final class Settings {
 
         loadProperty("reportsEnabled", "false");
         loadProperty("displayClusterRoots", "false");
+        loadProperty("hideClustersWithQuake", "false");
         loadProperty("displayClusters", "false");
         loadProperty("selectedDateFormatIndex", "0", o -> validateInt(0, DATE_FORMATS.length - 1, (Integer) o));
         loadProperty("stationIntensityVisibilityZoomLevel", "0.2", o -> validateDouble(0, 10, (Double) o));
@@ -274,12 +311,13 @@ public final class Settings {
         loadProperty("pWaveInaccuracyThreshold", String.valueOf(pWaveInaccuracyThresholdDefault));
         loadProperty("hypocenterCorrectThreshold", String.valueOf(hypocenterCorrectThresholdDefault));
         loadProperty("hypocenterDetectionResolution", String.valueOf(hypocenterDetectionResolutionDefault));
+        loadProperty("hypocenterDetectionResolutionGPU", String.valueOf(hypocenterDetectionResolutionGPUDefault));
         loadProperty("minimumStationsForEEW", String.valueOf(minimumStationsForEEWDefault));
         loadProperty("useOldColorScheme", "false");
         loadProperty("parallelHypocenterLocations", "true");
         loadProperty("displayHomeLocation", "true");
         loadProperty("antialiasing", "false");
-        loadProperty("fpsIdle", "30", o -> validateInt(1, 300, (Integer) o));
+        loadProperty("fpsIdle", "60", o -> validateInt(1, 300, (Integer) o));
         loadProperty("intensityScaleIndex", "0", o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));
         loadProperty("oldEventsTimeFilterEnabled", "false");
         loadProperty("oldEventsTimeFilter", "24.0", o -> validateDouble(0, 24 * 365, (Double) o));

@@ -1,6 +1,7 @@
 package globalquake.utils;
 
 import globalquake.core.Settings;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,7 +14,7 @@ public class Scale {
 	public static final double RATIO_THRESHOLD = 50_000.0;
 	public static final double EXPONENT = 0.25;
 
-	public static final boolean ENABLE_INTERPOLATION = true;
+	public static final boolean ENABLE_INTERPOLATION = false;
 
 	private static BufferedImage pgaScale;
 	public static void load() throws IOException, NullPointerException {
@@ -29,12 +30,14 @@ public class Scale {
 		return new Color(pgaScale.getRGB(0, Math.max(0, Math.min(pgaScale.getHeight() - 1, i))));
 	}
 
+	private static final double K = FastMath.pow(RATIO_THRESHOLD, EXPONENT);
+
 	public static Color getColorRatioNew(double ratio) {
 		if(ratio < 1){
 			return new Color(pgaScale.getRGB(0, 0));
 		}
 
-		double pct = Math.pow(ratio - 1.0, EXPONENT) / Math.pow(RATIO_THRESHOLD, EXPONENT);
+		double pct = Math.pow(ratio - 1.0, EXPONENT) / K;
 
 		int i1 = (int)(pct * (pgaScale.getHeight() - 1));
 		int i2 = i1 + 1;

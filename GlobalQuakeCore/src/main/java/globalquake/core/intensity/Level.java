@@ -7,19 +7,18 @@ public final class Level {
     private final String suffix;
     private final double pga;
     private final Color color;
+    private final String fullName;
 
     public Level(String name, String suffix, double pga, Color color) {
         this.name = name;
         this.suffix = suffix;
         this.pga = pga;
         this.color = color;
+        this.fullName = "%s%s".formatted(getName(), getSuffix());
     }
 
     public Level(String name, double pga, Color color) {
-        this.name = name;
-        this.suffix = "";
-        this.pga = pga;
-        this.color = color;
+        this(name, "", pga, color);
     }
 
     public String getName() {
@@ -38,8 +37,12 @@ public final class Level {
         return suffix;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
     @Override
     public String toString() {
-        return "%s%s".formatted(getName(), getSuffix());
+        return fullName;
     }
 }

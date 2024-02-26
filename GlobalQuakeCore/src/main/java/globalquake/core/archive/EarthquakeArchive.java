@@ -127,6 +127,10 @@ public class EarthquakeArchive {
 			archivedQuakes.remove(toRemove);
 			uuidArchivedQuakeMap.remove(toRemove.getUuid());
 		}
+
+		if(archivedQuakes.size() != uuidArchivedQuakeMap.size()){
+			Logger.error("Possible memory leak: %d archived quake, but %d in map".formatted(archivedQuakes.size(), uuidArchivedQuakeMap.size()));
+		}
 	}
 
 	public ArchivedQuake getArchivedQuakeByUUID(UUID uuid){

@@ -8,6 +8,7 @@ import globalquake.core.intensity.IntensityScales;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.Instant;
@@ -24,6 +25,8 @@ public class GeneralSettingsPanel extends SettingsPanel {
 	private JComboBox<DistanceUnit> distanceUnitJComboBox;
 	private JComboBox<ZoneId> timezoneCombobox;
 
+	private JSlider sliderStoreTime;
+
 	public GeneralSettingsPanel(SettingsFrame settingsFrame) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -31,8 +34,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		//createAlertsDialogSettings();
 		add(createIntensitySettingsPanel());
 		createOtherSettings(settingsFrame);
-
-		fill(this, 12);
+		add(createSettingStoreTime());
 	}
 
 	private void createOtherSettings(SettingsFrame settingsFrame) {
@@ -161,6 +163,26 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		add(outsidePanel);
 	}
 
+	private Component createSettingStoreTime() {
+		sliderStoreTime = HypocenterAnalysisSettingsPanel.createSettingsSlider(2, 20, 2, 1);
+
+		JLabel label = new JLabel();
+		ChangeListener changeListener = changeEvent -> label.setText("Waveform data storage time (minutes): %d".formatted(
+				sliderStoreTime.getValue()));
+
+		sliderStoreTime.addChangeListener(changeListener);
+
+		sliderStoreTime.setValue(Settings.logsStoreTimeMinutes);
+		changeListener.stateChanged(null);
+
+		return HypocenterAnalysisSettingsPanel.createCoolLayout(sliderStoreTime, label, "5",
+				"""
+                        In GlobalQuake, waveform data poses the highest demand on your system's RAM.
+                        If you're encountering memory constraints, you have two options:
+                        either reduce the number of selected stations or lower this specific value.
+                        """);
+	}
+
 	private JPanel createIntensitySettingsPanel() {
 		JPanel panel = new JPanel(new GridLayout(2,1));
 		panel.setBorder(BorderFactory.createTitledBorder("Intensity Scale"));
@@ -190,6 +212,7 @@ public class GeneralSettingsPanel extends SettingsPanel {
 		Settings.displayHomeLocation = chkBoxHomeLoc.isSelected();
 		Settings.distanceUnitsIndex = distanceUnitJComboBox.getSelectedIndex();
 		Settings.timezoneStr = ((ZoneId) Objects.requireNonNull(timezoneCombobox.getSelectedItem())).getId();
+		Settings.logsStoreTimeMinutes = sliderStoreTime.getValue();
 	}
 
 	@Override

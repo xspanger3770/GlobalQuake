@@ -74,7 +74,8 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
         Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
-        return GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
+        return (!Settings.hideClustersWithQuake && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME * 5) ||
+                GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
     }
 
     @Override
@@ -90,7 +91,10 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         }
 
         graphics.setStroke(new BasicStroke(1f));
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if(Settings.antialiasingClusters) {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
 
         graphics.setColor(getColorLevel(entity.getOriginal().getLevel()));
         graphics.fill(elementRoot.getShape());

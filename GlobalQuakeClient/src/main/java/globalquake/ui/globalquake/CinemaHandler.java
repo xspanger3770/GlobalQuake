@@ -37,6 +37,8 @@ public class CinemaHandler {
 
     private final Map<Warnable, Warning> warnings = new ConcurrentHashMap<>();
     private final ScheduledExecutorService cinemaTargetService = Executors.newSingleThreadScheduledExecutor();
+    private Earthquake lastEarthquake = null;
+    private Cluster lastCluster = null;
 
     public CinemaHandler(GlobePanel globePanel) {
         this.globePanel = globePanel;
@@ -174,8 +176,6 @@ public class CinemaHandler {
         return false;
     }
 
-    private Earthquake lastEarthquake = null;
-    private Cluster lastCluster = null;
 
     private CinemaTarget selectNextTarget() {
         CinemaTarget result = new CinemaTarget(Settings.homeLat, Settings.homeLon, 0.5 / (Settings.cinemaModeZoomMultiplier / 100.0), 0, null);
@@ -248,5 +248,12 @@ public class CinemaHandler {
         priority += pgaHome * 2000.0;
 
         return new CinemaTarget(earthquake.getLat(), earthquake.getLon(), zoom, priority, earthquake);
+    }
+
+    public void clear() {
+        warnings.clear();
+        lastTarget = null;
+        lastEarthquake = null;
+        lastCluster = null;
     }
 }
