@@ -3,14 +3,12 @@ package globalquake.ui.archived;
 import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedQuake;
 
-import javax.annotation.meta.When;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
-import java.util.ArrayList;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
