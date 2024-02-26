@@ -171,6 +171,11 @@ public final class Settings {
     public static String discordBotChannelID;
     @SuppressWarnings("unused")
     public static Boolean discordBotSendRevisions;
+
+    public static Boolean enableRTWSEventServer;
+    public static String RTWSEventIP;
+    public static Integer RTWSEventPort;
+
     public static Boolean hideClustersWithQuake;
     public static Boolean antialiasingQuakes;
     public static Boolean antialiasingOldQuakes;
@@ -242,6 +247,10 @@ public final class Settings {
         loadProperty("FDSNWSEventIP", "localhost"); //As a default, localhost is used for security.
         loadProperty("FDSNWSEventPort", "8080");
         loadProperty("autoStartFDSNWSEventServer", "false");
+
+        loadProperty("enableRTWSEventServer", "false");
+        loadProperty("RTWSEventIP", "localhost");
+        loadProperty("RTWSEventPort", "8081");
 
         loadProperty("shakingLevelScale", "0",
                 o -> validateInt(0, IntensityScales.INTENSITY_SCALES.length - 1, (Integer) o));

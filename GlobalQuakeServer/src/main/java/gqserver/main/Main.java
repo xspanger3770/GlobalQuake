@@ -13,6 +13,8 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
 import gqserver.bot.DiscordBot;
 import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
+import gqserver.websocketserver.JettyServer;
+
 
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
@@ -138,6 +140,7 @@ public class Main {
     }
 
     private static final double PHASES = 10.0;
+
     private static int phase = 0;
 
     public static void initAll() throws Exception{
@@ -169,6 +172,13 @@ public class Main {
             }catch (Exception e){
                 getErrorHandler().handleWarning(new RuntimeException("Unable to start FDSNWS EVENT server! Check logs for more info.", e));
             }
+        }
+      
+        //Start the WebSocket Server, if enabled
+        updateProgressBar("Starting WebSocket Server...", (int) ((phase++ / PHASES) * 100.0));
+        if(Settings.enableRTWSEventServer){
+            JettyServer.getInstance().init();
+            JettyServer.getInstance().start();
         }
 
         updateProgressBar("Starting Discord Bot...", (int) ((phase++ / PHASES) * 100.0));
