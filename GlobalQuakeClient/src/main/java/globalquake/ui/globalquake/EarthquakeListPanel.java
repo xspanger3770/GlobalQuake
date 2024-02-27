@@ -97,7 +97,7 @@ public class EarthquakeListPanel extends JPanel {
                     if(isMouseInGoUpRect) {
                         scroll = 0;
                     }
-                    else if (quake != null && !isOpened(quakeUuid) ) {
+                    else if (quake != null && !openedQuakes.contains(quakeUuid) ) {
                         // Create Instance of quakeUi panel
                         ArchivedQuakeUI quakeUi = new ArchivedQuakeUI(parent, quake);
                         // set the panel to be visible
@@ -136,23 +136,6 @@ public class EarthquakeListPanel extends JPanel {
                 isMouseInGoUpRect = goUpRectangle.contains(e.getPoint());
             }
         });
-    }
-
-    /**
-     * @author Chris Eberle
-     * @param UUID of an archived quake
-     * @return boolean representing whether a quakepanel is open
-     * 
-     * Compares the inputed id with all id's stored in openedquakes list
-    */
-    private boolean isOpened(UUID id) {
-        // loop through openedquakes
-        for( UUID i: openedQuakes) {
-            if( i == id) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
