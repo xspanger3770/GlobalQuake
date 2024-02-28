@@ -9,12 +9,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-public class DropConnectionHandler extends AbstractHandler {
-    /*
-        Defines a set of paths that are allowed to continue the chain of handlers
+/**
+    Defines a set of paths that are allowed to continue the chain of handlers
 
-        If the path is not allowed, close the connection abruptly
-     */
+    If the path is not allowed, close the connection abruptly
+
+    This is a basic security measure to prevent unwanted connections from using server resources
+ */
+public class DropConnectionHandler extends AbstractHandler {
 
     private static final String[] allowedPaths = {
         "/realtime_events/v1",

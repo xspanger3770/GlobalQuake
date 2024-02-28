@@ -12,12 +12,12 @@ import java.io.IOException;
 
 
 
-public class ErrorHandler extends AbstractHandler {
-    /*
-        Attempt to continue the chain of handlers
+/**
+    Attempt to continue the chain of handlers
 
-        If an exception is thrown, log the error and close the connection
-     */
+    If an exception is thrown, log the error and close the connection
+ */
+public class ErrorHandler extends AbstractHandler {
     private final Handler next;
 
     public ErrorHandler(Handler next) {

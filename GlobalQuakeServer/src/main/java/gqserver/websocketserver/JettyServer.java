@@ -1,32 +1,28 @@
 package gqserver.websocketserver;
 
 
-import java.util.EnumSet;
-import java.util.logging.Handler;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Response;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.eclipse.jetty.websocket.api.Session;
 
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.websocket.server.JettyWebSocketCreator;
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
-import org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter;
 
 import gqserver.websocketserver.handler_chain.DropConnectionHandler;
 import gqserver.websocketserver.handler_chain.ErrorHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
+
 
 // import globalquake.core.Settings;
 
@@ -36,12 +32,12 @@ public class JettyServer {
     private static final String host = "0.0.0.0";
 
 
-    private static Server server = null;
-    private static ServerConnector connector = null;
-    private static ServerEndpoint endpoint = null;
-
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
+    
     // private static InetSocketAddress address = new InetSocketAddress(Settings.RTWSEventIP, Settings.RTWSEventIP);
-
+    
+    private static Server server;
+    private static ServerConnector connector;
 
 
     //ALWAYS HAVE THIS LINE LAST SO OTHER STATIC VARIABLES ARE INITIALIZED
@@ -71,39 +67,37 @@ public class JettyServer {
         This is an init because it should only be called if the module is intended to be used. 
         Otherwise, it will be a waste of resources. Mainly registering the event callbacks
     */
-    public static void init() {
-        class EventEndpoint extends WebSocketAdapter
-        {
-            @Override
-            public void onWebSocketConnect(Session session)
-            {
-                super.onWebSocketConnect(session);
-                System.out.println("Socket Connected: " + session);
-
-                try
-                {
-                    session.getRemote().sendString("Hello Webbrowser");
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
+    public void init() {
+        if (instance.initialized.getAndSet(true)) {
+            return; //Already initialized. TODO: Log this
         }
+
 
         class EventEndpointCreator implements JettyWebSocketCreator
         {
             @Override
             public Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
             {
-                jettyServerUpgradeResponse.setHeader("Server", ServerHeader.SERVER_HEADER);
+                String ip = jettyServerUpgradeRequest.getHttpServletRequest().getRemoteAddr();
+                
+                int count = Clients.getInstance().getCountForIP(ip);
+                
+                if(!(count >= Clients.getInstance().getMaximumConnectionsPerUniqueIP())) {
+                    return new ServerEndpoint();
+                }
+                
+                //Attempt to kick the connection early if the IP has too many connections
+                try {
+                    //jettyServerUpgradeResponse.sendForbidden("Too many connections from this IP");
+                    
+                    System.out.println("Too many connections from " + ip);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                return new EventEndpoint();
+                return null;
             }
         }
-
-
-        
 
         /*
             This defines a chain of handlers that will be used to handle requests
@@ -138,15 +132,25 @@ public class JettyServer {
 
     }
 
-    private static void initWebSocket() {
-
-    }
     
-    public static void start() {
+    public void start() {
         // server.setHandler(contexts);
+
+        //call Clients.getInstance().DEBUG_SAVE_CONNECTION_COUNTS() every 3 seconds
+        Thread debugSaveConnectionCounts = new Thread(() -> {
+            while(true) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Clients.getInstance().DEBUG_SAVE_CONNECTION_COUNTS();
+            }
+        });
+        debugSaveConnectionCounts.start();
+
         try {
             server.start();
-            server.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,9 +163,5 @@ public class JettyServer {
             e.printStackTrace();
         }
     }
-    
-    public static void main(String[] args) {
-        JettyServer.init();
-        JettyServer.start();
-    }
+
 }
