@@ -5,6 +5,12 @@ import java.net.SocketAddress;
 
 import org.eclipse.jetty.websocket.api.Session;
 
+/*
+    BUG:
+    Using a scheduled executor to send pings will require a weak reference to the client object.
+    Otherwise, the client object will never be garbage collected, and the scheduled executor will continue to run.
+ */
+
 public class Client {
     private Session session;
     private String ip;

@@ -13,8 +13,13 @@ import org.tinylog.Logger;
  * If the number of connections exceeds the maximum limit, it logs a message and does not create a WebSocket instance.
  * A WebSocket not being returned will cause the connection to be closed.
  */
-class EventEndpointCreator_IPConnectionLimited implements JettyWebSocketCreator
+public class EventEndpointCreatorIPConnectionLimited implements JettyWebSocketCreator
 {
+
+    public EventEndpointCreatorIPConnectionLimited() {
+        super();
+    }
+
     @Override
     public Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
     {

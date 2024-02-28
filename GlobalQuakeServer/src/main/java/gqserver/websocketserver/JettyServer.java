@@ -1,10 +1,5 @@
 package gqserver.websocketserver;
 
-
-
-
-
-
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 
@@ -20,8 +15,7 @@ import globalquake.core.Settings;
 import gqserver.websocketserver.handler_chain.DropConnectionHandler;
 import gqserver.websocketserver.handler_chain.ErrorHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
-
-
+import gqserver.websocketserver.EventEndpointCreatorIPConnectionLimited;
 // import globalquake.core.Settings;
 
 
@@ -70,7 +64,7 @@ public class JettyServer {
         
 
         JettyWebSocketServletContainerInitializer.configure(context, (servletContext, wsContainer) -> {
-            wsContainer.addMapping("/realtime_events/v1", new EventEndpointCreator_IPConnectionLimited());
+            wsContainer.addMapping("/realtime_events/v1", new EventEndpointCreatorIPConnectionLimited());
         }); //This context will catch requests to /realtime_events/v1 and create a WebSocket instance if the IP is allowed to connect
 
         DropConnectionHandler dropConnectionHandler = new DropConnectionHandler(); //Drop connections if the path is not allowed
