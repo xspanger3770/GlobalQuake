@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.tinylog.Logger;
 
 
 
@@ -89,6 +90,8 @@ public class Clients {
     }
 
     public void clientDisconnected(String uniqueID) {
+        Logger.info("Client disconnected: " + uniqueID);
+
         Client client = clients.get(uniqueID);
         if(client == null) {
             return;
@@ -96,11 +99,10 @@ public class Clients {
 
         decrementConnectionCount(client.getIP());
         clients.remove(client.getUniqueID());
-
-        System.out.println("Client disconnected: " + uniqueID);
     }
 
     public void addClient(Client client) {
+        Logger.info("Client connected: " + client.getUniqueID());
 
         clients.put(client.getUniqueID(), client);
         incrementConnectionCount(client.getIP());

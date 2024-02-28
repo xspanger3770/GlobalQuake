@@ -2,6 +2,8 @@ package gqserver.websocketserver.handler_chain;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.tinylog.Logger;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +32,7 @@ public class ErrorHandler extends AbstractHandler {
             next.handle(target, baseRequest, request, response);
         } catch (Exception e) {
             // Log the error
-            e.printStackTrace();
+            Logger.error(e, "Error occurred while handling request");
 
             // Close the connection abruptly
             baseRequest.getHttpChannel().getEndPoint().close();

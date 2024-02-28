@@ -3,6 +3,8 @@ package gqserver.websocketserver.handler_chain;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.tinylog.Logger;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +38,7 @@ public class DropConnectionHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (!isAllowedPath(target)) {
-            System.out.println("Connection closed abruptly: " + target);
+            Logger.warn("Connection from {} was closed because the path is not allowed: {}", request.getRemoteAddr(), target);
             baseRequest.getHttpChannel().getEndPoint().close(); // Close the connection abruptly
         }
     }

@@ -2,7 +2,7 @@ package gqserver.websocketserver;
 
 
 
-import java.util.concurrent.atomic.AtomicBoolean;
+
 
 
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -13,12 +13,10 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest;
-import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse;
-import org.eclipse.jetty.websocket.server.JettyWebSocketCreator;
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.tinylog.Logger;
 
+import globalquake.core.Settings;
 import gqserver.websocketserver.handler_chain.DropConnectionHandler;
 import gqserver.websocketserver.handler_chain.ErrorHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
@@ -28,14 +26,6 @@ import gqserver.websocketserver.handler_chain.ServerHeader;
 
 
 public class JettyServer {
-    private static final int port = 8080;
-    private static final String host = "0.0.0.0";
-
-
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
-    
-    // private static InetSocketAddress address = new InetSocketAddress(Settings.RTWSEventIP, Settings.RTWSEventIP);
-    
     private static Server server;
     private static ServerConnector connector;
 
@@ -54,51 +44,19 @@ public class JettyServer {
         HttpConnectionFactory httpFactory = new HttpConnectionFactory(httpConfig);
         connector.addConnectionFactory(httpFactory);
 
-        connector.setHost(host);
-        connector.setPort(port);
+        connector.setHost(Settings.RTWSEventIP);
+        connector.setPort(Settings.RTWSEventPort);
         server.addConnector(connector);
+
+        initHandlers();
     }
 
     public static JettyServer getInstance() {
         return instance;
     }
     
-    /**
-        This is an init because it should only be called if the module is intended to be used. 
-        Otherwise, it will be a waste of resources. Mainly registering the event callbacks
-    */
-    public void init() {
-        if (instance.initialized.getAndSet(true)) {
-            return; //Already initialized. TODO: Log this
-        }
 
-
-        class EventEndpointCreator implements JettyWebSocketCreator
-        {
-            @Override
-            public Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
-            {
-                String ip = jettyServerUpgradeRequest.getHttpServletRequest().getRemoteAddr();
-                
-                int count = Clients.getInstance().getCountForIP(ip);
-                
-                if(!(count >= Clients.getInstance().getMaximumConnectionsPerUniqueIP())) {
-                    return new ServerEndpoint();
-                }
-                
-                //Attempt to kick the connection early if the IP has too many connections
-                try {
-                    //jettyServerUpgradeResponse.sendForbidden("Too many connections from this IP");
-                    
-                    System.out.println("Too many connections from " + ip);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-        }
-
+    private void initHandlers() {
         /*
             This defines a chain of handlers that will be used to handle requests
             
@@ -108,18 +66,15 @@ public class JettyServer {
         */
         
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("");
-
+        context.setContextPath(""); //This context will catch all requests
         
 
         JettyWebSocketServletContainerInitializer.configure(context, (servletContext, wsContainer) -> {
-            wsContainer.addMapping("/realtime_events/v1", new EventEndpointCreator());
-        });
+            wsContainer.addMapping("/realtime_events/v1", new EventEndpointCreator_IPConnectionLimited());
+        }); //This context will catch requests to /realtime_events/v1 and create a WebSocket instance if the IP is allowed to connect
 
-
-
-        DropConnectionHandler dropConnectionHandler = new DropConnectionHandler();
-        ErrorHandler errorHandler = new ErrorHandler(dropConnectionHandler);
+        DropConnectionHandler dropConnectionHandler = new DropConnectionHandler(); //Drop connections if the path is not allowed
+        ErrorHandler errorHandler = new ErrorHandler(dropConnectionHandler); //Drop connections if there are errors
         ServerHeader serverHeader = new ServerHeader(errorHandler); // Add the server header to the chain of handlers
         
 
@@ -129,7 +84,6 @@ public class JettyServer {
         contexts.addHandler(context);
 
         server.setHandler(contexts);
-
     }
 
     
@@ -152,15 +106,15 @@ public class JettyServer {
         try {
             server.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e, "Error starting Jetty server");
         }
     }
     
-    public static void stop() {
+    public void stop() {
         try {
             server.stop();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e, "Error stopping Jetty server");
         }
     }
 

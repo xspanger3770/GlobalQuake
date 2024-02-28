@@ -1,9 +1,8 @@
 package gqserver.websocketserver;
 
-import gqserver.websocketserver.Clients;
 
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
+
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 public class ServerEndpoint extends WebSocketAdapter{

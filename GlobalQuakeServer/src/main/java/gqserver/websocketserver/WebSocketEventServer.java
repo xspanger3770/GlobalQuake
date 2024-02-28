@@ -1,6 +1,16 @@
 package gqserver.websocketserver;
 
+import org.json.JSONObject;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.archive.ArchivedQuake;
+import globalquake.core.earthquake.data.Earthquake;
+import globalquake.core.events.GlobalQuakeEventListener;
+import globalquake.core.events.specific.QuakeCreateEvent;
+import globalquake.core.events.specific.QuakeRemoveEvent;
+import globalquake.core.events.specific.QuakeUpdateEvent;
+
+import org.tinylog.Logger;
 
 /**
     * The main entry point for the WebSocket server
@@ -15,12 +25,20 @@ public class WebSocketEventServer {
     private WebSocketEventServer() {
     }
 
+    /**
+     * This is an init because it should only be called if the module is intended to be used.
+     * Otherwise, it will be a waste of resources.
+     */
     public void init(){
-        JettyServer.getInstance().init();
+        Logger.info("Initializing WebSocketEventServer");
+        JettyServer.getInstance(); //initialize the Jetty server
+        initEventListeners();
+        WebSocketBroadcast.getInstance(); // Start the broadcast service
     }
     
 
     public void start() {
+        Logger.info("Starting WebSocketEventServer");
         JettyServer.getInstance().start();
     }
 
@@ -29,61 +47,38 @@ public class WebSocketEventServer {
     }
 
 
-    // private static ArchivedQuake convertToArchivedQuake(Earthquake quake) {
-    //     ArchivedQuake archivedQuake = new ArchivedQuake(quake);
-    //     archivedQuake.setRegion(quake.getRegion());
-    //     return archivedQuake;
-    // }
+    private static ArchivedQuake convertToArchivedQuake(Earthquake quake) {
+        ArchivedQuake archivedQuake = new ArchivedQuake(quake);
+        archivedQuake.setRegion(quake.getRegion());
+        return archivedQuake;
+    }
 
-    // private void initEventListeners() {
-    //     GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener()
-    //     {
-    //         @Override
-    //         public void onQuakeCreate(QuakeCreateEvent event) {
-    //             broadcastQuake("create", convertToArchivedQuake(event.earthquake()));
-    //         }
-
-    //         @Override
-    //         public void onQuakeUpdate(QuakeUpdateEvent event) {
-    //             broadcastQuake("update", convertToArchivedQuake(event.earthquake()));
-    //         }
-
-    //         @Override
-    //         public void onQuakeRemove(QuakeRemoveEvent event) {
-    //             broadcastQuake("remove", convertToArchivedQuake(event.earthquake()));
-    //         }
-    //     });
-
-    // }
-
-
-    // private void broadcastQuake(String action, ArchivedQuake quake) {
-    //     JSONObject json = new JSONObject();
-    //     json.put("action", action);
-    //     json.put("data", quake.getGeoJSON());
-    //     this.broadcast(json.toString());
-    // }
-
-    public static void main(String[] args) {
-        WebSocketEventServer instance = WebSocketEventServer.getInstance();    
-        instance.init();
-        instance.start();
-
-
-        Thread broadcastTest = new Thread(new Runnable() {
+    private void initEventListeners() {
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener()
+        {
             @Override
-            public void run() {
-                try {
-                    while(true){
-                        Thread.sleep(1000);
-                        WebSocketBroadcast.getInstance().broadcast("Hello World");
-                    }
-                    } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            public void onQuakeCreate(QuakeCreateEvent event) {
+                broadcastQuake("create", convertToArchivedQuake(event.earthquake()));
+            }
+
+            @Override
+            public void onQuakeUpdate(QuakeUpdateEvent event) {
+                broadcastQuake("update", convertToArchivedQuake(event.earthquake()));
+            }
+
+            @Override
+            public void onQuakeRemove(QuakeRemoveEvent event) {
+                broadcastQuake("remove", convertToArchivedQuake(event.earthquake()));
             }
         });
 
-        broadcastTest.start();
     }
+
+    private void broadcastQuake(String action, ArchivedQuake quake) {
+        JSONObject json = new JSONObject();
+        json.put("action", action);
+        json.put("data", quake.getGeoJSON());
+        WebSocketBroadcast.getInstance().broadcast(json.toString());
+    }
+
 }

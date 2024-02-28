@@ -14,8 +14,7 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import gqserver.bot.DiscordBot;
 import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
 import gqserver.websocketserver.JettyServer;
-
-
+import gqserver.websocketserver.WebSocketEventServer;
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
 import gqserver.ui.server.DatabaseMonitorFrame;
@@ -177,8 +176,8 @@ public class Main {
         //Start the WebSocket Server, if enabled
         updateProgressBar("Starting WebSocket Server...", (int) ((phase++ / PHASES) * 100.0));
         if(Settings.enableRTWSEventServer){
-            JettyServer.getInstance().init();
-            JettyServer.getInstance().start();
+            WebSocketEventServer.getInstance().init();
+            WebSocketEventServer.getInstance().start();
         }
 
         updateProgressBar("Starting Discord Bot...", (int) ((phase++ / PHASES) * 100.0));

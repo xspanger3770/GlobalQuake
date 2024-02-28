@@ -29,9 +29,7 @@ public class Client {
         InetSocketAddress inetAddress = (InetSocketAddress) remoteAddress;
 
         ip = inetAddress.getAddress().getHostAddress();
-
         uniqueID = ip + ":" +  inetAddress.getPort();
-        int b=0; //Breakpoint
     }
 
     public String getIP() {

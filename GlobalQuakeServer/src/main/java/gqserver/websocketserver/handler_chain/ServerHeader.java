@@ -12,6 +12,9 @@ import java.io.IOException;
 
 
 
+/**
+ * This class is responsible for setting the server header in all HTTP responses.
+ */
 public class ServerHeader extends AbstractHandler{
     public static final String SERVER_HEADER = "GlobalQuake RTWS Event Server";
 
@@ -23,7 +26,6 @@ public class ServerHeader extends AbstractHandler{
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        System.out.println("Setting server header");
         response.setHeader("Server", SERVER_HEADER);
         next.handle(target, baseRequest, request, response);
     }
