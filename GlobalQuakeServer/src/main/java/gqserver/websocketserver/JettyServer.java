@@ -13,8 +13,8 @@ import org.tinylog.Logger;
 
 import globalquake.core.Settings;
 import gqserver.websocketserver.handler_chain.DropConnectionHandler;
-import gqserver.websocketserver.handler_chain.ErrorHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
+import gqserver.websocketserver.handler_chain.HttpCatchAllLogger;
 import gqserver.websocketserver.EventEndpointCreatorIPConnectionLimited;
 // import globalquake.core.Settings;
 
@@ -35,6 +35,7 @@ public class JettyServer {
         HttpConfiguration httpConfig = new HttpConfiguration();
         httpConfig.setSendServerVersion(false);
         httpConfig.setSendXPoweredBy(false);
+
         HttpConnectionFactory httpFactory = new HttpConnectionFactory(httpConfig);
         connector.addConnectionFactory(httpFactory);
 
@@ -55,8 +56,9 @@ public class JettyServer {
             This defines a chain of handlers that will be used to handle requests
             
             Any errors that occur will be logged and the connection will be closed
-
+            The server header will be set in all HTTP responses
             If any path other than the allowed paths is requested, the connection will be closed
+            The WebSocket context will be created and will handle all WebSocket requests
         */
         
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -67,19 +69,22 @@ public class JettyServer {
             wsContainer.addMapping("/realtime_events/v1", new EventEndpointCreatorIPConnectionLimited());
         }); //This context will catch requests to /realtime_events/v1 and create a WebSocket instance if the IP is allowed to connect
 
+        ServerHeader serverHeader = new ServerHeader(); //Set the server header in all HTTP responses
+        HttpCatchAllLogger catchAllLogger = new HttpCatchAllLogger(); //Log all incoming requests
         DropConnectionHandler dropConnectionHandler = new DropConnectionHandler(); //Drop connections if the path is not allowed
-        ErrorHandler errorHandler = new ErrorHandler(dropConnectionHandler); //Drop connections if there are errors
-        ServerHeader serverHeader = new ServerHeader(errorHandler); // Add the server header to the chain of handlers
-        
 
         HandlerList contexts = new HandlerList();
 
-        contexts.addHandler(serverHeader); //Process this chain of handlers first
-        contexts.addHandler(context);
+        contexts.addHandler(catchAllLogger); //Log all incoming requests
+        contexts.addHandler(serverHeader); //Set the server header in all HTTP responses
+        contexts.addHandler(dropConnectionHandler); //Drop connections if the path is not allowed
+        contexts.addHandler(context); //The WebSocket context
 
+        JettyErrorPageHandler errorPageHandler = new JettyErrorPageHandler();
+        server.setErrorHandler(errorPageHandler);
         server.setHandler(contexts);
-    }
 
+    }
     
     public void start() {
         // server.setHandler(contexts);

@@ -8,7 +8,7 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 public class ServerEndpoint extends WebSocketAdapter{
     Client client;
     public ServerEndpoint() {
-        //this.initEventListeners();
+
     }
 
     @Override
@@ -28,8 +28,7 @@ public class ServerEndpoint extends WebSocketAdapter{
     @Override
     public void onWebSocketClose(int statusCode, String reason)
     {
-        // handle close
-        Clients.getInstance().clientDisconnected(this.client.getUniqueID());
+        client.disconnectEvent();
     }
 
     @Override
