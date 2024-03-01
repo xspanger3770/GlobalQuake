@@ -16,7 +16,6 @@ import gqserver.websocketserver.handler_chain.DropConnectionHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
 import gqserver.websocketserver.handler_chain.HttpCatchAllLogger;
 import gqserver.websocketserver.EventEndpointCreatorIPConnectionLimited;
-// import globalquake.core.Settings;
 
 
 public class JettyServer {
@@ -59,6 +58,8 @@ public class JettyServer {
             The server header will be set in all HTTP responses
             If any path other than the allowed paths is requested, the connection will be closed
             The WebSocket context will be created and will handle all WebSocket requests
+
+            Closing connections abruptly is a security measure to soften the effects from internet background radiation https://en.wikipedia.org/wiki/Internet_background_noise
         */
         
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

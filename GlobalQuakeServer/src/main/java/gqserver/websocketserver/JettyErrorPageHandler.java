@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
+
 
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.tinylog.Logger;

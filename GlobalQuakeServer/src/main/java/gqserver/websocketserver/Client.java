@@ -61,6 +61,8 @@ public class Client {
         } catch (Exception e) {
             session.close();
         }
+
+        lastMessageTime = System.currentTimeMillis();
     }
 
     public void sendString(String message) throws IOException {
