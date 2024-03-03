@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+
 import org.tinylog.Logger;
 
 
@@ -14,6 +18,8 @@ import org.tinylog.Logger;
 public class Clients {
     
     private int maxConnectionsPerUniqueIP = 10;
+
+    private ScheduledExecutorService pingExecutor;
 
     // IP:PORT -> Client
     private Hashtable<String, Client> clients;
@@ -23,9 +29,9 @@ public class Clients {
     
     private static Clients instance = new Clients();
     private Clients() {
+        pingExecutor = Executors.newScheduledThreadPool(4);
         clients = new Hashtable<String, Client>();
         uniqueIPConnectionCounts = new Hashtable<String, Integer>();
-    
     }
 
     public int getMaximumConnectionsPerUniqueIP() {
@@ -101,7 +107,7 @@ public class Clients {
         clients.remove(client.getUniqueID());
     }
 
-    public void addClient(Client client) {
+    public synchronized void addClient(Client client) {
         Logger.info("Client connected: " + client.getUniqueID());
 
         clients.put(client.getUniqueID(), client);
@@ -117,6 +123,10 @@ public class Clients {
         return new ArrayList<Client>(clients.values());
     }
 
+    public ScheduledExecutorService getPingExecutor() {
+        return pingExecutor;
+    }
+
     public void DEBUG_SAVE_CONNECTION_COUNTS() {
         String filename = "connection_counts.txt";
 
@@ -124,6 +134,12 @@ public class Clients {
             FileWriter writer = new FileWriter(filename);
 
             writer.write(uniqueIPConnectionCounts.toString());
+
+            writer.write("\n\n");
+
+            int totalConnections = 0;
+            totalConnections = clients.size();
+            writer.write("Total connections: " + totalConnections);
 
             writer.close();
         } catch (IOException e) {

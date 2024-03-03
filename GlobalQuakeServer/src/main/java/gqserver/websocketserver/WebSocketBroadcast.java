@@ -34,7 +34,6 @@ public class WebSocketBroadcast {
     }
 
     public void broadcast(String message) {
-        System.out.println("Broadcasting message: " + message);
         for (Client client : Clients.getInstance().getClients()) {
             sendExecutor.execute(() -> sendThread(client, message));
         }

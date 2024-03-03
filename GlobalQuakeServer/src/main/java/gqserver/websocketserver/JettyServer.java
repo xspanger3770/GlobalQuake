@@ -2,20 +2,18 @@ package gqserver.websocketserver;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
+
 import org.tinylog.Logger;
 
 import globalquake.core.Settings;
 import gqserver.websocketserver.handler_chain.DropConnectionHandler;
 import gqserver.websocketserver.handler_chain.ServerHeader;
 import gqserver.websocketserver.handler_chain.HttpCatchAllLogger;
-import gqserver.websocketserver.EventEndpointCreatorIPConnectionLimited;
 
 
 public class JettyServer {

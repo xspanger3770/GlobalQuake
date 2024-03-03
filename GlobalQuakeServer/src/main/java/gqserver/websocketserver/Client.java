@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.jetty.websocket.api.Session;
+
+import org.tinylog.Logger;
 
 public class Client {
     private Session session;
@@ -38,10 +39,9 @@ public class Client {
         ip = inetAddress.getAddress().getHostAddress();
         uniqueID = ip + ":" +  inetAddress.getPort();
 
-        //Start the ping thread
-        pingFuture = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::virtualPingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
-
+        pingFuture = Clients.getInstance().getPingExecutor().scheduleAtFixedRate(this::virtualPingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
     }
+
 
     private void virtualPingThread(){
         if(!isConnected()) {
@@ -51,13 +51,14 @@ public class Client {
         
         Long timeSinceLastMessage = System.currentTimeMillis() - lastMessageTime;
         
-        //Prevent sending pings back to back with other messages
+        //If the time since the last message is less than a third of the ping interval, don't send a ping
         if(timeSinceLastMessage<pingInterval.toMillis()/3){
             return;
         }
 
         try {
             session.getRemote().sendPing(null);
+            Logger.info("Sent ping to " + uniqueID);
         } catch (Exception e) {
             session.close();
         }
@@ -76,6 +77,10 @@ public class Client {
 
     public void disconnectEvent() {
         Clients.getInstance().clientDisconnected(this.getUniqueID());
+    }
+
+    public void updateLastMessageTime() {
+        lastMessageTime = System.currentTimeMillis();
     }
 
     public String getIP() {

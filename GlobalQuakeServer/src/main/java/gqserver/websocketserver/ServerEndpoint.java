@@ -22,7 +22,7 @@ public class ServerEndpoint extends WebSocketAdapter{
     @Override
     public void onWebSocketText(String message)
     {
-        // handle incoming message
+        client.updateLastMessageTime();
     }
 
     @Override
@@ -34,15 +34,12 @@ public class ServerEndpoint extends WebSocketAdapter{
     @Override
     public void onWebSocketError(Throwable cause)
     {
-        // handle error
+        //close is called automatically
     }
 
     @Override
     public void onWebSocketBinary(byte[] payload, int offset, int len)
     {
-        // handle incoming binary message
+        client.updateLastMessageTime();
     }
-
-
-
 }

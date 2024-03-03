@@ -21,7 +21,7 @@ public class EventEndpointCreatorIPConnectionLimited implements JettyWebSocketCr
     }
 
     @Override
-    public Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
+    public synchronized Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
     {
         String ip = jettyServerUpgradeRequest.getHttpServletRequest().getRemoteAddr();
         
