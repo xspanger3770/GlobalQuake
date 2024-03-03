@@ -1,5 +1,6 @@
 package globalquake.client.data;
 
+import globalquake.core.GlobalQuake;
 import gqserver.api.packets.station.InputType;
 import globalquake.core.station.GlobalStation;
 
@@ -27,7 +28,7 @@ public class ClientStation extends GlobalStation {
 
     @Override
     public long getDelayMS() {
-        return System.currentTimeMillis() - lastDataTime;
+        return GlobalQuake.instance.currentTimeMillis() - lastDataTime;
     }
 
     @Override

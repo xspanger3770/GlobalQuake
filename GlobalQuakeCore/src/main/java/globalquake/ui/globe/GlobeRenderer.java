@@ -301,8 +301,10 @@ public class GlobeRenderer {
     public synchronized void render(Graphics2D graphics, RenderProperties props) {
         graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        renderFeatures.forEach(feature -> feature.process(this, props));
-        renderFeatures.forEach(feature -> feature.renderAll(this, graphics, props));
+        renderFeatures.stream().filter(renderFeature -> renderFeature.isEnabled(props)).forEach(feature -> {
+            feature.process(this, props);
+            feature.renderAll(this, graphics, props);
+        });
     }
 
     public synchronized void addFeature(RenderFeature<?> renderFeature){
@@ -408,13 +410,17 @@ public class GlobeRenderer {
         if(lastMouse == null || coords == null){
             return false;
         }
-        if(moved && (System.currentTimeMillis() - lastMouseMove) > 15 * 1000){
+        if(moved && !hasMouseMovedRecently()){
             return false;
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
         return isAboveHorizon(vect,  renderProperties) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
+    }
+
+    public boolean hasMouseMovedRecently() {
+        return (System.currentTimeMillis() - lastMouseMove) <= 15 * 1000;
     }
 
     public boolean isMouseInside(Point2D coords, Shape shape, RenderProperties renderProperties) {

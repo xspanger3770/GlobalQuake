@@ -35,7 +35,7 @@ public enum DistanceUnit {
     public String format(double distance, int i) {
         double result = distance * getKmRatio();
         if(i == 0){
-            return "%d%s".formatted((int) result, getShortName());
+            return "%.0f%s".formatted(result, getShortName());
         }
         return ("%%.%df%%s".formatted(i)).formatted(result, getShortName());
     }

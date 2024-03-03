@@ -2,6 +2,6 @@ package gqserver.api;
 
 public class GQApi {
 
-    public static final int COMPATIBILITY_VERSION = 8;
+    public static final int COMPATIBILITY_VERSION = 9;
 
 }

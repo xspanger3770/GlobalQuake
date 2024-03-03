@@ -1,5 +1,7 @@
 package globalquake.core.earthquake.quality;
 
+import java.util.Arrays;
+
 public final class QualityCriteria {
 
     private final double[] thresholds;
@@ -25,5 +27,14 @@ public final class QualityCriteria {
         }
 
         return QualityClass.values()[Math.min(QualityClass.values().length - 1, result)];
+    }
+
+    @Override
+    public String toString() {
+        return "QualityCriteria{" +
+                "thresholds=" + Arrays.toString(thresholds) +
+                ", value=" + value +
+                ", smallerBetter=" + smallerBetter +
+                "}\n";
     }
 }

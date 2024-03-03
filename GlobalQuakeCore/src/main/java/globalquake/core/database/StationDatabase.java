@@ -69,9 +69,9 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
         stationSources.add(new StationSource("KOERI", "http://eida-service.koeri.boun.edu.tr/fdsnws/station/1/"));
         stationSources.add(new StationSource("ETHZ", "http://eida.ethz.ch/fdsnws/station/1/"));
-        stationSources.add(new StationSource("GEOFON, GFZ", "http://geofon.gfz-potsdam.de/fdsnws/station/1/"));
+        stationSources.add(new StationSource("GEOFON, GFZ", "https://geofon.gfz-potsdam.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("ICGC", "http://ws.icgc.cat/fdsnws/station/1/"));
-        stationSources.add(new StationSource("IPGP", "http://eida.ipgp.fr/fdsnws/station/1/"));
+        stationSources.add(new StationSource("IPGP", "http://ws.ipgp.fr/fdsnws/station/1/"));
         stationSources.add(new StationSource("INGV", "http://webservices.ingv.it/fdsnws/station/1/"));
         stationSources.add(new StationSource("LMU", "http://erde.geophysik.uni-muenchen.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("NIEP", "https://eida-sc3.infp.ro/fdsnws/station/1/"));
@@ -85,7 +85,7 @@ public class StationDatabase implements Serializable {
         stationSources.add(new StationSource("TexNet", "http://rtserve.beg.utexas.edu/fdsnws/station/1/"));
         stationSources.add(new StationSource("USP-IAG", "http://seisrequest.iag.usp.br/fdsnws/station/1/"));
         stationSources.add(new StationSource("BMKG", "https://geof.bmkg.go.id/fdsnws/station/1/"));
-        stationSources.add(new StationSource("AusPass", "http://auspass.edu.au:8080/fdsnws/station/1/"));
+        stationSources.add(new StationSource("AusPass", "https://auspass.edu.au:8080/fdsnws/station/1/"));
 
         // 0.9.3
         stationSources.add(new StationSource("ESM", "https://esm-db.eu/fdsnws/station/1/"));

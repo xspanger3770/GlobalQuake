@@ -50,6 +50,16 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     }
 
     @Override
+    public boolean isEnabled(RenderProperties props) {
+        return Settings.displayShakemaps;
+    }
+
+    @Override
+    public boolean needsUpdateEntities() {
+        return true;
+    }
+
+    @Override
     public boolean needsCreatePolygon(RenderEntity<IntensityHex> entity, boolean propertiesChanged) {
         return propertiesChanged;
     }
@@ -59,15 +69,10 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         return propertiesChanged;
     }
 
-    @Override
-    public boolean needsUpdateEntities() {
-        return true;
-    }
-
     private void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
         for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
-                .sorted(Comparator.comparing(kv -> -kv.getValue().getMag())).toList()){
+                .sorted(Comparator.comparing(kv -> kv.getValue().getRes())).toList()){
             ShakeMap shakeMap = pair.getValue();
             if(shakeMap != null){
                 shakeMap.getHexList().forEach(intensityHex -> {
@@ -155,7 +160,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
         graphics.fill(elementHex.getShape());
 
-        boolean mouseNearby = renderer.getLastMouse() != null && elementHex.getShape().contains(renderer.getLastMouse());
+        boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementHex.getShape().contains(renderer.getLastMouse());
 
         if(mouseNearby && renderProperties.scroll < 0.2) {
             graphics.setColor(col);
@@ -167,15 +172,10 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
             graphics.setColor(Color.white);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
-            graphics.drawString(level.getName(),
+            graphics.drawString(level.getFullName(),
                     (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
                     (int)centerPonint.y + graphics.getFont().getSize() / 2);
         }
-    }
-
-    @Override
-    protected boolean isVisible(RenderProperties properties) {
-        return Settings.displayShakemaps;
     }
 
     @Override

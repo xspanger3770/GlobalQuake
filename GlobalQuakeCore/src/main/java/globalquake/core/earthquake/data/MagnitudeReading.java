@@ -1,4 +1,6 @@
 package globalquake.core.earthquake.data;
 
-public record MagnitudeReading(double magnitude, double distance) {
+import gqserver.api.packets.station.InputType;
+
+public record MagnitudeReading(double magnitude, double distance, long eventAge, InputType inputType) {
 }

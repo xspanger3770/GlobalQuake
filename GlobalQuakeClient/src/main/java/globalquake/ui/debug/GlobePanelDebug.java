@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.quality.QualityClass;
 import globalquake.main.Main;
+import globalquake.ui.globalquake.feature.FeatureCities;
 import globalquake.utils.GeoUtils;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.regions.Regions;
@@ -110,6 +111,7 @@ public class GlobePanelDebug extends GQFrame {
 
 		System.out.println(debugStations.size());
 		panel.getRenderer().addFeature(new FeatureDebugStation(debugStations));
+		panel.getRenderer().addFeature(new FeatureCities());
 
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -170,7 +172,7 @@ public class GlobePanelDebug extends GQFrame {
 		Settings.oldEventsTimeFilterEnabled = false;
 		Settings.oldEventsMagnitudeFilterEnabled = false;
 		for(double mag = 0.5; mag <= 11; mag += 0.2) {
-			archivedQuakes.add(new ArchivedQuake(null, 0, 0, 0, mag, r.nextLong() % System.currentTimeMillis(), QualityClass.S));
+			archivedQuakes.add(new ArchivedQuake(null, 0, 0, 0, mag, r.nextLong() % System.currentTimeMillis(), QualityClass.S, System.currentTimeMillis()+100)); //100ms added to make finalUpdateMillis > origin
 		}
 		//archivedQuakes.sort(Comparator.comparing(ArchivedQuake::getOrigin));
 	}

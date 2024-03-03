@@ -9,4 +9,8 @@ public record ObviousArrivalsInfo(int total, int wrong) {
                 ", wrong=" + wrong +
                 '}';
     }
+
+    public double getPCT() {
+        return (total() - wrong()) / (double) total();
+    }
 }

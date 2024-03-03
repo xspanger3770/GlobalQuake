@@ -5,6 +5,7 @@ import globalquake.ui.table.Column;
 import globalquake.ui.table.FilterableTableModel;
 import globalquake.ui.table.TableCellRendererAdapter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class ClusterTableModel extends FilterableTableModel<Cluster> {
             Column.readonly("rootLon", Double.class, Cluster::getRootLon, new TableCellRendererAdapter<>()));
 
 
-    public ClusterTableModel(List<Cluster> data) {
+    public ClusterTableModel(Collection<Cluster> data) {
         super(data);
     }
 

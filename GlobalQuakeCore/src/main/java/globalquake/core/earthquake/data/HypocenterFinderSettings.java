@@ -1,4 +1,5 @@
 package globalquake.core.earthquake.data;
 
-public record HypocenterFinderSettings(double pWaveInaccuracyThreshold, double correctnessThreshold, double resolution, int minStations) {
+public record HypocenterFinderSettings(
+        double pWaveInaccuracyThreshold, double correctnessThreshold, double resolution, double resolutionGPU, int minStations, boolean useCUDA) {
 }

@@ -40,14 +40,14 @@ public class AlertManager {
     }
 
     public synchronized void tick() {
-        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning()));
+        GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().forEach(earthquake -> warnings.putIfAbsent(earthquake, new Warning(GlobalQuake.instance.currentTimeMillis())));
 
         for (Iterator<Map.Entry<Warnable, Warning>> iterator = warnings.entrySet().iterator(); iterator.hasNext(); ) {
             var kv = iterator.next();
             Warnable warnable = kv.getKey();
             Warning warning = kv.getValue();
 
-            long age = System.currentTimeMillis() - warning.createdAt;
+            long age = GlobalQuake.instance.currentTimeMillis() - warning.createdAt;
             if(age > 1000 * 60 * STORE_TIME_MINUTES){
                 iterator.remove();
                 continue;
@@ -68,7 +68,7 @@ public class AlertManager {
 
     private boolean meetsConditions(Warnable warnable) {
         if(warnable instanceof Earthquake){
-            return meetsConditions((Earthquake) warnable);
+            return meetsConditions((Earthquake) warnable, true);
         }
 
         // TODO cluster warnings
@@ -76,19 +76,23 @@ public class AlertManager {
         return false;
     }
 
-    public static boolean meetsConditions(Earthquake quake) {
+    public static boolean meetsConditions(Earthquake quake, boolean considerGlobal) {
         double distGC = GeoUtils.greatCircleDistance(quake.getLat(), quake.getLon(), Settings.homeLat,
                 Settings.homeLon);
 
-        if (Settings.alertLocal && distGC < Settings.alertLocalDist) {
+        if (Settings.alertLocal && distGC <= Settings.alertLocalDist) {
             return true;
         }
 
-        if (Settings.alertRegion && distGC < Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
+        if (Settings.alertRegion && distGC <= Settings.alertRegionDist && quake.getMag() >= Settings.alertRegionMag) {
             return true;
         }
 
-        return Settings.alertGlobal && quake.getMag() > Settings.alertGlobalMag;
+        return considerGlobal && Settings.alertGlobal && quake.getMag() >= Settings.alertGlobalMag;
+    }
+
+    public void clear() {
+        warnings.clear();
     }
 }
 

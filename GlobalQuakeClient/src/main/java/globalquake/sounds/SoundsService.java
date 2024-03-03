@@ -10,7 +10,6 @@ import globalquake.core.events.specific.QuakeCreateEvent;
 import globalquake.core.events.specific.QuakeUpdateEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.intensity.IntensityScales;
-import globalquake.core.intensity.MMIIntensityScale;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
@@ -32,15 +31,26 @@ public class SoundsService {
         GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
-                Sounds.playSound(Sounds.found);
+                if(SoundsService.this.canPing(event.earthquake())) {
+                    Sounds.playSound(Sounds.found);
+                    event.earthquake().foundPlayed = true;
+                }
             }
 
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
-                Sounds.playSound(Sounds.update);
+                if(SoundsService.this.canPing(event.earthquake())) {
+                    if(!event.earthquake().foundPlayed){
+                        Sounds.playSound(Sounds.found);
+                        event.earthquake().foundPlayed = true;
+                    } else {
+                        Sounds.playSound(Sounds.update);
+                    }
+                }
             }
         });
     }
+
 
     private void checkSounds() {
         try {
@@ -69,13 +79,11 @@ public class SoundsService {
             clusterSoundsInfo.put(cluster, info = new SoundsInfo());
         }
 
-        if (!info.firstSound) {
-            Sounds.playSound(Sounds.level_0);
-            info.firstSound = true;
-        }
-
         int level = cluster.getLevel();
-        if (level > info.maxLevel) {
+        if (level > info.maxLevel && (canPing(cluster) || canPing(cluster.getEarthquake()))) {
+            if(info.maxLevel < 0){
+                Sounds.playSound(Sounds.level_0);
+            }
             if (level >= 1 && info.maxLevel < 1) {
                 Sounds.playSound(Sounds.level_1);
             }
@@ -94,15 +102,16 @@ public class SoundsService {
         Earthquake quake = cluster.getEarthquake();
 
         if (quake != null) {
-            boolean meets = AlertManager.meetsConditions(quake);
+            boolean meets = AlertManager.meetsConditions(quake, true);
             if (meets && !info.meets) {
                 Sounds.playSound(Sounds.intensify);
                 info.meets = true;
             }
-            double pga = GeoUtils.pgaFunction(quake.getMag(), quake.getDepth(), quake.getDepth());
+            double pga = GeoUtils.getMaxPGA(quake.getLat(), quake.getLon(), quake.getDepth(), quake.getMag());
             if (info.maxPGA < pga) {
                 info.maxPGA = pga;
-                if (info.maxPGA >= MMIIntensityScale.VI.getPga() && !info.warningPlayed && level >= 2) {
+                double threshold_eew = IntensityScales.INTENSITY_SCALES[Settings.eewScale].getLevels().get(Settings.eewLevelIndex).getPga();
+                if (info.maxPGA >= threshold_eew && !info.warningPlayed && level >= Settings.eewClusterLevel) {
                     Sounds.playSound(Sounds.eew_warning);
                     info.warningPlayed = true;
                 }
@@ -131,7 +140,7 @@ public class SoundsService {
             if (shakingExpected) {
                 double sTravel = (long) (TauPTravelTimeCalculator.getSWaveTravelTime(quake.getDepth(),
                         TauPTravelTimeCalculator.toAngle(distGCD)));
-                double age = (System.currentTimeMillis() - quake.getOrigin()) / 1000.0;
+                double age = (GlobalQuake.instance.currentTimeMillis() - quake.getOrigin()) / 1000.0;
                 int secondsS = (int) Math.max(0, Math.ceil(sTravel - age));
 
                 if (secondsS < info.lastCountdown && secondsS <= 10) {
@@ -141,6 +150,24 @@ public class SoundsService {
                 }
             }
         }
+    }
+
+
+    private boolean canPing(Earthquake earthquake) {
+        if(earthquake == null || !Settings.enableEarthquakeSounds){
+            return false;
+        }
+
+        double distGCD = GeoUtils.greatCircleDistance(earthquake.getLat(), earthquake.getLon(), Settings.homeLat, Settings.homeLon);
+        return !(earthquake.getMag() < Settings.earthquakeSoundsMinMagnitude) || !(distGCD > Settings.earthquakeSoundsMaxDist);
+    }
+
+    private boolean canPing(Cluster cluster) {
+        if(cluster == null || !Settings.alertPossibleShaking){
+            return false;
+        }
+        double distGCD = GeoUtils.greatCircleDistance(cluster.getRootLat(), cluster.getRootLon(), Settings.homeLat, Settings.homeLon);
+        return !(distGCD > Settings.alertPossibleShakingDistance);
     }
 
     public void destroy(){

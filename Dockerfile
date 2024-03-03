@@ -22,7 +22,7 @@ RUN addgroup --gid 1000 group && \
 WORKDIR /home/user/
 
 # Copy the application JAR file into the container at the working directory
-COPY out/artifacts/GlobalQuakeServer/GlobalQuakeServer.jar .
+COPY GlobalQuakeServer/target/GlobalQuakeServer-*-jar-with-dependencies.jar ./GlobalQuakeServer.jar
 
 # Copy station database and configuration files
 COPY Container ./.GlobalQuakeServerData

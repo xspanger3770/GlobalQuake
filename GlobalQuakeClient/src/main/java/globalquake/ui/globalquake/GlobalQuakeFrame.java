@@ -18,8 +18,8 @@ public class GlobalQuakeFrame extends GQFrame {
 
 	private boolean hideList = false;
 	private final EarthquakeListPanel list;
-	private final GlobalQuakePanel panel;
-	private final JPanel mainPanel;
+	protected GlobalQuakePanel panel;
+	protected JPanel mainPanel;
 	private boolean _containsListToggle;
 
 	public GlobalQuakeFrame() {
@@ -108,7 +108,7 @@ public class GlobalQuakeFrame extends GQFrame {
 		});
 	}
 
-	private JMenuBar createJMenuBar() {
+	protected JMenuBar createJMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBackground(Color.lightGray);
 
@@ -118,7 +118,14 @@ public class GlobalQuakeFrame extends GQFrame {
 		settings.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				new SettingsFrame(GlobalQuakeFrame.this).setVisible(true);
+				 // Check if an instance of SettingsFrame already exists
+				 if (SettingsFrame.getInstance() == null) {
+					// If not, create a new instance and make it visible
+					SettingsFrame settingsFrame = new SettingsFrame(GlobalQuakeFrame.this, GlobalQuake.getInstance().limitedSettings());
+					settingsFrame.setVisible(true);
+					// Ensure that the SettingsFrame is always on top
+					settingsFrame.setAlwaysOnTop(true);
+				}
 			}
 		});
 
@@ -153,5 +160,9 @@ public class GlobalQuakeFrame extends GQFrame {
 
 	public GlobalQuakePanel getGQPanel() {
 		return panel;
+	}
+
+    public void clear() {
+    	getGQPanel().clear();
 	}
 }

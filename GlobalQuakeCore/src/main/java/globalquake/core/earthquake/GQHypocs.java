@@ -6,7 +6,6 @@ import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
-import globalquake.core.training.EarthquakeAnalysisTraining;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
@@ -27,23 +26,6 @@ public class GQHypocs {
 
     private static boolean stationLimitCalculated = false;
     private static int stationLimit = 0;
-
-    static {
-        try {
-            System.loadLibrary("gq_hypocs");
-            initCuda();
-            if(cudaLoaded) {
-                EarthquakeAnalysisTraining.hypocenterDetectionResolutionMax = 1000;
-                Logger.tag("Hypocs").info("CUDA library loaded successfully!");
-                printResolution();
-            } else {
-                Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
-            }
-        } catch(Exception | UnsatisfiedLinkError e) {
-            Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
-        }
-
-    }
 
     private static void printResolution() {
         for(int i = 0; i < depth_profiles.length; i++){
@@ -112,7 +94,7 @@ public class GQHypocs {
     }
 
     private static double getPointMultiplier() {
-        double point_multiplier = Settings.hypocenterDetectionResolution;
+        double point_multiplier = Settings.hypocenterDetectionResolutionGPU;
         point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
         return point_multiplier;
     }
@@ -121,4 +103,18 @@ public class GQHypocs {
         return cudaLoaded;
     }
 
- }
+    public static void load() {
+        try {
+            System.loadLibrary("gq_hypocs");
+            initCuda();
+            if(cudaLoaded) {
+                Logger.tag("Hypocs").info("CUDA library loaded successfully!");
+                printResolution();
+            } else {
+                Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
+            }
+        } catch(Exception | UnsatisfiedLinkError e) {
+            Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
+        }
+    }
+}

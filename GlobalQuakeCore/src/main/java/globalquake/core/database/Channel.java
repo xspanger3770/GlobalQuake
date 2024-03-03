@@ -1,6 +1,7 @@
 package globalquake.core.database;
 
 import gqserver.api.packets.station.InputType;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -85,11 +86,11 @@ public final class Channel implements Serializable {
     @Override
     public String toString() {
         if (seedlinkNetworks.isEmpty()) {
-            return "%s %s %dsps (unavailable)".formatted(getCode(), getLocationCode(), (int) getSampleRate());
+            return "%s %s %.1fsps (unavailable)".formatted(getCode(), getLocationCode(), getSampleRate());
         } else if (seedlinkNetworks.size() == 1) {
-            return "%s %s %dsps (%d seedlink)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+            return "%s %s %.1fsps (%d seedlink)".formatted(getCode(), getLocationCode(), getSampleRate(), seedlinkNetworks.size());
         } else {
-            return "%s %s %dsps (%d seedlinks)".formatted(getCode(), getLocationCode(), (int) getSampleRate(), seedlinkNetworks.size());
+            return "%s %s %.1fsps (%d seedlinks)".formatted(getCode(), getLocationCode(), getSampleRate(), seedlinkNetworks.size());
         }
     }
 
@@ -112,7 +113,11 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
-        if(sensitivity2 <= 0 && newChannel.sensitivity2 > 0){
+        if(newChannel.sensitivity2 > 0) {
+            double diff = Math.abs(sensitivity2 - newChannel.sensitivity2);
+            if(diff > 10){
+                Logger.trace("Sensitivity changed at station %s from %6.3E to %6.3E!".formatted(code, sensitivity2, newChannel.sensitivity2));
+            }
             sensitivity2 = newChannel.sensitivity2;
         }
 

@@ -1,5 +1,7 @@
 package globalquake.core.archive;
 
+import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.earthquake.data.Hypocenter;
 import globalquake.core.analysis.Event;
@@ -13,9 +15,18 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.TimeZone;
 import java.util.UUID;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, Regional {
 
@@ -32,13 +43,14 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 	private double maxRatio;
 	private double maxPGA;
 	private String region;
+    private final long finalUpdateMillis;
 
 	private final ArrayList<ArchivedEvent> archivedEvents;
 
 	private boolean wrong;
 
 	private transient RegionUpdater regionUpdater;
-	private static ExecutorService pgaService = Executors.newSingleThreadExecutor();
+	private static final ExecutorService pgaService = Executors.newSingleThreadExecutor();
 
 	@Serial
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -51,7 +63,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this(earthquake.getUuid(), earthquake.getLat(), earthquake.getLon(), earthquake.getDepth(), earthquake.getMag(),
 				earthquake.getOrigin(),
 				earthquake.getHypocenter() == null || earthquake.getHypocenter().quality == null ? null :
-						earthquake.getHypocenter().quality.getSummary());
+						earthquake.getHypocenter().quality.getSummary(), earthquake.getLastUpdate());
 		copyEvents(earthquake);
 	}
 
@@ -80,7 +92,7 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		}
 	}
 
-	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass) {
+	public ArchivedQuake(UUID uuid, double lat, double lon, double depth, double mag, long origin, QualityClass qualityClass, long finalUpdateMillis) {
 		this.uuid = uuid;
 		this.lat = lat;
 		this.lon = lon;
@@ -93,13 +105,11 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		this.maxPGA = 0.0;
 
 		pgaService.submit(this::calculatePGA);
-
-
+    	this.finalUpdateMillis = finalUpdateMillis;
 	}
 
 	private void calculatePGA() {
-		double distGEO = globalquake.core.regions.Regions.getOceanDistance(lat, lon, false, depth);
-		this.maxPGA = GeoUtils.pgaFunction(mag, distGEO, depth);
+		this.maxPGA = GeoUtils.getMaxPGA(getLat(), getLon(), getDepth(), getMag());
 	}
 
 	public double getDepth() {
@@ -168,9 +178,33 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 		return Long.compare(archivedQuake.getOrigin(), this.getOrigin());
 	}
 
+
 	public double getMaxPGA() {
 		return maxPGA;
 	}
+
+	public boolean shouldBeDisplayed() {
+		if(qualityClass.ordinal() > Settings.qualityFilter){
+			return false;
+		}
+
+		if (Settings.oldEventsMagnitudeFilterEnabled && getMag() < Settings.oldEventsMagnitudeFilter) {
+			return false;
+		}
+
+		return !Settings.oldEventsTimeFilterEnabled || !((GlobalQuake.instance.currentTimeMillis() - getOrigin()) > 1000 * 60 * 60L * Settings.oldEventsTimeFilter);
+	}
+  
+  public long getFinalUpdateMillis() {
+      return finalUpdateMillis;
+  }
+  
+  public String formattedUtcOrigin() {
+      SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      return utcFormat.format(new Date(getOrigin()));
+  }
+
 
 	@Override
 	public String toString() {
@@ -187,4 +221,92 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
 				", wrong=" + wrong +
 				'}';
 	}
+
+    public JSONObject getGeoJSON() {
+        JSONObject earthquakeJSON = new JSONObject();
+
+        earthquakeJSON.put("type", "Feature");
+        earthquakeJSON.put("id", getUuid());
+
+        JSONObject properties = new JSONObject();
+        properties.put("lastupdate", finalUpdateMillis);
+        properties.put("magtype", "gqm");
+        properties.put("evtype", "earthquake"); // TODO: this will need to be changed when there are other event types.
+        properties.put("lon", getLon());
+        properties.put("auth", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("lat", getLat());
+        properties.put("depth", Math.round(getDepth() * 1000.0) / 1000.0); //round to 3 decimal places
+        properties.put("unid", getUuid());
+        
+        properties.put("mag", Math.round(getMag() * 10.0) / 10.0); //round to 1 decimal place
+
+        properties.put("time", formattedUtcOrigin());
+
+        properties.put("source_id", "GlobalQuake_"+getUuid().toString()); // TODO: allow user to set this
+        properties.put("source_catalog", "GlobalQuake"); // TODO: allow user to set this
+        properties.put("flynn_region", getRegion());
+
+        earthquakeJSON.put("properties", properties);
+
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "Point");
+
+        JSONArray coordinates = new JSONArray();
+        coordinates.put(getLon());
+        coordinates.put(getLat());
+
+
+        //Depth is rounded to 3 decimal places and flipped to create altitude
+        coordinates.put(Math.round(getDepth() * 1000.0) / 1000.0 * -1);
+
+        geometry.put("coordinates", coordinates);
+
+        earthquakeJSON.put("geometry", geometry);
+
+        return earthquakeJSON;
+     }
+
+    public String getQuakeML() {
+        String quakeml = "<event publicID=\"quakeml:GlobalQuake:"+getUuid().toString()+"\">";
+        quakeml += "<description>";
+        quakeml += "<type>Flinn-Engdahl region</type>";
+        quakeml += "<text>"+getRegion()+"</text>";
+        quakeml += "</description>";
+        quakeml += "<origin>";
+        quakeml += "<time>";
+        quakeml += "<value>"+formattedUtcOrigin()+"</value>";
+        quakeml += "</time>";
+        quakeml += "<latitude>";
+        quakeml += "<value>"+getLat()+"</value>";
+        quakeml += "</latitude>";
+        quakeml += "<longitude>";
+        quakeml += "<value>"+getLon()+"</value>";
+        quakeml += "</longitude>";
+        quakeml += "<depth>";
+        quakeml += "<value>"+getDepth()+"</value>";
+        quakeml += "</depth>";
+        quakeml += "</origin>";
+        quakeml += "<magnitude>";
+        quakeml += "<mag>";
+        quakeml += "<value>"+getMag()+"</value>";
+        quakeml += "</mag>";
+        quakeml += "</magnitude>";
+        quakeml += "</event>\n";
+        return quakeml;
+      }
+
+    public String getFdsnText() {
+        //EventID|Time|Latitude|Longitude|Depth/km|Author|Catalog|Contributor|ContributorID|MagType|Magnitude|MagAuthor|EventLocationName
+        String fdsnText = "GlobalQuake_"+getUuid().toString()+"|";
+        fdsnText += formattedUtcOrigin()+"|";
+        fdsnText += getLat()+"|";
+        fdsnText += getLon()+"|";
+        fdsnText += getDepth()+"|";
+        fdsnText += "GlobalQuake|GlobalQuake|GlobalQuake|GlobalQuake_"+getUuid().toString()+"|";
+        fdsnText += "gqm|";
+        fdsnText += getMag()+"|";
+        fdsnText += "GlobalQuake|";
+        fdsnText += getRegion();
+        return fdsnText;
+        }
 }

@@ -5,8 +5,8 @@ import globalquake.core.Settings;
 
 public class IntensityScales {
 
-    private static final IntensityScale SHINDO = new ShindoIntensityScale();
-    private static final IntensityScale MMI = new MMIIntensityScale();
+    public static final IntensityScale SHINDO = new ShindoIntensityScale();
+    public static final IntensityScale MMI = new MMIIntensityScale();
 
     public static final IntensityScale[] INTENSITY_SCALES = {MMI, SHINDO};
     public static IntensityScale getIntensityScale(){

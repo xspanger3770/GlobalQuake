@@ -115,7 +115,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     private boolean isOld(DataRecord dataRecord) {
         return dataRecord.getStartBtime().toInstant().isBefore(
-                Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
+                Instant.ofEpochMilli(GlobalQuake.instance.currentTimeMillis()).minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES));
     }
 
     public StationStatus createStatus(AbstractStation station){
@@ -131,14 +131,14 @@ public class DataService extends GlobalQuakeEventListener {
                 if (previous == null || !previous.equals(status)) {
                     data.add(new StationIntensityData(abstractStation.getId(), status.intensity(), status.eventMode()));
                     if (data.size() >= STATIONS_INFO_PACKET_MAX_SIZE) {
-                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                        broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), GlobalQuake.instance.currentTimeMillis(), data));
                         data = new ArrayList<>();
                     }
                 }
             }
 
             if (!data.isEmpty()) {
-                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), System.currentTimeMillis(), data));
+                broadcast(getStationReceivingClients(), new StationsIntensityPacket(GlobalQuake.instance.getStationManager().getIndexing(), GlobalQuake.instance.currentTimeMillis(), data));
             }
         } catch(Exception e){
             Logger.tag("Server").error(e);
@@ -185,9 +185,6 @@ public class DataService extends GlobalQuakeEventListener {
     public void onNewData(SeedlinkDataEvent seedlinkDataEvent) {
         GlobalStation station = seedlinkDataEvent.getStation();
         DataRecord record = seedlinkDataEvent.getDataRecord();
-        if (!isValid(record)) {
-            return;
-        }
         synchronized (stationDataQueueLock) {
             stationDataQueueMap.putIfAbsent(station,
                     new PriorityQueue<>(getDataRecordComparator()));
@@ -229,12 +226,6 @@ public class DataService extends GlobalQuakeEventListener {
         return new ClusterData(cluster.getUuid(), cluster.getRootLat(), cluster.getRootLon(), cluster.getLevel());
     }
 
-    private boolean isValid(DataRecord record) {
-        Instant latest = Instant.now().plus(16, ChronoUnit.SECONDS);
-        Instant earliest = Instant.now().minus(Settings.logsStoreTimeMinutes, ChronoUnit.MINUTES);
-        return record.getStartBtime().toInstant().isAfter(earliest) & record.getStartBtime().toInstant().isBefore(latest);
-    }
-
     public static Comparator<DataRecord> getDataRecordComparator() {
         return Comparator.comparing(dataRecord -> dataRecord.getStartBtime().toInstant().toEpochMilli());
     }
@@ -247,7 +238,8 @@ public class DataService extends GlobalQuakeEventListener {
                 (float) archivedQuake.getDepth(),
                 (float) archivedQuake.getMag(),
                 archivedQuake.getOrigin(),
-                (byte) archivedQuake.getQualityClass().ordinal()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
+                (byte) archivedQuake.getQualityClass().ordinal(),
+                archivedQuake.getFinalUpdateMillis()), createArchivedEventsData(archivedQuake.getArchivedEvents()));
     }
 
     private List<ArchivedEventData> createArchivedEventsData(ArrayList<ArchivedEvent> archivedEvents) {
@@ -334,7 +326,7 @@ public class DataService extends GlobalQuakeEventListener {
     private static HypocenterData createHypocenterData(Earthquake earthquake) {
         return new HypocenterData(
                 earthquake.getUuid(), earthquake.getRevisionID(), (float) earthquake.getLat(), (float) earthquake.getLon(),
-                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag());
+                (float) earthquake.getDepth(), earthquake.getOrigin(), (float) earthquake.getMag(), earthquake.getLastUpdate(), earthquake.getRegion());
     }
 
     private void broadcast(List<ServerClient> clients, Packet packet) {
@@ -435,7 +427,7 @@ public class DataService extends GlobalQuakeEventListener {
                                 station.getStationCode(),
                                 station.getChannelName(),
                                 station.getLocationCode(),
-                                System.currentTimeMillis(),
+                                GlobalQuake.instance.currentTimeMillis(),
                                 (float) station.getMaxRatio60S(),
                                 station.isInEventMode(),
                                 station.getInputType()

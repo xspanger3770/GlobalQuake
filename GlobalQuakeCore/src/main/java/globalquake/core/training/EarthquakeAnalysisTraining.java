@@ -1,6 +1,7 @@
 package globalquake.core.training;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.GQHypocs;
@@ -27,14 +28,14 @@ public class EarthquakeAnalysisTraining {
     public static final double INACCURACY = 5000;
     private static final double MASSIVE_ERR_ODDS = 0.4;
 
-    public static double hypocenterDetectionResolutionMax = 160.0;
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
+        GQHypocs.load();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
-        Settings.hypocenterDetectionResolution = 40.0;
+        Settings.hypocenterDetectionResolution = 0.0;
         Settings.pWaveInaccuracyThreshold = 4000.0;
         Settings.parallelHypocenterLocations = true;
         long sum = 0;
@@ -42,7 +43,7 @@ public class EarthquakeAnalysisTraining {
         long a  = System.currentTimeMillis();
         int fails = 0;
         for(int i = 0; i < 100; i++) {
-            long err = runTest(888+i, STATIONS);
+            long err = runTest(888+i, STATIONS, false);
             System.err.printf("Error: %,d ms%n", err);
             if(err != -1) {
                 sum += err;
@@ -65,26 +66,36 @@ public class EarthquakeAnalysisTraining {
         System.exit(0);
     }
 
-    private static final long TARGET_TIME = 400;
 
-    public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider){
-        Settings.hypocenterDetectionResolution = 0.0;
+    public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider, boolean cpu) {
+        double resolution = 0.0;
         long lastTime;
         int seed = 6543;
         int failed = 0;
-        while(failed < 5 && Settings.hypocenterDetectionResolution <= hypocenterDetectionResolutionMax){
-            lastTime = measureTest(seed++, 60);
-            if(lastTime > TARGET_TIME){
+
+        long targetTime = HypocsSettings.getOrDefaultInt("calibrateTargetTime", 400);
+
+        while(failed < 5 && resolution <= (cpu ? 160 : 1000)) {
+            if(cpu){
+                Settings.hypocenterDetectionResolution = resolution;
+            } else {
+                Settings.hypocenterDetectionResolutionGPU = resolution;
+            }
+
+            lastTime = measureTest(seed++, 60, cpu);
+            if(lastTime > targetTime){
                 failed++;
             } else {
                 failed = 0;
-                Settings.hypocenterDetectionResolution += 4.0;
+                resolution += cpu ? 2.0 : 5.0;
             }
             if(progressUpdateFunction !=null){
-                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(Settings.hypocenterDetectionResolution / 100.0, lastTime, TARGET_TIME), (int) Math.max(0, Math.min(100, ((double)lastTime / TARGET_TIME) * 100.0)));
+                progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(
+                        resolution / 100.0, lastTime, targetTime),
+                        (int) Math.max(0, Math.min(100, ((double)lastTime / targetTime) * 100.0)));
             }
             if(slider != null){
-                slider.setValue(Settings.hypocenterDetectionResolution.intValue());
+                slider.setValue((int) resolution);
                 slider.repaint();
             }
         }
@@ -96,13 +107,13 @@ public class EarthquakeAnalysisTraining {
         Settings.save();
     }
 
-    public static long measureTest(long seed, int stations){
+    public static long measureTest(long seed, int stations, boolean cpu){
         long a = System.currentTimeMillis();
-        runTest(seed, stations);
+        runTest(seed, stations, cpu);
         return System.currentTimeMillis()-a;
     }
 
-    public static long runTest(long seed, int stations) {
+    public static long runTest(long seed, int stations, boolean cpu) {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 
@@ -121,12 +132,16 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster();
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, 200, 0, 0,0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(140 + r.nextDouble() * 10, r.nextDouble() * 10, 200, 0, 0,0, null, null);
 
         for(FakeStation fakeStation : fakeStations){
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
                     absolutetyCorrect.lon, fakeStation.lat, fakeStation.lon);
             double travelTime = TauPTravelTimeCalculator.getPWaveTravelTime(absolutetyCorrect.depth, TauPTravelTimeCalculator.toAngle(distGC));
+
+            if(travelTime < 0){
+                continue;
+            }
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
             time += (long)((r.nextDouble() - 0.5) * INACCURACY);
@@ -140,7 +155,7 @@ public class EarthquakeAnalysisTraining {
 
         cluster.calculateRoot(fakeStations);
 
-        earthquakeAnalysis.processCluster(cluster, pickedEvents);
+        earthquakeAnalysis.processCluster(cluster, pickedEvents, !cpu);
 
         Logger.debug("Shouldve been " + absolutetyCorrect);
         Logger.debug("Got           " + cluster.getPreviousHypocenter());
