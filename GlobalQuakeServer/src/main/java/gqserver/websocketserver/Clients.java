@@ -13,12 +13,11 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.tinylog.Logger;
 
+import globalquake.core.Settings;
+
 
 
 public class Clients {
-    
-    private int maxConnectionsPerUniqueIP = 10;
-
     private ScheduledExecutorService pingExecutor;
 
     // IP:PORT -> Client
@@ -32,10 +31,6 @@ public class Clients {
         pingExecutor = Executors.newScheduledThreadPool(4);
         clients = new Hashtable<String, Client>();
         uniqueIPConnectionCounts = new Hashtable<String, Integer>();
-    }
-
-    public int getMaximumConnectionsPerUniqueIP() {
-        return maxConnectionsPerUniqueIP;
     }
 
     public int getCountForIP(String ip) {
@@ -114,7 +109,7 @@ public class Clients {
         incrementConnectionCount(client.getIP());
 
         //Close the connection if the number of connections from this IP exceeds the limit
-        if(uniqueIPConnectionCounts.get(client.getIP()) > maxConnectionsPerUniqueIP) {
+        if(uniqueIPConnectionCounts.get(client.getIP()) > Settings.RTWSMaxConnectionsPerUniqueIP) {
             client.getSession().close(4420, "Too many connections from this IP");
         }
     }

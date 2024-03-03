@@ -23,7 +23,7 @@ public class JettyErrorPageHandler extends ErrorHandler {
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String message = (String) request.getAttribute(Dispatcher.ERROR_MESSAGE);
         if (message == null) {
-            message = "Unknown error";
+            message = "<NO ERROR FROM JETTY>";
         }
         Logger.error("Request encountered error from: {} - {}", request.getRemoteAddr(), message);
         

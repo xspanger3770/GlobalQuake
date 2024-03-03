@@ -5,6 +5,8 @@ import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.websocket.server.JettyWebSocketCreator;
 import org.tinylog.Logger;
 
+import globalquake.core.Settings;
+
 
 
 /**
@@ -23,18 +25,26 @@ public class EventEndpointCreatorIPConnectionLimited implements JettyWebSocketCr
     @Override
     public synchronized Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
     {
+        //If the server overall has too many connections, don't create a new connection
+        if(Clients.getInstance().getClients().size() >= Settings.RTWSEventMaxConnections) {
+            Logger.error("Maximum number of connections reached, not creating new connection");
+            return null;
+        }
+
         String ip = jettyServerUpgradeRequest.getHttpServletRequest().getRemoteAddr();
-        
         int count = Clients.getInstance().getCountForIP(ip);
         
-        if(!(count >= Clients.getInstance().getMaximumConnectionsPerUniqueIP())) {
+        //If the IP does not have too many connections, create a new connection
+        if(!(count >= Settings.RTWSMaxConnectionsPerUniqueIP)) {
             return new ServerEndpoint();
         }
         
-        //Attempt to kick the connection early if the IP has too many connections
+        /*
+            Attempt to kick the connection early if the IP has too many connections
+            Clients.addClient will also close connections if the IP has too many connections
+        */
         try {
             jettyServerUpgradeResponse.sendForbidden("Too many connections from this IP");
-            
             Logger.info("Connection from " + ip + " was denied due to too many connections");
         } catch (Exception e) {
             Logger.error(e, "Error occurred while trying to send forbidden response");

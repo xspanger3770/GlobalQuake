@@ -17,7 +17,7 @@ public class Client {
     private Future<?> pingFuture;
     private Long lastMessageTime = 0L;
     
-    private static Duration pingInterval = Duration.ofSeconds(20);
+    private static Duration pingInterval = Duration.ofSeconds(25);
 
     /**
      * Create a new client object from a Jetty WebSocket session
@@ -30,7 +30,8 @@ public class Client {
         SocketAddress remoteAddress = session.getRemoteAddress();
         //If the remote address is null, close the connection. Might happen.. idk
         if(remoteAddress == null) {
-            session.close(0, "No remote address"); //TODO: Log this. This will also trigger the onWebSocketClose event
+            Logger.error("A critical error occurred while trying to get the remote address for a new client");
+            session.close(0, "No remote address");
             return;
         }
         
@@ -39,11 +40,11 @@ public class Client {
         ip = inetAddress.getAddress().getHostAddress();
         uniqueID = ip + ":" +  inetAddress.getPort();
 
-        pingFuture = Clients.getInstance().getPingExecutor().scheduleAtFixedRate(this::virtualPingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
+        pingFuture = Clients.getInstance().getPingExecutor().scheduleAtFixedRate(this::pingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
 
-    private void virtualPingThread(){
+    private void pingThread(){
         if(!isConnected()) {
             pingFuture.cancel(true);
             return;
@@ -58,7 +59,6 @@ public class Client {
 
         try {
             session.getRemote().sendPing(null);
-            Logger.info("Sent ping to " + uniqueID);
         } catch (Exception e) {
             session.close();
         }
