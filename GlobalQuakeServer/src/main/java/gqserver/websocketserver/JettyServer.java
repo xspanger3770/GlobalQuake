@@ -86,21 +86,6 @@ public class JettyServer {
     }
     
     public void start() {
-        // server.setHandler(contexts);
-
-        //call Clients.getInstance().DEBUG_SAVE_CONNECTION_COUNTS() every 3 seconds
-        Thread debugSaveConnectionCounts = new Thread(() -> {
-            while(true) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Clients.getInstance().DEBUG_SAVE_CONNECTION_COUNTS();
-            }
-        });
-        debugSaveConnectionCounts.start();
-
         try {
             server.start();
         } catch (Exception e) {
