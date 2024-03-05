@@ -13,7 +13,6 @@ import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 
 import gqserver.bot.DiscordBot;
 import gqserver.fdsnws_event.FdsnwsEventsHTTPServer;
-import gqserver.websocketserver.JettyServer;
 import gqserver.websocketserver.WebSocketEventServer;
 import globalquake.utils.Scale;
 import gqserver.server.GlobalQuakeServer;
