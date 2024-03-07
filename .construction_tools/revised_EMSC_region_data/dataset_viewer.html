@@ -43,14 +43,6 @@
             opacity: 0.5;
         }
 
-        #fileDropZone {
-            width: 100%;
-            height: 100vh;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
 
     </style>
 
@@ -58,7 +50,7 @@
         <div id="map" style="width: 100%; height: 100vh;"></div>
         <input type="file" id="fileInput" onchange="loadFileFromUserInput(event)" accept=".geojson" style="display: none;">
         <button id="loadButton" onclick="loadButtonClicked()">Load GeoJSON<br>or drag and drop</button>
-        <div id="fileDropZone"></div>
+
     </body>
 
     <script>
@@ -91,13 +83,13 @@
         }
 
         function dragOverEventHandler(e) {
-            let dz = document.getElementById('fileDropZone');
+            let dz = document.getElementById('loadButton');
             dz.classList.add('dragOver');
             dz.style.zIndex = 1002;
         }
 
         function dragLeaveEventHandler(e) {
-            let dz = document.getElementById('fileDropZone');
+            let dz = document.getElementById('loadButton');
             dz.classList.remove('dragOver');
             dz.style.zIndex = 1000;
         }
@@ -116,11 +108,11 @@
             }
         }
 
-        document.getElementById('fileDropZone').addEventListener('dragenter', dragOverEventHandler, false)
+        document.getElementById('loadButton').addEventListener('dragenter', dragOverEventHandler, false)
 
-        document.getElementById('fileDropZone').addEventListener('dragleave', dragLeaveEventHandler, false)
+        document.getElementById('loadButton').addEventListener('dragleave', dragLeaveEventHandler, false)
 
-        document.getElementById('fileDropZone').addEventListener('drop', handleDrop, false)
+        document.getElementById('loadButton').addEventListener('drop', handleDrop, false)
 
         document.getElementById("fileInput").addEventListener("cancel", function() {
             loadingDialog(false);
