@@ -15,3 +15,11 @@ Several European country borders have been sourced from UNHCR.
 HUMDATA is the Humanitarian data Exchange which is provided by, OCHA Regional Office for Asia and the Pacific.
 
 Japan prefectures have been added from HUMDATA
+
+Turkey regions were accessed from the Overpass API, with this query:
+https://overpass-turbo.eu/s/1I7F
+
+    [out:json][timeout:25];
+    {{geocodeArea:Turkey}}->.searchArea;
+    nwr["admin_level"="3"](area.searchArea);
+    out geom;
