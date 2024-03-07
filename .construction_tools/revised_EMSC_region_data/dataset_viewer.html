@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+    </head>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #mapid {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        #loadButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+
+            padding: 8px;
+
+            font-size: large;
+            height: fit-content;
+            width: fit-content;
+
+            border-radius: 8px;
+
+            background-color: blue;
+
+            z-index: 1001;
+        }
+
+        .dragOver {
+            background-color: black;
+            opacity: 0.5;
+        }
+
+        #fileDropZone {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+    </style>
+
+    <body>
+        <div id="map" style="width: 100%; height: 100vh;"></div>
+        <input type="file" id="fileInput" onchange="loadFileFromUserInput(event)" accept=".geojson" style="display: none;">
+        <button id="loadButton" onclick="loadButtonClicked()">Load GeoJSON<br>or drag and drop</button>
+        <div id="fileDropZone"></div>
+    </body>
+
+    <script>
+        function preventDefaults (e) {
+            e.preventDefault()
+            e.stopPropagation()
+        }
+        // Prevent default drag behaviors
+        ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.body.addEventListener(eventName, preventDefaults, false)
+        })
+
+        function loadButtonClicked() {
+            loadingDialog(true);
+            document.getElementById('fileInput').click();
+        }
+
+        function loadingDialog(show){
+            let button = document.getElementById('loadButton');
+            if(show){
+                button.innerText = 'Loading...';
+                button.style.color = 'gray';
+            }
+            else{
+                button.innerHTML = 'Load GeoJSON<br>or drag and drop';
+                button.style.color = 'white';
+            }
+
+            button.disabled = show;
+        }
+
+        function dragOverEventHandler(e) {
+            let dz = document.getElementById('fileDropZone');
+            dz.classList.add('dragOver');
+            dz.style.zIndex = 1002;
+        }
+
+        function dragLeaveEventHandler(e) {
+            let dz = document.getElementById('fileDropZone');
+            dz.classList.remove('dragOver');
+            dz.style.zIndex = 1000;
+        }
+
+        // Handle dropped files
+        function handleDrop(e) {
+            loadingDialog(true);
+            dragLeaveEventHandler(e);
+            let files = e.dataTransfer.files;
+            if(! files.length) {
+                return
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                loadFileAndShow(files[i]);
+            }
+        }
+
+        document.getElementById('fileDropZone').addEventListener('dragenter', dragOverEventHandler, false)
+
+        document.getElementById('fileDropZone').addEventListener('dragleave', dragLeaveEventHandler, false)
+
+        document.getElementById('fileDropZone').addEventListener('drop', handleDrop, false)
+
+        document.getElementById("fileInput").addEventListener("cancel", function() {
+            loadingDialog(false);
+        });
+        
+        function getRandomColor() {
+            let letters = '0123456789ABCDEF';
+            let color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function onEachFeature(feature, layer) {
+            // Create popup content from feature properties
+            let popupContent = "";
+            for (let property in feature.properties) {
+                popupContent += property + ": " + feature.properties[property] + "<br>";
+            }
+            layer.bindPopup(popupContent);
+        }
+        
+        function styleFeature(feature) {
+            return {
+                fillColor: getRandomColor(),
+                fillOpacity: 0.8,
+                weight: 2
+            };
+        }
+
+        function centerMapToFeatures() {
+            let layers = map._layers;
+            let bounds = null;
+
+            for (let layer in layers) {
+                if (layers[layer]._latlngs) {
+                    if (!bounds) {
+                        bounds = layers[layer].getBounds();
+                    } else {
+                        bounds.extend(layers[layer].getBounds());
+                    }
+                }
+            }
+
+            if (bounds) {
+                map.fitBounds(bounds);
+            }
+        }
+
+        function loadFileFromUserInput(event) {
+            loadingDialog(true);
+            let file = event.target.files[0];
+
+            if (!file) {
+                loadingDialog(false);
+                return;
+            }
+
+            loadFileAndShow(file);
+        }
+
+        function loadFileAndShow(file){
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let data = JSON.parse(e.target.result);
+                L.geoJSON(data, {
+                    style: styleFeature, // Apply random color style
+                    onEachFeature: onEachFeature // Handle each feature
+                }).addTo(map);
+                centerMapToFeatures();
+                loadingDialog(false);
+            };
+            reader.readAsText(file);
+        }
+        
+        // Create Leaflet map
+        var map = L.map('map').setView([51.505, -0.09], 5);
+
+        // Add base tiles (e.g., OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    </script>
+</html>
