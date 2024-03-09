@@ -199,7 +199,7 @@ public class StationDatabaseManager {
         new Thread(() -> {
             toBeUpdated.parallelStream().forEach(seedlinkNetwork -> {
                         for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                            if(runSeedlinkUpdate(seedlinkNetwork, attempt + 1)){
+                            if (runSeedlinkUpdate(seedlinkNetwork, attempt + 1)) {
                                 break;
                             }
                         }
@@ -246,7 +246,7 @@ public class StationDatabaseManager {
         try {
             removeAllSeedlinks(getStationDatabase().getSeedlinkNetworks());
             removeAllStationSources(getStationDatabase().getStationSources());
-            getStationDatabase().addDefaults();
+            //getStationDatabase().addDefaults();
             fireUpdateEvent();
         } finally {
             getStationDatabase().getDatabaseWriteLock().unlock();
@@ -258,6 +258,8 @@ public class StationDatabaseManager {
             for (Station station : network.getStations()) {
                 for (Channel channel : station.getChannels()) {
                     toBeRemoved.forEach(channel.getSeedlinkNetworks()::remove);
+                    channel.getSeedlinkNetworks().entrySet().removeIf(
+                            seedlinkNetworkLongEntry -> !getStationDatabase().getSeedlinkNetworks().contains(seedlinkNetworkLongEntry.getKey()));
                 }
                 if (station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
                     station.selectBestAvailableChannel();
@@ -277,6 +279,7 @@ public class StationDatabaseManager {
                 for (Iterator<Channel> channelIterator = station.getChannels().iterator(); channelIterator.hasNext(); ) {
                     Channel channel = channelIterator.next();
                     toBeRemoved.forEach(channel.getStationSources()::remove);
+                    channel.getStationSources().removeIf(source -> !getStationDatabase().getStationSources().contains(source));
                     if (channel.getStationSources().isEmpty()) {
                         channelIterator.remove();
                     }
