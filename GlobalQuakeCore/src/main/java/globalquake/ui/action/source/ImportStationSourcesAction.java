@@ -63,15 +63,17 @@ public class ImportStationSourcesAction extends AbstractAction {
         var iter = reader.iterator();
         while (iter.hasNext()) {
             String[] data = iter.next();
-            try {
-                loaded.add(createSeedlinkNetworkFromStringArray(data));
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+            loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
+
+
+        boolean delete = JOptionPane.showConfirmDialog(parent, "Keep existing station sources?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION;
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try {
+            if (delete) {
+                databaseManager.removeAllStationSources(databaseManager.getStationDatabase().getStationSources());
+            }
             databaseManager.getStationDatabase().getStationSources().addAll(loaded);
         } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
@@ -81,7 +83,7 @@ public class ImportStationSourcesAction extends AbstractAction {
     }
 
     public StationSource createSeedlinkNetworkFromStringArray(String[] array) {
-        if (array.length != 4) {
+        if (array.length != 2) {
             throw new IllegalArgumentException("Invalid array length");
         }
 

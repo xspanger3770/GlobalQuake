@@ -1,10 +1,9 @@
 package globalquake.ui.database;
 
 import globalquake.core.database.StationDatabaseManager;
-import globalquake.ui.action.source.AddStationSourceAction;
-import globalquake.ui.action.source.EditStationSourceAction;
-import globalquake.ui.action.source.RemoveStationSourceAction;
-import globalquake.ui.action.source.UpdateStationSourceAction;
+import globalquake.ui.action.seedlink.ExportSeedlinksAction;
+import globalquake.ui.action.seedlink.ImportSeedlinksAction;
+import globalquake.ui.action.source.*;
 import globalquake.ui.table.StationSourcesTableModel;
 
 import javax.swing.*;
@@ -18,6 +17,9 @@ public class StationSourcesPanel extends JPanel {
     private final EditStationSourceAction editStationSourceAction;
     private final RemoveStationSourceAction removeStationSourceAction;
     private final UpdateStationSourceAction updateStationSourceAction;
+    private final ExportStationSourcesAction exportStationSourcesAction;
+    private final ImportStationSourcesAction importStationSourcesAction;
+
     private final JTable table;
     private final JButton selectButton;
     private final JButton launchButton;
@@ -32,6 +34,8 @@ public class StationSourcesPanel extends JPanel {
         this.editStationSourceAction = new EditStationSourceAction(parent, manager);
         this.removeStationSourceAction = new RemoveStationSourceAction(manager, this);
         this.updateStationSourceAction = new UpdateStationSourceAction(manager);
+        this.exportStationSourcesAction = new ExportStationSourcesAction(parent, manager);
+        this.importStationSourcesAction = new ImportStationSourcesAction(parent, manager);
 
         setLayout(new BorderLayout());
 
@@ -60,16 +64,17 @@ public class StationSourcesPanel extends JPanel {
     private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
         JPanel actionsPanel = new JPanel();
 
-        GridLayout gridLayout = new GridLayout(1, 4);
-        gridLayout.setHgap(5);
-
-        actionsPanel.setLayout(gridLayout);
+        actionsPanel.setLayout( new GridLayout(2,6,5,5));
 
         actionsPanel.add(new JButton(addStationSourceAction));
         actionsPanel.add(new JButton(editStationSourceAction));
         actionsPanel.add(new JButton(removeStationSourceAction));
         actionsPanel.add(new JButton(updateStationSourceAction));
         actionsPanel.add(new JButton(restoreDatabaseAction));
+        actionsPanel.add(new JLabel());
+        actionsPanel.add(new JButton(importStationSourcesAction));
+        actionsPanel.add(new JLabel());
+        actionsPanel.add(new JButton(exportStationSourcesAction));
 
         return actionsPanel;
     }
@@ -98,6 +103,8 @@ public class StationSourcesPanel extends JPanel {
         removeStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
         updateStationSourceAction.setEnabled(count >= 1 && !manager.isUpdating());
         addStationSourceAction.setEnabled(!manager.isUpdating());
+        exportStationSourcesAction.setEnabled(!manager.isUpdating());
+        importStationSourcesAction.setEnabled(!manager.isUpdating());
         selectButton.setEnabled(!manager.isUpdating());
         launchButton.setEnabled(!manager.isUpdating());
     }

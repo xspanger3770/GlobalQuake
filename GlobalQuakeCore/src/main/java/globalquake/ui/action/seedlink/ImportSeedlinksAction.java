@@ -62,15 +62,16 @@ public class ImportSeedlinksAction extends AbstractAction {
         var iter = reader.iterator();
         while (iter.hasNext()) {
             String[] data = iter.next();
-            try {
-                loaded.add(createSeedlinkNetworkFromStringArray(data));
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+            loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
+
+        boolean delete = JOptionPane.showConfirmDialog(parent, "Keep existing seedlink networks?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION;
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
         try {
+            if (delete) {
+                databaseManager.removeAllSeedlinks(databaseManager.getStationDatabase().getSeedlinkNetworks());
+            }
             databaseManager.getStationDatabase().getSeedlinkNetworks().addAll(loaded);
         } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();

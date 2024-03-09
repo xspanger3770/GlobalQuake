@@ -86,7 +86,6 @@ public class ExportStationSourcesAction extends AbstractAction {
             result.add(new String[]{
                     stationSource.getName().replace('"', ' '),
                     stationSource.getUrl().replace('"', ' '),
-                    String.valueOf(stationSource.getLastUpdate()),
             });
         }
         return result;
