@@ -60,10 +60,11 @@ public class StationDatabase implements Serializable {
     }
 
     public StationDatabase() {
-        addDefaults();
+        //addDefaults();
     }
 
     @SuppressWarnings("HttpUrlsUsage")
+    @Deprecated
     public void addDefaults() {
         stationSources.add(new StationSource("BGR", "https://eida.bgr.de/fdsnws/station/1/"));
         stationSources.add(new StationSource("KNMI", "http://rdsa.knmi.nl/fdsnws/station/1/"));
