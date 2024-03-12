@@ -38,7 +38,6 @@ public class GQServerSocket {
     private static final int WATCHDOG_TIMEOUT = 60 * 1000;
 
     public static final int READ_TIMEOUT = WATCHDOG_TIMEOUT + 10 * 1000;
-    private static final int CONNECTIONS_LIMIT = 3;
     private final DataService dataService;
     private SocketStatus status;
     private ExecutorService handshakeService;
@@ -277,7 +276,7 @@ public class GQServerSocket {
         synchronized (connectionsMapLock) {
             int connections = connectionsMap.getOrDefault(address, 1);
 
-            if (connections > CONNECTIONS_LIMIT) {
+            if (connections > Settings.maxConnectionsFromIP) {
                 return false;
             }
 
