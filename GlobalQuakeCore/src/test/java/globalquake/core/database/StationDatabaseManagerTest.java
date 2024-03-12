@@ -74,6 +74,8 @@ public class StationDatabaseManagerTest {
         Channel dummyChannel2 = new Channel("coolChannel2", "00", 50, 0, 0, 0, stationSource2, -1, InputType.UNKNOWN);
 
         StationDatabase stationDatabase = new StationDatabase();
+        stationDatabase.getStationSources().add(stationSource1);
+        stationDatabase.getStationSources().add(stationSource2);
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
 
         stationDatabase.getStationSources().add(stationSource1);
@@ -128,6 +130,10 @@ public class StationDatabaseManagerTest {
         assertEquals(dummySeedlinkNetwork2, dummyChannel.selectBestSeedlinkNetwork());
 
         StationDatabase stationDatabase = new StationDatabase();
+        stationDatabase.getStationSources().add(stationSource1);
+        stationDatabase.getStationSources().add(stationSource2);
+        stationDatabase.getSeedlinkNetworks().add(dummySeedlinkNetwork);
+        stationDatabase.getSeedlinkNetworks().add(dummySeedlinkNetwork2);
         StationDatabaseManager stationDatabaseManager = new StationDatabaseManager(stationDatabase);
 
         stationDatabase.getStationSources().add(stationSource1);
