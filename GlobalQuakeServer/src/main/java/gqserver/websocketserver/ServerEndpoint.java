@@ -7,39 +7,32 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 public class ServerEndpoint extends WebSocketAdapter{
     Client client;
-    public ServerEndpoint() {
-
-    }
+    public ServerEndpoint() {}
 
     @Override
-    public void onWebSocketConnect(Session sess)
-    {
+    public void onWebSocketConnect(Session sess){
         Client client = new Client(sess);
         this.client = client;
-        Clients.getInstance().addClient(client);
+        WebSocketEventServer.getInstance().getClientsHandler().addClient(client);
     }
 
     @Override
-    public void onWebSocketText(String message)
-    {
+    public void onWebSocketText(String message){
         client.updateLastMessageTime();
     }
 
     @Override
-    public void onWebSocketClose(int statusCode, String reason)
-    {
+    public void onWebSocketClose(int statusCode, String reason){
         client.disconnectEvent();
     }
 
     @Override
-    public void onWebSocketError(Throwable cause)
-    {
+    public void onWebSocketError(Throwable cause){
         //close is called automatically
     }
 
     @Override
-    public void onWebSocketBinary(byte[] payload, int offset, int len)
-    {
+    public void onWebSocketBinary(byte[] payload, int offset, int len){
         client.updateLastMessageTime();
     }
 }

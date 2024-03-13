@@ -11,20 +11,16 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import org.tinylog.Logger;
 
 import globalquake.core.Settings;
-import gqserver.websocketserver.handler_chain.DropConnectionHandler;
-import gqserver.websocketserver.handler_chain.ServerHeader;
-import gqserver.websocketserver.handler_chain.HttpCatchAllLogger;
+import gqserver.websocketserver.handlers.DropConnectionHandler;
+import gqserver.websocketserver.handlers.ServerHeader;
+import gqserver.websocketserver.handlers.HttpCatchAllLogger;
 
 
 public class JettyServer {
-    private static Server server;
-    private static ServerConnector connector;
+    private Server server;
+    private ServerConnector connector;
 
-
-    //ALWAYS HAVE THIS LINE LAST SO OTHER STATIC VARIABLES ARE INITIALIZED
-    private static JettyServer instance = new JettyServer();
-
-	private JettyServer() {
+	public JettyServer() {
         server = new Server();
         connector = new ServerConnector(server);
 
@@ -43,10 +39,6 @@ public class JettyServer {
         initHandlers();
     }
 
-    public static JettyServer getInstance() {
-        return instance;
-    }
-    
 
     private void initHandlers() {
         /*

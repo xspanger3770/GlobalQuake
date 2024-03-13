@@ -40,7 +40,7 @@ public class Client {
         ip = inetAddress.getAddress().getHostAddress();
         uniqueID = ip + ":" +  inetAddress.getPort();
 
-        pingFuture = Clients.getInstance().getPingExecutor().scheduleAtFixedRate(this::pingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
+        pingFuture = WebSocketEventServer.getInstance().getClientsHandler().getPingExecutor().scheduleAtFixedRate(this::pingThread, pingInterval.toMillis(), pingInterval.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
 
@@ -68,7 +68,7 @@ public class Client {
 
     public void sendString(String message) throws IOException {
         session.getRemote().sendString(message);
-        lastMessageTime = System.currentTimeMillis();
+        updateLastMessageTime();
     }
 
     public boolean isConnected() {
@@ -76,7 +76,7 @@ public class Client {
     }
 
     public void disconnectEvent() {
-        Clients.getInstance().clientDisconnected(this.getUniqueID());
+        WebSocketEventServer.getInstance().getClientsHandler().clientDisconnected(this.getUniqueID());
     }
 
     public void updateLastMessageTime() {

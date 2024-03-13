@@ -12,15 +12,10 @@ import org.tinylog.Logger;
  */
 public class WebSocketBroadcast {
     
-    ExecutorService sendExecutor = Executors.newFixedThreadPool(10);
+    ExecutorService sendExecutor;
 
-    static WebSocketBroadcast instance = new WebSocketBroadcast();
-
-    private WebSocketBroadcast() {
-    }
-
-    public static WebSocketBroadcast getInstance() {
-        return instance;
+    public WebSocketBroadcast() {
+        sendExecutor = Executors.newFixedThreadPool(10); //Attempt 10 simultaneous sends
     }
 
     private void sendThread(Client client, String message) {
@@ -34,7 +29,7 @@ public class WebSocketBroadcast {
     }
 
     public void broadcast(String message) {
-        for (Client client : Clients.getInstance().getClients()) {
+        for (Client client : WebSocketEventServer.getInstance().getClientsHandler().getClients()){
             sendExecutor.execute(() -> sendThread(client, message));
         }
     }

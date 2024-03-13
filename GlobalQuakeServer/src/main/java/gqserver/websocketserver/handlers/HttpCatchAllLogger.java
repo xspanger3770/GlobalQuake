@@ -1,4 +1,4 @@
-package gqserver.websocketserver.handler_chain;
+package gqserver.websocketserver.handlers;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

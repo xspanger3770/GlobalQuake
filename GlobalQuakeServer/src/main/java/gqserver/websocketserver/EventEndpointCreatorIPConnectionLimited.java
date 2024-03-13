@@ -26,13 +26,13 @@ public class EventEndpointCreatorIPConnectionLimited implements JettyWebSocketCr
     public synchronized Object createWebSocket(JettyServerUpgradeRequest jettyServerUpgradeRequest, JettyServerUpgradeResponse jettyServerUpgradeResponse)
     {
         //If the server overall has too many connections, don't create a new connection
-        if(Clients.getInstance().getClients().size() >= Settings.RTWSEventMaxConnections) {
+        if(WebSocketEventServer.getInstance().getClientsHandler().getClients().size() >= Settings.RTWSEventMaxConnections) {
             Logger.error("Maximum number of connections reached, not creating new connection");
             return null;
         }
 
         String ip = jettyServerUpgradeRequest.getHttpServletRequest().getRemoteAddr();
-        int count = Clients.getInstance().getCountForIP(ip);
+        int count = WebSocketEventServer.getInstance().getClientsHandler().getCountForIP(ip);
         
         //If the IP does not have too many connections, create a new connection
         if(!(count >= Settings.RTWSMaxConnectionsPerUniqueIP)) {

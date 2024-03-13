@@ -3,6 +3,7 @@ package gqserver.websocketserver;
 import org.json.JSONObject;
 
 import globalquake.core.GlobalQuake;
+import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
 import globalquake.core.events.GlobalQuakeEventListener;
@@ -20,9 +21,28 @@ import org.tinylog.Logger;
  */
 public class WebSocketEventServer {
     
+    private JettyServer jettyServer;
+    private WebSocketBroadcast broadcastService;
+    private ClientsHandler clientsHandler;
+
     private static WebSocketEventServer instance = new WebSocketEventServer();
 
     private WebSocketEventServer() {
+        jettyServer = new JettyServer();
+        broadcastService = new WebSocketBroadcast();
+        clientsHandler = new ClientsHandler();
+    }
+
+    public JettyServer getJettyServer() {
+        return jettyServer;
+    }
+
+    public WebSocketBroadcast getBroadcastService() {
+        return broadcastService;
+    }
+
+    public ClientsHandler getClientsHandler() {
+        return clientsHandler;
     }
 
     /**
@@ -31,15 +51,13 @@ public class WebSocketEventServer {
      */
     public void init(){
         Logger.info("Initializing WebSocketEventServer");
-        JettyServer.getInstance(); //initialize the Jetty server
         initEventListeners();
-        WebSocketBroadcast.getInstance(); // Start the broadcast service
     }
-    
 
     public void start() {
         Logger.info("Starting WebSocketEventServer");
-        JettyServer.getInstance().start();
+        jettyServer.start();
+        Logger.info("WebSocketEventServer started on " + Settings.RTWSEventIP + ":" + Settings.RTWSEventPort);
     }
 
     public static WebSocketEventServer getInstance() {
@@ -78,7 +96,7 @@ public class WebSocketEventServer {
         JSONObject json = new JSONObject();
         json.put("action", action);
         json.put("data", quake.getGeoJSON());
-        WebSocketBroadcast.getInstance().broadcast(json.toString());
+        broadcastService.broadcast(json.toString());
     }
 
 }

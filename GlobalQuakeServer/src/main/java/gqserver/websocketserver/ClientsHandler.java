@@ -17,7 +17,7 @@ import globalquake.core.Settings;
 
 
 
-public class Clients {
+public class ClientsHandler {
     private ScheduledExecutorService pingExecutor;
 
     // IP:PORT -> Client
@@ -25,9 +25,8 @@ public class Clients {
     
     //IP -> Integer
     private Hashtable<String, Integer> uniqueIPConnectionCounts;
-    
-    private static Clients instance = new Clients();
-    private Clients() {
+
+    public ClientsHandler() {
         pingExecutor = Executors.newScheduledThreadPool(4);
         clients = new Hashtable<String, Client>();
         uniqueIPConnectionCounts = new Hashtable<String, Integer>();
@@ -141,9 +140,5 @@ public class Clients {
             e.printStackTrace();
         }
 
-    }
-
-    public static Clients getInstance() {
-        return instance;
     }
 }

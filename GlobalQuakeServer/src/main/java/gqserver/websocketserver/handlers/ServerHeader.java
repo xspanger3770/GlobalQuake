@@ -1,4 +1,4 @@
-package gqserver.websocketserver.handler_chain;
+package gqserver.websocketserver.handlers;
 
 
 import org.eclipse.jetty.server.Request;
@@ -17,9 +17,6 @@ import java.io.IOException;
  */
 public class ServerHeader extends AbstractHandler{
     public static final String SERVER_HEADER = "GlobalQuake RTWS Event Server";
-
-    public ServerHeader( ) {
-    }
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
