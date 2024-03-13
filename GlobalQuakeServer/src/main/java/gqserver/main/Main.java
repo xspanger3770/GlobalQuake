@@ -137,7 +137,7 @@ public class Main {
         }
     }
 
-    private static final double PHASES = 10.0;
+    private static final double PHASES = 11.0;
 
     private static int phase = 0;
 
