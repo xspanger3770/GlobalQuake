@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import java.util.concurrent.Executors;
@@ -21,25 +21,19 @@ public class ClientsHandler {
     private ScheduledExecutorService pingExecutor;
 
     // IP:PORT -> Client
-    private Hashtable<String, Client> clients;
+    private HashMap<String, Client> clients;
     
     //IP -> Integer
-    private Hashtable<String, Integer> uniqueIPConnectionCounts;
+    private HashMap<String, Integer> uniqueIPConnectionCounts;
 
     public ClientsHandler() {
         pingExecutor = Executors.newScheduledThreadPool(4);
-        clients = new Hashtable<String, Client>();
-        uniqueIPConnectionCounts = new Hashtable<String, Integer>();
+        clients = new HashMap<String, Client>();
+        uniqueIPConnectionCounts = new HashMap<String, Integer>();
     }
 
     public int getCountForIP(String ip) {
-        int count = 0;
-        try{
-            count = uniqueIPConnectionCounts.get(ip);
-        }
-        catch(Exception e) {}
-        
-        return count;
+        return uniqueIPConnectionCounts.getOrDefault(ip, 0);
     }
 
     /**
