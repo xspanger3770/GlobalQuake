@@ -83,7 +83,7 @@ public class ClientsHandler {
         return count;
     }
 
-    public void clientDisconnected(String uniqueID) {
+    public synchronized void clientDisconnected(String uniqueID) {
         Logger.info("Client disconnected: " + uniqueID);
 
         Client client = clients.get(uniqueID);
