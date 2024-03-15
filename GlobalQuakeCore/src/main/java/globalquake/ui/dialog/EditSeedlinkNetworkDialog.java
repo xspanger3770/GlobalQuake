@@ -48,7 +48,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         fieldsPanel.add(nameField);
         fieldsPanel.add(new JLabel("Host (e.g. geofon.gfz-potsdam.de):"));
         fieldsPanel.add(hostField);
-        fieldsPanel.add(new JLabel("Port (default 38000):"));
+        fieldsPanel.add(new JLabel("Port (default 18000):"));
         fieldsPanel.add(portField);
         fieldsPanel.add(new JLabel("Timeout (seconds):"));
         fieldsPanel.add(timeoutField);
