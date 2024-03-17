@@ -38,6 +38,11 @@ public class DiscordBotDebug extends ListenerAdapter {
             }
         }
 
+        /*Guild guild = jda.getGuildById("1146784713806188614");
+        TextChannel textChannel = guild.getTextChannelsByName("general", true).get(0);
+
+        textChannel.sendMessage("M15 Incoming").queue();*/
+
        /* Guild guild = jda.getGuildById("955128942078087228");
 
         for(var member:guild.getRoles()){
