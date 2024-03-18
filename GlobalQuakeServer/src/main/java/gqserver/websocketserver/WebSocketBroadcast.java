@@ -29,7 +29,7 @@ public class WebSocketBroadcast {
     }
 
     public void broadcast(String message) {
-        for (Client client : WebSocketEventServer.getInstance().getClientsHandler().getClients()){
+        for (Client client : WebSocketEventServer.getInstance().getClientsHandler().getClients().values()) {
             sendExecutor.execute(() -> sendThread(client, message));
         }
     }

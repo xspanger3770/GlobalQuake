@@ -3,9 +3,7 @@ package gqserver.websocketserver;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -107,8 +105,8 @@ public class ClientsHandler {
         }
     }
 
-    public List<Client> getClients() {
-        return new ArrayList<Client>(clients.values());
+    public HashMap<String, Client> getClients(){
+        return clients;
     }
 
     public ScheduledExecutorService getPingExecutor() {
