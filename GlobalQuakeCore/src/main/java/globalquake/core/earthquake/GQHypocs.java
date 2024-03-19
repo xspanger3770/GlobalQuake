@@ -5,6 +5,7 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
+import globalquake.core.exception.FatalApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
@@ -81,6 +82,49 @@ public class GQHypocs {
         }
 
         return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time),0,0);
+    }
+
+    public static void main(String[] args) throws Exception{
+        performanceMeasurement();
+    }
+
+    public static void performanceMeasurement() throws Exception {
+        load();
+
+        if(!cudaLoaded) {
+            System.err.println("Test failed!");
+            System.exit(1);
+        }
+
+        TauPTravelTimeCalculator.init();
+        initCuda();
+
+        if(cudaLoaded) {
+            runSpeedTest(50, 100_000);
+        } else {
+            System.err.println("Test failed!");
+            System.exit(1);
+        }
+
+        createChart();
+
+        System.exit(0);
+    }
+
+    private static void createChart() {
+        int stations = 50;
+        for(int points = 1000; points < 10_000_000; points += 1000){
+            long a = System.currentTimeMillis();
+            runSpeedTest(stations, points);
+            System.err.println("Stations: %d: %d".formatted(stations, points));
+        }
+    }
+
+    private static void runSpeedTest(int station_count, long points) {
+        float[] stations_array = new float[station_count * 4];
+        float[] result = {0,0};
+        long time = 0;
+        GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, depth_profiles.length - 1, 90.0f, 2200);
     }
 
     public static void calculateStationLimit() {
