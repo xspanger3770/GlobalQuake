@@ -118,12 +118,20 @@ public class GQHypocs {
         int stations = 50;
         BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_results.csv"));
         writer.write("Points,Duration (ms)\n");
-        for(int points = 1000; points < 500_000; points += 1000){
+        int fails = 0;
+        int points = 1000;
+        while(fails < 5) {
             long a = System.currentTimeMillis();
             runSpeedTest(stations, points);
             long duration = System.currentTimeMillis() - a;
             writer.write(String.format("%d,%d\n", points, duration));
-            System.err.println("Stations: %d: %d".formatted(points, duration));
+            System.err.println("Points: %d: %d".formatted(points, duration));
+            if(duration > 1000){
+                fails++;
+            } else {
+                fails = 0;
+            }
+            points += 1000;
         }
         writer.close();
     }
