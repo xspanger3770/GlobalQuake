@@ -115,23 +115,29 @@ public class GQHypocs {
     }
 
     private static void createChart() throws IOException {
-        int stations = 50;
+        int[] stations_cases = new int[]{5, 10, 20, 50, 100};
         BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_results.csv"));
-        writer.write("Points,Duration (ms)\n");
-        int fails = 0;
-        int points = 1000;
-        while(fails < 5) {
-            long a = System.currentTimeMillis();
-            runSpeedTest(stations, points);
-            long duration = System.currentTimeMillis() - a;
-            writer.write(String.format("%d,%d\n", points, duration));
-            System.err.println("Points: %d: %d".formatted(points, duration));
-            if(duration > 1000){
-                fails++;
-            } else {
-                fails = 0;
+        writer.write("Points,");
+        for(int stations : stations_cases){
+            writer.write("%d Stations - Duration (ms)".formatted(stations));
+        }
+        writer.write("\n");
+        for(int stations : stations_cases) {
+            int fails = 0;
+            int points = 5000;
+            while (fails < 5) {
+                long a = System.currentTimeMillis();
+                runSpeedTest(stations, points);
+                long duration = System.currentTimeMillis() - a;
+                writer.write(String.format("%d,%d\n", points, duration));
+                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
+                if (duration > 1000) {
+                    fails++;
+                } else {
+                    fails = 0;
+                }
+                points += 5000;
             }
-            points += 1000;
         }
         writer.close();
     }
