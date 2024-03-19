@@ -11,6 +11,9 @@ import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -111,13 +114,18 @@ public class GQHypocs {
         System.exit(0);
     }
 
-    private static void createChart() {
+    private static void createChart() throws IOException {
         int stations = 50;
-        for(int points = 1000; points < 10_000_000; points += 1000){
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_results.csv"));
+        writer.write("Points,Duration (ms)\n");
+        for(int points = 1000; points < 500_000; points += 1000){
             long a = System.currentTimeMillis();
             runSpeedTest(stations, points);
-            System.err.println("Stations: %d: %d".formatted(points, System.currentTimeMillis() - a));
+            long duration = System.currentTimeMillis() - a;
+            writer.write(String.format("%d,%d\n", points, duration));
+            System.err.println("Stations: %d: %d".formatted(points, duration));
         }
+        writer.close();
     }
 
     private static void runSpeedTest(int station_count, long points) {
