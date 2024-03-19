@@ -133,12 +133,11 @@ public class GQHypocs {
                 long duration = System.currentTimeMillis() - a;
                 times[i] = duration;
                 System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
-                if (duration > 1000) {
+                if (duration > 100) {
                     fails++;
                 } else {
                     fails = 0;
                 }
-                points += 5000;
             }
 
             writer.write(String.format("%d,", points));
@@ -146,6 +145,7 @@ public class GQHypocs {
                 writer.write(String.format("%d,", time));
             }
             writer.write("\n");
+            points += 5000;
         }
         writer.close();
     }
