@@ -23,21 +23,21 @@ public class GQHypocs {
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
     // LOWEST DEPTH RESOLUTION MUST BE AT THE LAST POSITION IN THE FIELD !!
-    private static final float[] depth_profiles = new float[]{ 50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
+    private static final float[] depth_profiles = new float[]{50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
     // HIGHEST POINT COUNT MUST BE AT THE BEGINNING OF THE FIELD !!
-    private static final int[] point_profiles = new int[] { 40_000, 8_000, 4_000, 1600, 400};
-    private static final float[] dist_profiles = new float[]{ 135.0f, 30.0f, 4.0f, 0.8f, 0.2f};
+    private static final int[] point_profiles = new int[]{40_000, 8_000, 4_000, 1600, 400};
+    private static final float[] dist_profiles = new float[]{135.0f, 30.0f, 4.0f, 0.8f, 0.2f};
 
     private static boolean stationLimitCalculated = false;
     private static int stationLimit = 0;
 
     private static void printResolution() {
-        for(int i = 0; i < depth_profiles.length; i++){
-            Logger.tag("Hypocs").debug("Iteration #%d difficulty: %.2fK".formatted( i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
+        for (int i = 0; i < depth_profiles.length; i++) {
+            Logger.tag("Hypocs").debug("Iteration #%d difficulty: %.2fK".formatted(i, 750.0 / depth_profiles[i] * point_profiles[i] / 1000.0));
         }
 
-        for(int i = 0; i < depth_profiles.length; i++) {
-            double distKM = dist_profiles[i] / 360.0* GeoUtils.EARTH_CIRCUMFERENCE;
+        for (int i = 0; i < depth_profiles.length; i++) {
+            double distKM = dist_profiles[i] / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE;
             Logger.tag("Hypocs").debug("Iteration #%d space H %.2fkm V %fkm".formatted(i, Math.sqrt((distKM * distKM) / point_profiles[i]), depth_profiles[i]));
         }
     }
@@ -48,7 +48,7 @@ public class GQHypocs {
         init &= GQNativeFunctions.copyPTravelTable(TauPTravelTimeCalculator.getTravelTable().p_travel_table, (float) TauPTravelTimeCalculator.MAX_DEPTH);
         init &= GQNativeFunctions.initCUDA(depth_profiles);
 
-        if(init) {
+        if (init) {
             cudaLoaded = true;
         }
     }
@@ -71,11 +71,11 @@ public class GQHypocs {
         }
 
         float[] result = {
-                (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lat : cluster.getRootLat())  * RADIANS),
+                (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lat : cluster.getRootLat()) * RADIANS),
                 (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lon : cluster.getRootLon()) * RADIANS)
         };
 
-        for(int i = from; i < depth_profiles.length; i++){
+        for (int i = from; i < depth_profiles.length; i++) {
             result = GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], (long) (point_profiles[i] * getPointMultiplier()), i, dist_profiles[i] * RADIANS, (float) (finderSettings.pWaveInaccuracyThreshold() / 1000.0));
 
             if (result == null) {
@@ -84,10 +84,10 @@ public class GQHypocs {
 
         }
 
-        return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time),0,0);
+        return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time), 0, 0);
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         performanceMeasurement();
     }
 
@@ -95,14 +95,14 @@ public class GQHypocs {
         TauPTravelTimeCalculator.init();
         load();
 
-        if(!cudaLoaded) {
+        if (!cudaLoaded) {
             System.err.println("Test failed!");
             System.exit(1);
         }
 
         initCuda();
 
-        if(cudaLoaded) {
+        if (cudaLoaded) {
             runSpeedTest(50, 100_000);
         } else {
             System.err.println("Test failed!");
@@ -118,18 +118,20 @@ public class GQHypocs {
         int[] stations_cases = new int[]{5, 10, 20, 50, 100};
         BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_results.csv"));
         writer.write("Points,");
-        for(int stations : stations_cases){
-            writer.write("%d Stations - Duration (ms)".formatted(stations));
+        for (int stations : stations_cases) {
+            writer.write("%d Stations - Duration (ms),".formatted(stations));
         }
         writer.write("\n");
-        for(int stations : stations_cases) {
-            int fails = 0;
-            int points = 5000;
-            while (fails < 5) {
+        int fails = 0;
+        int points = 5000;
+        while (fails < 5) {
+            long[] times = new long[stations_cases.length];
+            for (int i = 0; i < stations_cases.length; i++) {
+                int stations = stations_cases[i];
                 long a = System.currentTimeMillis();
                 runSpeedTest(stations, points);
                 long duration = System.currentTimeMillis() - a;
-                writer.write(String.format("%d,%d\n", points, duration));
+                times[i] = duration;
                 System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
                 if (duration > 1000) {
                     fails++;
@@ -138,20 +140,26 @@ public class GQHypocs {
                 }
                 points += 5000;
             }
+
+            writer.write(String.format("%d,", points));
+            for (long time : times) {
+                writer.write(String.format("%d,", time));
+            }
+            writer.write("\n");
         }
         writer.close();
     }
 
     private static void runSpeedTest(int station_count, long points) {
         float[] stations_array = new float[station_count * 4];
-        float[] result = {0,0};
+        float[] result = {0, 0};
         long time = 0;
         GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, depth_profiles.length - 1, 90.0f, 2200);
     }
 
     public static void calculateStationLimit() {
         int stations = 128;
-        long bytes = GQNativeFunctions.getAllocationSize((int) (point_profiles[0]*getPointMultiplier()), stations, depth_profiles[depth_profiles.length - 1]);
+        long bytes = GQNativeFunctions.getAllocationSize((int) (point_profiles[0] * getPointMultiplier()), stations, depth_profiles[depth_profiles.length - 1]);
         double GB = bytes / (1024.0 * 1024 * 1024);
 
         stationLimitCalculated = true;
@@ -173,13 +181,13 @@ public class GQHypocs {
         try {
             System.loadLibrary("gq_hypocs");
             initCuda();
-            if(cudaLoaded) {
+            if (cudaLoaded) {
                 Logger.tag("Hypocs").info("CUDA library loaded successfully!");
                 printResolution();
             } else {
                 Logger.tag("Hypocs").warn("CUDA not loaded, earthquake parameters will be calculated on the CPU");
             }
-        } catch(Exception | UnsatisfiedLinkError e) {
+        } catch (Exception | UnsatisfiedLinkError e) {
             Logger.tag("Hypocs").warn("Failed to load or init CUDA: %s".formatted(e.getMessage()));
         }
     }
