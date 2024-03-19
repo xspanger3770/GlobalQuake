@@ -5,7 +5,6 @@ import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.earthquake.data.PreliminaryHypocenter;
-import globalquake.core.exception.FatalApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
@@ -103,27 +102,29 @@ public class GQHypocs {
         initCuda();
 
         if (cudaLoaded) {
+            calculateStationLimit();
             runSpeedTest(50, 100_000);
         } else {
             System.err.println("Test failed!");
             System.exit(1);
         }
 
-        createChart();
+        plotTimeVsPoints();
+        plotTimeVsStations();
 
         System.exit(0);
     }
 
-    private static void createChart() throws IOException {
+    private static void plotTimeVsPoints() throws IOException {
         int[] stations_cases = new int[]{4, 8, 16, 32, 64};
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_results.csv"));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_points.csv"));
         writer.write("Points,");
         for (int stations : stations_cases) {
             writer.write("%d Stations - Duration (ms),".formatted(stations));
         }
         writer.write("\n");
         int fails = 0;
-        int points = 1000;
+        int points = 5000;
         while (fails < 5) {
             long[] times = new long[stations_cases.length];
             for (int i = 0; i < stations_cases.length; i++) {
@@ -141,13 +142,51 @@ public class GQHypocs {
             }
             writer.write("\n");
 
-            if (times[0] > 1000) {
+            if (times[0] > 100) {
                 fails++;
             } else {
                 fails = 0;
             }
 
-            points += 1000;
+            points += 5000;
+        }
+        writer.close();
+    }
+
+    private static void plotTimeVsStations() throws IOException {
+        int[] points_cases = new int[]{10_000, 20_000, 50_000, 100_000};
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_stations.csv"));
+        writer.write("Stations,");
+        for (int points : points_cases) {
+            writer.write("%d Points - Duration (ms),".formatted(points));
+        }
+        writer.write("\n");
+        int fails = 0;
+        int stations = 4;
+        while (fails < 5 && stations < stationLimit) {
+            long[] times = new long[points_cases.length];
+            for (int i = 0; i < points_cases.length; i++) {
+                int points = points_cases[i];
+                long a = System.currentTimeMillis();
+                runSpeedTest(stations, points);
+                long duration = System.currentTimeMillis() - a;
+                times[i] = duration;
+                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
+            }
+
+            writer.write(String.format("%d,", stations));
+            for (long time : times) {
+                writer.write(String.format("%d,", time));
+            }
+            writer.write("\n");
+
+            if (times[0] > 100) {
+                fails++;
+            } else {
+                fails = 0;
+            }
+
+            stations += 2;
         }
         writer.close();
     }
