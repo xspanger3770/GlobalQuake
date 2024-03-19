@@ -89,6 +89,7 @@ public class GQHypocs {
     }
 
     public static void performanceMeasurement() throws Exception {
+        TauPTravelTimeCalculator.init();
         load();
 
         if(!cudaLoaded) {
@@ -96,7 +97,6 @@ public class GQHypocs {
             System.exit(1);
         }
 
-        TauPTravelTimeCalculator.init();
         initCuda();
 
         if(cudaLoaded) {
@@ -116,7 +116,7 @@ public class GQHypocs {
         for(int points = 1000; points < 10_000_000; points += 1000){
             long a = System.currentTimeMillis();
             runSpeedTest(stations, points);
-            System.err.println("Stations: %d: %d".formatted(stations, points));
+            System.err.println("Stations: %d: %d".formatted(points, System.currentTimeMillis() - a));
         }
     }
 
