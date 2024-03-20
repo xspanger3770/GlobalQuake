@@ -102,7 +102,6 @@ public class GQHypocs {
         initCuda();
 
         if (cudaLoaded) {
-            calculateStationLimit();
             runSpeedTest(50, 100_000);
         } else {
             System.err.println("Test failed!");
@@ -163,7 +162,7 @@ public class GQHypocs {
         writer.write("\n");
         int fails = 0;
         int stations = 4;
-        while (fails < 5 && stations < stationLimit) {
+        while (fails < 5) {
             long[] times = new long[points_cases.length];
             for (int i = 0; i < points_cases.length; i++) {
                 int points = points_cases[i];
