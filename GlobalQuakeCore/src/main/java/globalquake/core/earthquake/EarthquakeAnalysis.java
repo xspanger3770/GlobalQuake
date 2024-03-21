@@ -49,6 +49,7 @@ public class EarthquakeAnalysis {
     public static final int OBVIOUS_CORRECT_MIN_TOTAL = 8;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
+    private boolean HONEST_DEPTH = false;
 
     private final List<Earthquake> earthquakes;
 
@@ -253,7 +254,7 @@ public class EarthquakeAnalysis {
 
         if (far && (previousHypocenter == null || previousHypocenter.correctEvents < 24 || previousHypocenter.getCorrectness() < 0.8)) {
             // phase 1 search far from ANCHOR (it's not very certain)
-            bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings);
+            bestHypocenter = scanArea(selectedEvents, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) (40000 * pointMultiplier), _lat, _lon, 6 + iterationsDifference, maxDepth, finderSettings, HONEST_DEPTH);
             Logger.tag("Hypocs").debug("FAR: " + (System.currentTimeMillis() - timeMillis));
             Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
             _lat = bestHypocenter.lat;
@@ -263,7 +264,7 @@ public class EarthquakeAnalysis {
         if (previousHypocenter == null || previousHypocenter.correctEvents < 42 || previousHypocenter.getCorrectness() < 0.9) {
             // phase 2A search region near BEST or ANCHOR (it's quite certain)
             timeMillis = System.currentTimeMillis();
-            PreliminaryHypocenter hyp = scanArea(selectedEvents, 2500.0, (int) (20000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
+            PreliminaryHypocenter hyp = scanArea(selectedEvents, 2500.0, (int) (20000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings, HONEST_DEPTH);
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
             _lat = bestHypocenter.lat;
             _lon = bestHypocenter.lon;
@@ -272,7 +273,7 @@ public class EarthquakeAnalysis {
         } else {
             // phase 2B search region closer BEST or ANCHOR (it assumes it's almost right)
             timeMillis = System.currentTimeMillis();
-            PreliminaryHypocenter hyp = scanArea(selectedEvents, 1000.0, (int) (10000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings);
+            PreliminaryHypocenter hyp = scanArea(selectedEvents, 1000.0, (int) (10000 * pointMultiplier), _lat, _lon, 7 + iterationsDifference, maxDepth, finderSettings, HONEST_DEPTH);
             bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
             _lat = bestHypocenter.lat;
             _lon = bestHypocenter.lon;
@@ -282,7 +283,7 @@ public class EarthquakeAnalysis {
 
         // phase 3 find exact area
         timeMillis = System.currentTimeMillis();
-        PreliminaryHypocenter hyp = scanArea(selectedEvents, 100.0, (int) (4000 * pointMultiplier), _lat, _lon, 8 + iterationsDifference, maxDepth, finderSettings);
+        PreliminaryHypocenter hyp = scanArea(selectedEvents, 100.0, (int) (4000 * pointMultiplier), _lat, _lon, 8 + iterationsDifference, maxDepth, finderSettings, HONEST_DEPTH);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.tag("Hypocs").debug("EXACT: " + (System.currentTimeMillis() - timeMillis));
         Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
@@ -291,7 +292,7 @@ public class EarthquakeAnalysis {
         timeMillis = System.currentTimeMillis();
         _lat = bestHypocenter.lat;
         _lon = bestHypocenter.lon;
-        hyp = scanArea(selectedEvents, 10.0, (int) (4000 * pointMultiplier), _lat, _lon, 10 + iterationsDifference, maxDepth, finderSettings);
+        hyp = scanArea(selectedEvents, 10.0, (int) (4000 * pointMultiplier), _lat, _lon, 10 + iterationsDifference, maxDepth, finderSettings, HONEST_DEPTH);
         bestHypocenter = selectBetterHypocenter(hyp, bestHypocenter);
         Logger.tag("Hypocs").debug("DEPTH: " + (System.currentTimeMillis() - timeMillis));
         Logger.tag("Hypocs").debug(bestHypocenter.correctStations + " / " + bestHypocenter.err);
@@ -433,7 +434,7 @@ public class EarthquakeAnalysis {
                 threadData.bestHypocenter.correctStations = 0;
 
                 calculateDistances(pickedEvents, lat, lon);
-                getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData);
+                getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData, HONEST_DEPTH);
 
                 double h1 = calculateHeuristic(threadData.bestHypocenter);
                 double h2 = calculateHeuristic(bestHypocenter);
@@ -470,7 +471,7 @@ public class EarthquakeAnalysis {
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
         calculateDistances(pickedEvents, bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
         getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
-                bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData);
+                bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData, HONEST_DEPTH);
 
         bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
         bestHypocenterPrelim.err = threadData.bestHypocenter.err;
@@ -711,7 +712,7 @@ public class EarthquakeAnalysis {
         for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()) {
             double distGC = GeoUtils.greatCircleDistance(bestHypocenter.lat, bestHypocenter.lon, station.getLatitude(), station.getLongitude());
 
-            if(distGC > OBVIOUS_CORRECT_MAX_DISTANCE){
+            if (distGC > OBVIOUS_CORRECT_MAX_DISTANCE) {
                 continue;
             }
 
@@ -745,7 +746,7 @@ public class EarthquakeAnalysis {
     public static final double PHI = 1.61803398875;
 
     public static PreliminaryHypocenter scanArea(List<PickedEvent> events, double maxDist, int points, double _lat, double _lon, int depthIterations,
-                                           double maxDepth, HypocenterFinderSettings finderSettings) {
+                                                 double maxDepth, HypocenterFinderSettings finderSettings, boolean honestDepth) {
         int CPUS = Runtime.getRuntime().availableProcessors();
         double c = maxDist / Math.sqrt(points);
         double one = points / (double) CPUS;
@@ -768,7 +769,7 @@ public class EarthquakeAnalysis {
                         double lon = latLon[1];
 
                         calculateDistances(pickedEvents, lat, lon);
-                        getBestAtDepth(depthIterations, maxDepth, finderSettings, 0, lat, lon, pickedEvents, threadData);
+                        getBestAtDepth(depthIterations, maxDepth, finderSettings, 0, lat, lon, pickedEvents, threadData, honestDepth);
                     }
                     return threadData.bestHypocenter;
                 }
@@ -788,7 +789,7 @@ public class EarthquakeAnalysis {
                 distance -> {
                     List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(events);
                     HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
-                    getBestAtDist(distance, distHorizontal, _lat, _lon, pickedEvents, depthIterations, maxDepth, finderSettings, threadData);
+                    getBestAtDist(distance, distHorizontal, _lat, _lon, pickedEvents, depthIterations, maxDepth, finderSettings, threadData, false);
                     return threadData.bestHypocenter;
                 }
         ).reduce(EarthquakeAnalysis::selectBetterHypocenter).orElse(null);
@@ -824,7 +825,7 @@ public class EarthquakeAnalysis {
 
     private void getBestAtDist(double distFromAnchor, double distHorizontal, double _lat, double _lon,
                                List<ExactPickedEvent> events, int depthIterations, double depthEnd,
-                               HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
+                               HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData, boolean honest) {
         double depthStart = 0;
 
         double angularResolution = (distHorizontal * 360) / (5 * distFromAnchor + 10);
@@ -840,13 +841,35 @@ public class EarthquakeAnalysis {
             double lon = point2D.y;
 
             calculateDistances(events, lat, lon);
-            getBestAtDepth(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, events, threadData);
+            getBestAtDepth(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, events, threadData, honest);
         }
     }
 
     private static void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
-                                double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
-                                HypocenterFinderThreadData threadData) {
+                                       double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
+                                       HypocenterFinderThreadData threadData, boolean honest) {
+        if (honest) {
+            getBestAtDepthHonest(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, pickedEvents, threadData);
+        } else {
+            getBestAtDepthBinarySearch(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, pickedEvents, threadData);
+        }
+    }
+
+    private static void getBestAtDepthHonest(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
+                                             double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
+                                             HypocenterFinderThreadData threadData) {
+        double depthStep = (depthEnd - depthStart) / (depthIterations - 1.0);
+        double depth = depthStart;
+        for(int i = 0; i < depthIterations; i++, depth += depthStep){
+            analyseHypocenter(threadData.hypocenterA, lat, lon, depth, pickedEvents, finderSettings, threadData);
+            threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
+        }
+    }
+
+
+    private static void getBestAtDepthBinarySearch(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
+                                                   double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
+                                                   HypocenterFinderThreadData threadData) {
         double lowerBound = depthStart; // 0
         double upperBound = depthEnd; // 600
 
@@ -917,7 +940,7 @@ public class EarthquakeAnalysis {
             bestOrigin = threadData.origins[0];
         }
 
-        if(bestOrigin == UNKNOWN_ORIGIN){
+        if (bestOrigin == UNKNOWN_ORIGIN) {
             hypocenter.err = Double.MAX_VALUE;
             hypocenter.correctStations = 0;
             return;
