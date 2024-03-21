@@ -16,13 +16,13 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-public class GQHypocs {
+public class GQHypocs extends GQHypocenterSearchBenchmark {
 
     public static double MAX_GPU_MEM = 3.0;
     private static boolean cudaLoaded = false;
     private static final float RADIANS = (float) (Math.PI / 180.0);
     // LOWEST DEPTH RESOLUTION MUST BE AT THE LAST POSITION IN THE FIELD !!
-    private static final float[] depth_profiles = new float[]{50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
+    protected static final float[] depth_profiles = new float[]{50.0f, 10.0f, 5.0f, 2.0f, 0.5f};
     // HIGHEST POINT COUNT MUST BE AT THE BEGINNING OF THE FIELD !!
     private static final int[] point_profiles = new int[]{40_000, 8_000, 4_000, 1600, 400};
     private static final float[] dist_profiles = new float[]{135.0f, 30.0f, 4.0f, 0.8f, 0.2f};
@@ -57,17 +57,9 @@ public class GQHypocs {
 
         int station_count = !stationLimitCalculated ? pickedEventList.size() : Math.min(stationLimit, pickedEventList.size());
 
-        float[] stations_array = new float[station_count * 4];
-
         long time = pickedEventList.get(0).pWave();
 
-        for (int i = 0; i < station_count; i++) {
-            PickedEvent pickedEvent = pickedEventList.get(i);
-            stations_array[i] = (float) pickedEvent.lat() * RADIANS;
-            stations_array[i + station_count] = (float) pickedEvent.lon() * RADIANS;
-            stations_array[i + 2 * station_count] = (float) pickedEvent.elevation();
-            stations_array[i + 3 * station_count] = (float) ((pickedEvent.pWave() - time) / 1000.0);
-        }
+        float[] stations_array = createStationsArray(pickedEventList, station_count, time);
 
         float[] result = {
                 (float) ((cluster.getPreviousHypocenter() != null ? cluster.getPreviousHypocenter().lat : cluster.getRootLat()) * RADIANS),
@@ -86,116 +78,17 @@ public class GQHypocs {
         return new PreliminaryHypocenter(result[0] / RADIANS, result[1] / RADIANS, result[2], (long) (result[3] * 1000.0 + time), 0, 0);
     }
 
-    public static void main(String[] args) throws Exception {
-        performanceMeasurement();
-    }
-
-    public static void performanceMeasurement() throws Exception {
-        TauPTravelTimeCalculator.init();
-        load();
-
-        if (!cudaLoaded) {
-            System.err.println("Test failed!");
-            System.exit(1);
-        }
-
-        initCuda();
-
-        if (cudaLoaded) {
-            calculateStationLimit();
-            runSpeedTest(50, 100_000);
-        } else {
-            System.err.println("Test failed!");
-            System.exit(1);
-        }
-
-        plotTimeVsPoints();
-        plotTimeVsStations();
-
-        System.exit(0);
-    }
-
-    private static void plotTimeVsPoints() throws IOException {
-        int[] stations_cases = new int[]{4, 8, 16, 32, 64};
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_points.csv"));
-        writer.write("Points,");
-        for (int stations : stations_cases) {
-            writer.write("%d Stations - Duration (ms),".formatted(stations));
-        }
-        writer.write("\n");
-        int fails = 0;
-        int points = 5000;
-        while (fails < 5) {
-            long[] times = new long[stations_cases.length];
-            for (int i = 0; i < stations_cases.length; i++) {
-                int stations = stations_cases[i];
-                long a = System.currentTimeMillis();
-                runSpeedTest(stations, points);
-                long duration = System.currentTimeMillis() - a;
-                times[i] = duration;
-                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
-            }
-
-            writer.write(String.format("%d,", points));
-            for (long time : times) {
-                writer.write(String.format("%d,", time));
-            }
-            writer.write("\n");
-
-            if (times[0] > 100) {
-                fails++;
-            } else {
-                fails = 0;
-            }
-
-            points += 5000;
-        }
-        writer.close();
-    }
-
-    private static void plotTimeVsStations() throws IOException {
-        int[] points_cases = new int[]{10_000, 20_000, 50_000, 100_000};
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_stations.csv"));
-        writer.write("Stations,");
-        for (int points : points_cases) {
-            writer.write("%d Points - Duration (ms),".formatted(points));
-        }
-        writer.write("\n");
-        int fails = 0;
-        int stations = 4;
-        while (fails < 5 && stations < stationLimit) {
-            long[] times = new long[points_cases.length];
-            for (int i = 0; i < points_cases.length; i++) {
-                int points = points_cases[i];
-                long a = System.currentTimeMillis();
-                runSpeedTest(stations, points);
-                long duration = System.currentTimeMillis() - a;
-                times[i] = duration;
-                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
-            }
-
-            writer.write(String.format("%d,", stations));
-            for (long time : times) {
-                writer.write(String.format("%d,", time));
-            }
-            writer.write("\n");
-
-            if (times[0] > 100) {
-                fails++;
-            } else {
-                fails = 0;
-            }
-
-            stations += 2;
-        }
-        writer.close();
-    }
-
-    private static void runSpeedTest(int station_count, long points) {
+    private static float[] createStationsArray(List<PickedEvent> pickedEventList, int station_count, long time) {
         float[] stations_array = new float[station_count * 4];
-        float[] result = {0, 0};
-        long time = 0;
-        GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, depth_profiles.length - 1, 90.0f, 2200);
+
+        for (int i = 0; i < station_count; i++) {
+            PickedEvent pickedEvent = pickedEventList.get(i);
+            stations_array[i] = (float) pickedEvent.lat() * RADIANS;
+            stations_array[i + station_count] = (float) pickedEvent.lon() * RADIANS;
+            stations_array[i + 2 * station_count] = (float) pickedEvent.elevation();
+            stations_array[i + 3 * station_count] = (float) ((pickedEvent.pWave() - time) / 1000.0);
+        }
+        return stations_array;
     }
 
     public static void calculateStationLimit() {

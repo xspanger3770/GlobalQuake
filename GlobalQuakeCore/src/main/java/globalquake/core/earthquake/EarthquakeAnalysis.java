@@ -744,7 +744,7 @@ public class EarthquakeAnalysis {
 
     public static final double PHI = 1.61803398875;
 
-    private PreliminaryHypocenter scanArea(List<PickedEvent> events, double maxDist, int points, double _lat, double _lon, int depthIterations,
+    public static PreliminaryHypocenter scanArea(List<PickedEvent> events, double maxDist, int points, double _lat, double _lon, int depthIterations,
                                            double maxDepth, HypocenterFinderSettings finderSettings) {
         int CPUS = Runtime.getRuntime().availableProcessors();
         double c = maxDist / Math.sqrt(points);
@@ -794,7 +794,7 @@ public class EarthquakeAnalysis {
         ).reduce(EarthquakeAnalysis::selectBetterHypocenter).orElse(null);
     }
 
-    private List<ExactPickedEvent> createListOfExactPickedEvents(List<PickedEvent> events) {
+    private static List<ExactPickedEvent> createListOfExactPickedEvents(List<PickedEvent> events) {
         List<ExactPickedEvent> result = new ArrayList<>(events.size());
         for (PickedEvent event : events) {
             result.add(new ExactPickedEvent(event));
@@ -844,7 +844,7 @@ public class EarthquakeAnalysis {
         }
     }
 
-    private void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
+    private static void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
                                 double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
                                 HypocenterFinderThreadData threadData) {
         double lowerBound = depthStart; // 0
@@ -951,7 +951,7 @@ public class EarthquakeAnalysis {
         return elevation / 6000.0;
     }
 
-    private void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
+    private static void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
         for (ExactPickedEvent event : pickedEvents) {
             event.angle = TauPTravelTimeCalculator.toAngle(GeoUtils.greatCircleDistance(event.lat(),
                     event.lon(), lat, lon));
