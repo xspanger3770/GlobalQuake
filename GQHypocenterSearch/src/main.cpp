@@ -5,15 +5,16 @@
 #include "globalquake.hpp"
 #include "globalquake_jni_GQNativeFunctions.h"
 #include "travel_table.hpp"
+#include <sys/time.h>
 
 int main() {
     table_max_depth = 750.0;
-    float depth_resolution = 1.0;
+    float depth_resolution = 0.5;
 
     int len1 = table_max_depth / depth_resolution + 1;
     int len2 = 1501;
 
-    int points = 50 * 1000;
+    int points = 100 * 1000;
 
     table_rows = len1;
     table_columns = len2;
@@ -24,7 +25,7 @@ int main() {
         return 1;
     }
 
-    float resols[] = { 1.0 };
+    float resols[] = { depth_resolution };
     if (!init_depth_profiles(resols, 1)) {
         printf("Failure!\n");
         return 1;
@@ -32,7 +33,7 @@ int main() {
 
     Java_globalquake_jni_GQNativeFunctions_initCUDA(nullptr, nullptr, nullptr);
 
-    int st_c = 100;
+    int st_c = 50;
     float stations[st_c * 4];
 
     float a = 999.0;
@@ -48,10 +49,23 @@ int main() {
 
     float final_result[4];
 
-    if (run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result, 2.2f)) {
-        printf("FINAL RESULT %f %f %f %f\n", final_result[0], final_result[1], final_result[2], final_result[3]);
-    }
+    struct timeval t1, t2;
 
+    gettimeofday(&t1, 0);
+
+    double time = 0.0;
+
+    if (!run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result, 2.2f)) {
+        printf("Error!\n");
+        goto cleanup;
+    }
+    
+    gettimeofday(&t2, 0);
+    time = (1000000.0*(t2.tv_sec-t1.tv_sec) + t2.tv_usec-t1.tv_usec)/1000.0;
+
+    printf("Standard test with 100_000 points, 50 stations and 0.5km depth resolution: %.1fms @ %.1fpps @ %.1fpscps\n", time, ((points * 1000.0) / time), ((points * 1000.0 * st_c) / time));
+
+    cleanup:
     if (p_wave_travel_table) {
         free(p_wave_travel_table);
     }
