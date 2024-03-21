@@ -25,9 +25,18 @@ public class GQHypocenterSearchBenchmark {
     public static void performanceMeasurement() throws Exception {
         TauPTravelTimeCalculator.init();
 
+        double sum  = 0;
+
+        for(int i = 0; i < 5; i++) {
+            sum += runStandardTest();
+        }
+
+        System.out.println("Average: %.2f".formatted(sum / 5.0));
+
         // CPU
         GQHypocenterSearchBenchmark.plotTimeVsPoints(false);
         GQHypocenterSearchBenchmark.plotTimeVsStations(false);
+
 
         GQHypocs.load();
 
@@ -45,6 +54,17 @@ public class GQHypocenterSearchBenchmark {
         GQHypocenterSearchBenchmark.plotTimeVsStations(true);
 
         System.exit(0);
+    }
+
+    private static double runStandardTest() {
+        int points = 100_000;
+        int st_c = 50;
+        long a = System.currentTimeMillis();
+        runSpeedTest(st_c, points, false);
+        double time = (System.currentTimeMillis() - a);
+        double pps = ((points * 1000.0) / time);
+        System.out.printf("Standard test with %,d points, %d stations and 0.5km depth resolution: %.1fms @ %.1fpps @ %.1fpscps\n", points, st_c, time, pps, ((points * 1000.0 * st_c) / time));
+        return pps;
     }
 
     private static void plotTimeVsPoints(boolean gpu) throws IOException {
