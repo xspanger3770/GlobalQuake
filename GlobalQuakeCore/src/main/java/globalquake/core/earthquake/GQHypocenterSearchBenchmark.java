@@ -49,7 +49,7 @@ public class GQHypocenterSearchBenchmark {
 
     private static void plotTimeVsPoints(boolean gpu) throws IOException {
         int[] stations_cases = new int[]{4, 8, 16, 32, 64};
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_points%s.csv".formatted(gpu ? "" : "_CPU")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_points%s.csv".formatted(gpu ? "_GPU" : "_CPU")));
         writer.write("Points,");
         for (int stations : stations_cases) {
             writer.write("%d Stations - Duration (ms),".formatted(stations));
@@ -87,7 +87,7 @@ public class GQHypocenterSearchBenchmark {
 
     private static void plotTimeVsStations(boolean gpu) throws IOException {
         int[] points_cases = new int[]{10_000, 20_000, 50_000, 100_000};
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_stations%s.csv".formatted(gpu ? "" : "_CPU")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./speed_test_stations%s.csv".formatted(gpu ? "_GPU" : "_CPU")));
         writer.write("Stations,");
         for (int points : points_cases) {
             writer.write("%d Points - Duration (ms),".formatted(points));
