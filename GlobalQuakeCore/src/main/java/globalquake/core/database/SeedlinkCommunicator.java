@@ -19,11 +19,12 @@ public class SeedlinkCommunicator {
 
     public static final long UNKNOWN_DELAY = Long.MIN_VALUE;
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_SHORT = new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG_MILLIS = new ThreadLocal<>();
     private static final ThreadLocal<SimpleDateFormat> FORMAT_UTC_LONG = new ThreadLocal<>();
     private static final long MAX_DELAY_MS = 1000 * 60 * 60 * 24L;
 
     public static void runAvailabilityCheck(SeedlinkNetwork seedlinkNetwork, StationDatabase stationDatabase, int attempt) throws Exception {
-        if(attempt > 1){
+        if (attempt > 1) {
             Logger.warn("Attempt %d / 3 to obtain available stations from %s".formatted(attempt, seedlinkNetwork.getName()));
         }
 
@@ -65,16 +66,19 @@ public class SeedlinkCommunicator {
                 long delay = UNKNOWN_DELAY;
 
                 try {
-                    if(FORMAT_UTC_LONG.get() == null || FORMAT_UTC_SHORT.get() == null){
+                    if (FORMAT_UTC_LONG == null || FORMAT_UTC_LONG_MILLIS.get() == null || FORMAT_UTC_SHORT.get() == null) {
                         FORMAT_UTC_SHORT.set(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
                         FORMAT_UTC_SHORT.get().setTimeZone(TimeZone.getTimeZone("UTC"));
 
-                        FORMAT_UTC_LONG.set(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS"));
+                        FORMAT_UTC_LONG_MILLIS.set(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSSS"));
+                        FORMAT_UTC_LONG_MILLIS.get().setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                        FORMAT_UTC_LONG.set(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"));
                         FORMAT_UTC_LONG.get().setTimeZone(TimeZone.getTimeZone("UTC"));
                     }
 
                     Calendar end = Calendar.getInstance();
-                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.get().parse(endDate) : FORMAT_UTC_LONG.get().parse(endDate));
+                    end.setTime(endDate.contains("-") ? FORMAT_UTC_SHORT.get().parse(endDate) : endDate.contains(".") ? FORMAT_UTC_LONG_MILLIS.get().parse(endDate) : FORMAT_UTC_LONG.get().parse(endDate));
 
                     delay = System.currentTimeMillis() - end.getTimeInMillis();
 
@@ -82,7 +86,7 @@ public class SeedlinkCommunicator {
                         continue;
                     }
 
-                } catch(NumberFormatException e){
+                } catch (NumberFormatException e) {
                     Logger.warn(new RuntimeException("Failed to get delay from %s, %s: %s".formatted(stationCode, seedlinkNetwork.getName(), e.getMessage())));
                 }
 
@@ -96,16 +100,16 @@ public class SeedlinkCommunicator {
         stationDatabase.getDatabaseWriteLock().lock();
         try {
             Station station = StationDatabase.getStation(stationDatabase.getNetworks(), networkCode, stationCode);
-            if(station == null){
+            if (station == null) {
                 return; // :(
             }
 
             Channel channel = StationDatabase.getChannel(stationDatabase.getNetworks(), networkCode, stationCode, channelName, locationCode);
 
-            if(channel == null){
+            if (channel == null) {
                 channel = findChannelButDontUseLocationCode(station, channelName);
 
-                if(channel != null){
+                if (channel != null) {
                     var any = channel.getStationSources().stream().findAny();
                     Channel newChannel = StationDatabase.getOrCreateChannel(station, channelName, locationCode, channel.getLatitude(), channel.getLongitude(), channel.getElevation(), channel.getSampleRate(), any.orElse(null), -1, InputType.UNKNOWN);
                     Logger.warn("Did not find exact match for [%s %s %s `%s`], assuming the location code is `%s`".formatted(networkCode, stationCode, channelName, locationCode, channel.getLocationCode()));
@@ -119,14 +123,14 @@ public class SeedlinkCommunicator {
 
             seedlinkNetwork.availableStations++;
             channel.getSeedlinkNetworks().put(seedlinkNetwork, delay);
-        }finally {
+        } finally {
             stationDatabase.getDatabaseWriteLock().unlock();
         }
     }
 
     private static Channel findChannelButDontUseLocationCode(Station station, String channelName) {
         List<Channel> channels = new ArrayList<>(station.getChannels()).stream().filter(channel -> channel.getCode().equals(channelName)).sorted(Comparator.comparing(Channel::getLocationCode)).toList();
-        if(channels.isEmpty()){
+        if (channels.isEmpty()) {
             return null;
         }
 
