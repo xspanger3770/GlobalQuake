@@ -9,12 +9,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.net.ssl.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,10 +33,42 @@ public class FDSNWSDownloader {
     public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B', 'C', 'A');
     public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N', 'C');
 
+    static {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
+
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
 
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        URLConnection con = url.openConnection();
+
+        if (con instanceof HttpsURLConnection httpsURLConnection) {
+            httpsURLConnection.setHostnameVerifier(getHostnameVerifier());
+        }
+
         con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
         con.setReadTimeout(TIMEOUT_SECONDS * 1000);
         InputStream inp = con.getInputStream();
@@ -56,6 +90,16 @@ public class FDSNWSDownloader {
         return paramNames;
     }
 
+    private static HostnameVerifier getHostnameVerifier() {
+        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        };
+        return hostnameVerifier;
+    }
+
     public static List<Network> downloadFDSNWS(StationSource stationSource, String addons) throws Exception {
         List<Network> result = new ArrayList<>();
         downloadFDSNWS(stationSource, result, -180, 180, addons);
@@ -69,11 +113,11 @@ public class FDSNWSDownloader {
 
         StringBuilder addonsResult = new StringBuilder();
         List<String> addonsSplit = List.of(addons.split("&"));
-        for(String str : addonsSplit){
-            if(str.isEmpty()){
+        for (String str : addonsSplit) {
+            if (str.isEmpty()) {
                 continue;
             }
-            if(supportedAttributes.contains(str.split("=")[0])){
+            if (supportedAttributes.contains(str.split("=")[0])) {
                 addonsResult.append("&");
                 addonsResult.append(str);
             } else {
@@ -81,7 +125,7 @@ public class FDSNWSDownloader {
             }
         }
 
-        if(supportedAttributes.contains("endafter") && addons.isEmpty()){
+        if (supportedAttributes.contains("endafter") && addons.isEmpty()) {
             url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&endafter=%s&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, format1.format(Instant.now()), addonsResult));
         } else {
             url = new URL("%squery?minlongitude=%s&maxlongitude=%s&level=channel&format=xml&channel=??Z%s".formatted(stationSource.getUrl(), minLon, maxLon, addonsResult));
@@ -90,22 +134,29 @@ public class FDSNWSDownloader {
 
         Logger.info("Connecting to " + url);
 
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        URLConnection con = url.openConnection();
+        ;
+        int response = -1;
+
+        if (con instanceof HttpsURLConnection httpsURLConnection) {
+            httpsURLConnection.setHostnameVerifier(getHostnameVerifier());
+            response = httpsURLConnection.getResponseCode();
+        } else if (con instanceof HttpURLConnection httpURLConnection) {
+            response = httpURLConnection.getResponseCode();
+        }
         con.setConnectTimeout(TIMEOUT_SECONDS * 1000);
         con.setReadTimeout(TIMEOUT_SECONDS * 1000);
-
-        int response = con.getResponseCode();
 
         if (response == 413) {
             Logger.debug("413! Splitting...");
             stationSource.getStatus().setString("Splitting...");
-            if(maxLon - minLon < 0.1){
+            if (maxLon - minLon < 0.1) {
                 return;
             }
 
             downloadFDSNWS(stationSource, result, minLon, (minLon + maxLon) / 2.0, addons);
             downloadFDSNWS(stationSource, result, (minLon + maxLon) / 2.0, maxLon, addons);
-        } else if(response / 100 == 2) {
+        } else if (response / 100 == 2) {
             InputStream inp = con.getInputStream();
             downloadFDSNWS(stationSource, result, inp);
         } else {
@@ -119,12 +170,12 @@ public class FDSNWSDownloader {
         f.setValidating(false);
         final CountInputStream in = new CountInputStream(inp);
 
-        in.setEvent(() ->  stationSource.getStatus().setString("Downloading %dkB".formatted(in.getCount() / 1024)));
+        in.setEvent(() -> stationSource.getStatus().setString("Downloading %dkB".formatted(in.getCount() / 1024)));
 
         String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
         // some FDSNWS providers send empty document if no stations found by given parameters
-        if(text.isEmpty()){
+        if (text.isEmpty()) {
             return;
         }
 
@@ -209,7 +260,7 @@ public class FDSNWSDownloader {
             double stationLat, double stationLon, double stationAlt) {
         NodeList channels = stationNode.getElementsByTagName("Channel");
         for (int k = 0; k < channels.getLength(); k++) {
-                // Necessary values: lat lon alt sampleRate, Other can fail
+            // Necessary values: lat lon alt sampleRate, Other can fail
 
             Node channelNode = channels.item(k);
             String channel = channelNode.getAttributes().getNamedItem("code").getNodeValue();
@@ -221,7 +272,7 @@ public class FDSNWSDownloader {
             String endDateStr = channelNode.getAttributes().getNamedItem("endDate") != null ?
                     channelNode.getAttributes().getNamedItem("endDate").getNodeValue() : null;
 
-            if(!isWithinDateRange(startDateStr, endDateStr)){
+            if (!isWithinDateRange(startDateStr, endDateStr)) {
                 continue;
             }
 
@@ -241,7 +292,7 @@ public class FDSNWSDownloader {
                         .getElementsByTagName("InstrumentSensitivity").item(0))
                         .getElementsByTagName("Value").item(0).getTextContent()).doubleValue();
 
-                String inputUnits = ((Element)((Element) ((Element) (channelNode.getChildNodes()))
+                String inputUnits = ((Element) ((Element) ((Element) (channelNode.getChildNodes()))
                         .getElementsByTagName("InstrumentSensitivity").item(0))
                         .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
 
@@ -249,7 +300,7 @@ public class FDSNWSDownloader {
                 inputType = getInputType(inputUnits);
             } catch (NullPointerException e) {
                 Logger.debug(
-                        "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel+" @ "+stationSource.getUrl());
+                        "No Sensitivity!!!! " + stationCode + " " + networkCode + " " + channel + " @ " + stationSource.getUrl());
             }
 
             var item = ((Element) channelNode)
@@ -257,12 +308,12 @@ public class FDSNWSDownloader {
 
             // sample rate is not actually required as it is provided by the seedlink protocol itself
             double sampleRate = -1;
-            if(item != null){
+            if (item != null) {
                 sampleRate = Double.parseDouble(((Element) channelNode)
                         .getElementsByTagName("SampleRate").item(0).getTextContent());
             }
 
-            if(!isSupported(channel)){
+            if (!isSupported(channel)) {
                 continue;
             }
 
@@ -322,7 +373,7 @@ public class FDSNWSDownloader {
         char band = channel.charAt(0);
         char instrument = channel.charAt(1);
 
-        if(!(SUPPORTED_BANDS.contains(band))){
+        if (!(SUPPORTED_BANDS.contains(band))) {
             return false;
         }
 
