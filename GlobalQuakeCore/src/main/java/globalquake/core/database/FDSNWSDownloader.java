@@ -1,5 +1,6 @@
 package globalquake.core.database;
 
+import globalquake.core.GlobalQuake;
 import globalquake.core.exception.FdnwsDownloadException;
 import gqserver.api.packets.station.InputType;
 import org.tinylog.Logger;
@@ -11,8 +12,7 @@ import org.xml.sax.InputSource;
 
 import javax.net.ssl.*;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,6 +32,7 @@ public class FDSNWSDownloader {
 
     public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B', 'C', 'A');
     public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N', 'C');
+    private static List<SensitivityCorrection> sensitivityCorrections;
 
     static {
         TrustManager[] trustAllCerts = new TrustManager[]{
@@ -57,6 +58,41 @@ public class FDSNWSDownloader {
         } catch (Exception e) {
             Logger.error(e);
         }
+
+        sensitivityCorrections = new ArrayList<>();
+        try{
+            File file = new File(GlobalQuake.mainFolder, "sensitivity_corrections.txt");
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            sensitivityCorrections.addAll(loadSensitivityCorrections(file.getAbsolutePath()));
+        } catch(Exception e){
+            Logger.error("Unable to load sensitivity corrections", e);
+        }
+    }
+
+    public static List<SensitivityCorrection> loadSensitivityCorrections(String filePath) throws IOException {
+        List<SensitivityCorrection> corrections = new ArrayList<>();
+
+        Logger.info("Loading sensitivity corrections...");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] fields = line.split(";");
+                if (fields.length == 3) {
+                    String networkCode = fields[0].trim();
+                    String stationCode = fields[1].trim();
+                    double multiplier = Double.parseDouble(fields[2].trim());
+                    SensitivityCorrection correction = new SensitivityCorrection(networkCode, stationCode, multiplier);
+                    corrections.add(correction);
+                } else {
+                    Logger.error("Invalid line: " + line);
+                }
+            }
+        }
+
+        return corrections;
     }
 
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
@@ -297,6 +333,7 @@ public class FDSNWSDownloader {
                         .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
 
                 sensitivity *= getInputUnitsMultiplier(inputUnits);
+                sensitivity *= getExceptions(networkCode, stationCode);
                 inputType = getInputType(inputUnits);
             } catch (NullPointerException e) {
                 Logger.debug(
@@ -320,6 +357,15 @@ public class FDSNWSDownloader {
             addChannel(result, stationSource, networkCode, networkDescription, stationCode, stationSite, channel,
                     locationCode, lat, lon, alt, sampleRate, stationLat, stationLon, stationAlt, sensitivity, inputType);
         }
+    }
+
+    private static double getExceptions(String networkCode, String stationCode) {
+        for(SensitivityCorrection sensitivityCorrection : sensitivityCorrections){
+            if(sensitivityCorrection.match(networkCode, stationCode)){
+                return sensitivityCorrection.getMultiplier();
+            }
+        }
+        return 1.0;
     }
 
     private static final Set<String> unknownUnits = new HashSet<>();
