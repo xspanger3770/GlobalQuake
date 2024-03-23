@@ -92,6 +92,8 @@ public class FDSNWSDownloader {
             }
         }
 
+        Logger.info("Loaded %d sensitivity correction rules.");
+
         return corrections;
     }
 
@@ -333,7 +335,6 @@ public class FDSNWSDownloader {
                         .getElementsByTagName("InputUnits").item(0)).getElementsByTagName("Name").item(0).getTextContent();
 
                 sensitivity *= getInputUnitsMultiplier(inputUnits);
-                sensitivity *= getExceptions(networkCode, stationCode);
                 inputType = getInputType(inputUnits);
             } catch (NullPointerException e) {
                 Logger.debug(
@@ -359,7 +360,7 @@ public class FDSNWSDownloader {
         }
     }
 
-    private static double getExceptions(String networkCode, String stationCode) {
+    public static double getSensitivityCorrection(String networkCode, String stationCode) {
         for(SensitivityCorrection sensitivityCorrection : sensitivityCorrections){
             if(sensitivityCorrection.match(networkCode, stationCode)){
                 return sensitivityCorrection.getMultiplier();
