@@ -3,6 +3,7 @@ package globalquake.ui.settings;
 import globalquake.core.intensity.IntensityScale;
 import globalquake.core.intensity.IntensityScales;
 import globalquake.core.intensity.Level;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -24,11 +25,13 @@ public class IntensityScaleSelector extends JPanel {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 levelComboBox.removeAllItems();
-                ((IntensityScale)shakingScaleComboBox.getSelectedItem()).getLevels().forEach(levelComboBox::addItem);
+                ((IntensityScale) shakingScaleComboBox.getSelectedItem()).getLevels().forEach(levelComboBox::addItem);
             }
         });
 
-        add(new JLabel(text));
+        if (StringUtils.isNoneEmpty(text)) {
+            add(new JLabel(text));
+        }
         add(shakingScaleComboBox);
         add(levelComboBox);
     }
