@@ -62,7 +62,8 @@ public class ImportSeedlinksAction extends AbstractAction {
         var iter = reader.iterator();
         while (iter.hasNext()) {
             String[] data = iter.next();
-            loaded.add(createSeedlinkNetworkFromStringArray(data));
+            if(data.length > 0)
+                loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
 
         boolean delete = JOptionPane.showConfirmDialog(parent, "Keep existing seedlink networks?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION;

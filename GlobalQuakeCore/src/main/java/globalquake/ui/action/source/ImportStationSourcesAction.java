@@ -50,6 +50,7 @@ public class ImportStationSourcesAction extends AbstractAction {
                 importCSV(chooser.getSelectedFile());
                 JOptionPane.showMessageDialog(chooser, "CSV file imported successfully!");
             } catch (Exception e) {
+                e.printStackTrace();
                 JOptionPane.showMessageDialog(chooser, "Import failed: " + e.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -63,7 +64,8 @@ public class ImportStationSourcesAction extends AbstractAction {
         var iter = reader.iterator();
         while (iter.hasNext()) {
             String[] data = iter.next();
-            loaded.add(createSeedlinkNetworkFromStringArray(data));
+            if(data.length > 0)
+                loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
 
 
