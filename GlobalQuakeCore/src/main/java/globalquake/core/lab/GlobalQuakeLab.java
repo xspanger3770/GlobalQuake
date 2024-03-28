@@ -6,9 +6,7 @@ import globalquake.core.Settings;
 import globalquake.core.archive.ArchivedEvent;
 import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.EarthquakeAnalysis;
-import globalquake.core.earthquake.data.Cluster;
-import globalquake.core.earthquake.data.Hypocenter;
-import globalquake.core.earthquake.data.PickedEvent;
+import globalquake.core.earthquake.data.*;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.training.EarthquakeAnalysisTraining;
 import org.tinylog.Logger;
@@ -17,10 +15,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static globalquake.core.earthquake.EarthquakeAnalysis.calculateDistances;
+import static globalquake.core.earthquake.EarthquakeAnalysis.createListOfExactPickedEvents;
+
 public class GlobalQuakeLab {
 
-    private static final File mainFolder = new File("./TrainingData/");
-    private static final File archivedFolder = new File(mainFolder,"./archived/");
+    private static final File mainFolder = new File("./training/");
+    private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.00_Poland_2024_03_09_18_56_40/");
 
     public static void main(String[] args) throws Exception{
         TauPTravelTimeCalculator.init();
@@ -72,7 +73,55 @@ public class GlobalQuakeLab {
          * [2024-02-22 16:11:49] TRACE: Hypocenter finding finished in: 53 ms
          */
 
-        runTest(archivedQuake);
+        depthInspection(archivedQuake);
+
+        //runTest(archivedQuake);
+    }
+
+    private static void depthInspection(ArchivedQuake archivedQuake) {
+        List<PickedEvent> pickedEvents = new ArrayList<>();
+        var cluster = new Cluster();
+        cluster.updateCount = 6543541;
+
+        List<EarthquakeAnalysisTraining.FakeStation> fakeStations = new ArrayList<>();
+        for (ArchivedEvent archivedEvent : archivedQuake.getArchivedEvents()) {
+            fakeStations.add(new EarthquakeAnalysisTraining.FakeStation(archivedEvent.lat(), archivedEvent.lon()));
+        }
+
+        Hypocenter absolutetyCorrect = new Hypocenter(archivedQuake.getLat(),
+                archivedQuake.getLon(), archivedQuake.getDepth(), archivedQuake.getOrigin(), 0, 0, null, null);
+
+        for (ArchivedEvent archivedEvent : archivedQuake.getArchivedEvents()) {
+            var event = new PickedEvent(archivedEvent.pWave(), archivedEvent.lat(), archivedEvent.lon(), 0, archivedEvent.maxRatio());
+            pickedEvents.add(event);
+        }
+
+        cluster.calculateRoot(fakeStations);
+        System.err.println(cluster);
+
+        HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(fakeStations.size());
+        HypocenterFinderSettings finderSettings = EarthquakeAnalysis.createSettings(false);
+
+        List<EarthquakeAnalysis.ExactPickedEvent> exactPickedEvents = createListOfExactPickedEvents(pickedEvents);
+        calculateDistances(exactPickedEvents, archivedQuake.getLat(), archivedQuake.getLon());
+
+        String filePath = "output.csv";
+
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write("depth,err,correct,heuristic\n");
+
+            for (double depth = 0.0; depth <= 600.0; depth += 0.5) {
+           // double depth = 50.0;
+                EarthquakeAnalysis.analyseHypocenter(threadData.hypocenterA, archivedQuake.getLat(), archivedQuake.getLon(), depth, exactPickedEvents, finderSettings, threadData);
+
+                double heuristics = EarthquakeAnalysis.calculateHeuristic(threadData.hypocenterA);
+
+                writer.write("%s,%s,%s,%s\n".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
+                System.err.println("%s,%s,%s,%s".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
+           }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void runTest(ArchivedQuake archivedQuake) {
@@ -93,7 +142,6 @@ public class GlobalQuakeLab {
 
         for (ArchivedEvent archivedEvent : archivedQuake.getArchivedEvents()) {
             var event = new PickedEvent(archivedEvent.pWave(), archivedEvent.lat(), archivedEvent.lon(), 0, archivedEvent.maxRatio());
-            System.err.println(archivedEvent);
             pickedEvents.add(event);
         }
 

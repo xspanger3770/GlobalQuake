@@ -795,7 +795,7 @@ public class EarthquakeAnalysis {
         ).reduce(EarthquakeAnalysis::selectBetterHypocenter).orElse(null);
     }
 
-    private static List<ExactPickedEvent> createListOfExactPickedEvents(List<PickedEvent> events) {
+    public static List<ExactPickedEvent> createListOfExactPickedEvents(List<PickedEvent> events) {
         List<ExactPickedEvent> result = new ArrayList<>(events.size());
         for (PickedEvent event : events) {
             result.add(new ExactPickedEvent(event));
@@ -803,7 +803,7 @@ public class EarthquakeAnalysis {
         return result;
     }
 
-    private static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
+    public static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
         return (hypocenter.correctStations * hypocenter.correctStations) / (hypocenter.err * hypocenter.err);
     }
 
@@ -947,19 +947,22 @@ public class EarthquakeAnalysis {
         }
 
         double err = 0;
-        int acc = 0;
+        double acc = 0;
 
         for (long orign : threadData.origins) {
             double _err = Math.abs(orign - bestOrigin);
+            if (_err > 1000 * 60 * 60){
+                _err = 0;
+            }
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
-                acc++;
+                acc+=1.0 - _err / finderSettings.pWaveInaccuracyThreshold();
             } else {
                 _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
             }
 
-            _err /= 1000;
+            _err /= 1000.0;
 
-            err += _err * _err;
+            err += _err;
         }
 
         hypocenter.lat = lat;
@@ -974,7 +977,7 @@ public class EarthquakeAnalysis {
         return elevation / 6000.0;
     }
 
-    private static void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
+    public static void calculateDistances(List<ExactPickedEvent> pickedEvents, double lat, double lon) {
         for (ExactPickedEvent event : pickedEvents) {
             event.angle = TauPTravelTimeCalculator.toAngle(GeoUtils.greatCircleDistance(event.lat(),
                     event.lon(), lat, lon));

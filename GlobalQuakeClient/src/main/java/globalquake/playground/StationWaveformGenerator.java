@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class StationWaveformGenerator {
 
-    private static final double TIME_BIAS = 2000;
-    private static final double DELAY_BIAS = 8000;
+    private static final double TIME_BIAS = 0;
+    private static final double DELAY_BIAS = 0;
     private final double sensMul;
     private final long bias;
     private final long delay;
