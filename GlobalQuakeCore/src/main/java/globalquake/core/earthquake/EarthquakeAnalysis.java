@@ -860,7 +860,7 @@ public class EarthquakeAnalysis {
                                              HypocenterFinderThreadData threadData) {
         double depthStep = (depthEnd - depthStart) / (depthIterations - 1.0);
         double depth = depthStart;
-        for(int i = 0; i < depthIterations; i++, depth += depthStep){
+        for (int i = 0; i < depthIterations; i++, depth += depthStep) {
             analyseHypocenter(threadData.hypocenterA, lat, lon, depth, pickedEvents, finderSettings, threadData);
             threadData.setBest(selectBetterHypocenter(threadData.bestHypocenter, threadData.hypocenterA));
         }
@@ -951,11 +951,11 @@ public class EarthquakeAnalysis {
 
         for (long orign : threadData.origins) {
             double _err = Math.abs(orign - bestOrigin);
-            if (_err > 1000 * 60 * 60){
+            if (_err > 1000 * 60 * 60) {
                 _err = 0;
             }
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
-                acc+=1.0 - _err / finderSettings.pWaveInaccuracyThreshold();
+                acc += 1.0 - _err / finderSettings.pWaveInaccuracyThreshold();
             } else {
                 _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
             }
@@ -971,6 +971,72 @@ public class EarthquakeAnalysis {
         hypocenter.origin = bestOrigin;
         hypocenter.err = err;
         hypocenter.correctStations = acc;
+    }
+
+    // TODO
+    public static void analyseHypocenterDeeply(PreliminaryHypocenter hypocenter, double lat, double lon, double depth, List<ExactPickedEvent> events, HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData) {
+        int c = 0;
+
+        for (ExactPickedEvent event : events) {
+            double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, event.angle);
+            if (travelTime == TauPTravelTimeCalculator.NO_ARRIVAL) {
+                threadData.origins[c] = UNKNOWN_ORIGIN;
+                c++;
+                continue;
+            }
+
+            travelTime += getElevationCorrection(event.elevation());
+
+            long origin = event.pWave() - ((long) (travelTime * 1000));
+            threadData.origins[c] = origin;
+            c++;
+        }
+
+        double bestHeuristic = 0;
+        for(long currentOrigin: threadData.origins){
+            double err = 0;
+            double acc = 0;
+
+            for (long orign : threadData.origins) {
+                double _err = Math.abs(orign - currentOrigin);
+                if (_err > 1000 * 60 * 60) {
+                    _err = 0;
+                }
+                if (_err < finderSettings.pWaveInaccuracyThreshold()) {
+                    acc += 1.0 - _err / finderSettings.pWaveInaccuracyThreshold();
+                } else {
+                    _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
+                }
+
+                _err /= 1000.0;
+
+                err += _err;
+            }
+
+            double heuristic = (acc * acc) / (err * err);
+            if(heuristic > bestHeuristic){
+                bestHeuristic = heuristic;
+                hypocenter.origin = currentOrigin;
+                hypocenter.err = err;
+                hypocenter.correctStations = acc;
+            }
+        }
+        /*if (USE_MEDIAN_FOR_ORIGIN) {
+            Arrays.sort(threadData.origins);
+            bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
+        } else {
+            bestOrigin = threadData.origins[0];
+        }
+
+        if (bestOrigin == UNKNOWN_ORIGIN) {
+            hypocenter.err = Double.MAX_VALUE;
+            hypocenter.correctStations = 0;
+            return;
+        }*/
+
+        hypocenter.lat = lat;
+        hypocenter.lon = lon;
+        hypocenter.depth = depth;
     }
 
     public static double getElevationCorrection(double elevation) {

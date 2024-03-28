@@ -9,10 +9,12 @@ import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.data.*;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.core.training.EarthquakeAnalysisTraining;
+import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static globalquake.core.earthquake.EarthquakeAnalysis.calculateDistances;
@@ -21,9 +23,10 @@ import static globalquake.core.earthquake.EarthquakeAnalysis.createListOfExactPi
 public class GlobalQuakeLab {
 
     private static final File mainFolder = new File("./training/");
-    private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.00_Poland_2024_03_09_18_56_40/");
+    //private static final File archivedFolder = new File("/home/jakub/Desktop/GlobalQuake/training/events/events/M4.67_Provincia_di_Pordenone,_Italy_2024_03_27_21_19_37/");
+    private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.51_east_of_the_North_Island_of_New_Zealand_2024_03_13_12_59_04/");
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File(mainFolder, "/settings/"), null);
@@ -32,7 +35,7 @@ public class GlobalQuakeLab {
         Settings.pWaveInaccuracyThreshold = 3000.0;
         Settings.parallelHypocenterLocations = true;
 
-        if(!archivedFolder.exists()){
+        if (!archivedFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
             archivedFolder.mkdirs();
             System.out.printf("Created archived quakes folder at %s".formatted(archivedFolder.getAbsolutePath()));
@@ -47,17 +50,17 @@ public class GlobalQuakeLab {
 
     @SuppressWarnings("DataFlowIssue")
     private static void findFiles() {
-        for(File file : archivedFolder.listFiles()) {
+        for (File file : archivedFolder.listFiles()) {
             try {
                 tryFile(file);
-            }catch(Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
             }
         }
     }
 
     private static void tryFile(File file) throws Exception {
-        if(file.isDirectory()){
+        if (file.isDirectory()) {
             return;
         }
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
@@ -74,8 +77,39 @@ public class GlobalQuakeLab {
          */
 
         depthInspection(archivedQuake);
+        try {
+            residualsInspection(archivedQuake);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         //runTest(archivedQuake);
+    }
+
+    private static void residualsInspection(ArchivedQuake archivedQuake) throws IOException {
+        long origin = archivedQuake.getOrigin();
+        String filePath = "residuals.csv";
+
+        double depth = archivedQuake.getDepth();
+
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write("angle,azimuth,residual\n");
+
+            archivedQuake.getArchivedEvents().sort(Comparator.comparing(archivedEvent -> GeoUtils.greatCircleDistance(archivedEvent.lat(), archivedEvent.lon(), archivedQuake.getLat(), archivedQuake.getLon())));
+
+            for (ArchivedEvent archivedEvent : archivedQuake.getArchivedEvents()) {
+                long arrival = archivedEvent.pWave();
+                double angle = TauPTravelTimeCalculator.toAngle(
+                        GeoUtils.greatCircleDistance(archivedEvent.lat(), archivedEvent.lon(), archivedQuake.getLat(), archivedQuake.getLon()));
+                double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, angle);
+                long expectedArrival = (origin + (long) (travelTime * 1000l));
+                double residual = (arrival - expectedArrival) / 1000.0;
+                double azimuth = GeoUtils.calculateAngle(archivedEvent.lat(), archivedEvent.lon(), archivedQuake.getLat(), archivedQuake.getLon());
+                if (Math.abs(residual) < 15.0 && angle < 20)
+                    writer.write("%s,%s,%s\n".formatted(angle, azimuth, residual));
+                System.err.println("Residual = %.2fs".formatted(residual));
+            }
+        }
     }
 
     private static void depthInspection(ArchivedQuake archivedQuake) {
@@ -110,15 +144,15 @@ public class GlobalQuakeLab {
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write("depth,err,correct,heuristic\n");
 
-            for (double depth = 0.0; depth <= 600.0; depth += 0.5) {
-           // double depth = 50.0;
+            for (double depth = 0.0; depth <= 749.0; depth += 0.25) {
+                // double depth = 50.0;
                 EarthquakeAnalysis.analyseHypocenter(threadData.hypocenterA, archivedQuake.getLat(), archivedQuake.getLon(), depth, exactPickedEvents, finderSettings, threadData);
 
                 double heuristics = EarthquakeAnalysis.calculateHeuristic(threadData.hypocenterA);
 
                 writer.write("%s,%s,%s,%s\n".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
                 System.err.println("%s,%s,%s,%s".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
-           }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -155,7 +189,7 @@ public class GlobalQuakeLab {
         Logger.debug("Previous " + absolutetyCorrect);
         Logger.debug("Got           " + cluster.getPreviousHypocenter());
         if (cluster.getPreviousHypocenter() != null) {
-            Logger.debug("Quality: "+cluster.getPreviousHypocenter().quality);
+            Logger.debug("Quality: " + cluster.getPreviousHypocenter().quality);
         }
     }
 
