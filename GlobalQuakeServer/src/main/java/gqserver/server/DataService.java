@@ -332,10 +332,8 @@ public class DataService extends GlobalQuakeEventListener {
     private void broadcast(List<ServerClient> clients, Packet packet) {
         clients.forEach(client -> {
             try {
-                client.sendPacket(packet);
-            } catch(SocketException | SocketTimeoutException e){
-                Logger.tag("Server").trace(e);
-            }catch (Exception e) {
+                client.queuePacket(packet);
+            } catch (Exception e) {
                 Logger.tag("Server").error(e);
             }
         });
@@ -433,20 +431,20 @@ public class DataService extends GlobalQuakeEventListener {
                                 station.getInputType()
                                 ));
             if(data.size() >= STATIONS_INFO_PACKET_MAX_SIZE){
-                client.sendPacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
+                client.queuePacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
                 data = new ArrayList<>();
             }
         }
 
         if(!data.isEmpty()){
-            client.sendPacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
+            client.queuePacket(new StationsInfoPacket(GlobalQuake.instance.getStationManager().getIndexing(), data));
         }
     }
 
     private void processArchivedQuakesRequest(ServerClient client) throws IOException {
         int count = 0;
         for(ArchivedQuake archivedQuake : GlobalQuake.instance.getArchive().getArchivedQuakes()){
-            client.sendPacket(createArchivedPacket(archivedQuake));
+            client.queuePacket(createArchivedPacket(archivedQuake));
             count++;
         }
     }
@@ -454,7 +452,7 @@ public class DataService extends GlobalQuakeEventListener {
     private void processEarthquakeRequest(ServerClient client, EarthquakeRequestPacket earthquakeRequestPacket) throws IOException {
         for(Earthquake earthquake : GlobalQuakeServer.instance.getEarthquakeAnalysis().getEarthquakes()){
             if(earthquake.getUuid().equals(earthquakeRequestPacket.uuid())){
-                client.sendPacket(createQuakePacket(earthquake));
+                client.queuePacket(createQuakePacket(earthquake));
                 return;
             }
         }
@@ -462,7 +460,7 @@ public class DataService extends GlobalQuakeEventListener {
 
     private void processEarthquakesRequest(ServerClient client) throws IOException {
         for (EarthquakeInfo info : currentEarthquakes) {
-            client.sendPacket(new EarthquakeCheckPacket(info));
+            client.queuePacket(new EarthquakeCheckPacket(info));
         }
     }
 

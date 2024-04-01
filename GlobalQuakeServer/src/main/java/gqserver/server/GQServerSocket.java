@@ -170,7 +170,7 @@ public class GQServerSocket {
             } else {
                 Logger.tag("Server").info("Client #%d handshake successfull".formatted(client.getID()));
                 stats.successfull++;
-                client.sendPacket(new HandshakeSuccessfulPacket());
+                client.queuePacket(new HandshakeSuccessfulPacket());
                 readerService.submit(new ClientReader(client));
                 clients.add(client);
                 GlobalQuakeServer.instance.getServerEventHandler().fireEvent(new ClientJoinedEvent(client));
@@ -208,7 +208,7 @@ public class GQServerSocket {
     public void stop() throws IOException {
         for (ServerClient client : clients) {
             try {
-                client.sendPacket(new TerminationPacket("Server closed by operator"));
+                client.sendPacketNow(new TerminationPacket("Server closed by operator"));
                 client.flush();
                 client.destroy();
             } catch (Exception e) {

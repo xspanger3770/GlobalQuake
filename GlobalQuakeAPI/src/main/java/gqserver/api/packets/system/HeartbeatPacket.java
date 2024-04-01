@@ -14,6 +14,6 @@ public record HeartbeatPacket() implements Packet {
     @Override
     public void onServerReceive(ServerClient serverClient) throws IOException {
         serverClient.noteHeartbeat();
-        serverClient.sendPacket(new HeartbeatPacket());
+        serverClient.queuePacket(new HeartbeatPacket());
     }
 }
