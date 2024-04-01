@@ -23,8 +23,8 @@ import static globalquake.core.earthquake.EarthquakeAnalysis.createListOfExactPi
 public class GlobalQuakeLab {
 
     private static final File mainFolder = new File("./training/");
-    //private static final File archivedFolder = new File("/home/jakub/Desktop/GlobalQuake/training/events/events/M4.67_Provincia_di_Pordenone,_Italy_2024_03_27_21_19_37/");
-    private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.51_east_of_the_North_Island_of_New_Zealand_2024_03_13_12_59_04/");
+    private static final File archivedFolder = new File("/home/jakub/Desktop/GlobalQuake/training/events/events/M4.67_Provincia_di_Pordenone,_Italy_2024_03_27_21_19_37/");
+    //private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.51_east_of_the_North_Island_of_New_Zealand_2024_03_13_12_59_04/");
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
