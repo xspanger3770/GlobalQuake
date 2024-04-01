@@ -21,9 +21,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.UUID;
+
 public class EarthquakeListPanel extends JPanel {
     private double scroll = 0;
     protected int mouseY = -999;
+
+    // Holds the list of currently opened archived quakes
+    private ArrayList<UUID> openedQuakes = new ArrayList<UUID>();
 
     public static final DecimalFormat f1d = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
     private static final int cell_height = 50;
@@ -65,6 +73,8 @@ public class EarthquakeListPanel extends JPanel {
             }
         });
 
+
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -77,6 +87,8 @@ public class EarthquakeListPanel extends JPanel {
 
                 ArchivedQuake quake = filtered.get(i);
 
+                UUID quakeUuid = quake.getUuid();
+
                 if (quake != null && e.getButton() == MouseEvent.BUTTON3 && !isMouseInGoUpRect) {
                     quake.setWrong(!quake.isWrong());
                 }
@@ -84,8 +96,25 @@ public class EarthquakeListPanel extends JPanel {
                 if(e.getButton() == MouseEvent.BUTTON1) {
                     if(isMouseInGoUpRect) {
                         scroll = 0;
-                    }else if (quake != null ) {
-                        new ArchivedQuakeUI(parent, quake).setVisible(true);
+                    }
+                    else if (quake != null && !openedQuakes.contains(quakeUuid) ) {
+                        // Create Instance of quakeUi panel
+                        ArchivedQuakeUI quakeUi = new ArchivedQuakeUI(parent, quake);
+                        // set the panel to be visible
+                        quakeUi.setVisible(true);
+                        // add the quake to the list of opened panels
+                        openedQuakes.add(quakeUuid);
+
+                        // When quake panel is closed, remove quake from the ArrayList of openedQuakes
+                        quakeUi.addWindowListener(new WindowAdapter() {
+                            @Override
+                            public void windowClosing(WindowEvent e) {
+                                openedQuakes.remove(quakeUuid);
+                            }
+                            public void windowClosed(WindowEvent e) {
+                                openedQuakes.remove(quakeUuid);
+                            }
+                        });
                     }
                 }
 

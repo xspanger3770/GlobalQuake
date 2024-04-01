@@ -10,7 +10,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 public class ArchivedQuakeUI extends JDialog {
+    
+    private boolean animationPanelOpen = false;
 
     public ArchivedQuakeUI(Frame parent, ArchivedQuake quake) {
         super(parent);
@@ -42,7 +47,26 @@ public class ArchivedQuakeUI extends JDialog {
         animButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new ArchivedQuakeAnimation(parent, quake).setVisible(true);
+                if (!animationPanelOpen) { // if animation panel is not already open then create new one on event
+                    ArchivedQuakeAnimation animUi = new ArchivedQuakeAnimation(parent, quake);
+                    // set panel to visible
+                    animUi.setVisible(true);
+                    // set class tracking boolean to true because the panel is open
+                    animationPanelOpen = true;
+
+                    //listen for animation window closing
+                    animUi.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                            // set anim traking boolean to false as pane has now closed
+                            animationPanelOpen = false;
+                        }
+                        public void windowClosed(WindowEvent e) {
+                            // set anim traking boolean to false as pane has now closed
+                            animationPanelOpen = false;
+                        }
+                    });
+                }
             }
         });
 
