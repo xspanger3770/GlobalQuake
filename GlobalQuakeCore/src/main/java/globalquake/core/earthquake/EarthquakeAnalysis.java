@@ -949,8 +949,8 @@ public class EarthquakeAnalysis {
         double err = 0;
         double acc = 0;
 
-        for (long orign : threadData.origins) {
-            double _err = Math.abs(orign - bestOrigin);
+        for (long origin : threadData.origins) {
+            double _err = Math.abs(origin - bestOrigin);
             if (_err > 1000 * 60 * 60) {
                 _err = 0;
             }
