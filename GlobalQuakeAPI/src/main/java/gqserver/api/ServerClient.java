@@ -51,6 +51,7 @@ public class ServerClient {
     private final Object limitsLock = new Object();
 
     private final ExecutorService packetQueue;
+    private boolean destroyed;
 
     static {
         limitRules.put(HandshakePacket.class, 2);
@@ -61,7 +62,6 @@ public class ServerClient {
         limitRules.put(ArchivedQuakesRequestPacket.class, 4);
         limitRules.put(DataRequestPacket.class, 60);
     }
-
     public ServerClient(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = new ObjectInputStream(socket.getInputStream());
@@ -83,7 +83,7 @@ public class ServerClient {
     public Packet readPacket() throws IOException, UnknownPacketException, PacketLimitException {
         try {
             Object obj = getInputStream().readObject();
-            if(obj instanceof Packet packet) {
+            if (obj instanceof Packet packet) {
                 receivedPackets++;
 
                 checkLimits(packet);
@@ -92,19 +92,19 @@ public class ServerClient {
             }
 
             throw new UnknownPacketException("Received obj not instance of Packet!", null);
-        }  catch(ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             throw new UnknownPacketException(e.getMessage(), e);
         }
     }
 
-    private void checkLimits(Packet packet) throws PacketLimitException{
+    private void checkLimits(Packet packet) throws PacketLimitException {
         int maximum = limitRules.getOrDefault(packet.getClass(), -1);
-        if(maximum == -1) {
+        if (maximum == -1) {
             throw new PacketLimitException("Unknown request of type %s received from client #%d".formatted(packet.getClass(), getID()), null);
         }
 
         int count = limits.getOrDefault(packet.getClass(), 1);
-        if(count > maximum) {
+        if (count > maximum) {
             throw new PacketLimitException("Too many requests (%d / %d) received of type %s from client #%d".formatted(count, maximum, packet.getClass(), getID()), null);
         }
 
@@ -129,7 +129,11 @@ public class ServerClient {
         return clientConfig;
     }
 
-    public void queuePacket(Packet packet){
+    public synchronized void queuePacket(Packet packet) {
+        if(destroyed){
+            return;
+        }
+
         packetQueue.submit(() -> {
             try {
                 sendPacketNow(packet);
@@ -139,16 +143,16 @@ public class ServerClient {
         });
     }
 
-    public void sendPacketNow(Packet packet) throws IOException{
+    public void sendPacketNow(Packet packet) throws IOException {
         getOutputStream().writeObject(packet);
-        if(sentPackets % RESET_COUNT == 0) {
+        if (sentPackets % RESET_COUNT == 0) {
             // to avoid memory leaks in clients!
             getOutputStream().reset();
         }
         sentPackets++;
     }
 
-    public void destroy() throws IOException {
+    public synchronized void destroy() throws IOException {
         socket.close();
 
         packetQueue.shutdown();
@@ -162,11 +166,14 @@ public class ServerClient {
         } catch (InterruptedException ignored) {
 
         }
+
+        destroyed = true;
     }
 
-    public void destroy(String reason) throws IOException{
+    public void destroy(String reason) throws IOException {
         try {
             sendPacketNow(new TerminationPacket(reason));
+            flush();
         } finally {
             destroy();
         }
@@ -180,7 +187,7 @@ public class ServerClient {
         return joinTime;
     }
 
-    public LocalDateTime getJoinDate(){
+    public LocalDateTime getJoinDate() {
         return Instant.ofEpochMilli(getJoinTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
@@ -196,7 +203,7 @@ public class ServerClient {
         return lastHeartbeat;
     }
 
-    public long getDelay(){
+    public long getDelay() {
         return System.currentTimeMillis() - getLastHeartbeat();
     }
 
