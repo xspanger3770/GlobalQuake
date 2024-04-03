@@ -36,7 +36,6 @@ import gqserver.events.GlobalQuakeServerEventListener;
 import gqserver.events.specific.ClientLeftEvent;
 import org.tinylog.Logger;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -346,24 +345,20 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     public void processPacket(ServerClient client, Packet packet) {
-        try {
-            if (packet instanceof EarthquakesRequestPacket) {
-                processEarthquakesRequest(client);
-            } else if (packet instanceof EarthquakeRequestPacket earthquakeRequestPacket) {
-                processEarthquakeRequest(client, earthquakeRequestPacket);
-            } else if (packet instanceof ArchivedQuakesRequestPacket) {
-                processArchivedQuakesRequest(client);
-            } else if(packet instanceof StationsRequestPacket){
-                processStationsRequestPacket(client);
-            } else if(packet instanceof DataRequestPacket dataRequestPacket){
-                processDataRequest(client, dataRequestPacket);
-            }
-        } catch(IOException e){
-            Logger.tag("Server").error(e);
+        if (packet instanceof EarthquakesRequestPacket) {
+            processEarthquakesRequest(client);
+        } else if (packet instanceof EarthquakeRequestPacket earthquakeRequestPacket) {
+            processEarthquakeRequest(client, earthquakeRequestPacket);
+        } else if (packet instanceof ArchivedQuakesRequestPacket) {
+            processArchivedQuakesRequest(client);
+        } else if(packet instanceof StationsRequestPacket){
+            processStationsRequestPacket(client);
+        } else if(packet instanceof DataRequestPacket dataRequestPacket){
+            processDataRequest(client, dataRequestPacket);
         }
     }
 
-    private void processDataRequest(ServerClient client, DataRequestPacket packet) throws IOException{
+    private void processDataRequest(ServerClient client, DataRequestPacket packet){
         stationMap.putIfAbsent(packet.station(), (GlobalStation) GlobalQuake.instance.getStationManager().getStationByIdentifier(packet.station()));
         GlobalStation station = stationMap.get(packet.station());
         if(station == null){
