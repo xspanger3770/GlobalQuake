@@ -10,9 +10,6 @@ import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
 import org.tinylog.Logger;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 

@@ -3,7 +3,6 @@ package globalquake.ui.action.seedlink;
 import com.opencsv.CSVReader;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
-import org.tinylog.Logger;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,11 +24,6 @@ public class ImportSeedlinksAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Import Seedlink Networks");
-
-        /*ImageIcon addIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/add.png")));
-        Image image = addIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(image);
-        putValue(Action.SMALL_ICON, scaledIcon);*/ //TODO
     }
 
     @Override
@@ -59,10 +53,8 @@ public class ImportSeedlinksAction extends AbstractAction {
         java.util.List<SeedlinkNetwork> loaded = new ArrayList<>();
         CSVReader reader = new CSVReader(new FileReader(selectedFile));
         reader.skip(1);
-        var iter = reader.iterator();
-        while (iter.hasNext()) {
-            String[] data = iter.next();
-            if(data.length > 0)
+        for (String[] data : reader) {
+            if (data.length > 0)
                 loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
 

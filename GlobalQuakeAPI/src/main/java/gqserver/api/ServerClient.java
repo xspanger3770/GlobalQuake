@@ -50,7 +50,7 @@ public class ServerClient {
 
     private final Object limitsLock = new Object();
 
-    private ExecutorService packetQueue;
+    private final ExecutorService packetQueue;
 
     static {
         limitRules.put(HandshakePacket.class, 2);
@@ -159,8 +159,8 @@ public class ServerClient {
                     System.err.println("Unable to terminate one or more services!");
                 }
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignored) {
+
         }
     }
 

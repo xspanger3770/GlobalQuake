@@ -66,7 +66,7 @@ public class SeedlinkCommunicator {
                 long delay = UNKNOWN_DELAY;
 
                 try {
-                    if (FORMAT_UTC_LONG == null || FORMAT_UTC_LONG_MILLIS.get() == null || FORMAT_UTC_SHORT.get() == null) {
+                    if (FORMAT_UTC_LONG_MILLIS.get() == null || FORMAT_UTC_SHORT.get() == null) {
                         FORMAT_UTC_SHORT.set(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
                         FORMAT_UTC_SHORT.get().setTimeZone(TimeZone.getTimeZone("UTC"));
 

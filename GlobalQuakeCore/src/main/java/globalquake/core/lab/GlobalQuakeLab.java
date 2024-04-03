@@ -21,6 +21,7 @@ import java.util.List;
 import static globalquake.core.earthquake.EarthquakeAnalysis.calculateDistances;
 import static globalquake.core.earthquake.EarthquakeAnalysis.createListOfExactPickedEvents;
 
+@SuppressWarnings("unused")
 public class GlobalQuakeLab {
 
     private static final File mainFolder = new File("./training/");
@@ -154,7 +155,7 @@ public class GlobalQuakeLab {
                 //System.err.printf("%s,%s,%s,%s%n", depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 

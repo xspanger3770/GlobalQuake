@@ -4,7 +4,6 @@ import com.opencsv.CSVWriter;
 import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.exception.RuntimeApplicationException;
-import globalquake.ui.dialog.EditSeedlinkNetworkDialog;
 import org.tinylog.Logger;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ExportSeedlinksAction extends AbstractAction {
 
@@ -28,11 +26,6 @@ public class ExportSeedlinksAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Export Seedlink Networks");
-
-        /*ImageIcon addIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/add.png")));
-        Image image = addIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(image);
-        putValue(Action.SMALL_ICON, scaledIcon);*/ //TODO
     }
 
     @Override
@@ -62,22 +55,19 @@ public class ExportSeedlinksAction extends AbstractAction {
                     return;
                 }
             }
-            try {
-                exportTo(selectedFile);
-                JOptionPane.showMessageDialog(parent, "CSV file exported successfully!");
-            } catch (IOException e) {
-                throw new RuntimeException("Export failed", e);
-            }
+
+            exportTo(selectedFile);
+            JOptionPane.showMessageDialog(parent, "CSV file exported successfully!");
         }
     }
 
-    private void exportTo(File selectedFile) throws IOException {
+    private void exportTo(File selectedFile) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(selectedFile))) {
             // Writing data to CSV file
             writer.writeAll(createData());
             Logger.info("CSV file exported successfully!");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeApplicationException("CSV export failed! %s".formatted(e.getMessage()));
         }
     }
 

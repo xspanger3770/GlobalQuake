@@ -1,7 +1,6 @@
 package globalquake.ui.action.source;
 
 import com.opencsv.CSVReader;
-import globalquake.core.database.SeedlinkNetwork;
 import globalquake.core.database.StationDatabaseManager;
 import globalquake.core.database.StationSource;
 import org.tinylog.Logger;
@@ -26,11 +25,6 @@ public class ImportStationSourcesAction extends AbstractAction {
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Import Seedlink Networks");
-
-        /*ImageIcon addIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/add.png")));
-        Image image = addIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(image);
-        putValue(Action.SMALL_ICON, scaledIcon);*/ //TODO
     }
 
     @Override
@@ -50,7 +44,7 @@ public class ImportStationSourcesAction extends AbstractAction {
                 importCSV(chooser.getSelectedFile());
                 JOptionPane.showMessageDialog(chooser, "CSV file imported successfully!");
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.error(e);
                 JOptionPane.showMessageDialog(chooser, "Import failed: " + e.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -61,10 +55,8 @@ public class ImportStationSourcesAction extends AbstractAction {
         java.util.List<StationSource> loaded = new ArrayList<>();
         CSVReader reader = new CSVReader(new FileReader(selectedFile));
         reader.skip(1);
-        var iter = reader.iterator();
-        while (iter.hasNext()) {
-            String[] data = iter.next();
-            if(data.length > 0)
+        for (String[] data : reader) {
+            if (data.length > 0)
                 loaded.add(createSeedlinkNetworkFromStringArray(data));
         }
 

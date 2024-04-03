@@ -153,6 +153,7 @@ public final class Settings {
     public static Integer eewLevelIndex;
     public static Integer qualityFilter;
     public static Integer eewClusterLevel;
+    @SuppressWarnings("unused")
     public static Integer maxConnectionsFromIP;
     @SuppressWarnings("unused")
     public static String FDSNWSEventIP;

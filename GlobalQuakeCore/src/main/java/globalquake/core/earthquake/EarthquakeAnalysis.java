@@ -49,7 +49,7 @@ public class EarthquakeAnalysis {
     public static final int OBVIOUS_CORRECT_MIN_TOTAL = 8;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
-    private boolean HONEST_DEPTH = false;
+    private final boolean HONEST_DEPTH = false;
 
     private final List<Earthquake> earthquakes;
 
@@ -823,6 +823,7 @@ public class EarthquakeAnalysis {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void getBestAtDist(double distFromAnchor, double distHorizontal, double _lat, double _lon,
                                List<ExactPickedEvent> events, int depthIterations, double depthEnd,
                                HypocenterFinderSettings finderSettings, HypocenterFinderThreadData threadData, boolean honest) {
@@ -965,12 +966,13 @@ public class EarthquakeAnalysis {
             err += _err;
         }
 
-        hypocenter.lat = lat;
-        hypocenter.lon = lon;
-        hypocenter.depth = depth;
         hypocenter.origin = bestOrigin;
         hypocenter.err = err;
         hypocenter.correctStations = acc;
+        hypocenter.lat = lat;
+        hypocenter.lon = lon;
+        hypocenter.depth = depth;
+
     }
 
     public static double getElevationCorrection(double elevation) {

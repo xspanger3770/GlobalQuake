@@ -5,7 +5,6 @@ import globalquake.core.station.GlobalStation;
 import gqserver.api.ServerClient;
 import gqserver.api.packets.data.DataRecordPacket;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -45,7 +44,7 @@ public class DataRequest {
         dataRecordQueue.add(dataRecord);
     }
 
-    public synchronized void sendAll() throws IOException {
+    public synchronized void sendAll() {
         while(!dataRecordQueue.isEmpty()){
             DataRecord dataRecord = dataRecordQueue.remove();
             client.queuePacket(new DataRecordPacket(station.getId(), dataRecord.toByteArray()));

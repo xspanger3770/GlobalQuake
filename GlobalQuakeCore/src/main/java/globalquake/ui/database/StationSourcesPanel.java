@@ -1,8 +1,6 @@
 package globalquake.ui.database;
 
 import globalquake.core.database.StationDatabaseManager;
-import globalquake.ui.action.seedlink.ExportSeedlinksAction;
-import globalquake.ui.action.seedlink.ImportSeedlinksAction;
 import globalquake.ui.action.source.*;
 import globalquake.ui.table.StationSourcesTableModel;
 

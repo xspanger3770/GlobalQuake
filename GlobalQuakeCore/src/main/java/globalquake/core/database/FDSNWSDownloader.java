@@ -32,7 +32,7 @@ public class FDSNWSDownloader {
 
     public static final List<Character> SUPPORTED_BANDS = List.of('E', 'S', 'H', 'B', 'C', 'A');
     public static final List<Character> SUPPORTED_INSTRUMENTS = List.of('H', 'L', 'G', 'M', 'N', 'C');
-    private static List<SensitivityCorrection> sensitivityCorrections;
+    private static final List<SensitivityCorrection> sensitivityCorrections;
 
     static {
         TrustManager[] trustAllCerts = new TrustManager[]{
@@ -62,8 +62,10 @@ public class FDSNWSDownloader {
         sensitivityCorrections = new ArrayList<>();
         try{
             File file = new File(GlobalQuake.mainFolder, "sensitivity_corrections.txt");
-            if(!file.exists()){
-                file.createNewFile();
+            if(!file.exists()) {
+                if(!file.createNewFile()){
+                    throw new RuntimeException("Failed to create sensitivity_corrections.txt file!");
+                }
             }
             sensitivityCorrections.addAll(loadSensitivityCorrections(file.getAbsolutePath()));
         } catch(Exception e){
@@ -129,13 +131,7 @@ public class FDSNWSDownloader {
     }
 
     private static HostnameVerifier getHostnameVerifier() {
-        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
-        return hostnameVerifier;
+        return (hostname, session) -> true;
     }
 
     public static List<Network> downloadFDSNWS(StationSource stationSource, String addons) throws Exception {
@@ -173,7 +169,6 @@ public class FDSNWSDownloader {
         Logger.info("Connecting to " + url);
 
         URLConnection con = url.openConnection();
-        ;
         int response = -1;
 
         if (con instanceof HttpsURLConnection httpsURLConnection) {

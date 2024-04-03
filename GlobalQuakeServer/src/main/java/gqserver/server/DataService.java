@@ -37,8 +37,6 @@ import gqserver.events.specific.ClientLeftEvent;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -206,11 +204,7 @@ public class DataService extends GlobalQuakeEventListener {
                     }
 
                     if(dr.ready){
-                        try {
-                            dr.sendAll();
-                        } catch (IOException e) {
-                            Logger.tag("Server").trace(e);
-                        }
+                        dr.sendAll();
                     }
                 }
             }
@@ -364,8 +358,6 @@ public class DataService extends GlobalQuakeEventListener {
             } else if(packet instanceof DataRequestPacket dataRequestPacket){
                 processDataRequest(client, dataRequestPacket);
             }
-        } catch(SocketTimeoutException | SocketException e) {
-            Logger.tag("Server").trace(e);
         } catch(IOException e){
             Logger.tag("Server").error(e);
         }
@@ -392,7 +384,7 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
-    private void sendDataRequest(Set<DataRequest> dataRequests, DataRequest dataRequest) throws IOException{
+    private void sendDataRequest(Set<DataRequest> dataRequests, DataRequest dataRequest) {
         if(!dataRequests.add(dataRequest)){
             // data request from that client to this station already exists
             return;
@@ -414,7 +406,7 @@ public class DataService extends GlobalQuakeEventListener {
         dataRequest.ready = true;
     }
 
-    private void processStationsRequestPacket(ServerClient client) throws IOException {
+    private void processStationsRequestPacket(ServerClient client) {
         List<StationInfoData> data = new ArrayList<>();
         for (AbstractStation station : GlobalQuake.instance.getStationManager().getStations()){
             data.add(new StationInfoData(
@@ -441,7 +433,7 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
-    private void processArchivedQuakesRequest(ServerClient client) throws IOException {
+    private void processArchivedQuakesRequest(ServerClient client) {
         int count = 0;
         for(ArchivedQuake archivedQuake : GlobalQuake.instance.getArchive().getArchivedQuakes()){
             client.queuePacket(createArchivedPacket(archivedQuake));
@@ -449,7 +441,7 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
-    private void processEarthquakeRequest(ServerClient client, EarthquakeRequestPacket earthquakeRequestPacket) throws IOException {
+    private void processEarthquakeRequest(ServerClient client, EarthquakeRequestPacket earthquakeRequestPacket) {
         for(Earthquake earthquake : GlobalQuakeServer.instance.getEarthquakeAnalysis().getEarthquakes()){
             if(earthquake.getUuid().equals(earthquakeRequestPacket.uuid())){
                 client.queuePacket(createQuakePacket(earthquake));
@@ -458,7 +450,7 @@ public class DataService extends GlobalQuakeEventListener {
         }
     }
 
-    private void processEarthquakesRequest(ServerClient client) throws IOException {
+    private void processEarthquakesRequest(ServerClient client) {
         for (EarthquakeInfo info : currentEarthquakes) {
             client.queuePacket(new EarthquakeCheckPacket(info));
         }

@@ -1,6 +1,5 @@
 package globalquake.core.earthquake;
 
-import com.sun.tools.javac.Main;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
@@ -31,7 +30,7 @@ public class GQHypocenterSearchBenchmark {
             sum += runStandardTest();
         }
 
-        System.out.println("Average: %.2f".formatted(sum / 5.0));
+        System.out.printf("Average: %.2f%n", sum / 5.0);
 
         // CPU
         GQHypocenterSearchBenchmark.plotTimeVsPoints(false);
@@ -85,7 +84,7 @@ public class GQHypocenterSearchBenchmark {
                 GQHypocenterSearchBenchmark.runSpeedTest(stations, points, gpu);
                 long duration = System.currentTimeMillis() - a;
                 times[i] = duration;
-                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
+                System.err.printf("Stations: %d | Points: %d: %d%n", stations, points, duration);
             }
 
             writer.write(String.format("%d,", points));
@@ -123,7 +122,7 @@ public class GQHypocenterSearchBenchmark {
                 GQHypocenterSearchBenchmark.runSpeedTest(stations, points, gpu);
                 long duration = System.currentTimeMillis() - a;
                 times[i] = duration;
-                System.err.println("Stations: %d | Points: %d: %d".formatted(stations, points, duration));
+                System.err.printf("Stations: %d | Points: %d: %d%n", stations, points, duration);
             }
 
             writer.write(String.format("%d,", stations));
@@ -152,7 +151,6 @@ public class GQHypocenterSearchBenchmark {
         if (gpu) {
             float[] stations_array = new float[station_count * 4];
             float[] result = {0, 0};
-            long time = 0;
             GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, GQHypocs.depth_profiles.length - 1, 90.0f, 2200);
         } else {
             List<PickedEvent> events = new ArrayList<>();
