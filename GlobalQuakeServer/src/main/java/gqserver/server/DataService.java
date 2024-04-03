@@ -429,10 +429,8 @@ public class DataService extends GlobalQuakeEventListener {
     }
 
     private void processArchivedQuakesRequest(ServerClient client) {
-        int count = 0;
         for(ArchivedQuake archivedQuake : GlobalQuake.instance.getArchive().getArchivedQuakes()){
             client.queuePacket(createArchivedPacket(archivedQuake));
-            count++;
         }
     }
 
