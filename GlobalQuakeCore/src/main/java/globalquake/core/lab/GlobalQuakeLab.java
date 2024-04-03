@@ -14,6 +14,7 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -23,7 +24,7 @@ import static globalquake.core.earthquake.EarthquakeAnalysis.createListOfExactPi
 public class GlobalQuakeLab {
 
     private static final File mainFolder = new File("./training/");
-    private static final File archivedFolder = new File("/home/jakub/Desktop/GlobalQuake/training/events/events/M4.67_Provincia_di_Pordenone,_Italy_2024_03_27_21_19_37/");
+    private static final File archivedFolder = new File("/home/xspanger/Desktop/GlobalQuake/training/");
     //private static final File archivedFolder = new File(mainFolder,"./training/events/events/M3.51_east_of_the_North_Island_of_New_Zealand_2024_03_13_12_59_04/");
 
     public static void main(String[] args) throws Exception {
@@ -41,7 +42,7 @@ public class GlobalQuakeLab {
             System.out.printf("Created archived quakes folder at %s".formatted(archivedFolder.getAbsolutePath()));
         }
 
-        findFiles();
+        traverseDirectories(archivedFolder);
 
         HypocsSettings.save();
 
@@ -49,36 +50,38 @@ public class GlobalQuakeLab {
     }
 
     @SuppressWarnings("DataFlowIssue")
-    private static void findFiles() {
-        for (File file : archivedFolder.listFiles()) {
-            try {
-                tryFile(file);
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+    public static void traverseDirectories(File folder) {
+        if (folder.isDirectory()) {
+            Arrays.asList(folder.listFiles()).parallelStream().forEach(file -> {
+                try {
+                    if (file.isDirectory()) {
+                        System.err.println(file.getAbsolutePath());
+                        traverseDirectories(file); // Recursive call for subdirectory
+                    } else if(file.getName().endsWith(".dat")){
+                        tryFile(file, folder); // Call tryFile for each file
+                    }
+                } catch (Exception e) {
+                    Logger.error(e);
+                }
+            });
         }
     }
 
-    private static void tryFile(File file) throws Exception {
+    private static void tryFile(File file, File folder) throws Exception {
         if (file.isDirectory()) {
             return;
         }
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
         ArchivedQuake archivedQuake = (ArchivedQuake) in.readObject();
-        inspectArchivedQuake(archivedQuake);
+        inspectArchivedQuake(archivedQuake, folder);
     }
 
-    private static void inspectArchivedQuake(ArchivedQuake archivedQuake) {
-        System.out.println(archivedQuake);
+    private static void inspectArchivedQuake(ArchivedQuake archivedQuake, File folder) {
+        //System.out.println(archivedQuake);
 
-        /** HOW:
-         * [2024-02-22 16:11:49] DEBUG: Hypocenter{totalErr=1.7976931348623157E308, correctEvents=6, lat=-15.049294471740723, lon=-104.17449188232422, depth=716.5, origin=1708617187426, selectedEvents=11, magnitude=5.947031779428777, mags=[MagnitudeReading[magnitude=6.022983368320283, distance=14087.3446279849, eventAge=246800], MagnitudeReading[magnitude=4.798863024224573, distance=14109.64226820795, eventAge=244325], MagnitudeReading[magnitude=5.321131406557377, distance=14110.037034335299, eventAge=244900], MagnitudeReading[magnitude=5.947031779428777, distance=14162.969490055464, eventAge=318400], MagnitudeReading[magnitude=7.033905968753155, distance=15279.572844378148, eventAge=274920], MagnitudeReading[magnitude=8.42564223128777, distance=15989.629923569568, eventAge=263090], MagnitudeReading[magnitude=5.946263594638879, distance=17316.639339086327, eventAge=221420]], obviousArrivalsInfo=ObviousArrivalsInfo{total=6361, wrong=6289}, depthConfidenceInterval=HypocenterConfidenceInterval{minDepth=716.5, maxDepth=716.5}}
-         * [2024-02-22 16:11:49] TRACE: Hypocenter finding finished in: 53 ms
-         */
-
-        depthInspection(archivedQuake);
+        depthInspection(archivedQuake, folder);
         try {
-            residualsInspection(archivedQuake);
+            residualsInspection(archivedQuake, folder);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -86,9 +89,9 @@ public class GlobalQuakeLab {
         //runTest(archivedQuake);
     }
 
-    private static void residualsInspection(ArchivedQuake archivedQuake) throws IOException {
+    private static void residualsInspection(ArchivedQuake archivedQuake, File folder) throws IOException {
         long origin = archivedQuake.getOrigin();
-        String filePath = "residuals.csv";
+        String filePath = new File(folder,"residuals.csv").getAbsolutePath();
 
         double depth = archivedQuake.getDepth();
 
@@ -102,17 +105,17 @@ public class GlobalQuakeLab {
                 double angle = TauPTravelTimeCalculator.toAngle(
                         GeoUtils.greatCircleDistance(archivedEvent.lat(), archivedEvent.lon(), archivedQuake.getLat(), archivedQuake.getLon()));
                 double travelTime = TauPTravelTimeCalculator.getPWaveTravelTimeFast(depth, angle);
-                long expectedArrival = (origin + (long) (travelTime * 1000l));
+                long expectedArrival = (origin + (long) (travelTime * 1000L));
                 double residual = (arrival - expectedArrival) / 1000.0;
                 double azimuth = GeoUtils.calculateAngle(archivedEvent.lat(), archivedEvent.lon(), archivedQuake.getLat(), archivedQuake.getLon());
                 if (Math.abs(residual) < 15.0 && angle < 20)
                     writer.write("%s,%s,%s\n".formatted(angle, azimuth, residual));
-                System.err.println("Residual = %.2fs".formatted(residual));
+                // System.err.printf("Residual = %.2fs%n", residual);
             }
         }
     }
 
-    private static void depthInspection(ArchivedQuake archivedQuake) {
+    private static void depthInspection(ArchivedQuake archivedQuake, File folder) {
         List<PickedEvent> pickedEvents = new ArrayList<>();
         var cluster = new Cluster();
         cluster.updateCount = 6543541;
@@ -122,16 +125,13 @@ public class GlobalQuakeLab {
             fakeStations.add(new EarthquakeAnalysisTraining.FakeStation(archivedEvent.lat(), archivedEvent.lon()));
         }
 
-        Hypocenter absolutetyCorrect = new Hypocenter(archivedQuake.getLat(),
-                archivedQuake.getLon(), archivedQuake.getDepth(), archivedQuake.getOrigin(), 0, 0, null, null);
-
         for (ArchivedEvent archivedEvent : archivedQuake.getArchivedEvents()) {
             var event = new PickedEvent(archivedEvent.pWave(), archivedEvent.lat(), archivedEvent.lon(), 0, archivedEvent.maxRatio());
             pickedEvents.add(event);
         }
 
         cluster.calculateRoot(fakeStations);
-        System.err.println(cluster);
+        //System.err.println(cluster);
 
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(fakeStations.size());
         HypocenterFinderSettings finderSettings = EarthquakeAnalysis.createSettings(false);
@@ -139,7 +139,7 @@ public class GlobalQuakeLab {
         List<EarthquakeAnalysis.ExactPickedEvent> exactPickedEvents = createListOfExactPickedEvents(pickedEvents);
         calculateDistances(exactPickedEvents, archivedQuake.getLat(), archivedQuake.getLon());
 
-        String filePath = "output.csv";
+        String filePath = new File(folder,"heuristic.csv").getAbsolutePath();
 
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write("depth,err,correct,heuristic\n");
@@ -151,7 +151,7 @@ public class GlobalQuakeLab {
                 double heuristics = EarthquakeAnalysis.calculateHeuristic(threadData.hypocenterA);
 
                 writer.write("%s,%s,%s,%s\n".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
-                System.err.println("%s,%s,%s,%s".formatted(depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics));
+                //System.err.printf("%s,%s,%s,%s%n", depth, threadData.hypocenterA.err, threadData.hypocenterA.correctStations, heuristics);
             }
         } catch (IOException e) {
             e.printStackTrace();
