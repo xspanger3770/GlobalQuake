@@ -31,7 +31,7 @@ public class EarthquakeAnalysis {
 
     public static final int QUADRANTS = 26;
 
-    public static final boolean USE_MEDIAN_FOR_ORIGIN = true;
+    public static boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
     private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
@@ -434,7 +434,7 @@ public class EarthquakeAnalysis {
                 threadData.bestHypocenter.correctStations = 0;
 
                 calculateDistances(pickedEvents, lat, lon);
-                getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData, HONEST_DEPTH);
+                getBestAtDepth(200, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0, lat, lon, pickedEvents, threadData, true);
 
                 double h1 = calculateHeuristic(threadData.bestHypocenter);
                 double h2 = calculateHeuristic(bestHypocenter);
@@ -470,8 +470,8 @@ public class EarthquakeAnalysis {
         List<ExactPickedEvent> pickedEvents = createListOfExactPickedEvents(selectedEvents);
         HypocenterFinderThreadData threadData = new HypocenterFinderThreadData(pickedEvents.size());
         calculateDistances(pickedEvents, bestHypocenterPrelim.lat, bestHypocenterPrelim.lon);
-        getBestAtDepth(DEPTH_ITERS_POLYGONS, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
-                bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData, HONEST_DEPTH);
+        getBestAtDepth(200, TauPTravelTimeCalculator.MAX_DEPTH, finderSettings, 0,
+                bestHypocenterPrelim.lat, bestHypocenterPrelim.lon, pickedEvents, threadData, true);
 
         bestHypocenterPrelim.correctStations = threadData.bestHypocenter.correctStations;
         bestHypocenterPrelim.err = threadData.bestHypocenter.err;
@@ -846,7 +846,7 @@ public class EarthquakeAnalysis {
         }
     }
 
-    private static void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
+    public static void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
                                        double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
                                        HypocenterFinderThreadData threadData, boolean honest) {
         if (honest) {
@@ -938,7 +938,7 @@ public class EarthquakeAnalysis {
             Arrays.sort(threadData.origins);
             bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
         } else {
-            bestOrigin = threadData.origins[0];
+            bestOrigin = (long) Arrays.stream(threadData.origins).average().orElse(threadData.origins[0]);
         }
 
         if (bestOrigin == UNKNOWN_ORIGIN) {
