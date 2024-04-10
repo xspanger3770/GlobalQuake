@@ -151,8 +151,8 @@ __device__ inline float *hypocenter_err(float *hypocenter, int grid_size) {
     return &hypocenter[0 * grid_size];
 }
 
-__device__ inline int *hypocenter_correct(float *hypocenter, int grid_size) {
-    return (int *) &hypocenter[1 * grid_size];
+__device__ inline float *hypocenter_correct(float *hypocenter, int grid_size) {
+    return &hypocenter[1 * grid_size];
 }
 
 __device__ inline float *hypocenter_index(float *hypocenter, int grid_size) {
@@ -168,15 +168,15 @@ __device__ inline float *hypocenter_depth(float *hypocenter, int grid_size) {
 }
 
 __device__ inline float heuristic(float correct, float err) {
-    return (correct * correct) / (err * err);
+    return (correct * correct) / (err * err * err);
 }
 
 __device__ void reduce(float *hypocenter_a, float *hypocenter_b, int grid_size) {
     float err_a = *hypocenter_err(hypocenter_a, grid_size);
     float err_b = *hypocenter_err(hypocenter_b, grid_size);
 
-    int correct_a = *hypocenter_correct(hypocenter_a, grid_size);
-    int correct_b = *hypocenter_correct(hypocenter_b, grid_size);
+    float correct_a = *hypocenter_correct(hypocenter_a, grid_size);
+    float correct_b = *hypocenter_correct(hypocenter_b, grid_size);
 
     bool swap = heuristic(correct_b, err_b) > heuristic(correct_a, err_a);
 
@@ -240,8 +240,8 @@ __global__ void evaluate_hypocenter(float *results,
         final_origin = predicted_origin;
     }
 
-    float err = 0.0;
-    int correct = station_count;
+    float err = 0.0f;
+    float correct = 0.0f;
 
     for (int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
@@ -250,17 +250,14 @@ __global__ void evaluate_hypocenter(float *results,
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-
-        if (_err > p_wave_threshold) {
-            correct--;
-            _err = (_err - p_wave_threshold) * 0.1f + p_wave_threshold;
-        }
-
-        err += _err * _err;
+        correct += fmaxf(0.0f, p_wave_threshold - _err);
+        err += _err;
     }
 
+    correct /= p_wave_threshold;
+
     s_results[threadIdx.x + blockDim.x * 0] = err;
-    *(int *) &s_results[threadIdx.x + blockDim.x * 1] = correct;
+    s_results[threadIdx.x + blockDim.x * 1] = correct;
     *(int *) (&s_results[threadIdx.x + blockDim.x * 2]) = point_index;
     s_results[threadIdx.x + blockDim.x * 3] = final_origin;
     s_results[threadIdx.x + blockDim.x * 4] = depth;
