@@ -804,7 +804,7 @@ public class EarthquakeAnalysis {
     }
 
     public static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
-        return (hypocenter.correctStations * hypocenter.correctStations) / (hypocenter.err * hypocenter.err);
+        return Math.pow(hypocenter.correctStations, 2) / Math.pow(hypocenter.err, 3);
     }
 
     private static PreliminaryHypocenter selectBetterHypocenter(PreliminaryHypocenter hypocenter1, PreliminaryHypocenter hypocenter2) {
@@ -847,8 +847,8 @@ public class EarthquakeAnalysis {
     }
 
     public static void getBestAtDepth(int depthIterations, double depthEnd, HypocenterFinderSettings finderSettings,
-                                       double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
-                                       HypocenterFinderThreadData threadData, boolean honest) {
+                                      double depthStart, double lat, double lon, List<ExactPickedEvent> pickedEvents,
+                                      HypocenterFinderThreadData threadData, boolean honest) {
         if (honest) {
             getBestAtDepthHonest(depthIterations, depthEnd, finderSettings, depthStart, lat, lon, pickedEvents, threadData);
         } else {
@@ -957,11 +957,7 @@ public class EarthquakeAnalysis {
             }
             if (_err < finderSettings.pWaveInaccuracyThreshold()) {
                 acc += 1.0 - _err / finderSettings.pWaveInaccuracyThreshold();
-            } else {
-                _err = (_err - finderSettings.pWaveInaccuracyThreshold()) * 0.2 + finderSettings.pWaveInaccuracyThreshold();
             }
-
-            _err /= 1000.0;
 
             err += _err;
         }
