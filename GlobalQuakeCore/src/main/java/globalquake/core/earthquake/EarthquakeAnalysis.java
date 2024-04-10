@@ -31,11 +31,11 @@ public class EarthquakeAnalysis {
 
     public static final int QUADRANTS = 26;
 
+    @SuppressWarnings("CanBeFinal")
     public static boolean USE_MEDIAN_FOR_ORIGIN = true;
     private static final boolean REMOVE_WEAKEST = false;
     private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
-    private static final int DEPTH_ITERS_POLYGONS = 12;
     protected static final double NO_MAGNITUDE = -999.0;
     private static final boolean CHECK_DELTA_P = false;
 
@@ -49,6 +49,7 @@ public class EarthquakeAnalysis {
     public static final int OBVIOUS_CORRECT_MIN_TOTAL = 8;
 
     public static boolean DEPTH_FIX_ALLOWED = true;
+    @SuppressWarnings("FieldCanBeLocal")
     private final boolean HONEST_DEPTH = false;
 
     private final List<Earthquake> earthquakes;

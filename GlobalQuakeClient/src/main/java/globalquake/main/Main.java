@@ -8,18 +8,13 @@ import globalquake.ui.client.MainFrame;
 import org.apache.commons.cli.*;
 import org.tinylog.Logger;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.util.Objects;
 
 public class Main {
 
     private static ApplicationErrorHandler errorHandler;
     public static final String fullName = "GlobalQuake " + GlobalQuake.version;
     public static final File MAIN_FOLDER = new File("./.GlobalQuakeData/");
-
-    public static final Image LOGO = new ImageIcon(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("logo/logo.png"))).getImage();
 
     public static void main(String[] args) {
         initErrorHandler();
