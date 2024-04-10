@@ -100,7 +100,7 @@ public class GQHypocs extends GQHypocenterSearchBenchmark {
 
     private static double getPointMultiplier() {
         double point_multiplier = Settings.hypocenterDetectionResolutionGPU;
-        point_multiplier = ((point_multiplier * point_multiplier + 600) / 2200.0);
+        point_multiplier = ((point_multiplier * point_multiplier + 100) / 2200.0);
         return point_multiplier;
     }
 
