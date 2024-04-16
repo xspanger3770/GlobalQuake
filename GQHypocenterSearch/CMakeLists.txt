@@ -25,8 +25,9 @@ foreach(arch ${CUDA_ARCH_LIST})
     set(CUDA_NVCC_FLAGS_${arch} "-gencode arch=compute_${arch},code=sm_${arch}")
 endforeach()
 
-include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/)
-include_directories(/usr/lib/jvm/java-17-openjdk-amd64/include/linux)
+# Find JNI (Java Native Interface)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
 
 # Compile CUDA sources into a shared library
 cuda_add_library(gq_hypocs SHARED ${SRC_FILES})
