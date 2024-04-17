@@ -26,6 +26,7 @@
 */
 
 #define SHARED_TRAVEL_TABLE_SIZE 2048
+#define MAX_ANG_VIRTUAL (181.0f)
 
 #define PHI2 2.618033989f
 #define PI 3.14159256f
@@ -135,11 +136,6 @@ __device__ void calculate_params_device(int points, int index, float max_dist, f
 }
 
 __device__ float travel_table_interpolate(float *s_travel_table, float index) {
-    // if we are out of bounds, then return some arbitrary value
-    if (index >= SHARED_TRAVEL_TABLE_SIZE - 1.0f) {
-        return s_travel_table[SHARED_TRAVEL_TABLE_SIZE - 1];
-    }
-
     int index1 = (int) index;
     int index2 = index1 + 1;
 
@@ -314,7 +310,7 @@ __global__ void results_reduce(float *out, float *in, int total_size) {
     }
 }
 
-const float ANGLE_TO_INDEX = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG;
+const float ANGLE_TO_INDEX = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG_VIRTUAL;
 
 __global__ void precompute_station_distances(
         float *station_distances, float *stations, int station_count, int points, float max_dist, float from_lat, float from_lon) {
@@ -340,7 +336,7 @@ void prepare_travel_table(float *fitted_travel_table, int rows) {
     for (int row = 0; row < rows; row++) {
         for (int column = 0; column < SHARED_TRAVEL_TABLE_SIZE; column++) {
             fitted_travel_table[row * SHARED_TRAVEL_TABLE_SIZE + column] =
-                    p_wave_interpolate(column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG, (row / (rows - 1.0)) * table_max_depth);
+                    p_wave_interpolate(column / (SHARED_TRAVEL_TABLE_SIZE - 1.0) * MAX_ANG_VIRTUAL, (row / (rows - 1.0)) * table_max_depth);
         }
     }
 }
