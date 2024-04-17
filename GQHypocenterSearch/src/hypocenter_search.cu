@@ -243,6 +243,8 @@ __global__ void evaluate_hypocenter(float *results,
     float err = 0.0f;
     float correct = 0.0f;
 
+    float k = 1.0f / p_wave_threshold;
+
     for (int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
         float s_pwave = s_stations[i];
@@ -250,11 +252,9 @@ __global__ void evaluate_hypocenter(float *results,
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        correct += fmaxf(0.0f, p_wave_threshold - _err);
+        correct += k * fmaxf(0.0f, p_wave_threshold - _err);
         err += _err;
     }
-
-    correct /= p_wave_threshold;
 
     s_results[threadIdx.x + blockDim.x * 0] = err;
     s_results[threadIdx.x + blockDim.x * 1] = correct;
