@@ -35,12 +35,12 @@ public class EarthquakeAnalysisTraining {
 
         Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 4000.0;
-        Settings.hypocenterDetectionResolutionGPU = 0.0;
+        Settings.hypocenterDetectionResolutionGPU = 40.0;
         Settings.parallelHypocenterLocations = true;
         long a = System.currentTimeMillis();
 
         List<Double> times = new ArrayList<>();
-        int runs = 5000;
+        int runs = 20000;
 
         String units = "km";
 
@@ -50,8 +50,11 @@ public class EarthquakeAnalysisTraining {
                 times.add(err);
             }
         }
+
+        long duration = System.currentTimeMillis() - a;
+
         System.err.println("============================================");
-        System.err.printf("TEST TOOK %,d ms%n", System.currentTimeMillis() - a);
+        System.err.printf("TEST TOOK %,d ms (%.2fms per run)%n", duration, (double) duration / runs);
 
         if (times.isEmpty()) {
             System.err.println("NO CORRECT!");

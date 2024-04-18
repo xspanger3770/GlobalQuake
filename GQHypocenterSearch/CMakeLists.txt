@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 project(GQHypocenterSearch)
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} $ENV{CUDA_NVCC_FLAGS} -lineinfo -g --use_fast_math")
+
+# Define default values for BLOCK_HYPOCS and TILE
+if(NOT DEFINED BLOCK_HYPOCS)
+    set(BLOCK_HYPOCS_DEFAULT 512)
+    set(BLOCK_HYPOCS ${BLOCK_HYPOCS_DEFAULT})
+endif()
+
+if(NOT DEFINED TILE)
+    set(TILE_DEFAULT 5)
+    set(TILE ${TILE_DEFAULT})
+endif()
+
+# Add definitions for CUDA_NVCC_FLAGS based on BLOCK_HYPOCS and TILE
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} $ENV{CUDA_NVCC_FLAGS} --use_fast_math -DBLOCK_HYPOCS=${BLOCK_HYPOCS} -DTILE=${TILE}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBLOCK_HYPOCS=${BLOCK_HYPOCS} -DTILE=${TILE}")
 
 # Find CUDA package
 find_package(CUDA REQUIRED)

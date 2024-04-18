@@ -7,10 +7,8 @@
 #include "globalquake_jni_GQNativeFunctions.h"
 #include "travel_table.hpp"
 
-#define BLOCK_HYPOCS 512
 #define BLOCK_REDUCE 256
 #define BLOCK_DISTANCES 64
-#define TILE 5
 #define SHARED_TRAVEL_TABLE_SIZE 256
 
 #define STATION_FILEDS 4
@@ -164,7 +162,7 @@ __device__ inline float *hypocenter_depth(float *hypocenter, int grid_size) {
 }
 
 __device__ inline float heuristic(float correct, float err) {
-    return (correct * correct) / (err * err * err);
+    return (correct * correct) / (err * err);
 }
 
 __device__ void reduce(float *hypocenter_a, float *hypocenter_b, int grid_size) {
@@ -417,7 +415,7 @@ bool run_hypocenter_search(float *stations,
         return false;
     }
 
-    points += (BLOCK_HYPOCS - points % BLOCK_HYPOCS) + BLOCK_HYPOCS;
+    points += (BLOCK_HYPOCS - points % BLOCK_HYPOCS);
 
     bool success = true;
 
