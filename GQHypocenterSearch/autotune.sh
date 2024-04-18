@@ -4,6 +4,9 @@
 BLOCK_HYPOCS_VALUES=(32 64 128 224 256 264 280 324 360 384 442 512 1024)
 TILE_VALUES=(1 2 3 4 5 6 7 8 10 12)
 
+#BLOCK_HYPOCS_VALUES=(32)
+#TILE_VALUES=(5)
+
 DEFAULT_TESTS=12
 TESTS=${1:-$DEFAULT_TESTS}
 
@@ -37,3 +40,14 @@ for BLOCK_HYPOCS in "${BLOCK_HYPOCS_VALUES[@]}"; do
         # make clean
     done
 done
+
+cd ..
+
+highest_value=$(awk -F';' 'NR > 1 {print $3}' "$filename" | sort -n -r | head -n 1)
+
+# Use grep to find the entire row with the highest value in the third column
+row=$(grep "$highest_value" "$filename")
+
+echo "Best solution:"
+echo "$row"
+echo "$row">best_solution.txt
