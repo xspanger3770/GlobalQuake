@@ -4,6 +4,9 @@
 BLOCK_HYPOCS_VALUES=(32 64 128 224 256 264 280 324 360 384 442 512 1024)
 TILE_VALUES=(1 2 3 4 5 6 7 8 10 12)
 
+DEFAULT_TESTS=12
+TESTS=${1:-$DEFAULT_TESTS}
+
 filename="autotune_results.csv"
 
 # Remove the existing file if it exists
@@ -22,7 +25,7 @@ for BLOCK_HYPOCS in "${BLOCK_HYPOCS_VALUES[@]}"; do
     # Loop over TILE values
     for TILE in "${TILE_VALUES[@]}"; do
         # Run cmake with specified BLOCK_HYPOCS and TILE values
-        cmake -DBLOCK_HYPOCS=$BLOCK_HYPOCS -DTILE=$TILE ..
+        cmake -DBLOCK_HYPOCS=$BLOCK_HYPOCS -DTILE=$TILE -DTESTS=$TESTS ..
 
         # Compile the project using make
         make

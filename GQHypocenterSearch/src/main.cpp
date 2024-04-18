@@ -67,7 +67,7 @@ int main() {
 
     float final_result[4];
 
-    int tests = 2;
+    int tests = TESTS;
 
     double best_pps = 0;
 
