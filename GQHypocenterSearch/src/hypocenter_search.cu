@@ -223,7 +223,7 @@ __global__ void evaluate_hypocenter(float *results,
         return;
     }
 
-    int j = blockIdx.y % station_count;
+    int j = (blockIdx.y + point_index) % station_count;
     float final_origin = 0.0f;
 
     // trick with changing station that is being used for origin calculation
@@ -239,8 +239,6 @@ __global__ void evaluate_hypocenter(float *results,
     float err = 0.0f;
     float correct = 0.0f;
 
-    float k = 1.0f / p_wave_threshold;
-
     for (int i = 0; i < station_count; i++) {
         float ang_dist = station_distances[point_index + i * points];
         float s_pwave = s_stations[i];
@@ -248,7 +246,7 @@ __global__ void evaluate_hypocenter(float *results,
         float predicted_origin = s_pwave - expected_travel_time;
 
         float _err = fabsf(predicted_origin - final_origin);
-        correct += k * fmaxf(0.0f, p_wave_threshold - _err);
+        correct += fmaxf(0.0f, p_wave_threshold - _err); // divide by p_wave_threshold at the end! ! actually we dont have to
         err += _err;
     }
 
