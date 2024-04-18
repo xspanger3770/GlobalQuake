@@ -40,7 +40,7 @@ public class EarthquakeAnalysisTraining {
         long a = System.currentTimeMillis();
 
         List<Double> times = new ArrayList<>();
-        int runs = 500;
+        int runs = 5000;
 
         String units = "km";
 

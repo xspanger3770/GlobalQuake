@@ -78,6 +78,8 @@ int main() {
 
     printf("best: %.2fpps\n", best_pps);
 
+    printf("allocation size %.2fkB\n", get_total_allocation_size(points, st_c, depth_resolution) / 1024.0);
+
     cleanup:
     if (p_wave_travel_table) {
         free(p_wave_travel_table);

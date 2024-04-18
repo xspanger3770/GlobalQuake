@@ -11,6 +11,7 @@
 #define BLOCK_REDUCE 256
 #define BLOCK_DISTANCES 64
 #define TILE 5
+#define SHARED_TRAVEL_TABLE_SIZE 256
 
 #define STATION_FILEDS 4
 #define HYPOCENTER_FILEDS 5
@@ -26,9 +27,7 @@
  * lat, lon, depth, origin
 */
 
-#define SHARED_TRAVEL_TABLE_SIZE 512
 #define MAX_ANG_VIRTUAL (181.0f)
-
 #define PHI2 2.618033989f
 #define PI 3.14159256f
 
@@ -223,7 +222,7 @@ __global__ void evaluate_hypocenter(float *results,
 
     float origins[TILE];
 
-    int j = ((blockIdx.y * TILE) + blockIdx.x) % station_count;
+    int j = ((blockIdx.y * TILE) + point_index) % station_count;
 
     // trick with changing station that is being used for origin calculation
     {
@@ -442,7 +441,7 @@ bool run_hypocenter_search(float *stations,
     const int block_count = ceil(static_cast<float>(points) / BLOCK_DISTANCES);
 
     TRACE(1, "Station array size (%ld stations) %.2fkB\n", station_count, station_array_size / (1024.0));
-    TRACE(1, "Station distances array size %.2fkB\n", station_distances_array_size / (1024.0));
+    TRACE(1, "Station distances array size %.2fMB\n", station_distances_array_size / (1024.0 * 1024.0));
     TRACE(1, "Temp results array size %.2fkB\n", (sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) / (1024.0));
     TRACE(1, "Results array has size %.2fMB\n", (results_size / (1024.0 * 1024.0)));
 
