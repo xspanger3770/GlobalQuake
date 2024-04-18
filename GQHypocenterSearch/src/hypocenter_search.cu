@@ -10,7 +10,7 @@
 #define BLOCK_HYPOCS 512
 #define BLOCK_REDUCE 256
 #define BLOCK_DISTANCES 64
-#define TILE 4
+#define TILE 5
 
 #define STATION_FILEDS 4
 #define HYPOCENTER_FILEDS 5
@@ -260,14 +260,17 @@ __global__ void evaluate_hypocenter(float *results,
     }
 
     int best_tile = 0;
-    float best_heuristic = 0;
-    for(int tile = 0; tile < TILE; tile++) {
+    float best_heuristic = heuristic(correct[0], err[0]);
+    
+    #if TILE > 1
+    for(int tile = 1; tile < TILE; tile++) {
         float h = heuristic(correct[tile], err[tile]);
         if(h > best_heuristic){
             best_heuristic = h;
             best_tile = tile;
         }
     }
+    #endif
     
     float depth = max_depth * ((blockIdx.y * TILE + best_tile) / (float) (gridDim.y * TILE - 1.0f));
             
