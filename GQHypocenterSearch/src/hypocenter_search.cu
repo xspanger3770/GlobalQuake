@@ -364,7 +364,7 @@ void prepare_travel_table(float *fitted_travel_table, int rows) {
 size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution) {
     size_t result = total_travel_table_size;
 
-    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / depth_resolution) + 1, 1 };
+    dim3 blocks = { (unsigned int) ceil(static_cast<float>(points) / BLOCK_HYPOCS), (unsigned int) ceil(table_max_depth / (depth_resolution * TILE)) + 1, 1 };
 
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
