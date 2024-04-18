@@ -99,6 +99,12 @@ public class FDSNWSDownloader {
         return corrections;
     }
 
+    public static void main(String[] args) throws Exception{
+        GlobalQuake.prepare(new File("./.GlobalQuakeData/"), null);
+        var a = loadSensitivityCorrections(new File(GlobalQuake.mainFolder, "sensitivity_corrections.txt").getAbsolutePath());
+        System.err.println(a);
+    }
+
     private static List<String> downloadWadl(StationSource stationSource) throws Exception {
         URL url = new URL("%sapplication.wadl".formatted(stationSource.getUrl()));
 
