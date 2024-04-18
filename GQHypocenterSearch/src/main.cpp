@@ -49,21 +49,34 @@ int main() {
 
     float final_result[4];
 
-    struct timeval t1, t2;
+    int tests = 15;
 
-    gettimeofday(&t1, 0);
+    double best_pps = 0;
 
-    double time = 0.0;
+    for(int i = 0; i < tests; i++){
+        struct timeval t1, t2;
 
-    if (!run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result, 2.2f)) {
-        printf("Error!\n");
-        goto cleanup;
+        gettimeofday(&t1, 0);
+
+        double time = 0.0;
+
+        if (!run_hypocenter_search(stations, st_c, points, 0, 90.0 * RADIANS, 0, 0, final_result, 2.2f)) {
+            printf("Error!\n");
+            goto cleanup;
+        }
+        
+        gettimeofday(&t2, 0);
+        time = (1000000.0*(t2.tv_sec-t1.tv_sec) + t2.tv_usec-t1.tv_usec)/1000.0;
+
+        double pps = ((points * 1000.0) / time);
+        printf("Standard test with 100_000 points, 50 stations and 0.5km depth resolution: %.1fms @ %.1fpps @ %.1fpscps\n", time, pps, ((points * 1000.0 * st_c) / time));
+
+        if(pps > best_pps){
+            best_pps = pps;
+        }
     }
-    
-    gettimeofday(&t2, 0);
-    time = (1000000.0*(t2.tv_sec-t1.tv_sec) + t2.tv_usec-t1.tv_usec)/1000.0;
 
-    printf("Standard test with 100_000 points, 50 stations and 0.5km depth resolution: %.1fms @ %.1fpps @ %.1fpscps\n", time, ((points * 1000.0) / time), ((points * 1000.0 * st_c) / time));
+    printf("best: %.2fpps\n", best_pps);
 
     cleanup:
     if (p_wave_travel_table) {

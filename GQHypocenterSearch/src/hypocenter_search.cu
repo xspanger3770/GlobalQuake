@@ -260,10 +260,10 @@ __global__ void evaluate_hypocenter(float *results,
     }
 
     int best_tile = 0;
-    float best_heuristic = heuristic(correct[0], err[0]);
+    float best_heuristic = 0;
     for(int tile = 0; tile < TILE; tile++) {
         float h = heuristic(correct[tile], err[tile]);
-        if(h < best_heuristic){
+        if(h > best_heuristic){
             best_heuristic = h;
             best_tile = tile;
         }
