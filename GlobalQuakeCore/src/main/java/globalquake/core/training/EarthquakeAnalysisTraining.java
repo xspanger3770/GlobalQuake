@@ -35,7 +35,7 @@ public class EarthquakeAnalysisTraining {
 
         Settings.hypocenterDetectionResolution = 40.0;
         Settings.pWaveInaccuracyThreshold = 4000.0;
-        Settings.hypocenterDetectionResolutionGPU = 20.0;
+        Settings.hypocenterDetectionResolutionGPU = 0.0;
         Settings.parallelHypocenterLocations = true;
         long a = System.currentTimeMillis();
 
@@ -67,7 +67,7 @@ public class EarthquakeAnalysisTraining {
     }
 
 
-    public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider, boolean cpu) {
+    public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider, boolean cpuOnly) {
         double resolution = 0.0;
         long lastTime;
         int seed = 6543;
@@ -75,19 +75,19 @@ public class EarthquakeAnalysisTraining {
 
         long targetTime = HypocsSettings.getOrDefaultInt("calibrateTargetTime", 400);
 
-        while (failed < 5 && resolution <= (cpu ? 160 : 1000)) {
-            if (cpu) {
+        while (failed < 5 && resolution <= (cpuOnly ? 160 : 1000)) {
+            if (cpuOnly) {
                 Settings.hypocenterDetectionResolution = resolution;
             } else {
                 Settings.hypocenterDetectionResolutionGPU = resolution;
             }
 
-            lastTime = measureTest(seed++, 60, cpu);
+            lastTime = measureTest(seed++, 60, cpuOnly);
             if (lastTime > targetTime) {
                 failed++;
             } else {
                 failed = 0;
-                resolution += cpu ? 2.0 : 5.0;
+                resolution += cpuOnly ? 2.0 : 5.0;
             }
             if (progressUpdateFunction != null) {
                 progressUpdateFunction.update("Calibrating: Resolution %.2f took %d / %d ms".formatted(
@@ -107,13 +107,13 @@ public class EarthquakeAnalysisTraining {
         Settings.save();
     }
 
-    public static long measureTest(long seed, int stations, boolean cpu) {
+    public static long measureTest(long seed, int stations, boolean cpuOnly) {
         long a = System.currentTimeMillis();
-        runTest(seed, stations, cpu);
+        runTest(seed, stations, cpuOnly);
         return System.currentTimeMillis() - a;
     }
 
-    public static double runTest(long seed, int stations, boolean cpu) {
+    public static double runTest(long seed, int stations, boolean cpuOnly) {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 
@@ -155,7 +155,7 @@ public class EarthquakeAnalysisTraining {
 
         cluster.calculateRoot(fakeStations);
 
-        HypocenterFinderSettings finderSettings = EarthquakeAnalysis.createSettings(true);
+        HypocenterFinderSettings finderSettings = EarthquakeAnalysis.createSettings(!cpuOnly);
 
         PreliminaryHypocenter result = earthquakeAnalysis.runHypocenterFinder(pickedEvents, cluster, finderSettings, true);
 
