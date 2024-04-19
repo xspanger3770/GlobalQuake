@@ -41,7 +41,7 @@ that are capable of estimating the magnitude reasonably accurately for nearly an
 
 ### What GlobalQuake is struggling with?
 
-* Larger earthquakes (M6+) often trigger false detections or show duplicated earthquakes.
+* Larger earthquakes (M8+) often trigger false detections or show duplicated earthquakes.
 * Unable to detect multiple earthquakes in the same epicenter in short period of time.
 * Calculation of distant earthquakes from a certain set of station is always less accurate than a local earthquake.
 
