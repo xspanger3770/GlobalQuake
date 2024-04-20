@@ -80,7 +80,7 @@ public class GQServerSocket {
             clientsLimitWatchdog.scheduleAtFixedRate(this::updateLimits, 0, 60, TimeUnit.SECONDS);
             acceptService.submit(this::runAccept);
 
-            if(Main.isHeadless()){
+            if (Main.isHeadless()) {
                 statusReportingService.scheduleAtFixedRate(this::printStatus, 0, 30, TimeUnit.SECONDS);
             }
 
@@ -110,7 +110,7 @@ public class GQServerSocket {
         if (stats != null) {
             Logger.tag("ServerStatus").info(
                     "accepted: %d, wrongVersion: %d, wrongPacket: %d, serverFull: %d, success: %d, error: %d, ipRejects: %d"
-                    .formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors, stats.ipRejects));
+                            .formatted(stats.accepted, stats.wrongVersion, stats.wrongPacket, stats.serverFull, stats.successfull, stats.errors, stats.ipRejects));
         }
     }
 
@@ -131,7 +131,7 @@ public class GQServerSocket {
                 }
             }
             clients.removeAll(toRemove);
-        }catch(Exception e) {
+        } catch (Exception e) {
             Logger.tag("Server").error(e);
         }
     }
@@ -229,7 +229,7 @@ public class GQServerSocket {
                 lastSocket.setSoTimeout(0); // we can wait for clients forever
                 Socket socket = lastSocket.accept();
 
-                if(!checkAddress(socket)){
+                if (!checkAddress(socket)) {
                     socket.close();
                     Logger.tag("Server").warn("Client rejected for reaching max connection count!");
                     stats.ipRejects++;
@@ -246,7 +246,7 @@ public class GQServerSocket {
                     try {
                         client = new ServerClient(socket);
                         Logger.tag("Server").info("Performing handshake for client #%d".formatted(client.getID()));
-                        if(!handshake(client)){
+                        if (!handshake(client)) {
                             clientLeft(socket);
                         }
                     } catch (IOException e) {

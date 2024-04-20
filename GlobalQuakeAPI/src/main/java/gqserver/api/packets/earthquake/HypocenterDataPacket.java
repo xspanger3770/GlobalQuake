@@ -7,7 +7,8 @@ import gqserver.api.data.earthquake.advanced.AdvancedHypocenterData;
 
 import java.io.Serial;
 
-public record HypocenterDataPacket(HypocenterData data, AdvancedHypocenterData advancedHypocenterData, ClusterData clusterData) implements Packet {
+public record HypocenterDataPacket(HypocenterData data, AdvancedHypocenterData advancedHypocenterData,
+                                   ClusterData clusterData) implements Packet {
     @Serial
     private static final long serialVersionUID = 0L;
 }

@@ -55,7 +55,7 @@ public final class SeedlinkNetwork implements Serializable {
                 "port=" + port + ']';
     }
 
-    public void setStatus(int value, String str){
+    public void setStatus(int value, String str) {
         SwingUtilities.invokeLater(() -> {
             getStatusBar().setString(str);
             getStatusBar().setValue(value);
@@ -63,7 +63,7 @@ public final class SeedlinkNetwork implements Serializable {
     }
 
     public JProgressBar getStatusBar() {
-        if(statusBar == null){
+        if (statusBar == null) {
             statusBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
             statusBar.setIndeterminate(false);
             statusBar.setString("Ready");
@@ -86,7 +86,7 @@ public final class SeedlinkNetwork implements Serializable {
     }
 
     public int getTimeout() {
-        if(timeout < 5){
+        if (timeout < 5) {
             timeout = DEFAULT_TIMEOUT;
         }
         return timeout;

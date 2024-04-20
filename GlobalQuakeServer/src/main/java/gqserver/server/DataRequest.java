@@ -45,7 +45,7 @@ public class DataRequest {
     }
 
     public synchronized void sendAll() {
-        while(!dataRecordQueue.isEmpty()){
+        while (!dataRecordQueue.isEmpty()) {
             DataRecord dataRecord = dataRecordQueue.remove();
             client.queuePacket(new DataRecordPacket(station.getId(), dataRecord.toByteArray()));
         }

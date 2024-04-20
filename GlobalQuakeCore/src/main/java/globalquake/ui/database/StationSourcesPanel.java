@@ -62,7 +62,7 @@ public class StationSourcesPanel extends JPanel {
     private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
         JPanel actionsPanel = new JPanel();
 
-        actionsPanel.setLayout( new GridLayout(2,6,5,5));
+        actionsPanel.setLayout(new GridLayout(2, 6, 5, 5));
 
         actionsPanel.add(new JButton(addStationSourceAction));
         actionsPanel.add(new JButton(editStationSourceAction));

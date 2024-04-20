@@ -20,7 +20,7 @@ public class RemoveStationSourceAction extends AbstractAction {
 
     private JTable table;
 
-    public RemoveStationSourceAction(StationDatabaseManager databaseManager, Component parent){
+    public RemoveStationSourceAction(StationDatabaseManager databaseManager, Component parent) {
         super("Remove");
         this.parent = parent;
         this.databaseManager = databaseManager;
@@ -53,14 +53,14 @@ public class RemoveStationSourceAction extends AbstractAction {
         }
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
+        try {
             List<StationSource> toBeRemoved = new ArrayList<>();
-            for(int i:selectedRows){
+            for (int i : selectedRows) {
                 StationSource stationSource = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeRemoved.add(stationSource);
             }
             databaseManager.removeAllStationSources(toBeRemoved);
-        }finally {
+        } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 

@@ -72,7 +72,7 @@ public class Regions {
         parseGeoJson("polygons_converted/italy_provinces.geojson", raw_polygonsIT, regionsIT, NONE);
         parseGeoJson("polygons_converted/region_dataset.geojson", null, regionSearchHD, NONE);
 
-        for(List<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)){
+        for (List<Region> list : List.of(regionsUS, regionsAK, regionsJP, regionsNZ, regionsHW, regionsIT)) {
             regionSearchHD.addAll(list);
         }
 
@@ -83,11 +83,11 @@ public class Regions {
     private static void loadLookupTable() throws IOException {
         shorelineLookup = LookupTableIO.importLookupTableFromFile();
 
-        if(shorelineLookup == null){
+        if (shorelineLookup == null) {
             System.err.println("No lookup table found! Generating...");
             double start = System.currentTimeMillis();
             boolean exportResult = LookupTableIO.exportLookupTableToFile();
-            System.out.println("Generating took: " + (System.currentTimeMillis() - start)/1000 + "s");
+            System.out.println("Generating took: " + (System.currentTimeMillis() - start) / 1000 + "s");
 
             if (exportResult) {
                 System.out.println("Lookup table successfully generated! Loading " + shorelineLookup.size() + " items.");
@@ -130,13 +130,13 @@ public class Regions {
         double closestDistance = Double.MAX_VALUE;
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regionsUHD) {
-            for(Path2D.Float path : reg.paths()){
-                if(path.contains(point)){
+            for (Path2D.Float path : reg.paths()) {
+                if (path.contains(point)) {
                     return depth;
                 }
             }
             for (GQPolygon polygon : reg.raws()) {
-                for(int i = 0; i < polygon.getSize(); i++) {
+                for (int i = 0; i < polygon.getSize(); i++) {
                     double pLat = polygon.getLats()[i];
                     double pLon = polygon.getLons()[i];
                     double dist = gcd ? GeoUtils.greatCircleDistance(pLat, pLon, lat, lon) :
@@ -162,7 +162,7 @@ public class Regions {
             int i = 0;
             for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
-                    if(path.contains(point)) {
+                    if (path.contains(point)) {
                         return false;
                     }
                 }
@@ -173,13 +173,13 @@ public class Regions {
         return true;
     }
 
-    public static String getName(double lat, double lon, List<Region> regions){
+    public static String getName(double lat, double lon, List<Region> regions) {
         Point2D.Double point = new Point2D.Double(lon, lat);
         for (Region reg : regions) {
             int i = 0;
             for (Path2D.Float path : reg.paths()) {
                 if (reg.bounds().get(i).contains(point)) {
-                    if(path.contains(point)) {
+                    if (path.contains(point)) {
                         return reg.name();
                     }
                 }
@@ -190,10 +190,10 @@ public class Regions {
         return null;
     }
 
-    public static String getExtendedName(double lat, double lon){
+    public static String getExtendedName(double lat, double lon) {
         String localName = getName(lat, lon, regionSearchHD);
 
-        if(localName != null){
+        if (localName != null) {
             return localName;
         }
 
@@ -202,7 +202,7 @@ public class Regions {
 
     public static String getRegion(double lat, double lon) {
         String extendedName = getExtendedName(lat, lon);
-        if(extendedName != null){
+        if (extendedName != null) {
             return extendedName;
         }
 
@@ -212,7 +212,7 @@ public class Regions {
         double closestDistance = Double.MAX_VALUE;
         for (Region reg : regionsMD) {
             for (GQPolygon polygon : reg.raws()) {
-                for(int i = 0; i < polygon.getSize(); i++) {
+                for (int i = 0; i < polygon.getSize(); i++) {
                     float pLat = polygon.getLats()[i];
                     float pLon = polygon.getLons()[i];
                     double dist = GeoUtils.greatCircleDistance(pLat, pLon, lat, lon);
@@ -228,9 +228,9 @@ public class Regions {
 
         String closestNameExtended = closest;
 
-        if(closestDistance != Double.MAX_VALUE) {
+        if (closestDistance != Double.MAX_VALUE) {
             String closestExtended = getExtendedName(closestLat, closestLon);
-            if(closestExtended != null){
+            if (closestExtended != null) {
                 closestNameExtended = closestExtended;
             }
         }
@@ -249,14 +249,14 @@ public class Regions {
 
     public static double getShorelineDistance(double lat, double lon) {
         String extendedName = getExtendedName(lat, lon);
-        if(extendedName != null){
+        if (extendedName != null) {
             return 0;
         }
 
         double closestDistance = Double.MAX_VALUE;
         for (Region reg : regionsMD) {
             for (GQPolygon polygon : reg.raws()) {
-                for(int i = 0; i < polygon.getSize(); i++) {
+                for (int i = 0; i < polygon.getSize(); i++) {
                     float pLat = polygon.getLats()[i];
                     float pLon = polygon.getLons()[i];
                     double dist = GeoUtils.greatCircleDistance(pLat, pLon, lat, lon);
@@ -334,14 +334,14 @@ public class Regions {
             double lat, double lon,
             HashMap<String, Double> lookupTable
     ) {
-        if(lookupTable.containsKey(String.format("%.6f,%.6f", lat, lon))){
+        if (lookupTable.containsKey(String.format("%.6f,%.6f", lat, lon))) {
             return lookupTable.get(String.format("%.6f,%.6f", lat, lon));
         }
 
         double tmp = lat - Math.floor(lat);
         double x0, x1, y0, y1;
 
-        if(tmp < 0.5) {
+        if (tmp < 0.5) {
             x0 = (int) Math.floor(lat);
             x1 = x0 + 0.5;
         } else {
@@ -351,7 +351,7 @@ public class Regions {
 
         tmp = lon - Math.floor(lon);
 
-        if(tmp < 0.5) {
+        if (tmp < 0.5) {
             y0 = (int) Math.floor(lon);
             y1 = y0 + 0.5;
         } else {
@@ -364,26 +364,26 @@ public class Regions {
             return -1;
         }
 
-        String first    = String.format("%.6f,%.6f", x0, y0);
-        String second   = String.format("%.6f,%.6f", x0, y1);
-        String third    = String.format("%.6f,%.6f", x1, y0);
-        String fourth   = String.format("%.6f,%.6f", x1, y1);
+        String first = String.format("%.6f,%.6f", x0, y0);
+        String second = String.format("%.6f,%.6f", x0, y1);
+        String third = String.format("%.6f,%.6f", x1, y0);
+        String fourth = String.format("%.6f,%.6f", x1, y1);
 
         double f00 = lookupTable.getOrDefault(first, (double) 0);
         double f01 = lookupTable.getOrDefault(second, (double) 0);
         double f10 = lookupTable.getOrDefault(third, (double) 0);
         double f11 = lookupTable.getOrDefault(fourth, (double) 0);
 
-        double r1 = ((x1 - lat)/(x1 - x0) * f00) + ((lat - x0)/(x1 - x0) * f10);
-        double r2 = ((x1 - lat)/(x1 - x0) * f01) + ((lat - x0)/(x1 - x0) * f11);
+        double r1 = ((x1 - lat) / (x1 - x0) * f00) + ((lat - x0) / (x1 - x0) * f10);
+        double r2 = ((x1 - lat) / (x1 - x0) * f01) + ((lat - x0) / (x1 - x0) * f11);
 
-        double result = ((y1 - lon)/(y1 - y0) * r1) + ((lon - y0)/(y1 - y0) * r2);
+        double result = ((y1 - lon) / (y1 - y0) * r1) + ((lon - y0) / (y1 - y0) * r2);
 
         return Double.isNaN(result) ? 0 : result;
     }
 
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         System.out.println("INIT");
         init();
 
@@ -395,7 +395,7 @@ public class Regions {
         assert shorelineLookup != null;
         double interpolation = interpolate(lat, lon, shorelineLookup);
 
-        if (Double.isNaN(interpolation) || interpolation == -1){
+        if (Double.isNaN(interpolation) || interpolation == -1) {
             System.err.println("Values couldn't be interpolated, using legacy method...");
             double shorelineDistance = getShorelineDistance(lat, lon);
             shorelineLookup.putIfAbsent(String.format("%.6f,%.6f", lat, lon), shorelineDistance);
@@ -405,7 +405,7 @@ public class Regions {
         }
 
         boolean exportResult = LookupTableIO.exportLookupTableToFile(shorelineLookup);
-        if(exportResult){
+        if (exportResult) {
             System.out.println("Lookup Table was successfully exported.");
         } else {
             System.err.println("Lookup Table export failed");
@@ -461,9 +461,9 @@ public class Regions {
 
     private static String fetchName(Feature f) {
         String name;
-        for(String str : NAME_NAMES){
+        for (String str : NAME_NAMES) {
             name = f.getProperty(str);
-            if(name != null){
+            if (name != null) {
                 return name;
             }
         }

@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 public class StationDatabaseManagerTest {
 
     @Test
-    public void testConstructor(){
+    public void testConstructor() {
         StationDatabase stationDatabase = new StationDatabase();
         StationDatabaseManager databaseManager = new StationDatabaseManager(stationDatabase);
 
@@ -20,7 +20,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testAcceptChannel(){
+    public void testAcceptChannel() {
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
@@ -36,7 +36,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testAcceptAnotherChannel(){
+    public void testAcceptAnotherChannel() {
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
@@ -64,7 +64,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testRemoveStationSource(){
+    public void testRemoveStationSource() {
         StationSource stationSource1 = new StationSource("1", "");
         StationSource stationSource2 = new StationSource("2", "");
         Network dummyNetwork = new Network("coolNetwork", "");
@@ -112,7 +112,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testBasicallyEverything(){
+    public void testBasicallyEverything() {
         SeedlinkNetwork dummySeedlinkNetwork = new SeedlinkNetwork("dummy", "", 5);
         SeedlinkNetwork dummySeedlinkNetwork2 = new SeedlinkNetwork("dummy2", "", 5);
         StationSource stationSource1 = new StationSource("1", "");
@@ -188,7 +188,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testChannelUpdate(){
+    public void testChannelUpdate() {
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
@@ -211,7 +211,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testAcceptNetworks(){
+    public void testAcceptNetworks() {
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);
         Channel dummyChannel = new Channel("coolChannel", "00", 50, 0, 0, 0, null, -1, InputType.UNKNOWN);
@@ -226,7 +226,7 @@ public class StationDatabaseManagerTest {
     }
 
     @Test
-    public void testChannelDeselectWhenRemoveAllSeedlinks(){
+    public void testChannelDeselectWhenRemoveAllSeedlinks() {
         SeedlinkNetwork seedlinkNetwork = new SeedlinkNetwork("dummy", "D", 5);
         Network dummyNetwork = new Network("coolNetwork", "");
         Station dummyStation = new Station(dummyNetwork, "coolStation", "", 0, 0, 0);

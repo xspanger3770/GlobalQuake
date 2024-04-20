@@ -18,8 +18,8 @@ public class DeselectUnavailableAction extends AbstractAction {
 
     public DeselectUnavailableAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Deselect Unavailable");
-        this.stationDatabaseManager=stationDatabaseManager;
-        this.parent=parent;
+        this.stationDatabaseManager = stationDatabaseManager;
+        this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Unavailable Stations");
 
@@ -33,25 +33,25 @@ public class DeselectUnavailableAction extends AbstractAction {
     public void actionPerformed(ActionEvent actionEvent) {
         boolean alreadyDeselected = true;
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
-            for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
-                for(Station station : network.getStations()){
-                    if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()){
+        try {
+            for (Network network : stationDatabaseManager.getStationDatabase().getNetworks()) {
+                for (Station station : network.getStations()) {
+                    if (station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
                         alreadyDeselected = false;
                         break;
                     }
                 }
                 network.getStations().forEach(station -> {
-                    if(station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
+                    if (station.getSelectedChannel() != null && !station.getSelectedChannel().isAvailable()) {
                         station.setSelectedChannel(null);
                     }
                 });
             }
-            if(alreadyDeselected){
+            if (alreadyDeselected) {
                 JOptionPane.showMessageDialog(parent, "All Unavailable Stations Already Deselected");
             }
             stationDatabaseManager.fireUpdateEvent();
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }

@@ -97,7 +97,7 @@ public class DatabaseMonitorFrame extends GQFrame {
     private Component createTabbedPane() {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Seedlink Networks", new SeedlinkServersPanel(
-                this, manager,restoreDatabaseAction, getBtnSelectStations(), getBtnLaunch()));
+                this, manager, restoreDatabaseAction, getBtnSelectStations(), getBtnLaunch()));
         tabbedPane.addTab("Station Sources", new StationSourcesPanel(
                 this, manager, restoreDatabaseAction, getBtnSelectStations(), getBtnLaunch()));
         return tabbedPane;
@@ -151,14 +151,14 @@ public class DatabaseMonitorFrame extends GQFrame {
 
         bottomPanel.add(new StationCountPanel(manager, new GridLayout(2, 2)));
 
-        mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+        mainProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         mainProgressBar.setValue(0);
         mainProgressBar.setStringPainted(true);
         mainProgressBar.setString("Init...");
 
         buttonsOutsidePanel.add(buttonsPanel);
         buttonsOutsidePanel.add(mainProgressBar);
-        
+
         bottomPanel.add(buttonsOutsidePanel);
         return bottomPanel;
     }
@@ -172,7 +172,7 @@ public class DatabaseMonitorFrame extends GQFrame {
     }
 
     public JButton getBtnSelectStations() {
-        return btnSelectStations;  
+        return btnSelectStations;
     }
 
     public JButton getBtnLaunch() {

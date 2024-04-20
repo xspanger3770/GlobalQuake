@@ -16,7 +16,7 @@ public class SensitivityCorrection {
         return multiplier;
     }
 
-    public boolean match(String networkCode, String stationCode){
+    public boolean match(String networkCode, String stationCode) {
         return networkCode.toUpperCase().startsWith(this.networkCode.toUpperCase()) && stationCode.toUpperCase().startsWith(this.stationCode.toUpperCase());
     }
 }

@@ -6,6 +6,8 @@ public interface GlobalQuakeEvent {
 
     void run(GlobalQuakeEventListener eventListener);
 
-    default boolean shouldLog() {return true;}
+    default boolean shouldLog() {
+        return true;
+    }
 
 }

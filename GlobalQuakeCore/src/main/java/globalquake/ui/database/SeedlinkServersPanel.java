@@ -25,7 +25,7 @@ public class SeedlinkServersPanel extends JPanel {
     private final JButton launchButton;
 
     public SeedlinkServersPanel(Window parent, StationDatabaseManager manager, AbstractAction restoreDatabaseAction,
-                               JButton selectButton, JButton launchButton) {
+                                JButton selectButton, JButton launchButton) {
         this.manager = manager;
         this.selectButton = selectButton;
         this.launchButton = launchButton;
@@ -65,7 +65,7 @@ public class SeedlinkServersPanel extends JPanel {
     private JPanel createActionsPanel(AbstractAction restoreDatabaseAction) {
         JPanel actionsPanel = new JPanel();
 
-        actionsPanel.setLayout( new GridLayout(2,6,5,5));
+        actionsPanel.setLayout(new GridLayout(2, 6, 5, 5));
 
         actionsPanel.add(new JButton(addSeedlinkNetworkAction));
         actionsPanel.add(new JButton(editSeedlinkNetworkAction));

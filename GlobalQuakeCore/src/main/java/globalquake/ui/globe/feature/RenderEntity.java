@@ -6,10 +6,10 @@ public class RenderEntity<E> {
 
     private final RenderElement[] renderElements;
 
-    public RenderEntity(E original, int renderElements){
+    public RenderEntity(E original, int renderElements) {
         this.original = original;
         this.renderElements = new RenderElement[renderElements];
-        for(int i = 0; i < renderElements; i++){
+        for (int i = 0; i < renderElements; i++) {
             this.renderElements[i] = new RenderElement();
         }
     }
@@ -18,7 +18,7 @@ public class RenderEntity<E> {
         return original;
     }
 
-    public RenderElement getRenderElement(int index){
+    public RenderElement getRenderElement(int index) {
         return renderElements[index];
     }
 

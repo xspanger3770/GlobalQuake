@@ -24,9 +24,9 @@ public class GQHypocenterSearchBenchmark {
     public static void performanceMeasurement() throws Exception {
         TauPTravelTimeCalculator.init();
 
-        double sum  = 0;
+        double sum = 0;
 
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             sum += runStandardTest();
         }
 
@@ -154,10 +154,10 @@ public class GQHypocenterSearchBenchmark {
             GQNativeFunctions.findHypocenter(stations_array, result[0], result[1], points, GQHypocs.depth_profiles.length - 1, 90.0f, 2200);
         } else {
             List<PickedEvent> events = new ArrayList<>();
-            for(int i = 0; i < station_count; i++){
-                events.add(new PickedEvent(r.nextLong(100000),r.nextDouble() * 90.0,r.nextDouble() * 180.0,0,100));
+            for (int i = 0; i < station_count; i++) {
+                events.add(new PickedEvent(r.nextLong(100000), r.nextDouble() * 90.0, r.nextDouble() * 180.0, 0, 100));
             }
-            EarthquakeAnalysis.scanArea(events, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int)points, 0, 0, (int)(TauPTravelTimeCalculator.MAX_DEPTH * 2), TauPTravelTimeCalculator.MAX_DEPTH - 1.0, FINDER_SETTINGS, true);
+            EarthquakeAnalysis.scanArea(events, 90.0 / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE, (int) points, 0, 0, (int) (TauPTravelTimeCalculator.MAX_DEPTH * 2), TauPTravelTimeCalculator.MAX_DEPTH - 1.0, FINDER_SETTINGS, true);
         }
     }
 }

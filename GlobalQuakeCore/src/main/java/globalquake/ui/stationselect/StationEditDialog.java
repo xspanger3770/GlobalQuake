@@ -44,7 +44,7 @@ public class StationEditDialog extends JDialog {
         });
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBorder(new EmptyBorder(5,5,5,5));
+        buttonPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         buttonPanel.add(doneButton);
         add(buttonPanel, BorderLayout.SOUTH);
 

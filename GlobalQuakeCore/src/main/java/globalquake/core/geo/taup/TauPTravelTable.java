@@ -49,7 +49,7 @@ public class TauPTravelTable implements Serializable {
     private static void fill(float[][] array, TauP_Time timeModel, String phases, double minAngle, double maxAngle) {
         List<Double> depths = new ArrayList<>();
 
-        for (int depthI = 0; depthI <= (int)(TauPTravelTimeCalculator.MAX_DEPTH / TauPTravelTimeCalculator.DEPTH_RESOLUTION); depthI++) {
+        for (int depthI = 0; depthI <= (int) (TauPTravelTimeCalculator.MAX_DEPTH / TauPTravelTimeCalculator.DEPTH_RESOLUTION); depthI++) {
             double depth = depthI * TauPTravelTimeCalculator.DEPTH_RESOLUTION;
             depths.add(depth);
         }
@@ -59,7 +59,7 @@ public class TauPTravelTable implements Serializable {
                 TauP_Time timeTool = new TauP_Time(timeModel.getTauModelName());
                 timeTool.parsePhaseList(phases);
 
-                for (int angI = (int)(minAngle / TauPTravelTimeCalculator.ANG_RESOLUTION); angI <= maxAngle / TauPTravelTimeCalculator.ANG_RESOLUTION; angI ++) {
+                for (int angI = (int) (minAngle / TauPTravelTimeCalculator.ANG_RESOLUTION); angI <= maxAngle / TauPTravelTimeCalculator.ANG_RESOLUTION; angI++) {
                     double ang = angI * TauPTravelTimeCalculator.ANG_RESOLUTION;
                     timeTool.setSourceDepth(depth);
                     timeTool.calculate(ang);

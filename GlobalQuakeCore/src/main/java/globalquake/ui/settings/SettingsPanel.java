@@ -5,41 +5,42 @@ import globalquake.core.exception.RuntimeApplicationException;
 
 import javax.swing.*;
 
-public abstract class SettingsPanel extends JPanel{
+public abstract class SettingsPanel extends JPanel {
 
-	public abstract void save() throws NumberFormatException;
-	
-	public abstract String getTitle();
+    public abstract void save() throws NumberFormatException;
 
-	public void refreshUI() {}
+    public abstract String getTitle();
 
-	public double parseDouble(String str, String name, double min, double max){
-		double d = Double.parseDouble(str.replace(',', '.'));
-		if(Double.isNaN(d) || Double.isInfinite(d)){
-			throw new RuntimeApplicationException("Invalid number: %s".formatted(str));
-		}
+    public void refreshUI() {
+    }
 
-		if(d < min || d > max){
-			throw new RuntimeApplicationException("%s must be between %s and %s (entered %s)!".formatted(name, min, max, d));
-		}
+    public double parseDouble(String str, String name, double min, double max) {
+        double d = Double.parseDouble(str.replace(',', '.'));
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
+            throw new RuntimeApplicationException("Invalid number: %s".formatted(str));
+        }
 
-		return d;
-	}
+        if (d < min || d > max) {
+            throw new RuntimeApplicationException("%s must be between %s and %s (entered %s)!".formatted(name, min, max, d));
+        }
 
-	public int parseInt(String str, String name, int min, int max){
-		int n = Integer.parseInt(str);
+        return d;
+    }
 
-		if(n < min || n > max){
-			throw new RuntimeApplicationException("%s must be between %s and %s (entered %s)!".formatted(name, min, max, n));
-		}
+    public int parseInt(String str, String name, int min, int max) {
+        int n = Integer.parseInt(str);
 
-		return n;
-	}
+        if (n < min || n > max) {
+            throw new RuntimeApplicationException("%s must be between %s and %s (entered %s)!".formatted(name, min, max, n));
+        }
 
-	public void fill(JPanel panel, int n){
-		for(int i = 0; i < n; i++){
-			panel.add(new JPanel());
-		}
-	}
+        return n;
+    }
+
+    public void fill(JPanel panel, int n) {
+        for (int i = 0; i < n; i++) {
+            panel.add(new JPanel());
+        }
+    }
 
 }

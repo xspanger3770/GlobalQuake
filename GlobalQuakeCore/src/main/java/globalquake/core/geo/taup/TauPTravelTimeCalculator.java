@@ -24,17 +24,17 @@ public class TauPTravelTimeCalculator {
     public static void init() throws FatalApplicationException {
         try {
             travelTable = loadTravelTable("travel_table/travel_table.dat");
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new FatalApplicationException(e);
         }
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         createTravelTable();
     }
 
     @SuppressWarnings("unused")
-    private static void createTravelTable() throws Exception{
+    private static void createTravelTable() throws Exception {
         TauPTravelTable travelTable = new TauPTravelTable();
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("travel_table.dat"));
         out.writeObject(travelTable);
@@ -44,7 +44,7 @@ public class TauPTravelTimeCalculator {
     @SuppressWarnings("SameParameterValue")
     private static TauPTravelTable loadTravelTable(String path) throws FatalIOException {
         var url = ClassLoader.getSystemClassLoader().getResource(path);
-        if(url == null){
+        if (url == null) {
             throw new FatalIOException("Unable to load travel table!", new NullPointerException());
         }
 
@@ -52,7 +52,7 @@ public class TauPTravelTimeCalculator {
         try {
             ObjectInput in = new ObjectInputStream(url.openStream());
             res = (TauPTravelTable) in.readObject();
-        }catch(IOException | ClassNotFoundException e){
+        } catch (IOException | ClassNotFoundException e) {
             throw new FatalIOException("Unable to load travel table!", e);
         }
 
@@ -60,24 +60,23 @@ public class TauPTravelTimeCalculator {
     }
 
 
-
-    public static double getPWaveTravelTime(double depth, double angle){
+    public static double getPWaveTravelTime(double depth, double angle) {
         return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, false);
     }
 
-    public static double getPWaveTravelTimeFast(double depth, double angle){
+    public static double getPWaveTravelTimeFast(double depth, double angle) {
         return interpolateWaves(travelTable.p_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, true);
     }
 
-    public static double getSWaveTravelTime(double depth, double angle){
+    public static double getSWaveTravelTime(double depth, double angle) {
         return interpolateWaves(travelTable.s_travel_table, TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE, depth, angle, false);
     }
 
-    public static double getPKIKPWaveTravelTime(double depth, double angle){
+    public static double getPKIKPWaveTravelTime(double depth, double angle) {
         return interpolateWaves(travelTable.pkikp_travel_table, TauPTravelTable.PKIKP_MIN_ANGLE, TauPTravelTable.PKIKP_MAX_ANGLE, depth, angle, false);
     }
 
-    public static double getPKPWaveTravelTime(double depth, double angle){
+    public static double getPKPWaveTravelTime(double depth, double angle) {
         return interpolateWaves(travelTable.pkp_travel_table, TauPTravelTable.PKP_MIN_ANGLE, TauPTravelTable.PKP_MAX_ANGLE, depth, angle, false);
     }
 
@@ -86,17 +85,17 @@ public class TauPTravelTimeCalculator {
     }
 
     public static double getPWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 ||
-                timeSeconds > getMaxTime(travelTable.p_travel_table)){
-            return  NO_ARRIVAL;
+        if (timeSeconds < 0 ||
+                timeSeconds > getMaxTime(travelTable.p_travel_table)) {
+            return NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getPWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
     }
 
     public static double getSWaveTravelAngle(double depth, double timeSeconds) {
-        if(timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.s_travel_table)){
-            return  NO_ARRIVAL;
+        if (timeSeconds < 0 || timeSeconds > getMaxTime(travelTable.s_travel_table)) {
+            return NO_ARRIVAL;
         }
         return binarySearchTime((angle) -> getSWaveTravelTime(depth, angle), timeSeconds, 1e-4,
                 TauPTravelTable.P_S_MIN_ANGLE, TauPTravelTable.P_S_MAX_ANGLE);
@@ -122,7 +121,7 @@ public class TauPTravelTimeCalculator {
             double mid = left + (right - left) / 2.0;
 
             midValue = func.apply(mid);
-            if(midValue == NO_ARRIVAL){
+            if (midValue == NO_ARRIVAL) {
                 return NO_ARRIVAL;
             }
 
@@ -133,7 +132,7 @@ public class TauPTravelTimeCalculator {
             }
         }
 
-        if(Math.abs(target - midValue) > 0.5){
+        if (Math.abs(target - midValue) > 0.5) {
             return NO_ARRIVAL;
         }
 
@@ -144,10 +143,10 @@ public class TauPTravelTimeCalculator {
     private static double interpolateWaves(float[][] array, double minAng, double maxAng, double depth, double angle, boolean fast) {
         double x = (depth / MAX_DEPTH) * (array.length - 1);
         double y = ((angle - minAng) / (maxAng - minAng)) * (array[0].length - 1);
-        if(x < 0 || y < 0 || x > array.length - 1 || y > array[0].length - 1){
+        if (x < 0 || y < 0 || x > array.length - 1 || y > array[0].length - 1) {
             return NO_ARRIVAL;
         }
-        return fast? fastbilinearInterpolation(array, x, y) : bilinearInterpolation(array, x, y);
+        return fast ? fastbilinearInterpolation(array, x, y) : bilinearInterpolation(array, x, y);
     }
 
     private static double fastbilinearInterpolation(float[][] array, double x, double y) {
@@ -168,7 +167,7 @@ public class TauPTravelTimeCalculator {
     }
 
     private static double bilinearInterpolation(float[][] array, double x, double y) {
-        if(x < 0 || y < 0){
+        if (x < 0 || y < 0) {
             return NO_ARRIVAL;
         }
 

@@ -310,8 +310,8 @@ public class ArchivedQuake implements Serializable, Comparable<ArchivedQuake>, R
         return fdsnText;
     }
 
-	public static void main(String[] args) {
-		System.err.println(UUID.randomUUID());
-	}
+    public static void main(String[] args) {
+        System.err.println(UUID.randomUUID());
+    }
 
 }

@@ -49,7 +49,7 @@ public class StationDatabase implements Serializable {
     }
 
     private void convert() {
-        if(version < VERSION){
+        if (version < VERSION) {
             Logger.warn("Database updated!");
             networks.clear();
             stationSources.forEach(stationSource -> stationSource.setLastUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())));
@@ -171,9 +171,9 @@ public class StationDatabase implements Serializable {
         return databaseWriteLock;
     }
 
-    public static Channel getChannel(Station station, String channelCode, String locationCode){
-        for(Channel channel: station.getChannels()){
-            if(channel.getCode().equalsIgnoreCase(channelCode) && channel.getLocationCode().equalsIgnoreCase(locationCode)){
+    public static Channel getChannel(Station station, String channelCode, String locationCode) {
+        for (Channel channel : station.getChannels()) {
+            if (channel.getCode().equalsIgnoreCase(channelCode) && channel.getLocationCode().equalsIgnoreCase(locationCode)) {
                 return channel;
             }
         }
@@ -185,8 +185,8 @@ public class StationDatabase implements Serializable {
                                              double lat, double lon, double alt, double sampleRate,
                                              StationSource stationSource, double sensitivity, InputType inputType) {
         Channel channel = getChannel(station, channelCode, locationCode);
-        if(channel != null){
-            if(channel.getSensitivity() <= 0 && sensitivity > 0){
+        if (channel != null) {
+            if (channel.getSensitivity() <= 0 && sensitivity > 0) {
                 channel.setSensitivity(sensitivity);
             }
             return channel;
@@ -200,7 +200,7 @@ public class StationDatabase implements Serializable {
 
     public static Station getStation(List<Network> networks, String networkCode, String stationCode) {
         Network network = getNetwork(networks, networkCode);
-        if(network == null){
+        if (network == null) {
             return null;
         }
 
@@ -209,7 +209,7 @@ public class StationDatabase implements Serializable {
 
     public static Channel getChannel(List<Network> networks, String networkCode, String stationCode, String channelName, String locationCode) {
         Station station = getStation(networks, networkCode, stationCode);
-        if(station == null){
+        if (station == null) {
             return null;
         }
 
@@ -217,8 +217,8 @@ public class StationDatabase implements Serializable {
     }
 
     private static Station findStation(Network network, String stationCode) {
-        for(Station station: network.getStations()){
-            if(station.getStationCode().equalsIgnoreCase(stationCode)){
+        for (Station station : network.getStations()) {
+            if (station.getStationCode().equalsIgnoreCase(stationCode)) {
                 return station;
             }
         }
@@ -228,11 +228,11 @@ public class StationDatabase implements Serializable {
 
     public static Station getOrCreateStation(Network network, String stationCode, String stationSite, double lat, double lon, double alt) {
         Station station = findStation(network, stationCode);
-        if(station != null){
+        if (station != null) {
             return station;
         }
 
-        station = new Station(network, stationCode, stationSite, lat, lon ,alt);
+        station = new Station(network, stationCode, stationSite, lat, lon, alt);
 
         network.getStations().add(station);
 
@@ -241,7 +241,7 @@ public class StationDatabase implements Serializable {
 
     public static Station getOrInsertStation(Network network, Station stationNew) {
         Station station = findStation(network, stationNew.getStationCode());
-        if(station != null){
+        if (station != null) {
             return station;
         }
 
@@ -251,8 +251,8 @@ public class StationDatabase implements Serializable {
     }
 
     public static Network getNetwork(List<Network> networks, String networkCode) {
-        for(Network network: networks){
-            if(network.getNetworkCode().equalsIgnoreCase(networkCode)){
+        for (Network network : networks) {
+            if (network.getNetworkCode().equalsIgnoreCase(networkCode)) {
                 return network;
             }
         }
@@ -262,7 +262,7 @@ public class StationDatabase implements Serializable {
 
     public static Network getOrCreateNetwork(List<Network> networks, String networkCode, String networkDescription) {
         Network resultNetwork = getNetwork(networks, networkCode);
-        if(resultNetwork != null) {
+        if (resultNetwork != null) {
             return resultNetwork;
         }
 
@@ -274,7 +274,7 @@ public class StationDatabase implements Serializable {
 
     public static Network getOrInsertNetwork(List<Network> networks, Network network) {
         Network resultNetwork = getNetwork(networks, network.getNetworkCode());
-        if(resultNetwork != null) {
+        if (resultNetwork != null) {
             return resultNetwork;
         }
 
@@ -289,7 +289,7 @@ public class StationDatabase implements Serializable {
         Network networkFound = getOrInsertNetwork(networks, network);
         Station stationFound = getOrInsertStation(networkFound, station);
         Channel channelFound = getChannel(stationFound, channel.getCode(), channel.getLocationCode());
-        if(channelFound != null) {
+        if (channelFound != null) {
             channelFound.merge(channel);
         } else {
             stationFound.getChannels().add(channel);

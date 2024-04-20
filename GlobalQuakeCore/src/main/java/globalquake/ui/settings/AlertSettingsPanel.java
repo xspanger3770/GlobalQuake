@@ -50,7 +50,7 @@ public class AlertSettingsPanel extends SettingsPanel {
         createPossibleShakingPanel(panel);
         createEarthquakeSoundsPanel(panel);
 
-        JPanel eewThresholdPanel = new JPanel(new GridLayout(3,1));
+        JPanel eewThresholdPanel = new JPanel(new GridLayout(3, 1));
         eewThresholdPanel.setBorder(BorderFactory.createTitledBorder("EEW"));
         eewThresholdPanel.add(new JLabel("Trigger eew_warning.wav sound effect if estimated intensity at land reaches: "));
 
@@ -62,7 +62,7 @@ public class AlertSettingsPanel extends SettingsPanel {
         maxClusterLevelPanel.add(new JLabel("and the associated Cluster has level at least: "));
 
         comboBoxEEWClusterLevel = new JComboBox<>();
-        for(int i : IntStream.rangeClosed(0, Cluster.MAX_LEVEL).toArray()){
+        for (int i : IntStream.rangeClosed(0, Cluster.MAX_LEVEL).toArray()) {
             comboBoxEEWClusterLevel.addItem(i);
         }
 
@@ -81,9 +81,9 @@ public class AlertSettingsPanel extends SettingsPanel {
 
     private void createEarthquakeSoundsPanel(JPanel panel) {
         chkBoxEarthquakeSounds = new JCheckBox("Play sound alerts if earthquake is bigger than (magnitude): ", Settings.enableEarthquakeSounds);
-        textFieldQuakeMinMag = new JTextField(String.valueOf(Settings.earthquakeSoundsMinMagnitude) ,12);
+        textFieldQuakeMinMag = new JTextField(String.valueOf(Settings.earthquakeSoundsMinMagnitude), 12);
         textFieldQuakeMinMag.setEnabled(chkBoxEarthquakeSounds.isSelected());
-        textFieldQuakeMaxDist =  new JTextField("1",12);
+        textFieldQuakeMaxDist = new JTextField("1", 12);
         textFieldQuakeMaxDist.setEnabled(chkBoxEarthquakeSounds.isSelected());
 
         chkBoxEarthquakeSounds.addChangeListener(changeEvent -> {
@@ -91,7 +91,7 @@ public class AlertSettingsPanel extends SettingsPanel {
             textFieldQuakeMaxDist.setEnabled(chkBoxEarthquakeSounds.isSelected());
         });
 
-        JPanel earthquakePanel = new JPanel(new GridLayout(2,1));
+        JPanel earthquakePanel = new JPanel(new GridLayout(2, 1));
         earthquakePanel.setBorder(BorderFactory.createTitledBorder("Earthquake alerts"));
 
         JPanel quakeMagpanel = new JPanel();
@@ -113,13 +113,13 @@ public class AlertSettingsPanel extends SettingsPanel {
 
     private void createPossibleShakingPanel(JPanel panel) {
         chkBoxPossibleShaking = new JCheckBox("Play sound if possible shaking is detected closer than (%s): ".formatted(Settings.getSelectedDistanceUnit().getShortName()), Settings.alertPossibleShaking);
-        textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance) ,12);
+        textFieldPossibleShakingDistance = new JTextField(String.valueOf(Settings.alertPossibleShakingDistance), 12);
         textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected());
 
 
         chkBoxPossibleShaking.addChangeListener(changeEvent -> textFieldPossibleShakingDistance.setEnabled(chkBoxPossibleShaking.isSelected()));
 
-        JPanel possibleShakingPanel = new JPanel(new GridLayout(1,1));
+        JPanel possibleShakingPanel = new JPanel(new GridLayout(1, 1));
         possibleShakingPanel.setBorder(BorderFactory.createTitledBorder("Possible shaking detection"));
 
         JPanel regionMagPanel = new JPanel();
@@ -168,7 +168,7 @@ public class AlertSettingsPanel extends SettingsPanel {
         textFieldLocalDist.setEnabled(chkBoxLocal.isSelected());
         chkBoxLocal.addChangeListener(changeEvent -> textFieldLocalDist.setEnabled(chkBoxLocal.isSelected()));
 
-        JPanel localPanel = new JPanel(new GridLayout(1,1));
+        JPanel localPanel = new JPanel(new GridLayout(1, 1));
         localPanel.setBorder(BorderFactory.createTitledBorder("Local area"));
 
         JPanel nearbyPanel = new JPanel();
@@ -180,9 +180,9 @@ public class AlertSettingsPanel extends SettingsPanel {
         panel.add(localPanel);
 
         chkBoxRegion = new JCheckBox("Alert earthquakes larger than (magnitude): ", Settings.alertRegion);
-        textFieldRegionMag = new JTextField(String.valueOf(Settings.alertRegionMag) ,12);
+        textFieldRegionMag = new JTextField(String.valueOf(Settings.alertRegionMag), 12);
         textFieldRegionMag.setEnabled(chkBoxRegion.isSelected());
-        textFieldRegionDist =  new JTextField("1",12);
+        textFieldRegionDist = new JTextField("1", 12);
         textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
 
         chkBoxRegion.addChangeListener(changeEvent -> {
@@ -190,7 +190,7 @@ public class AlertSettingsPanel extends SettingsPanel {
             textFieldRegionDist.setEnabled(chkBoxRegion.isSelected());
         });
 
-        JPanel regionPanel = new JPanel(new GridLayout(2,1));
+        JPanel regionPanel = new JPanel(new GridLayout(2, 1));
         regionPanel.setBorder(BorderFactory.createTitledBorder("Regional area"));
 
         JPanel regionMagPanel = new JPanel();
@@ -210,7 +210,7 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         panel.add(regionPanel);
 
-        JPanel globalPanel = new JPanel(new GridLayout(1,1));
+        JPanel globalPanel = new JPanel(new GridLayout(1, 1));
         globalPanel.setBorder(BorderFactory.createTitledBorder("Global"));
 
         checkBoxGlobal = new JCheckBox("Alert earthquakes larger than (magnitude): ", Settings.alertGlobal);
@@ -228,10 +228,10 @@ public class AlertSettingsPanel extends SettingsPanel {
 
         panel.add(globalPanel);
 
-        JPanel panel2 = new JPanel(new GridLayout(2,1));
+        JPanel panel2 = new JPanel(new GridLayout(2, 1));
 
-        panel2.add( chkBoxFocus = new JCheckBox("Focus main window if the conditions above are met", Settings.focusOnEvent));
-        panel2.add( chkBoxJumpToAlert = new JCheckBox("Jump directly to the warned event", Settings.jumpToAlert));
+        panel2.add(chkBoxFocus = new JCheckBox("Focus main window if the conditions above are met", Settings.focusOnEvent));
+        panel2.add(chkBoxJumpToAlert = new JCheckBox("Jump directly to the warned event", Settings.jumpToAlert));
 
         panel.add(panel2);
 

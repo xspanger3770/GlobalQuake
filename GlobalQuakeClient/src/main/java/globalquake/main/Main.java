@@ -87,7 +87,7 @@ public class Main {
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
-        if(errorHandler == null) {
+        if (errorHandler == null) {
             errorHandler = new ApplicationErrorHandler(null, false);
         }
         return errorHandler;

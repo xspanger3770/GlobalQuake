@@ -13,7 +13,7 @@ public class AddSeedlinkNetworkAction extends AbstractAction {
     private final StationDatabaseManager databaseManager;
     private final Window parent;
 
-    public AddSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager){
+    public AddSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager) {
         super("Add");
         this.databaseManager = databaseManager;
         this.parent = parent;

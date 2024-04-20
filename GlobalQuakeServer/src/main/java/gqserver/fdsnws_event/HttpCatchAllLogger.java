@@ -1,6 +1,7 @@
 package gqserver.fdsnws_event;
 
 import java.io.IOException;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -11,7 +12,7 @@ public class HttpCatchAllLogger implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         logIncomingRequest(exchange);
-        
+
         exchange.sendResponseHeaders(404, 0); //set status code to 404
         exchange.close(); //send 404 and close connection
     }
@@ -26,5 +27,5 @@ public class HttpCatchAllLogger implements HttpHandler {
 
         Logger.info("{} :: {} :: {} :: {}", requestProtocol, requestMethod, requestURI, requestIP);
     }
-    
+
 }

@@ -13,7 +13,7 @@ public class AddStationSourceAction extends AbstractAction {
     private final StationDatabaseManager databaseManager;
     private final Window parent;
 
-    public AddStationSourceAction(Window parent, StationDatabaseManager databaseManager){
+    public AddStationSourceAction(Window parent, StationDatabaseManager databaseManager) {
         super("Add");
         this.databaseManager = databaseManager;
         this.parent = parent;

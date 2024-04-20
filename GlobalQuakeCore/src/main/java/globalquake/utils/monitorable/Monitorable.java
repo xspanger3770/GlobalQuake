@@ -6,11 +6,11 @@ public interface Monitorable {
 
     AtomicInteger monitor = new AtomicInteger(0);
 
-    default int getMonitorState(){
+    default int getMonitorState() {
         return monitor.get();
     }
 
-    default void noteChange(){
+    default void noteChange() {
         monitor.incrementAndGet();
     }
 

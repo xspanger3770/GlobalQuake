@@ -62,6 +62,7 @@ public class ServerClient {
         limitRules.put(ArchivedQuakesRequestPacket.class, 4);
         limitRules.put(DataRequestPacket.class, 60);
     }
+
     public ServerClient(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = new ObjectInputStream(socket.getInputStream());
@@ -130,7 +131,7 @@ public class ServerClient {
     }
 
     public synchronized void queuePacket(Packet packet) {
-        if(destroyed){
+        if (destroyed) {
             return;
         }
 

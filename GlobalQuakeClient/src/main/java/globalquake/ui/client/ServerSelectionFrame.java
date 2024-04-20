@@ -35,7 +35,7 @@ public class ServerSelectionFrame extends GQFrame {
         client = new ClientSocket();
         setTitle(Main.fullName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(400,160));
+        setPreferredSize(new Dimension(400, 160));
 
         add(createServerSelectionPanel());
 
@@ -50,7 +50,7 @@ public class ServerSelectionFrame extends GQFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        var grid=  new GridLayout(2,1);
+        var grid = new GridLayout(2, 1);
         grid.setVgap(5);
         JPanel addressPanel = new JPanel(grid);
         addressPanel.setBorder(BorderFactory.createTitledBorder("Server address"));
@@ -58,25 +58,25 @@ public class ServerSelectionFrame extends GQFrame {
         JPanel ipPanel = new JPanel();
         ipPanel.setLayout(new BoxLayout(ipPanel, BoxLayout.X_AXIS));
         ipPanel.add(new JLabel("IP Address: "));
-        ipPanel.add(addressField = new JTextField(Settings.lastServerIP,20));
+        ipPanel.add(addressField = new JTextField(Settings.lastServerIP, 20));
 
         addressPanel.add(ipPanel);
 
         JPanel portPanel = new JPanel();
         portPanel.setLayout(new BoxLayout(portPanel, BoxLayout.X_AXIS));
         portPanel.add(new JLabel("Port: "));
-        portPanel.add(portField = new JTextField(String.valueOf(Settings.lastServerPORT),20));
+        portPanel.add(portField = new JTextField(String.valueOf(Settings.lastServerPORT), 20));
 
         addressPanel.add(portPanel);
 
         panel.add(addressPanel);
 
-        var gridl2 = new GridLayout(1,2);
+        var gridl2 = new GridLayout(1, 2);
         gridl2.setVgap(5);
         gridl2.setHgap(5);
 
         JPanel buttonsPanel = new JPanel(gridl2);
-        buttonsPanel.setBorder(new EmptyBorder(5,5,5,5));
+        buttonsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         connectButton = new JButton("Connect");
         ActionListener connectEvent = actionEvent1 -> connect();
@@ -154,12 +154,12 @@ public class ServerSelectionFrame extends GQFrame {
         });
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         init();
         new ServerSelectionFrame();
     }
 
-    private static void init() throws Exception{
+    private static void init() throws Exception {
         Regions.init();
         Scale.load();
         ShakeMap.init();

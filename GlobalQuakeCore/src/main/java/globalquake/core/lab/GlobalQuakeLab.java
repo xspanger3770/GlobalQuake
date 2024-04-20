@@ -58,7 +58,7 @@ public class GlobalQuakeLab {
                     if (file.isDirectory()) {
                         System.err.println(file.getAbsolutePath());
                         traverseDirectories(file); // Recursive call for subdirectory
-                    } else if(file.getName().endsWith(".dat")){
+                    } else if (file.getName().endsWith(".dat")) {
                         tryFile(file, folder); // Call tryFile for each file
                     }
                 } catch (Exception e) {
@@ -92,7 +92,7 @@ public class GlobalQuakeLab {
 
     private static void residualsInspection(ArchivedQuake archivedQuake, File folder) throws IOException {
         long origin = archivedQuake.getOrigin();
-        String filePath = new File(folder,"residuals.csv").getAbsolutePath();
+        String filePath = new File(folder, "residuals.csv").getAbsolutePath();
 
         double depth = archivedQuake.getDepth();
 
@@ -140,7 +140,7 @@ public class GlobalQuakeLab {
         List<EarthquakeAnalysis.ExactPickedEvent> exactPickedEvents = createListOfExactPickedEvents(pickedEvents);
         calculateDistances(exactPickedEvents, archivedQuake.getLat(), archivedQuake.getLon());
 
-        String filePath = new File(folder,"heuristic.csv").getAbsolutePath();
+        String filePath = new File(folder, "heuristic.csv").getAbsolutePath();
 
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write("depth,err,correct,heuristic\n");

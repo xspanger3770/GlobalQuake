@@ -17,7 +17,7 @@ public class DeselectAllAction extends AbstractAction {
     public DeselectAllAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Deselect All");
         this.parent = parent;
-        this.stationDatabaseManager=stationDatabaseManager;
+        this.stationDatabaseManager = stationDatabaseManager;
 
         putValue(SHORT_DESCRIPTION, "Deselects All Available Stations");
 
@@ -39,12 +39,12 @@ public class DeselectAllAction extends AbstractAction {
         }
 
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
-            for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
+        try {
+            for (Network network : stationDatabaseManager.getStationDatabase().getNetworks()) {
                 network.getStations().forEach(station -> station.setSelectedChannel(null));
             }
             stationDatabaseManager.fireUpdateEvent();
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }

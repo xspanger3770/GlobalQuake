@@ -21,7 +21,7 @@ public class StationWaveformGenerator {
     private final long bias;
     private final long delay;
 
-    static class Distances{
+    static class Distances {
         public final double gcd;
         public final double geo;
         private final double distMultiplier;
@@ -54,8 +54,8 @@ public class StationWaveformGenerator {
 
     private final Map<Earthquake, Distances> earthquakeDistancesMap = new ConcurrentHashMap<>();
 
-    static{
-        for(int i = 0; i < STEPS; i++){
+    static {
+        for (int i = 0; i < STEPS; i++) {
             double freq = MIN_FREQ * Math.pow(2, i);
             FREQS[i] = freq;
             BACKGROUND_NOISES[i] = backgroundNoise(freq);
@@ -66,6 +66,7 @@ public class StationWaveformGenerator {
     private static double backgroundNoise(double freq) {
         return (freq * 120000.0) / (160 * (freq - 0.15) * (freq - 0.15) + 1);
     }
+
     private static final Random r = new Random();
 
     public StationWaveformGenerator(AbstractStation station, int seed) {
@@ -73,10 +74,10 @@ public class StationWaveformGenerator {
         sensMul = Math.pow(100, r.nextGaussian() * 0.12 + 0.5) / 10.0; // todo setting maybe for the 0.12
         bias = (long) Math.abs(r.nextGaussian() * TIME_BIAS);
         delay = (long) Math.abs(r.nextGaussian() * DELAY_BIAS);
-        for(int i = 0; i < STEPS; i++){
+        for (int i = 0; i < STEPS; i++) {
             double freq = FREQS[i];
             noises[i] = new Perlin();
-            noises[i].setSeed(seed + i*23);
+            noises[i].setSeed(seed + i * 23);
             noises[i].setOctaveCount(1);
             noises[i].setFrequency(freq);
         }
@@ -88,8 +89,8 @@ public class StationWaveformGenerator {
 
     public int getValue(long time) {
         double sum = 0.0;
-        for(int i = 0; i < STEPS; i++) {
-            sum += noises[i].getValue(time / 1000.0,0,0) * getPower(i, time);
+        for (int i = 0; i < STEPS; i++) {
+            sum += noises[i].getValue(time / 1000.0, 0, 0) * getPower(i, time);
         }
         return (int) sum;
     }
@@ -98,20 +99,20 @@ public class StationWaveformGenerator {
         double freq = FREQS[i];
 
         double result = BACKGROUND_NOISES[i];
-        for(Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()){
+        for (Earthquake earthquake : ((GlobalQuakePlayground) GlobalQuake.instance).getPlaygroundEarthquakes()) {
             result += getPowerFromQuake(earthquake, freq, time - bias, i);
         }
 
         return result;
     }
 
-    public void second(){
+    public void second() {
         earthquakeDistancesMap.entrySet().removeIf(kv -> EarthquakeAnalysis.shouldRemove(kv.getKey(), 0));
     }
 
     private double getPowerFromQuake(Earthquake earthquake, double freq, long time, int i) {
         Distances distances = earthquakeDistancesMap.get(earthquake);
-        if(distances == null){
+        if (distances == null) {
             earthquakeDistancesMap.put(earthquake, distances = new Distances(earthquake, station));
         }
 
@@ -127,13 +128,13 @@ public class StationWaveformGenerator {
         double m = earthquake.getMag() + gcd / 30.0;
         double m2 = (m * m);
 
-        if(_secondsP < 0 && distances.pTravel >= 0){
-            double decay = (m2) / (_secondsP * _secondsP+ m2);
+        if (_secondsP < 0 && distances.pTravel >= 0) {
+            double decay = (m2) / (_secondsP * _secondsP + m2);
             double increase = Math.min(1.0, (-_secondsP) / earthquake.getMag());
             result += 2E3 * decay * increase;
         }
 
-        if(_secondsS < 0 && distances.sTravel >= 0){
+        if (_secondsS < 0 && distances.sTravel >= 0) {
             double decay = (m2) / (_secondsS * _secondsS + m2);
             double increase = Math.min(1.0, (-_secondsS) / earthquake.getMag());
             result += 2E3 * decay * increase * psRatio(gcd);

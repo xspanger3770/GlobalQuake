@@ -8,7 +8,7 @@ public final class QualityCriteria {
     private final double value;
     private final boolean smallerBetter;
 
-    public QualityCriteria(double[] thresholds, double value, boolean smallerBetter){
+    public QualityCriteria(double[] thresholds, double value, boolean smallerBetter) {
         this.thresholds = thresholds;
         this.value = value;
         this.smallerBetter = smallerBetter;
@@ -20,9 +20,9 @@ public final class QualityCriteria {
 
     public QualityClass getQualityClass() {
         int result = 0;
-        for(double threshold : thresholds){
-            if(smallerBetter ? value > threshold : value < threshold){
-                result ++;
+        for (double threshold : thresholds) {
+            if (smallerBetter ? value > threshold : value < threshold) {
+                result++;
             }
         }
 

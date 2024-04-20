@@ -62,11 +62,11 @@ public class CinemaHandler {
 
         cinemaTargetService.schedule(task, 0, TimeUnit.SECONDS);
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 CinemaTarget target = createTarget(event.earthquake());
-                if(lastTarget == null || target.priority() > lastTarget.priority()){
+                if (lastTarget == null || target.priority() > lastTarget.priority()) {
                     selectTarget(target, true);
                 }
             }
@@ -74,7 +74,7 @@ public class CinemaHandler {
             @Override
             public void onClusterCreate(ClusterCreateEvent event) {
                 CinemaTarget target = createTarget(event.cluster());
-                if(lastTarget == null || target.priority() > lastTarget.priority()){
+                if (lastTarget == null || target.priority() > lastTarget.priority()) {
                     selectTarget(target, true);
                 }
             }
@@ -82,8 +82,8 @@ public class CinemaHandler {
             @Override
             public void onQuakeRemove(QuakeRemoveEvent event) {
                 warnings.remove(event.earthquake());
-                if(lastTarget != null && lastTarget.original() instanceof Earthquake earthquake){
-                    if(event.earthquake().getUuid().equals(earthquake.getUuid())){
+                if (lastTarget != null && lastTarget.original() instanceof Earthquake earthquake) {
+                    if (event.earthquake().getUuid().equals(earthquake.getUuid())) {
                         lastTarget = null;
                     }
                 }
@@ -91,9 +91,9 @@ public class CinemaHandler {
 
             @Override
             public void onQuakeArchive(QuakeArchiveEvent event) {
-                if(event.earthquake() != null) {
+                if (event.earthquake() != null) {
                     warnings.remove(event.earthquake());
-                    if(lastTarget != null && lastTarget.original() instanceof Earthquake earthquake) {
+                    if (lastTarget != null && lastTarget.original() instanceof Earthquake earthquake) {
                         if (event.earthquake().getUuid().equals(earthquake.getUuid())) {
                             lastTarget = null;
                         }
@@ -102,7 +102,7 @@ public class CinemaHandler {
             }
         });
 
-        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
+        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener() {
             @Override
             public void onWarningIssued(AlertIssuedEvent event) {
                 warnings.putIfAbsent(event.warnable(), event.warning());
@@ -133,7 +133,7 @@ public class CinemaHandler {
         });
     }
 
-    public void stop(){
+    public void stop() {
         GlobalQuake.instance.stopService(cinemaTargetService);
     }
 
@@ -152,7 +152,7 @@ public class CinemaHandler {
             return;
         }
 
-        if(isWarningInProgress() && !isWarned(target.original())){
+        if (isWarningInProgress() && !isWarned(target.original())) {
             return;
         }
 
@@ -167,8 +167,8 @@ public class CinemaHandler {
     }
 
     private boolean isWarningInProgress() {
-        for(Warning warning : warnings.values()){
-            if(GlobalQuake.instance.currentTimeMillis() - warning.createdAt < WARNING_VALID){
+        for (Warning warning : warnings.values()) {
+            if (GlobalQuake.instance.currentTimeMillis() - warning.createdAt < WARNING_VALID) {
                 return true;
             }
         }
@@ -215,7 +215,7 @@ public class CinemaHandler {
         var cluster = GlobalQuake.instance.getClusterAnalysis().getClusters().stream().findFirst();
         if (cluster.isPresent()) {
             Cluster cluster1 = cluster.get();
-            if (! (GlobalQuake.instance.currentTimeMillis()- cluster1.getLastUpdate() > 1000 * 60 ||  cluster1.getRootLon() < -500 || cluster1.getRootLat() < -500)) {
+            if (!(GlobalQuake.instance.currentTimeMillis() - cluster1.getLastUpdate() > 1000 * 60 || cluster1.getRootLon() < -500 || cluster1.getRootLat() < -500)) {
                 lastCluster = cluster1;
                 return createTarget(cluster1);
             }
@@ -232,12 +232,12 @@ public class CinemaHandler {
     private CinemaTarget createTarget(Earthquake earthquake) {
         double ageMin = (GlobalQuake.instance.currentTimeMillis() - earthquake.getOrigin()) / (1000 * 60.0);
         double zoom = Math.max(0.1, Math.min(1.6, ageMin / 5.0)) / (Settings.cinemaModeZoomMultiplier / 100.0);
-        if(ageMin >= 3.0 && (GlobalQuake.instance.currentTimeMillis() % 60000 < 22000)){
+        if (ageMin >= 3.0 && (GlobalQuake.instance.currentTimeMillis() % 60000 < 22000)) {
             zoom = Math.max(0.02, earthquake.getMag() / 50.0);
         }
 
         double priority = 100 + Math.max(0, earthquake.getMag() * 100.0);
-        if(AlertManager.meetsConditions(earthquake, true)){
+        if (AlertManager.meetsConditions(earthquake, true)) {
             priority += 10000.0;
         }
 

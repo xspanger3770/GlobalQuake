@@ -18,7 +18,7 @@ public class EditStationSourceAction extends AbstractAction {
 
     private JTable table;
 
-    public EditStationSourceAction(Window parent, StationDatabaseManager databaseManager){
+    public EditStationSourceAction(Window parent, StationDatabaseManager databaseManager) {
         super("Edit");
         this.databaseManager = databaseManager;
         this.parent = parent;
