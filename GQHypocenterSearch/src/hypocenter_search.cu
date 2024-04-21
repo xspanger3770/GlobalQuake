@@ -214,11 +214,11 @@ __global__ void evaluate_hypocenter(float *results,
 
     float origins[TILE];
 
-    int j = (point_index + blockIdx.y * TILE) % station_count;
+    int j = (point_index) % station_count;
 
     // trick with changing station that is being used for origin calculation
     {
-        float ang_dist = station_distances[point_index + j * points];
+        float ang_dist = station_distances_across[point_index];
         float s_pwave = s_stations[j];
 
         for(int tile = 0; tile < TILE; tile++) {

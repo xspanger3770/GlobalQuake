@@ -26,6 +26,9 @@ public class EarthquakeAnalysisTraining {
     public static final double INACCURACY = 5000;
     private static final double MASSIVE_ERR_ODDS = 0.4;
 
+    public static final double DIST_STATIONS = 10;
+    private static final double DIST_HYPOC_ANG = 0;
+
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
@@ -126,7 +129,7 @@ public class EarthquakeAnalysisTraining {
 
         for (int i = 0; i < stations; i++) {
             double ang = r.nextDouble() * 360.0;
-            double dist = r.nextDouble() * DIST;
+            double dist = r.nextDouble() * DIST_STATIONS;
             double[] latLon = GeoUtils.moveOnGlobe(0, 0, dist, ang);
             fakeStations.add(new FakeStation(latLon[0], latLon[1]));
         }
@@ -135,7 +138,7 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster();
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * 10, r.nextDouble() * 10, r.nextDouble() * 600.0, 0, 0, 0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * DIST_HYPOC_ANG, r.nextDouble() * DIST_HYPOC_ANG, r.nextDouble() * 600.0, 0, 0, 0, null, null);
 
         for (FakeStation fakeStation : fakeStations) {
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
