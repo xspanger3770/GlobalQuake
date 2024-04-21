@@ -221,11 +221,11 @@ __global__ void evaluate_hypocenter(float *results,
 
     float origins[TILE];
 
-    int j = ((blockIdx.y * TILE) + point_index) % station_count;
+    int j = (point_index) % station_count;
 
     // trick with changing station that is being used for origin calculation
     {
-        float ang_dist = station_distances_across[point_index * station_count + j];
+        float ang_dist = station_distances_across[point_index];
         float s_pwave = s_stations[j];
 
         for(int tile = 0; tile < TILE; tile++) {
@@ -344,13 +344,18 @@ __global__ void precompute_station_distances(
 
     calculate_params_device(points, index, max_dist, from_lat, from_lon, &lat, &lon, &dist);
 
+    int j = index % station_count;
+
     for (int i = 0; i < station_count; i++) {
         float s_lat = stations[i + 0 * station_count];
         float s_lon = stations[i + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI;  // because travel table is in degrees
         float ang_index = ang_dist * ANGLE_TO_INDEX; // precompute;
         station_distances[index + i * points] = ang_index;
-        station_distances_across[index * station_count + i] = ang_index;
+
+        if( i == j ) {
+            station_distances_across[index] = ang_index;
+        }
     }
 }
 
@@ -435,6 +440,7 @@ bool run_hypocenter_search(float *stations,
 
     size_t station_array_size = sizeof(float) * station_count * STATION_FILEDS;
     size_t station_distances_array_size = sizeof(float) * station_count * points;
+    size_t station_distances_array_size_across = sizeof(float) * points;
     size_t results_size = sizeof(float) * HYPOCENTER_FILEDS * (blocks.x * (blocks.y) * blocks.z);
 
     size_t temp_results_array_elements = ceil((blocks.x * (blocks.y ) * blocks.z) / static_cast<float>(BLOCK_REDUCE));
@@ -450,7 +456,7 @@ bool run_hypocenter_search(float *stations,
     success &= cudaMalloc(&device_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(device_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&device_stations_distances, station_distances_array_size) == cudaSuccess;
-    success &= cudaMalloc(&device_stations_distances_across, station_distances_array_size) == cudaSuccess;
+    success &= cudaMalloc(&device_stations_distances_across, station_distances_array_size_across) == cudaSuccess;
     success &= cudaMalloc(&device_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
     success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
 
