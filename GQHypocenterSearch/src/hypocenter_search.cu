@@ -187,6 +187,7 @@ __global__ void evaluate_hypocenter(float *results,
         float *travel_table,
         float *stations,
         float *station_distances,
+        float *station_distances_across,
         int station_count,
         int points,
         float max_dist,
@@ -224,7 +225,7 @@ __global__ void evaluate_hypocenter(float *results,
 
     // trick with changing station that is being used for origin calculation
     {
-        float ang_dist = station_distances[point_index + j * points];
+        float ang_dist = station_distances_across[point_index * station_count + j];
         float s_pwave = s_stations[j];
 
         for(int tile = 0; tile < TILE; tile++) {
@@ -332,7 +333,7 @@ __global__ void results_reduce(float *out, float *in, int total_size) {
 const float ANGLE_TO_INDEX = (SHARED_TRAVEL_TABLE_SIZE - 1.0f) / MAX_ANG_VIRTUAL;
 
 __global__ void precompute_station_distances(
-        float *station_distances, float *stations, int station_count, int points, float max_dist, float from_lat, float from_lon) {
+        float *station_distances, float* station_distances_across, float *stations, int station_count, int points, float max_dist, float from_lat, float from_lon) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (index >= points) {
@@ -347,7 +348,9 @@ __global__ void precompute_station_distances(
         float s_lat = stations[i + 0 * station_count];
         float s_lon = stations[i + 1 * station_count];
         float ang_dist = haversine(lat, lon, s_lat, s_lon) * 180.0f / PI;  // because travel table is in degrees
-        station_distances[index + i * points] = ang_dist * ANGLE_TO_INDEX; // precompute
+        float ang_index = ang_dist * ANGLE_TO_INDEX; // precompute;
+        station_distances[index + i * points] = ang_index;
+        station_distances_across[index * station_count + i] = ang_index;
     }
 }
 
@@ -403,6 +406,7 @@ bool run_hypocenter_search(float *stations,
 
     float *device_stations;
     float *device_stations_distances;
+    float *device_stations_distances_across;
     float *device_temp_results;
 
     if (points < 2) {
@@ -446,6 +450,7 @@ bool run_hypocenter_search(float *stations,
     success &= cudaMalloc(&device_stations, station_array_size) == cudaSuccess;
     success &= cudaMemcpy(device_stations, stations, station_array_size, cudaMemcpyHostToDevice) == cudaSuccess;
     success &= cudaMalloc(&device_stations_distances, station_distances_array_size) == cudaSuccess;
+    success &= cudaMalloc(&device_stations_distances_across, station_distances_array_size) == cudaSuccess;
     success &= cudaMalloc(&device_temp_results, sizeof(float) * HYPOCENTER_FILEDS * temp_results_array_elements) == cudaSuccess;
     success &= cudaMalloc(&f_results_device, results_size) == cudaSuccess;
 
@@ -460,7 +465,7 @@ bool run_hypocenter_search(float *stations,
 
     if (success) {
         precompute_station_distances<<<block_count, BLOCK_DISTANCES>>>(
-                device_stations_distances, device_stations, station_count, points, max_dist, from_lat, from_lon);
+                device_stations_distances, device_stations_distances_across, device_stations, station_count, points, max_dist, from_lat, from_lon);
     }
 
     success &= cudaDeviceSynchronize() == cudaSuccess;
@@ -475,6 +480,7 @@ bool run_hypocenter_search(float *stations,
                 depth_profile->device_travel_table,
                 device_stations,
                 device_stations_distances,
+                device_stations_distances_across,
                 station_count,
                 points,
                 max_dist,
@@ -530,6 +536,9 @@ cleanup:
 
     if (device_stations) {
         success &= cudaFree(device_stations) == cudaSuccess;
+    }
+    if (device_stations_distances_across) {
+        success &= cudaFree(device_stations_distances_across) == cudaSuccess;
     }
     if (device_stations_distances) {
         success &= cudaFree(device_stations_distances) == cudaSuccess;
