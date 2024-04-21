@@ -805,7 +805,7 @@ public class EarthquakeAnalysis {
     }
 
     public static double calculateHeuristic(PreliminaryHypocenter hypocenter) {
-        return Math.pow(hypocenter.correctStations, 2) / Math.pow(hypocenter.err, 3);
+        return Math.pow(hypocenter.correctStations, 2) / Math.pow(hypocenter.err, 2);
     }
 
     private static PreliminaryHypocenter selectBetterHypocenter(PreliminaryHypocenter hypocenter1, PreliminaryHypocenter hypocenter2) {
@@ -815,13 +815,7 @@ public class EarthquakeAnalysis {
             return hypocenter1;
         }
 
-        if (hypocenter1.correctStations > (int) (hypocenter2.correctStations * 1.3)) {
-            return hypocenter1;
-        } else if (hypocenter2.correctStations > (int) (hypocenter1.correctStations * 1.3)) {
-            return hypocenter2;
-        } else {
-            return calculateHeuristic(hypocenter1) > calculateHeuristic(hypocenter2) ? hypocenter1 : hypocenter2;
-        }
+        return calculateHeuristic(hypocenter1) > calculateHeuristic(hypocenter2) ? hypocenter1 : hypocenter2;
     }
 
     @SuppressWarnings("SameParameterValue")
