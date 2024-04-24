@@ -238,7 +238,6 @@ public class GQServerSocket {
 
                 stats.accepted++;
 
-                Logger.tag("Server").info("A new client is joining...");
                 socket.setSoTimeout(HANDSHAKE_TIMEOUT);
 
                 handshakeService.submit(() -> {
@@ -251,7 +250,7 @@ public class GQServerSocket {
                         }
                     } catch (IOException e) {
                         stats.errors++;
-                        Logger.tag("Server").error("Failure when accepting client!");
+                        Logger.tag("Server").trace("Failure when accepting client!");
                         Logger.tag("Server").trace(e);
                         clientLeft(socket);
                     }
