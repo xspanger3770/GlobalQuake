@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class StationSourcesTableModel extends FilterableTableModel<StationSource>{
+public class StationSourcesTableModel extends FilterableTableModel<StationSource> {
     private final List<Column<StationSource, ?>> columns = List.of(
             Column.readonly("Name", String.class, StationSource::getName, new TableCellRendererAdapter<>()),
             Column.readonly("URL", String.class, StationSource::getUrl, new TableCellRendererAdapter<>()),

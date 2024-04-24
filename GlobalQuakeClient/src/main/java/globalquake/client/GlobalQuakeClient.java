@@ -32,11 +32,11 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         super.seedlinkNetworksReader = new SeedlinkNetworksReaderClient();
         this.clientSocket = clientSocket;
 
-        getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
+        getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener() {
             @Override
             public void onStationMonitorOpened(StationMonitorOpenEvent event) {
                 try {
-                    if(openedStationMonitors.stream().noneMatch(stationMonitor -> stationMonitor.getStation().getIdentifier().equals(event.station().getIdentifier()))) {
+                    if (openedStationMonitors.stream().noneMatch(stationMonitor -> stationMonitor.getStation().getIdentifier().equals(event.station().getIdentifier()))) {
                         clientSocket.sendPacket(new DataRequestPacket(event.station().getIdentifier(), false));
                     }
 
@@ -50,7 +50,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             public void onStationMonitorClosed(StationMonitorCloseEvent event) {
                 try {
                     openedStationMonitors.remove(event.monitor());
-                    if(openedStationMonitors.stream().noneMatch(stationMonitor -> stationMonitor.getStation().getIdentifier().equals(event.station().getIdentifier()))) {
+                    if (openedStationMonitors.stream().noneMatch(stationMonitor -> stationMonitor.getStation().getIdentifier().equals(event.station().getIdentifier()))) {
                         event.station().getAnalysis().fullReset();
                         clientSocket.sendPacket(new DataRequestPacket(event.station().getIdentifier(), true));
                     }
@@ -62,7 +62,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             @Override
             public void onSocketReconnect(SocketReconnectEvent socketReconnectEvent) {
                 try {
-                    for(StationMonitor monitor : new HashSet<StationMonitor>(openedStationMonitors)){
+                    for (StationMonitor monitor : new HashSet<StationMonitor>(openedStationMonitors)) {
                         clientSocket.sendPacket(new DataRequestPacket(monitor.getStation().getIdentifier(), false));
                     }
                 } catch (IOException e) {
@@ -78,10 +78,10 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
-        ((EarthquakeAnalysisClient)getEarthquakeAnalysis()).processPacket(socket, packet);
-        ((EarthquakeArchiveClient)getArchive()).processPacket(socket, packet);
-        ((GlobalStationManagerClient)getStationManager()).processPacket(socket, packet);
-        ((ClusterAnalysisClient)getClusterAnalysis()).processPacket(socket, packet);
+        ((EarthquakeAnalysisClient) getEarthquakeAnalysis()).processPacket(socket, packet);
+        ((EarthquakeArchiveClient) getArchive()).processPacket(socket, packet);
+        ((GlobalStationManagerClient) getStationManager()).processPacket(socket, packet);
+        ((ClusterAnalysisClient) getClusterAnalysis()).processPacket(socket, packet);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
             globalQuakeFrame.setVisible(true);
 
             Main.getErrorHandler().setParent(globalQuakeFrame);
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error(e);
             System.exit(0);
         }

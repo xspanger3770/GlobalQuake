@@ -26,7 +26,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
 
     private final Map<Integer, ClientStation> stationsIdMap = new ConcurrentHashMap<>();
 
-    public GlobalStationManagerClient(){
+    public GlobalStationManagerClient() {
         stations = new CopyOnWriteArrayList<>();
     }
 
@@ -36,18 +36,18 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     public void processPacket(ClientSocket socket, Packet packet) {
-        if(packet instanceof StationsInfoPacket stationsInfoPacket){
+        if (packet instanceof StationsInfoPacket stationsInfoPacket) {
             processStationsInfoPacket(socket, stationsInfoPacket);
         } else if (packet instanceof StationsIntensityPacket stationsIntensityPacket) {
             processStationsIntensityPacket(socket, stationsIntensityPacket);
-        } else if (packet instanceof DataRecordPacket dataRecordPacket){
+        } else if (packet instanceof DataRecordPacket dataRecordPacket) {
             processDataRecordPacket(dataRecordPacket);
         }
     }
 
     private void processDataRecordPacket(DataRecordPacket dataRecordPacket) {
         ClientStation station = stationsIdMap.get(dataRecordPacket.stationIndex());
-        if(station == null){
+        if (station == null) {
             Logger.warn("Received data record but for unkown station!");
             return;
         }
@@ -62,24 +62,24 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void processStationsIntensityPacket(ClientSocket socket, StationsIntensityPacket stationsIntensityPacket) {
-        if(getIndexing() == null ||!getIndexing().equals(stationsIntensityPacket.stationsIndexing())){
+        if (getIndexing() == null || !getIndexing().equals(stationsIntensityPacket.stationsIndexing())) {
             resetIndexing(socket, stationsIntensityPacket.stationsIndexing());
         }
-        for(StationIntensityData stationIntensityData : stationsIntensityPacket.intensities()){
+        for (StationIntensityData stationIntensityData : stationsIntensityPacket.intensities()) {
             ClientStation clientStation = stationsIdMap.get(stationIntensityData.index());
-            if(clientStation != null){
+            if (clientStation != null) {
                 clientStation.setIntensity(stationIntensityData.maxIntensity(), stationsIntensityPacket.time(), stationIntensityData.eventMode());
             }
         }
     }
 
     private void processStationsInfoPacket(ClientSocket socket, StationsInfoPacket stationsInfoPacket) {
-        if(getIndexing() == null || !getIndexing().equals(stationsInfoPacket.stationsIndexing())){
+        if (getIndexing() == null || !getIndexing().equals(stationsInfoPacket.stationsIndexing())) {
             resetIndexing(socket, stationsInfoPacket.stationsIndexing());
         }
         List<AbstractStation> list = new ArrayList<>();
-        for(StationInfoData infoData : stationsInfoPacket.stationInfoDataList()) {
-            if(!stationsIdMap.containsKey(infoData.index())) {
+        for (StationInfoData infoData : stationsInfoPacket.stationInfoDataList()) {
+            if (!stationsIdMap.containsKey(infoData.index())) {
                 ClientStation station;
                 list.add(station = new ClientStation(
                         infoData.network(),
@@ -100,7 +100,7 @@ public class GlobalStationManagerClient extends GlobalStationManager {
     }
 
     private void resetIndexing(ClientSocket socket, UUID uuid) {
-        if(super.indexing != null) {
+        if (super.indexing != null) {
             Logger.info("Station indexing has changed, probably because the server has been restarted");
             try {
                 socket.sendPacket(new StationsRequestPacket());

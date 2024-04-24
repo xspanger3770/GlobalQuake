@@ -7,7 +7,8 @@ import gqserver.api.data.earthquake.ArchivedQuakeData;
 import java.io.Serial;
 import java.util.List;
 
-public record ArchivedQuakePacket(ArchivedQuakeData archivedQuakeData, List<ArchivedEventData> archivedEventDataList) implements Packet {
+public record ArchivedQuakePacket(ArchivedQuakeData archivedQuakeData,
+                                  List<ArchivedEventData> archivedEventDataList) implements Packet {
     @Serial
     private static final long serialVersionUID = 0L;
 }

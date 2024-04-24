@@ -29,7 +29,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
     private Component createIndividualSoundsPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        for(GQSound gqSound : Sounds.ALL_ACTUAL_SOUNDS){
+        for (GQSound gqSound : Sounds.ALL_ACTUAL_SOUNDS) {
             var borderLayout = new BorderLayout();
             borderLayout.setHgap(10);
             borderLayout.setVgap(4);
@@ -39,7 +39,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
             JPanel soundPanel = new JPanel(borderLayout);
             //soundPanel.setLayout(new BoxLayout(soundPanel, BoxLayout.X_AXIS));
-            soundPanel.setSize(300,300);
+            soundPanel.setSize(300, 300);
 
             JLabel label = new JLabel(gqSound.getFilename());
             label.setPreferredSize(new Dimension(160, 40));
@@ -71,7 +71,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
                     try {
                         gqSound.load(true);
                     } catch (FatalIOException e) {
-                        if(GlobalQuake.getErrorHandler() != null){
+                        if (GlobalQuake.getErrorHandler() != null) {
                             GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Failed to load this sound!", e));
                         } else {
                             Logger.error(e);
@@ -80,7 +80,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 }
             });
 
-            var gl = new GridLayout(2,1);
+            var gl = new GridLayout(2, 1);
             gl.setHgap(2);
             gl.setVgap(4);
 
@@ -105,7 +105,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
     }
 
     private static JSlider createSingleSoundVolumeSlider(GQSound gqSound, JLabel label) {
-        JSlider volumeSlider = new JSlider(SwingConstants.HORIZONTAL,0,100, (int) (gqSound.volume * 100.0));
+        JSlider volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, (int) (gqSound.volume * 100.0));
         volumeSlider.setMajorTickSpacing(10);
         volumeSlider.setMinorTickSpacing(5);
         volumeSlider.setPaintTicks(true);
@@ -113,7 +113,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
         volumeSlider.addChangeListener(changeEvent -> {
             gqSound.volume = volumeSlider.getValue() / 100.0;
-            if (gqSound.equals(Sounds.countdown)){
+            if (gqSound.equals(Sounds.countdown)) {
                 Sounds.countdown2.volume = Sounds.countdown.volume; // workaround
             }
             label.setText("Volume: %d%%".formatted((int) (gqSound.volume * 100.0)));
@@ -121,7 +121,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
         return volumeSlider;
     }
 
-    private Component createMasterVolumeSlider(){
+    private Component createMasterVolumeSlider() {
         sliderMasterVolume = HypocenterAnalysisSettingsPanel.createSettingsSlider(0, 100, 10, 2);
 
         JLabel label = new JLabel();
@@ -137,7 +137,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
         changeListener.stateChanged(null);
 
 
-        JPanel coolLayout =  HypocenterAnalysisSettingsPanel.createCoolLayout(sliderMasterVolume, label, null,
+        JPanel coolLayout = HypocenterAnalysisSettingsPanel.createCoolLayout(sliderMasterVolume, label, null,
                 null);
 
         JPanel fill1 = new JPanel();
@@ -148,14 +148,14 @@ public class SoundsSettingsPanel extends SettingsPanel {
 
         chkBoxEnableSounds.addChangeListener(changeEvent -> Settings.enableSound = chkBoxEnableSounds.isSelected());
 
-        JButton btnSoundsFolder=new JButton("Open Sounds Folder");
+        JButton btnSoundsFolder = new JButton("Open Sounds Folder");
         btnSoundsFolder.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     Desktop.getDesktop().open(Sounds.EXPORT_DIR);
                 } catch (IOException e) {
-                    if(GlobalQuake.getErrorHandler() != null){
+                    if (GlobalQuake.getErrorHandler() != null) {
                         GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to open file explorer!", e));
                     } else {
                         Logger.error(e);
@@ -163,16 +163,16 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 }
             }
         });
-        fill1. add(btnSoundsFolder);
+        fill1.add(btnSoundsFolder);
 
-        JButton btnReloadSounds=new JButton("Reload Sounds");
+        JButton btnReloadSounds = new JButton("Reload Sounds");
         btnReloadSounds.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     Sounds.loadSounds();
                 } catch (Exception e) {
-                    if(GlobalQuake.getErrorHandler() != null){
+                    if (GlobalQuake.getErrorHandler() != null) {
                         GlobalQuake.getErrorHandler().handleWarning(new RuntimeApplicationException("Unable to reload sounds!", e));
                     } else {
                         Logger.error(e);
@@ -180,7 +180,7 @@ public class SoundsSettingsPanel extends SettingsPanel {
                 }
             }
         });
-        fill1. add(btnReloadSounds);
+        fill1.add(btnReloadSounds);
         coolLayout.add(fill1);
 
         return coolLayout;

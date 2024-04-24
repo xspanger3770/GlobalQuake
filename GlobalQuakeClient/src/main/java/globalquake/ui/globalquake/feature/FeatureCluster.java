@@ -68,12 +68,12 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         RenderElement elementRoot = entity.getRenderElement(0);
         elementRoot.getShape().reset();
         elementRoot.shouldDraw = renderer.project3D(elementRoot.getShape(), elementRoot.getPolygon(), true, renderProperties);
-   }
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean isEntityVisible(RenderEntity<?> entity) {
-        Cluster cluster = ((RenderEntity<Cluster>)entity).getOriginal();
+        Cluster cluster = ((RenderEntity<Cluster>) entity).getOriginal();
         return (!Settings.hideClustersWithQuake && GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME * 5) ||
                 GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() <= FLASH_TIME && cluster.getEarthquake() == null;
     }
@@ -82,17 +82,17 @@ public class FeatureCluster extends RenderFeature<Cluster> {
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Cluster> entity, RenderProperties renderProperties) {
         RenderElement elementRoot = entity.getRenderElement(0);
 
-        if(!elementRoot.shouldDraw) {
+        if (!elementRoot.shouldDraw) {
             return;
         }
 
-        if((System.currentTimeMillis() / 500) % 2 != 0){
+        if ((System.currentTimeMillis() / 500) % 2 != 0) {
             return;
         }
 
         graphics.setStroke(new BasicStroke(1f));
 
-        if(Settings.antialiasingClusters) {
+        if (Settings.antialiasingClusters) {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
@@ -110,7 +110,7 @@ public class FeatureCluster extends RenderFeature<Cluster> {
         return null;
     }
 
-    private static final Color[] colors = {Color.WHITE, new Color(10, 100, 255), new Color(0,255,0), new Color(255,200,0), new Color(200,0,0)};
+    private static final Color[] colors = {Color.WHITE, new Color(10, 100, 255), new Color(0, 255, 0), new Color(255, 200, 0), new Color(200, 0, 0)};
 
     private Color getColorLevel(int level) {
         return level >= 0 && level < colors.length ? colors[level] : Color.GRAY;

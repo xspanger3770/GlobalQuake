@@ -29,14 +29,14 @@ public class GQSound {
 
     public static final Map<String, String> descriptions = new HashMap<>();
 
-    static{
+    static {
         descriptions.put("level_0.wav",
                 "Triggered once so-called Cluster is created. " +
-                "\nThis happens if 4 or more stations detect shaking in close proximity.");
+                        "\nThis happens if 4 or more stations detect shaking in close proximity.");
 
         descriptions.put("level_1.wav",
                 "Triggered when cluster reaches level 1. " +
-                "\nThis happens when at least 7 stations reach 64 counts or at least 4 stations reach 1,000 counts.");
+                        "\nThis happens when at least 7 stations reach 64 counts or at least 4 stations reach 1,000 counts.");
 
         descriptions.put("level_2.wav",
                 "Triggered when cluster reaches level 2. " +
@@ -72,7 +72,7 @@ public class GQSound {
         descriptions.put("found.wav", "Earthquake epicenter determined for the first time and it appears on the map.");
     }
 
-    public GQSound(String filename){
+    public GQSound(String filename) {
         this(filename, descriptions.getOrDefault(filename, "[No description provided]"));
     }
 
@@ -91,7 +91,7 @@ public class GQSound {
                     ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + filename);
 
             if (audioInStream == null) {
-                throw new IOException("Sound file not found: %s (from file = %s)".formatted(filename,  Files.exists(soundPath)));
+                throw new IOException("Sound file not found: %s (from file = %s)".formatted(filename, Files.exists(soundPath)));
             }
 
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(
@@ -99,12 +99,12 @@ public class GQSound {
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
             this.clip = clip;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new FatalIOException("Failed to load sound: " + filename, e);
         }
     }
 
-    public void export(Path exportPath) throws IOException{
+    public void export(Path exportPath) throws IOException {
         Path exportedFilePath = exportPath.resolve(filename);
         if (!Files.exists(exportedFilePath)) { // Check if the file already exists
             InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("sounds/" + filename);

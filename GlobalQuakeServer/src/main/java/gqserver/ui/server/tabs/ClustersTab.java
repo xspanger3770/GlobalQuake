@@ -11,14 +11,14 @@ import java.util.concurrent.TimeUnit;
 
 public class ClustersTab extends JPanel {
 
-    public ClustersTab(){
+    public ClustersTab() {
         setLayout(new BorderLayout());
 
         ClusterTableModel model;
         add(new JScrollPane(new GQTable<>(
                 model = new ClusterTableModel(GlobalQuakeServer.instance.getClusterAnalysis().getClusters()))));
 
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(model::applyFilter, 0,1, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(model::applyFilter, 0, 1, TimeUnit.SECONDS);
     }
 
 }

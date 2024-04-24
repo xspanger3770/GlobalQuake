@@ -85,6 +85,7 @@ public class GlobalQuakePlayground extends GlobalQuakeLocal {
         return playgroundEarthquakes;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public String getWatermark() {
         return "Playground Mode";
     }

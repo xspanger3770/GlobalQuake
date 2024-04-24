@@ -18,7 +18,7 @@ public class WaveformTransformator {
     private double valueDerived;
 
     public WaveformTransformator(double minFreq, double maxFreq, double sensitivity, double sampleRate, InputType inputType) {
-        if (sensitivity < 10) {
+        if (sensitivity <= 0) {
             Logger.warn("Defaulting sensitivity from %.1f to %.1f!".formatted(sensitivity, DEFAULT_SENSITIVITY));
             sensitivity = DEFAULT_SENSITIVITY;
         }

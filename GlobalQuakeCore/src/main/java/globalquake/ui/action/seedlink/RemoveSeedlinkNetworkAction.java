@@ -19,7 +19,7 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
 
     private JTable table;
 
-    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager, Component parent){
+    public RemoveSeedlinkNetworkAction(StationDatabaseManager databaseManager, Component parent) {
         super("Remove");
         this.parent = parent;
         this.databaseManager = databaseManager;
@@ -52,14 +52,14 @@ public class RemoveSeedlinkNetworkAction extends AbstractAction {
         }
 
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
+        try {
             java.util.List<SeedlinkNetwork> toBeRemoved = new ArrayList<>();
-            for(int i:selectedRows){
+            for (int i : selectedRows) {
                 SeedlinkNetwork seedlinkNetwork = tableModel.getEntity(table.getRowSorter().convertRowIndexToModel(i));
                 toBeRemoved.add(seedlinkNetwork);
             }
             databaseManager.removeAllSeedlinks(toBeRemoved);
-        }finally {
+        } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 

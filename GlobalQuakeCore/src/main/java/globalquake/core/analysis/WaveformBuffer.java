@@ -31,11 +31,11 @@ public class WaveformBuffer {
         this.sps = sps;
         this.size = (int) Math.ceil(seconds * sps);
 
-        if(size <= 0){
+        if (size <= 0) {
             throw new IllegalArgumentException("Wavefor buffer size must be positive!");
         }
 
-        if(!isServer()) {
+        if (!isServer()) {
             rawValues = new int[size];
         }
 
@@ -51,25 +51,25 @@ public class WaveformBuffer {
     }
 
     private void log(long time, int rawValue, float filteredV, float ratio, float mediumRatio, float specialRatio, boolean expand) {
-        if(time <= lastLog) {
+        if (time <= lastLog) {
             return;
         }
-        if(expand && !isEmpty() && nextFreeSlot == oldestDataSlot){
+        if (expand && !isEmpty() && nextFreeSlot == oldestDataSlot) {
             _resize(size * 2);
         }
 
-        if(!isServer()){
+        if (!isServer()) {
             rawValues[nextFreeSlot] = rawValue;
             computed[FILTERED_VALUE][nextFreeSlot] = filteredV;
         }
 
-        if(timeReference == Long.MIN_VALUE){
+        if (timeReference == Long.MIN_VALUE) {
             timeReference = time;
         }
 
-        int deltaT = (int)(time - timeReference);
+        int deltaT = (int) (time - timeReference);
 
-        if(deltaT > TIME_REF_LIMIT){
+        if (deltaT > TIME_REF_LIMIT) {
             changeReference();
             deltaT = (int) (time - timeReference);
         }
@@ -88,13 +88,13 @@ public class WaveformBuffer {
     }
 
     private void changeReference() {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return;
         }
         long oldestTime = getTime(getOldestDataSlot());
 
         int index = getOldestDataSlot();
-        while(index != getNextSlot()) {
+        while (index != getNextSlot()) {
             times[index] = (int) (getTime(index) - oldestTime);
             index = (index + 1) % size;
         }
@@ -103,7 +103,7 @@ public class WaveformBuffer {
     }
 
     public void log(long time, int rawValue, float filteredV, float shortAverage, float mediumAverage, float longAverage,
-                    float specialAverage, boolean expand){
+                    float specialAverage, boolean expand) {
         log(time, rawValue, filteredV, shortAverage / longAverage, mediumAverage / longAverage, specialAverage / longAverage, expand);
     }
 
@@ -119,24 +119,24 @@ public class WaveformBuffer {
         float[][] new_computed = new float[getComputedCount()][new_size];
 
         int i2 = 0;
-        for(int step = 0; step < Math.min(size, new_size); step++){
+        for (int step = 0; step < Math.min(size, new_size); step++) {
             i2 -= 1;
-            if(i2 < 0){
+            if (i2 < 0) {
                 i2 = new_size - 1;
             }
 
             nextFreeSlot -= 1;
-            if(nextFreeSlot < 0){
+            if (nextFreeSlot < 0) {
                 nextFreeSlot = size - 1;
             }
 
             new_times[i2] = times[nextFreeSlot];
 
-            if(!server){
+            if (!server) {
                 new_rawValues[i2] = rawValues[nextFreeSlot];
             }
 
-            for(int i = 0; i < getComputedCount(); i++) {
+            for (int i = 0; i < getComputedCount(); i++) {
                 new_computed[i][i2] = computed[i][nextFreeSlot];
             }
         }
@@ -170,34 +170,34 @@ public class WaveformBuffer {
         return oldestDataSlot;
     }
 
-    public long getTime(int index){
+    public long getTime(int index) {
         return timeReference + times[index];
     }
 
-    public int getRaw(int index){
+    public int getRaw(int index) {
         return rawValues[index];
     }
 
-    public float getComputed(int type, int index){
+    public float getComputed(int type, int index) {
         return computed[type][index];
     }
 
-    public double getMediumRatio(int index){
+    public double getMediumRatio(int index) {
         return getComputed(MEDIUM_RATIO, index);
     }
 
 
-    public double getSpecialRatio(int index){
+    public double getSpecialRatio(int index) {
         return getComputed(SPECIAL_RATIO, index);
     }
 
 
-    public double getRatio(int index){
+    public double getRatio(int index) {
         return getComputed(RATIO, index);
     }
 
-    public Log toLog(int index){
-        if(isServer()){
+    public Log toLog(int index) {
+        if (isServer()) {
             throw new UnsupportedOperationException("toLog() is not supported in server mode!");
         }
         return new Log(
@@ -224,23 +224,23 @@ public class WaveformBuffer {
 
     public WaveformBuffer extract(long start, long end) {
         int seconds = (int) Math.ceil((end - start) / 1000.0);
-        if(seconds <= 0){
+        if (seconds <= 0) {
             throw new IllegalArgumentException("Cannot extract empty waveform buffer!");
         }
 
         // additional space
-        seconds  = (int)(seconds * 1.4);
+        seconds = (int) (seconds * 1.4);
 
         WaveformBuffer result = new WaveformBuffer(sps, seconds, server);
 
-        if(isEmpty()){
+        if (isEmpty()) {
             return result;
         }
 
         int closest = getClosestIndex(start);
         long time = getTime(closest);
 
-        while(closest != getNextSlot() && time <= end){
+        while (closest != getNextSlot() && time <= end) {
             result.log(
                     time,
                     isServer() ? 0 : getRaw(closest),
@@ -259,21 +259,21 @@ public class WaveformBuffer {
     }
 
     public int getClosestIndex(long time) {
-        if(isEmpty()){
+        if (isEmpty()) {
             throw new IllegalStateException("There is no closest log since the buffer is empty!");
         }
 
         int low = getOldestDataSlot();
         int high = getNewestDataSlot();
-        if(low > high){
+        if (low > high) {
             high += size;
         }
 
-        while(high - low > 1){
+        while (high - low > 1) {
             int mid = (low + high) / 2;
-            if(getTime(mid % size) > time){
+            if (getTime(mid % size) > time) {
                 high = mid;
-            } else{
+            } else {
                 low = mid;
             }
         }
@@ -286,7 +286,7 @@ public class WaveformBuffer {
 
     public void checkSize(int seconds) {
         int _size = (int) Math.ceil(seconds * sps);
-        if(_size != size){
+        if (_size != size) {
             _resize(_size);
         }
     }

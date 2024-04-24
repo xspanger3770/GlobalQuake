@@ -30,7 +30,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
     public StationSelectFrame(Window parent, StationDatabaseManager manager) {
         setLayout(new BorderLayout());
         this.manager = manager;
-        
+
         JPanel togglePanel = new JPanel(new GridBagLayout());
         JButton toggleButton = new JButton("<");
         selectAll = new JButton(new SelectAllAction(manager, this));
@@ -53,7 +53,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         toggleButton.setBackground(Color.GRAY);
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
-        stationSelectPanel = new StationSelectPanel(this, manager){
+        stationSelectPanel = new StationSelectPanel(this, manager) {
             @Override
             public void paint(Graphics gr) {
                 super.paint(gr);
@@ -106,7 +106,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
 
         add(centerPanel, BorderLayout.CENTER);
         add(toolBar, BorderLayout.WEST);
-        add(new StationCountPanel(manager, new GridLayout(1,4)), BorderLayout.SOUTH);
+        add(new StationCountPanel(manager, new GridLayout(1, 4)), BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(parent);
@@ -127,7 +127,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         selectButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(selectButton.isSelected()){
+                if (selectButton.isSelected()) {
                     setDragMode(DragMode.SELECT);
                 } else {
                     setDragMode(DragMode.NONE);
@@ -138,14 +138,14 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
         deselectButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(deselectButton.isSelected()){
+                if (deselectButton.isSelected()) {
                     setDragMode(DragMode.DESELECT);
                 } else {
                     setDragMode(DragMode.NONE);
                 }
             }
         });
-        
+
         ImageIcon selectRegion = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image_icons/selectRegion.png")));
         Image image = selectRegion.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         selectButton.setIcon(new ImageIcon(image));
@@ -182,7 +182,7 @@ public class StationSelectFrame extends GQFrame implements ActionListener {
     }
 
     public void setDragMode(DragMode dragMode) {
-        this.dragMode=  dragMode;
+        this.dragMode = dragMode;
         selectButton.setSelected(this.dragMode.equals(DragMode.SELECT));
         deselectButton.setSelected(this.dragMode.equals(DragMode.DESELECT));
     }

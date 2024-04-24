@@ -21,20 +21,20 @@ public class GlobalQuakeLocalEventHandler {
         return this;
     }
 
-    public void stopHandler(){
+    public void stopHandler() {
         GlobalQuake.instance.stopService(executor);
     }
 
-    public void registerEventListener(GlobalQuakeLocalEventListener eventListener){
+    public void registerEventListener(GlobalQuakeLocalEventListener eventListener) {
         eventListeners.add(eventListener);
     }
 
     @SuppressWarnings("unused")
-    public boolean removeEventListener(GlobalQuakeLocalEventListener eventListener){
+    public boolean removeEventListener(GlobalQuakeLocalEventListener eventListener) {
         return eventListeners.remove(eventListener);
     }
 
-    public void fireEvent(GlobalQuakeLocalEvent event){
+    public void fireEvent(GlobalQuakeLocalEvent event) {
         executor.submit(() -> {
             Logger.tag("Event").trace("GQLocal event fired: %s".formatted(event.toString()));
             for (GlobalQuakeLocalEventListener eventListener : eventListeners) {

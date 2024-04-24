@@ -24,19 +24,19 @@ public class GlobalQuakeEventHandler {
         return this;
     }
 
-    public void stopHandler(){
+    public void stopHandler() {
         GlobalQuake.instance.stopService(defaultExecutor);
         GlobalQuake.instance.stopService(seedlinkExecutor);
         eventListeners.clear();
     }
 
-    public void registerEventListener(GlobalQuakeEventListener eventListener){
+    public void registerEventListener(GlobalQuakeEventListener eventListener) {
         eventListeners.add(eventListener);
     }
 
-    public void fireEvent(GlobalQuakeEvent event){
+    public void fireEvent(GlobalQuakeEvent event) {
         getExecutorFor(event).submit(() -> {
-            if(event.shouldLog()) {
+            if (event.shouldLog()) {
                 Logger.tag("Event").trace("Event fired: %s".formatted(event.toString()));
             }
             for (GlobalQuakeEventListener eventListener : eventListeners) {
@@ -50,7 +50,7 @@ public class GlobalQuakeEventHandler {
     }
 
     private ExecutorService getExecutorFor(GlobalQuakeEvent event) {
-        if(event instanceof SeedlinkEvent){
+        if (event instanceof SeedlinkEvent) {
             return seedlinkExecutor;
         }
 

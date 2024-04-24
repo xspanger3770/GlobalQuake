@@ -43,7 +43,7 @@ public class GlobeRenderer {
     private final List<RenderFeature<?>> renderFeatures;
     private Point lastMouse;
 
-    public GlobeRenderer(){
+    public GlobeRenderer() {
         renderFeatures = new ArrayList<>();
     }
 
@@ -89,7 +89,7 @@ public class GlobeRenderer {
         renderProperties = properties;
     }
 
-    public Point2D projectPoint(Vector3D pos, RenderProperties renderProperties){
+    public Point2D projectPoint(Vector3D pos, RenderProperties renderProperties) {
         Point2D point2D = new Point2D();
         project(point2D, pos.getX(), pos.getY(), pos.getZ(),
                 GeoUtils.EARTH_RADIUS + renderProperties.getRenderPrecomputedValues().camera_altitude,
@@ -99,7 +99,7 @@ public class GlobeRenderer {
     }
 
     public boolean project3D(Path2D.Float result, Polygon3D polygon3D, boolean canClip, RenderProperties renderProperties) {
-        if(polygon3D == null || polygon3D.getBoundingBoxCorner(0) == null){
+        if (polygon3D == null || polygon3D.getBoundingBoxCorner(0) == null) {
             return false;
         }
         Point2D point2D = new Point2D();
@@ -182,7 +182,7 @@ public class GlobeRenderer {
         }
 
 
-        if(canClip && mask != 0){
+        if (canClip && mask != 0) {
             return false;
         }
 
@@ -235,7 +235,7 @@ public class GlobeRenderer {
 
         ground(point2D, renderProperties);
 
-        if(!bow) {
+        if (!bow) {
             result.lineTo(startX, startY);
             result.moveTo(point2D.x, point2D.y);
             return;
@@ -249,8 +249,8 @@ public class GlobeRenderer {
         double x_mid = (startX + endX) / 2.0;
         double y_mid = (startY + endY) / 2.0;
 
-        point2D.x=x_mid;
-        point2D.y=y_mid;
+        point2D.x = x_mid;
+        point2D.y = y_mid;
 
         ground(point2D, renderProperties);
 
@@ -258,7 +258,7 @@ public class GlobeRenderer {
         drawBow(point2D, result, point2D.x, point2D.y, endX, endY, renderProperties);
     }
 
-    private void drawBow(Point2D point2D, Path2D.Float result, double startX, double startY, double endX, double endY, RenderProperties renderProperties){
+    private void drawBow(Point2D point2D, Path2D.Float result, double startX, double startY, double endX, double endY, RenderProperties renderProperties) {
         double dx = endX - startX;
         double dy = endY - startY;
 
@@ -272,7 +272,7 @@ public class GlobeRenderer {
         }
     }
 
-    void ground(Point2D point2D, RenderProperties renderProperties){
+    void ground(Point2D point2D, RenderProperties renderProperties) {
         double dist = Math.sqrt(Math.pow(point2D.x - renderProperties.width / 2.0, 2) + Math.pow(point2D.y - renderProperties.height / 2.0, 2));
 
         point2D.x = renderProperties.width / 2.0 + (point2D.x - renderProperties.width / 2.0) * (renderProperties.getRenderPrecomputedValues().horizonDist / dist);
@@ -307,7 +307,7 @@ public class GlobeRenderer {
         });
     }
 
-    public synchronized void addFeature(RenderFeature<?> renderFeature){
+    public synchronized void addFeature(RenderFeature<?> renderFeature) {
         renderFeatures.add(renderFeature);
     }
 
@@ -327,7 +327,7 @@ public class GlobeRenderer {
 
     public void createNGon(Polygon3D polygon3D, double lat, double lon, double radius, double altitude, double startAngle, double step) {
         polygon3D.reset();
-        if(radius < 1e-6){
+        if (radius < 1e-6) {
             return;
         }
         Point2DGQ point = new Point2DGQ();
@@ -391,7 +391,7 @@ public class GlobeRenderer {
     public <E> List<E> getAllInside(RenderFeature<E> renderFeature, Shape shape, RenderProperties renderPropertiesLocal) {
         List<E> result = new ArrayList<>();
         renderFeature.getEntities().forEach(renderEntity -> {
-            if(isMouseInside(renderFeature.getCenterCoords(renderEntity), shape, renderPropertiesLocal)){
+            if (isMouseInside(renderFeature.getCenterCoords(renderEntity), shape, renderPropertiesLocal)) {
                 result.add(renderEntity.getOriginal());
             }
         });
@@ -407,16 +407,16 @@ public class GlobeRenderer {
     }
 
     public boolean isMouseNearby(Point2D coords, double dist, boolean moved, RenderProperties renderProperties) {
-        if(lastMouse == null || coords == null){
+        if (lastMouse == null || coords == null) {
             return false;
         }
-        if(moved && !hasMouseMovedRecently()){
+        if (moved && !hasMouseMovedRecently()) {
             return false;
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
-        return isAboveHorizon(vect,  renderProperties) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
+        return isAboveHorizon(vect, renderProperties) && Math.sqrt(Math.pow(point.x - lastMouse.x, 2) + Math.pow(point.y - lastMouse.y, 2)) <= dist;
     }
 
     public boolean hasMouseMovedRecently() {
@@ -424,13 +424,13 @@ public class GlobeRenderer {
     }
 
     public boolean isMouseInside(Point2D coords, Shape shape, RenderProperties renderProperties) {
-        if(coords == null || shape == null){
+        if (coords == null || shape == null) {
             return false;
         }
         Vector3D vect;
         Point2D point = projectPoint(vect = new Vector3D(getX_3D(coords.x, coords.y, 0),
                 getY_3D(coords.x, coords.y, 0), getZ_3D(coords.x, coords.y, 0)), renderProperties);
-        return  isAboveHorizon(vect, renderProperties) && shape.contains(point.toAwt());
+        return isAboveHorizon(vect, renderProperties) && shape.contains(point.toAwt());
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -443,7 +443,7 @@ public class GlobeRenderer {
     }
 
     public double getAngularDistance(Point2D centerCoords, RenderProperties renderProperties) {
-        if(centerCoords == null){
+        if (centerCoords == null) {
             return Double.NaN;
         }
         return GeoUtils.greatCircleDistance(centerCoords.x, centerCoords.y, renderProperties.centerLat, renderProperties.centerLon) / GeoUtils.EARTH_CIRCUMFERENCE * 360.0;

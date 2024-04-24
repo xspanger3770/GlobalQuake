@@ -41,7 +41,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             throw new RuntimeException(e);
         }
 
-        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener(){
+        GlobalQuakeLocal.instance.getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener() {
             @Override
             public void onShakemapCreated(ShakeMapsUpdatedEvent event) {
                 hexService.submit(() -> updateHexes());
@@ -71,18 +71,18 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private void updateHexes() {
         java.util.Map<Long, IntensityHex> items = new HashMap<>();
-        for(var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
-                .sorted(Comparator.comparing(kv -> kv.getValue().getRes())).toList()){
+        for (var pair : GlobalQuakeLocal.instance.getShakemapService().getShakeMaps().entrySet().stream()
+                .sorted(Comparator.comparing(kv -> kv.getValue().getRes())).toList()) {
             ShakeMap shakeMap = pair.getValue();
-            if(shakeMap != null){
+            if (shakeMap != null) {
                 shakeMap.getHexList().forEach(intensityHex -> {
                     IntensityHex current = items.get(intensityHex.id());
-                    if(current == null){
+                    if (current == null) {
                         current = findParent(items, intensityHex.id());
                     }
-                    if(current == null){
+                    if (current == null) {
                         items.put(intensityHex.id(), intensityHex);
-                    } else if(intensityHex.pga() > current.pga()){
+                    } else if (intensityHex.pga() > current.pga()) {
                         items.put(current.id(), new IntensityHex(current.id(), intensityHex.pga(), current.center()));
                     }
                 });
@@ -95,10 +95,10 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
     private IntensityHex findParent(Map<Long, IntensityHex> items, long id) {
         int res = h3.getResolution(id);
-        while(res >= 1){
+        while (res >= 1) {
             res--;
             id = h3.cellToParent(id, res);
-            if(items.containsKey(id)){
+            if (items.containsKey(id)) {
                 return items.get(id);
             }
         }
@@ -113,7 +113,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<IntensityHex> entity, RenderProperties renderProperties) {
         RenderElement elementHex = entity.getRenderElement(0);
-        if(elementHex.getPolygon() == null){
+        if (elementHex.getPolygon() == null) {
             elementHex.setPolygon(new Polygon3D());
         }
 
@@ -126,7 +126,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
         coords.add(coords.get(0));
 
-        for(LatLng latLng : coords){
+        for (LatLng latLng : coords) {
             Vector3D vector3D = new Vector3D(
                     GlobeRenderer.getX_3D(latLng.lat, latLng.lng, 0),
                     GlobeRenderer.getY_3D(latLng.lat, latLng.lng, 0),
@@ -150,7 +150,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
         RenderElement elementHex = entity.getRenderElement(0);
 
         Level level = IntensityScales.getIntensityScale().getLevel(entity.getOriginal().pga());
-        if(level == null){
+        if (level == null) {
             return;
         }
 
@@ -162,7 +162,7 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
 
         boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementHex.getShape().contains(renderer.getLastMouse());
 
-        if(mouseNearby && renderProperties.scroll < 0.2) {
+        if (mouseNearby && renderProperties.scroll < 0.2) {
             graphics.setColor(col);
             graphics.setStroke(new BasicStroke(0.5f));
             graphics.draw(elementHex.getShape());
@@ -173,8 +173,8 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             graphics.setColor(Color.white);
             graphics.setFont(new Font("Calibri", Font.BOLD, 16));
             graphics.drawString(level.getFullName(),
-                    (int)centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
-                    (int)centerPonint.y + graphics.getFont().getSize() / 2);
+                    (int) centerPonint.x - graphics.getFontMetrics().stringWidth(level.getName()) / 2,
+                    (int) centerPonint.y + graphics.getFont().getSize() / 2);
         }
     }
 

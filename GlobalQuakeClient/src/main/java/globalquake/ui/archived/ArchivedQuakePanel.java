@@ -29,14 +29,14 @@ public class ArchivedQuakePanel extends GlobePanel {
         this.animation = animation;
 
         this.quake = quake;
-        setPreferredSize(new Dimension(600,480));
+        setPreferredSize(new Dimension(600, 480));
         setCinemaMode(true);
 
         getRenderer().addFeature(new FeatureGlobalStation(createFakeStations()));
         getRenderer().addFeature(new FeatureEarthquake(createFakeQuake(quake)));
     }
 
-    static class AnimatedStation extends AbstractStation{
+    static class AnimatedStation extends AbstractStation {
 
         private final ArchivedQuakeAnimation animation;
         private final ArchivedEvent event;
@@ -97,7 +97,7 @@ public class ArchivedQuakePanel extends GlobePanel {
     private List<AbstractStation> createFakeStations() {
         List<AbstractStation> result = new ArrayList<>();
 
-        for(ArchivedEvent event : quake.getArchivedEvents()){
+        for (ArchivedEvent event : quake.getArchivedEvents()) {
             result.add(new AnimatedStation(animation, event));
         }
 
@@ -105,7 +105,7 @@ public class ArchivedQuakePanel extends GlobePanel {
     }
 
     private List<Earthquake> createFakeQuake(ArchivedQuake quake) {
-        Earthquake fake = new AnimatedEarthquake(animation,quake.getLat(),quake.getLon(),quake.getDepth());
+        Earthquake fake = new AnimatedEarthquake(animation, quake.getLat(), quake.getLon(), quake.getDepth());
         fake.getHypocenter().magnitude = quake.getMag();
         return List.of(fake);
     }
@@ -115,16 +115,16 @@ public class ArchivedQuakePanel extends GlobePanel {
     public void paint(Graphics gr) {
         super.paint(gr);
 
-        Graphics2D g =(Graphics2D) gr;
+        Graphics2D g = (Graphics2D) gr;
         g.setColor(Color.white);
         g.setFont(new Font("Calibri", Font.BOLD, 14));
 
         int y = 0;
-        g.drawString("M%.1f %s".formatted(quake.getMag(), quake.getRegion()), 5, y+=15);
-        g.drawString("%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()))), 5, y+=15);
-        g.drawString("%.4f %.4f".formatted(quake.getLat(), quake.getLon()), 5, y+=15);
-        g.drawString("Depth: %s".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), 5, y+=15);
-        g.drawString("%d Stations".formatted(quake.getAssignedStations()), 5, y+=15);
+        g.drawString("M%.1f %s".formatted(quake.getMag(), quake.getRegion()), 5, y += 15);
+        g.drawString("%s".formatted(Settings.formatDateTime(Instant.ofEpochMilli(quake.getOrigin()))), 5, y += 15);
+        g.drawString("%.4f %.4f".formatted(quake.getLat(), quake.getLon()), 5, y += 15);
+        g.drawString("Depth: %s".formatted(Settings.getSelectedDistanceUnit().format(quake.getDepth(), 1)), 5, y += 15);
+        g.drawString("%d Stations".formatted(quake.getAssignedStations()), 5, y += 15);
 
         g.setFont(new Font("Calibri", Font.BOLD, 18));
         g.setColor(Color.orange);

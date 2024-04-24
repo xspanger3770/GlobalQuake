@@ -56,16 +56,16 @@ public class ArchivedQuakeAnimation extends JDialog {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     animationStart -= 5000;
                 }
-                if(e.getKeyCode() == KeyEvent.VK_LEFT){
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     animationStart += 5000;
                 }
-                if(e.getKeyCode() == KeyEvent.VK_DOWN){
+                if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                     animationStart = System.currentTimeMillis() + 5000;
                 }
-                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 }
             }

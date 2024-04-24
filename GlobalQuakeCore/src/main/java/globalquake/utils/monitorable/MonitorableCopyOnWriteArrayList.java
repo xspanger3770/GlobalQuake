@@ -11,7 +11,7 @@ public class MonitorableCopyOnWriteArrayList<E> extends CopyOnWriteArrayList<E> 
         super(tmpList);
     }
 
-    public MonitorableCopyOnWriteArrayList(){
+    public MonitorableCopyOnWriteArrayList() {
         super();
     }
 

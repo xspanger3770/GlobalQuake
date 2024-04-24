@@ -11,7 +11,7 @@ public class LookupTableIO {
     public static boolean exportLookupTableToFile() {
         List<HashMap<String, Double>> lookupTables = Regions.generateLookupTablesInParallel();
         HashMap<String, Double> lookupTable = new HashMap<>();
-        for(HashMap<String, Double> singleLT : lookupTables) {
+        for (HashMap<String, Double> singleLT : lookupTables) {
             lookupTable.putAll(singleLT);
         }
 
@@ -24,11 +24,11 @@ public class LookupTableIO {
 
     private static boolean performExport(HashMap<String, Double> lookupTable) {
 
-        try{
+        try {
             ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream("lookupTable.dat"));
             output.writeObject(lookupTable);
             output.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             System.err.println("Unable to save a lookup table! " + e);
             return false;
         }
@@ -47,7 +47,7 @@ public class LookupTableIO {
         }
 
         HashMap<String, Double> lookupTable;
-        try{
+        try {
             ObjectInput input = new ObjectInputStream(resource.openStream());
             lookupTable = (HashMap<String, Double>) input.readObject();
         } catch (IOException | ClassNotFoundException e) {

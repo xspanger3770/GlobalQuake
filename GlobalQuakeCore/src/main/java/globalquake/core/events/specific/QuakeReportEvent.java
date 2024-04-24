@@ -6,7 +6,8 @@ import globalquake.core.events.GlobalQuakeEventListener;
 
 import java.awt.image.BufferedImage;
 
-public record QuakeReportEvent(Earthquake earthquake, ArchivedQuake archivedQuake, BufferedImage map, BufferedImage intensities) implements GlobalQuakeEvent {
+public record QuakeReportEvent(Earthquake earthquake, ArchivedQuake archivedQuake, BufferedImage map,
+                               BufferedImage intensities) implements GlobalQuakeEvent {
 
     @Override
     public void run(GlobalQuakeEventListener eventListener) {

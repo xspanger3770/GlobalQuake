@@ -19,7 +19,7 @@ public class GlobalStationManager {
     protected UUID indexing;
 
     public void initStations(StationDatabaseManager databaseManager) {
-        if(databaseManager == null){
+        if (databaseManager == null) {
             return;
         }
         indexing = UUID.randomUUID();
@@ -31,7 +31,7 @@ public class GlobalStationManager {
             databaseManager.getStationDatabase().getSeedlinkNetworks().forEach(seedlinkNetwork -> seedlinkNetwork.selectedStations = 0);
             for (Network n : databaseManager.getStationDatabase().getNetworks()) {
                 for (Station s : n.getStations()) {
-                    if(s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null){
+                    if (s.getSelectedChannel() == null || s.getSelectedChannel().selectBestSeedlinkNetwork() == null) {
                         continue;
                     }
                     (s.getSelectedChannel().selectedSeedlinkNetwork = s.getSelectedChannel().selectBestSeedlinkNetwork()).selectedStations++;
@@ -47,7 +47,7 @@ public class GlobalStationManager {
         Logger.info("Initialized " + stations.size() + " Stations.");
     }
 
-    public static void createListOfClosestStations(Collection<AbstractStation> stations){
+    public static void createListOfClosestStations(Collection<AbstractStation> stations) {
         stations.parallelStream().forEach(station -> {
             @SuppressWarnings("unchecked") Queue<NearbyStationDistanceInfo>[] rays = new Queue[RAYS];
             for (int i = 0; i < RAYS; i++) {
@@ -59,7 +59,7 @@ public class GlobalStationManager {
                     double dist = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), station2.getLatitude(),
                             station2.getLongitude());
 
-                    if(dist > 4000){
+                    if (dist > 4000) {
                         continue;
                     }
 
@@ -84,15 +84,15 @@ public class GlobalStationManager {
             }
 
             Set<NearbyStationDistanceInfo> result = new HashSet<>();
-            for(Queue<NearbyStationDistanceInfo> ray : rays){
+            for (Queue<NearbyStationDistanceInfo> ray : rays) {
                 int count = 0;
-                while(count < STATIONS_PER_RAY && !ray.isEmpty()) {
+                while (count < STATIONS_PER_RAY && !ray.isEmpty()) {
                     NearbyStationDistanceInfo stationDistanceInfo = ray.remove();
-                    if(result.add(stationDistanceInfo)){
+                    if (result.add(stationDistanceInfo)) {
                         count++;
                     }
 
-                    if(stationDistanceInfo.dist() > 1000){
+                    if (stationDistanceInfo.dist() > 1000) {
                         break; // only 1 station furher than 1000km allowed
                     }
                 }
@@ -106,7 +106,9 @@ public class GlobalStationManager {
         return new GlobalStation(station.getNetwork().getNetworkCode().toUpperCase(),
                 station.getStationCode().toUpperCase(), ch.getCode().toUpperCase(), ch.getLocationCode().toUpperCase(),
                 ch.getLatitude(), ch.getLongitude(), ch.getElevation(),
-                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork, ch.getSensitivity(), ch.getInputType());
+                nextID.getAndIncrement(), ch.selectedSeedlinkNetwork,
+                ch.getSensitivity() * FDSNWSDownloader.getSensitivityCorrection(station.getNetwork().getNetworkCode(), station.getStationCode()),
+                ch.getInputType());
     }
 
     public Collection<AbstractStation> getStations() {

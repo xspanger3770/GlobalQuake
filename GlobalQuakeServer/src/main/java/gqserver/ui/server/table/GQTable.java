@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class GQTable<E> extends JTable {
 
-    public GQTable(FilterableTableModel<E> tableModel){
+    public GQTable(FilterableTableModel<E> tableModel) {
         super(tableModel);
         setFont(new Font("Arial", Font.PLAIN, 14));
         setRowHeight(20);

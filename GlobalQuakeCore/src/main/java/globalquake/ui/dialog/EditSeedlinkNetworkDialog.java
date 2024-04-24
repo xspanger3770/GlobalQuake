@@ -24,20 +24,19 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         this.databaseManager = databaseManager;
         setLayout(new BorderLayout());
 
-        setTitle("Edit Seedlink Network");
+        setTitle(this.seedlinkNetwork == null ? "Add Seedlink Network" : "Edit Seedlink Network");
         setSize(320, 180);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(parent);
 
         JPanel fieldsPanel = new JPanel();
         LayoutManager gridLayout = new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS);
         fieldsPanel.setLayout(gridLayout);
-        fieldsPanel.setBorder(new EmptyBorder(10,10,10,10));
+        fieldsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        nameField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getName(), 40);
-        hostField = new JTextField(seedlinkNetwork==null ? "" : seedlinkNetwork.getHost(), 40);
-        portField = new JTextField(seedlinkNetwork==null ? "18000" : String.valueOf(seedlinkNetwork.getPort()), 40);
-        timeoutField = new JTextField(seedlinkNetwork==null ? String.valueOf(SeedlinkNetwork.DEFAULT_TIMEOUT) : String.valueOf(seedlinkNetwork.getTimeout()), 40);
+        nameField = new JTextField(seedlinkNetwork == null ? "" : seedlinkNetwork.getName(), 40);
+        hostField = new JTextField(seedlinkNetwork == null ? "" : seedlinkNetwork.getHost(), 40);
+        portField = new JTextField(seedlinkNetwork == null ? "18000" : String.valueOf(seedlinkNetwork.getPort()), 40);
+        timeoutField = new JTextField(seedlinkNetwork == null ? String.valueOf(SeedlinkNetwork.DEFAULT_TIMEOUT) : String.valueOf(seedlinkNetwork.getTimeout()), 40);
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");
@@ -47,9 +46,9 @@ public class EditSeedlinkNetworkDialog extends JDialog {
 
         fieldsPanel.add(new JLabel("Name:"));
         fieldsPanel.add(nameField);
-        fieldsPanel.add(new JLabel("Host:"));
+        fieldsPanel.add(new JLabel("Host (e.g. geofon.gfz-potsdam.de):"));
         fieldsPanel.add(hostField);
-        fieldsPanel.add(new JLabel("Port:"));
+        fieldsPanel.add(new JLabel("Port (default 18000):"));
         fieldsPanel.add(portField);
         fieldsPanel.add(new JLabel("Timeout (seconds):"));
         fieldsPanel.add(timeoutField);
@@ -62,16 +61,17 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         setResizable(false);
 
         pack();
+        setLocationRelativeTo(parent);
         setVisible(true);
     }
 
     private void saveChanges() {
         SeedlinkNetwork newSeedlinkNetwork = getSeedlinkNetwork();
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
+        try {
             databaseManager.getStationDatabase().getSeedlinkNetworks().remove(seedlinkNetwork);
             databaseManager.getStationDatabase().getSeedlinkNetworks().add(newSeedlinkNetwork);
-        }finally {
+        } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 
@@ -84,7 +84,7 @@ public class EditSeedlinkNetworkDialog extends JDialog {
         int port;
         try {
             port = Integer.parseInt(portField.getText());
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             throw new RuntimeApplicationException("Invalid port!", e);
         }
 
@@ -92,11 +92,11 @@ public class EditSeedlinkNetworkDialog extends JDialog {
 
         try {
             timeout = Integer.parseInt(timeoutField.getText());
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             throw new RuntimeApplicationException("Invalid timeout!", e);
         }
 
-        if(timeout < 5 || timeout > 300){
+        if (timeout < 5 || timeout > 300) {
             throw new RuntimeApplicationException("Timeout must be between 5s and 300s!");
         }
 

@@ -15,7 +15,7 @@ public class IntensityTable {
 
     public static double getIntensity(double mag, double dist) {
         double limit = 1200;
-        if(mag > 7.5){
+        if (mag > 7.5) {
             limit += (mag - 7.5) * 500;
         }
         if (mag > 9) {

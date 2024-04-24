@@ -80,7 +80,7 @@ public class GlobalQuakeLocal extends GlobalQuake {
                         getArchive().saveArchive();
                     }
                 });
-            }catch (Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
                 System.exit(0);
             }

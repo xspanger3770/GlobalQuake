@@ -16,7 +16,7 @@ public class GQServerSocketTest {
 
     public static void main(String[] args) throws InterruptedException {
         var pool = Executors.newFixedThreadPool(100);
-        for(int i = 0; i < 100; i++){
+        for (int i = 0; i < 100; i++) {
             pool.submit(() -> {
                 try {
                     ddos();
@@ -27,15 +27,15 @@ public class GQServerSocketTest {
         }
     }
 
-    public static void ddos() throws IOException, InterruptedException{
-        Socket socket  = new Socket();
+    public static void ddos() throws IOException, InterruptedException {
+        Socket socket = new Socket();
         socket.connect(new InetSocketAddress("0.0.0.0", 12345));
 
 
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         out.writeObject(new HandshakePacket(GQApi.COMPATIBILITY_VERSION, new ServerClientConfig(false, false)));
 
-        while(true){
+        while (true) {
             Thread.sleep(1000);
             out.writeObject(new HeartbeatPacket());
         }

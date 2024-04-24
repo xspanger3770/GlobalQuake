@@ -9,12 +9,12 @@ import globalquake.ui.globe.RenderProperties;
 import java.awt.*;
 import java.util.Collection;
 
-public class FeatureHorizon extends RenderFeature<Point2D>{
+public class FeatureHorizon extends RenderFeature<Point2D> {
 
     private final java.util.List<Point2D> points;
     private final double quality;
 
-    public FeatureHorizon(Point2D center, double quality){
+    public FeatureHorizon(Point2D center, double quality) {
         super(1);
         points = java.util.List.of(center);
         this.quality = quality;
@@ -28,13 +28,13 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        if(element.getPolygon() == null){
+        if (element.getPolygon() == null) {
             element.setPolygon(new Polygon3D());
         }
         renderer.createCircle(element.getPolygon(),
                 renderProperties.centerLat,
                 renderProperties.centerLon,
-                renderProperties.getRenderPrecomputedValues().maxAngle / (2*Math.PI) * GeoUtils.EARTH_CIRCUMFERENCE, 0, quality);
+                renderProperties.getRenderPrecomputedValues().maxAngle / (2 * Math.PI) * GeoUtils.EARTH_CIRCUMFERENCE, 0, quality);
     }
 
     @Override
@@ -56,13 +56,13 @@ public class FeatureHorizon extends RenderFeature<Point2D>{
     public void project(GlobeRenderer renderer, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), false, renderProperties);
+        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), false, renderProperties);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<Point2D> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        if(!element.shouldDraw){
+        if (!element.shouldDraw) {
             return;
         }
         graphics.setColor(FeatureGeoPolygons.oceanColor);

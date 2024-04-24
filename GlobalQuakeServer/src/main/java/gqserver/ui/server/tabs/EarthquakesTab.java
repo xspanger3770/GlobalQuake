@@ -14,14 +14,14 @@ import java.awt.*;
 
 public class EarthquakesTab extends JPanel {
 
-    public EarthquakesTab(){
+    public EarthquakesTab() {
         setLayout(new BorderLayout());
 
         EarthquakeTableModel model;
         add(new JScrollPane(new GQTable<>(
                 model = new EarthquakeTableModel(GlobalQuakeServer.instance.getEarthquakeAnalysis().getEarthquakes()))));
 
-        GlobalQuakeServer.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
+        GlobalQuakeServer.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
                 model.applyFilter();

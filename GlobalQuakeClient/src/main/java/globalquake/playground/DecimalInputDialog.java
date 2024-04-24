@@ -13,7 +13,7 @@ public class DecimalInputDialog extends JDialog {
 
     public DecimalInputDialog(JFrame parent, String title, java.util.List<DecimalInput> decimalInputs, Runnable action) {
         super(parent, title, true);
-        this. decimalInputs = decimalInputs;
+        this.decimalInputs = decimalInputs;
 
         sliders = new JSlider[decimalInputs.size()];
 
@@ -26,7 +26,7 @@ public class DecimalInputDialog extends JDialog {
             sliders[i].setPaintTicks(true);
             sliders[i].setMajorTickSpacing(1000);
             sliders[i].setMinorTickSpacing(200);
-            sliders[i].setPreferredSize(new Dimension(500,40));
+            sliders[i].setPreferredSize(new Dimension(500, 40));
 
             JPanel panel = new JPanel(new BorderLayout());
             JLabel field = new JLabel("%s: %.1f".formatted(decimalInput.getName(), getValue(i)));
@@ -71,7 +71,7 @@ public class DecimalInputDialog extends JDialog {
 
     private double getValue(int i) {
         DecimalInput input = decimalInputs.get(i);
-        double pct = sliders[i] . getValue()  / 10000.0;
+        double pct = sliders[i].getValue() / 10000.0;
         return input.getMin() + (input.getMax() - input.getMin()) * pct;
     }
 

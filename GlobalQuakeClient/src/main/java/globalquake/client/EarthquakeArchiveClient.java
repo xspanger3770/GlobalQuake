@@ -12,14 +12,14 @@ import gqserver.api.packets.earthquake.ArchivedQuakePacket;
 public class EarthquakeArchiveClient extends EarthquakeArchive {
 
     public void processPacket(ClientSocket ignoredSocket, Packet packet) {
-        if(packet instanceof ArchivedQuakePacket quakePacket) {
-            if(getArchivedQuakeByUUID(quakePacket.archivedQuakeData().uuid()) == null) {
+        if (packet instanceof ArchivedQuakePacket quakePacket) {
+            if (getArchivedQuakeByUUID(quakePacket.archivedQuakeData().uuid()) == null) {
                 archiveQuake(quakePacket, null);
             }
         }
     }
 
-    public void archiveQuake(ArchivedQuakePacket quakePacket, Earthquake earthquake){
+    public void archiveQuake(ArchivedQuakePacket quakePacket, Earthquake earthquake) {
         archiveQuake(createArchivedQuake(quakePacket), earthquake);
     }
 

@@ -5,7 +5,7 @@ import globalquake.core.database.SeedlinkNetwork;
 import javax.swing.*;
 import java.util.List;
 
-public class SeedlinkNetworksTableModel extends FilterableTableModel<SeedlinkNetwork>{
+public class SeedlinkNetworksTableModel extends FilterableTableModel<SeedlinkNetwork> {
     private final List<Column<SeedlinkNetwork, ?>> columns = List.of(
             Column.readonly("Name", String.class, SeedlinkNetwork::getName, new TableCellRendererAdapter<>()),
             Column.readonly("Host", String.class, SeedlinkNetwork::getHost, new TableCellRendererAdapter<>()),

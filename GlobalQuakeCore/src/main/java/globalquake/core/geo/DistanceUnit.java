@@ -9,8 +9,8 @@ public enum DistanceUnit {
     private final String shortName;
     private final double kmRatio;
 
-    DistanceUnit(String longName, String shortName, double kmRatio){
-        this.longName=longName;
+    DistanceUnit(String longName, String shortName, double kmRatio) {
+        this.longName = longName;
         this.shortName = shortName;
         this.kmRatio = kmRatio;
     }
@@ -34,7 +34,7 @@ public enum DistanceUnit {
 
     public String format(double distance, int i) {
         double result = distance * getKmRatio();
-        if(i == 0){
+        if (i == 0) {
             return "%.0f%s".formatted(result, getShortName());
         }
         return ("%%.%df%%s".formatted(i)).formatted(result, getShortName());

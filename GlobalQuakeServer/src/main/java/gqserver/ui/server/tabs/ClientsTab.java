@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit;
 
 public class ClientsTab extends JPanel {
 
-    public ClientsTab(){
+    public ClientsTab() {
         setLayout(new BorderLayout());
 
         ClientsTableModel model;
         add(new JScrollPane(new GQTable<>(
                 model = new ClientsTableModel(GlobalQuakeServer.instance.getServerSocket().getClients()))));
 
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(model::applyFilter, 0,1, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(model::applyFilter, 0, 1, TimeUnit.SECONDS);
 
-        GlobalQuakeServer.instance.getServerEventHandler().registerEventListener(new GlobalQuakeServerEventListener(){
+        GlobalQuakeServer.instance.getServerEventHandler().registerEventListener(new GlobalQuakeServerEventListener() {
             @Override
             public void onClientLeave(ClientLeftEvent clientLeftEvent) {
                 model.applyFilter();
