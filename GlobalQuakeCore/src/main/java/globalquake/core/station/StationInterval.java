@@ -7,7 +7,7 @@ public class StationInterval {
     private final long start;
     private long end;
 
-    public StationInterval(long start, long end, StationState state){
+    public StationInterval(long start, long end, StationState state) {
         this.start = start;
         this.end = end;
         this.state = state;

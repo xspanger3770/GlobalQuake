@@ -20,7 +20,7 @@ public class RenderPrecomputedValues {
     public final double sinPitch;
     public double horizonDist;
 
-    public RenderPrecomputedValues(RenderProperties renderProperties){
+    public RenderPrecomputedValues(RenderProperties renderProperties) {
         camera_altitude = GeoUtils.EARTH_RADIUS * renderProperties.scroll;
 
         double cameraYaw = -FastMath.toRadians(renderProperties.centerLon);
@@ -34,9 +34,9 @@ public class RenderPrecomputedValues {
         cameraPoint = new Vector3D(getX_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
                 getY_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000),
                 GlobeRenderer.getZ_3D(renderProperties.centerLat, renderProperties.centerLon, camera_altitude * 1000));
-     }
+    }
 
-    public void part2(GlobeRenderer renderer, RenderProperties renderProperties){
+    public void part2(GlobeRenderer renderer, RenderProperties renderProperties) {
         double[] moved = GeoUtils.moveOnGlobe(renderProperties.centerLat, renderProperties.centerLon, 1, 0);
 
         Vector3D surfacePoint = new Vector3D(getX_3D(renderProperties.centerLat, renderProperties.centerLon, 0),

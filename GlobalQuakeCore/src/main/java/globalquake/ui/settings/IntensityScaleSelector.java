@@ -24,7 +24,7 @@ public class IntensityScaleSelector extends JPanel {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 levelComboBox.removeAllItems();
-                ((IntensityScale)shakingScaleComboBox.getSelectedItem()).getLevels().forEach(levelComboBox::addItem);
+                ((IntensityScale) shakingScaleComboBox.getSelectedItem()).getLevels().forEach(levelComboBox::addItem);
             }
         });
 

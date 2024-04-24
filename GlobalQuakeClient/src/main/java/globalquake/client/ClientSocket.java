@@ -68,24 +68,24 @@ public class ClientSocket {
             sendPacket(new StationsRequestPacket());
             GlobalQuakeClient.instance.getLocalEventHandler().fireEvent(new SocketReconnectEvent());
             status = ClientSocketStatus.CONNECTED;
-        } catch(ConnectException | SocketTimeoutException ce){
+        } catch (ConnectException | SocketTimeoutException ce) {
             Logger.trace(ce);
             status = ClientSocketStatus.DISCONNECTED;
             throw ce;
-        } catch(Exception e) {
+        } catch (Exception e) {
             status = ClientSocketStatus.DISCONNECTED;
             Logger.error(e);
             throw e;
         }
     }
 
-    public void runReconnectService(){
+    public void runReconnectService() {
         reconnectService = Executors.newSingleThreadScheduledExecutor();
         reconnectService.scheduleAtFixedRate(this::checkReconnect, 0, 10, TimeUnit.SECONDS);
     }
 
-    public void destroy(){
-        if(reconnectService == null){
+    public void destroy() {
+        if (reconnectService == null) {
             return;
         }
 
@@ -93,7 +93,7 @@ public class ClientSocket {
     }
 
     private void checkReconnect() {
-        if(!socket.isConnected() || socket.isClosed()){
+        if (!socket.isConnected() || socket.isClosed()) {
             try {
                 connect(ip, port);
             } catch (Exception e) {
@@ -105,7 +105,7 @@ public class ClientSocket {
     private void sendQuakeRequest() {
         try {
             sendPacket(new EarthquakesRequestPacket());
-        } catch(SocketTimeoutException | SocketException e){
+        } catch (SocketTimeoutException | SocketException e) {
             Logger.trace(e);
             onClose();
         } catch (IOException e) {
@@ -117,7 +117,7 @@ public class ClientSocket {
     private void sendHeartbeat() {
         try {
             sendPacket(new HeartbeatPacket());
-        } catch(SocketTimeoutException | SocketException e){
+        } catch (SocketTimeoutException | SocketException e) {
             Logger.trace(e);
             onClose();
         } catch (IOException e) {
@@ -128,10 +128,10 @@ public class ClientSocket {
 
     private void onClose() {
         status = ClientSocketStatus.DISCONNECTED;
-        if(socket != null){
+        if (socket != null) {
             try {
                 socket.close();
-            } catch(SocketTimeoutException | SocketException e){
+            } catch (SocketTimeoutException | SocketException e) {
                 Logger.trace(e);
                 onClose();
             } catch (IOException e) {
@@ -145,7 +145,7 @@ public class ClientSocket {
         GlobalQuake.instance.stopService(quakeCheckService);
     }
 
-    public boolean isConnected(){
+    public boolean isConnected() {
         return socket.isConnected() && !socket.isClosed();
     }
 
@@ -156,9 +156,9 @@ public class ClientSocket {
                 Logger.trace("Received packet: %s".formatted(packet.toString()));
                 ((GlobalQuakeClient) GlobalQuakeClient.instance).processPacket(this, packet);
             }
-        } catch(SocketTimeoutException | SocketException se){
+        } catch (SocketTimeoutException | SocketException se) {
             Logger.trace(se);
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error(e);
         } finally {
             onClose();
@@ -166,7 +166,7 @@ public class ClientSocket {
     }
 
     public synchronized void sendPacket(Packet packet) throws IOException {
-        if(outputStream == null){
+        if (outputStream == null) {
             return;
         }
 
@@ -178,8 +178,8 @@ public class ClientSocket {
     private void handshake() throws IOException, ClassNotFoundException {
         sendPacket(new HandshakePacket(GQApi.COMPATIBILITY_VERSION, new ServerClientConfig(true, true)));
         Packet packet = (Packet) inputStream.readObject();
-        if(!(packet instanceof HandshakeSuccessfulPacket)) {
-            if(packet instanceof TerminationPacket terminationPacket){
+        if (!(packet instanceof HandshakeSuccessfulPacket)) {
+            if (packet instanceof TerminationPacket terminationPacket) {
                 throw new RuntimeApplicationException(terminationPacket.cause());
             } else {
                 throw new RuntimeApplicationException("Unknown");

@@ -12,7 +12,7 @@ public class RestoreDatabaseAction extends AbstractAction {
     private final StationDatabaseManager databaseManager;
     private final Window parent;
 
-    public RestoreDatabaseAction(Window parent, StationDatabaseManager databaseManager){
+    public RestoreDatabaseAction(Window parent, StationDatabaseManager databaseManager) {
         super("Restore Defaults");
         this.databaseManager = databaseManager;
         this.parent = parent;

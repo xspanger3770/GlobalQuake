@@ -21,18 +21,17 @@ public class EditStationSourceDialog extends JDialog {
         this.stationSource = stationSource;
         setLayout(new BorderLayout());
 
-        setTitle("Edit Station Source");
-        setSize(320, 180);
+        setTitle(this.stationSource == null ? "Add Station Source" : "Edit Station Source");
+        setSize(200, 180);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(parent);
 
         JPanel fieldsPanel = new JPanel();
         LayoutManager gridLayout = new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS);
         fieldsPanel.setLayout(gridLayout);
-        fieldsPanel.setBorder(new EmptyBorder(10,10,10,10));
+        fieldsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        nameField = new JTextField(stationSource==null ? "" : stationSource.getName(), 40);
-        urlField = new JTextField(stationSource==null ? "" : stationSource.getUrl(), 40);
+        nameField = new JTextField(stationSource == null ? "" : stationSource.getName(), 40);
+        urlField = new JTextField(stationSource == null ? "" : stationSource.getUrl(), 40);
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> saveChanges());
         JButton cancelButton = new JButton("Cancel");
@@ -42,7 +41,7 @@ public class EditStationSourceDialog extends JDialog {
 
         fieldsPanel.add(new JLabel("Name:"));
         fieldsPanel.add(nameField);
-        fieldsPanel.add(new JLabel("URL:"));
+        fieldsPanel.add(new JLabel("Station select URL (e.g. https://service.iris.edu/fdsnws/station/1/):"));
         fieldsPanel.add(urlField);
         buttonsPanel.add(cancelButton);
         buttonsPanel.add(saveButton);
@@ -53,16 +52,17 @@ public class EditStationSourceDialog extends JDialog {
         setResizable(false);
 
         pack();
+        setLocationRelativeTo(parent);
         setVisible(true);
     }
 
     private void saveChanges() {
         StationSource newStationSource = new StationSource(nameField.getText(), urlField.getText());
         databaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
+        try {
             databaseManager.getStationDatabase().getStationSources().remove(stationSource);
             databaseManager.getStationDatabase().getStationSources().add(newStationSource);
-        }finally {
+        } finally {
             databaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
 

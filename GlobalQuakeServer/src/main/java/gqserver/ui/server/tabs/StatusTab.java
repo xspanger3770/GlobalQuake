@@ -22,30 +22,30 @@ public class StatusTab extends JPanel {
     private final JProgressBar ramProgressBar;
 
     public StatusTab() {
-        setLayout(new GridLayout(4,1));
+        setLayout(new GridLayout(4, 1));
 
         long maxMem = Runtime.getRuntime().maxMemory();
 
-        clientsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, Settings.maxClients);
+        clientsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, Settings.maxClients);
         clientsProgressBar.setStringPainted(true);
         add(clientsProgressBar);
 
-        seedlinksProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, 10);
+        seedlinksProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 10);
         seedlinksProgressBar.setStringPainted(true);
         add(seedlinksProgressBar);
 
-        stationsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, 10);
+        stationsProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 10);
         stationsProgressBar.setStringPainted(true);
         add(stationsProgressBar);
 
-        ramProgressBar = new JProgressBar(JProgressBar.HORIZONTAL,0, (int) (maxMem / MB));
+        ramProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, (int) (maxMem / MB));
         ramProgressBar.setStringPainted(true);
         add(ramProgressBar);
 
         updateRamProgressBar();
         updateClientsProgressBar();
 
-        GlobalQuakeServer.instance.getServerEventHandler().registerEventListener(new GlobalQuakeServerEventListener(){
+        GlobalQuakeServer.instance.getServerEventHandler().registerEventListener(new GlobalQuakeServerEventListener() {
             @Override
             public void onClientJoin(ClientJoinedEvent clientJoinedEvent) {
                 updateClientsProgressBar();
@@ -57,7 +57,10 @@ public class StatusTab extends JPanel {
             }
         });
 
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {updateRamProgressBar();updateStations();}, 0, 100, TimeUnit.MILLISECONDS);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            updateRamProgressBar();
+            updateStations();
+        }, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     private synchronized void updateStations() {

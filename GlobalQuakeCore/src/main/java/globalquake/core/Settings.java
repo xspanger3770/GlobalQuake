@@ -154,6 +154,8 @@ public final class Settings {
     public static Integer qualityFilter;
     public static Integer eewClusterLevel;
     @SuppressWarnings("unused")
+    public static Integer maxConnectionsFromIP;
+    @SuppressWarnings("unused")
     public static String FDSNWSEventIP;
     @SuppressWarnings("unused")
     public static Integer FDSNWSEventPort;
@@ -195,6 +197,7 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
+        loadProperty("maxConnectionsFromIP", "3", o -> validateInt(1, 9999, (Integer) o));
         loadProperty("debugSendPGV", "false");
         loadProperty("antialiasingOldQuakes", "true");
         loadProperty("antialiasingClusters", "true");

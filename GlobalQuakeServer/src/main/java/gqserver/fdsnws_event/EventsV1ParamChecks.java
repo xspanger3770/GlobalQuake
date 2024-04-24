@@ -10,14 +10,14 @@ import gqserver.fdsnws_event.EventsV1Handler.HttpRequestException;
 
 public class EventsV1ParamChecks {
     //2011-03-11T05:00:00 UTC
-    static public Date parseDate(String date){
+    static public Date parseDate(String date) {
         //Takes a string in the format of "YYYY-MM-DDTHH:MM:SS" UTC time and returns a Date object
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
         Date parsedDate;
-        try{
+        try {
             parsedDate = dateFormat.parse(date);
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
         return parsedDate;
@@ -25,15 +25,15 @@ public class EventsV1ParamChecks {
 
     //A bunch of fancy parseFloats that check for stuff
 
-    static public Float parseLatitude(String latitude){
+    static public Float parseLatitude(String latitude) {
         //Takes a string in the format of "[-]DD.DD" and returns a Float object
         float parsedLatitude;
-        try{
+        try {
             parsedLatitude = Float.parseFloat(latitude);
-            if(parsedLatitude > 90 || parsedLatitude < -90){
+            if (parsedLatitude > 90 || parsedLatitude < -90) {
                 return null;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
 
@@ -42,42 +42,42 @@ public class EventsV1ParamChecks {
 
     //radius
 
-    static public Float parseLongitude(String longitude){
+    static public Float parseLongitude(String longitude) {
         //Takes a string in the format of "[-]DDD.DD" and returns a Float object
         float parsedLongitude;
-        try{
+        try {
             parsedLongitude = Float.parseFloat(longitude);
-            if(parsedLongitude > 180 || parsedLongitude < -180){
+            if (parsedLongitude > 180 || parsedLongitude < -180) {
                 return null;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
         return parsedLongitude;
     }
 
-    static public Float parseDepth(String depth){
+    static public Float parseDepth(String depth) {
         /*Takes a string and makes sure it is a valid depth
          *In the future, this will need an appropriate range check
-        */
+         */
         float parsedDepth;
-        try{
+        try {
             parsedDepth = Float.parseFloat(depth);
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
         return parsedDepth;
     }
 
-    static public Float parseMagnitude(String magnitude){
+    static public Float parseMagnitude(String magnitude) {
         //Takes a string and makes sure it is a valid magnitude
         float parsedMagnitude;
-        try{
+        try {
             parsedMagnitude = Float.parseFloat(magnitude);
-            if(parsedMagnitude > 10 || parsedMagnitude < -10){
+            if (parsedMagnitude > 10 || parsedMagnitude < -10) {
                 return null;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
 
@@ -86,16 +86,16 @@ public class EventsV1ParamChecks {
 
     //several other things
 
-    static public String parseFormat(String format) throws HttpRequestException{
+    static public String parseFormat(String format) throws HttpRequestException {
         //Takes a string and makes sure it is a valid format
         List<String> validFormats = Arrays.asList("quakeml", "geojson", "text", "json", "xml");
         List<String> disallowedDroids = Arrays.asList("xmlp", "geojsonp", "jsonp", "quakemlp", "textp");
 
-        if(validFormats.contains(format)){
+        if (validFormats.contains(format)) {
             return format;
         }
 
-        if(disallowedDroids.contains(format)){
+        if (disallowedDroids.contains(format)) {
             throw new HttpRequestException(400, "Invalid format. The format " + format + " are not the droids you're looking for");
         }
 
@@ -104,15 +104,15 @@ public class EventsV1ParamChecks {
 
     }
 
-    static public int parseNoData(String noData){
+    static public int parseNoData(String noData) {
         //Takes a string and makes sure it is a valid nodata
         int parsedNoData;
-        try{
+        try {
             parsedNoData = Integer.parseInt(noData);
-            if(parsedNoData > 999 || parsedNoData < 1){
+            if (parsedNoData > 999 || parsedNoData < 1) {
                 return 0;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return 0;
         }
         return parsedNoData;

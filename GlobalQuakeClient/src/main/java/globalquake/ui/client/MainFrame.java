@@ -199,9 +199,11 @@ public class MainFrame extends GQFrame {
 
         if (Settings.recalibrateOnLaunch) {
             EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null, true);
-            if(GQHypocs.isCudaLoaded()){
+            if (GQHypocs.isCudaLoaded()) {
                 EarthquakeAnalysisTraining.calibrateResolution(MainFrame::updateProgressBar, null, false);
             }
+        } else if (GQHypocs.isCudaLoaded()) {
+            GQHypocs.calculateStationLimit();
         }
 
         updateProgressBar("Updating Station Sources...", (int) ((phase++ / (PHASES + 4)) * 100.0));

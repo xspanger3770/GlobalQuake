@@ -15,10 +15,10 @@ float p_wave_interpolate(float ang, float depth) {
     float row = (depth / table_max_depth) * (table_rows - 1.0);
     float column = (ang / MAX_ANG) * (table_columns - 1.0);
 
-    int row_floor = floor(row);
-    int col_floor = floor(column);
-    int row_ceil = fmin(table_rows - 1, row_floor + 1);
-    int col_ceil = fmin(table_columns - 1, col_floor + 1);
+    int row_floor = fmin(table_rows - 2, floor(row));
+    int col_floor = fmin(table_columns - 2, floor(column));
+    int row_ceil = row_floor + 1;
+    int col_ceil = col_floor + 1;
 
     float row_frac = row - row_floor;
     float col_frac = column - col_floor;

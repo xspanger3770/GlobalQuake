@@ -96,7 +96,7 @@ public class Station implements Serializable {
     public void selectBestChannel() {
         selectBestAvailableChannel();
 
-        if(selectedChannel != null){
+        if (selectedChannel != null) {
             return;
         }
 
@@ -109,11 +109,11 @@ public class Station implements Serializable {
             selectedChannel = null;
         }
 
-        if(selectedChannel != null){
+        if (selectedChannel != null) {
             return;
         }
 
-        for(Channel channel : getChannels()){
+        for (Channel channel : getChannels()) {
             if (channel.isAvailable() && (selectedChannel == null || channel.getSampleRate() < selectedChannel.getSampleRate())) {
                 selectedChannel = channel;
             }
@@ -121,7 +121,7 @@ public class Station implements Serializable {
     }
 
     public boolean locationErrorSuspected() {
-        if(getSelectedChannel() == null){
+        if (getSelectedChannel() == null) {
             return false;
         }
 

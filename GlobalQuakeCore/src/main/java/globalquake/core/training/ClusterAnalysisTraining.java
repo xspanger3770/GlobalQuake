@@ -23,7 +23,7 @@ public class ClusterAnalysisTraining {
     private static final int MINUTE = 1000 * 60;
 
     private static final boolean PKIKP = false;
-    private static final boolean P =  true;
+    private static final boolean P = true;
 
     public static class SimulatedStation extends AbstractStation {
 
@@ -55,7 +55,7 @@ public class ClusterAnalysisTraining {
         Settings.maxEvents = 30;
 
         System.out.println("Running");
-        for(int i = 0; i < 1; i++) {
+        for (int i = 0; i < 1; i++) {
             SimulatedStation.nextId.set(0);
             long a = System.currentTimeMillis();
             runTest(5000);
@@ -75,7 +75,7 @@ public class ClusterAnalysisTraining {
 
         double maxDist = 180;
 
-        for(int i  = 0; i < numStations; i++){
+        for (int i = 0; i < numStations; i++) {
             double dist = r.nextDouble() * maxDist / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE;
             double[] vals = GeoUtils.moveOnGlobe(0, 0, dist, r.nextDouble() * 360.0);
 
@@ -92,7 +92,7 @@ public class ClusterAnalysisTraining {
         ClusterAnalysis clusterAnalysis = new ClusterAnalysis(earthquakes, stations);
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis(clusterAnalysis, earthquakes);
 
-        System.out.println("Init done with "+stations.size()+" stations");
+        System.out.println("Init done with " + stations.size() + " stations");
 
         int notDetected = 0;
         int oneDetected = 0;
@@ -114,7 +114,7 @@ public class ClusterAnalysisTraining {
 
         while (simulatedQuakesCount < MAX_QUAKES) {
 
-            if(allSimulatedEarthquakes.size() < MAX_QUAKES && r.nextDouble() < 0.2){
+            if (allSimulatedEarthquakes.size() < MAX_QUAKES && r.nextDouble() < 0.2) {
                 double dist = r.nextDouble() * maxDist / 360.0 * GeoUtils.EARTH_CIRCUMFERENCE;
                 double[] vals = GeoUtils.moveOnGlobe(0, 0, dist, r.nextDouble() * 360.0);
                 double depth = r.nextDouble() * 600.0;
@@ -125,16 +125,16 @@ public class ClusterAnalysisTraining {
                 allSimulatedEarthquakes.add(earthquake);
             }
 
-            for(SimulatedEarthquake simulatedEarthquake : simulatedEarthquakes){
-                for(Earthquake earthquake : earthquakes){
+            for (SimulatedEarthquake simulatedEarthquake : simulatedEarthquakes) {
+                for (Earthquake earthquake : earthquakes) {
                     double rawP = TauPTravelTimeCalculator.getPWaveTravelTime(simulatedEarthquake.depth, 0);
-                    if(rawP < 0){
+                    if (rawP < 0) {
                         continue;
                     }
                     long expectedArrival = (long) (simulatedEarthquake.origin + 1000 * rawP);
 
                     double rawPA = TauPTravelTimeCalculator.getPWaveTravelTime(earthquake.getDepth(), 0);
-                    if(rawPA < 0){
+                    if (rawPA < 0) {
                         continue;
                     }
 
@@ -142,7 +142,7 @@ public class ClusterAnalysisTraining {
 
 
                     long err = Math.abs(expectedArrival - actualArrival);
-                    if(err < simulatedEarthquake.maxError){
+                    if (err < simulatedEarthquake.maxError) {
                         simulatedEarthquake.maxError = err;
                     }
                 }
@@ -163,34 +163,34 @@ public class ClusterAnalysisTraining {
 
             System.out.printf("time passed: %.2f%n", time / 1000.0);
 
-            if(clusterAnalysis.getClusters().isEmpty()){
+            if (clusterAnalysis.getClusters().isEmpty()) {
                 notDetected++;
-            } else if(clusterAnalysis.getClusters().size() == 1){
+            } else if (clusterAnalysis.getClusters().size() == 1) {
                 oneDetected++;
             } else {
                 tooManyDetected++;
             }
 
-            if(earthquakes.size() > maxQuakes){
+            if (earthquakes.size() > maxQuakes) {
                 maxQuakes = earthquakes.size();
             }
 
-            if(clusterAnalysis.getClusters().size() > maxClusters){
+            if (clusterAnalysis.getClusters().size() > maxClusters) {
                 maxClusters = clusterAnalysis.getClusters().size();
             }
 
-            time += step*5;
+            time += step * 5;
         }
 
-        System.out.println("Total Events: "+eventC);
+        System.out.println("Total Events: " + eventC);
         System.out.println("\n========== SUMMARY ==========");
         System.out.printf("Counts: %d | %d | %d%n", notDetected, oneDetected, tooManyDetected);
-        System.err.println("Final cluster count: "+clusterAnalysis.getClusters().size());
-        System.err.println("Max clusters count: "+maxClusters);
-        System.err.println("Final quakes count: "+earthquakes.size());
-        System.err.println("Max quakes count: "+maxQuakes);
+        System.err.println("Final cluster count: " + clusterAnalysis.getClusters().size());
+        System.err.println("Max clusters count: " + maxClusters);
+        System.err.println("Final quakes count: " + earthquakes.size());
+        System.err.println("Max quakes count: " + maxQuakes);
 
-        for(SimulatedEarthquake simulatedEarthquake : allSimulatedEarthquakes){
+        for (SimulatedEarthquake simulatedEarthquake : allSimulatedEarthquakes) {
             System.err.println(simulatedEarthquake);
         }
     }

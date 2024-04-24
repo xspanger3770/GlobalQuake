@@ -3,7 +3,8 @@ package globalquake.events.specific;
 import globalquake.core.station.GlobalStation;
 import globalquake.events.GlobalQuakeLocalEventListener;
 
-public record StationMonitorOpenEvent(globalquake.ui.StationMonitor stationMonitor, GlobalStation station) implements GlobalQuakeLocalEvent {
+public record StationMonitorOpenEvent(globalquake.ui.StationMonitor stationMonitor,
+                                      GlobalStation station) implements GlobalQuakeLocalEvent {
 
     @Override
     public void run(GlobalQuakeLocalEventListener eventListener) {

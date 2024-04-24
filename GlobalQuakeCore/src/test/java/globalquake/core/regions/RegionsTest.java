@@ -24,7 +24,7 @@ public class RegionsTest {
         Regions.init();
 
         double lat = 62.659630,
-               lon = -42.440372;
+                lon = -42.440372;
 
         assertEquals(19.53736973813437, Regions.getShorelineDistance(lat, lon), 0.1);
 
@@ -38,6 +38,7 @@ public class RegionsTest {
 
         assertEquals(55, Regions.getShorelineDistance(lat, lon), 1);
     }
+
     @SuppressWarnings("unused")
     public void bilinearInterpolationTest() throws IOException {
         HashMap<String, Double> lookupTable = LookupTableIO.importLookupTableFromFile();
@@ -49,6 +50,7 @@ public class RegionsTest {
         interpolation = interpolate(-2.376240, -38.963751, lookupTable);
         assertEquals(125, interpolation, 5);
     }
+
     @SuppressWarnings("unused")
     public void lookupTableEffectivityTest() throws IOException {
         Regions.init();
@@ -70,7 +72,7 @@ public class RegionsTest {
         double legacy = legacyEndTime - legacyStartTime;
         double lookup = lookupEndTime - lookupStartTime;
 
-        assert(lookup < legacy);
+        assert (lookup < legacy);
     }
 
     @SuppressWarnings("unused")
@@ -87,10 +89,10 @@ public class RegionsTest {
         assertEquals(4, testLookupTable.size());
 
         double lat = 0, lon;
-        for(int i = 0; i < 2; i++){
+        for (int i = 0; i < 2; i++) {
             lon = 0;
 
-            for(int j = 0; j < 2; j++){
+            for (int j = 0; j < 2; j++) {
                 String expectedKey = String.format("%.6f,%.6f", lat, lon);
                 assertTrue(testLookupTable.containsKey(expectedKey));
 

@@ -33,8 +33,8 @@ public class EarthquakeListPanel extends JPanel {
     private final List<ArchivedQuake> archivedQuakes;
     private boolean isMouseInGoUpRect;
 
-    private List<ArchivedQuake> getFiltered(){
-        if(archivedQuakes == null){
+    private List<ArchivedQuake> getFiltered() {
+        if (archivedQuakes == null) {
             return null;
         }
         return archivedQuakes.stream().filter(ArchivedQuake::shouldBeDisplayed).collect(Collectors.toList());
@@ -49,7 +49,7 @@ public class EarthquakeListPanel extends JPanel {
 
         addMouseWheelListener(e -> {
             List<ArchivedQuake> filtered = getFiltered();
-            if(filtered == null){
+            if (filtered == null) {
                 return;
             }
             boolean down = e.getWheelRotation() < 0;
@@ -71,7 +71,7 @@ public class EarthquakeListPanel extends JPanel {
                 int y = e.getY();
                 int i = (int) ((y + scroll) / cell_height);
                 List<ArchivedQuake> filtered = getFiltered();
-                if (filtered == null || i < 0 || i >=filtered.size()) {
+                if (filtered == null || i < 0 || i >= filtered.size()) {
                     return;
                 }
 
@@ -81,15 +81,15 @@ public class EarthquakeListPanel extends JPanel {
                     quake.setWrong(!quake.isWrong());
                 }
 
-                if(e.getButton() == MouseEvent.BUTTON1) {
-                    if(isMouseInGoUpRect) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (isMouseInGoUpRect) {
                         scroll = 0;
-                    }else if (quake != null ) {
+                    } else if (quake != null) {
                         new ArchivedQuakeUI(parent, quake).setVisible(true);
                     }
                 }
 
-                if(e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
+                if (e.getButton() == MouseEvent.BUTTON2 && !isMouseInGoUpRect && quake != null) {
                     new ArchivedQuakeAnimation(parent, quake).setVisible(true);
                 }
             }
@@ -113,7 +113,7 @@ public class EarthquakeListPanel extends JPanel {
     public void paint(Graphics gr) {
         super.paint(gr);
 
-        if(getWidth() <= 60){
+        if (getWidth() <= 60) {
             return;
         }
 
@@ -121,13 +121,13 @@ public class EarthquakeListPanel extends JPanel {
         Graphics2D g = (Graphics2D) gr;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         int i = 0;
-        if(getFiltered() != null) {
+        if (getFiltered() != null) {
             for (ArchivedQuake quake : getFiltered()) {
                 int y = (int) (i * cell_height - scroll);
                 if (y > getHeight()) {
                     break;
                 }
-                if(y < -cell_height){
+                if (y < -cell_height) {
                     i++;
                     continue;
                 }
@@ -153,7 +153,7 @@ public class EarthquakeListPanel extends JPanel {
                 g.setStroke(new BasicStroke(0.5f));
                 g.draw(rect);
 
-                if (!isMouseInGoUpRect && (int)((mouseY + scroll) / cell_height) == i) {
+                if (!isMouseInGoUpRect && (int) ((mouseY + scroll) / cell_height) == i) {
                     g.setColor(new Color(0, 0, 0, 60));
                     g.fill(rect);
                 }
@@ -214,18 +214,18 @@ public class EarthquakeListPanel extends JPanel {
 
         g.setStroke(new BasicStroke(1f));
 
-        if(i == 0){
+        if (i == 0) {
             g.setFont(new Font("Calibri", Font.BOLD, 16));
             g.setColor(Color.white);
             String str = "No earthquakes archived";
             g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, 22);
         }
 
-        if(scroll > 0){
+        if (scroll > 0) {
             g.setColor(Color.gray);
             g.fill(goUpRectangle);
 
-            if(isMouseInGoUpRect){
+            if (isMouseInGoUpRect) {
                 g.setStroke(new BasicStroke(2f));
             }
 

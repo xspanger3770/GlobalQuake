@@ -18,7 +18,7 @@ public class EditSeedlinkNetworkAction extends AbstractAction {
 
     private JTable table;
 
-    public EditSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager){
+    public EditSeedlinkNetworkAction(Window parent, StationDatabaseManager databaseManager) {
         super("Edit");
         this.databaseManager = databaseManager;
         this.parent = parent;

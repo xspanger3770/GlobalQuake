@@ -22,4 +22,6 @@ bool run_hypocenter_search(float *stations,
 
 bool init_depth_profiles(float *resols, int count);
 
+size_t get_total_allocation_size(size_t points, size_t station_count, float depth_resolution);
+
 #endif // _GLOBALQUAKE_H

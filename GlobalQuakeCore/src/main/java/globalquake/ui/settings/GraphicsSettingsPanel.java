@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
-public class GraphicsSettingsPanel extends SettingsPanel{
+public class GraphicsSettingsPanel extends SettingsPanel {
 
     private JCheckBox chkBoxScheme;
     private JSlider sliderFpsIdle;
@@ -71,7 +71,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
     private Component createCinemaModeTab() {
         JPanel panel = new JPanel();
-        panel.setBorder(new EmptyBorder(6,6,6,6));
+        panel.setBorder(new EmptyBorder(6, 6, 6, 6));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         textFieldTime = new JTextField(String.valueOf(Settings.cinemaModeSwitchTime), 12);
@@ -83,12 +83,12 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         panel.add(timePanel);
 
         JPanel zoomPanel = new JPanel();
-        zoomPanel.setBorder(new EmptyBorder(5,5,5,5));
+        zoomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.X_AXIS));
         zoomPanel.add(new JLabel("Zoom multiplier (move right to zoom in):"));
 
-        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20,500, Settings.cinemaModeZoomMultiplier);
+        sliderZoomMul = new JSlider(JSlider.HORIZONTAL, 20, 500, Settings.cinemaModeZoomMultiplier);
         sliderZoomMul.setMinorTickSpacing(10);
         sliderZoomMul.setMajorTickSpacing(50);
         sliderZoomMul.setPaintTicks(true);
@@ -120,11 +120,11 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         sliderFpsIdle.setPaintTicks(true);
         sliderFpsIdle.setMajorTickSpacing(10);
         sliderFpsIdle.setMinorTickSpacing(5);
-        sliderFpsIdle.setBorder(new EmptyBorder(5,5,10,5));
+        sliderFpsIdle.setBorder(new EmptyBorder(5, 5, 10, 5));
 
-        JLabel label = new JLabel("FPS limit: "+sliderFpsIdle.getValue());
+        JLabel label = new JLabel("FPS limit: " + sliderFpsIdle.getValue());
 
-        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS limit: "+sliderFpsIdle.getValue()));
+        sliderFpsIdle.addChangeListener(changeEvent -> label.setText("FPS limit: " + sliderFpsIdle.getValue()));
 
         performancePanel.add(label);
         performancePanel.add(sliderFpsIdle);
@@ -136,7 +136,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         comboBoxDateFormat = new JComboBox<>();
         Instant now = Instant.now();
-        for(DateTimeFormatter formatter: Settings.DATE_FORMATS){
+        for (DateTimeFormatter formatter : Settings.DATE_FORMATS) {
             comboBoxDateFormat.addItem(formatter.format(now));
         }
 
@@ -148,7 +148,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(dateFormatPanel);
 
-        JPanel mainWindowPanel = new JPanel(new GridLayout(4,2));
+        JPanel mainWindowPanel = new JPanel(new GridLayout(4, 2));
         mainWindowPanel.setBorder(new TitledBorder("Main Screen"));
 
         mainWindowPanel.add(chkBoxDisplaySystemInfo = new JCheckBox("Display system info", Settings.displaySystemInfo));
@@ -162,7 +162,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(mainWindowPanel);
 
-        JPanel clustersPanel = new JPanel(new GridLayout(3,1));
+        JPanel clustersPanel = new JPanel(new GridLayout(3, 1));
         clustersPanel.setBorder(new TitledBorder("Cluster settings"));
 
         clustersPanel.add(chkBoxClusterRoots = new JCheckBox("Display Clusters (possible shaking locations)", Settings.displayClusterRoots));
@@ -171,7 +171,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         panel.add(clustersPanel);
 
-        JPanel antialiasPanel = new JPanel(new GridLayout(3,1));
+        JPanel antialiasPanel = new JPanel(new GridLayout(3, 1));
         antialiasPanel.setBorder(new TitledBorder("Antialiasing"));
         antialiasPanel.add(chkBoxAntialiasStations = new JCheckBox("Stations", Settings.antialiasing));
         antialiasPanel.add(chkBoxAntialiasClusters = new JCheckBox("Clusters", Settings.antialiasingClusters));
@@ -190,7 +190,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         JPanel timePanel = new JPanel();
         timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
-        timePanel.setBorder(new EmptyBorder(5,5,5,5));
+        timePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         chkBoxEnableTimeFilter = new JCheckBox("Don't display older than (hours): ");
         chkBoxEnableTimeFilter.setSelected(Settings.oldEventsTimeFilterEnabled);
@@ -206,7 +206,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         eventsPanel.add(timePanel);
 
         JPanel magnitudePanel = new JPanel();
-        magnitudePanel.setBorder(new EmptyBorder(5,5,5,5));
+        magnitudePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         magnitudePanel.setLayout(new BoxLayout(magnitudePanel, BoxLayout.X_AXIS));
 
         chkBoxEnableMagnitudeFilter = new JCheckBox("Don't display smaller than (magnitude): ");
@@ -224,7 +224,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         JPanel removeOldPanel = new JPanel();
         removeOldPanel.setLayout(new BoxLayout(removeOldPanel, BoxLayout.X_AXIS));
-        removeOldPanel.setBorder(new EmptyBorder(5,5,5,5));
+        removeOldPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         textFieldMaxArchived = new JTextField(Settings.maxArchivedQuakes.toString(), 12);
 
@@ -235,10 +235,10 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
 
         JPanel opacityPanel = new JPanel();
-        opacityPanel.setBorder(new EmptyBorder(5,5,5,5));
+        opacityPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         opacityPanel.setLayout(new BoxLayout(opacityPanel, BoxLayout.X_AXIS));
 
-        sliderOpacity = new JSlider(JSlider.HORIZONTAL,0,100, Settings.oldEventsOpacity.intValue());
+        sliderOpacity = new JSlider(JSlider.HORIZONTAL, 0, 100, Settings.oldEventsOpacity.intValue());
         sliderOpacity.setMajorTickSpacing(10);
         sliderOpacity.setMinorTickSpacing(2);
         sliderOpacity.setPaintTicks(true);
@@ -272,7 +272,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
             public void actionPerformed(ActionEvent actionEvent) {
                 for (int i = 0; i < colorButtons.length; i++) {
                     JRadioButton button = colorButtons[i];
-                    if(button.isSelected()){
+                    if (button.isSelected()) {
                         Settings.selectedEventColorIndex = i;
                         break;
                     }
@@ -280,7 +280,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
             }
         };
 
-        for(JRadioButton button : colorButtons) {
+        for (JRadioButton button : colorButtons) {
             bg.add(button);
             button.addActionListener(colorButtonActionListener);
             colorsPanel.add(button);
@@ -294,7 +294,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         qualityFilterPanel.add(new JLabel("Only show old events with quality equal or better than: "));
 
         comboBoxQuality = new JComboBox<>(QualityClass.values());
-        comboBoxQuality.setSelectedIndex(Math.max(0, Math.min(QualityClass.values().length-1, Settings.qualityFilter)));
+        comboBoxQuality.setSelectedIndex(Math.max(0, Math.min(QualityClass.values().length - 1, Settings.qualityFilter)));
         qualityFilterPanel.add(comboBoxQuality);
 
         eventsPanel.add(qualityFilterPanel);
@@ -309,7 +309,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         stationsPanel.setLayout(new BoxLayout(stationsPanel, BoxLayout.Y_AXIS));
         stationsPanel.setBorder(BorderFactory.createTitledBorder("Stations"));
 
-        JPanel checkBoxes = new JPanel(new GridLayout(1,2));
+        JPanel checkBoxes = new JPanel(new GridLayout(1, 2));
         checkBoxes.setBorder(BorderFactory.createTitledBorder("Appearance"));
 
         chkBoxScheme = new JCheckBox("Use old color scheme (exaggerated)");
@@ -336,7 +336,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
             public void actionPerformed(ActionEvent actionEvent) {
                 for (int i = 0; i < buttons.length; i++) {
                     JRadioButton button = buttons[i];
-                    if(button.isSelected()){
+                    if (button.isSelected()) {
                         Settings.stationsShapeIndex = i;
                         break;
                     }
@@ -344,7 +344,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
             }
         };
 
-        for(JRadioButton button : buttons){
+        for (JRadioButton button : buttons) {
             buttonGroup.add(button);
             stationsShapePanel.add(button);
             button.addActionListener(shapeActionListener);
@@ -354,7 +354,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         stationsPanel.add(stationsShapePanel);
 
-        JPanel intensityPanel = new JPanel(new GridLayout(2,1));
+        JPanel intensityPanel = new JPanel(new GridLayout(2, 1));
         intensityPanel.add(new JLabel("Display station's intensity label at zoom level (0 very close, 200 very far):"));
 
         sliderIntensityZoom = new JSlider(SwingConstants.HORIZONTAL, 0, 200, (int) (Settings.stationIntensityVisibilityZoomLevel * 100));
@@ -371,7 +371,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
         intensityPanel.add(sliderIntensityZoom);
         stationsPanel.add(intensityPanel);
 
-        JPanel stationSizePanel = new JPanel(new GridLayout(2,1));
+        JPanel stationSizePanel = new JPanel(new GridLayout(2, 1));
         stationSizePanel.add(new JLabel("Stations size multiplier (100 default, 20 tiny, 300 huge):"));
 
         sliderStationsSize = new JSlider(SwingConstants.HORIZONTAL, 20, 300, (int) (Settings.stationsSizeMul * 100));
@@ -419,7 +419,7 @@ public class GraphicsSettingsPanel extends SettingsPanel{
 
         Settings.maxArchivedQuakes = parseInt(textFieldMaxArchived.getText(), "Max number of archived quakes", 1, Integer.MAX_VALUE);
 
-        Settings.cinemaModeZoomMultiplier= sliderZoomMul.getValue();
+        Settings.cinemaModeZoomMultiplier = sliderZoomMul.getValue();
         Settings.cinemaModeSwitchTime = parseInt(textFieldTime.getText(), "Cinema mode switch time", 1, 3600);
         Settings.cinemaModeOnStartup = chkBoxEnableOnStartup.isSelected();
         Settings.cinemaModeReenable = chkBoxReEnable.isSelected();

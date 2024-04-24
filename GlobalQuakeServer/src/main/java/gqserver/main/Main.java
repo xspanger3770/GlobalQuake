@@ -83,29 +83,29 @@ public class Main {
 
         headless = cmd.hasOption(headlessOption.getOpt());
 
-        if(cmd.hasOption(maxClientsOption.getOpt())) {
+        if (cmd.hasOption(maxClientsOption.getOpt())) {
             try {
-                int maxCli =  Integer.parseInt(cmd.getOptionValue(maxClientsOption.getOpt()));
-                if(maxCli < 1){
+                int maxCli = Integer.parseInt(cmd.getOptionValue(maxClientsOption.getOpt()));
+                if (maxCli < 1) {
                     throw new IllegalArgumentException("Maximum client count must be at least 1!");
                 }
                 Settings.maxClients = maxCli;
                 Logger.info("Maximum client count set to %d".formatted(Settings.maxClients));
-            } catch(IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 Logger.error(e);
                 System.exit(1);
             }
         }
 
-        if(cmd.hasOption(maxGpuMemOption.getOpt())) {
+        if (cmd.hasOption(maxGpuMemOption.getOpt())) {
             try {
-                double maxMem =  Double.parseDouble(cmd.getOptionValue(maxGpuMemOption.getOpt()));
-                if(maxMem <= 0){
+                double maxMem = Double.parseDouble(cmd.getOptionValue(maxGpuMemOption.getOpt()));
+                if (maxMem <= 0) {
                     throw new IllegalArgumentException("Invalid maximum GPU memory amount");
                 }
                 GQHypocs.MAX_GPU_MEM = maxMem;
                 Logger.info("Maximum GPU memory allocation will be limited to around %.2f GB".formatted(maxMem));
-            } catch(IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 Logger.error(e);
                 System.exit(1);
             }
@@ -129,9 +129,9 @@ public class Main {
     }
 
     public static void updateProgressBar(String status, int value) {
-        if(headless){
+        if (headless) {
             Logger.info("Initialising... %d%%: %s".formatted(value, status));
-        }else{
+        } else {
             databaseMonitorFrame.getMainProgressBar().setString(status);
             databaseMonitorFrame.getMainProgressBar().setValue(value);
         }
@@ -140,7 +140,7 @@ public class Main {
     private static final double PHASES = 10.0;
     private static int phase = 0;
 
-    public static void initAll() throws Exception{
+    public static void initAll() throws Exception {
         updateProgressBar("Loading regions...", (int) ((phase++ / PHASES) * 100.0));
         Regions.init();
 
@@ -154,33 +154,46 @@ public class Main {
         GQHypocs.load();
 
         updateProgressBar("Calibrating...", (int) ((phase++ / PHASES) * 100.0));
-        if(Settings.recalibrateOnLaunch) {
+        if (Settings.recalibrateOnLaunch) {
             EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null, true);
-            if(GQHypocs.isCudaLoaded()) {
+            if (GQHypocs.isCudaLoaded()) {
                 EarthquakeAnalysisTraining.calibrateResolution(Main::updateProgressBar, null, false);
             }
+        } else if (GQHypocs.isCudaLoaded()) {
+            GQHypocs.calculateStationLimit();
         }
+
 
         //start up the FDSNWS_Event Server, if enabled
         updateProgressBar("Starting FDSNWS_Event Server...", (int) ((phase++ / PHASES) * 100.0));
-        if(Settings.autoStartFDSNWSEventServer){
+        if (Settings.autoStartFDSNWSEventServer) {
             try {
                 FdsnwsEventsHTTPServer.getInstance().startServer();
-            }catch (Exception e){
+            } catch (Exception e) {
                 getErrorHandler().handleWarning(new RuntimeException("Unable to start FDSNWS EVENT server! Check logs for more info.", e));
             }
         }
 
         updateProgressBar("Starting Discord Bot...", (int) ((phase++ / PHASES) * 100.0));
-        if(Settings.discordBotEnabled){
+        if (Settings.discordBotEnabled) {
             DiscordBot.init();
         }
 
         updateProgressBar("Updating Station Sources...", (int) ((phase++ / PHASES) * 100.0));
         databaseManager.runUpdate(
-                databaseManager.getStationDatabase().getStationSources().stream()
-                        .filter(StationSource::isOutdated).collect(Collectors.toList()),
-                () -> {
+                databaseManager.getStationDatabase().
+
+                        getStationSources().
+
+                        stream()
+                                .
+
+                        filter(StationSource::isOutdated).
+
+                        collect(Collectors.toList()),
+                () ->
+
+                {
                     updateProgressBar("Checking Seedlink Networks...", (int) ((phase++ / PHASES) * 100.0));
                     databaseManager.runAvailabilityCheck(databaseManager.getStationDatabase().getSeedlinkNetworks(), () -> {
                         updateProgressBar("Saving...", (int) ((phase++ / PHASES) * 100.0));
@@ -191,13 +204,13 @@ public class Main {
                             getErrorHandler().handleException(new RuntimeException(e));
                         }
 
-                        if(!headless) {
+                        if (!headless) {
                             databaseMonitorFrame.initDone();
                         }
 
                         updateProgressBar("Done", (int) ((phase++ / PHASES) * 100.0));
 
-                        if(headless){
+                        if (headless) {
                             autoStartServer();
                         }
                     });
@@ -211,7 +224,7 @@ public class Main {
     }
 
     public static ApplicationErrorHandler getErrorHandler() {
-        if(errorHandler == null) {
+        if (errorHandler == null) {
             errorHandler = new ApplicationErrorHandler(null, headless);
         }
         return errorHandler;

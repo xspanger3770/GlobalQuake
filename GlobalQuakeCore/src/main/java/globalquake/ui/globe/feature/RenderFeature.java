@@ -25,29 +25,29 @@ public abstract class RenderFeature<E> {
     private ConcurrentHashMap<E, RenderEntity<E>> entities = new ConcurrentHashMap<>();
     private ConcurrentHashMap<E, RenderEntity<E>> entities_temp = new ConcurrentHashMap<>();
 
-    public RenderFeature(int renderElements){
+    public RenderFeature(int renderElements) {
         this.renderElements = renderElements;
     }
 
-    private void swapEntities(){
+    private void swapEntities() {
         var entities3 = entities;
         entities = entities_temp;
         entities_temp = entities3;
     }
 
-    public final boolean updateEntities(){
+    public final boolean updateEntities() {
         int hash;
 
-        if(getElements() instanceof Monitorable){
+        if (getElements() instanceof Monitorable) {
             hash = ((Monitorable) getElements()).getMonitorState();
-        }else {
+        } else {
             hash = getElements().hashCode();
-            if(needsUpdateEntities() && !warned){
+            if (needsUpdateEntities() && !warned) {
                 Logger.warn("Render Features with non-monitorable elements might not be updating correctly! %s".formatted(this));
                 warned = true;
             }
         }
-        if(hash != lastHash) {
+        if (hash != lastHash) {
             entities_temp.clear();
             getElements().parallelStream().forEach(element -> entities_temp.put(element, entities.getOrDefault(element, new RenderEntity<>(element, renderElements))));
             swapEntities();
@@ -60,7 +60,7 @@ public abstract class RenderFeature<E> {
         return false;
     }
 
-    public boolean isEnabled(RenderProperties renderProperties){
+    public boolean isEnabled(RenderProperties renderProperties) {
         return true;
     }
 
@@ -68,15 +68,15 @@ public abstract class RenderFeature<E> {
         return getEntities().isEmpty();
     }
 
-    public boolean needsCreatePolygon(RenderEntity<E> entity, boolean propertiesChanged){
+    public boolean needsCreatePolygon(RenderEntity<E> entity, boolean propertiesChanged) {
         return Arrays.stream(entity.getRenderElements()).anyMatch(renderElement -> renderElement.getPolygon() == null);
     }
 
-    public boolean needsProject(RenderEntity<E> entity, boolean propertiesChanged){
+    public boolean needsProject(RenderEntity<E> entity, boolean propertiesChanged) {
         return propertiesChanged || Arrays.stream(entity.getRenderElements()).anyMatch(renderElement -> renderElement.getShape() == null);
     }
 
-    public final boolean propertiesChanged(RenderProperties properties){
+    public final boolean propertiesChanged(RenderProperties properties) {
         boolean result = properties != lastProperties;
         lastProperties = properties;
         return result;
@@ -86,7 +86,7 @@ public abstract class RenderFeature<E> {
         boolean entitiesUpdated = false;
         boolean settingsChanged = Settings.changes != settingsChanges;
         settingsChanges = Settings.changes;
-        if(needsUpdateEntities() || settingsChanged) {
+        if (needsUpdateEntities() || settingsChanged) {
             entitiesUpdated = updateEntities();
         }
 
@@ -94,9 +94,9 @@ public abstract class RenderFeature<E> {
 
         boolean finalEntitiesUpdated = entitiesUpdated;
         getEntities().parallelStream().forEach(entity -> {
-            if(finalEntitiesUpdated || settingsChanged || needsCreatePolygon(entity, propertiesChanged))
+            if (finalEntitiesUpdated || settingsChanged || needsCreatePolygon(entity, propertiesChanged))
                 createPolygon(renderer, entity, renderProperties);
-            if(finalEntitiesUpdated || settingsChanged || needsProject(entity, propertiesChanged))
+            if (finalEntitiesUpdated || settingsChanged || needsProject(entity, propertiesChanged))
                 project(renderer, entity, renderProperties);
         });
     }
@@ -111,7 +111,9 @@ public abstract class RenderFeature<E> {
 
     public abstract void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<E> entity, RenderProperties renderProperties);
 
-    public boolean isEntityVisible(RenderEntity<?> entity) {return true;}
+    public boolean isEntityVisible(RenderEntity<?> entity) {
+        return true;
+    }
 
     public void renderAll(GlobeRenderer renderer, Graphics2D graphics, RenderProperties properties) {
         getEntities().stream().filter(this::isEntityVisible).forEach(entity -> {

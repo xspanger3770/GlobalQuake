@@ -141,14 +141,14 @@ public class DatabaseMonitorFrame extends GQFrame {
 
         bottomPanel.add(new StationCountPanel(manager, new GridLayout(2, 2)));
 
-        mainProgressBar  = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+        mainProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         mainProgressBar.setValue(0);
         mainProgressBar.setStringPainted(true);
         mainProgressBar.setString("Init...");
 
         buttonsOutsidePanel.add(buttonsPanel);
         buttonsOutsidePanel.add(mainProgressBar);
-        
+
         bottomPanel.add(buttonsOutsidePanel);
         return bottomPanel;
     }
@@ -162,7 +162,7 @@ public class DatabaseMonitorFrame extends GQFrame {
     }
 
     public JButton getBtnSelectStations() {
-        return btnSelectStations;  
+        return btnSelectStations;
     }
 
 }

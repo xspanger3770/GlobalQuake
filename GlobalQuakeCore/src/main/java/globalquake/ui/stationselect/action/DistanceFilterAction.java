@@ -21,8 +21,8 @@ public class DistanceFilterAction extends AbstractAction {
 
     public DistanceFilterAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Apply Distance Filter");
-        this.stationDatabaseManager=stationDatabaseManager;
-        this.parent=parent;
+        this.stationDatabaseManager = stationDatabaseManager;
+        this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Select Stations with Minimum Distance Between Channels");
 
@@ -38,18 +38,16 @@ public class DistanceFilterAction extends AbstractAction {
         double minDist;
         if (input != null) { // Check if user clicked OK or Cancel
             try {
-                if(Double.parseDouble(input) > 0){
+                if (Double.parseDouble(input) > 0) {
                     minDist = Double.parseDouble(input);
-                }
-                else{
+                } else {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(parent, "Invalid input. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        else{
+        } else {
             return;
         }
 
@@ -58,7 +56,7 @@ public class DistanceFilterAction extends AbstractAction {
 
         double finalMinDist = minDist;
         new Thread(() -> {
-            try{
+            try {
                 runAlgorithm(finalMinDist);
             } finally {
                 DistanceFilterAction.this.setEnabled(true);
@@ -67,14 +65,14 @@ public class DistanceFilterAction extends AbstractAction {
 
     }
 
-    private void runAlgorithm(double minDist){
+    private void runAlgorithm(double minDist) {
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
+        try {
 
             List<FilterChannel> selectedAvailableChannels = new ArrayList<>();
-            for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
-                for(Station station: network.getStations()){
-                    if(station.getSelectedChannel() != null && station.getSelectedChannel().isAvailable()){
+            for (Network network : stationDatabaseManager.getStationDatabase().getNetworks()) {
+                for (Station station : network.getStations()) {
+                    if (station.getSelectedChannel() != null && station.getSelectedChannel().isAvailable()) {
                         selectedAvailableChannels.add(new FilterChannel(station));
                     }
                 }
@@ -83,7 +81,7 @@ public class DistanceFilterAction extends AbstractAction {
             selectedAvailableChannels.parallelStream().forEach(filterChannel -> filterChannel.calculateClosestChannel(new ArrayList<>(selectedAvailableChannels)));
             selectedAvailableChannels.sort(Comparator.comparingDouble(FilterChannel::getClosestChannel));
 
-            while(true) {
+            while (true) {
                 boolean removed = false;
                 for (Iterator<FilterChannel> iterator = selectedAvailableChannels.iterator(); iterator.hasNext(); ) {
                     FilterChannel filterChannel = iterator.next();
@@ -92,15 +90,15 @@ public class DistanceFilterAction extends AbstractAction {
                         filterChannel.getStation().setSelectedChannel(null);
                         iterator.remove();
                         removed = true;
-                        for(int i = 0; i < 2; i++){
-                            if(!iterator.hasNext()){
+                        for (int i = 0; i < 2; i++) {
+                            if (!iterator.hasNext()) {
                                 break;
                             }
                             iterator.next();
                         }
                     }
                 }
-                if(!removed){
+                if (!removed) {
                     break;
                 }
 
@@ -109,7 +107,7 @@ public class DistanceFilterAction extends AbstractAction {
             }
 
             stationDatabaseManager.fireUpdateEvent();
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }
@@ -130,14 +128,14 @@ public class DistanceFilterAction extends AbstractAction {
             return closestChannel;
         }
 
-        public void calculateClosestChannel(List<FilterChannel> filterChannels){
+        public void calculateClosestChannel(List<FilterChannel> filterChannels) {
             double closest = 99999999;
-            for(FilterChannel filterChannel : filterChannels){
-                if(filterChannel.equals(this)){
+            for (FilterChannel filterChannel : filterChannels) {
+                if (filterChannel.equals(this)) {
                     continue;
                 }
                 double dist = GeoUtils.greatCircleDistance(station.getLatitude(), station.getLongitude(), filterChannel.getStation().getLatitude(), filterChannel.getStation().getLongitude());
-                if(dist  < closest){
+                if (dist < closest) {
                     closest = dist;
                 }
             }

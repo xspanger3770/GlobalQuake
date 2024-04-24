@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class GlobalQuake {
 
-    public static final String version = "v0.11.0_pre-2";
+    public static final String version = "v0.11.0_build-58";
 
     protected GlobalQuakeRuntime globalQuakeRuntime;
     protected SeedlinkNetworksReader seedlinkNetworksReader;
@@ -179,7 +179,7 @@ public abstract class GlobalQuake {
 
     public abstract boolean limitedWaveformBuffers();
 
-    public boolean isSimulation(){
+    public boolean isSimulation() {
         return false;
     }
 }

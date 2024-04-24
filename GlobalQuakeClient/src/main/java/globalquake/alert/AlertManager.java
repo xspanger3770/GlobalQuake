@@ -21,7 +21,7 @@ public class AlertManager {
     public AlertManager() {
         this.warnings = new HashMap<>();
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
                 tick();
@@ -48,7 +48,7 @@ public class AlertManager {
             Warning warning = kv.getValue();
 
             long age = GlobalQuake.instance.currentTimeMillis() - warning.createdAt;
-            if(age > 1000 * 60 * STORE_TIME_MINUTES){
+            if (age > 1000 * 60 * STORE_TIME_MINUTES) {
                 iterator.remove();
                 continue;
             }
@@ -61,13 +61,13 @@ public class AlertManager {
     }
 
     private void conditionsSatisfied(Warnable warnable, Warning warning) {
-        if(GlobalQuakeLocal.instance != null){
+        if (GlobalQuakeLocal.instance != null) {
             GlobalQuakeLocal.instance.getLocalEventHandler().fireEvent(new AlertIssuedEvent(warnable, warning));
         }
     }
 
     private boolean meetsConditions(Warnable warnable) {
-        if(warnable instanceof Earthquake){
+        if (warnable instanceof Earthquake) {
             return meetsConditions((Earthquake) warnable, true);
         }
 

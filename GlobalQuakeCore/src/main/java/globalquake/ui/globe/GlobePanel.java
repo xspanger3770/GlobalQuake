@@ -81,7 +81,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
             public void mouseDragged(MouseEvent e) {
                 lastMouse = e.getPoint();
                 renderer.mouseMoved(e);
-                if(cinemaMode){
+                if (cinemaMode) {
                     Logger.info("Cinema mode disabled by dragging");
                     setCinemaMode(false);
                 }
@@ -147,7 +147,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         });
 
         addMouseWheelListener(e -> {
-            if(cinemaMode){
+            if (cinemaMode) {
                 Logger.info("Cinema mode disabled by scrolling");
                 setCinemaMode(false);
             }
@@ -213,7 +213,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private void runAnimation(Animation animation) {
-        if(animation == null){
+        if (animation == null) {
             return;
         }
 
@@ -230,13 +230,13 @@ public class GlobePanel extends JPanel implements GeoUtils {
             @Override
             public void run() {
                 Animation next = nextAnimation;
-                if(animation != next){
+                if (animation != next) {
                     this.cancel();
                     runAnimation(next);
                     latch.countDown();
                     return;
                 }
-                if(!cinemaMode){
+                if (!cinemaMode) {
                     Logger.info("Animation aborted!");
                     this.cancel();
                     latch.countDown();
@@ -244,7 +244,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
                 }
                 double t = (double) step[0] / steps;
                 double t1 = -Math.cos(t * Math.PI) * 0.5 + 0.5;
-                double t2 = Math.sin(t * Math.PI) * Math.max(1.6, animation.initialScroll() + animation.targetScroll()) *  (distGC / 14000.0);
+                double t2 = Math.sin(t * Math.PI) * Math.max(1.6, animation.initialScroll() + animation.targetScroll()) * (distGC / 14000.0);
                 double currentScroll = t2 + animation.initialScroll() + t * (animation.targetScroll() - animation.initialScroll());
                 double currentLatitude = animation.initialLat() + t1 * (animation.targetLat() - animation.initialLat());
                 double currentLongitude = animation.initialLon() + t1 * (animation.targetLon() - animation.initialLon());
@@ -254,7 +254,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
 
                 renderer.updateCamera(createRenderProperties());
 
-                if(step[0] == steps){
+                if (step[0] == steps) {
                     this.cancel();
                     latch.countDown();
                 }
@@ -283,8 +283,8 @@ public class GlobePanel extends JPanel implements GeoUtils {
         renderer.updateCamera(createRenderProperties());
     }
 
-    public synchronized void smoothTransition(double targetLat, double targetLon, double targetScroll){
-        if(!cinemaMode || (System.currentTimeMillis() - lastJump < 1000)){
+    public synchronized void smoothTransition(double targetLat, double targetLon, double targetScroll) {
+        if (!cinemaMode || (System.currentTimeMillis() - lastJump < 1000)) {
             return;
         }
 
@@ -295,11 +295,11 @@ public class GlobePanel extends JPanel implements GeoUtils {
         targetLat %= 360;
         targetLon %= 360;
 
-        if(Math.abs((startLon + 360) - targetLon) < Math.abs(startLon - targetLon)){
+        if (Math.abs((startLon + 360) - targetLon) < Math.abs(startLon - targetLon)) {
             startLon += 360;
         }
 
-        if(Math.abs(startLon - (targetLon + 360)) < Math.abs(startLon - targetLon)){
+        if (Math.abs(startLon - (targetLon + 360)) < Math.abs(startLon - targetLon)) {
             targetLon += 360;
         }
 
@@ -377,7 +377,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean _interactionAllowed(){
+    private boolean _interactionAllowed() {
         return interactionAllowed() && !cinemaMode;
     }
 
@@ -385,7 +385,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
         ArrayList<RenderEntity<?>> clicked = new ArrayList<>();
         renderer.getRenderFeatures().parallelStream().forEach(feature -> {
             for (RenderEntity<?> entity : feature.getEntities()) {
-                if(!feature.isEntityVisible(entity)){
+                if (!feature.isEntityVisible(entity)) {
                     continue;
                 }
                 Point2D centerCoords = feature.getCenterCoords(entity);
@@ -472,7 +472,7 @@ public class GlobePanel extends JPanel implements GeoUtils {
     }
 
     private void checkCinemaMode() {
-        if(!cinemaMode && Settings.cinemaModeReenable && System.currentTimeMillis() - lastCinemaModeCheck > CINEMA_MODE_CHECK_INTERVAL){
+        if (!cinemaMode && Settings.cinemaModeReenable && System.currentTimeMillis() - lastCinemaModeCheck > CINEMA_MODE_CHECK_INTERVAL) {
             setCinemaMode(true);
         }
     }

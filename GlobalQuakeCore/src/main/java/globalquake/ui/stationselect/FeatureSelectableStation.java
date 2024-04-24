@@ -48,27 +48,23 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
 
         InputType inputType = entity.getOriginal().getSelectedChannel() == null ? InputType.UNKNOWN : entity.getOriginal().getSelectedChannel().getInputType();
 
-        switch (inputType){
-            case UNKNOWN ->
-                    renderer.createCircle(entity.getRenderElement(0).getPolygon(),
-                            entity.getOriginal().getLatitude(),
-                            entity.getOriginal().getLongitude(),
-                            size, 0, 30);
-            case VELOCITY ->
-                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
-                            entity.getOriginal().getLatitude(),
-                            entity.getOriginal().getLongitude(),
-                            size * 1.41, 0, 0);
-            case ACCELERATION ->
-                    renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
-                            entity.getOriginal().getLatitude(),
-                            entity.getOriginal().getLongitude(),
-                            size * 1.41, 0, 180);
-            case DISPLACEMENT ->
-                    renderer.createSquare(entity.getRenderElement(0).getPolygon(),
-                            entity.getOriginal().getLatitude(),
-                            entity.getOriginal().getLongitude(),
-                            size * 1.41, 0);
+        switch (inputType) {
+            case UNKNOWN -> renderer.createCircle(entity.getRenderElement(0).getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size, 0, 30);
+            case VELOCITY -> renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size * 1.41, 0, 0);
+            case ACCELERATION -> renderer.createTriangle(entity.getRenderElement(0).getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size * 1.41, 0, 180);
+            case DISPLACEMENT -> renderer.createSquare(entity.getRenderElement(0).getPolygon(),
+                    entity.getOriginal().getLatitude(),
+                    entity.getOriginal().getLongitude(),
+                    size * 1.41, 0);
         }
     }
 
@@ -111,28 +107,28 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         var point3D = GlobeRenderer.createVec3D(centerCoords);
         var centerPonint = renderer.projectPoint(point3D, renderProperties);
 
-        if(mouseNearby){
-            drawInfo(graphics, (int)centerPonint.x, (int)centerPonint.y, entity.getOriginal());
+        if (mouseNearby) {
+            drawInfo(graphics, (int) centerPonint.x, (int) centerPonint.y, entity.getOriginal());
         } else if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().isAvailable()
                 && renderer.getAngularDistance(centerCoords, renderProperties) < 25.0 && renderProperties.scroll < 0.75) {
             Optional<Long> minDelay = entity.getOriginal().getSelectedChannel().getSeedlinkNetworks().values().stream().min(Long::compare);
 
             int x = (int) (centerPonint.x + 10);
 
-            if(minDelay.isPresent() && minDelay.get() > 5 * 60 * 1000L) {
+            if (minDelay.isPresent() && minDelay.get() > 5 * 60 * 1000L) {
                 graphics.setColor(Color.red);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
                 graphics.drawString("!", x, (int) centerPonint.y + 9);
-                x+=graphics.getFontMetrics().stringWidth("!");
+                x += graphics.getFontMetrics().stringWidth("!");
             }
 
-            if(entity.getOriginal().locationErrorSuspected()){
+            if (entity.getOriginal().locationErrorSuspected()) {
                 graphics.setColor(Color.yellow);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
                 graphics.drawString("!", x, (int) centerPonint.y + 9);
             }
 
-            if(entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().getSensitivity() <= 0){
+            if (entity.getOriginal().getSelectedChannel() != null && entity.getOriginal().getSelectedChannel().getSensitivity() <= 0) {
                 graphics.setColor(Color.blue);
                 graphics.setFont(new Font("Calibri", Font.BOLD, 14));
                 graphics.drawString("%.1f".formatted(entity.getOriginal().getSelectedChannel().getSensitivity()), x + 20, (int) centerPonint.y + 9);
@@ -144,7 +140,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         g.setColor(Color.white);
         g.setFont(new Font("Calibri", Font.PLAIN, 12));
 
-        String str = original.getNetwork().getNetworkCode()+" "+original.getStationCode();
+        String str = original.getNetwork().getNetworkCode() + " " + original.getStationCode();
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y - 11);
 
         y += 20;
@@ -155,22 +151,22 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         str = original.getStationSite();
         g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y += 13);
 
-        if(original.getSelectedChannel() != null && original.getSelectedChannel().isAvailable()) {
+        if (original.getSelectedChannel() != null && original.getSelectedChannel().isAvailable()) {
             str = "Sensitivity: %6.3E".formatted(original.getSelectedChannel().getSensitivity());
             g.drawString(str, x - g.getFontMetrics().stringWidth(str) / 2, y += 13);
 
             int _y = y + 20;
-            for(var availableSeedlinkNetwork : original.getSelectedChannel().getSeedlinkNetworks().entrySet()) {
+            for (var availableSeedlinkNetwork : original.getSelectedChannel().getSeedlinkNetworks().entrySet()) {
                 drawDelay(g, x, _y, availableSeedlinkNetwork.getValue(), availableSeedlinkNetwork.getKey().getName());
                 _y += 13;
             }
         }
     }
 
-    private static String getDelayString(long delay){
-        if(delay == SeedlinkCommunicator.UNKNOWN_DELAY){
+    private static String getDelayString(long delay) {
+        if (delay == SeedlinkCommunicator.UNKNOWN_DELAY) {
             return "???";
-        } else if(delay <= 60 * 1000L){
+        } else if (delay <= 60 * 1000L) {
             return "%.1fs".formatted(delay / 1000.0);
         } else if (delay < 60 * 60 * 1000L) {
             return "%d:%02d".formatted(delay / (1000 * 60), (delay / 1000) % 60);
@@ -183,7 +179,7 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
         String fullPrefix = prefix == null ? "" : prefix + ": ";
 
         String str = fullPrefix + delayString;
-        int _x =  x - g.getFontMetrics().stringWidth(str) / 2;
+        int _x = x - g.getFontMetrics().stringWidth(str) / 2;
         g.setColor(Color.magenta);
         g.drawString(fullPrefix, _x, y);
         _x += g.getFontMetrics().stringWidth(fullPrefix);
@@ -192,11 +188,11 @@ public class FeatureSelectableStation extends RenderFeature<Station> {
     }
 
     private static Color getColorDelay(long delay) {
-        if(delay <= 16 * 1000L){
+        if (delay <= 16 * 1000L) {
             return Color.green;
-        } else if(delay <= 60 * 1000L){
+        } else if (delay <= 60 * 1000L) {
             return Color.YELLOW;
-        } else if(delay <= 5 * 60 * 1000L){
+        } else if (delay <= 5 * 60 * 1000L) {
             return Color.ORANGE;
         }
 
