@@ -57,6 +57,10 @@ public class WebSocketEventServer {
     public void start() {
         Logger.info("Starting WebSocketEventServer");
         jettyServer.start();
+
+        //ACTIVATE_CONNECTION_DEBUG();
+        //This has been left as a comment to provide an example of how to debug the number of connections 😉
+        
         Logger.info("WebSocketEventServer started on " + Settings.RTWSEventIP + ":" + Settings.RTWSEventPort);
     }
 
@@ -64,6 +68,19 @@ public class WebSocketEventServer {
         return instance;
     }
 
+    public void ACTIVATE_CONNECTION_DEBUG() {
+        Thread t = new Thread(() -> {
+            while (true) {     
+                try {
+                    Thread.sleep(1000);
+                    clientsHandler.DEBUG_SAVE_CONNECTION_COUNTS();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+    }
 
     private static ArchivedQuake convertToArchivedQuake(Earthquake quake) {
         ArchivedQuake archivedQuake = new ArchivedQuake(quake);
