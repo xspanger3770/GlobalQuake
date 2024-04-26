@@ -104,7 +104,7 @@ public class ClientSocket {
 
     private void sendQuakeRequest() {
         try {
-            sendPacket(new EarthquakesRequestPacket());
+            sendPacket(EarthquakesRequestPacket.getInstance());
         } catch(SocketTimeoutException | SocketException e){
             Logger.trace(e);
             onClose();
