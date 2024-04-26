@@ -9,14 +9,14 @@ public abstract class Column<E, T> {
     private final String name;
     private final Function<E, T> valueGetter;
     private final Class<T> columnType;
-	private final TableCellRendererAdapter<E, ?> renderer;
+    private final TableCellRendererAdapter<E, ?> renderer;
 
     private Column(String name, Class<T> columnClass, Function<E, T> valueGetter, TableCellRendererAdapter<E, ?> renderer) {
         this.name = Objects.requireNonNull(name, "name cannot be null");
         this.columnType = Objects.requireNonNull(columnClass, "column class cannot be null");
         this.valueGetter = Objects.requireNonNull(valueGetter, "value getter cannot be null");
         this.renderer = Objects.requireNonNull(renderer, "renderer cannot be null");
-    }	
+    }
 
     @SuppressWarnings("unused")
     public static <E, T> Column<E, T> editable(String name, Class<T> columnClass, Function<E, T> valueGetter,
@@ -43,10 +43,10 @@ public abstract class Column<E, T> {
     public Class<T> getColumnType() {
         return columnType;
     }
-    
+
     public TableCellRendererAdapter<E, ?> getRenderer() {
-		return renderer;
-	}
+        return renderer;
+    }
 
     private static class ReadOnly<E, T> extends Column<E, T> {
 

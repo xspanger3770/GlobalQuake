@@ -28,15 +28,20 @@ public class DiscordBotDebug extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        for(Guild guild:jda.getGuilds()){
+        for (Guild guild : jda.getGuilds()) {
             System.out.printf("GUILD %s - %s\n".formatted(guild.getName(), guild.getId()));
-            for(Role role : guild.getRoles()){
+            for (Role role : guild.getRoles()) {
                 System.out.printf("     ROLE %s - %s\n".formatted(role.getName(), role.getId()));
             }
-            for(TextChannel channel : guild.getTextChannels()){
+            for (TextChannel channel : guild.getTextChannels()) {
                 System.out.printf("     CHANNEL %s - %s\n".formatted(channel.getName(), channel.getId()));
             }
         }
+
+        /*Guild guild = jda.getGuildById("1146784713806188614");
+        TextChannel textChannel = guild.getTextChannelsByName("general", true).get(0);
+
+        textChannel.sendMessage("M15 Incoming").queue();*/
 
        /* Guild guild = jda.getGuildById("955128942078087228");
 
@@ -63,6 +68,6 @@ public class DiscordBotDebug extends ListenerAdapter {
         jda.getGuildById("955128942078087228").getTextChannelById("955128942078087230")
                 .sendMessageEmbeds(builder.build()).queue();*/
 
-       // jda.getGuildById("1150807505115549736").getTextChannelById("1151878913123962940").createInvite().queue(invite -> System.err.println(invite.getUrl()));
+        // jda.getGuildById("1150807505115549736").getTextChannelById("1151878913123962940").createInvite().queue(invite -> System.err.println(invite.getUrl()));
     }
 }

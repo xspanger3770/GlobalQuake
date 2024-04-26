@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class RegionUpdaterTest {
 
     @Test
-    public void testNonnull(){
+    public void testNonnull() {
         RegionalInst inst = new RegionalInst(50, 17);
         new RegionUpdater(inst);
         assertEquals(RegionUpdater.DEFAULT_REGION, inst.getRegion());
@@ -19,7 +19,7 @@ public class RegionUpdaterTest {
 
 
     @Test
-    public void testBasicUpdate(){
+    public void testBasicUpdate() {
         RegionalInst inst = new RegionalInst(50, 17);
         RegionUpdater updater = new RegionUpdater(inst);
         updater.updateRegion();
@@ -27,14 +27,14 @@ public class RegionUpdaterTest {
     }
 
     @Test
-    public void testEarthquakeRegion(){
+    public void testEarthquakeRegion() {
         Earthquake earthquake = new Earthquake(new Cluster());
         assertNotNull(earthquake.getRegion());
     }
 
     @Test
-    public void testArchivedEarthquakeRegion(){
-        ArchivedQuake archivedQuake = new ArchivedQuake(null, 50,17,0,0,0, QualityClass.S, 100);
+    public void testArchivedEarthquakeRegion() {
+        ArchivedQuake archivedQuake = new ArchivedQuake(null, 50, 17, 0, 0, 0, QualityClass.S, 100);
         assertNotNull(archivedQuake.getRegion());
     }
 
@@ -44,7 +44,7 @@ public class RegionUpdaterTest {
         private final double lon;
         private String region;
 
-        public RegionalInst(double lat, double lon){
+        public RegionalInst(double lat, double lon) {
             this.lat = lat;
             this.lon = lon;
         }

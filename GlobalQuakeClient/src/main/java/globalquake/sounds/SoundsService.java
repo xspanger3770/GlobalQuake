@@ -24,14 +24,14 @@ public class SoundsService {
     private final Map<Cluster, SoundsInfo> clusterSoundsInfo = new HashMap<>();
     private final ScheduledExecutorService soundCheckService;
 
-    public SoundsService(){
+    public SoundsService() {
         soundCheckService = Executors.newSingleThreadScheduledExecutor();
         soundCheckService.scheduleAtFixedRate(this::checkSounds, 0, 200, TimeUnit.MILLISECONDS);
 
-        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener(){
+        GlobalQuake.instance.getEventHandler().registerEventListener(new GlobalQuakeEventListener() {
             @Override
             public void onQuakeCreate(QuakeCreateEvent event) {
-                if(SoundsService.this.canPing(event.earthquake())) {
+                if (SoundsService.this.canPing(event.earthquake())) {
                     Sounds.playSound(Sounds.found);
                     event.earthquake().foundPlayed = true;
                 }
@@ -39,8 +39,8 @@ public class SoundsService {
 
             @Override
             public void onQuakeUpdate(QuakeUpdateEvent event) {
-                if(SoundsService.this.canPing(event.earthquake())) {
-                    if(!event.earthquake().foundPlayed){
+                if (SoundsService.this.canPing(event.earthquake())) {
+                    if (!event.earthquake().foundPlayed) {
                         Sounds.playSound(Sounds.found);
                         event.earthquake().foundPlayed = true;
                     } else {
@@ -54,7 +54,7 @@ public class SoundsService {
 
     private void checkSounds() {
         try {
-            if(GlobalQuake.instance.getClusterAnalysis() == null ||GlobalQuake.instance.getEarthquakeAnalysis() == null){
+            if (GlobalQuake.instance.getClusterAnalysis() == null || GlobalQuake.instance.getEarthquakeAnalysis() == null) {
                 return;
             }
 
@@ -67,7 +67,7 @@ public class SoundsService {
             }
 
             clusterSoundsInfo.entrySet().removeIf(kv -> System.currentTimeMillis() - kv.getValue().createdAt > 1000 * 60 * 100);
-        }catch(Exception e){
+        } catch (Exception e) {
             Logger.error(e);
         }
     }
@@ -75,13 +75,13 @@ public class SoundsService {
     public void determineSounds(Cluster cluster) {
         SoundsInfo info = clusterSoundsInfo.get(cluster);
 
-        if(info == null){
+        if (info == null) {
             clusterSoundsInfo.put(cluster, info = new SoundsInfo());
         }
 
         int level = cluster.getLevel();
         if (level > info.maxLevel && (canPing(cluster) || canPing(cluster.getEarthquake()))) {
-            if(info.maxLevel < 0){
+            if (info.maxLevel < 0) {
                 Sounds.playSound(Sounds.level_0);
             }
             if (level >= 1 && info.maxLevel < 1) {
@@ -154,7 +154,7 @@ public class SoundsService {
 
 
     private boolean canPing(Earthquake earthquake) {
-        if(earthquake == null || !Settings.enableEarthquakeSounds){
+        if (earthquake == null || !Settings.enableEarthquakeSounds) {
             return false;
         }
 
@@ -163,14 +163,14 @@ public class SoundsService {
     }
 
     private boolean canPing(Cluster cluster) {
-        if(cluster == null || !Settings.alertPossibleShaking){
+        if (cluster == null || !Settings.alertPossibleShaking) {
             return false;
         }
         double distGCD = GeoUtils.greatCircleDistance(cluster.getRootLat(), cluster.getRootLon(), Settings.homeLat, Settings.homeLon);
         return !(distGCD > Settings.alertPossibleShakingDistance);
     }
 
-    public void destroy(){
+    public void destroy() {
         GlobalQuake.instance.stopService(soundCheckService);
     }
 

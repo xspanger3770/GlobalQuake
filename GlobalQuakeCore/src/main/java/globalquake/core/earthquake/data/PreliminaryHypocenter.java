@@ -12,9 +12,9 @@ public class PreliminaryHypocenter {
     public long origin;
 
     public double err = 0;
-    public int correctStations = 0;
+    public double correctStations = 0;
 
-    public PreliminaryHypocenter(double lat, double lon, double depth, long origin, double totalErr, int correctStations) {
+    public PreliminaryHypocenter(double lat, double lon, double depth, long origin, double totalErr, double correctStations) {
         this.lat = lat;
         this.lon = lon;
         this.depth = depth;
@@ -28,7 +28,7 @@ public class PreliminaryHypocenter {
     }
 
     public Hypocenter finish(DepthConfidenceInterval hypocenterConfidenceInterval, List<PolygonConfidenceInterval> polygonConfidenceIntervals) {
-        return new Hypocenter(lat, lon, depth, origin, err, correctStations, hypocenterConfidenceInterval, polygonConfidenceIntervals);
+        return new Hypocenter(lat, lon, depth, origin, err, (int) correctStations, hypocenterConfidenceInterval, polygonConfidenceIntervals);
     }
 
     @Override

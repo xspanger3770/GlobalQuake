@@ -21,7 +21,7 @@ public class ShakeMap {
     private final int res;
     private double maxPGA;
 
-    public static void init() throws IOException{
+    public static void init() throws IOException {
         h3 = H3Core.newInstance();
     }
 
@@ -36,7 +36,7 @@ public class ShakeMap {
         IntensityScale intensityScale = IntensityScales.getIntensityScale();
         double pga = GeoUtils.pgaFunction(hypocenter.magnitude, hypocenter.depth, hypocenter.depth);
         Level level = intensityScale.getLevel(pga);
-        if(level == null){
+        if (level == null) {
             return;
         }
 
@@ -56,7 +56,7 @@ public class ShakeMap {
         Queue<IntensityHex> pq = new PriorityQueue<>();
         pq.add(intensityHex);
 
-        while(!pq.isEmpty()) {
+        while (!pq.isEmpty()) {
             IntensityHex current = pq.remove();
             result.add(current);
 

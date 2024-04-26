@@ -31,8 +31,8 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
 
     private void checkClusters() {
         List<Cluster> toRemove = new ArrayList<>();
-        for(Cluster cluster : clusters){
-            if(GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 30 * 60 * 1000){
+        for (Cluster cluster : clusters) {
+            if (GlobalQuake.instance.currentTimeMillis() - cluster.getLastUpdate() > 30 * 60 * 1000) {
                 toRemove.add(cluster);
             }
         }
@@ -46,14 +46,14 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
     }
 
     public void processPacket(ClientSocket ignoredSocket, Packet packet) {
-        if(packet instanceof ClusterPacket clusterPacket){
+        if (packet instanceof ClusterPacket clusterPacket) {
             getCluster(clusterPacket.clusterData());
         }
     }
 
     public Cluster getCluster(ClusterData clusterData) {
         Cluster existing = findCluster(clusterData.uuid());
-        if(existing != null) {
+        if (existing != null) {
             existing.updateLevel(clusterData.level());
             existing.updateRoot(clusterData.rootLat(), clusterData.rootLon());
         } else {

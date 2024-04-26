@@ -243,7 +243,7 @@ public class BetterAnalysis extends Analysis {
         numRecords = 0;
         latestLogTime = 0;
 
-        if(waveformDefault == null) {
+        if (waveformDefault == null) {
             waveformDefault = new WaveformTransformator(minFreqDefault, maxFreqDefault, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
             waveformLowFreq = new WaveformTransformator(minFreqLow, maxFreqLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());
             waveformUltraLowFreq = new WaveformTransformator(minFreqUltraLow, maxFreqUltraLow, getStation().getSensitivity(), getSampleRate(), getStation().getInputType());

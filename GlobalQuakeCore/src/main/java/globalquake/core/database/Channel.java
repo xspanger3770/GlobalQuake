@@ -113,15 +113,15 @@ public final class Channel implements Serializable {
         this.latitude = newChannel.latitude;
         this.longitude = newChannel.longitude;
         this.elevation = newChannel.elevation;
-        if(newChannel.sensitivity2 > 0) {
+        if (newChannel.sensitivity2 > 0) {
             double diff = Math.abs(sensitivity2 - newChannel.sensitivity2);
-            if(diff > 10){
+            if (diff > 10) {
                 Logger.trace("Sensitivity changed at station %s from %6.3E to %6.3E!".formatted(code, sensitivity2, newChannel.sensitivity2));
             }
             sensitivity2 = newChannel.sensitivity2;
         }
 
-        if(inputType == InputType.UNKNOWN && newChannel.inputType != InputType.UNKNOWN){
+        if (inputType == InputType.UNKNOWN && newChannel.inputType != InputType.UNKNOWN) {
             inputType = newChannel.inputType;
         }
     }

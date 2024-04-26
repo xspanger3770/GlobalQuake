@@ -17,14 +17,14 @@ public class FdsnwsEventsHTTPServer {
     private final Duration clientCleanExitTime = Duration.ofSeconds(3);
 
     private FdsnwsEventsHTTPServer() {
-        if(instance != null){
+        if (instance != null) {
             return;
         }
         serverRunning = false;
         server = null;
     }
 
-    private void initRoutes(){
+    private void initRoutes() {
         server.createContext("/", new HttpCatchAllLogger());
 
         EventsV1Handler ev1handler = new EventsV1Handler();
@@ -41,7 +41,7 @@ public class FdsnwsEventsHTTPServer {
     }
 
     public void startServer() throws Exception {
-        if(serverRunning){
+        if (serverRunning) {
             Logger.warn("fdsnws_event Server was attempted to be started but was already running");
             return;
         }
@@ -63,7 +63,7 @@ public class FdsnwsEventsHTTPServer {
             return;
         }
 
-        server.stop((int)clientCleanExitTime.getSeconds());
+        server.stop((int) clientCleanExitTime.getSeconds());
         serverRunning = false;
         Logger.info("fdsnws_event Server stopped");
     }

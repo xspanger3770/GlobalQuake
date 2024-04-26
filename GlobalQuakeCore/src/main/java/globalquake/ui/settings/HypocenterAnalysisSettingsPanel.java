@@ -66,23 +66,23 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
                         """);
     }
 
-    public static JPanel createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation){
+    public static JPanel createCoolLayout(JSlider slider, JLabel label, String defaultValue, String explanation) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createRaisedBevelBorder());
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(new EmptyBorder(5,5,5,5));
+        topPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         topPanel.add(label, BorderLayout.NORTH);
         topPanel.add(slider, BorderLayout.CENTER);
 
-        if(defaultValue != null) {
+        if (defaultValue != null) {
             JLabel labelDefault = new JLabel("Default value: " + defaultValue);
             labelDefault.setBorder(new EmptyBorder(8, 2, 0, 0));
             topPanel.add(labelDefault, BorderLayout.SOUTH);
         }
 
-        if(explanation != null) {
+        if (explanation != null) {
             JTextArea textAreaExplanation = new JTextArea(explanation);
             textAreaExplanation.setBorder(new EmptyBorder(5, 5, 5, 5));
             textAreaExplanation.setEditable(false);
@@ -95,7 +95,7 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
         return panel;
     }
 
-    public static JSlider createSettingsSlider(int min, int max, int major, int minor){
+    public static JSlider createSettingsSlider(int min, int max, int major, int minor) {
         JSlider slider = new JSlider();
         slider.setMinimum(min);
         slider.setMaximum(max);
@@ -145,13 +145,13 @@ public class HypocenterAnalysisSettingsPanel extends SettingsPanel {
 
         return createCoolLayout(sliderPWaveInaccuracy, label, "%s ms".formatted(Settings.pWaveInaccuracyThresholdDefault),
                 """
-                This value determines the threshold value when the hypocenter finding\s
-                algorithm considers the arrival from current point to a station correct \s
-                or incorrect\s
-                Higher values are less restrictive and will lead to more false positives.
-                Lower values will force the algorithm to find more accurate hypocenter \s
-                and will lead to more false negatives.
-                """);
+                        This value determines the threshold value when the hypocenter finding\s
+                        algorithm considers the arrival from current point to a station correct \s
+                        or incorrect\s
+                        Higher values are less restrictive and will lead to more false positives.
+                        Lower values will force the algorithm to find more accurate hypocenter \s
+                        and will lead to more false negatives.
+                        """);
     }
 
     @Override

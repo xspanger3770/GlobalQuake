@@ -8,12 +8,13 @@ import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.data.Earthquake;
 
 import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class EarthquakeDataExport {
 
-    public static List<ArchivedQuake> getArchivedAndLiveEvents(){
+    public static List<ArchivedQuake> getArchivedAndLiveEvents() {
         //make a copy of the earthquakes, both archived and current.
         List<ArchivedQuake> archivedQuakes = new ArrayList<>(GlobalQuake.instance.getArchive().getArchivedQuakes());
         List<Earthquake> currentEarthquakes = GlobalQuake.instance.getEarthquakeAnalysis().getEarthquakes().stream().toList();

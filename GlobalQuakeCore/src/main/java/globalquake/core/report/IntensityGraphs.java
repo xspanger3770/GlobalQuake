@@ -67,7 +67,6 @@ public class IntensityGraphs {
         recs.add(new DistanceIntensityRecord(3.0, 700, 1e1));
 
 
-
         drawGraph(g, w, h, recs, MagnitudeType.DEFAULT, false);
         ImageIO.write(img, "PNG", new File("aaa29.png"));
 
@@ -166,7 +165,7 @@ public class IntensityGraphs {
                 double x1 = wrx + (Math.log10(dist1) / 5) * (w - wrx);
                 double x2 = wrx + (Math.log10(dist2) / 5) * (w - wrx);
                 double v1 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist1) : IntensityTable.getIntensity(mag / 10.0, dist1);
-                double v2 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist2) :IntensityTable.getIntensity(mag / 10.0, dist2);
+                double v2 = accelerometers ? IntensityTable.getIntensityAccelerometers(mag / 10.0, dist2) : IntensityTable.getIntensity(mag / 10.0, dist2);
                 double y1 = (h - wry) - (h - wry) * ((Math.log10(v1) - minP) / (maxP - minP + 1));
                 double y2 = (h - wry) - (h - wry) * ((Math.log10(v2) - minP) / (maxP - minP + 1));
                 if (y2 < h - wry) {

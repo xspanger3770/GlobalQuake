@@ -34,7 +34,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     private final Map<UUID, Earthquake> clientEarthquakeMap;
     private final ScheduledExecutorService checkService;
 
-    public EarthquakeAnalysisClient(){
+    public EarthquakeAnalysisClient() {
         clientEarthquakeMap = new ConcurrentHashMap<>();
 
         checkService = Executors.newSingleThreadScheduledExecutor();
@@ -54,17 +54,17 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
             getEarthquakes().removeAll(toRemove);
 
             clientEarthquakeMap.entrySet().removeIf(kv -> shouldRemove(kv.getValue(), -30));
-        } catch(Exception e) {
+        } catch (Exception e) {
             Logger.error(e);
         }
     }
 
     public void processPacket(ClientSocket socket, Packet packet) throws IOException {
-        if(packet instanceof HypocenterDataPacket hypocenterData) {
+        if (packet instanceof HypocenterDataPacket hypocenterData) {
             processQuakeDataPacket(hypocenterData);
-        } else if(packet instanceof EarthquakeCheckPacket checkPacket) {
+        } else if (packet instanceof EarthquakeCheckPacket checkPacket) {
             processQuakeCheckPacket(socket, checkPacket);
-        } else if(packet instanceof ArchivedQuakePacket archivedQuakePacket) {
+        } else if (packet instanceof ArchivedQuakePacket archivedQuakePacket) {
             processQuakeArchivePacket(archivedQuakePacket);
         }
     }
@@ -75,20 +75,20 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         if (existingQuake != null) {
             clientEarthquakeMap.remove(uuid);
             getEarthquakes().remove(existingQuake);
-            ((EarthquakeArchiveClient)GlobalQuakeClient.instance.getArchive()).archiveQuake(archivedQuakePacket, existingQuake);
+            ((EarthquakeArchiveClient) GlobalQuakeClient.instance.getArchive()).archiveQuake(archivedQuakePacket, existingQuake);
         }
     }
 
     private void processQuakeCheckPacket(ClientSocket socket, EarthquakeCheckPacket checkPacket) throws IOException {
         UUID uuid = checkPacket.info().uuid();
         Earthquake existingQuake = clientEarthquakeMap.get(uuid);
-        if(checkPacket.info().revisionID() == EarthquakeInfo.REMOVED){
+        if (checkPacket.info().revisionID() == EarthquakeInfo.REMOVED) {
             clientEarthquakeMap.remove(uuid);
-            if(existingQuake != null) {
+            if (existingQuake != null) {
                 getEarthquakes().remove(existingQuake);
                 GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(existingQuake));
             }
-        }else  if(existingQuake == null || existingQuake.getRevisionID() < checkPacket.info().revisionID()){
+        } else if (existingQuake == null || existingQuake.getRevisionID() < checkPacket.info().revisionID()) {
             socket.sendPacket(new EarthquakeRequestPacket(uuid));
         }
     }
@@ -101,16 +101,16 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
         Earthquake newQuake = createEarthquake(data, hypocenterDataPacket.advancedHypocenterData(), hypocenterDataPacket.clusterData());
 
         // ignore quake data that are too old
-        if(shouldRemove(newQuake, 30)) {
+        if (shouldRemove(newQuake, 30)) {
             return;
         }
 
-        if(existingQuake == null) {
+        if (existingQuake == null) {
             clientEarthquakeMap.put(uuid, newQuake);
             getEarthquakes().add(newQuake);
             newQuake.getCluster().revisionID = data.revisionID();
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeCreateEvent(newQuake));
-        } else if(existingQuake.getRevisionID() < data.revisionID()) {
+        } else if (existingQuake.getRevisionID() < data.revisionID()) {
             existingQuake.update(newQuake);
             newQuake.getCluster().revisionID = data.revisionID();
             GlobalQuake.instance.getEventHandler().fireEvent(new QuakeUpdateEvent(existingQuake, null));
@@ -119,21 +119,21 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
     private Earthquake createEarthquake(HypocenterData hypocenterData, AdvancedHypocenterData advancedHypocenterData, ClusterData clusterData) {
         DepthConfidenceInterval depthConfidenceInterval = advancedHypocenterData == null ? null : createDepthConfidenceInterval(advancedHypocenterData.depthIntervalData());
-        var polygonConfidenceIntervals =advancedHypocenterData == null ? null : createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData());
+        var polygonConfidenceIntervals = advancedHypocenterData == null ? null : createPolygonConfidenceIntervals(advancedHypocenterData.locationConfidenceIntervalData());
 
         Hypocenter hypocenter = new Hypocenter(hypocenterData.lat(), hypocenterData.lon(), hypocenterData.depth(), hypocenterData.origin(),
-            0,0, depthConfidenceInterval,
+                0, 0, depthConfidenceInterval,
                 polygonConfidenceIntervals);
 
         hypocenter.magnitude = hypocenterData.magnitude();
 
-        Cluster cluster = ((ClusterAnalysisClient)GlobalQuakeClient.instance.getClusterAnalysis()).getCluster(clusterData);
+        Cluster cluster = ((ClusterAnalysisClient) GlobalQuakeClient.instance.getClusterAnalysis()).getCluster(clusterData);
 
-        if(advancedHypocenterData != null){
+        if (advancedHypocenterData != null) {
             hypocenter.quality = createQuality(advancedHypocenterData.qualityData());
 
             StationCountData stationCountData = advancedHypocenterData.stationCountData();
-            if(stationCountData != null) {
+            if (stationCountData != null) {
                 hypocenter.totalEvents = stationCountData.total();
                 hypocenter.reducedEvents = stationCountData.reduced();
                 hypocenter.usedEvents = stationCountData.used();
@@ -142,8 +142,8 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
 
             hypocenter.mags = new ArrayList<>();
 
-            for(Float mag : advancedHypocenterData.magsData()){
-                hypocenter.mags.add(new MagnitudeReading(mag, 0,55555, InputType.VELOCITY));
+            for (Float mag : advancedHypocenterData.magsData()) {
+                hypocenter.mags.add(new MagnitudeReading(mag, 0, 55555, InputType.VELOCITY));
             }
         }
 
@@ -158,7 +158,7 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     private List<PolygonConfidenceInterval> createPolygonConfidenceIntervals(LocationConfidenceIntervalData locationConfidenceIntervalData) {
         List<PolygonConfidenceInterval> result = new ArrayList<>();
 
-        for(var interval : locationConfidenceIntervalData.polygonConfidenceIntervalDataList()){
+        for (var interval : locationConfidenceIntervalData.polygonConfidenceIntervalDataList()) {
             result.add(new PolygonConfidenceInterval(interval.n(), interval.offset(), interval.lengths().stream().map(Float::doubleValue).collect(Collectors.toList()),
                     0, 0));
         }

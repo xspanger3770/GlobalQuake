@@ -26,7 +26,7 @@ public class ArchivedQuakeUI extends JDialog {
 
         // Create a panel to hold the labels
         JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(latLabel);
         panel.add(lonLabel);
@@ -49,19 +49,19 @@ public class ArchivedQuakeUI extends JDialog {
         getContentPane().add(panel, BorderLayout.CENTER);
 
         JPanel panel2 = new JPanel();
-        panel2.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        panel2.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel2.add(animButton);
 
         getContentPane().add(panel2, BorderLayout.SOUTH);
 
-        for(Component component: panel.getComponents()){
+        for (Component component : panel.getComponents()) {
             component.setFont(new Font("Calibri", Font.PLAIN, 18));
         }
 
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     dispose();
                 }
             }

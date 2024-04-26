@@ -22,7 +22,7 @@ public class FeatureGeoPolygons extends RenderFeature<GQPolygon> {
     private final double minScroll;
     private final double maxScroll;
 
-    public FeatureGeoPolygons(List<GQPolygon> polygonList, double minScroll, double maxScroll){
+    public FeatureGeoPolygons(List<GQPolygon> polygonList, double minScroll, double maxScroll) {
         super(1);
         this.polygonList = polygonList;
         this.minScroll = minScroll;
@@ -36,7 +36,7 @@ public class FeatureGeoPolygons extends RenderFeature<GQPolygon> {
 
     @Override
     public boolean isEnabled(RenderProperties properties) {
-        return properties.scroll >=minScroll && properties.scroll < maxScroll;
+        return properties.scroll >= minScroll && properties.scroll < maxScroll;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class FeatureGeoPolygons extends RenderFeature<GQPolygon> {
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<GQPolygon> entity, RenderProperties renderProperties) {
         Polygon3D result_pol = new Polygon3D();
-        for(int i = 0; i < entity.getOriginal().getSize(); i++){
+        for (int i = 0; i < entity.getOriginal().getSize(); i++) {
             float lat = entity.getOriginal().getLats()[i];
             float lon = entity.getOriginal().getLons()[i];
             Vector3D vec = GlobeRenderer.createVec3D(new Vector2D(lat, lon), 0);
@@ -83,7 +83,7 @@ public class FeatureGeoPolygons extends RenderFeature<GQPolygon> {
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<GQPolygon> entity, RenderProperties renderProperties) {
         RenderElement element = entity.getRenderElement(0);
-        if(!element.shouldDraw){
+        if (!element.shouldDraw) {
             return;
         }
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);

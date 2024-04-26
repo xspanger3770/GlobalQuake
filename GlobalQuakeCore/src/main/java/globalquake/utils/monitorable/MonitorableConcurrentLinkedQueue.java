@@ -10,7 +10,7 @@ public class MonitorableConcurrentLinkedQueue<E> extends ConcurrentLinkedQueue<E
         super(tmpList);
     }
 
-    public MonitorableConcurrentLinkedQueue(){
+    public MonitorableConcurrentLinkedQueue() {
         super();
     }
 

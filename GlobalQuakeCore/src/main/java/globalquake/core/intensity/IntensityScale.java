@@ -10,15 +10,16 @@ public interface IntensityScale {
     List<Level> getLevels();
 
     String getNameShort();
+
     @SuppressWarnings("unused")
     String getNameLong();
 
     double getDarkeningFactor();
 
-    default Level getLevel(double pga){
+    default Level getLevel(double pga) {
         Level result = null;
-        for(Level level : getLevels()){
-            if(pga < level.getPga()){
+        for (Level level : getLevels()) {
+            if (pga < level.getPga()) {
                 return result;
             }
 

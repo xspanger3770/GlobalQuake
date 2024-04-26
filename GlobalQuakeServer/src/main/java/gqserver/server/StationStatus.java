@@ -2,7 +2,7 @@ package gqserver.server;
 
 import java.util.Objects;
 
-public record StationStatus(boolean eventMode, boolean hasData, float intensity){
+public record StationStatus(boolean eventMode, boolean hasData, float intensity) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

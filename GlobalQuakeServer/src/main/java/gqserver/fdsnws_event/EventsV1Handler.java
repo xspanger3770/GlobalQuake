@@ -21,18 +21,17 @@ import globalquake.core.archive.ArchivedQuake;
 import globalquake.core.earthquake.EarthquakeDataExport;
 import globalquake.core.exception.RuntimeApplicationException;
 
-public class EventsV1Handler implements HttpHandler{
+public class EventsV1Handler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         HttpCatchAllLogger.logIncomingRequest(exchange);
 
 
-
         //check if application.wadl was requested
-        if(exchange.getRequestURI().toString().endsWith("application.wadl")){
+        if (exchange.getRequestURI().toString().endsWith("application.wadl")) {
             URL wadlURL = getClass().getClassLoader().getResource("fdsnws_event_application.wadl");
 
-            if(wadlURL == null){
+            if (wadlURL == null) {
                 HttpRequestException ex = new HttpRequestException(500, "Internal Server Error");
                 ex.transmitToClient(exchange);
                 Logger.error(new RuntimeApplicationException("Wadl URL is null!"));
@@ -41,9 +40,9 @@ public class EventsV1Handler implements HttpHandler{
 
             String wadl;
 
-            try(InputStream in = wadlURL.openStream()){
+            try (InputStream in = wadlURL.openStream()) {
                 wadl = new String(in.readAllBytes());
-            } catch(Exception e){
+            } catch (Exception e) {
                 Logger.error(e);
                 HttpRequestException ex = new HttpRequestException(500, "Internal Server Error");
                 ex.transmitToClient(exchange);
@@ -57,9 +56,9 @@ public class EventsV1Handler implements HttpHandler{
 
         //Parse the query string first to avoid extra work if there is an error
         FdsnwsEventsRequest request;
-        try{
+        try {
             request = new FdsnwsEventsRequest(exchange);
-        }catch(HttpRequestException e){
+        } catch (HttpRequestException e) {
             //An error occurred parsing the query string
             e.transmitToClient(exchange);
             return;
@@ -70,7 +69,7 @@ public class EventsV1Handler implements HttpHandler{
         List<ArchivedQuake> earthquakes = EarthquakeDataExport.getArchivedAndLiveEvents();
 
         List<ArchivedQuake> filteredQuakes = filterEventDataWithRequest(earthquakes, request);
-        
+
         String formattedResult;
         String contentType;
 
@@ -107,58 +106,61 @@ public class EventsV1Handler implements HttpHandler{
     }
 
 
-    private List<ArchivedQuake> filterEventDataWithRequest(List<ArchivedQuake> earthquakes, FdsnwsEventsRequest request){
+    private List<ArchivedQuake> filterEventDataWithRequest(List<ArchivedQuake> earthquakes, FdsnwsEventsRequest request) {
         //Order does not necessarily matter here.
 
         //A basic wrapper is made to easily filter the earthquakes
-        class protoquake {public ArchivedQuake quake; public boolean include;}
+        class protoquake {
+            public ArchivedQuake quake;
+            public boolean include;
+        }
         List<protoquake> protoquakes = new ArrayList<>();
-        for(ArchivedQuake quake : earthquakes){
+        for (ArchivedQuake quake : earthquakes) {
             protoquake protoquake = new protoquake();
             protoquake.quake = quake;
             protoquake.include = true;
             protoquakes.add(protoquake);
         }
-        
+
         //If an event falls outside of any of the filters, it is removed from the list
-        for(protoquake protoquake : protoquakes){
+        for (protoquake protoquake : protoquakes) {
             //Filter by time
-            if(protoquake.quake.getOrigin() < request.starttime.getTime()){
+            if (protoquake.quake.getOrigin() < request.starttime.getTime()) {
                 protoquake.include = false;
             }
-            if(protoquake.quake.getOrigin() > request.endtime.getTime()){
+            if (protoquake.quake.getOrigin() > request.endtime.getTime()) {
                 protoquake.include = false;
             }
 
             //Filter by latitude
-            if(protoquake.quake.getLat() < request.minlatitude){
+            if (protoquake.quake.getLat() < request.minlatitude) {
                 protoquake.include = false;
             }
-            if(protoquake.quake.getLat() > request.maxlatitude){
+            if (protoquake.quake.getLat() > request.maxlatitude) {
                 protoquake.include = false;
             }
 
             //Filter by longitude
-            if(protoquake.quake.getLon() < request.minlongitude){
+            if (protoquake.quake.getLon() < request.minlongitude) {
                 protoquake.include = false;
             }
-            if(protoquake.quake.getLon() > request.maxlongitude){
+            if (protoquake.quake.getLon() > request.maxlongitude) {
                 protoquake.include = false;
             }
 
             //Filter by depth
-            if(protoquake.quake.getDepth() < request.mindepth){
+            if (protoquake.quake.getDepth() < request.mindepth) {
                 protoquake.include = false;
             }
-            if(protoquake.quake.getDepth() > request.maxdepth){
+            if (protoquake.quake.getDepth() > request.maxdepth) {
                 protoquake.include = false;
             }
 
             //Filter by magnitude
-            if(protoquake.quake.getMag() < request.minmagnitude){
+            if (protoquake.quake.getMag() < request.minmagnitude) {
                 protoquake.include = false;
             }
-            if(protoquake.quake.getMag() > request.maxmagnitude){
+            if (protoquake.quake.getMag() > request.maxmagnitude) {
                 protoquake.include = false;
             }
         }
@@ -168,7 +170,7 @@ public class EventsV1Handler implements HttpHandler{
 
         //Convert the protoquakes back into a list of ArchivedQuakes
         List<ArchivedQuake> filteredEarthquakes = new ArrayList<>();
-        for(protoquake protoquake : protoquakes){
+        for (protoquake protoquake : protoquakes) {
             filteredEarthquakes.add(protoquake.quake);
         }
 
@@ -177,7 +179,7 @@ public class EventsV1Handler implements HttpHandler{
 
     }
 
-    private static void sendResponse(HttpExchange exchange, HttpResponse response) throws IOException{
+    private static void sendResponse(HttpExchange exchange, HttpResponse response) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", response.responseContentType());
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*"); //TODO: make this configurable
         exchange.sendResponseHeaders(response.responseCode(), response.responseContent().length());
@@ -225,17 +227,17 @@ public class EventsV1Handler implements HttpHandler{
         private String eventid;               //Select a specific event by ID; event identifiers are data center specific
         private int limit;                    //Limit the results to the specified number of events.
         private int offset;                   //Return results starting at the event count specified, starting at 1.
-        
+
         private String orderby;             //Order the results. The allowed values are:
-                                            //time - the default, order by origin descending time
-                                            //time-asc - order by origin ascending time
-                                            //magnitude - order by descending magnitude
-                                            //magnitude-asc - order by ascending magnitude
+        //time - the default, order by origin descending time
+        //time-asc - order by origin ascending time
+        //magnitude - order by descending magnitude
+        //magnitude-asc - order by ascending magnitude
 
         private String catalog;            //Limit to events from a specified catalog.
         private String contributor;        //Limit to events contributed by a specified contributor.
         private Date updatedafter;         //Limit to events updated after the specified time.
-                                           //* While this option is not required it is highly recommended due to usefulness.
+        //* While this option is not required it is highly recommended due to usefulness.
 
         private String format;             //Specify the output format. XML, json|geojson, text.
         private int nodata;                //HTTP status code to return when no data is found. Default is 204, no content.
@@ -266,103 +268,103 @@ public class EventsV1Handler implements HttpHandler{
         }
         */
 
-        public FdsnwsEventsRequest(HttpExchange exchange) throws HttpRequestException{
+        public FdsnwsEventsRequest(HttpExchange exchange) throws HttpRequestException {
             initDefaultParameters();
             parseQuery(exchange.getRequestURI());
         }
 
-        private void parseQuery(URI uri) throws HttpRequestException{
+        private void parseQuery(URI uri) throws HttpRequestException {
             //Comments here appear once when needed to avoid duplicated explanations
             Map<String, String> parameters = parseQueryString(uri.getQuery());
 
             String start1 = parameters.get("start");
             String start2 = parameters.get("starttime");
             //If both are null, then the default is used
-            if(start1 != null){
+            if (start1 != null) {
                 starttime = EventsV1ParamChecks.parseDate(start1);
-            }else if(start2 != null){
+            } else if (start2 != null) {
                 starttime = EventsV1ParamChecks.parseDate(start2);
             }
             //If an error occurred, tell the user and log it
-            if(starttime == null){
+            if (starttime == null) {
                 throw new HttpRequestException(400, "Issue parsing start time. Use the format \"YYYY-MM-DDTHH:MM:SS\" UTC time");
             }
 
             String end1 = parameters.get("end");
             String end2 = parameters.get("endtime");
-            if(end1 != null){
+            if (end1 != null) {
                 endtime = EventsV1ParamChecks.parseDate(end1);
-            }else if(end2 != null){
+            } else if (end2 != null) {
                 endtime = EventsV1ParamChecks.parseDate(end2);
             }
-            if(endtime == null){
+            if (endtime == null) {
                 throw new HttpRequestException(400, "Issue parsing end time. Use the format of \"YYYY-MM-DDTHH:MM:SS\" UTC time");
             }
 
             String minlat1 = parameters.get("minlat");
             String minlat2 = parameters.get("minimumlatitude");
-            if(minlat1 != null){
+            if (minlat1 != null) {
                 minlatitude = EventsV1ParamChecks.parseLatitude(minlat1);
-            }else if(minlat2 != null){
+            } else if (minlat2 != null) {
                 minlatitude = EventsV1ParamChecks.parseLatitude(minlat2);
             }
-            if(minlatitude == null){
+            if (minlatitude == null) {
                 throw new HttpRequestException(400, "Issue parsing minimum latitude. Make sure it is between -90 and 90");
             }
 
             String maxlat1 = parameters.get("maxlat");
             String maxlat2 = parameters.get("maximumlatitude");
-            if(maxlat1 != null){
+            if (maxlat1 != null) {
                 maxlatitude = EventsV1ParamChecks.parseLatitude(maxlat1);
-            }else if(maxlat2 != null){
+            } else if (maxlat2 != null) {
                 maxlatitude = EventsV1ParamChecks.parseLatitude(maxlat2);
             }
-            if(maxlatitude == null){
+            if (maxlatitude == null) {
                 throw new HttpRequestException(400, "Issue parsing maximum latitude. Make sure it is between -90 and 90");
             }
 
             String minlon1 = parameters.get("minlon");
             String minlon2 = parameters.get("minimumlongitude");
-            if(minlon1 != null){
+            if (minlon1 != null) {
                 minlongitude = EventsV1ParamChecks.parseLongitude(minlon1);
-            }else if(minlon2 != null){
+            } else if (minlon2 != null) {
                 minlongitude = EventsV1ParamChecks.parseLongitude(minlon2);
             }
-            if(minlongitude == null){
+            if (minlongitude == null) {
                 throw new HttpRequestException(400, "Issue parsing minimum longitude. Make sure it is between -180 and 180");
             }
 
             String maxlon1 = parameters.get("maxlon");
             String maxlon2 = parameters.get("maximumlongitude");
-            if(maxlon1 != null){
+            if (maxlon1 != null) {
                 maxlongitude = EventsV1ParamChecks.parseLongitude(maxlon1);
-            }else if(maxlon2 != null){
+            } else if (maxlon2 != null) {
                 maxlongitude = EventsV1ParamChecks.parseLongitude(maxlon2);
             }
-            if(maxlongitude == null){
+            if (maxlongitude == null) {
                 throw new HttpRequestException(400, "Issue parsing maximum longitude. Make sure it is between -180 and 180");
             }
- 
+
             String lat1 = parameters.get("lat");
             String lat2 = parameters.get("latitude");
-            if(lat1 != null){
+            if (lat1 != null) {
                 latitude = EventsV1ParamChecks.parseLatitude(lat1);
-            }else if(lat2 != null){
+            } else if (lat2 != null) {
                 latitude = EventsV1ParamChecks.parseLatitude(lat2);
             }
             //Either lat was null and the result is null
-            if( (lat1 != null || lat2 != null) && latitude == null){
+            if ((lat1 != null || lat2 != null) && latitude == null) {
                 throw new HttpRequestException(400, "Issue parsing latitude. Make sure it is between -90 and 90");
             }
 
             String lon1 = parameters.get("lon");
             String lon2 = parameters.get("longitude");
-            if(lon1 != null){
+            if (lon1 != null) {
                 longitude = EventsV1ParamChecks.parseLongitude(lon1);
-            }else if(lon2 != null){
+            } else if (lon2 != null) {
                 longitude = EventsV1ParamChecks.parseLongitude(lon2);
             }
-            if( (lon1 != null || lon2 != null) && longitude == null){
+            if ((lon1 != null || lon2 != null) && longitude == null) {
                 throw new HttpRequestException(400, "Issue parsing longitude. Make sure it is between -180 and 180");
             }
 
@@ -370,40 +372,40 @@ public class EventsV1Handler implements HttpHandler{
             //maxradius
 
             String mindepth1 = parameters.get("mindepth");
-            if(mindepth1 != null){
+            if (mindepth1 != null) {
                 mindepth = EventsV1ParamChecks.parseDepth(mindepth1);
             }
-            if(mindepth == null){
+            if (mindepth == null) {
                 throw new HttpRequestException(400, "Issue parsing minimum depth");
             }
 
             String maxdepth1 = parameters.get("maxdepth");
-            if(maxdepth1 != null){
+            if (maxdepth1 != null) {
                 maxdepth = EventsV1ParamChecks.parseDepth(maxdepth1);
             }
-            if(maxdepth == null){
+            if (maxdepth == null) {
                 throw new HttpRequestException(400, "Issue parsing maximum depth");
             }
 
             String minmag1 = parameters.get("minmag");
             String minmag2 = parameters.get("minmagnitude");
-            if(minmag1 != null){
+            if (minmag1 != null) {
                 minmagnitude = EventsV1ParamChecks.parseMagnitude(minmag1);
-            }else if(minmag2 != null){
+            } else if (minmag2 != null) {
                 minmagnitude = EventsV1ParamChecks.parseMagnitude(minmag2);
             }
-            if(minmagnitude == null){
+            if (minmagnitude == null) {
                 throw new HttpRequestException(400, "Issue parsing minimum magnitude, make sure it is between -10 and 10");
             }
 
             String maxmag1 = parameters.get("maxmag");
             String maxmag2 = parameters.get("maxmagnitude");
-            if(maxmag1 != null){
+            if (maxmag1 != null) {
                 maxmagnitude = EventsV1ParamChecks.parseMagnitude(maxmag1);
-            }else if(maxmag2 != null){
+            } else if (maxmag2 != null) {
                 maxmagnitude = EventsV1ParamChecks.parseMagnitude(maxmag2);
             }
-            if(maxmagnitude == null){
+            if (maxmagnitude == null) {
                 throw new HttpRequestException(400, "Issue parsing maximum magnitude, make sure it is between -10 and 10");
             }
 
@@ -419,28 +421,28 @@ public class EventsV1Handler implements HttpHandler{
             //catalog
             //contributor
             //updatedafter
-            
+
             String format1 = parameters.get("format");
-            if(format1 != null){
+            if (format1 != null) {
                 //This might throw an exception
                 format = EventsV1ParamChecks.parseFormat(format1);
             }
-            if(format == null){
+            if (format == null) {
                 throw new HttpRequestException(400, "Issue parsing format. Make sure it is one of \"xml\", \"json\", \"geojson\", or \"text\"");
             }
 
             String nodata1 = parameters.get("nodata");
-            if(nodata1 != null){
+            if (nodata1 != null) {
                 nodata = EventsV1ParamChecks.parseNoData(nodata1);
             }
-            if(nodata == 0){
+            if (nodata == 0) {
                 throw new HttpRequestException(400, "Issue parsing nodata. Make sure it is between 1 and 999");
             }
 
         }
 
-        
-        private void initDefaultParameters(){
+
+        private void initDefaultParameters() {
             //Required parameters are set to reasonable defaults
             starttime = new Date(System.currentTimeMillis() - 3600 * 1000); //one hour ago
             endtime = new Date(System.currentTimeMillis()); //now
@@ -487,35 +489,35 @@ public class EventsV1Handler implements HttpHandler{
     }
 
     @SuppressWarnings("unused")
-    public static class HttpRequestException extends Exception{
+    public static class HttpRequestException extends Exception {
         private final int errorCode;
         private final String errorMessage;
         private boolean revealError = true;
 
-        public HttpRequestException(int errorCode, String errorMessage){
+        public HttpRequestException(int errorCode, String errorMessage) {
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
         }
 
-        public int getErrorCode(){
+        public int getErrorCode() {
             return errorCode;
         }
 
-        public String getErrorMessage(){
+        public String getErrorMessage() {
             return errorMessage;
         }
 
-        public boolean shouldRevealError(){
+        public boolean shouldRevealError() {
             return revealError;
         }
 
-        public void setRevealError(boolean revealError){
+        public void setRevealError(boolean revealError) {
             this.revealError = revealError;
         }
 
-        public void transmitToClient(HttpExchange exchange) throws IOException{
+        public void transmitToClient(HttpExchange exchange) throws IOException {
             HttpResponse response;
-            if(!revealError){
+            if (!revealError) {
                 response = new HttpResponse(500, "Internal Server Error", "text/plain");
                 sendResponse(exchange, response);
             }

@@ -37,16 +37,16 @@ public class StationCountPanel extends JPanel {
         int sel = 0;
         int unb = 0;
         manager.getStationDatabase().getDatabaseReadLock().lock();
-        try{
-            for(Network network : manager.getStationDatabase().getNetworks()){
-                for(Station station: network.getStations()){
-                    for(Channel channel:station.getChannels()){
+        try {
+            for (Network network : manager.getStationDatabase().getNetworks()) {
+                for (Station station : network.getStations()) {
+                    for (Channel channel : station.getChannels()) {
                         tot++;
-                        if(channel.isAvailable()){
+                        if (channel.isAvailable()) {
                             ava++;
                         }
-                        if(channel.equals(station.getSelectedChannel())){
-                            if(channel.isAvailable()){
+                        if (channel.equals(station.getSelectedChannel())) {
+                            if (channel.isAvailable()) {
                                 sel++;
                             } else {
                                 unb++;
@@ -64,12 +64,12 @@ public class StationCountPanel extends JPanel {
         unavailable.setCount(unb);
     }
 
-    static class CounterPanel extends JPanel
-    {
+    static class CounterPanel extends JPanel {
         private final String name;
         private final JLabel label;
         private int count;
-        public CounterPanel(String name, Color color){
+
+        public CounterPanel(String name, Color color) {
             this.name = name;
             add(new StationIcon(color));
             add(label = new JLabel());
@@ -97,7 +97,7 @@ public class StationCountPanel extends JPanel {
 
             public StationIcon(Color color) {
                 this.color = color;
-                setPreferredSize(new Dimension(22,22));
+                setPreferredSize(new Dimension(22, 22));
             }
 
             @Override
@@ -109,7 +109,7 @@ public class StationCountPanel extends JPanel {
                 Path2D path = new Path2D.Double();
                 path.moveTo(0, size * (Math.sqrt(3) / 2.0));
                 path.lineTo(size, size * (Math.sqrt(3) / 2.0));
-                path.lineTo(size/ 2.0, 0);
+                path.lineTo(size / 2.0, 0);
                 path.closePath();
 
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

@@ -10,13 +10,13 @@ public class GQPolygon {
     private final float[] lats;
     private final float[] lons;
 
-    public GQPolygon(org.geojson.Polygon polygon){
+    public GQPolygon(org.geojson.Polygon polygon) {
         List<LngLatAlt> list = polygon.getCoordinates().get(0);
         this.size = list.size();
         lats = new float[size];
         lons = new float[size];
         int i = 0;
-        for(LngLatAlt lngLatAlt : list){
+        for (LngLatAlt lngLatAlt : list) {
             lats[i] = (float) lngLatAlt.getLatitude();
             lons[i] = (float) lngLatAlt.getLongitude();
             i++;

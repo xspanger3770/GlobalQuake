@@ -16,7 +16,7 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
 
     private final MonitorableCopyOnWriteArrayList<DebugStation> list;
 
-    public FeatureDebugStation(MonitorableCopyOnWriteArrayList<DebugStation> list){
+    public FeatureDebugStation(MonitorableCopyOnWriteArrayList<DebugStation> list) {
         super(1);
         this.list = list;
     }
@@ -28,8 +28,8 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
 
     @Override
     public void createPolygon(GlobeRenderer renderer, RenderEntity<DebugStation> entity, RenderProperties renderProperties) {
-        RenderElement element=entity.getRenderElement(0);
-        if(element.getPolygon() == null){
+        RenderElement element = entity.getRenderElement(0);
+        if (element.getPolygon() == null) {
             element.setPolygon(new Polygon3D());
         }
 
@@ -46,20 +46,20 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
 
     @Override
     public void project(GlobeRenderer renderer, RenderEntity<DebugStation> entity, RenderProperties renderProperties) {
-        RenderElement element=entity.getRenderElement(0);
+        RenderElement element = entity.getRenderElement(0);
         element.getShape().reset();
-        element.shouldDraw =  renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
+        element.shouldDraw = renderer.project3D(element.getShape(), element.getPolygon(), true, renderProperties);
     }
 
     @Override
     public void render(GlobeRenderer renderer, Graphics2D graphics, RenderEntity<DebugStation> entity, RenderProperties renderProperties) {
-        RenderElement element=entity.getRenderElement(0);
-        if(!element.shouldDraw){
+        RenderElement element = entity.getRenderElement(0);
+        if (!element.shouldDraw) {
             return;
         }
         graphics.setColor(Color.BLUE);
         graphics.fill(element.getShape());
-        if(renderer.isMouseNearby(entity.getOriginal().coords(), 10.0, true, renderProperties) && renderProperties.scroll < 1){
+        if (renderer.isMouseNearby(entity.getOriginal().coords(), 10.0, true, renderProperties) && renderProperties.scroll < 1) {
             graphics.setColor(Color.yellow);
             graphics.draw(element.getShape());
         }
@@ -68,6 +68,6 @@ public class FeatureDebugStation extends RenderFeature<DebugStation> {
     @SuppressWarnings("unchecked")
     @Override
     public Point2D getCenterCoords(RenderEntity<?> entity) {
-        return ((RenderEntity<DebugStation>)entity).getOriginal().coords();
+        return ((RenderEntity<DebugStation>) entity).getOriginal().coords();
     }
 }

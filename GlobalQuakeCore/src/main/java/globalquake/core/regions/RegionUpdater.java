@@ -8,7 +8,7 @@ public class RegionUpdater {
 
     public RegionUpdater(Regional target) {
         this.target = target;
-        if(target.getRegion() == null) {
+        if (target.getRegion() == null) {
             target.setRegion(DEFAULT_REGION);
         }
     }

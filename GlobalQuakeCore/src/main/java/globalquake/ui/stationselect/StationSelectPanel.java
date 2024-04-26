@@ -47,7 +47,7 @@ public class StationSelectPanel extends GlobePanel {
 
                 dragEnd = e.getPoint();
 
-                if(dragStart != null) {
+                if (dragStart != null) {
                     Rectangle rectangle = new Rectangle(dragStart);
                     rectangle.add(dragEnd);
                     dragRectangle = rectangle;
@@ -62,12 +62,12 @@ public class StationSelectPanel extends GlobePanel {
                     return;
                 }
 
-                if(e.getButton() == MouseEvent.BUTTON3){
+                if (e.getButton() == MouseEvent.BUTTON3) {
                     stationSelectFrame.setDragMode(DragMode.NONE);
                     dragEnd = null;
                     dragRectangle = null;
                     return;
-                } else if(e.getButton() != MouseEvent.BUTTON1){
+                } else if (e.getButton() != MouseEvent.BUTTON1) {
                     return;
                 }
 
@@ -83,12 +83,12 @@ public class StationSelectPanel extends GlobePanel {
                     return;
                 }
 
-                if(dragEnd == null || e.getButton() != MouseEvent.BUTTON1){
+                if (dragEnd == null || e.getButton() != MouseEvent.BUTTON1) {
                     return;
                 }
 
                 dragEnd = e.getPoint();
-                if(dragStart != null) {
+                if (dragStart != null) {
                     Rectangle rectangle = new Rectangle(dragStart);
                     rectangle.add(dragEnd);
                     dragRectangle = rectangle;
@@ -106,26 +106,26 @@ public class StationSelectPanel extends GlobePanel {
     @Override
     public void featuresClicked(ArrayList<RenderEntity<?>> clicked) {
         List<Station> clickedStations = new ArrayList<>();
-        for(RenderEntity<?> renderEntity:clicked){
-            if(renderEntity.getOriginal() instanceof Station){
-                clickedStations.add((Station)renderEntity.getOriginal());
+        for (RenderEntity<?> renderEntity : clicked) {
+            if (renderEntity.getOriginal() instanceof Station) {
+                clickedStations.add((Station) renderEntity.getOriginal());
             }
         }
 
-        if(clickedStations.isEmpty()){
+        if (clickedStations.isEmpty()) {
             return;
         }
 
         Station selectedStation;
 
-        if(clickedStations.size() == 1){
+        if (clickedStations.size() == 1) {
             selectedStation = clickedStations.get(0);
         } else {
             selectedStation = (Station) JOptionPane.showInputDialog(this, "Select station:", "Station selection",
                     JOptionPane.PLAIN_MESSAGE, null, clickedStations.toArray(), clickedStations.get(0));
         }
 
-        if(selectedStation != null)
+        if (selectedStation != null)
             new StationEditDialog(stationSelectFrame, selectedStation);
     }
 
@@ -140,7 +140,7 @@ public class StationSelectPanel extends GlobePanel {
             }
 
             stationDatabaseManager.fireUpdateEvent();
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }
@@ -149,7 +149,7 @@ public class StationSelectPanel extends GlobePanel {
     public void paint(Graphics gr) {
         super.paint(gr);
         Graphics2D g = (Graphics2D) gr;
-        if(stationSelectFrame.getDragMode() == DragMode.NONE){
+        if (stationSelectFrame.getDragMode() == DragMode.NONE) {
             return;
         }
 
@@ -159,8 +159,8 @@ public class StationSelectPanel extends GlobePanel {
                 : "Drag to deselect region";
         g.drawString(str, getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, getHeight() - 8);
 
-        if(dragRectangle != null){
-            g.setColor(stationSelectFrame.getDragMode() == DragMode.SELECT ? Color.green:Color.red);
+        if (dragRectangle != null) {
+            g.setColor(stationSelectFrame.getDragMode() == DragMode.SELECT ? Color.green : Color.red);
             g.setStroke(new BasicStroke(2f));
             g.draw(dragRectangle);
         }
@@ -174,14 +174,14 @@ public class StationSelectPanel extends GlobePanel {
     public void updateAllStations() {
         List<Station> stations = new ArrayList<>();
         stationDatabaseManager.getStationDatabase().getDatabaseReadLock().lock();
-        try{
-            for(Network network:stationDatabaseManager.getStationDatabase().getNetworks()){
+        try {
+            for (Network network : stationDatabaseManager.getStationDatabase().getNetworks()) {
                 stations.addAll(network.getStations().stream().filter(station -> showUnavailable || station.hasAvailableChannel()).toList());
             }
 
             allStationsList.clear();
             allStationsList.addAll(stations);
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseReadLock().unlock();
         }
     }

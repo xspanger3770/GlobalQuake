@@ -439,7 +439,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
             }
 
-            if(GlobalQuake.instance.isSimulation()){
+            if (GlobalQuake.instance.isSimulation()) {
                 g.setColor(Color.orange);
             }
             g.drawString(str, getWidth() - g.getFontMetrics().stringWidth(str) - 6, getHeight() - 9);
@@ -638,7 +638,7 @@ public class GlobalQuakePanel extends GlobePanel {
                     g.setColor(isDark(levelColor) ? Color.white : Color.black);
                     g.drawString(quakeString, x + 3, y + 21);
 
-                    String sim = GlobalQuake.instance.isSimulation() ? " (Simulated)":"";
+                    String sim = GlobalQuake.instance.isSimulation() ? " (Simulated)" : "";
 
                     g.setColor(Color.white);
                     g.setFont(regionFont);
@@ -659,7 +659,7 @@ public class GlobalQuakePanel extends GlobePanel {
 
                     var obv = quake.getHypocenter().obviousArrivalsInfo;
 
-                    if(Settings.displayAdditionalQuakeInfo && obv != null && obv.total() >= EarthquakeAnalysis.OBVIOUS_CORRECT_MIN_TOTAL) {
+                    if (Settings.displayAdditionalQuakeInfo && obv != null && obv.total() >= EarthquakeAnalysis.OBVIOUS_CORRECT_MIN_TOTAL) {
                         str = "Obv: %.1f%%".formatted(obv.getPCT() * 100.0);
                         g.drawString(str, x + baseWidth - g.getFontMetrics().stringWidth(str) - 5, y + 104);
                     }

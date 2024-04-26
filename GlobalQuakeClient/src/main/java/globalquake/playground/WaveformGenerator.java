@@ -18,22 +18,22 @@ public class WaveformGenerator {
     private void updateWaveforms() {
         try {
             globalQuakePlayground.getStationManager().getStations().parallelStream().forEach(WaveformGenerator::generateWaveform);
-        }catch(Exception e){
+        } catch (Exception e) {
             Logger.error(e);
         }
-        }
+    }
 
     private static void generateWaveform(AbstractStation station) {
         PlaygroundStation playgroundStation = (PlaygroundStation) station;
         long lastLog = playgroundStation.lastSampleTime;
         long now = GlobalQuake.instance.currentTimeMillis() - playgroundStation.getDelay();
 
-        if(lastLog < 0){
+        if (lastLog < 0) {
             lastLog = now - 2 * 60 * 1000;
         }
 
 
-        while(lastLog < now) {
+        while (lastLog < now) {
             station.getAnalysis().nextSample(
                     playgroundStation.getNoise(lastLog),
                     lastLog,

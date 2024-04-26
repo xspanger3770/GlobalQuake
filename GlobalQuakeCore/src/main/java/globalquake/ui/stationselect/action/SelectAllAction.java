@@ -17,7 +17,7 @@ public class SelectAllAction extends AbstractAction {
 
     public SelectAllAction(StationDatabaseManager stationDatabaseManager, Window parent) {
         super("Select All");
-        this.stationDatabaseManager=stationDatabaseManager;
+        this.stationDatabaseManager = stationDatabaseManager;
         this.parent = parent;
 
         putValue(SHORT_DESCRIPTION, "Selects All Available Stations");
@@ -40,12 +40,12 @@ public class SelectAllAction extends AbstractAction {
         }
 
         stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().lock();
-        try{
-            for(Network network : stationDatabaseManager.getStationDatabase().getNetworks()){
+        try {
+            for (Network network : stationDatabaseManager.getStationDatabase().getNetworks()) {
                 network.getStations().forEach(Station::selectBestAvailableChannel);
             }
             stationDatabaseManager.fireUpdateEvent();
-        }finally {
+        } finally {
             stationDatabaseManager.getStationDatabase().getDatabaseWriteLock().unlock();
         }
     }
