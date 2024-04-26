@@ -116,7 +116,7 @@ public class ClientSocket {
 
     private void sendHeartbeat() {
         try {
-            sendPacket(new HeartbeatPacket());
+            sendPacket(HeartbeatPacket.getInstance());
         } catch(SocketTimeoutException | SocketException e){
             Logger.trace(e);
             onClose();

@@ -37,7 +37,7 @@ public class GQServerSocketTest {
 
         while(true){
             Thread.sleep(1000);
-            out.writeObject(new HeartbeatPacket());
+            out.writeObject(HeartbeatPacket.getInstance());
         }
     }
 
