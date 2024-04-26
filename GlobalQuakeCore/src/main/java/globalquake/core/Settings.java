@@ -197,7 +197,7 @@ public final class Settings {
             Logger.info("Created GlobalQuake properties file at " + optionsFile.getAbsolutePath());
         }
 
-        loadProperty("maxConnectionsFromIP", "3", o -> validateInt(1, 9999, (Integer) o));
+        loadProperty("maxConnectionsFromIP", "3", o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
         loadProperty("debugSendPGV", "false");
         loadProperty("antialiasingOldQuakes", "true");
         loadProperty("antialiasingClusters", "true");
@@ -237,7 +237,7 @@ public final class Settings {
                 o -> validateInt(0, StationsShape.values().length, (Integer) o));
 
         loadProperty("maxClients", "64",
-                o -> validateInt(2, 10000, (Integer) o));
+                o -> validateInt(1, Integer.MAX_VALUE, (Integer) o));
 
         loadProperty("lastServerIP", "0.0.0.0");
         loadProperty("lastServerPORT", "38000");
