@@ -21,10 +21,6 @@
 
         <dependency>
             <groupId>edu.sc.seis</groupId>
-            <artifactId>seisFile</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.sc.seis</groupId>
             <artifactId>seedCodec</artifactId>
         </dependency>
         <dependency>

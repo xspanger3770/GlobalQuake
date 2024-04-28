@@ -53,17 +53,8 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>seisFile</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.uber</groupId>
             <artifactId>h3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-api</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.googlecode.soundlibs</groupId>
@@ -76,10 +67,6 @@
         <dependency>
             <groupId>javazoom</groupId>
             <artifactId>jlayer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
         </dependency>
         <dependency>
             <groupId>com.flowpowered</groupId>

@@ -54,38 +54,6 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>seisFile</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>seedCodec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.sc.seis</groupId>
-            <artifactId>TauP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.grundid.opendatalab</groupId>
-            <artifactId>geojson-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>uk.me.berndporr</groupId>
-            <artifactId>iirj</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.wendykierp</groupId>
-            <artifactId>JTransforms</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-impl</artifactId>
-        </dependency>
-        <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
         </dependency>
