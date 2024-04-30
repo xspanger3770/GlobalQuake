@@ -35,7 +35,6 @@ public class ClientSocket {
     private ObjectInputStream inputStream;
 
     private ObjectOutputStream outputStream;
-    private ScheduledExecutorService quakeCheckService;
     private ScheduledExecutorService reconnectService;
     private String ip;
     private int port;
@@ -61,11 +60,6 @@ public class ClientSocket {
             heartbeatService = Executors.newSingleThreadScheduledExecutor();
             heartbeatService.scheduleAtFixedRate(this::sendHeartbeat, 0, 10, TimeUnit.SECONDS);
 
-            quakeCheckService = Executors.newSingleThreadScheduledExecutor();
-            quakeCheckService.scheduleAtFixedRate(this::sendQuakeRequest, 0, 20, TimeUnit.SECONDS);
-
-            sendPacket(new ArchivedQuakesRequestPacket());
-            sendPacket(new StationsRequestPacket());
             GlobalQuakeClient.instance.getLocalEventHandler().fireEvent(new SocketReconnectEvent());
             status = ClientSocketStatus.CONNECTED;
         } catch (ConnectException | SocketTimeoutException ce) {
@@ -102,18 +96,6 @@ public class ClientSocket {
         }
     }
 
-    private void sendQuakeRequest() {
-        try {
-            sendPacket(new EarthquakesRequestPacket());
-        } catch (SocketTimeoutException | SocketException e) {
-            Logger.trace(e);
-            onClose();
-        } catch (IOException e) {
-            Logger.error(e);
-            onClose();
-        }
-    }
-
     private void sendHeartbeat() {
         try {
             sendPacket(new HeartbeatPacket());
@@ -142,7 +124,6 @@ public class ClientSocket {
 
         GlobalQuake.instance.stopService(heartbeatService);
         GlobalQuake.instance.stopService(inputService);
-        GlobalQuake.instance.stopService(quakeCheckService);
     }
 
     public boolean isConnected() {

@@ -17,11 +17,9 @@ import gqserver.api.data.cluster.ClusterData;
 import gqserver.api.data.earthquake.EarthquakeInfo;
 import gqserver.api.data.earthquake.HypocenterData;
 import gqserver.api.data.earthquake.advanced.*;
-import gqserver.api.packets.earthquake.ArchivedQuakePacket;
-import gqserver.api.packets.earthquake.EarthquakeCheckPacket;
-import gqserver.api.packets.earthquake.EarthquakeRequestPacket;
-import gqserver.api.packets.earthquake.HypocenterDataPacket;
+import gqserver.api.packets.earthquake.*;
 import gqserver.api.packets.station.InputType;
+import gqserver.api.packets.station.StationsRequestPacket;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -185,5 +183,15 @@ public class EarthquakeAnalysisClient extends EarthquakeAnalysis {
     @Override
     public void destroy() {
         GlobalQuake.instance.stopService(checkService);
+    }
+
+    public void onIndexingReset(ClientSocket socket) {
+        clientEarthquakeMap.values().forEach(earthquake -> GlobalQuake.instance.getEventHandler().fireEvent(new QuakeRemoveEvent(earthquake)));
+        clientEarthquakeMap.clear();
+        try {
+            socket.sendPacket(new EarthquakesRequestPacket());
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 }

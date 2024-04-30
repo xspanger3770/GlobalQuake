@@ -4,6 +4,7 @@ import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.ClusterAnalysis;
 import globalquake.core.earthquake.data.Cluster;
 import globalquake.core.events.specific.ClusterCreateEvent;
+import globalquake.core.events.specific.QuakeRemoveEvent;
 import globalquake.utils.monitorable.MonitorableCopyOnWriteArrayList;
 import gqserver.api.Packet;
 import gqserver.api.data.cluster.ClusterData;
@@ -70,5 +71,9 @@ public class ClusterAnalysisClient extends ClusterAnalysis {
     @Override
     public void destroy() {
         GlobalQuake.instance.stopService(executorService);
+    }
+
+    public void onIndexingReset(ClientSocket socket) {
+        clusters.clear();
     }
 }

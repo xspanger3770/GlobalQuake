@@ -1,5 +1,6 @@
 package globalquake.client;
 
+import globalquake.core.seedlink.SeedlinkNetworksReader;
 import globalquake.events.GlobalQuakeLocalEventListener;
 import globalquake.events.specific.SocketReconnectEvent;
 import globalquake.events.specific.StationCreateEvent;
@@ -27,9 +28,9 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
 
         super.globalStationManager = new GlobalStationManagerClient();
         super.earthquakeAnalysis = new EarthquakeAnalysisClient();
+        this.seedlinkNetworksReader = new SeedlinkNetworksReader();
         super.clusterAnalysis = new ClusterAnalysisClient();
         super.archive = new EarthquakeArchiveClient();
-        super.seedlinkNetworksReader = new SeedlinkNetworksReaderClient();
         this.clientSocket = clientSocket;
 
         getLocalEventHandler().registerEventListener(new GlobalQuakeLocalEventListener() {
@@ -97,6 +98,14 @@ public class GlobalQuakeClient extends GlobalQuakeLocal {
         }
         return this;
 
+    }
+
+
+    public void onIndexingReset(globalquake.client.ClientSocket socket) {
+        ((GlobalStationManagerClient) getStationManager()).onIndexingReset(socket);
+        ((EarthquakeAnalysisClient) getEarthquakeAnalysis()).onIndexingReset(socket);
+        ((ClusterAnalysisClient) getClusterAnalysis()).onIndexingReset(socket);
+        ((EarthquakeArchiveClient) getArchive()).onIndexingReset(socket);
     }
 
     @Override

@@ -182,4 +182,5 @@ public abstract class GlobalQuake {
     public boolean isSimulation() {
         return false;
     }
+
 }

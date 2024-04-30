@@ -8,6 +8,11 @@ import globalquake.core.earthquake.quality.QualityClass;
 import gqserver.api.Packet;
 import gqserver.api.data.earthquake.ArchivedQuakeData;
 import gqserver.api.packets.earthquake.ArchivedQuakePacket;
+import gqserver.api.packets.earthquake.ArchivedQuakesRequestPacket;
+import gqserver.api.packets.station.StationsRequestPacket;
+import org.tinylog.Logger;
+
+import java.io.IOException;
 
 public class EarthquakeArchiveClient extends EarthquakeArchive {
 
@@ -34,5 +39,14 @@ public class EarthquakeArchiveClient extends EarthquakeArchive {
         )));
 
         return archivedQuake;
+    }
+
+    public void onIndexingReset(ClientSocket socket) {
+        super.getArchivedQuakes().clear();
+        try {
+            socket.sendPacket(new ArchivedQuakesRequestPacket());
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 }
