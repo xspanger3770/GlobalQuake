@@ -17,7 +17,6 @@
         <dependency>
             <groupId>edu.sc.seis</groupId>
             <artifactId>seisFile</artifactId>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
