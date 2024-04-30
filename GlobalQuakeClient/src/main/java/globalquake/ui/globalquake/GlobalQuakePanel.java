@@ -59,8 +59,8 @@ public class GlobalQuakePanel extends GlobePanel {
     public static final DecimalFormat f4d = new DecimalFormat("0.0000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     private CinemaHandler cinemaHandler;
-    private volatile Earthquake lastCinemaModeEarthquake;
-    private volatile long lastCinemaModeEvent;
+    public volatile Earthquake lastCinemaModeEarthquake;
+    public volatile long lastCinemaModeEvent;
     private Earthquake lastDisplayedQuake;
 
     public GlobalQuakePanel(JFrame frame) {
