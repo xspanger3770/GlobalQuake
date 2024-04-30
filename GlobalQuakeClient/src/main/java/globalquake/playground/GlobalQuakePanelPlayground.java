@@ -33,6 +33,7 @@ public class GlobalQuakePanelPlayground extends GlobalQuakePanel {
 
     public GlobalQuakePanelPlayground(JFrame parent) {
         super(parent);
+        initCinemaHandler(parent);
         this.parent = parent;
 
         parent.addKeyListener(new KeyAdapter() {

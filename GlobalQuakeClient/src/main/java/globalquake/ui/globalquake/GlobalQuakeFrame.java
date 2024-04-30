@@ -39,6 +39,9 @@ public class GlobalQuakeFrame extends GQFrame {
                 g.drawString(hideList ? "<" : ">", getWidth() - 16, 20);
             }
         };
+
+        panel.initCinemaHandler(this);
+
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
