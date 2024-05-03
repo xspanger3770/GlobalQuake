@@ -30,7 +30,17 @@ public class TauPTravelTimeCalculator {
     }
 
     public static void main(String[] args) throws Exception {
-        createTravelTable();
+        init();
+        double depth = 0;
+        String str = "";
+        for(double ang = 0; ang <= 180; ang += 0.1) {
+            double travelTime = getPWaveTravelTime(depth, ang);
+            if(travelTime < 0){
+                break;
+            }
+            str = str + "%.4f, ".formatted(travelTime);
+        }
+        System.err.println(str);
     }
 
     @SuppressWarnings("unused")
