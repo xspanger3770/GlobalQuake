@@ -3,28 +3,203 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>xspanger.GlobalQuake</groupId>
 	<artifactId>GlobalQuake</artifactId>
 	<version>0.11.0_build-58</version>
 	<packaging>pom</packaging>
+
 	<modules>
-		<module>GlobalQuakeClient</module>
-		<module>GlobalQuakeCore</module>
 		<module>GlobalQuakeAPI</module>
+		<module>GlobalQuakeCore</module>
+		<module>GlobalQuakeClient</module>
 		<module>GlobalQuakeServer</module>
     </modules>
 
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<GlobalQuakeAPI.version>0.9.0</GlobalQuakeAPI.version>
+
+		<seisFile.version>2.1.0-SNAPSHOT</seisFile.version> <!-- https://mvnrepository.com/artifact/edu.sc.seis/seisFile -->
+		<seedCodec.version>1.1.1</seedCodec.version> <!-- https://mvnrepository.com/artifact/edu.sc.seis/seedCodec -->
+		<TauP.version>2.6.1</TauP.version> <!-- https://mvnrepository.com/artifact/edu.sc.seis/TauP -->
+		<tinylog.version>2.7.0</tinylog.version> <!-- https://mvnrepository.com/artifact/org.tinylog/tinylog-api -->
+		<geojson-jackson.version>1.14</geojson-jackson.version> <!-- https://mvnrepository.com/artifact/de.grundid.opendatalab/geojson-jackson -->
+		<iirj.version>1.7</iirj.version> <!-- https://mvnrepository.com/artifact/uk.me.berndporr/iirj -->
+		<JTransforms.version>3.1</JTransforms.version> <!-- https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms -->
+		<json.version>20240303</json.version> <!-- https://mvnrepository.com/artifact/org.json/json -->
+		<commons-cli.version>1.7.0</commons-cli.version> <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+		<jsr305.version>3.0.2</jsr305.version> <!-- https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305 -->
+		<opencsv.version>5.9</opencsv.version> <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+		<h3.version>4.1.1</h3.version> <!-- https://mvnrepository.com/artifact/com.uber/h3 -->
+		<mp3spi.version>1.9.5.4</mp3spi.version> <!-- https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi -->
+		<tritonus-share.version>0.3.7.4</tritonus-share.version> <!-- https://mvnrepository.com/artifact/com.googlecode.soundlibs/tritonus-share -->
+		<jlayer.version>1.0.1</jlayer.version> <!-- https://mvnrepository.com/artifact/javazoom/jlayer -->
+		<flow-noise.version>1.0.0</flow-noise.version> <!-- https://mvnrepository.com/artifact/com.flowpowered/flow-noise -->
+		<JDA.version>5.0.0-beta.23</JDA.version> <!-- https://mvnrepository.com/artifact/net.dv8tion/JDA -->
+		<junit.version>4.13.2</junit.version> <!-- https://mvnrepository.com/artifact/junit/junit -->
+
+		<maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version> <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>data-local</id>
+			<name>data</name>
+			<url>file://${project.basedir}/../libs</url>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>GlobalQuakeAPI</artifactId>
+				<version>${GlobalQuakeAPI.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>GlobalQuakeCore</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>edu.sc.seis</groupId>
+				<artifactId>seisFile</artifactId>
+				<version>${seisFile.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.sc.seis</groupId>
+				<artifactId>seedCodec</artifactId>
+				<version>${seedCodec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.sc.seis</groupId>
+				<artifactId>TauP</artifactId>
+				<version>${TauP.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.tinylog</groupId>
+				<artifactId>tinylog-api</artifactId>
+				<version>${tinylog.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.tinylog</groupId>
+				<artifactId>tinylog-impl</artifactId>
+				<version>${tinylog.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.grundid.opendatalab</groupId>
+				<artifactId>geojson-jackson</artifactId>
+				<version>${geojson-jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>uk.me.berndporr</groupId>
+				<artifactId>iirj</artifactId>
+				<version>${iirj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.wendykierp</groupId>
+				<artifactId>JTransforms</artifactId>
+				<version>${JTransforms.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>${json.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-cli</groupId>
+				<artifactId>commons-cli</artifactId>
+				<version>${commons-cli.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>${jsr305.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.opencsv</groupId>
+				<artifactId>opencsv</artifactId>
+				<version>${opencsv.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.uber</groupId>
+				<artifactId>h3</artifactId>
+				<version>${h3.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.soundlibs</groupId>
+				<artifactId>mp3spi</artifactId>
+				<version>${mp3spi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.soundlibs</groupId>
+				<artifactId>tritonus-share</artifactId>
+				<version>${tritonus-share.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javazoom</groupId>
+				<artifactId>jlayer</artifactId>
+				<version>${jlayer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.flowpowered</groupId>
+				<artifactId>flow-noise</artifactId>
+				<version>${flow-noise.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.dv8tion</groupId>
+				<artifactId>JDA</artifactId>
+				<version>${JDA.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
     <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven-assembly-plugin.version}</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<mainClass>${main.class}</mainClass>
+							</manifest>
+						</archive>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+					</configuration>
+					<executions>
+						<execution>
+							<id>make-assembly</id> <!-- this is used for inheritance merges -->
+							<phase>package</phase> <!-- bind to the packaging phase -->
+							<goals>
+								<goal>single</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>
