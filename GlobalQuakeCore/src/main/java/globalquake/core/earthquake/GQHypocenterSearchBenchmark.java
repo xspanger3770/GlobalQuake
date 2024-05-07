@@ -6,6 +6,7 @@ import globalquake.core.earthquake.data.PickedEvent;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
+import org.tinylog.Logger;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,11 +27,15 @@ public class GQHypocenterSearchBenchmark {
 
         double sum = 0;
 
-        for (int i = 0; i < 5; i++) {
-            sum += runStandardTest();
+        for(OriginMethod originMethod : OriginMethod.values()) {
+            EarthquakeAnalysis.ORIGIN_METHOD = originMethod;
+            Logger.info("Running test with origin method %s".formatted(originMethod));
+            for (int i = 0; i < 3; i++) {
+                sum += runStandardTest();
+            }
+            System.out.printf("Average: %.2f pps%n", sum / 5.0);
+            sum = 0;
         }
-
-        System.out.printf("Average: %.2f%n", sum / 5.0);
 
         // CPU
         GQHypocenterSearchBenchmark.plotTimeVsPoints(false);
