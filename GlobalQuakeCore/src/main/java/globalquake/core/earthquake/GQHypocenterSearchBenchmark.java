@@ -26,15 +26,18 @@ public class GQHypocenterSearchBenchmark {
         TauPTravelTimeCalculator.init();
 
         double sum = 0;
+        int c = 0;
 
         for(OriginMethod originMethod : OriginMethod.values()) {
             EarthquakeAnalysis.ORIGIN_METHOD = originMethod;
             Logger.info("Running test with origin method %s".formatted(originMethod));
             for (int i = 0; i < 3; i++) {
-                sum += runStandardTest();
+                sum += runStandardTest() * 1500.0; // 0.5km depth step
+                c++;
             }
-            System.out.printf("Average: %.2f pps%n", sum / 5.0);
+            System.out.printf("Average: %.2f hypocenters/s%n", sum / c);
             sum = 0;
+            c = 0;
         }
 
         // CPU
