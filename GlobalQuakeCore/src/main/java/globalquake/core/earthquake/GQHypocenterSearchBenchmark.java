@@ -3,6 +3,7 @@ package globalquake.core.earthquake;
 import globalquake.core.GlobalQuake;
 import globalquake.core.earthquake.data.HypocenterFinderSettings;
 import globalquake.core.earthquake.data.PickedEvent;
+import globalquake.core.exception.FatalApplicationException;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.jni.GQNativeFunctions;
 import globalquake.utils.GeoUtils;
@@ -22,9 +23,15 @@ public class GQHypocenterSearchBenchmark {
         GQHypocenterSearchBenchmark.performanceMeasurement();
     }
 
-    public static void performanceMeasurement() throws Exception {
-        TauPTravelTimeCalculator.init();
+    static {
+        try {
+            TauPTravelTimeCalculator.init();
+        } catch (FatalApplicationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public static void performanceMeasurement() throws Exception {
         double sum = 0;
         int c = 0;
 
@@ -40,6 +47,10 @@ public class GQHypocenterSearchBenchmark {
             c = 0;
         }
 
+
+    }
+
+    public static void asymptoticAnalysis() throws Exception{
         // CPU
         GQHypocenterSearchBenchmark.plotTimeVsPoints(false);
         GQHypocenterSearchBenchmark.plotTimeVsStations(false);
@@ -59,8 +70,6 @@ public class GQHypocenterSearchBenchmark {
 
         GQHypocenterSearchBenchmark.plotTimeVsPoints(true);
         GQHypocenterSearchBenchmark.plotTimeVsStations(true);
-
-        System.exit(0);
     }
 
     private static double runStandardTest() {

@@ -27,9 +27,13 @@ public class Main {
         maxGpuMemOption.setRequired(false);
         options.addOption(maxGpuMemOption);
 
-        Option performanceTest = new Option("p", "performance-test", false, "run CUDA performance test");
+        Option performanceTest = new Option("p", "performance-test", false, "run hypocenter search performance test");
         performanceTest.setRequired(false);
         options.addOption(performanceTest);
+
+        Option asymptoticTest = new Option("a", "asymptotic-test", false, "run hypocenter search asymptotic test");
+        asymptoticTest.setRequired(false);
+        options.addOption(asymptoticTest);
 
 
         CommandLineParser parser = new org.apache.commons.cli.BasicParser();
@@ -59,12 +63,22 @@ public class Main {
             }
         }
 
-        if (cmd.hasOption(performanceTest.getOpt())) {
-            try {
-                GQHypocs.performanceMeasurement();
-            } catch (Exception e) {
-                Logger.error(e);
+        if (cmd.hasOption(performanceTest.getOpt()) || cmd.hasOption(asymptoticTest.getOpt())) {
+            if (cmd.hasOption(asymptoticTest.getOpt())) {
+                try {
+                    GQHypocs.asymptoticAnalysis();
+                } catch (Exception e) {
+                    Logger.error(e);
+                }
             }
+            if (cmd.hasOption(performanceTest.getOpt())) {
+                try {
+                    GQHypocs.performanceMeasurement();
+                } catch (Exception e) {
+                    Logger.error(e);
+                }
+            }
+            System.exit(0);
         } else {
 
             MainFrame mainFrame = new MainFrame();
