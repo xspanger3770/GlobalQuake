@@ -7,6 +7,7 @@ public class HypocenterFinderThreadData {
 
     public final PreliminaryHypocenter hypocenterB;
     public final PreliminaryHypocenter bestHypocenter;
+    public volatile int nextStation;
 
     public HypocenterFinderThreadData(int size) {
         origins = new long[size];

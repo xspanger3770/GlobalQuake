@@ -32,7 +32,7 @@ public class EarthquakeAnalysis {
     public static final int QUADRANTS = 26;
 
     @SuppressWarnings("CanBeFinal")
-    public static boolean USE_MEDIAN_FOR_ORIGIN = true;
+    public static OriginMethod ORIGIN_METHOD = OriginMethod.MEDIAN;
     private static final boolean REMOVE_WEAKEST = false;
     private static final boolean CHECK_QUADRANTS = true;
     private static final boolean CHECK_DISTANT_EVENT_STATIONS = false;
@@ -929,11 +929,18 @@ public class EarthquakeAnalysis {
         }
 
         long bestOrigin;
-        if (USE_MEDIAN_FOR_ORIGIN) {
-            Arrays.sort(threadData.origins);
-            bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
-        } else {
-            bestOrigin = (long) Arrays.stream(threadData.origins).average().orElse(threadData.origins[0]);
+
+        switch (ORIGIN_METHOD){
+            case SINGLE -> {
+                threadData.nextStation = (threadData.nextStation + 1) % threadData.origins.length;
+                bestOrigin = threadData.origins[threadData.nextStation];
+            }
+            case MEDIAN -> {
+                Arrays.sort(threadData.origins);
+                bestOrigin = threadData.origins[(threadData.origins.length - 1) / 2];
+            }
+            case AVERAGE ->  bestOrigin = (long) Arrays.stream(threadData.origins).average().orElse(threadData.origins[0]);
+            default -> bestOrigin = UNKNOWN_ORIGIN;
         }
 
         if (bestOrigin == UNKNOWN_ORIGIN) {
