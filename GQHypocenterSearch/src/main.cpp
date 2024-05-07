@@ -96,7 +96,7 @@ int main() {
         }
     }
 
-    printf("best: %.2fpps\n", best_pps);
+    printf("best: %.2fpps, %.2f hypocs/s\n", best_pps, (best_pps * 1500.0));
 
     append_to_csv(filename, best_pps, BLOCK_HYPOCS, TILE);
 
