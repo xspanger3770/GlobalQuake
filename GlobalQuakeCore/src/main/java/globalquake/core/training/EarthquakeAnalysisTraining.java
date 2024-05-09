@@ -32,7 +32,7 @@ public class EarthquakeAnalysisTraining {
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
-        //GQHypocs.load();
+        GQHypocs.load();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
@@ -45,7 +45,7 @@ public class EarthquakeAnalysisTraining {
         List<Double> times = new ArrayList<>();
 
         EarthquakeAnalysis.ORIGIN_METHOD = OriginMethod.MEDIAN;
-        int runs = 10000;
+        int runs = 1000;
 
         String units = "km";
 
