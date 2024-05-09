@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Random;
 
 public class PerformanceSettingsPanel extends SettingsPanel {
     private JSlider sliderResolution;
@@ -102,7 +103,7 @@ public class PerformanceSettingsPanel extends SettingsPanel {
             public void actionPerformed(ActionEvent actionEvent) {
                 testSpeed.setEnabled(false);
                 new Thread(() -> {
-                    testSpeed.setText("Test took %d ms".formatted(EarthquakeAnalysisTraining.measureTest(System.currentTimeMillis(), 60, true)));
+                    testSpeed.setText("Test took %d ms".formatted(EarthquakeAnalysisTraining.measureTest(new Random(System.currentTimeMillis()), 60, true)));
                     testSpeed.setEnabled(true);
                 }).start();
             }

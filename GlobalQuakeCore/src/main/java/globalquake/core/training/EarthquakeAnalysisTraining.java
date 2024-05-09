@@ -5,6 +5,7 @@ import globalquake.core.HypocsSettings;
 import globalquake.core.Settings;
 import globalquake.core.earthquake.EarthquakeAnalysis;
 import globalquake.core.earthquake.GQHypocs;
+import globalquake.core.earthquake.OriginMethod;
 import globalquake.core.earthquake.data.*;
 import globalquake.core.geo.taup.TauPTravelTimeCalculator;
 import globalquake.ui.ProgressUpdateFunction;
@@ -17,22 +18,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@SuppressWarnings("unused")
 public class EarthquakeAnalysisTraining {
 
-    public static final int STATIONS = 30;
-    public static final double DIST = 5000;
+    private static final double MAX_DEPTH = 700.0;
+    public static int STATIONS = 30;
 
-    public static final double INACCURACY = 5000;
-    private static final double MASSIVE_ERR_ODDS = 0.4;
+    public static double INACCURACY = 5000;
+    private static double MASSIVE_ERR_ODDS = 0.4;
 
-    public static final double DIST_STATIONS = 10;
-    private static final double DIST_HYPOC_ANG = 0;
+    public static double DIST_STATIONS_KM = 10;
+    private static double DIST_HYPOC_ANG = 0;
 
 
     public static void main(String[] args) throws Exception {
         TauPTravelTimeCalculator.init();
-        GQHypocs.load();
+        //GQHypocs.load();
         EarthquakeAnalysis.DEPTH_FIX_ALLOWED = false;
         GlobalQuake.prepare(new File("./training/"), null);
 
@@ -43,14 +43,31 @@ public class EarthquakeAnalysisTraining {
         long a = System.currentTimeMillis();
 
         List<Double> times = new ArrayList<>();
-        int runs = 20000;
+
+        EarthquakeAnalysis.ORIGIN_METHOD = OriginMethod.MEDIAN;
+        int runs = 10000;
 
         String units = "km";
 
+        Random random = new Random(123);
+
+        int lastPCT = -1;
+
         for (int i = 0; i < runs; i++) {
-            double err = runTest(654654 + i, STATIONS, false);
+            STATIONS = 10 + random.nextInt(40);
+            INACCURACY = random.nextDouble() * random.nextDouble() * 3000.0;
+            MASSIVE_ERR_ODDS = random.nextDouble() * 0.2;
+            DIST_STATIONS_KM = 200 + random.nextDouble() * random.nextDouble() * 5000.0;
+            DIST_HYPOC_ANG = random.nextDouble() * random.nextDouble() * 50.0;
+            double err = runTest(random, STATIONS, false);
             if (err != -1) {
                 times.add(err);
+            }
+
+            int pct = (int)((i / (double) runs) * 100.0);
+            if(pct != lastPCT){
+                lastPCT = pct;
+                System.err.printf("%d%%%n", pct);
             }
         }
 
@@ -76,7 +93,7 @@ public class EarthquakeAnalysisTraining {
     public static void calibrateResolution(ProgressUpdateFunction progressUpdateFunction, JSlider slider, boolean cpuOnly) {
         double resolution = 0.0;
         long lastTime;
-        int seed = 6543;
+        Random random = new Random(654654);
         int failed = 0;
 
         long targetTime = HypocsSettings.getOrDefaultInt("calibrateTargetTime", 400);
@@ -88,7 +105,7 @@ public class EarthquakeAnalysisTraining {
                 Settings.hypocenterDetectionResolutionGPU = resolution;
             }
 
-            lastTime = measureTest(seed++, 60, cpuOnly);
+            lastTime = measureTest(random, 60, cpuOnly);
             if (lastTime > targetTime) {
                 failed++;
             } else {
@@ -113,23 +130,21 @@ public class EarthquakeAnalysisTraining {
         Settings.save();
     }
 
-    public static long measureTest(long seed, int stations, boolean cpuOnly) {
+    public static long measureTest(Random random, int stations, boolean cpuOnly) {
         long a = System.currentTimeMillis();
-        runTest(seed, stations, cpuOnly);
+        runTest(random, stations, cpuOnly);
         return System.currentTimeMillis() - a;
     }
 
-    public static double runTest(long seed, int stations, boolean cpuOnly) {
+    public static double runTest(Random random, int stations, boolean cpuOnly) {
         EarthquakeAnalysis earthquakeAnalysis = new EarthquakeAnalysis();
         earthquakeAnalysis.testing = true;
 
         List<FakeStation> fakeStations = new ArrayList<>();
 
-        Random r = new Random(seed);
-
         for (int i = 0; i < stations; i++) {
-            double ang = r.nextDouble() * 360.0;
-            double dist = r.nextDouble() * DIST_STATIONS;
+            double ang = random.nextDouble() * 360.0;
+            double dist = random.nextDouble() * DIST_STATIONS_KM;
             double[] latLon = GeoUtils.moveOnGlobe(0, 0, dist, ang);
             fakeStations.add(new FakeStation(latLon[0], latLon[1]));
         }
@@ -138,7 +153,7 @@ public class EarthquakeAnalysisTraining {
         var cluster = new Cluster();
         cluster.updateCount = 6543541;
 
-        Hypocenter absolutetyCorrect = new Hypocenter(r.nextDouble() * DIST_HYPOC_ANG, r.nextDouble() * DIST_HYPOC_ANG, r.nextDouble() * 600.0, 0, 0, 0, null, null);
+        Hypocenter absolutetyCorrect = new Hypocenter(random.nextDouble() * DIST_HYPOC_ANG, random.nextDouble() * DIST_HYPOC_ANG, random.nextDouble() * MAX_DEPTH, 0, 0, 0, null, null);
 
         for (FakeStation fakeStation : fakeStations) {
             double distGC = GeoUtils.greatCircleDistance(absolutetyCorrect.lat,
@@ -150,9 +165,9 @@ public class EarthquakeAnalysisTraining {
             }
 
             long time = absolutetyCorrect.origin + ((long) (travelTime * 1000.0));
-            time += (long) ((r.nextDouble() - 0.5) * INACCURACY);
-            if (r.nextDouble() < MASSIVE_ERR_ODDS) {
-                time += (long) ((r.nextDouble() * 10.0 - 5.0) * INACCURACY);
+            time += (long) ((random.nextDouble() - 0.5) * INACCURACY);
+            if (random.nextDouble() < MASSIVE_ERR_ODDS) {
+                time += (long) ((random.nextDouble() * 10.0 - 5.0) * INACCURACY);
             }
 
             var event = new PickedEvent(time, fakeStation.lat, fakeStation.lon, 0, 100);
