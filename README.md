@@ -55,7 +55,7 @@ that are capable of estimating the magnitude reasonably accurately for nearly an
 
 ## Installing
 
-A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/tree/main/tutorials)
+A guide for installing the application and the software needed for it can be found here: [Tutorials](https://github.com/xspanger3770/GlobalQuake/wiki/Downloads-And-Installation)
 
 ## Livestream
 
