@@ -154,16 +154,14 @@ public class FeatureShakemap extends RenderFeature<IntensityHex> {
             return;
         }
 
-        Color col = level.getColor();
-
         graphics.setStroke(new BasicStroke(1.0f));
-        graphics.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 100));
+        graphics.setColor(level.getColorAlpha100());
         graphics.fill(elementHex.getShape());
 
         boolean mouseNearby = renderer.getLastMouse() != null && renderer.hasMouseMovedRecently() && elementHex.getShape().contains(renderer.getLastMouse());
 
         if (mouseNearby && renderProperties.scroll < 0.2) {
-            graphics.setColor(col);
+            graphics.setColor(level.getColor());
             graphics.setStroke(new BasicStroke(0.5f));
             graphics.draw(elementHex.getShape());
 

@@ -7,6 +7,7 @@ public final class Level {
     private final String suffix;
     private final double pga;
     private final Color color;
+    private final Color colorAlpha100;
     private final String fullName;
 
     public Level(String name, String suffix, double pga, Color color) {
@@ -14,6 +15,7 @@ public final class Level {
         this.suffix = suffix;
         this.pga = pga;
         this.color = color;
+        this.colorAlpha100 = (new Color(color.getRed(), color.getGreen(), color.getBlue(), 100));
         this.fullName = "%s%s".formatted(getName(), getSuffix());
     }
 
@@ -27,6 +29,10 @@ public final class Level {
 
     public Color getColor() {
         return color;
+    }
+
+    public Color getColorAlpha100() {
+        return colorAlpha100;
     }
 
     public double getPga() {
