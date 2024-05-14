@@ -1,0 +1,14 @@
+{
+  "name": "ws_overload_test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ws_overload_test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^1.1.5"
+    }
+}
