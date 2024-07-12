@@ -419,11 +419,11 @@ public class ClusterAnalysis {
     @SuppressWarnings("RedundantIfStatement")
     private boolean potentialArrival(Event ev, Event e, double dist) {
         if (e.isValid() && ev.isValid() && !ev.isSWave() && !e.isSWave() && ev.getpWave() > 0 && ev.assignedCluster == null) {
-            long earliestPossibleTimeOfThatEvent = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
+            long earliestEventTime = e.getpWave() - (long) ((dist * 1000.0) / 5.0)
                     - 2500;
             long latestPossibleTimeOfThatEvent = e.getpWave() + (long) ((dist * 1000.0) / 5.0)
                     + 2500;
-            if (ev.getpWave() >= earliestPossibleTimeOfThatEvent
+            if (ev.getpWave() >= earliestEventTime
                     && ev.getpWave() <= latestPossibleTimeOfThatEvent) {
                 return true;
             }
@@ -454,11 +454,11 @@ public class ClusterAnalysis {
                         double dist = info.dist();
                         for (Event e : close.getAnalysis().getDetectedEvents()) {
                             if (e.isValid() && !e.isSWave() && e.getpWave() > 0 && e.assignedCluster == null) {
-                                long earliestPossibleTimeOfThatEvent = event.getpWave()
+                                long earliestEventTime = event.getpWave()
                                         - (long) ((dist * 1000.0) / 5.0) - 2500;
                                 long latestPossibleTimeOfThatEvent = event.getpWave()
                                         + (long) ((dist * 1000.0) / 5.0) + 2500;
-                                if (e.getpWave() >= earliestPossibleTimeOfThatEvent
+                                if (e.getpWave() >= earliestEventTime
                                         && e.getpWave() <= latestPossibleTimeOfThatEvent) {
                                     validEvents.add(e);
                                     continue closestLoop;
